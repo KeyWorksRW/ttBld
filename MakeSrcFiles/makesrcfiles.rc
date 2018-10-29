@@ -1,0 +1,235 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "res.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "res.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,8149,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "Comments", "Released under Apache License\0"
+            VALUE "CompanyName", "KeyWorks Software\0"
+            VALUE "FileDescription", "Creates/modifies .srcfiles\0"
+            VALUE "FileVersion", "1.0.8149\0"
+            VALUE "InternalName", "MakeSrcFiles\0"
+            VALUE "LegalCopyright", "Copyright (c) 2018 KeyWorks Software\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "MakeSrcFiles.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "MakeSrcFiles\0"
+            VALUE "ProductVersion", "1.0\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDDLG_SRCFILES DIALOG DISCARDABLE  0, 0, 443, 340
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION ".srcfiles Options"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
+    EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
+    GROUPBOX        "Target",IDC_STATIC,7,25,147,43
+    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,21,37,42,10
+    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,75,37,41,10
+    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,21,51,37,10
+    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,75,51,29,10
+    GROUPBOX        "Compiler Options",IDC_STATIC,6,77,147,141
+    LTEXT           "Optimize for:",IDC_STATIC,16,92,40,8
+    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,61,92,35,10
+    CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,105,
+                    92,35,10
+    LTEXT           "Convention:",IDC_STATIC,16,108,39,8
+    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,61,108,33,10
+    CONTROL         "stdcall",IDC_RADIO_STDCALL,"Button",BS_AUTORADIOBUTTON,
+                    105,108,36,10
+    LTEXT           "&Warning:",IDC_STATIC,16,124,30,8
+    CONTROL         "4",IDRADIO_WARN4,"Button",BS_AUTORADIOBUTTON,61,124,20,
+                    10
+    CONTROL         "3",IDRADIO_WARN3,"Button",BS_AUTORADIOBUTTON,86,124,20,
+                    10
+    CONTROL         "2",IDRADIO_WARN2,"Button",BS_AUTORADIOBUTTON,110,124,20,
+                    10
+    CONTROL         "1",IDRADIO_WARN1,"Button",BS_AUTORADIOBUTTON,130,124,20,
+                    10
+    LTEXT           "PC&H:",IDC_STATIC,16,143,18,8
+    EDITTEXT        IDEDIT_PCH,39,141,45,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Change...",IDBTN_PCH,94,141,51,14
+    LTEXT           "CFlags:",IDC_STATIC,15,164,24,8
+    EDITTEXT        IDEDIT_CFLAGS,45,161,100,14,ES_AUTOHSCROLL
+    LTEXT           "IncDirs:",IDC_STATIC,15,181,25,8
+    EDITTEXT        IDEDIT_INCDIRS,45,179,100,14,ES_AUTOHSCROLL
+    CONTROL         "Permissive",IDC_CHECK_PERMISSIVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,200,49,10
+    GROUPBOX        "Linker Options",IDC_STATIC,6,225,147,82
+    CONTROL         "&64-bit builds",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,15,239,53,10
+    CONTROL         "'64' suffix",IDCHECK_BITEXT,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,98,239,45,10
+    CONTROL         "Static CRT",IDCHECK_STATIC_CRT,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,15,255,51,10
+    CONTROL         "MS-Link",IDCHECK_MSLINKER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,98,255,42,10
+    LTEXT           "Link Flags:",IDC_STATIC,14,271,35,8
+    EDITTEXT        IDEDIT_LINK_FLAGS,54,268,89,14,ES_AUTOHSCROLL
+    LTEXT           "LibDirs:",IDC_STATIC,15,287,24,8
+    EDITTEXT        IDEDIT_LIBDIRS,54,285,89,14,ES_AUTOHSCROLL
+    GROUPBOX        "Compilers",IDC_STATIC,177,7,143,36
+    CONTROL         "CLANG",IDCHECK_CLANG,"Button",BS_AUTOCHECKBOX |
+                    WS_GROUP | WS_TABSTOP,185,21,40,10
+    CONTROL         "MSVC",IDCHECK_MSVC,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,236,21,36,10
+    GROUPBOX        "Makefile",IDC_STATIC,177,50,143,88
+    LTEXT           "Create:",IDC_STATIC,186,65,24,8
+    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,197,78,37,10
+    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,238,78,37,10
+    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,279,78,37,10
+    LTEXT           "Compiler:",IDC_STATIC,186,96,30,8
+    CONTROL         "CLANG",IDRADIO_MF_CLANG,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,221,96,37,10
+    CONTROL         "MSVC",IDRADIO_MF_MSVC,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,263,96,37,10
+    LTEXT           "Target:",IDC_STATIC,186,117,24,8
+    CONTROL         "debug",IDRADIO_MF_DEBUG,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,221,117,37,10
+    CONTROL         "release",IDRADIO_MF_RELEASE,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,263,117,37,10
+    GROUPBOX        "Create IDE scripts",IDC_STATIC,177,151,143,69
+    CONTROL         "CodeBLocks",IDCHECK_CODEBLOCKS,"Button",BS_AUTOCHECKBOX |
+                    WS_GROUP | WS_TABSTOP,189,167,57,10
+    CONTROL         "CodeLite",IDCHECK_CODELITE,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,189,185,44,10
+    CONTROL         "VcxProj",IDCHECK_VCXPROJ,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,189,203,40,10
+    GROUPBOX        "Libraries",IDC_STATIC,177,230,143,78
+    LTEXT           "Build these:",IDC_STATIC,184,244,38,8
+    EDITTEXT        IDEDIT_LIBS_BUILD,197,256,114,14,ES_AUTOHSCROLL
+    LTEXT           "Link these:",IDC_STATIC,184,274,36,8
+    EDITTEXT        IDEDIT_LIBS_LINK,197,285,114,14,ES_AUTOHSCROLL
+    LTEXT           "Source &Files:",IDC_STATIC,337,6,42,8
+    LISTBOX         IDLIST_FILES,337,17,99,270,LBS_SORT |
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Add...",IDBTN_ADD,337,293,50,14
+    PUSHBUTTON      "&Remove...",IDBTN_REMOVE,387,293,50,14
+    DEFPUSHBUTTON   "OK",IDOK,266,318,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,327,318,50,14
+    PUSHBUTTON      "Help...",IDC_BTN_HELP,387,318,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE
+BEGIN
+    IDDLG_SRCFILES, DIALOG
+    BEGIN
+        RIGHTMARGIN, 437
+        BOTTOMMARGIN, 332
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

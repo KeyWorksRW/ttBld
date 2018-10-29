@@ -1,0 +1,26 @@
+Project: MakeSrcFiles
+
+Compilers:
+  CLANG
+  MSVC
+
+Options:
+  PCH: precomp.h        # "none" or name of header file to use for precompilation
+  exe_type:   console   # [window | console | lib | dll]
+  64Bit:      true      # create 64-bit project
+  bit_suffix: true      # add "64" to the end of the project name (e.g., ../bin64/MakeSrcFiles.exe)
+
+  IncDirs: ../MakeSrcFiles
+  BuildLibs: ../ttLib/lib/ttLib
+
+Files:
+  precomp.cpp
+  makesrcfiles.rc
+
+  main.cpp
+  addfiles.cpp
+  convert.cpp
+  dlgsrcoptions.cpp
+
+  ../common/csrcfiles.cpp
+  ../common/writesrcfiles.cpp

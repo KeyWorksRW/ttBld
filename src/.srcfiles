@@ -1,0 +1,24 @@
+Options:
+  Project: MakeNinja
+  TargetDirs:  ../bin; ../bin64
+  exe_type:   console   # [window | console | lib | dll]
+  PCH: precomp.h        # "none" or name of header file to use for precompilation
+  64Bit:      true      # create 64-bit project in addition to 32-bit project
+  bit_suffix: true      # add "64" to the end of the project name (e.g., MakeNinja64.exe)
+  Compilers: CLANG MSVC
+  IncDirs: ../src
+  BuildLibs: ../ttLib/lib/ttLib
+
+Files:
+  precomp.cpp
+  makeninja.rc
+
+  bldmaster.cpp
+  codelite.cpp
+  createmakefile.cpp
+  init.cpp
+  makeninja.cpp
+  ninja.cpp
+  vcxproj.cpp
+
+  ../common/csrcfiles.cpp
