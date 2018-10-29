@@ -1,0 +1,71 @@
+# Call with nmake.exe (MSVC) or a GNU make variation (mingw32-make.exe, gmake.exe, or make.exe)
+
+# mingw32-make release 		 <-- this will build release target(s)
+# mingw32-make clean release <-- this will clean and rebuild release target(s)
+# mingw32-make cleanD debug  <-- this will clean and rebuild debug target(s)
+
+# nmake release 	  <-- this will build release target(s)
+# nmake clean release <-- this will clean and rebuild release target(s)
+# nmake cleanD debug  <-- this will clean and rebuild debug target(s)
+
+# \
+!ifndef 0 # \
+# Following section is for nmake \
+!ifdef LIB64 # \
+LIB=$(LIB64) # \
+!endif # \
+!ifdef PATH64 # \
+PATH=$(PATH64) # \
+!endif  # \
+!ifndef cmplr # \
+cmplr=%compiler% # \
+!endif
+
+# \
+!else
+# Following section is for GNU make and variants
+
+ifdef LIB64
+	LIB=$(LIB64)
+endif
+
+ifdef PATH64
+	PATH=$(PATH64)
+endif
+
+ifndef cmplr
+	cmplr=%compiler%
+endif
+
+.DEFAULT_GOAL := %defgoal%
+
+# \
+!endif
+
+########## release section ##########
+
+release: %project%
+
+%project%:
+	ninja -f build/$(cmplr)Build64.ninja
+
+########## debug section ##########
+
+debug: %project%D
+
+%project%D:
+	ninja -f build/$(cmplr)Build64D.ninja
+
+########## clean release section ##########
+
+clean: %project%Clean
+
+%project%Clean:
+	ninja -f build/$(cmplr)Build64.ninja -t clean
+
+########## clean debug section ##########
+
+cleanD: %project%CleanD
+
+%project%CleanD:
+	ninja -f build/$(cmplr)Build64D.ninja -t clean
