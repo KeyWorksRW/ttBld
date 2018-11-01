@@ -88,136 +88,6 @@ ptrdiff_t CWriteSrcFiles::FindSection(const char* pszSection)
 	return -1;
 }
 
-void CWriteSrcFiles::UpdateCompilerSection()
-{
-
-	// The default compiler is CLANG -- if the user is now requesting MSVC then we need to update .srcfiles
-	// If the user specified only CLANG, don't add a Compiler: section if there isn't one already.
-	// If the user unchecked both compilers, remove any Compiler: section
-
-	ptrdiff_t posCompilers = FindSection("Compilers:");
-	if (m_CompilerType & COMPILER_MSVC)	{
-		if (posCompilers < 0) {
-			ptrdiff_t posInsert = FindSection("Project:") + 1;
-			m_lstOriginal.InsertAt(posInsert++, "");	// insert blank line
-			m_lstOriginal.InsertAt(posInsert++, "Compilers:");
-			if (m_CompilerType & COMPILER_CLANG)
-				m_lstOriginal.InsertAt(posInsert++, " CLANG");
-			if (m_CompilerType & COMPILER_CLANG)
-				m_lstOriginal.InsertAt(posInsert++, " MSVC");
-			return;
-		}
-		bool bFound = false;
-		for (ptrdiff_t pos = posCompilers + 1; pos < (ptrdiff_t) m_lstOriginal.GetCount(); ++pos) {
-			const char* pszOptionVal = FindNonSpace(m_lstOriginal[pos]);
-			if (isSameSubString(pszOptionVal, "CLANG") && !(m_CompilerType & COMPILER_CLANG))
-				m_lstOriginal.Remove(pos--);
-			else if (isSameSubString(pszOptionVal, "MSVC") && !(m_CompilerType & COMPILER_CLANG))
-				bFound = true;
-			// Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a new section
-			else if (IsAlpha(*m_lstOriginal[pos]))
-				break;
-		}
-		if (!bFound)
-			m_lstOriginal.InsertAt(posCompilers + 1, "  MSVC");
-	}
-	else if (m_CompilerType & COMPILER_CLANG && posCompilers >= 0) {
-		// Main purpose here will be to remove MSVC compiler if user didn't request it
-		bool bFound = false;
-		for (ptrdiff_t pos = posCompilers + 1; pos < (ptrdiff_t) m_lstOriginal.GetCount(); ++pos) {
-			const char* pszOptionVal = FindNonSpace(m_lstOriginal[pos]);
-			if (isSameSubString(pszOptionVal, "MSVC") && !(m_CompilerType & COMPILER_MSVC))
-				m_lstOriginal.Remove(pos--);
-			else if (isSameSubString(pszOptionVal, "CLANG") && !(m_CompilerType & COMPILER_CLANG))
-				bFound = true;
-			// Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a new section
-			else if (IsAlpha(*m_lstOriginal[pos]))
-				break;
-		}
-		if (!bFound)
-			m_lstOriginal.InsertAt(posCompilers + 1, "  CLANG");
-	}
-	else if (m_CompilerType == COMPILER_DEFAULT  && posCompilers >= 0) {	// user unchecked both, remove the entire section
-		for (ptrdiff_t pos = posCompilers + 1; pos < (ptrdiff_t) m_lstOriginal.GetCount(); ++pos) {
-			const char* pszOptionVal = FindNonSpace(m_lstOriginal[pos]);
-			if (isSameSubString(pszOptionVal, "MSVC") && !(m_CompilerType & COMPILER_MSVC))
-				m_lstOriginal.Remove(pos--);
-			else if (isSameSubString(pszOptionVal, "CLANG") && !(m_CompilerType & COMPILER_CLANG))
-				m_lstOriginal.Remove(pos--);
-			// Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a new section
-			else if (IsAlpha(*m_lstOriginal[pos]))
-				break;
-		}
-		m_lstOriginal.Remove(posCompilers);
-	}
-}
-
-void CWriteSrcFiles::UpdateIdeSection()
-{
-	ptrdiff_t posSection = FindSection("IDE:");
-	if (m_IDE != IDE_NONE) {
-		if (posSection < 0) {
-			ptrdiff_t posInsert = FindSection("Project:") + 1;
-			m_lstOriginal.InsertAt(posInsert++, "");	// insert blank line
-			m_lstOriginal.InsertAt(posInsert++, "IDE:");
-			if (m_IDE & IDE_CODEBLOCK)
-				m_lstOriginal.InsertAt(posInsert++, " CodeBlocks");
-			if (m_IDE & IDE_CODELITE)
-				m_lstOriginal.InsertAt(posInsert++, " CodeLite");
-			if (m_IDE & IDE_VS)
-				m_lstOriginal.InsertAt(posInsert++, " VisualStudio");
-			return;
-		}
-		size_t ideFound = 0;
-		for (ptrdiff_t pos = posSection + 1; pos < (ptrdiff_t) m_lstOriginal.GetCount(); ++pos) {
-			const char* pszOption = FindNonSpace(m_lstOriginal[pos]);
-			if (isSameSubString(pszOption, "CodeBlocks")) {
-				if (!(m_IDE & IDE_CODEBLOCK))
-					m_lstOriginal.Remove(pos--);
-				else
-					ideFound |= IDE_CODEBLOCK;
-			}
-			else if (isSameSubString(pszOption, "CodeLite")) {
-				if (!(m_IDE & IDE_CODELITE))
-					m_lstOriginal.Remove(pos--);
-				else
-					ideFound |= IDE_CODELITE;
-			}
-			else if (isSameSubString(pszOption, "VisualStudio")) {
-				if (!(m_IDE & IDE_VS))
-					m_lstOriginal.Remove(pos--);
-				else
-					ideFound |= IDE_VS;
-			}
-			// Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a new section
-			else if (IsAlpha(*m_lstOriginal[pos]))
-				break;
-		}
-		++posSection;
-		if (!(ideFound & IDE_CODEBLOCK) && (m_IDE & IDE_CODEBLOCK))
-			m_lstOriginal.InsertAt(posSection++, " CodeBlocks");
-		if (!(ideFound & IDE_CODELITE) && (m_IDE & IDE_CODELITE))
-			m_lstOriginal.InsertAt(posSection++, " CodeLite");
-		if (!(ideFound & IDE_VS) && (m_IDE & IDE_VS))
-			m_lstOriginal.InsertAt(posSection++, " VisualStudio");
-	}
-	else if (posSection >= 0) {	// no IDE specified, so if there is an IDE section, remove it
-		for (ptrdiff_t pos = posSection + 1; pos < (ptrdiff_t) m_lstOriginal.GetCount(); ++pos) {
-			const char* pszOptionVal = FindNonSpace(m_lstOriginal[pos]);
-			if (isSameSubString(pszOptionVal, "CodeBlocks"))
-				m_lstOriginal.Remove(pos--);
-			else if (isSameSubString(pszOptionVal, "CodeLite"))
-				m_lstOriginal.Remove(pos--);
-			else if (isSameSubString(pszOptionVal, "VisualStudio"))
-				m_lstOriginal.Remove(pos--);
-			// Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a new section
-			else if (IsAlpha(*m_lstOriginal[pos]))
-				break;
-		}
-		m_lstOriginal.Remove(posSection);
-	}
-}
-
 static const char* pszOptionFmt = "  %-12s %-12s # %s";
 static const char* pszLongOptionFmt = "  %-12s %s";
 
@@ -291,7 +161,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		cszTmp = "CLANG ";
 	if (m_CompilerType & COMPILER_MSVC)
 		cszTmp += "MSVC ";
-	UpdateOption("Compilers:", cszTmp, "[CLANG and/or MSVC]");
+	UpdateOption("Compilers:", cszTmp, "[CLANG and/or MSVC]", m_CompilerType != COMPILER_DEFAULT);
 
 	const char* pszVal;
 	if (m_fCreateMakefile == MAKEMAKE_NEVER)
