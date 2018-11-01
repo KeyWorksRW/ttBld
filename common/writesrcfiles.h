@@ -22,8 +22,6 @@ public:
 protected:
 	// Class functions
 
-	void UpdateCompilerSection();
-	void UpdateIdeSection();
 	void UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment = nullptr);
 	void UpdateOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite = false);
 	void UpdateOptionsSection();
