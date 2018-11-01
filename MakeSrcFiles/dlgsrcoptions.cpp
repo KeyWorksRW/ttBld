@@ -29,7 +29,7 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : CTTDlg(IDDLG_SRCFILES), 
 		m_cszSrcDir = pszSrcDir;
 
 	if (m_WarningLevel == 0) {
-		m_WarningLevel = 4;
+		m_WarningLevel = WARNLEVEL_DEFAULT;
 	}
 
 	if (m_cszPCHheader.IsEmpty()) {
@@ -52,50 +52,6 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : CTTDlg(IDDLG_SRCFILES), 
 			m_cszPCHheader = "precomp.h";
 		}
 	}
-
-	if (m_lstSrcFiles.GetCount() < 1) {
-		CStr cszPattern;
-		if (m_cszSrcDir.IsNonEmpty()) {
-			cszPattern = m_cszSrcDir;
-			cszPattern.AppendFileName("*.c*");
-		}
-		else
-			 cszPattern = "*.c*";
-
-		CTTFindFile ff(cszPattern);
-		if (ff.isValid()) {
-			do {
-				if (m_cszSrcDir.IsNonEmpty()) {
-					CStr cszFile(m_cszSrcDir);
-					cszFile.AppendFileName(ff);
-					m_lstSrcFiles += (char*) cszFile;
-				}
-				else
-					m_lstSrcFiles += (const char*) ff;
-			} while(ff.NextFile());
-		}
-
-		if (m_cszSrcDir.IsNonEmpty()) {
-			cszPattern = m_cszSrcDir;
-			cszPattern.AppendFileName("*.rc");
-		}
-		else
-			 cszPattern = "*.rc";
-
-		if (ff.NewPattern(cszPattern)) {
-			do {
-				if (m_cszSrcDir.IsNonEmpty()) {
-					CStr cszFile(m_cszSrcDir);
-					cszFile.AppendFileName(ff);
-					m_lstSrcFiles += (char*) cszFile;
-				}
-				else
-					m_lstSrcFiles += (const char*) ff;
-			} while(ff.NextFile());
-		}
-	}
-
-	m_fFileListChanged = false;
 }
 
 void CDlgSrcOptions::SaveChanges()
@@ -115,11 +71,6 @@ void CDlgSrcOptions::OnBegin(void)
 	CStr cszTitle(txtSrcFilesFileName);
 	cszTitle += " Options";
 	SetWindowText(*this, cszTitle);
-
-	m_lb.Initialize(*this, DLG_ID(IDLIST_FILES));
-	for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); pos++) {
-		m_lb.Add(m_lstSrcFiles[pos]);
-	}
 
 	if (GetProjectName())
 		SetControlText(DLG_ID(IDEDIT_PROJ_NAME), GetProjectName());
@@ -165,16 +116,13 @@ void CDlgSrcOptions::OnBegin(void)
 		SetCheck(DLG_ID(IDCHECK_BITEXT));
 	if (m_bStaticCrt)
 		SetCheck(DLG_ID(IDCHECK_STATIC_CRT));
-	if (m_bBuildForSpeed)
-		SetCheck(DLG_ID(IDC_RADIO_SPEED));
-	else
-		SetCheck(DLG_ID(IDC_RADIO_SPACE));
 	if (m_bPermissive)
 		SetCheck(DLG_ID(IDC_CHECK_PERMISSIVE));
-	if (m_bStdcall)
-		SetCheck(DLG_ID(IDC_RADIO_STDCALL));
 	if (m_bUseMsvcLinker)
 		SetCheck(DLG_ID(IDCHECK_MSLINKER));
+
+	SetCheck(DLG_ID(m_bBuildForSpeed ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
+	SetCheck(DLG_ID(m_bStdcall ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
 
 	switch (m_WarningLevel) {
 		case WARNLEVEL_1:
@@ -192,22 +140,6 @@ void CDlgSrcOptions::OnBegin(void)
 			break;
 	}
 
-	// IDE: section options
-
-	if (m_IDE & IDE_VS)
-		SetCheck(DLG_ID(IDCHECK_VCXPROJ));
-	if (m_IDE & IDE_CODELITE)
-		SetCheck(DLG_ID(IDCHECK_CODELITE));
-	if (m_IDE & IDE_CODEBLOCK)
-		SetCheck(DLG_ID(IDCHECK_CODEBLOCKS));
-
-	// Compilers: section options
-
-	if (m_CompilerType & COMPILER_MSVC)
-		SetCheck(DLG_ID(IDCHECK_MSVC));
-	if (m_CompilerType & COMPILER_CLANG || m_CompilerType == COMPILER_DEFAULT)
-		SetCheck(DLG_ID(IDCHECK_CLANG));
-
 	// Makefile: section options
 
 	switch (m_fCreateMakefile) {
@@ -224,16 +156,6 @@ void CDlgSrcOptions::OnBegin(void)
 			SetCheck(DLG_ID(IDRADIO_MF_MISSING));
 			break;
 	}
-
-	if (m_MakeFileCompiler == COMPILER_CLANG)
-		SetCheck(DLG_ID(IDRADIO_MF_CLANG));
-	else
-		SetCheck(DLG_ID(IDRADIO_MF_MSVC));
-
-	if (isSameString(m_cszDefaultTarget, "release"))
-		SetCheck(DLG_ID(IDRADIO_MF_RELEASE));
-	else
-		SetCheck(DLG_ID(IDRADIO_MF_DEBUG));
 }
 
 void CDlgSrcOptions::OnEnd(void)
@@ -272,38 +194,6 @@ void CDlgSrcOptions::OnEnd(void)
 	else if (GetCheck(DLG_ID(IDRADIO_WARN4)))
 		m_WarningLevel = 4;
 
-	if (m_fFileListChanged) {
-		auto cbItems = m_lb.GetCount();
-		if (cbItems > 0) {
-			if ((size_t) cbItems > m_lstSrcFiles.GetCount()) {
-				m_lstSrcFiles.RemoveAll();
-				for (auto pos = cbItems - 1; pos >= 0; pos--) {		// This assumes that whatever type m_lb.GetCount() uses, it will be signed
-					CStr cszFile;
-					m_lb.GetText(&cszFile, (int) pos);
-					m_lstSrcFiles.Add(cszFile);
-				}
-			}
-		}
-	}
-
-	// Find out which build scripts to generate
-
-	m_IDE = IDE_NONE;
-	if (GetCheck(DLG_ID(IDCHECK_VCXPROJ)))
-		m_IDE |= IDE_VS;
-	if (GetCheck(DLG_ID(IDCHECK_CODELITE)))
-		m_IDE |= IDE_CODELITE;
-	if (GetCheck(DLG_ID(IDCHECK_CODEBLOCKS)))
-		m_IDE |= IDE_CODEBLOCK;
-
-	// Find out which compiler to generate a script for
-
-	m_CompilerType = 0;
-	if (GetCheck(DLG_ID(IDCHECK_MSVC)))
-		m_CompilerType |= COMPILER_MSVC;
-	if (GetCheck(DLG_ID(IDCHECK_CLANG)))
-		m_CompilerType |= COMPILER_CLANG;
-
 	// Makefile: section options
 
 	if (GetCheck(DLG_ID(IDRADIO_MF_NEVER)))
@@ -312,9 +202,6 @@ void CDlgSrcOptions::OnEnd(void)
 		m_fCreateMakefile = MAKEMAKE_ALWAYS;
 	else
 		m_fCreateMakefile = MAKEMAKE_MISSING;
-
-	m_MakeFileCompiler = GetCheck(DLG_ID(IDRADIO_MF_CLANG)) ? COMPILER_CLANG : COMPILER_MSVC;
-	m_cszDefaultTarget = GetCheck(DLG_ID(IDRADIO_MF_RELEASE)) ? "release" : "debug";
 }
 
 void CDlgSrcOptions::OnBtnChangePch()
@@ -353,57 +240,3 @@ void CDlgSrcOptions::OnBtnChangePch()
 		MsgBox(cszFile);
 	}
 }
-
-void CDlgSrcOptions::OnBtnAddFile()
-{
-	CFileDlg fdlg(*this);
-	fdlg.SetFilter("Source Files|*.c;*.cc;*.cxx;*.cpp;*.rc;*.idl");
-	CStr cszCWD;
-	cszCWD.GetCWD();
-	cszCWD.AddTrailingSlash();
-	fdlg.SetInitialDir(cszCWD);
-	if (fdlg.GetOpenFileName()) {
-		const char* pszFileName = fdlg.GetFileName();
-		const char* pszCWD = cszCWD;
-		while (tolower(*pszFileName) == tolower(*pszCWD)) {
-			pszFileName++;
-			pszCWD++;
-		}
-		if (m_lb.FindString(pszFileName) == LB_ERR) {
-			m_lb.Add(pszFileName);
-			m_fFileListChanged = true;
-		}
-	}
-}
-
-void CDlgSrcOptions::OnBtnREmove()
-{
-	auto sel = m_lb.GetCurSel();
-	if (sel == LB_ERR) {
-		MsgBox("You need to select a file to delete first!");
-		return;
-	}
-
-	// Need to confirm if attempting to delete the source file used to build a precompiled header
-
-	CStr cszFile;
-	cszFile.GetListBoxText(GetDlgItem(DLG_ID(IDLIST_FILES)));
-	CStr cszPCH;
-	cszPCH.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
-	if (cszPCH.IsNonEmpty()) {
-		char* pszExtension = kstrchrR(cszPCH, '.');
-		if (pszExtension) {
-			cszFile.ChangeExtension(pszExtension);
-			if (IsSameString(cszFile, cszPCH)) {
-				if (MsgBox("Removing this file will prevent Precompiled Headers. Continue?", MB_YESNO | MB_ICONWARNING) == IDYES)
-					SetControlText(DLG_ID(IDEDIT_PCH), "");
-				else
-					return;
-			}
-		}
-	}
-
-	m_lb.DeleteString(sel);
-	m_fFileListChanged = true;
-}
-
