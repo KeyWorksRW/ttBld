@@ -7,7 +7,6 @@ build/
 
 .private/
 tests/
-ttLib/
 
 # General file extensions to ignore
 *.backup
