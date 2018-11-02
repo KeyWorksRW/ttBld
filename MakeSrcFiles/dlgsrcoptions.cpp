@@ -110,16 +110,11 @@ void CDlgSrcOptions::OnBegin(void)
 	else
 		SetCheck(DLG_ID(IDRADIO_NORMAL));
 
-	if (m_b64bit)
-		SetCheck(DLG_ID(IDCHECK_64BIT));
-	if (m_bBitSuffix)
-		SetCheck(DLG_ID(IDCHECK_BITEXT));
-	if (m_bStaticCrt)
-		SetCheck(DLG_ID(IDCHECK_STATIC_CRT));
-	if (m_bPermissive)
-		SetCheck(DLG_ID(IDC_CHECK_PERMISSIVE));
-	if (m_bUseMsvcLinker)
-		SetCheck(DLG_ID(IDCHECK_MSLINKER));
+	KDDX_Check(DLG_ID(IDCHECK_64BIT), m_b64bit);
+	KDDX_Check(DLG_ID(IDCHECK_BITEXT), m_bBitSuffix);
+	KDDX_Check(DLG_ID(IDCHECK_STATIC_CRT), m_bStaticCrt);
+	KDDX_Check(DLG_ID(IDC_CHECK_PERMISSIVE), m_bPermissive);
+	KDDX_Check(DLG_ID(IDCHECK_MSLINKER), m_bUseMsvcLinker);
 
 	SetCheck(DLG_ID(m_bBuildForSpeed ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
 	SetCheck(DLG_ID(m_bStdcall ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
@@ -177,13 +172,14 @@ void CDlgSrcOptions::OnEnd(void)
 	else
 		m_exeType = EXE_WINDOW;
 
-	m_b64bit = GetCheck(DLG_ID(IDCHECK_64BIT));
-	m_bBitSuffix = GetCheck(DLG_ID(IDCHECK_BITEXT));
-	m_bStaticCrt = GetCheck(DLG_ID(IDCHECK_STATIC_CRT));
+	KDDX_Check(DLG_ID(IDCHECK_64BIT), m_b64bit);
+	KDDX_Check(DLG_ID(IDCHECK_BITEXT), m_bBitSuffix);
+	KDDX_Check(DLG_ID(IDCHECK_STATIC_CRT), m_bStaticCrt);
+	KDDX_Check(DLG_ID(IDC_CHECK_PERMISSIVE), m_bPermissive);
+	KDDX_Check(DLG_ID(IDCHECK_MSLINKER), m_bUseMsvcLinker);
+
 	m_bBuildForSpeed = GetCheck(DLG_ID(IDC_RADIO_SPEED));
-	m_bPermissive = GetCheck(DLG_ID(IDC_CHECK_PERMISSIVE));
 	m_bStdcall = GetCheck(DLG_ID(IDC_RADIO_STDCALL));
-	m_bUseMsvcLinker = GetCheck(DLG_ID(IDCHECK_MSLINKER));
 
 	if (GetCheck(DLG_ID(IDRADIO_WARN1)))
 		m_WarningLevel = 1;
