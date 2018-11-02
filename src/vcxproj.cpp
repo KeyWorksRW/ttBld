@@ -18,24 +18,34 @@
 #include "resource.h"
 #include "vcxproj.h"						// CVcxProj
 
+static bool CreateGuid(CStr& cszGuid)
+{
+	UUID uuid;
+	RPC_STATUS ret_val = ::UuidCreate(&uuid);
+
+	if (ret_val == RPC_S_OK) {
+		RPC_CSTR* pszUuid = nullptr;
+		::UuidToStringA(&uuid, (RPC_CSTR*) &pszUuid);
+		if (pszUuid) {
+			cszGuid = (char*) pszUuid;
+			::RpcStringFreeA(pszUuid);
+		}
+	}
+	return cszGuid.IsNonEmpty();
+}
+
 bool CVcxProj::CreateBuildFile()
 {
 #ifndef _WINDOWS_
-	return false;	// we only support create VisualStudio projects on Windows
-#else
-    UUID uuid;
-	CStr cszGuid;
-    RPC_STATUS ret_val = ::UuidCreate(&uuid);
+	// Currently we only support creating VisualStudio projects on Windows. To get this to work on another platform, a
+	// replacement would be needed for creating a GUID, and the templates we store in the .rc file would need to be added
+	// in a different way (perhaps including them directly into the source code instead of the resource).
 
-    if (ret_val == RPC_S_OK) {
-        RPC_CSTR* pszUuid = nullptr;
-        ::UuidToStringA(&uuid, (RPC_CSTR*) &pszUuid);
-        if (pszUuid) {
-            cszGuid = (char*) pszUuid;
-            ::RpcStringFreeA(pszUuid);
-        }
-    }
-	if (cszGuid.IsEmpty()) {
+	return false;
+#endif	// _WINDOWS_
+
+	CStr cszGuid;
+	if (!CreateGuid(cszGuid)) {
 		AddError("Unable to create a UUID -- cannot create .vcxproj without it.");
 		return false;
 	}
@@ -57,10 +67,31 @@ bool CVcxProj::CreateBuildFile()
 			return false;
 		}
 
-		// TODO: [randalphwa - 10-15-2018]	Add all the source files to project.vcxproj.filters
+		kf.Delete();
+		kf.ReadResource(IDR_VCXPROJ_MASTER);
+		CreateGuid(cszGuid);	// it already succeeded once if we got here, so we don't check for error again
+		while (kf.ReplaceStr("%guidSrc%", cszGuid));
+		CreateGuid(cszGuid);
+		while (kf.ReplaceStr("%guidHdr%", cszGuid));
+		CreateGuid(cszGuid);
+		while (kf.ReplaceStr("%guidResource%", cszGuid));
 
+		kf.WriteEol("  <ItemGroup>");
+
+		CStr cszSrcFile;
+		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
+			cszSrcFile.printf("    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>", m_lstSrcFiles[pos]);
+			kf.WriteEol(cszSrcFile);
+		}
+		kf.WriteEol("  </ItemGroup>");
+		kf.WriteEol("</Project>");
+		cszProjVC += ".filters";
+		if (!kf.WriteFile(cszProjVC)) {
+			CStr cszMsg;
+			cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
+			AddError(cszMsg);
+			return false;
+		}
 	}
-
 	return true;
-#endif
 }
