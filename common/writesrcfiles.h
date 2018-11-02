@@ -6,10 +6,7 @@
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../common/csrcfiles.h"		// CSrcFiles
-
-// If both cszTarget32 and cszTarget64 are empty, CreateTargetsString()
-
+#include "csrcfiles.h"		// CSrcFiles
 
 class CWriteSrcFiles : public CSrcFiles
 {
