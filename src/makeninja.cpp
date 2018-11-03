@@ -12,6 +12,7 @@
 
 #include "bldmaster.h"	// CBldMaster
 #include "ninja.h"		// CNinja
+#include "vcxproj.h"	// CVcxProj
 
 int MakeNinja(int argc, char* argv[])
 {
@@ -86,8 +87,12 @@ int MakeNinja(int argc, char* argv[])
 	else
 		puts("All ninja scripts are up to date.");
 
-	if (cNinja.isCodeLiteIDE()) {
+	if (cNinja.isCodeLiteIDE())
 		CreateCodeLiteProject();
+
+	if (cNinja.isVisualStudioIDE())	{
+		CVcxProj vcxProj;
+		vcxProj.CreateBuildFile();
 	}
 
 	return 0;
