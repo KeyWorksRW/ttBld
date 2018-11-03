@@ -6,6 +6,8 @@
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #include "csrcfiles.h"		// CSrcFiles
 
 class CWriteSrcFiles : public CSrcFiles
