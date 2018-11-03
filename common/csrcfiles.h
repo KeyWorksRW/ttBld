@@ -68,6 +68,11 @@ public:
 
 	bool IsProcessed() { return m_bRead; }
 
+	bool isWindowApp() { return m_exeType == EXE_WINDOW; }
+	bool isConsoleApp() { return m_exeType == EXE_CONSOLE; }
+	bool isLibApp() { return m_exeType == EXE_LIB; }
+	bool isDllApp() { return m_exeType == EXE_DLL; }
+
 	const char* GetProjectName() { return m_cszProjectName; }
 
 protected:
