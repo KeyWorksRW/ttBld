@@ -49,8 +49,6 @@ ifndef cmplr
 	cmplr=clang
 endif
 
-.DEFAULT_GOAL := debug
-
 # \
 !endif
 
