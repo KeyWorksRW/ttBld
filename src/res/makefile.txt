@@ -15,6 +15,10 @@
 # If you are using the MSVC compiler, then you should also set a PATH64 environment variable ahead of time to point to
 # the 64-bit compiler/linker.
 
+# Remove the '#' character in the following line to always build 64-bit targets
+
+#b64=1
+
 # \
 !ifndef 0 # \
 # Following section is for nmake \
@@ -28,7 +32,7 @@ PATH=$(PATH64) # \
 !endif  # \
 !endif  # b64 \
 !ifndef cmplr # \
-cmplr=%compiler% # \
+cmplr=msvc # \
 !endif
 
 # \
@@ -46,10 +50,8 @@ ifdef b64
 endif
 
 ifndef cmplr
-	cmplr=%compiler%
+	cmplr=clang
 endif
-
-.DEFAULT_GOAL := %defgoal%
 
 # \
 !endif
