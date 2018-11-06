@@ -5,9 +5,6 @@
 IDR_PRE_PROJECT         RCDATA  MOVEABLE PURE   "res/cdlprojectpre.txt"
 IDR_POST_PROJECT        RCDATA  MOVEABLE PURE   "res/cdlprojectpost.txt"
 IDR_MAKEFILE	        RCDATA  MOVEABLE PURE   "res/makefile.txt"
-IDR_MAKEFILE_64	        RCDATA  MOVEABLE PURE   "res/makefile64.txt"
-IDR_MAKEFILE_TTLIB      RCDATA  MOVEABLE PURE   "res/makefilettLib.txt"
-IDR_MAKEFILE_TTLIB_64   RCDATA  MOVEABLE PURE   "res/makefilettLib64.txt"
 IDR_VCXPROJ_MASTER      RCDATA  MOVEABLE PURE   "res/vcxproj.xml"
 IDR_VCXPROJ_FILTERS     RCDATA  MOVEABLE PURE   "res/vcxproj.filters.xml"
 

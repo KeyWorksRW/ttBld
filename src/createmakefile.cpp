@@ -9,9 +9,13 @@
 #include "precomp.h"
 
 #include "../ttLib/include/keyfile.h"	// CKeyFile
+#include "../ttLib/include/enumstr.h"	// CEnumStr
+#include "../ttLib/include/findfile.h"	// CTTFindFile
 
 #include "bldmaster.h"	// CBldMaster
 #include "resource.h"	// IDR_MAKEFILE
+
+static bool FindBuildSrc(const char* pszBuildTarget, CStr& cszDir);
 
 bool CBldMaster::CreateMakeFile()
 {
@@ -25,56 +29,68 @@ bool CBldMaster::CreateMakeFile()
 	// We get here if MAKEMAKE_ALWAYS is set, or MAKEMAKE_MISSING is set and the makefile doesn't exist
 
 	CKeyFile kf;
-	// 64-bit only builds use the _64 variation
-	DWORD resID = (is64BitBuild() && !is64BitSuffix()) ? IDR_MAKEFILE_64 : IDR_MAKEFILE;
-
-	// We special-case ttLib since it's used in almost all KeyWorksRW/Randalph repositories
-
-	if (DirExists("../ttLib/") && !IsSameString(m_cszProjectName, "ttLib"))
-		resID = (is64BitBuild() && !is64BitSuffix()) ? IDR_MAKEFILE_TTLIB_64 : IDR_MAKEFILE_TTLIB;
-
-	if (!kf.ReadResource(resID)) {
+	if (!kf.ReadResource(IDR_MAKEFILE)) {
 		m_lstErrors += "MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile!";
 		return false;
 	}
-
-	if (m_MakeFileCompiler == COMPILER_DEFAULT)	{
-		if (m_CompilerType == COMPILER_DEFAULT)
-			m_MakeFileCompiler = COMPILER_CLANG;	// default to CLANG compiler
-		else {
-			if (m_CompilerType & COMPILER_CLANG)
-				m_MakeFileCompiler = COMPILER_CLANG;	// default to CLANG compiler
-			else
-				m_MakeFileCompiler = COMPILER_MSVC;
-		}
-	}
-
-	const char* pszCompiler = "clang";
-	if (m_MakeFileCompiler == COMPILER_MSVC)
-		pszCompiler = "msvc";
-
-	while (kf.ReplaceStr("%defgoal%", m_cszDefaultTarget.IsNonEmpty() && !isSameString(m_cszDefaultTarget, "default") ?
-		(char*) m_cszDefaultTarget : "release"));
-
-	// The first %compiler% will be in the nmake section. If the user generate .ninja scripts for the MSVC compiler,
-	// then we default to using the MSVC compiler in the nmake section. For the mingw32-make section, we use the CLANG
-	// compiler if the user generated .ninja scripts for it -- and if not, we default to the MSVC compiler.
-
-	if (m_CompilerType & COMPILER_MSVC)	{
-		kf.ReplaceStr("%compiler%", "msvc");
-		while (kf.ReplaceStr("%compiler%", m_CompilerType & COMPILER_CLANG ? "clang" : "msvc"));
-	}
-	else
-		while (kf.ReplaceStr("%compiler%", "clang"));
-
 	while (kf.ReplaceStr("%project%", m_cszProjectName));
+
+	// Now we parse the file as if we had read it, changing or adding as needed
+
+	CKeyFile kfOut;
+	while (kf.readline()) {
+		if (isSameSubString(kf, "#b64")) {
+			if (m_b64bit && !m_bBitSuffix)
+				kfOut.WriteEol("b64=1");
+			else
+				kfOut.WriteEol(kf);
+		}
+		else if (isSameSubString(kf, "release:") || isSameSubString(kf, "debug:")) {
+			bool bDebugTarget = isSameSubString(kf, "debug:");	// so we don't have to keep parsing the line
+			if (m_cszBuildLibs.IsNonEmpty()) {
+				CStr cszNewLine(kf);
+				CEnumStr cEnumStr(m_cszBuildLibs, ';');
+				const char* pszBuildLib;
+				while (cEnumStr.Enum(&pszBuildLib)) {
+					CStr cszTarget;
+					cszTarget.printf(" %s%s ", FindFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
+
+					// Line is "release: project" so we simply replace the first space with our additional target (which begins and ends with a space
+
+					cszNewLine.ReplaceStr(" ", cszTarget);
+				}
+				kfOut.WriteEol(cszNewLine);
+
+				// Now that we've added the targets to the release: or debug: line, we need to add the rule
+
+				cEnumStr.SetNewStr(m_cszBuildLibs, ';');
+				while (cEnumStr.Enum(&pszBuildLib)) {
+					kfOut.printf("\n%s%s:\n", FindFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
+					CStr cszCWD;
+					if (!FindBuildSrc(pszBuildLib, cszCWD)) {
+						CStr cszMsg;
+						cszMsg.printf("Unable to find build/ directory for %s library", FindFilePortion(pszBuildLib));
+						m_lstErrors += cszMsg;
+						cszCWD = pszBuildLib;
+						char* pszLibName = FindFilePortion(cszCWD);
+						if (pszLibName)
+							*pszLibName = 0;
+					}
+					kfOut.printf("\tcd %s & ninja -f build/$(cmplr)Build$(bits)%s.ninja\n", (const char*) cszCWD,
+																				bDebugTarget ? "D" : "");
+				}
+			}
+		}
+		else
+			kfOut.WriteEol(kf);
+	}
 
 	// If the makefile already exists, don't write to it unless something has actually changed
 
 	if (FileExists("makefile"))	{
 		CKeyFile kfOrg;
-		if (!kfOrg.ReadFile("makefile") || strcmp(kfOrg, kf) != 0) {
-			if (kf.WriteFile("makefile")) {
+		if (!kfOrg.ReadFile("makefile") || strcmp(kfOrg, kfOut) != 0) {
+			if (kfOut.WriteFile("makefile")) {
 				puts("makefile updated");
 				return true;
 			}
@@ -85,7 +101,7 @@ bool CBldMaster::CreateMakeFile()
 		}
 	}
 	else {
-		if (kf.WriteFile("makefile")) {
+		if (kfOut.WriteFile("makefile")) {
 			puts("makefile created");
 			return true;
 		}
@@ -96,4 +112,54 @@ bool CBldMaster::CreateMakeFile()
 	}
 
 	return true;
+}
+
+static bool FindBuildSrc(const char* pszBuildTarget, CStr& cszDir)
+{
+	ASSERT_MSG(pszBuildTarget, "NULL pointer!");
+	ASSERT_MSG(*pszBuildTarget, "Empty string!");
+
+	/*
+	 * Typical BuildLib: target name will be "../dir/lib/name". We assume that "name" is both the name of the library We
+	 * start by extracting the "name" portion. If the name is preceeded by "lib", we remove that. That should leave us
+	 * with "../dir/". We then look at every sub-directory underneath "../dir" until we find a "build/" sub-directory.
+	 * Once we find that, we use it's parent as the location of the source files.
+
+	 * There are lots of ways this can get an incorrect directory. If the user specified "lib/name" then the src files
+	 * won't be found. If there are multiple sub-projects under "../dir/" then there's a possibility that the wrong one
+	 * will be used. If the src files are two sub-directories in ("../dir/mylib/src") then it won't be found. The
+	 * assumption is that a broken makefile that the user can easily edit and fix is better then no makefile at all.
+
+	 */
+
+	cszDir = pszBuildTarget;
+	char* pszName = FindFilePortion(cszDir);
+	if (!pszName)
+		return false;	// means a bogus BuildLibs: line in .srcfiles
+
+	if (pszName > cszDir.getptr())
+		--pszName;		// so that we also remove any trailing backslash
+	*pszName = 0;
+	pszName = FindFilePortion(cszDir);
+	if (pszName && isSameString(pszName, "lib"))
+		*pszName = 0;
+
+	CStr cszPattern((const char*) cszDir);
+	cszPattern.AppendFileName("*");
+	CTTFindFile ff(cszPattern);
+	if (ff.isValid()) {
+		do {
+			if (ff.isDir() && IsValidFileChar(ff, 0)) {
+				CStr cszPossible((const char*) cszDir);
+				cszPossible.AppendFileName(ff);
+				cszPossible.AddTrailingSlash();
+				cszPossible.AppendFileName("build");
+				if (DirExists(cszPossible))	{	// found it! (we hope)
+					cszDir.AppendFileName(ff);
+					return true;
+				}
+			}
+		} while(ff.NextFile());
+	}
+	return false;
 }
