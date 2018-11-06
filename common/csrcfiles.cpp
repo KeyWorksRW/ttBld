@@ -385,6 +385,12 @@ void CSrcFiles::ProcessFile(char* pszFile)
 		m_cszRcName = pszFile;
 		return;
 	}
+
+	pszExt = kstristr(pszFile, ".hhp");
+	if (pszExt) {	// ignore .rc2, .resources, etc.
+		m_cszHHPName = pszFile;
+		return;
+	}
 }
 
 void CSrcFiles::ProcessInclude(const char* pszFile, CStrIntList& lstAddSrcFiles, bool bFileSection)

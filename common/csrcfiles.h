@@ -121,6 +121,7 @@ public:
 	CStr m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
 	CStr m_cszProjectName;		// name of the project
 	CStr m_cszRcName;			// resource file to build (if any)
+	CStr m_cszHHPName;			// HTML Help project file
 	CStr m_cszSourcePattern;	// Specifies one or more wildcards to add to Files: section
 
 	CStrList m_lstSrcFiles;
