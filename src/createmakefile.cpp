@@ -136,13 +136,23 @@ static bool FindBuildSrc(const char* pszBuildTarget, CStr& cszDir)
 	char* pszName = FindFilePortion(cszDir);
 	if (!pszName)
 		return false;	// means a bogus BuildLibs: line in .srcfiles
+	CStr cszName(pszName);
 
 	if (pszName > cszDir.getptr())
 		--pszName;		// so that we also remove any trailing backslash
 	*pszName = 0;
 	pszName = FindFilePortion(cszDir);
-	if (pszName && isSameString(pszName, "lib"))
+	if (pszName && isSameString(pszName, "lib")) {
 		*pszName = 0;
+
+		// If BuildTarget is "../lib/name" then removing "lib" will leave us with "../" which unlikely to be what the
+		// user wants, so add the name to the end. I.e., "../lib/name" becomes "../name"
+
+		BackslashToForwardslash(cszDir);
+		pszName = kstrchr(cszDir, '/');
+		if (pszName && !pszName[1])		// catch case where removing "lib" leaves "../ "
+			cszDir.AppendFileName(cszName);
+	}
 
 	CStr cszPattern((const char*) cszDir);
 	cszPattern.AppendFileName("*");
@@ -150,6 +160,8 @@ static bool FindBuildSrc(const char* pszBuildTarget, CStr& cszDir)
 	if (ff.isValid()) {
 		do {
 			if (ff.isDir() && IsValidFileChar(ff, 0)) {
+				if (isSameString(ff, "build"))
+					return true;	// we found it, presumably after "lib" was removed from the path
 				CStr cszPossible((const char*) cszDir);
 				cszPossible.AppendFileName(ff);
 				cszPossible.AddTrailingSlash();
