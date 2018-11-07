@@ -21,6 +21,36 @@ void SetSrcFileOptions()
 		dlg.SaveChanges();
 }
 
+void CreateNewSrcFiles()
+{
+	if (FileExists(".srcfiles")) {
+		puts(".srcfiles already exists! Delete it before using -new option, or use the -overwrite option.");
+		return;
+	}
+
+	CDlgSrcOptions dlg;
+	if (dlg.DoModal() == IDOK) {
+		// CWriteSrcFiles only writes out the Options: section since that's all that's needed by MakeNinja. For the -new
+		// option, we first create a .srcfiles with nothing but a Files: section, and then call SaveChanges() to add the
+		// Options: section.
+
+		CKeyFile kfOut;
+		kfOut.WriteEol("Files:");
+
+		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc");	// All types of C++ files plus any resource file
+		for (size_t pos = 0; pos < dlg.m_lstSrcFiles.GetCount(); ++pos) {
+			kfOut.printf("  %s\n", dlg.m_lstSrcFiles[pos]);
+		}
+		if (!kfOut.WriteFile(".srcfiles")) {
+			puts("Unable to write to .srcfiles!");
+			return;
+		}
+
+		puts(".srcfiles created");
+		dlg.SaveChanges();	// now add the Options: section
+	}
+}
+
 CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : CTTDlg(IDDLG_SRCFILES), CWriteSrcFiles()
 {
 	ReadFile();	// read in any existing .srcfiles
@@ -58,7 +88,7 @@ void CDlgSrcOptions::SaveChanges()
 {
 	if (FileExists(txtSrcFilesFileName)) {
 		if (WriteUpdates())
-			puts(".srcfiles updated");
+			puts(".srcfiles Options: section updated");
 	}
 	else {
 		if (WriteUpdates())

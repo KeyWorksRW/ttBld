@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 			DisplayUsage();
 			return 1;
 		}
-		else if (isSameString(argv[argpos] + 1, "-convert")) {
+		else if (isSameString(argv[argpos] + 1, "convert")) {
 			if (ConvertBuildScript(argpos + 1 < argc ? nullptr : argv[argpos + 1]))	{
 				SetSrcFileOptions();
 				return 1;
@@ -42,12 +42,16 @@ int main(int argc, char* argv[])
 			else
 				return 0;
 		}
-		else if (isSameString(argv[argpos] + 1, "-add")) {
+		else if (isSameString(argv[argpos] + 1, "add")) {
 			CStrList lstFiles;
 			for (++argpos; argpos < argc; ++argpos) {
 				lstFiles += argv[argpos];
 			}
 			AddFiles(lstFiles);
+			return 1;
+		}
+		else if (isSameString(argv[argpos] + 1, "new")) {
+			CreateNewSrcFiles();
 			return 1;
 		}
 		else {
