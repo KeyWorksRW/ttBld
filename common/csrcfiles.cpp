@@ -130,14 +130,14 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 	if (m_exeType == EXE_UNSPECIFIED)
 		m_exeType= EXE_WINDOW;
 
-	AddSourcePattern();
+	AddSourcePattern(m_cszSourcePattern);
 
 	// If no Files: or Sources: we're specified, then we still won't have any files to build. Default to every type of C++
 	// source file in the current directory.
 
 	if (m_lstSrcFiles.GetCount() < 1) {
 		m_cszSourcePattern = "*.cpp;*.cc;*.cxx;*.rc";
-		AddSourcePattern();
+		AddSourcePattern(m_cszSourcePattern);
 	}
 
 	return true;
@@ -432,12 +432,12 @@ void CSrcFiles::ProcessInclude(const char* pszFile, CStrIntList& lstAddSrcFiles,
 	}
 }
 
-void CSrcFiles::AddSourcePattern()
+void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 {
-	if (m_cszSourcePattern.IsEmpty())
+	if (!pszFilePattern || !*pszFilePattern)
 		return;
 
-	CStr cszPattern(m_cszSourcePattern);
+	CStr cszPattern(pszFilePattern);
 	char* pszPattern = (char*) cszPattern;
 	char* pszSep = kstrchr(cszPattern, ';');
 	if (pszSep)

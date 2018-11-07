@@ -75,6 +75,8 @@ public:
 
 	const char* GetProjectName() { return m_cszProjectName; }
 
+	void AddSourcePattern(const char* pszFilePattern);
+
 protected:
 	void ProcessFile(char* pszFile);
 	void ProcessInclude(const char* pszFile, CStrIntList& lstAddSrcFiles, bool bFileSection);
@@ -84,7 +86,6 @@ protected:
 
 	void AddCompilerFlag(const char* pszFlag);
 	void AddLibrary(const char* pszName);
-	void AddSourcePattern();
 
 	// Class members (note that these are NOT marked protected or private -- too many callers need to access individual members)
 
