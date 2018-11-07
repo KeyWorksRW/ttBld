@@ -7,12 +7,17 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "precomp.h"
-#include "bldmaster.h"		// CBldMaster
+
 #include "../ttLib/include/cstr.h"	// CStr
+
+#include "bldmaster.h"				// CBldMaster
 
 CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 {
 	ReadTwoFiles(".srcfiles", bReadPrivate ? ".private/.srcfiles" : nullptr);
+
+	// if they are both empty, fill them in with defaults. If only one is empty, then it's likely only a single platform
+	// is being build (32-bit or 64-bit)
 
 	if (m_cszTarget32.IsEmpty() && m_cszTarget64.IsEmpty()) {
 		if (m_exeType == EXE_LIB) {
@@ -65,10 +70,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 	if (m_cszRcName.IsNonEmpty())
 		FindRcDependencies(m_cszRcName);
 
-	// BUGBUG: [randalphwa - 10/27/2018] Issue #41: This should get expanded to store a path to either ../bin64 or bin64,
-	// and a second path to ../lib64 or lib64
-
-	m_bBin64Exists = DirExists("../bin64");
+	m_bBin64Exists = (m_cszTarget64.IsNonEmpty() && kstrstr(m_cszTarget64, "64"));
 }
 
 const char* lstRcKeywords[] = {		// list of keywords that load a file
@@ -246,20 +248,29 @@ const char* CBldMaster::GetTargetDebug()
 		return cszTargetDebug;
 
 	if (isExeTypeLib())	{
-		cszTargetDebug = DirExists("../lib") ? "../lib" : "lib";
+		if (m_cszTarget32.IsNonEmpty())
+			cszTargetDebug = m_cszTarget32;
+		else
+			cszTargetDebug = DirExists("../lib") ? "../lib" : "lib";
 		cszTargetDebug.AppendFileName(getProjName());
 		cszTargetDebug += "D.lib";
 		return cszTargetDebug;
 	}
 
 	else if (isExeTypeDll()) {
-		cszTargetDebug = DirExists("../bin") ? "../bin" : "bin";
+		if (m_cszTarget32.IsNonEmpty())
+			cszTargetDebug = m_cszTarget32;
+		else
+			cszTargetDebug = DirExists("../bin") ? "../bin" : "bin";
 		cszTargetDebug.AppendFileName(getProjName());
 		cszTargetDebug += ".dll";	// Note that we do NOT add a 'D' to the end of the dll name
 		return cszTargetDebug;
 	}
 	else {
-		cszTargetDebug = DirExists("../bin") ? "../bin" : "bin";
+		if (m_cszTarget32.IsNonEmpty())
+			cszTargetDebug = m_cszTarget32;
+		else
+			cszTargetDebug = DirExists("../bin") ? "../bin" : "bin";
 		cszTargetDebug.AppendFileName(getProjName());
 		cszTargetDebug += "D.exe";
 		return cszTargetDebug;
@@ -272,20 +283,29 @@ const char* CBldMaster::GetTargetRelease()
 		return cszTargetRelease;
 
 	if (isExeTypeLib())	{
-		cszTargetRelease = DirExists("../lib") ? "../lib" : "lib";
+		if (m_cszTarget32.IsNonEmpty())
+			cszTargetRelease = m_cszTarget32;
+		else
+			cszTargetRelease = DirExists("../lib") ? "../lib" : "lib";
 		cszTargetRelease.AppendFileName(getProjName());
 		cszTargetRelease += ".lib";
 		return cszTargetRelease;
 	}
 
 	else if (isExeTypeDll()) {
-		cszTargetRelease = DirExists("../bin") ? "../bin" : "bin";
+		if (m_cszTarget32.IsNonEmpty())
+			cszTargetRelease = m_cszTarget32;
+		else
+			cszTargetRelease = DirExists("../bin") ? "../bin" : "bin";
 		cszTargetRelease.AppendFileName(getProjName());
 		cszTargetRelease += "dll";
 		return cszTargetRelease;
 	}
 	else {
-		cszTargetRelease = DirExists("../bin") ? "../bin" : "bin";
+		if (m_cszTarget32.IsNonEmpty())
+			cszTargetRelease = m_cszTarget32;
+		else
+			cszTargetRelease = DirExists("../bin") ? "../bin" : "bin";
 		cszTargetRelease.AppendFileName(getProjName());
 		cszTargetRelease += ".exe";
 		return cszTargetRelease;
@@ -298,20 +318,29 @@ const char* CBldMaster::GetTargetDebug64()
 		return cszTargetDebug64;
 
 	if (isExeTypeLib())	{
-		cszTargetDebug64 = DirExists("../lib") ? "../lib" : "lib";
+		if (m_cszTarget64.IsNonEmpty())
+			cszTargetDebug64 = m_cszTarget64;
+		else
+			cszTargetDebug64 = DirExists("../lib") ? "../lib" : "lib";
 		cszTargetDebug64.AppendFileName(getProjName());
 		cszTargetDebug64 += is64BitSuffix() ? "64D.lib" : "D.lib";
 		return cszTargetDebug64;
 	}
 
 	else if (isExeTypeDll()) {
-		cszTargetDebug64 = isBin64() ? "../bin64" : (DirExists("../bin") ? "../bin" : "bin");
+		if (m_cszTarget64.IsNonEmpty())
+			cszTargetDebug64 = m_cszTarget64;
+		else
+			cszTargetDebug64 = isBin64() ? "../bin64" : (DirExists("../bin") ? "../bin" : "bin");
 		cszTargetDebug64.AppendFileName(getProjName());
 		cszTargetDebug64 = (isBin64() || !is64BitSuffix()) ? ".dll" : "64.dll";
 		return cszTargetDebug64;
 	}
 	else {
-		cszTargetDebug64 = isBin64() ? "../bin64" : (DirExists("../bin") ? "../bin" : "bin");
+		if (m_cszTarget64.IsNonEmpty())
+			cszTargetDebug64 = m_cszTarget64;
+		else
+			cszTargetDebug64 = isBin64() ? "../bin64" : (DirExists("../bin") ? "../bin" : "bin");
 		cszTargetDebug64.AppendFileName(getProjName());
 		cszTargetDebug64 += (isBin64() || !is64BitSuffix()) ? "D.exe" : "64D.exe";
 		return cszTargetDebug64;
@@ -324,20 +353,29 @@ const char* CBldMaster::GetTargetRelease64()
 		return cszTargetRelease64;
 
 	if (isExeTypeLib())	{
-		cszTargetRelease64 = DirExists("../lib") ? "../lib" : "lib";
+		if (m_cszTarget64.IsNonEmpty())
+			cszTargetRelease64 = m_cszTarget64;
+		else
+			cszTargetRelease64 = DirExists("../lib") ? "../lib" : "lib";
 		cszTargetRelease64.AppendFileName(getProjName());
 		cszTargetRelease64 += is64BitSuffix() ? "64.lib" : ".lib";
 		return cszTargetRelease64;
 	}
 
 	else if (isExeTypeDll()) {
-		cszTargetRelease64 = isBin64() ? "../bin64" : (DirExists("../bin") ? "../bin" : "bin");
+		if (m_cszTarget64.IsNonEmpty())
+			cszTargetRelease64 = m_cszTarget64;
+		else
+			cszTargetRelease64 = isBin64() ? "../bin64" : (DirExists("../bin") ? "../bin" : "bin");
 		cszTargetRelease64.AppendFileName(getProjName());
 		cszTargetRelease64 = (isBin64() || !is64BitSuffix()) ? ".dll" : "64.dll";
 		return cszTargetRelease64;
 	}
 	else {
-		cszTargetRelease64 = isBin64() ? "../bin64" : (DirExists("../bin") ? "../bin" : "bin");
+		if (m_cszTarget64.IsNonEmpty())
+			cszTargetRelease64 = m_cszTarget64;
+		else
+			cszTargetRelease64 = isBin64() ? "../bin64" : (DirExists("../bin") ? "../bin" : "bin");
 		cszTargetRelease64.AppendFileName(getProjName());
 		cszTargetRelease64 += (isBin64() || !is64BitSuffix()) ? ".exe" : "64.exe";;
 		return cszTargetRelease64;
