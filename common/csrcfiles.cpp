@@ -43,8 +43,6 @@ CSrcFiles::CSrcFiles()
 	m_exeType = EXE_DEFAULT;
 
 	m_fCreateMakefile = MAKEMAKE_DEFAULT;	// create makefile only if it doesn't already exist
-	m_MakeFileCompiler = COMPILER_DEFAULT;
-	m_cszDefaultTarget = "release";
 
 	m_lstSrcFiles.SetFlags(CStrList::FLG_URL_STRINGS);
 	m_lstLibFiles.SetFlags(CStrList::FLG_URL_STRINGS);

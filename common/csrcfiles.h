@@ -138,8 +138,6 @@ public:
 	// Following are for the makefile: section
 
 	size_t	m_fCreateMakefile;		// MAKEMAKE_NEVER, MAKEMAKE_MISSING or MAKEMAKE_ALWAYS
-	size_t	m_MakeFileCompiler;		// COMPILER_DEFAULT, COMPILER_CLANG or COMPILER_MSVC
-	CStr	m_cszDefaultTarget;		// typically debug or release
 
 protected:
 	bool m_bRead;				// file has been read and processed
