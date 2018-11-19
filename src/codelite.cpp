@@ -63,7 +63,6 @@ size_t CreateCodeLiteProject()
 	}
 
 	CKeyFile kf;
-	kf.SetUnixLF();
 	if (!kf.ReadResource(IDR_PRE_PROJECT)) {
 		puts("MakeNinja.exe is corrupted -- cannot read the necessary resource");
 		return CLP_MISSING_RES;
