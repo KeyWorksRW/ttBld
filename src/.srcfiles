@@ -5,7 +5,7 @@ Options:
   PCH: precomp.h        # "none" or name of header file to use for precompilation
   64Bit:      true      # create 64-bit project in addition to 32-bit project
   bit_suffix: true      # add "64" to the end of the project name (e.g., MakeNinja64.exe)
-  IncDirs: ../src
+  IncDirs: ../src		# so that files in ../common can locate precomp.h
   BuildLibs: ../ttLib/lib/ttLib
 
 Files:
