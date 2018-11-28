@@ -145,12 +145,15 @@ static bool FindBuildSrc(const char* pszBuildTarget, CStr& cszDir)
 	if (pszName && isSameString(pszName, "lib")) {
 		*pszName = 0;
 
-		// If BuildTarget is "../lib/name" then removing "lib" will leave us with "../" which unlikely to be what the
-		// user wants, so add the name to the end. I.e., "../lib/name" becomes "../name"
+		// If BuildTarget is "../lib/name" then removing "lib" will leave us with "../" which is unlikely to be what the
+		// user wants, so add the name to the end. I.e., "../lib/name" becomes "../name", "../../lib/name" becomes
+		// "../../name", etc.
 
 		BackslashToForwardslash(cszDir);
-		pszName = kstrchr(cszDir, '/');
-		if (pszName && !pszName[1])		// catch case where removing "lib" leaves "../ "
+		pszName = kstrstr(cszDir, "../");
+		while (pszName && isSameSubString(pszName + 3, "../"))
+			pszName += 3;
+		if (pszName && !pszName[3])		// catch case where removing "lib" leaves "../ "
 			cszDir.AppendFileName(cszName);
 	}
 
