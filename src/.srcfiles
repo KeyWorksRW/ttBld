@@ -18,6 +18,7 @@ Files:
   init.cpp
   makeninja.cpp
   ninja.cpp
+  parsehhp.cpp
   vcxproj.cpp
 
   ../common/csrcfiles.cpp

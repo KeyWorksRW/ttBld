@@ -16,6 +16,7 @@
 #include "resource.h"	// IDR_MAKEFILE
 
 static bool FindBuildSrc(const char* pszBuildTarget, CStr& cszDir);
+extern const char* txtHelpNinja;
 
 bool CBldMaster::CreateMakeFile()
 {
@@ -47,8 +48,22 @@ bool CBldMaster::CreateMakeFile()
 		}
 		else if (isSameSubString(kf, "release:") || isSameSubString(kf, "debug:")) {
 			bool bDebugTarget = isSameSubString(kf, "debug:");	// so we don't have to keep parsing the line
+			CStr cszNewLine(kf);
+			if (!IsEmptyString(getHHPName())) {
+				CStr cszTarget(" ");
+				cszTarget += FindFilePortion(getHHPName());
+				cszTarget.RemoveExtension();
+				cszTarget += " ";
+				cszNewLine.ReplaceStr(" ", cszTarget);
+				if (m_cszBuildLibs.IsEmpty()) {
+					kfOut.WriteEol(cszNewLine);
+					cszTarget = FindFilePortion(getHHPName());
+					cszTarget.RemoveExtension();
+					kfOut.printf("\n%s:\n\tninja -f %s\n\n", (char*) cszTarget, txtHelpNinja);
+				}
+			}
+
 			if (m_cszBuildLibs.IsNonEmpty()) {
-				CStr cszNewLine(kf);
 				CEnumStr cEnumStr(m_cszBuildLibs, ';');
 				const char* pszBuildLib;
 				while (cEnumStr.Enum(&pszBuildLib)) {
@@ -60,6 +75,11 @@ bool CBldMaster::CreateMakeFile()
 					cszNewLine.ReplaceStr(" ", cszTarget);
 				}
 				kfOut.WriteEol(cszNewLine);
+				if (!IsEmptyString(getHHPName())) {
+					CStr cszTarget(FindFilePortion(getHHPName()));
+					cszTarget.RemoveExtension();
+					kfOut.printf("\n%s:\n\tninja -f %s\n\n", (char*) cszTarget, txtHelpNinja);
+				}
 
 				// Now that we've added the targets to the release: or debug: line, we need to add the rule
 

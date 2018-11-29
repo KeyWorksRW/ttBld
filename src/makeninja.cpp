@@ -73,6 +73,9 @@ int MakeNinja(int argc, char* argv[])
 		}
 	}
 
+	if (IsNonEmptyString(cNinja.getHHPName()))
+		cNinja.CreateHelpFile();
+
 	// Display any errors that occurred during processing
 
 	if (cNinja.GetErrorCount()) {

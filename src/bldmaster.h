@@ -83,6 +83,7 @@ public:
 
 	const char* getProjName()	{ return m_cszProjectName; }
 	const char* getPchName()	{ return m_cszPCHheader; }
+	const char* getHHPName()	{ return m_cszHHPName; }
 
 	const char* GetTargetDebug();
 	const char* GetTargetDebug64();

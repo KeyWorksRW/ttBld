@@ -46,6 +46,8 @@ build $outdir/makeninja.obj: compile makeninja.cpp | $outdir/precomp.obj
 
 build $outdir/ninja.obj: compile ninja.cpp | $outdir/precomp.obj
 
+build $outdir/parsehhp.obj: compile parsehhp.cpp | $outdir/precomp.obj
+
 build $outdir/vcxproj.obj: compile vcxproj.cpp | $outdir/precomp.obj
 
 build $outdir/csrcfiles.obj: compile ../common/csrcfiles.cpp | $outdir/precomp.obj
@@ -66,6 +68,7 @@ build ../bin/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib.lib $
   $outdir/init.obj $
   $outdir/makeninja.obj $
   $outdir/ninja.obj $
+  $outdir/parsehhp.obj $
   $outdir/vcxproj.obj $
   $outdir/csrcfiles.obj
 

@@ -24,6 +24,7 @@ public:
 	} GEN_TYPE;
 
 	bool CreateBuildFile(GEN_TYPE gentype, size_t Compiler = CSrcFiles::COMPILER_MSVC);
+	bool CreateHelpFile();
 
 protected:
 	// Class functions
@@ -50,4 +51,5 @@ protected:
 	CStr m_cszPCH;			// the .pch name that will be generated
 	CStr m_cszCPP_PCH;		// the .cpp name that will be used to create the .pch file
 	CStr m_cszPCHObj;		// the .obj file that is built to create the .pch file
+	CStr m_cszChmFile;		// set if a .hhp file was specified in .srcfiles
 };
