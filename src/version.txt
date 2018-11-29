@@ -1,0 +1,2 @@
+const char* txtVersion   = "MakeNinja 2.0.8295.0";
+const char* txtCopyRight = "Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)";
