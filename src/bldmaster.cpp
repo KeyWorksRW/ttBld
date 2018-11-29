@@ -164,7 +164,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 		else {
 			char* pszKeyWord = FindNonSpace(kf);
-			if (!pszKeyWord || pszKeyWord[0] == '/')
+			if (!pszKeyWord || pszKeyWord[0] == '/' || pszKeyWord[0] == CH_QUOTE)	// TEXTINCLUDE typically puts things in quotes
 				continue;	// blank line or comment line
 			pszKeyWord = FindNextSpace(pszKeyWord);
 			if (!pszKeyWord)
