@@ -50,16 +50,10 @@ bool CBldMaster::CreateMakeFile()
 			bool bDebugTarget = isSameSubString(kf, "debug:");	// so we don't have to keep parsing the line
 			CStr cszNewLine(kf);
 			if (!IsEmptyString(getHHPName())) {
-				CStr cszTarget(" ");
-				cszTarget += FindFilePortion(getHHPName());
-				cszTarget.RemoveExtension();
-				cszTarget += " ";
-				cszNewLine.ReplaceStr(" ", cszTarget);
+				cszNewLine.ReplaceStr(" ", " ChmHelp ");
 				if (m_cszBuildLibs.IsEmpty()) {
 					kfOut.WriteEol(cszNewLine);
-					cszTarget = FindFilePortion(getHHPName());
-					cszTarget.RemoveExtension();
-					kfOut.printf("\n%s:\n\tninja -f %s\n\n", (char*) cszTarget, txtHelpNinja);
+					kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
 				}
 			}
 
@@ -76,9 +70,7 @@ bool CBldMaster::CreateMakeFile()
 				}
 				kfOut.WriteEol(cszNewLine);
 				if (!IsEmptyString(getHHPName())) {
-					CStr cszTarget(FindFilePortion(getHHPName()));
-					cszTarget.RemoveExtension();
-					kfOut.printf("\n%s:\n\tninja -f %s\n\n", (char*) cszTarget, txtHelpNinja);
+					kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
 				}
 
 				// Now that we've added the targets to the release: or debug: line, we need to add the rule
