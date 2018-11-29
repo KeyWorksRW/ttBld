@@ -23,6 +23,7 @@ void DisplayUsage()
 	puts("\t-add filename(s) <-- will add the filename(s) to the Files: section of the current .srcfiles file");
 	puts("\t-convert filename <-- will convert the build script (file.vcxproj, file.project, or file.cbp) into a .srcfiles file in current directory");
 	puts("\t-overwrite <-- will read the current .srcfiles and completely overwrite it with any changes you make in the dialog");
+	puts("\t-new <-- creates a new .srcfiles file (unless one already exists)");
 }
 
 int main(int argc, char* argv[])

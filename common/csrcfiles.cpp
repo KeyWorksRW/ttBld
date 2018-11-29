@@ -438,13 +438,11 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 		return;
 
 	CStr cszPattern(pszFilePattern);
-	char* pszPattern = (char*) cszPattern;
-	char* pszSep = kstrchr(cszPattern, ';');
-	if (pszSep)
-		*pszSep = 0;
+	CEnumStr enumstr(cszPattern, ';');
+	const char* pszPattern;
 
-	CTTFindFile ff(pszPattern);
-	while (pszPattern) {
+	while (enumstr.Enum(&pszPattern)) {
+		CTTFindFile ff(pszPattern);
 		while (ff.isValid()) {
 			char* psz = kstrchrR(ff, '.');
 			if (psz) {
@@ -453,6 +451,8 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 						IsSameString(psz, ".cpp") ||
 						IsSameString(psz, ".cc") ||
 						IsSameString(psz, ".cxx") ||
+						IsSameString(psz, ".hhp") ||
+						IsSameString(psz, ".idl") ||
 						IsSameString(psz, ".rc")
 					) {
 						m_lstSrcFiles.Add(ff);
@@ -461,13 +461,6 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 			if (!ff.NextFile())
 				break;
 		}
-		if (!pszSep)
-			break;
-		pszPattern = FindNonSpace(pszSep + 1);
-		pszSep = kstrchr(cszPattern, ';');
-		if (pszSep)
-			*pszSep = 0;
-		ff.NewPattern(pszPattern);
 	}
 }
 

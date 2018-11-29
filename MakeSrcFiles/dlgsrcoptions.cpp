@@ -37,7 +37,7 @@ void CreateNewSrcFiles()
 		CKeyFile kfOut;
 		kfOut.WriteEol("Files:");
 
-		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc");	// All types of C++ files plus any resource file
+		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.c;*.rc;*.idl;*.hhp;");
 		for (size_t pos = 0; pos < dlg.m_lstSrcFiles.GetCount(); ++pos) {
 			kfOut.printf("  %s\n", dlg.m_lstSrcFiles[pos]);
 		}
