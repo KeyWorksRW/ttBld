@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:		CParseHHP
-// Purpose:
+// Purpose:		Parse a .HHP file and generate a list of file dependencies
 // Author:		Ralph Walden
 // Copyright:	Copyright (c) 2018 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
@@ -197,9 +197,7 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 					AddDependency(pszHHP, kf);
 				}
 				break;
-
 		}
-
 	}
 }
 
@@ -257,11 +255,9 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
 		return;
 	}
 
-	m_lstDependencies += (const char*) cszRelative;
-
 	// TODO: [KeyWorksRW - 11-29-2018]	If this is an HTML file, then we need to parse it to find additional dependencies
 
-
+	m_lstDependencies += (const char*) cszRelative;
 }
 
 const char* txtHelpNinja = "build/ChmHelp.ninja";
