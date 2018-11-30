@@ -150,6 +150,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 
 	UpdateLongOption("PCH:", 		(char*) m_cszPCHheader);
 	UpdateLongOption("Cflags:", 	(char*) m_cszCFlags);
+	UpdateLongOption("Midlflags:", 	(char*) m_cszMidlFlags);
 	UpdateLongOption("LinkFlags:",	(char*) m_cszLinkFlags);
 	UpdateLongOption("Libs:", 		(char*) m_cszLibs);
 	UpdateLongOption("BuildLibs:", 	(char*) m_cszBuildLibs);

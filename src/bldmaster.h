@@ -52,7 +52,6 @@ public:
 	const char* getAddIncDirs()	{ return m_cszIncDirs; }
 	const char* getAddLibDirs()	{ return m_cszLibDirs; }
 	const char* getRcFile()		{ return m_cszRcName; }
-	const char* getIdlFile()	{ return m_cszIdlName; }
 
 	const char* getDir32()	{ return m_cszTarget32; }	// 32-bit target directory
 	const char* getDir64()	{ return m_cszTarget64; }	// 64-bit target directory

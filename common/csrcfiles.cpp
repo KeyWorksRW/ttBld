@@ -290,6 +290,11 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
+	if (IsSameSubString(pszLine, "MidlFlags:")) {
+		m_cszMidlFlags = pszVal;
+		return;
+	}
+
 	if (IsSameSubString(pszLine, "LinkFlags:") || IsSameSubString(pszLine, "LINK:")) {
 		m_cszLinkFlags = pszVal;
 		return;
@@ -374,7 +379,7 @@ void CSrcFiles::ProcessFile(char* pszFile)
 
 	char* pszExt = kstristr(pszFile, ".idl");
 	if (pszExt)	{
-		m_cszIdlName = pszFile;
+		m_lstIdlFiles += pszFile;
 		return;
 	}
 

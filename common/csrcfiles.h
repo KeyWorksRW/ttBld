@@ -116,7 +116,7 @@ public:
 	CStr m_cszTarget32;			// target directory for non-64 bit builds
 	CStr m_cszTarget64;			// target directory for 64 bit builds
 
-	CStr m_cszIdlName;			// file.idl file used to build file.tlb
+	CStr m_cszMidlFlags;		// flags to pass to the midl compiler
 	CStr m_cszLibName;			// name and location of any additional library to build (used by Lib: section)
 	CStr m_cszLibPCHheader;		// header file to use for Lib precompilation
 	CStr m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
@@ -127,6 +127,7 @@ public:
 
 	CStrList m_lstSrcFiles;
 	CStrList m_lstLibFiles;		// list of any files used to build additional library
+	CStrList m_lstIdlFiles;		// list of any idl files to compile with midl compiler
 
 	CDblStrList m_lstDepLibs;	// key is library, val is src (if any)
 

@@ -132,7 +132,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 	WriteCompilerFlags();
 	WriteCompilerDirectives();
 	WriteRcDirective();
-	WriteMidlDirective();
+	WriteMidlDirective(gentype);
 	WriteLibDirective();
 	WriteLinkDirective();
 
@@ -205,6 +205,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 		file.WriteEol("\n");
 	}
 
+	WriteMidlTargets();
 	WriteLinkTargets(gentype);
 
 	if (!DirExists("build")) {
@@ -524,28 +525,41 @@ void CNinja::WriteRcDirective()
 	}
 }
 
-void CNinja::WriteMidlDirective()
+void CNinja::WriteMidlDirective(GEN_TYPE gentype)
 {
-	if (FileExists(getIdlFile())) {
-/*
-	KeyHelp.tlb: KeyHelp.idl
-	!ifdef B64
-		midl /nologo /env win64 /tlb KeyHelp.tlb /h KeyHelp.h KeyHelp.idl
-	!else
-		midl /nologo /env win32 /tlb KeyHelp.tlb /h KeyHelp.h KeyHelp.idl
-!endif
-*/
+	if (m_lstIdlFiles.GetCount()) {
+		if (gentype == GEN_DEBUG64 || gentype == GEN_RELEASE64)
+			m_pkfOut->WriteEol("rule midl\n  command = midl.exe /nologo /x64 /tlb $out $in");
+		else
+			m_pkfOut->WriteEol("rule midl\n  command = midl.exe /nologo /win32 /tlb $out $in");
+		m_pkfOut->WriteEol("  description = midl compiler... $in\n");
+	}
+}
 
-//		file.printf("rule midl\n  command = midl.exe -nologo -r%s /l 0x409 -fo$out $in\n",
-//			(gentype == GEN_DEBUG || gentype == GEN_DEBUG64) ? " /d \042_DEBUG\042" : ""
-//			);
-//		file.WriteEol("  description = midl compiler...\n");
+void CNinja::WriteMidlTargets()
+{
+	for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos) {
+		CStr cszTypeLib(m_lstIdlFiles[pos]);
+		cszTypeLib.ChangeExtension(".tlb");
+		CStr cszIdlC(m_lstIdlFiles[pos]);
+
+		// By default, midl will generate a file_i.c file which gets #included in one of the source files. The C++
+		// compilers should generate a dependency for it, so we use that file as the target rather then the .tlb file so
+		// that ninja will know to recompile the file that included the file_i.c file.
+
+		cszIdlC.RemoveExtension();
+		cszIdlC += "_i.c";
+		if (m_cszMidlFlags.IsNonEmpty())
+			m_pkfOut->printf("build %s : midl %s /tlb %s %s\n\n",
+				(char*) cszIdlC, (char*) m_cszMidlFlags, (char*) cszTypeLib, m_lstIdlFiles[pos]);
+		else
+			m_pkfOut->printf("build %s : midl /tlb %s %s\n\n",
+				(char*) cszIdlC, (char*) cszTypeLib, m_lstIdlFiles[pos]);
 	}
 }
 
 void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 {
-
 	// Note that bin and lib don't need to exist ahead of time as ninja will create them, however if the output is
 	// supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way around
 	// this would be to add support for an "OutPrefix: ../" option in .srcfiles.

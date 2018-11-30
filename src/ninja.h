@@ -36,9 +36,11 @@ protected:
 	void WriteCompilerFlags();
 	void WriteLibDirective();
 	void WriteLinkDirective();
-	void WriteLinkTargets(GEN_TYPE gentype);
-	void WriteMidlDirective();
+	void WriteMidlDirective(GEN_TYPE gentype);
 	void WriteRcDirective();
+
+	void WriteLinkTargets(GEN_TYPE gentype);
+	void WriteMidlTargets();
 
 	// Class members
 
