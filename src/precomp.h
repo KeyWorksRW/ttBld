@@ -62,5 +62,6 @@ extern const char* txtCopyRight;
 #include "../ttLib/include/ttlib.h"
 #include "../ttLib/include/cstr.h"		// CStr
 #include "../ttLib/include/strlist.h"	// CStrList
+#include "../ttLib/include/keyfile.h"	// CKeyFile
 
 #include "funcs.h"
