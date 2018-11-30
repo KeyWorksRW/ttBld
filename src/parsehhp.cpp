@@ -9,6 +9,7 @@
 #include "precomp.h"
 
 #include "../ttLib/include/keyfile.h"	// CKeyFile
+#include "../ttLib/include/findfile.h"	// CTTFindFile
 
 #include "parsehhp.h"	// CParseHHP
 #include "ninja.h"		// CNinja
@@ -240,7 +241,21 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
 		ConvertToRelative(m_cszCWD, cszHHP, cszRelative);
 	}
 
-	// TODO: [KeyWorksRW - 11-29-2018]	The filename might contain wildcards -- if so, we need to add all of them
+	if (kstrchr(cszRelative, '*') || kstrchr(cszRelative, '?')) {
+		CTTFindFile ff(cszRelative);
+		char* pszFilePortion = FindFilePortion(cszRelative);
+		ptrdiff_t cFilePortion = (pszFilePortion - cszRelative.getptr());
+		if (ff.isValid()) {
+			do {
+				if (!ff.isDir()) {
+					cszRelative.getptr()[cFilePortion] = 0;
+					cszRelative.AppendFileName(ff);
+					m_lstDependencies += (const char*) cszRelative;
+				}
+			} while(ff.NextFile());
+		}
+		return;
+	}
 
 	m_lstDependencies += (const char*) cszRelative;
 
