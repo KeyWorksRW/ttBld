@@ -1,0 +1,2 @@
+const char* txtVersion   = "MakeSrcFiles 1.0.8149";
+const char* txtCopyRight = "Copyright (c) 2018 KeyWorks Software (Ralph Walden)";
