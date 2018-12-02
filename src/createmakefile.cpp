@@ -92,6 +92,8 @@ bool CBldMaster::CreateMakeFile()
 																				bDebugTarget ? "D" : "");
 				}
 			}
+			else
+				kfOut.WriteEol(kf);
 		}
 		else
 			kfOut.WriteEol(kf);
