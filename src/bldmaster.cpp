@@ -125,7 +125,9 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 		}
 	}
 
+	size_t curLine = 0;
 	while (kf.readline()) {
+		++curLine;
 		if (IsSameSubString(FindNonSpace(kf), "#include")) {
 			char* psz = FindNonSpace(FindNonSpace(kf) + sizeof("#include"));
 
@@ -145,7 +147,8 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 				if (!FileExists(cszHeader)) {
 					CStr cszErrMsg;
-					cszErrMsg.printf("Cannot locate %s", (char*) cszHeader);
+					cszErrMsg.printf("%s(%kt,%kt):  warning: cannot locate include file %s",
+						pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
 					m_lstErrors += cszErrMsg;
 					continue;
 				}
@@ -212,7 +215,8 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 						if (!FileExists(cszFile)) {
 							CStr cszErrMsg;
-							cszErrMsg.printf("Cannot locate %s", (char*) cszFile);
+							cszErrMsg.printf("%s(%kt,%kt):  warning: cannot locate include file %s",
+								pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (pszFileName - kf.GetLnPtr()),  (char*) cszFile);
 							m_lstErrors += cszErrMsg;
 							break;
 						}
