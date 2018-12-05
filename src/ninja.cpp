@@ -604,17 +604,9 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 	}
 
 	if (getBuildLibs()) {
-		CStr cszAddLib(FindNonSpace(getBuildLibs()));
-		char* pszLib = cszAddLib;
-		char* pszSemi = kstrchr(pszLib, ';');
-		while (pszSemi) {
-			*pszSemi = 0;
-			AddDependentLibrary(pszLib, gentype);
-			pszLib = FindNonSpace(pszSemi + 1);
-			pszSemi = kstrchr(pszLib, ';');
-		}
-		if (*pszLib)
-			AddDependentLibrary(pszLib, gentype);
+		CEnumStr enumLib(FindNonSpace(getBuildLibs()), ';');
+		while (enumLib.Enum())
+			AddDependentLibrary(enumLib, gentype);
 	}
 
 	for (size_t iPos = 0; iPos < getSrcCount(); iPos++) {
@@ -653,6 +645,14 @@ void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 			break;
 	}
 
+#if 1
+	m_pkfOut->WriteChar(CH_SPACE);
+	m_pkfOut->WriteStr(cszLib);
+#else
+	// [randalphwa - 12/5/2018] The problem with this code is that it can mess up a valid library name if the library
+	// doesn't exist when MakeNinja is being run. That can result in "foo64D.lib" being turned into "foo.lib" which is
+	// probably the wrong platform version.
+
 	if (FileExists(cszLib))	{
 		m_pkfOut->WriteChar(CH_SPACE);
 		m_pkfOut->WriteStr(cszLib);
@@ -663,4 +663,5 @@ void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 		m_pkfOut->WriteChar(CH_SPACE);
 		m_pkfOut->WriteStr(cszLib);
 	}
+#endif
 }
