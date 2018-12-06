@@ -9,6 +9,7 @@
 #include "precomp.h"
 
 #include "../ttLib/include/keyxml.h"	// CKeyXmlBranch
+#include "../ttLib/include/findfile.h"	// CTTFindFile
 
 #include "../common/csrcfiles.h"		// CSrcFiles
 
@@ -29,14 +30,37 @@ bool ConvertBuildScript(const char* pszBldFile)
 	}
 
 	if (!pszBldFile || !*pszBldFile) {
-		// REVIEW: [randalphwa - 10/2/2018] Actually, we should just try all of the extensions we support, and if the file exists, run with it
+		CTTFindFile ff("*.vcxproj");
+		if (ff.isValid())
+			return ConvertVcxProj(ff);
+		else if (ff.NewPattern("*.vcproj"))
+			return ConvertVcProj(ff);
+		else if (ff.NewPattern("*.project"))
+			return ConvertCodeLite(ff);
+		else if (ff.NewPattern("*.cbp"))
+			return ConvertCodeBlocks(ff);
 
+		puts("Could not locate a supported build script to convert.");
 		return false;
 	}
 
 	const char* pszExt = kstrchrR(pszBldFile, '.');
 	if (!pszExt) {
-		printf("%s does not have an extension, so unable to determine build script type.\n", pszBldFile);
+		CStr cszBuild(pszBldFile);
+		cszBuild.ChangeExtension(".vcxproj");
+		if (FileExists(cszBuild))
+			return ConvertVcxProj(cszBuild);
+		cszBuild.ChangeExtension(".vcproj");
+		if (FileExists(cszBuild))
+			return ConvertVcProj(cszBuild);
+		cszBuild.ChangeExtension(".project");
+		if (FileExists(cszBuild))
+			return ConvertCodeLite(cszBuild);
+		cszBuild.ChangeExtension(".cbp");
+		if (FileExists(cszBuild))
+			return ConvertCodeBlocks(cszBuild);
+
+		puts("Could not locate a supported build script to convert.");
 		return false;
 	}
 
