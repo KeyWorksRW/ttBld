@@ -11,7 +11,7 @@
 #include "../ttLib/include/keyxml.h"	// CKeyXmlBranch
 #include "../ttLib/include/findfile.h"	// CTTFindFile
 
-#include "../common/csrcfiles.h"		// CSrcFiles
+#include "../common/writesrcfiles.h"	// CWriteSrcFiles
 
 bool ConvertCodeBlocks(const char* pszBldFile);
 bool ConvertCodeLite(const char* pszBldFile);
@@ -19,7 +19,7 @@ bool ConvertVcProj(const char* pszBldFile);
 bool ConvertVcxProj(const char* pszBldFile);
 bool ConvertVcxProj(const char* pszBldFile);
 
-static void AddCodeLiteFiles(CKeyXmlBranch* pParent, CSrcFiles& cSrcFiles);
+static void AddCodeLiteFiles(CKeyXmlBranch* pParent, CWriteSrcFiles& cSrcFiles);
 static bool isValidSrcFile(const char* pszFile);
 
 bool ConvertBuildScript(const char* pszBldFile)
@@ -85,7 +85,7 @@ bool ConvertCodeLite(const char* pszBldFile)
 		return false;
 	}
 
-	CSrcFiles cSrcFiles;
+	CWriteSrcFiles cSrcFiles;
 	CKeyXML xml;
 
 	HRESULT hr = xml.ParseXmlFile(pszBldFile);
@@ -112,7 +112,8 @@ bool ConvertCodeLite(const char* pszBldFile)
 					cSrcFiles.m_exeType = CSrcFiles::EXE_LIB;
 			}
 		}
-		// BUGBUG: [randalphwa - 10/27/2018] CSrcFiles doesn't support writing any more -- need to do this ourselves
+		if (cSrcFiles.WriteNew())
+			printf(".srcfiles created using %s as the original\n", pszBldFile);
 		return true;
 	}
 	else
@@ -126,7 +127,7 @@ bool ConvertCodeBlocks(const char* pszBldFile)
 		return false;
 	}
 
-	CSrcFiles cSrcFiles;
+	CWriteSrcFiles cSrcFiles;
 	CKeyXML xml;
 
 	HRESULT hr = xml.ParseXmlFile(pszBldFile);
@@ -149,7 +150,9 @@ bool ConvertCodeBlocks(const char* pszBldFile)
 			}
 		}
 
-		// TODO: [randalphwa - 10-27-2018]	Add writing code here
+		if (cSrcFiles.WriteNew())
+			printf(".srcfiles created using %s as the original\n", pszBldFile);
+
 		return true;
 	}
 	else
@@ -169,7 +172,7 @@ bool ConvertVcxProj(const char* pszBldFile)
 	if (!IsSameString(cszFilters.FindExt(), ".filters"))
 		cszFilters += ".filters";
 
-	CSrcFiles cSrcFiles;
+	CWriteSrcFiles cSrcFiles;
 	CKeyXML xml;
 
 	HRESULT hr = xml.ParseXmlFile(cszFilters);
@@ -193,7 +196,8 @@ bool ConvertVcxProj(const char* pszBldFile)
 				}
 			}
 		}
-		// TODO: [randalphwa - 10-27-2018]	Add writing code here
+		if (cSrcFiles.WriteNew())
+			printf(".srcfiles created using %s as the original\n", pszBldFile);
 		return true;
 	}
 	else
@@ -207,7 +211,7 @@ bool ConvertVcProj(const char* pszBldFile)
 		return false;
 	}
 
-	CSrcFiles cSrcFiles;
+	CWriteSrcFiles cSrcFiles;
 	CKeyXML xml;
 
 	HRESULT hr = xml.ParseXmlFile(pszBldFile);
@@ -229,7 +233,7 @@ bool ConvertVcProj(const char* pszBldFile)
 			return false;
 		}
 		CKeyXmlBranch* pFilter = pFiles->FindFirstElement("Filter");
-		if (!pFilter)	{
+		if (!pFilter) {
 			CStr cszMsg;
 			puts(cszMsg.printf("Cannot locate <Filter> in %s", pszBldFile));
 			return false;
@@ -241,15 +245,27 @@ bool ConvertVcProj(const char* pszBldFile)
 					cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("RelativePath");
 			}
 		}
+		pFilter = pFiles->FindFirstAttribute("Name", "Resource Files");
+		if (pFilter) {
+			for (size_t item = 0; item < pFilter->GetChildrenCount(); item++) {
+				CKeyXmlBranch* pItem = pFilter->GetChildAt(item);
+				if (IsSameString(pItem->GetName(), "File")) {
+					if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
+						cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("RelativePath");
+				}
+			}
+		}
 
-		// TODO: [randalphwa - 10-27-2018]	Add writing code here
+		if (cSrcFiles.WriteNew())
+			printf(".srcfiles created using %s as the original\n", pszBldFile);
+
 		return true;
 	}
 	else
 		return false;
 }
 
-static void AddCodeLiteFiles(CKeyXmlBranch* pParent, CSrcFiles& cSrcFiles)
+static void AddCodeLiteFiles(CKeyXmlBranch* pParent, CWriteSrcFiles& cSrcFiles)
 {
 	for (size_t child = 0; child < pParent->GetChildrenCount(); child++) {
 		CKeyXmlBranch* pFile = pParent->GetChildAt(child);
