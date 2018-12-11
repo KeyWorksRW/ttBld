@@ -2,13 +2,14 @@
 // Name:		main.cpp
 // Purpose:		Entry point and Usage information
 // Author:		Ralph Walden
-// Copyright:   Copyright (c) 2018 KeyWorks Software (Ralph Walden)
-// License:     Apache License (see ../LICENSE)
+// Copyright:	Copyright (c) 2018 KeyWorks Software (Ralph Walden)
+// License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #include "precomp.h"
 
 #include "../ttLib/include/strlist.h"	// CStrList
+#include <iostream>
 
 #include "version.txt"	// Version (txtVersion) and Copyright (txtCopyRight) information
 #include "funcs.h"
@@ -36,8 +37,8 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 		else if (isSameString(argv[argpos] + 1, "convert")) {
-			if (ConvertBuildScript(argpos + 1 < argc ? nullptr : argv[argpos + 1]))	{
-				SetSrcFileOptions();
+			if (ConvertBuildScript(argpos + 1 < argc ? nullptr : argv[argpos + 1])) {
+				// SetSrcFileOptions();
 				return 1;
 			}
 			else
