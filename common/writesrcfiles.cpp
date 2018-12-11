@@ -67,6 +67,40 @@ bool CWriteSrcFiles::WriteUpdates()
 	return kfOut.WriteFile(".srcfiles");
 }
 
+bool CWriteSrcFiles::WriteNew()
+{
+	m_lstOriginal.SetFlags(CStrList::FLG_ADD_DUPLICATES);	// required to add blank lines
+	m_lstOriginal += "Options:";
+	if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() ||  m_cszRcName.IsNonEmpty()) {
+		CStr cszFile;
+		m_lstOriginal += "";
+		m_lstOriginal += "Files:";
+		if (m_cszRcName.IsNonEmpty()) {
+			cszFile = "  ";
+			cszFile += (const char*) m_cszRcName;
+			m_lstOriginal += cszFile;
+		}
+		for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos) {
+			cszFile = "  ";
+			cszFile += m_lstIdlFiles[pos];
+			m_lstOriginal += cszFile;
+		}
+		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
+			cszFile = "  ";
+			cszFile += m_lstSrcFiles[pos];
+			m_lstOriginal += cszFile;
+		}
+	}
+
+	UpdateOptionsSection();
+	CKeyFile kfOut;
+	kfOut.SetUnixLF();
+
+	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos)
+		kfOut.WriteEol(m_lstOriginal[pos]);
+	return kfOut.WriteFile(".srcfiles");
+}
+
 ptrdiff_t CWriteSrcFiles::FindOption(const char* pszOption, CStr& cszDst)
 {
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos) {
