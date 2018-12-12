@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 		else if (isSameString(argv[argpos] + 1, "convert")) {
-			if (ConvertBuildScript(argpos + 1 < argc ? nullptr : argv[argpos + 1])) {
+			if (ConvertBuildScript(argpos + 1 > argc ? nullptr : argv[argpos + 1])) {
 				// SetSrcFileOptions();
 				return 1;
 			}
