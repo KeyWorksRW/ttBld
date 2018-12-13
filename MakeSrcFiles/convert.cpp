@@ -10,6 +10,7 @@
 
 #include "../ttLib/include/keyxml.h"	// CKeyXmlBranch
 #include "../ttLib/include/findfile.h"	// CTTFindFile
+#include "../ttLib/include/enumstr.h"	// CEnumStr
 
 #include "../common/writesrcfiles.h"	// CWriteSrcFiles
 
@@ -24,10 +25,12 @@ static bool isValidSrcFile(const char* pszFile);
 
 bool ConvertBuildScript(const char* pszBldFile)
 {
+#ifndef _DEBUG
 	if (FileExists(".srcfiles")) {
 		puts(".srcfiles already exists!");
 		return false;
 	}
+#endif
 
 	if (!pszBldFile || !*pszBldFile) {
 		CTTFindFile ff("*.vcxproj");
@@ -252,6 +255,66 @@ bool ConvertVcProj(const char* pszBldFile)
 				if (IsSameString(pItem->GetName(), "File")) {
 					if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
 						cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("RelativePath");
+				}
+			}
+		}
+
+		CKeyXmlBranch* pConfigurations = pProject->FindFirstElement("Configurations");
+		CKeyXmlBranch* pConfiguration = pConfigurations ? pConfigurations->FindFirstElement("Configuration") : nullptr;
+		if (pConfiguration) {
+			// REVIEW: [randalphwa - 12/12/2018] Unusual, but possible to have 64-bit projects in an old .vcproj file,
+			// but we should look for it and set the output directory to match 32 and 64 bit builds.
+
+			CKeyXmlBranch* pOption = pConfiguration->FindFirstAttribute("OutputFile");
+			if (pOption) {
+				CStr cszOutDir(pOption->GetAttribute("OutputFile"));	// will typically be something like: "../bin/$(ProjectName).exe"
+				char* pszFile = FindFilePortion(cszOutDir);
+				if (pszFile)
+					*pszFile = 0;
+				cSrcFiles.m_cszTarget32 = (const char*) cszOutDir;
+			}
+			do {
+				if (kstristr(pConfiguration->GetAttribute("Name"), "Release"))
+					break;
+				pConfiguration = pConfigurations->FindNextElement("Configuration");
+			} while(pConfiguration);
+
+			CKeyXmlBranch* pRelease = pConfiguration ? pConfiguration->FindFirstAttribute("Name") : nullptr;
+
+			if (pRelease) {
+				const char* pszOption = pRelease->GetAttribute("FavorSizeOrSpeed");
+				if (pszOption && isSameSubString(pszOption, "1"))
+					cSrcFiles.m_bBuildForSpeed = true;
+
+				pszOption = pRelease->GetAttribute("WarningLevel");
+				if (pszOption && !isSameSubString(pszOption, "4"))
+					cSrcFiles.m_WarningLevel = Atoi(pszOption);
+
+				pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
+				if (pszOption)
+					cSrcFiles.m_cszIncDirs += pszOption;
+
+				pszOption = pRelease->GetAttribute("PreprocessorDefinitions");
+				if (pszOption) {
+					CEnumStr enumFlags(pszOption);
+					while (enumFlags.Enum()) {
+						if (isSameString(enumFlags, "NDEBUG"))
+							continue;	// we already add this
+						if (isSameString(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
+							cSrcFiles.m_exeType = CSrcFiles::EXE_CONSOLE;
+							continue;	// we already add this
+						}
+						if (isSameString(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
+							cSrcFiles.m_exeType = CSrcFiles::EXE_DLL;
+							continue;	// do we need to add this?
+						}
+						if (isSameSubString(enumFlags, "$("))	// Visual Studio specific, ignore it
+							continue;
+						if (cSrcFiles.m_cszCFlags.IsNonEmpty())
+							cSrcFiles.m_cszCFlags += " ";
+						cSrcFiles.m_cszCFlags += "-D";
+						cSrcFiles.m_cszCFlags += enumFlags;
+					}
 				}
 			}
 		}
