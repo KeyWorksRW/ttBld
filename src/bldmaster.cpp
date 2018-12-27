@@ -302,7 +302,7 @@ const char* CBldMaster::GetTargetRelease()
 		else
 			cszTargetRelease = DirExists("../bin") ? "../bin" : "bin";
 		cszTargetRelease.AppendFileName(getProjName());
-		cszTargetRelease += "dll";
+		cszTargetRelease += ".dll";
 		return cszTargetRelease;
 	}
 	else {
