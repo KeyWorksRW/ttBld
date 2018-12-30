@@ -15,16 +15,18 @@ class CWriteSrcFiles : public CSrcFiles
 public:
 	CWriteSrcFiles() : CSrcFiles() { }
 
+	// Class methods
+
 	bool WriteUpdates(const char* pszFile = txtSrcFilesFileName);	// write updates to the [OPTIONS] section
 	bool WriteNew(const char* pszFile = txtSrcFilesFileName);		// write complete .srcfiles file (replacing any file that already exists)
 	void CreateTargetsString(CStr& cszTargets);	// will set m_cszTarget32 and maybe m_cszTarget64 if they are both empty
 
-protected:
-	// Class functions
-
+	CStrList* GetOrgList() { return &m_lstOriginal; }
+	void UpdateOptionsSection();
 	void UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment = nullptr);
 	void UpdateOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite = false);
-	void UpdateOptionsSection();
+
+protected:
 
 	const char* GetExeType();
 
