@@ -23,12 +23,11 @@
 
 // Put another way, we may change spacing and formating, but we will preserve any custom data like comments
 
-bool CWriteSrcFiles::WriteUpdates()
+bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 {
 	m_lstOriginal.SetFlags(CStrList::FLG_ADD_DUPLICATES);
 	CKeyFile kfIn;
-	if (!kfIn.ReadFile(".srcfiles")) {
-		puts("Unable to read .srcfiles!");
+	if (!kfIn.ReadFile(pszFile)) {
 		return false;
 	}
 	while (kfIn.readline()) {
@@ -61,13 +60,13 @@ bool CWriteSrcFiles::WriteUpdates()
 	}
 
 	kfIn.Delete();
-	kfIn.ReadFile(".srcfiles");
+	kfIn.ReadFile(pszFile);
 	if (strcmp(kfIn, kfOut) == 0)
 		return false;	// nothing has changed
-	return kfOut.WriteFile(".srcfiles");
+	return kfOut.WriteFile(pszFile);
 }
 
-bool CWriteSrcFiles::WriteNew()
+bool CWriteSrcFiles::WriteNew(const char* pszFile)
 {
 	m_lstOriginal.SetFlags(CStrList::FLG_ADD_DUPLICATES);	// required to add blank lines
 	m_lstOriginal += "Options:";
@@ -98,7 +97,7 @@ bool CWriteSrcFiles::WriteNew()
 
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos)
 		kfOut.WriteEol(m_lstOriginal[pos]);
-	return kfOut.WriteFile(".srcfiles");
+	return kfOut.WriteFile(pszFile);
 }
 
 ptrdiff_t CWriteSrcFiles::FindOption(const char* pszOption, CStr& cszDst)

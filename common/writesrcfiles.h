@@ -15,8 +15,8 @@ class CWriteSrcFiles : public CSrcFiles
 public:
 	CWriteSrcFiles() : CSrcFiles() { }
 
-	bool WriteUpdates();	// write updates to the [OPTIONS] section
-	bool WriteNew();		// write complete .srcfiles file (replacing any file that already exists)
+	bool WriteUpdates(const char* pszFile = txtSrcFilesFileName);	// write updates to the [OPTIONS] section
+	bool WriteNew(const char* pszFile = txtSrcFilesFileName);		// write complete .srcfiles file (replacing any file that already exists)
 	void CreateTargetsString(CStr& cszTargets);	// will set m_cszTarget32 and maybe m_cszTarget64 if they are both empty
 
 protected:
