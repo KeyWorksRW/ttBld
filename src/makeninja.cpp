@@ -2,13 +2,15 @@
 // Name:		makeninja.cpp
 // Purpose:		ninja build script generator
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 // Given a .srcfiles file in the current directory, this tool creates Ninja build script files.
 
-#include "precomp.h"
+#include "pch.h"
+
+#include "../ttLib/include/ttmem.h" // ttMem
 
 #include "bldmaster.h"	// CBldMaster
 #include "ninja.h"		// CNinja
@@ -29,7 +31,7 @@ int MakeNinja(int argc, char* argv[])
 					puts("\t-np ignore any .private/.srcfiles (default is this file overrides anything specified in the master .srcfiles)");
 					return 1;
 				}
-				else if (IsSameSubString(argv[argpos] + 1, "np")) {
+				else if (tt::samesubstri(argv[argpos] + 1, "np")) {
 					bReadPrivate = false;
 				}
 				else {
@@ -73,7 +75,7 @@ int MakeNinja(int argc, char* argv[])
 		}
 	}
 
-	if (IsNonEmptyString(cNinja.getHHPName()))
+	if (tt::isnonempty(cNinja.getHHPName()))
 		cNinja.CreateHelpFile();
 
 	// Display any errors that occurred during processing
@@ -103,21 +105,21 @@ int MakeNinja(int argc, char* argv[])
 
 bool isSystemHeaderFile(const char* pszHeaderFile)
 {
-	CTMem<char*> pszEnvironment(4096);
+	ttTMem<char*> pszEnvironment(4096);
 	GetEnvironmentVariable("INCLUDE", pszEnvironment, 4094);	// leave room for appending a ';' character and NULL
-	kstrcat(pszEnvironment, ";");
-	char* pszSemi = kstrchr(pszEnvironment, ';');
+	tt::strcat(pszEnvironment, ";");
+	char* pszSemi = tt::findchr(pszEnvironment, ';');
 	char* pszPath = pszEnvironment;
 	while (pszSemi) {
 		*pszSemi = 0;
-		CStr cszFile(pszPath);
+		ttString cszFile(pszPath);
 		cszFile.AddTrailingSlash();
 		cszFile += pszHeaderFile;
-		if (FileExists(cszFile))
+		if (tt::FileExists(cszFile))
 			return true;
 
 		pszPath = pszSemi + 1;
-		pszSemi = kstrchr(pszPath, ';');
+		pszSemi = tt::findchr(pszPath, ';');
 	}
 	return false;
 }

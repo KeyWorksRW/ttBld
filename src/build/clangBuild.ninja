@@ -16,12 +16,12 @@ cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -I"../src" 
 
 rule compilePCH
   deps = msvc
-  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/MakeNinja.pdb -Ycprecomp.h
+  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/MakeNinja.pdb -Ycpch.h
   description = compiling $in
 
 rule compile
   deps = msvc
-  command = clang-cl.exe -c $cflags -Fo$out $in -Yuprecomp.h
+  command = clang-cl.exe -c $cflags -Fo$out $in -Yupch.h
   description = compiling $in
 
 rule rc
@@ -32,25 +32,25 @@ rule link
   command = lld-link.exe /out:$out /manifest:no /machine:x86 /opt:ref /opt:icf /subsystem:console $in
   description = linking $out
 
-build $outdir/precomp.obj: compilePCH precomp.cpp
+build $outdir/pch.obj: compilePCH pch.cpp
 
-build $outdir/bldmaster.obj: compile bldmaster.cpp | $outdir/precomp.obj
+build $outdir/bldmaster.obj: compile bldmaster.cpp | $outdir/pch.obj
 
-build $outdir/codelite.obj: compile codelite.cpp | $outdir/precomp.obj
+build $outdir/codelite.obj: compile codelite.cpp | $outdir/pch.obj
 
-build $outdir/createmakefile.obj: compile createmakefile.cpp | $outdir/precomp.obj
+build $outdir/createmakefile.obj: compile createmakefile.cpp | $outdir/pch.obj
 
-build $outdir/init.obj: compile init.cpp | $outdir/precomp.obj
+build $outdir/init.obj: compile init.cpp | $outdir/pch.obj
 
-build $outdir/makeninja.obj: compile makeninja.cpp | $outdir/precomp.obj
+build $outdir/makeninja.obj: compile makeninja.cpp | $outdir/pch.obj
 
-build $outdir/ninja.obj: compile ninja.cpp | $outdir/precomp.obj
+build $outdir/ninja.obj: compile ninja.cpp | $outdir/pch.obj
 
-build $outdir/parsehhp.obj: compile parsehhp.cpp | $outdir/precomp.obj
+build $outdir/parsehhp.obj: compile parsehhp.cpp | $outdir/pch.obj
 
-build $outdir/vcxproj.obj: compile vcxproj.cpp | $outdir/precomp.obj
+build $outdir/vcxproj.obj: compile vcxproj.cpp | $outdir/pch.obj
 
-build $outdir/csrcfiles.obj: compile ../common/csrcfiles.cpp | $outdir/precomp.obj
+build $outdir/csrcfiles.obj: compile ../common/csrcfiles.cpp | $outdir/pch.obj
 
 build $resout/makeninja.res: rc makeninja.rc | $
   resource.h $
@@ -61,7 +61,7 @@ build $resout/makeninja.res: rc makeninja.rc | $
   res/vcxproj.filters.xml
 
 build ../bin/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib.lib $
-  $outdir/precomp.obj $
+  $outdir/pch.obj $
   $outdir/bldmaster.obj $
   $outdir/codelite.obj $
   $outdir/createmakefile.obj $

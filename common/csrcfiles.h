@@ -2,7 +2,7 @@
 // Name:		CSrcFiles
 // Purpose:		Class for reading/writing .SrcFile (master file used by makemake.exe to generate build scripts)
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -11,9 +11,9 @@
 #ifndef __CSRCFILES_H__
 #define __CSRCFILES_H__
 
-#include "../ttLib/include/strlist.h"	// CStrList
-#include "../ttLib/include/cstr.h"		// CStr
-#include "../ttLib/include/keyfile.h"	// CKeyFile
+#include "../ttLib/include/ttlist.h"	// ttList
+#include "../ttLib/include/ttstr.h"		// ttString
+#include "../ttLib/include/ttfile.h"	// ttFile
 
 extern const char* txtSrcFilesFileName;
 
@@ -79,7 +79,7 @@ public:
 
 protected:
 	void ProcessFile(char* pszFile);
-	void ProcessInclude(const char* pszFile, CStrIntList& lstAddSrcFiles, bool bFileSection);
+	void ProcessInclude(const char* pszFile, ttStrIntList& lstAddSrcFiles, bool bFileSection);
 	void ProcessLibSection(char* pszLibFile);
 	void ProcessOption(char* pszLine);
 	void ProcessTarget(char* pszLine);
@@ -104,38 +104,38 @@ public:
 	size_t m_CompilerType;		// COMPILER_CLANG, COMPILER_MSVC or COMPILER_DEFAULT
 	size_t m_IDE;				// IDE_CODEBLOCK, IDE_CODELITE, IDE_VS or IDE_NONE
 
-	CStr m_cszLibs;				// additional libraries to link to
-	CStr m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
+	ttString m_cszLibs;				// additional libraries to link to
+	ttString m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
 
-	CStr m_cszLibDirs;			// additional library directories to search
-	CStr m_cszIncDirs;			// additional include directories to search
+	ttString m_cszLibDirs;			// additional library directories to search
+	ttString m_cszIncDirs;			// additional include directories to search
 
-	CStr m_cszCFlags;			// additional flags to pass to the compiler in all build targets
-	CStr m_cszLinkFlags;		// additional flags to pass to the linker in all build targets
+	ttString m_cszCFlags;			// additional flags to pass to the compiler in all build targets
+	ttString m_cszLinkFlags;		// additional flags to pass to the linker in all build targets
 
-	CStr m_cszTarget32;			// target directory for non-64 bit builds
-	CStr m_cszTarget64;			// target directory for 64 bit builds
+	ttString m_cszTarget32;			// target directory for non-64 bit builds
+	ttString m_cszTarget64;			// target directory for 64 bit builds
 
-	CStr m_cszMidlFlags;		// flags to pass to the midl compiler
-	CStr m_cszLibName;			// name and location of any additional library to build (used by Lib: section)
-	CStr m_cszLibPCHheader;		// header file to use for Lib precompilation
-	CStr m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
-	CStr m_cszProjectName;		// name of the project
-	CStr m_cszRcName;			// resource file to build (if any)
-	CStr m_cszHHPName;			// HTML Help project file
-	CStr m_cszSourcePattern;	// Specifies one or more wildcards to add to Files: section
+	ttString m_cszMidlFlags;		// flags to pass to the midl compiler
+	ttString m_cszLibName;			// name and location of any additional library to build (used by Lib: section)
+	ttString m_cszLibPCHheader;		// header file to use for Lib precompilation
+	ttString m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
+	ttString m_cszProjectName;		// name of the project
+	ttString m_cszRcName;			// resource file to build (if any)
+	ttString m_cszHHPName;			// HTML Help project file
+	ttString m_cszSourcePattern;	// Specifies one or more wildcards to add to Files: section
 
-	CStrList m_lstSrcFiles;
-	CStrList m_lstLibFiles;		// list of any files used to build additional library
-	CStrList m_lstIdlFiles;		// list of any idl files to compile with midl compiler
+	ttList m_lstSrcFiles;
+	ttList m_lstLibFiles;		// list of any files used to build additional library
+	ttList m_lstIdlFiles;		// list of any idl files to compile with midl compiler
 
-	CDblStrList m_lstDepLibs;	// key is library, val is src (if any)
+	ttDblList m_lstDepLibs;	// key is library, val is src (if any)
 
-	CStrList m_lstErrors;		// list of any errors that occurred during processing
+	ttList m_lstErrors;		// list of any errors that occurred during processing
 
-	CStrIntList m_lstAddSrcFiles;		// additional .srcfiles to read into Files: section
-	CStrIntList m_lstLibAddSrcFiles;	// additional .srcfiles to read into Lib: section
-	CStrList	m_lstSrcIncluded;		// the names of all files included by all ".include path/.srcfiles" directives
+	ttStrIntList m_lstAddSrcFiles;		// additional .srcfiles to read into Files: section
+	ttStrIntList m_lstLibAddSrcFiles;	// additional .srcfiles to read into Lib: section
+	ttList		 m_lstSrcIncluded;		// the names of all files included by all ".include path/.srcfiles" directives
 
 	// Following are for the makefile: section
 

@@ -2,24 +2,24 @@
 // Name:		CVcxProj
 // Purpose:		Class for creating/maintaining .vcxproj file for use by the msbuild build tool (or VS IDE)
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precomp.h"
+#include "pch.h"
 
 #ifdef _WINDOWS_
 #include <Rpc.h>
 #pragma comment(lib, "Rpcrt4.lib")
 #endif
 
-#include "../ttLib/include/keyfile.h"		// CKeyFile
-#include "../ttLib/include/findfile.h"		// CTTFindFile
+#include "../ttLib/include/ttfile.h"		// ttFile
+#include "../ttLib/include/findfile.h"		// ttFindFile
 
 #include "resource.h"
 #include "vcxproj.h"						// CVcxProj
 
-static bool CreateGuid(CStr& cszGuid)
+static bool CreateGuid(ttString& cszGuid)
 {
 	UUID uuid;
 	RPC_STATUS ret_val = ::UuidCreate(&uuid);
@@ -44,16 +44,16 @@ bool CVcxProj::CreateBuildFile()
 	return false;
 #endif	// _WINDOWS_
 
-	CStr cszGuid;
+	ttString cszGuid;
 	if (!CreateGuid(cszGuid)) {
 		AddError("Unable to create a UUID -- cannot create .vcxproj without it.");
 		return false;
 	}
 
-	CStr cszProjVC(getProjName());
+	ttString cszProjVC(getProjName());
 	cszProjVC.ChangeExtension(".vcxproj");
-	if (!FileExists(cszProjVC))	{
-		CKeyFile kf;
+	if (!tt::FileExists(cszProjVC))	{
+		ttFile kf;
 		kf.ReadResource(IDR_VCXPROJ_MASTER);
 		while (kf.ReplaceStr("%guid%", cszGuid));
 		while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug()));
@@ -61,9 +61,9 @@ bool CVcxProj::CreateBuildFile()
 		while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug64()));
 		while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease64()));
 
-		CStr cszSrcFile;
+		ttString cszSrcFile;
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			if (kstristr(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
+			if (tt::findstri(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
 				cszSrcFile.printf(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>", m_lstSrcFiles[pos]);
 				kf.WriteEol(cszSrcFile);
 			}
@@ -73,7 +73,7 @@ bool CVcxProj::CreateBuildFile()
 			kf.WriteEol(cszSrcFile);
 		}
 
-		CTTFindFile ff("*.h");	// add all header files in current directory
+		ttFindFile ff("*.h");	// add all header files in current directory
 		if (ff.isValid()) {
 			do {
 				cszSrcFile.printf(" <ItemGroup>\n    <ClInclude Include=%kq />\n  </ItemGroup>", (const char*) ff);
@@ -87,7 +87,7 @@ bool CVcxProj::CreateBuildFile()
 		kf.WriteEol("</Project>");
 
 		if (!kf.WriteFile(cszProjVC)) {
-			CStr cszMsg;
+			ttString cszMsg;
 			cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
 			AddError(cszMsg);
 			return false;
@@ -107,7 +107,7 @@ bool CVcxProj::CreateBuildFile()
 		kf.WriteEol("  <ItemGroup>");
 
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			if (kstristr(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
+			if (tt::findstri(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
 				cszSrcFile.printf("    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>", m_lstSrcFiles[pos]);
 				kf.WriteEol(cszSrcFile);
 			}
@@ -116,7 +116,7 @@ bool CVcxProj::CreateBuildFile()
 		kf.WriteEol("</Project>");
 		cszProjVC += ".filters";
 		if (!kf.WriteFile(cszProjVC)) {
-			CStr cszMsg;
+			ttString cszMsg;
 			cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
 			AddError(cszMsg);
 			return false;

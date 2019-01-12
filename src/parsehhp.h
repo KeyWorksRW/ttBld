@@ -2,14 +2,14 @@
 // Name:		CParseHHP
 // Purpose:		Parse an HHP file to collect dependencies
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2018 KeyWorks Software (Ralph Walden)
-// Licence:		Apache License (see ../LICENSE)
+// Copyright:	Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
+// License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include "../ttLib/include/strlist.h"	// CStrList
-#include "../ttLib/include/cstr.h"		// CStr
+#include "../ttLib/include/ttlist.h"	// ttList
+#include "../ttLib/include/ttstr.h"		// ttString
 
 class CParseHHP
 {
@@ -28,16 +28,17 @@ public:
 
 	void ParseHhpFile(const char* pszHHP = nullptr);
 
-	CStrList	m_lstDependencies;
-	CStr		m_cszChmFile;
+	ttList	m_lstDependencies;
+	ttString		m_cszChmFile;
 
 protected:
 	void AddDependency(const char* pszHHP, const char* pszFile);
 
 	// Class members
 
-	CStr	m_cszCWD;
-	size_t	m_section;
-	CStr	m_cszRoot;		// root directory to base all filenames and includes to
-	CStr	m_cszHHPName;	// root level HHP filename
+	ttString	m_cszCWD;
+	ttString	m_cszRoot;		// root directory to base all filenames and includes to
+	ttString	m_cszHHPName;	// root level HHP filename
+
+	size_t		m_section;
 };

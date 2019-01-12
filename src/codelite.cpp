@@ -1,17 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:		codelite.cpp
 // Purpose:		Creates a CodeLite project file
-//				and launching CodeLie.
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precomp.h"
+#include "pch.h"
 
-#include "../ttLib/include/keyfile.h"		// CKeyFile
+#include "../ttLib/include/ttfile.h"	// ttFile
 
-#include "../common/csrcfiles.h"	// CSrcFiles
+#include "../common/csrcfiles.h"		// CSrcFiles
 
 #include "resource.h"
 
@@ -54,15 +53,15 @@ size_t CreateCodeLiteProject()
 		return CLP_NO_PROJECT;
 	}
 
-	CStr cszProjFile(cSrcFiles.GetProjectName());
+	ttString cszProjFile(cSrcFiles.GetProjectName());
 	cszProjFile.ChangeExtension(".project");
-	if (FileExists(cszProjFile)) {
+	if (tt::FileExists(cszProjFile)) {
 		// TODO: [randalphwa - 10/8/2018] We could call a function here to update the .project file, adding any src files that
 		// are in .srcfiles, but missing in .project
 		return CLP_EXISTS;
 	}
 
-	CKeyFile kf;
+	ttFile kf;
 	if (!kf.ReadResource(IDR_PRE_PROJECT)) {
 		puts("MakeNinja.exe is corrupted -- cannot read the necessary resource");
 		return CLP_MISSING_RES;
@@ -83,22 +82,22 @@ size_t CreateCodeLiteProject()
 
 	kf.WriteEol("\t</VirtualDirectory>");
 
-	CKeyFile kfPost;
+	ttFile kfPost;
 	if (!kfPost.ReadResource(IDR_POST_PROJECT)) {
 		puts("MakeNinja.exe is corrupted -- cannot read the necessary resource");
 		return CLP_MISSING_RES;
 	}
 
-	CStr cszCWD;
+	ttString cszCWD;
 	cszCWD.GetCWD();
 
 	while (kfPost.ReplaceStr("%cwd%", cszCWD));
-	CStr cszExe(cszCWD);
+	ttString cszExe(cszCWD);
 	cszExe.AppendFileName("../bin/");
 	cszExe += (char*) cSrcFiles.m_cszProjectName;
 	cszExe += "D.exe";
 	cszExe.GetFullPathName();
-	BackslashToForwardslash(cszExe);
+	tt::BackslashToForwardslash(cszExe);
 	while (kfPost.ReplaceStr("%exepath%", cszExe));
 
 	while (kfPost.readline())

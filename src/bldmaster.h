@@ -2,7 +2,7 @@
 // Name:		bldmaster.h
 // Purpose:		Class providing interface to CSrcFiles
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -15,8 +15,9 @@
 
 #pragma once
 
+#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
+
 #include "../common/csrcfiles.h"		// CSrcFiles
-#include "../ttLib/include/strlist.h"	// CStrList
 
 class CBldMaster : public CSrcFiles
 {
@@ -56,9 +57,9 @@ public:
 	const char* getDir32()	{ return m_cszTarget32; }	// 32-bit target directory
 	const char* getDir64()	{ return m_cszTarget64; }	// 64-bit target directory
 
-	CStrList* getSrcFileList()  { return &m_lstSrcFiles; }
-	CStrList* getLibFileList()  { return &m_lstLibFiles; }
-	CStrList* getRcDepList()  	{ return &m_lstRcDependencies; }
+	ttList* getSrcFileList()  { return &m_lstSrcFiles; }
+	ttList* getLibFileList()  { return &m_lstLibFiles; }
+	ttList* getRcDepList()  	{ return &m_lstRcDependencies; }
 
 	bool is64BitBuild()		{ return m_b64bit; }
 	bool is64BitSuffix()	{ return m_bBitSuffix; }
@@ -89,18 +90,18 @@ public:
 	const char* GetTargetRelease();
 	const char* GetTargetRelease64();
 
-	CStrList m_lstRcDependencies;
+	ttList m_lstRcDependencies;
 
 protected:
 	bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
-	const char* NormalizeHeader(const char* pszBaseFile, CStr& cszHeader);
+	const char* NormalizeHeader(const char* pszBaseFile, ttString& cszHeader);
 
 	// Class members
 
-	CStr cszTargetDebug;
-	CStr cszTargetDebug64;
-	CStr cszTargetRelease;
-	CStr cszTargetRelease64;
+	ttString cszTargetDebug;
+	ttString cszTargetDebug64;
+	ttString cszTargetRelease;
+	ttString cszTargetRelease64;
 
 	bool m_bBin64Exists;	// if true, the directory ../bin64 exists
 };

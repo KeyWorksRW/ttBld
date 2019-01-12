@@ -2,14 +2,14 @@ Options:
   Project: MakeNinja
   TargetDirs:  ../bin; ../bin64
   exe_type:   console   # [window | console | lib | dll]
-  PCH: precomp.h        # "none" or name of header file to use for precompilation
+  PCH: pch.h        	# "none" or name of header file to use for precompilation
   64Bit:      true      # create 64-bit project in addition to 32-bit project
   bit_suffix: true      # add "64" to the end of the project name (e.g., MakeNinja64.exe)
-  IncDirs: ../src		# so that files in ../common can locate precomp.h
+  IncDirs: ../src		# so that files in ../common can locate pch.h
   BuildLibs: ../ttLib/lib/ttLib
 
 Files:
-  precomp.cpp
+  pch.cpp
   makeninja.rc
 
   bldmaster.cpp

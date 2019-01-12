@@ -1,10 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:		precomp.h
-// Purpose:		Precompiled header
-// Author:		Ralph Walden
-// Copyright:	Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)
-// License:     Apache License (see ../LICENSE)
-/////////////////////////////////////////////////////////////////////////////
+// Precompiled header
 
 #pragma once
 
@@ -59,9 +53,9 @@
 extern const char* txtVersion;
 extern const char* txtCopyRight;
 
+#define __TTLIB_INCLUDE_MAJOR__	// tell ttLib.h to include other major ttLib header files
 #include "../ttLib/include/ttlib.h"
-#include "../ttLib/include/cstr.h"		// CStr
-#include "../ttLib/include/strlist.h"	// CStrList
-#include "../ttLib/include/keyfile.h"	// CKeyFile
+
+using namespace ttch;	// For the CH_ constants
 
 #include "funcs.h"

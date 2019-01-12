@@ -2,14 +2,14 @@
 // Name:		CParseHHP
 // Purpose:		Parse a .HHP file and generate a list of file dependencies
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precomp.h"
+#include "pch.h"
 
-#include "../ttLib/include/keyfile.h"	// CKeyFile
-#include "../ttLib/include/findfile.h"	// CTTFindFile
+#include "../ttLib/include/ttfile.h"	// ttFile
+#include "../ttLib/include/findfile.h"	// ttFindFile
 
 #include "parsehhp.h"	// CParseHHP
 #include "ninja.h"		// CNinja
@@ -22,7 +22,7 @@ CParseHHP::CParseHHP(const char* pszHHPName)
 	m_cszChmFile.ChangeExtension(".chm");
 	m_cszRoot = pszHHPName;
 	m_cszRoot.GetFullPathName();
-	char* pszFile = FindFilePortion(m_cszRoot);
+	char* pszFile = tt::FindFilePortion(m_cszRoot);
 	if (pszFile)
 		*pszFile = 0;
 	m_cszCWD.GetCWD();
@@ -44,10 +44,10 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 	if (!pszHHP)
 		pszHHP = m_cszHHPName;	// use root name
 
-	CKeyFile kf;
+	ttFile kf;
 	if (!kf.ReadFile(pszHHP)) {
 // REVIEW: [randalphwa - 11/29/2018] Need a way to add error msgs to CNinja
-//		CStr cszMsg;
+//		ttString cszMsg;
 //		cszMsg.printf("Cannot read the file %s\n", pszHHP);
 //		AddError(cszMsg);
 		return;
@@ -70,11 +70,11 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 	while (kf.readline()) {
 		if (!kf[0])
 			continue;	// blank line
-		if (isSameSubString(kf, "#include")) {
-			char* pszFile = FindNonSpace(FindNextSpace(kf));
+		if (tt::samesubstri(kf, "#include")) {
+			char* pszFile = tt::nextnonspace(tt::nextspace(kf));
 			if (!*pszFile)
 				continue;	// invalid #include -- doesn't specify a filename
-			CStr cszFile;
+			ttString cszFile;
 			if (*pszFile == CH_QUOTE) {
 				cszFile.GetQuotedString(pszFile);
 			}
@@ -84,25 +84,25 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 			// [KeyWorksRW - 11-29-2018] It's not clear from HH docs when comments are allowed on a line -- we remove it
 			// here just in case.
 
-			char* pszComment = kstrchr(cszFile, ';');
+			char* pszComment = tt::findchr(cszFile, ';');
 			if (pszComment)
 				*pszComment = 0;
-			trim(cszFile);
+			tt::trim_right(cszFile);
 
 			// A couple of sections sometimes include .h files -- but we only care about an #included .hhp file
 
-			if (kstristr(cszFile, ".hhp"))
+			if (tt::findstri(cszFile, ".hhp"))
 				ParseHhpFile(cszFile);
 			continue;
 		}
 
 		if (kf[0] == '[') {	// sections are placed in brackets
 			m_section = SECTION_UNKNOWN;
-			if (isSameSubString(kf, "[ALIAS"))
+			if (tt::samesubstri(kf, "[ALIAS"))
 				m_section = SECTION_ALIAS;
-			else if (isSameSubString(kf, "[FILE"))
+			else if (tt::samesubstri(kf, "[FILE"))
 				m_section = SECTION_FILES;
-			else if (isSameSubString(kf, "[OPTION"))
+			else if (tt::samesubstri(kf, "[OPTION"))
 				m_section = SECTION_OPTIONS;
 			continue;
 		}
@@ -116,34 +116,34 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 				{
 					size_t pos;
 					for (pos = 0; aOptions[pos]; ++pos) {
-						if (isSameSubString(kf, aOptions[pos]))
+						if (tt::samesubstri(kf, aOptions[pos]))
 							break;
 					}
 					if (aOptions[pos]) {
-						char* pszFile = kstrchr(kf, '=');
+						char* pszFile = tt::findchr(kf, '=');
 						if (pszFile) {
-							pszFile = FindNonSpace(pszFile + 1);
+							pszFile = tt::nextnonspace(pszFile + 1);
 							if (*pszFile) {
 								// [KeyWorksRW - 11-29-2018] I don't believe the HH compiler from MS supports comments after filenames, but
 								// we can't be certain other compilers and/or authoring systems don't use them -- so remove any comment just
 								// to be sure.
 
-								char* pszComment = kstrchr(pszFile, ';');
+								char* pszComment = tt::findchr(pszFile, ';');
 								if (pszComment)
 									*pszComment = 0;
-								trim(pszFile);
+								tt::trim_right(pszFile);
 								AddDependency(pszHHP, pszFile);
 							}
 						}
 					}
-					else if (isSameSubString(kf, "Compiled file")) {
-						char* pszFile = kstrchr(kf, '=');
+					else if (tt::samesubstri(kf, "Compiled file")) {
+						char* pszFile = tt::findchr(kf, '=');
 						if (pszFile) {
-							char* pszComment = kstrchr(pszFile, ';');
+							char* pszComment = tt::findchr(pszFile, ';');
 							if (pszComment)
 								*pszComment = 0;
-							trim(pszFile);
-							m_cszChmFile = FindNonSpace(pszFile + 1);
+							tt::trim_right(pszFile);
+							m_cszChmFile = tt::nextnonspace(pszFile + 1);
 						}
 					}
 				}
@@ -151,14 +151,14 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 
 			case SECTION_ALIAS:
 				{
-					char* pszFile = kstrchr(kf, ';');	// remove any comment
+					char* pszFile = tt::findchr(kf, ';');	// remove any comment
 					if (pszFile) {
 						*pszFile = 0;
-						trim(kf);
+						tt::trim_right(kf);
 					}
-					pszFile = kstrchr(kf, '=');
+					pszFile = tt::findchr(kf, '=');
 					if (pszFile) {
-						pszFile = FindNextSpace(pszFile + 1);
+						pszFile = tt::nextspace(pszFile + 1);
 						if (*pszFile) {
 							AddDependency(pszHHP, pszFile);
 						}
@@ -168,10 +168,10 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 
 			case SECTION_TEXT_POPUPS:
 				{
-					char* pszFile = kstrchr(kf, ';');	// remove any comment
+					char* pszFile = tt::findchr(kf, ';');	// remove any comment
 					if (pszFile) {
 						*pszFile = 0;
-						trim(kf);
+						tt::trim_right(kf);
 					}
 
 					// This section may include .h files that are parsed, but not compiled, but we need them for dependency checking.
@@ -186,10 +186,10 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 					// though it should. I'm supporting comments here just to be sure we can support other file formats
 					// like YAML which do allow for comments
 
-					char* pszFile = kstrchr(kf, ';');	// remove any comment
+					char* pszFile = tt::findchr(kf, ';');	// remove any comment
 					if (pszFile) {
 						*pszFile = 0;
-						trim(kf);
+						tt::trim_right(kf);
 					}
 
 					// This section may include .h files that are parsed, but not compiled, but we need them for dependency checking.
@@ -217,31 +217,31 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
 		We need to create a dependency to ../Help/html/bar.html
 	*/
 
-	CStr cszRelative;
-	CStr cszHHP;
+	ttString cszRelative;
+	ttString cszHHP;
 
-	if (!isSameString(pszHHP, m_cszHHPName)) {
+	if (!tt::samestri(pszHHP, m_cszHHPName)) {
 		// If we're in a nested .HHP file, then we need to first get the location of the nested .HHP, use that to get the location
 		// of the pszFile;
 
-		ConvertToRelative(m_cszRoot, pszHHP, cszHHP);
+		tt::ConvertToRelative(m_cszRoot, pszHHP, cszHHP);
 		cszHHP.GetFullPathName();	// now that we have the location relative to our original .hhp file, convert it to a full path
-		char* pszFilePortion = FindFilePortion(cszHHP);
+		char* pszFilePortion = tt::FindFilePortion(cszHHP);
 		*pszFilePortion = 0;
-		ConvertToRelative(cszHHP, pszFile, cszRelative);
+		tt::ConvertToRelative(cszHHP, pszFile, cszRelative);
 		cszHHP.AppendFileName(cszRelative);
 		cszHHP.GetFullPathName();
-		ConvertToRelative(m_cszCWD, cszHHP, cszRelative);
+		tt::ConvertToRelative(m_cszCWD, cszHHP, cszRelative);
 	}
 	else {
 		cszHHP = (char*) m_cszRoot;
 		cszHHP.AppendFileName(pszFile);
-		ConvertToRelative(m_cszCWD, cszHHP, cszRelative);
+		tt::ConvertToRelative(m_cszCWD, cszHHP, cszRelative);
 	}
 
-	if (kstrchr(cszRelative, '*') || kstrchr(cszRelative, '?')) {
-		CTTFindFile ff(cszRelative);
-		char* pszFilePortion = FindFilePortion(cszRelative);
+	if (tt::findchr(cszRelative, '*') || tt::findchr(cszRelative, '?')) {
+		ttFindFile ff(cszRelative);
+		char* pszFilePortion = tt::FindFilePortion(cszRelative);
 		ptrdiff_t cFilePortion = (pszFilePortion - cszRelative.getptr());
 		if (ff.isValid()) {
 			do {
@@ -264,11 +264,11 @@ const char* txtHelpNinja = "build/ChmHelp.ninja";
 
 bool CNinja::CreateHelpFile()
 {
-	if (IsEmptyString(getHHPName()))
+	if (tt::isempty(getHHPName()))
 		return false;
 
-	if (!DirExists("build")) {
-		if (!CreateDir("build")) {
+	if (!tt::DirExists("build")) {
+		if (!tt::CreateDir("build")) {
 			AddError("Unable to create the build directory -- so no place to put the .ninja files!\n");
 			return false;
 		}
@@ -278,7 +278,7 @@ bool CNinja::CreateHelpFile()
 	chhp.ParseHhpFile();	// this will figure out all of the dependencies
 	m_cszChmFile = (const char*) chhp.m_cszChmFile;
 
-	CKeyFile file;
+	ttFile file;
 	file.SetUnixLF();	// WARNING!!! NINJA doesn't allow \r characters (or \t for that matter)
 	file.printf("# WARNING: THIS FILE IS AUTO-GENERATED by %s. CHANGES YOU MAKE WILL BE LOST IF IT IS AUTO-GENERATED AGAIN.\n\n", txtVersion);
 	file.WriteEol("ninja_required_version = 1.8\n");
@@ -297,14 +297,14 @@ bool CNinja::CreateHelpFile()
 	// We don't want to touch the build script if it hasn't changed, since that would change the timestamp causing git
 	// and other tools that check timestamp to think something is different.
 
-	CKeyFile kfOrg;
+	ttFile kfOrg;
 	if (kfOrg.ReadFile(txtHelpNinja)) {
 		if (strcmp(kfOrg, file) == 0)
 			return false;
 	}
 
 	if (!file.WriteFile(txtHelpNinja)) {
-		CStr cszMsg;
+		ttString cszMsg;
 		cszMsg.printf("Cannot write to %s\n", txtHelpNinja);
 		AddError(cszMsg);
 		return false;

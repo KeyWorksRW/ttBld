@@ -2,11 +2,11 @@
 // Name:		init.cpp
 // Purpose:		initialization
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precomp.h"
+#include "pch.h"
 
 #include "version.txt"	// Version (txtVersion) and Copyright (txtCopyRight) information
 
@@ -21,14 +21,14 @@ void Usage()
 
 int main(int argc, char* argv[])
 {
-	InitCaller(NULL, NULL, txtVersion);
+	tt::InitCaller(txtVersion);
 
-	if (!FileExists(".srcfiles")) {
+	if (!tt::FileExists(".srcfiles")) {
 		puts("Cannot run without .srcfiles in current folder. Run MakeSrcFiles.exe to create it.");
 		return 1;
 	}
 
-	if (argc > 1 && (IsSameString(argv[1], "-?") || IsSameString(argv[1], "/?"))) {
+	if (argc > 1 && (tt::samestri(argv[1], "-?") || tt::samestri(argv[1], "/?"))) {
 		Usage();
 		return 1;
 	}
