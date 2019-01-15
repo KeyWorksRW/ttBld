@@ -12,6 +12,7 @@
 #include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
 
 #include "csrcfiles.h"					// CSrcFiles
+#include "dryrun.h" 					// CDryRun
 
 class CWriteSrcFiles : public CSrcFiles
 {
@@ -29,6 +30,8 @@ public:
 	void UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment = nullptr);
 	void UpdateOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite = false);
 
+	void EnableDryRun() { m_dryrun.Enable(); }
+
 protected:
 
 	const char* GetExeType();
@@ -39,8 +42,10 @@ protected:
 
 	// Class members
 
-	ttString m_cszOptComment;
-	ttList m_lstOriginal;
-	ptrdiff_t m_posOptions;
-	ptrdiff_t m_posInsert;
+	ttString	m_cszOptComment;
+	ttList		m_lstOriginal;
+	CDryRun		m_dryrun;
+
+	ptrdiff_t	m_posOptions;
+	ptrdiff_t	m_posInsert;
 };

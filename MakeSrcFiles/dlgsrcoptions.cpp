@@ -14,9 +14,12 @@
 
 #include "dlgsrcoptions.h"
 
-void SetSrcFileOptions()
+void SetSrcFileOptions(bool bDryRun)
 {
 	CDlgSrcOptions dlg;
+	if (bDryRun)
+		dlg.EnableDryRun();
+
 	if (dlg.DoModal() == IDOK)
 		dlg.SaveChanges();
 }

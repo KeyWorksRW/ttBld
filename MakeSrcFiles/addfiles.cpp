@@ -12,8 +12,9 @@
 #include "../ttLib/include/ttfile.h"	// ttFile
 
 #include "../common/csrcfiles.h"		// CSrcFiles
+#include "../common/dryrun.h"			// CDryRun
 
-void AddFiles(ttList& lstFiles)
+void AddFiles(ttList& lstFiles, bool bDryRun)
 {
 	if (lstFiles.GetCount() < 1) {
 		puts("You didn't specify any files to add!");
@@ -37,6 +38,7 @@ void AddFiles(ttList& lstFiles)
 		puts("Cannot read .srcfiles!");
 		return;
 	}
+	kfIn.MakeCopy();
 
 	while (kfIn.readline() && !tt::samesubstri(kfIn, "Files:"))
 		kfOut.WriteEol(kfIn);
@@ -56,7 +58,7 @@ void AddFiles(ttList& lstFiles)
 			return;
 		}
 
-		// Use CStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files -- 1
+		// Use ttStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files -- 1
 		// file is singular
 
 		ttStr cszResults;
@@ -92,6 +94,14 @@ void AddFiles(ttList& lstFiles)
 
 	while (kfIn.readline())
 		kfOut.WriteEol(kfIn);
+
+	if (bDryRun) {
+		CDryRun dryrun;
+		dryrun.Enable();
+		dryrun.NewFile(".srcfiles");
+		dryrun.DisplayFileDiff(kfIn, kfOut);
+		return;
+	}
 
 	if (!kfOut.WriteFile(".srcfiles")) {
 		puts("Cannot write to .srcfiles!");

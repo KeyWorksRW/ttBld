@@ -31,12 +31,19 @@ void DisplayUsage()
 int main(int argc, char* argv[])
 {
 	tt::InitCaller(txtVersion);
+	bool bDryRun = false;
 
 	for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos) {
 		if (argv[argpos][1] == '?') {
 			DisplayUsage();
 			return 1;
 		}
+
+		// The dryrun option isn't shown in Usage because it's really just for debugging -- i.e., you can make some
+		// changes to the code then run MakeNinja -dryrun to make certain it is doing what you expect. It's not under
+		// _DEBUG so you can test retail release.
+		else if (tt::samestri(argv[argpos] + 1, "dryrun"))
+			bDryRun = true;
 		else if (tt::samestri(argv[argpos] + 1, "convert")) {
 			if (ConvertBuildScript(argpos + 1 > argc ? nullptr : argv[argpos + 1])) {
 				// SetSrcFileOptions();
@@ -50,7 +57,7 @@ int main(int argc, char* argv[])
 			for (++argpos; argpos < argc; ++argpos) {
 				lstFiles += argv[argpos];
 			}
-			AddFiles(lstFiles);
+			AddFiles(lstFiles, bDryRun);
 			return 1;
 		}
 		else if (tt::samestri(argv[argpos] + 1, "new")) {
@@ -62,6 +69,6 @@ int main(int argc, char* argv[])
 			return 0;
 		}
 	}
-	// SetSrcFileOptions();
-	// return 1;
+	SetSrcFileOptions(bDryRun);
+	return 1;
 }

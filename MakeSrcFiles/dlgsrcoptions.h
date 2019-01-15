@@ -42,9 +42,9 @@ protected:
 
 	// Class members
 
-	ttListBox m_lb;
-	ttString m_cszSrcDir;
-	ttString m_cszOptComment;
-	ttList m_lstOriginal;
-	ptrdiff_t m_posProject;
+	ttListBox	m_lb;
+	ttString	m_cszSrcDir;
+	ttString	m_cszOptComment;
+	ttList		m_lstOriginal;
+	ptrdiff_t	m_posProject;
 };

@@ -28,6 +28,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 	if (!kfIn.ReadFile(pszFile)) {
 		return false;
 	}
+	kfIn.MakeCopy();
+
 	while (kfIn.readline()) {
 		m_lstOriginal += (const char*) kfIn;
 	}
@@ -57,10 +59,14 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 		kfOut.WriteEol(m_lstOriginal[pos]);
 	}
 
-	kfIn.Delete();
-	kfIn.ReadFile(pszFile);
+	kfIn.RestoreCopy();
 	if (strcmp(kfIn, kfOut) == 0)
 		return false;	// nothing has changed
+	if (m_dryrun.isEnabled()) {
+		m_dryrun.NewFile(pszFile);
+		m_dryrun.DisplayFileDiff(kfIn, kfOut);
+		return false;	// since we didn't actually change anything
+	}
 	return kfOut.WriteFile(pszFile);
 }
 
