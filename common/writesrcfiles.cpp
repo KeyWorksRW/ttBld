@@ -74,11 +74,11 @@ bool CWriteSrcFiles::WriteNew(const char* pszFile)
 {
 	m_lstOriginal.SetFlags(ttList::FLG_ADD_DUPLICATES);	// required to add blank lines
 	m_lstOriginal += "Options:";
-	if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() ||  m_cszRcName.IsNonEmpty()) {
+	if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() ||  m_cszRcName.isnonempty()) {
 		ttString cszFile;
 		m_lstOriginal += "";
 		m_lstOriginal += "Files:";
-		if (m_cszRcName.IsNonEmpty()) {
+		if (m_cszRcName.isnonempty()) {
 			cszFile = "  ";
 			cszFile += (const char*) m_cszRcName;
 			m_lstOriginal += cszFile;
@@ -160,7 +160,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	ttString cszTargets;
 	CreateTargetsString(cszTargets);
 	UpdateLongOption("TargetDirs:", cszTargets);
-	if (m_cszSrcPattern.IsNonEmpty())
+	if (m_cszSrcPattern.isnonempty())
 		UpdateOption("Sources:", m_cszSrcPattern, "source file patterns", true);
 	UpdateOption("exe_type:", GetExeType(), "[window | console | lib | dll]", true);
 
@@ -217,7 +217,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		cszTmp += "CodeLite ";
 	if (m_IDE & IDE_VS)
 		cszTmp += "VisualStudio";
-	if (cszTmp.IsNonEmpty())
+	if (cszTmp.isnonempty())
 		tt::trim_right(cszTmp);
 	UpdateLongOption("IDE:", cszTmp, "[CodeBlocks and/or CodeLite and/or VisualStudio]");
 }
@@ -227,7 +227,7 @@ void CWriteSrcFiles::UpdateOption(const char* pszOption, const char* pszVal, con
 	char szLine[4096];
 	ptrdiff_t posOption = GetOptionLine(pszOption);
 	if (posOption >= 0) {
-		if (m_cszOptComment.IsEmpty())		// we keep any comment that was previously used
+		if (m_cszOptComment.isempty())		// we keep any comment that was previously used
 			m_cszOptComment = pszComment;	// otherwise we use our own
 		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
 		m_lstOriginal.Replace(posOption, szLine);
@@ -247,10 +247,10 @@ void CWriteSrcFiles::UpdateLongOption(const char* pszOption, const char* pszVal,
 			m_lstOriginal.Remove(posOption);
 			return;
 		}
-		if (m_cszOptComment.IsEmpty() && pszComment)	// we keep any comment that was previously used
+		if (m_cszOptComment.isempty() && pszComment)	// we keep any comment that was previously used
 			m_cszOptComment = pszComment;				// otherwise we use our own if supplied
 
-		if (tt::strlen(pszVal) <= 12 && m_cszOptComment.IsNonEmpty()) {	// can we use the shorter formatted version?
+		if (tt::strlen(pszVal) <= 12 && m_cszOptComment.isnonempty()) {	// can we use the shorter formatted version?
 			sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
 			m_lstOriginal.Replace(posOption, szLine);
 			return;
@@ -258,14 +258,14 @@ void CWriteSrcFiles::UpdateLongOption(const char* pszOption, const char* pszVal,
 
 		sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt, pszOption, pszVal);
 
-		if (m_cszOptComment.IsNonEmpty()) { 			// we keep any comment that was previously used
+		if (m_cszOptComment.isnonempty()) { 			// we keep any comment that was previously used
 			tt::strcat_s(szLine, sizeof(szLine), "    # ");
 			tt::strcat_s(szLine, sizeof(szLine), m_cszOptComment);
 		}
 		m_lstOriginal.Replace(posOption, szLine);
 	}
 	else if (pszVal && *pszVal) {
-		if (tt::strlen(pszVal) <= 12 && m_cszOptComment.IsNonEmpty()) {	// can we use the shorter formatted version?
+		if (tt::strlen(pszVal) <= 12 && m_cszOptComment.isnonempty()) {	// can we use the shorter formatted version?
 			sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
 			m_lstOriginal.Replace(posOption, szLine);
 		}
@@ -325,7 +325,7 @@ const char* CWriteSrcFiles::GetExeType()
 
 void CWriteSrcFiles::CreateTargetsString(ttString& cszTargets)
 {
-	if (m_cszTarget32.IsEmpty() && m_cszTarget64.IsEmpty()) {
+	if (m_cszTarget32.isempty() && m_cszTarget64.isempty()) {
 		if (m_exeType == EXE_LIB) {
 			if (tt::DirExists("../lib")) {
 				m_cszTarget32 = "../lib";
@@ -353,15 +353,15 @@ void CWriteSrcFiles::CreateTargetsString(ttString& cszTargets)
 		}
 	}
 
-	if (m_cszTarget32.IsNonEmpty())	{
+	if (m_cszTarget32.isnonempty())	{
 		if (!(m_b64bit && !m_bBitSuffix))	// m_b64bit with no suffix means 64-bit only target
 			cszTargets = (char*) m_cszTarget32;
-		if (m_b64bit && m_cszTarget64.IsNonEmpty())	{
+		if (m_b64bit && m_cszTarget64.isnonempty())	{
 			cszTargets += "; ";
 			cszTargets += (char*) m_cszTarget64;
 		}
 	}
-	else if (m_b64bit && m_cszTarget64.IsNonEmpty()) {
+	else if (m_b64bit && m_cszTarget64.isnonempty()) {
 		cszTargets = "; ";
 		cszTargets += (char*) m_cszTarget64;
 	}

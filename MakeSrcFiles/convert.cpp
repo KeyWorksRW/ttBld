@@ -310,7 +310,7 @@ bool ConvertVcProj(const char* pszBldFile)
 						}
 						if (tt::samesubstri(enumFlags, "$("))	// Visual Studio specific, ignore it
 							continue;
-						if (cSrcFiles.m_cszCFlags.IsNonEmpty())
+						if (cSrcFiles.m_cszCFlags.isnonempty())
 							cSrcFiles.m_cszCFlags += " ";
 						cSrcFiles.m_cszCFlags += "-D";
 						cSrcFiles.m_cszCFlags += enumFlags;

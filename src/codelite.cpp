@@ -70,7 +70,7 @@ size_t CreateCodeLiteProject()
 	while (kf.ReplaceStr("%projname%", cSrcFiles.GetProjectName()));
 
 	kf.WriteEol("\t\t<File Name=\042.srcfiles\042/>");
-	if (cSrcFiles.m_cszPCHheader.IsNonEmpty())
+	if (cSrcFiles.m_cszPCHheader.isnonempty())
 		kf.printf("\t\t<File Name=\042%s\042/>\n", (char*) cSrcFiles.m_cszPCHheader);
 
 	cSrcFiles.m_lstSrcFiles.Sort();
@@ -89,7 +89,7 @@ size_t CreateCodeLiteProject()
 	}
 
 	ttString cszCWD;
-	cszCWD.GetCWD();
+	cszCWD.getCWD();
 
 	while (kfPost.ReplaceStr("%cwd%", cszCWD));
 	ttString cszExe(cszCWD);

@@ -123,7 +123,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 				}
 			}
 		}
-		if (m_cszCPP_PCH.IsNonEmpty()) {
+		if (m_cszCPP_PCH.isnonempty()) {
 			m_cszPCHObj = m_cszCPP_PCH;
 			m_cszPCHObj.ChangeExtension(".obj");
 		}
@@ -150,11 +150,11 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 
 	for (size_t iPos = 0; iPos < getSrcFileList()->GetCount(); iPos++) {
 		ttString cszFile(tt::FindFilePortion(getSrcFileList()->GetAt(iPos)));
-		if (!tt::findstri(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() &&  tt::samestri(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
+		if (!tt::findstri(cszFile, ".c") || (m_cszCPP_PCH.isnonempty() &&  tt::samestri(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
 			continue;	// we already handled this
 		cszFile.ChangeExtension(".obj");
 
-		if (m_cszPCH.IsNonEmpty())
+		if (m_cszPCH.isnonempty())
 			file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, getSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
 		else
 			file.printf("build $outdir/%s: compile %s\n\n", (char*) cszFile, getSrcFileList()->GetAt(iPos));
@@ -164,11 +164,11 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 
 	for (size_t iPos = 0; iPos < getLibFileList()->GetCount(); iPos++) {
 		ttString cszFile(tt::FindFilePortion(getLibFileList()->GetAt(iPos)));
-		if (!tt::findstri(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() && tt::samestri(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
+		if (!tt::findstri(cszFile, ".c") || (m_cszCPP_PCH.isnonempty() && tt::samestri(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
 			continue;	// we already handled this
 		cszFile.ChangeExtension(".obj");
 
-		if (m_cszPCH.IsNonEmpty())
+		if (m_cszPCH.isnonempty())
 			file.printf("build $libout/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, getLibFileList()->GetAt(iPos), (char*) m_cszPCHObj);
 		else
 			file.printf("build $libout/%s: compile %s\n\n", (char*) cszFile, tt::FindFilePortion(getLibFileList()->GetAt(iPos)));
@@ -554,7 +554,7 @@ void CNinja::WriteMidlTargets()
 
 		cszIdlC.RemoveExtension();
 		cszIdlC += "_i.c";
-		if (m_cszMidlFlags.IsNonEmpty())
+		if (m_cszMidlFlags.isnonempty())
 			m_pkfOut->printf("build %s : midl %s /tlb %s %s\n\n",
 				(char*) cszIdlC, (char*) m_cszMidlFlags, (char*) cszTypeLib, m_lstIdlFiles[pos]);
 		else

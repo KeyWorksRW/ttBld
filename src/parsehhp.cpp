@@ -25,7 +25,7 @@ CParseHHP::CParseHHP(const char* pszHHPName)
 	char* pszFile = tt::FindFilePortion(m_cszRoot);
 	if (pszFile)
 		*pszFile = 0;
-	m_cszCWD.GetCWD();
+	m_cszCWD.getCWD();
 }
 
 static const char* aOptions[] = {	// array of options that specify files that will be compiled

@@ -112,9 +112,9 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
 	// Everything has been processed, if options were not specified that are needed, make some default assumptions
 
-	if (m_cszProjectName.IsEmpty())	{
+	if (m_cszProjectName.isempty())	{
 		ttString cszProj;
-		cszProj.GetCWD();
+		cszProj.getCWD();
 		char* pszProj = tt::FindFilePortion(cszProj);
 		if (pszProj && !tt::samestri(pszProj, "src"))
 			m_cszProjectName = pszProj;
@@ -324,7 +324,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 
 void CSrcFiles::AddCompilerFlag(const char* pszFlag)
 {
-	if (m_cszCFlags.IsEmpty() || !tt::findstri(m_cszCFlags, pszFlag))	{
+	if (m_cszCFlags.isempty() || !tt::findstri(m_cszCFlags, pszFlag))	{
 		m_cszCFlags += pszFlag;
 		m_cszCFlags += " ";
 	}
@@ -332,7 +332,7 @@ void CSrcFiles::AddCompilerFlag(const char* pszFlag)
 
 void CSrcFiles::AddLibrary(const char* pszName)
 {
-	if (m_cszLibs.IsEmpty() || !tt::findstri(m_cszLibs, pszName)) {
+	if (m_cszLibs.isempty() || !tt::findstri(m_cszLibs, pszName)) {
 		m_cszLibs += pszName;
 		m_cszLibs += " ";
 	}
@@ -344,7 +344,7 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
 	// "tmplib". The name is also to indicate that this is a temporary library -- it's not designed to be linked to outside of the
 	// scope of the current project.
 
-	if (m_cszLibName.IsEmpty())
+	if (m_cszLibName.isempty())
 		m_cszLibName = "tmplib";
 
 	if (tt::findstri(pszLibFile, ".lib"))	// this was used before we created a default name
@@ -414,7 +414,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttStrIntList& lstAddSrcFiles
 	}
 
 	ttString cszCWD;
-	cszCWD.GetCWD();
+	cszCWD.getCWD();
 
 	ttString cszFullPath(pszFile);
 	cszFullPath.GetFullPathName();

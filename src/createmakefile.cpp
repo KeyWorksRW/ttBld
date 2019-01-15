@@ -52,13 +52,13 @@ bool CBldMaster::CreateMakeFile()
 			ttString cszNewLine(kf);
 			if (!tt::isempty(getHHPName())) {
 				cszNewLine.ReplaceStr(" ", " ChmHelp ");
-				if (m_cszBuildLibs.IsEmpty()) {
+				if (m_cszBuildLibs.isempty()) {
 					kfOut.WriteEol(cszNewLine);
 					kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
 				}
 			}
 
-			if (m_cszBuildLibs.IsNonEmpty()) {
+			if (m_cszBuildLibs.isnonempty()) {
 				ttEnumStr cEnumStr(m_cszBuildLibs, ';');
 				const char* pszBuildLib;
 				while (cEnumStr.Enum(&pszBuildLib)) {

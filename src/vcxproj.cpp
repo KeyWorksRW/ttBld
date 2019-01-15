@@ -31,7 +31,7 @@ static bool CreateGuid(ttString& cszGuid)
 			::RpcStringFreeA(&pszUuid);
 		}
 	}
-	return cszGuid.IsNonEmpty();
+	return cszGuid.isnonempty();
 }
 
 bool CVcxProj::CreateBuildFile()
@@ -68,7 +68,7 @@ bool CVcxProj::CreateBuildFile()
 				kf.WriteEol(cszSrcFile);
 			}
 		}
-		if (m_cszRcName.IsNonEmpty()) {
+		if (m_cszRcName.isnonempty()) {
 			cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>", (char*) m_cszRcName);
 			kf.WriteEol(cszSrcFile);
 		}

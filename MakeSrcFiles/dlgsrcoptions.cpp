@@ -65,7 +65,7 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttDlg(IDDLG_SRCFILES), C
 		m_WarningLevel = WARNLEVEL_DEFAULT;
 	}
 
-	if (m_cszPCHheader.IsEmpty()) {
+	if (m_cszPCHheader.isempty()) {
 		if (tt::FileExists("stdafx.h"))
 			m_cszPCHheader = "stdafx.h";
 		else if (tt::FileExists("pch.h"))
@@ -113,19 +113,19 @@ void CDlgSrcOptions::OnBegin(void)
 		SetControlText(DLG_ID(IDEDIT_PROJ_NAME), pszProject);
 	}
 
-	if (m_cszPCHheader.IsNonEmpty())
+	if (m_cszPCHheader.isnonempty())
 		SetControlText(DLG_ID(IDEDIT_PCH), m_cszPCHheader);
-	if (m_cszCFlags.IsNonEmpty())
+	if (m_cszCFlags.isnonempty())
 		SetControlText(DLG_ID(IDEDIT_CFLAGS), m_cszCFlags);
-	if (m_cszLinkFlags.IsNonEmpty())
+	if (m_cszLinkFlags.isnonempty())
 		SetControlText(DLG_ID(IDEDIT_LINK_FLAGS), m_cszLinkFlags);
-	if (m_cszLibs.IsNonEmpty())
+	if (m_cszLibs.isnonempty())
 		SetControlText(DLG_ID(IDEDIT_LIBS), m_cszLibs);
-	if (m_cszBuildLibs.IsNonEmpty())
+	if (m_cszBuildLibs.isnonempty())
 		SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), m_cszBuildLibs);
-	if (m_cszIncDirs.IsNonEmpty())
+	if (m_cszIncDirs.isnonempty())
 		SetControlText(DLG_ID(IDEDIT_INCDIRS), m_cszIncDirs);
-	if (m_cszLibDirs.IsNonEmpty())
+	if (m_cszLibDirs.isnonempty())
 		SetControlText(DLG_ID(IDEDIT_LIBDIRS), m_cszLibDirs);
 
 	if (m_exeType == EXE_CONSOLE)
@@ -232,7 +232,7 @@ void CDlgSrcOptions::OnBtnChangePch()
 	ttFileDlg fdlg(*this);
 	fdlg.SetFilter("Header Files|*.h");
 	ttString cszCWD;
-	cszCWD.GetCWD();
+	cszCWD.getCWD();
 	cszCWD.AddTrailingSlash();
 	fdlg.SetInitialDir(cszCWD);
 	if (fdlg.GetOpenFileName()) {

@@ -19,7 +19,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 	// if they are both empty, fill them in with defaults. If only one is empty, then it's likely only a single platform
 	// is being build (32-bit or 64-bit)
 
-	if (m_cszTarget32.IsEmpty() && m_cszTarget64.IsEmpty()) {
+	if (m_cszTarget32.isempty() && m_cszTarget64.isempty()) {
 		if (m_exeType == EXE_LIB) {
 			if (tt::DirExists("../lib")) {
 				m_cszTarget32 = "../lib";
@@ -49,7 +49,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 
 	if (!getProjName()) {
 		ttString cszCwd;
-		cszCwd.GetCWD();
+		cszCwd.getCWD();
 		char* pszTmp = (char*) cszCwd.FindLastSlash();
 		if (!pszTmp[1])		// if path ends with a slash, remove it -- we need that last directory name
 			*pszTmp = 0;
@@ -67,10 +67,10 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 
 	m_lstRcDependencies.SetFlags(ttList::FLG_URL_STRINGS);
 
-	if (m_cszRcName.IsNonEmpty())
+	if (m_cszRcName.isnonempty())
 		FindRcDependencies(m_cszRcName);
 
-	m_bBin64Exists = (m_cszTarget64.IsNonEmpty() && tt::findstr(m_cszTarget64, "64"));
+	m_bBin64Exists = (m_cszTarget64.isnonempty() && tt::findstr(m_cszTarget64, "64"));
 }
 
 const char* lstRcKeywords[] = {		// list of keywords that load a file
@@ -237,7 +237,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 const char* CBldMaster::NormalizeHeader(const char* pszRoot, ttString& cszHeader)
 {
-	ttASSERT(cszHeader.IsNonEmpty());
+	ttASSERT(cszHeader.isnonempty());
 
 	if (pszRoot && *pszRoot)
 		tt::ConvertToRelative(pszRoot, cszHeader, cszHeader);
@@ -248,11 +248,11 @@ const char* CBldMaster::NormalizeHeader(const char* pszRoot, ttString& cszHeader
 
 const char* CBldMaster::GetTargetDebug()
 {
-	if (cszTargetDebug.IsNonEmpty())
+	if (cszTargetDebug.isnonempty())
 		return cszTargetDebug;
 
 	if (isExeTypeLib())	{
-		if (m_cszTarget32.IsNonEmpty())
+		if (m_cszTarget32.isnonempty())
 			cszTargetDebug = m_cszTarget32;
 		else
 			cszTargetDebug = tt::DirExists("../lib") ? "../lib" : "lib";
@@ -262,7 +262,7 @@ const char* CBldMaster::GetTargetDebug()
 	}
 
 	else if (isExeTypeDll()) {
-		if (m_cszTarget32.IsNonEmpty())
+		if (m_cszTarget32.isnonempty())
 			cszTargetDebug = m_cszTarget32;
 		else
 			cszTargetDebug = tt::DirExists("../bin") ? "../bin" : "bin";
@@ -271,7 +271,7 @@ const char* CBldMaster::GetTargetDebug()
 		return cszTargetDebug;
 	}
 	else {
-		if (m_cszTarget32.IsNonEmpty())
+		if (m_cszTarget32.isnonempty())
 			cszTargetDebug = m_cszTarget32;
 		else
 			cszTargetDebug = tt::DirExists("../bin") ? "../bin" : "bin";
@@ -283,11 +283,11 @@ const char* CBldMaster::GetTargetDebug()
 
 const char* CBldMaster::GetTargetRelease()
 {
-	if (cszTargetRelease.IsNonEmpty())
+	if (cszTargetRelease.isnonempty())
 		return cszTargetRelease;
 
 	if (isExeTypeLib())	{
-		if (m_cszTarget32.IsNonEmpty())
+		if (m_cszTarget32.isnonempty())
 			cszTargetRelease = m_cszTarget32;
 		else
 			cszTargetRelease = tt::DirExists("../lib") ? "../lib" : "lib";
@@ -297,7 +297,7 @@ const char* CBldMaster::GetTargetRelease()
 	}
 
 	else if (isExeTypeDll()) {
-		if (m_cszTarget32.IsNonEmpty())
+		if (m_cszTarget32.isnonempty())
 			cszTargetRelease = m_cszTarget32;
 		else
 			cszTargetRelease = tt::DirExists("../bin") ? "../bin" : "bin";
@@ -306,7 +306,7 @@ const char* CBldMaster::GetTargetRelease()
 		return cszTargetRelease;
 	}
 	else {
-		if (m_cszTarget32.IsNonEmpty())
+		if (m_cszTarget32.isnonempty())
 			cszTargetRelease = m_cszTarget32;
 		else
 			cszTargetRelease = tt::DirExists("../bin") ? "../bin" : "bin";
@@ -318,11 +318,11 @@ const char* CBldMaster::GetTargetRelease()
 
 const char* CBldMaster::GetTargetDebug64()
 {
-	if (cszTargetDebug64.IsNonEmpty())
+	if (cszTargetDebug64.isnonempty())
 		return cszTargetDebug64;
 
 	if (isExeTypeLib())	{
-		if (m_cszTarget64.IsNonEmpty())
+		if (m_cszTarget64.isnonempty())
 			cszTargetDebug64 = m_cszTarget64;
 		else
 			cszTargetDebug64 = tt::DirExists("../lib") ? "../lib" : "lib";
@@ -332,7 +332,7 @@ const char* CBldMaster::GetTargetDebug64()
 	}
 
 	else if (isExeTypeDll()) {
-		if (m_cszTarget64.IsNonEmpty())
+		if (m_cszTarget64.isnonempty())
 			cszTargetDebug64 = m_cszTarget64;
 		else
 			cszTargetDebug64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
@@ -341,7 +341,7 @@ const char* CBldMaster::GetTargetDebug64()
 		return cszTargetDebug64;
 	}
 	else {
-		if (m_cszTarget64.IsNonEmpty())
+		if (m_cszTarget64.isnonempty())
 			cszTargetDebug64 = m_cszTarget64;
 		else
 			cszTargetDebug64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
@@ -353,11 +353,11 @@ const char* CBldMaster::GetTargetDebug64()
 
 const char* CBldMaster::GetTargetRelease64()
 {
-	if (cszTargetRelease64.IsNonEmpty())
+	if (cszTargetRelease64.isnonempty())
 		return cszTargetRelease64;
 
 	if (isExeTypeLib())	{
-		if (m_cszTarget64.IsNonEmpty())
+		if (m_cszTarget64.isnonempty())
 			cszTargetRelease64 = m_cszTarget64;
 		else
 			cszTargetRelease64 = tt::DirExists("../lib") ? "../lib" : "lib";
@@ -367,7 +367,7 @@ const char* CBldMaster::GetTargetRelease64()
 	}
 
 	else if (isExeTypeDll()) {
-		if (m_cszTarget64.IsNonEmpty())
+		if (m_cszTarget64.isnonempty())
 			cszTargetRelease64 = m_cszTarget64;
 		else
 			cszTargetRelease64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
@@ -376,7 +376,7 @@ const char* CBldMaster::GetTargetRelease64()
 		return cszTargetRelease64;
 	}
 	else {
-		if (m_cszTarget64.IsNonEmpty())
+		if (m_cszTarget64.isnonempty())
 			cszTargetRelease64 = m_cszTarget64;
 		else
 			cszTargetRelease64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
