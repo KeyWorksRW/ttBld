@@ -6,13 +6,11 @@
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precomp.h"
+#include "pch.h"
 
 #include <stdio.h>	// for sprintf
 
-#include "../ttLib/include/strlist.h"	// CStrList
-#include "../ttLib/include/keyfile.h"	// CKeyFile
-#include "../ttLib/include/cstr.h"		// CStr
+#include "../ttLib/include/ttfile.h"	// ttFile
 
 #include "writesrcfiles.h"
 
@@ -25,8 +23,8 @@
 
 bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 {
-	m_lstOriginal.SetFlags(CStrList::FLG_ADD_DUPLICATES);
-	CKeyFile kfIn;
+	m_lstOriginal.SetFlags(ttList::FLG_ADD_DUPLICATES);
+	ttFile kfIn;
 	if (!kfIn.ReadFile(pszFile)) {
 		return false;
 	}
@@ -34,14 +32,14 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 		m_lstOriginal += (const char*) kfIn;
 	}
 
-	CStr cszOrg;
-	CStr cszComment;
+	ttString cszOrg;
+	ttString cszComment;
 
 	// The calling order below will determine the order Sections appear (if they don't already exist)
 
 	UpdateOptionsSection();
 
-	CKeyFile kfOut;
+	ttFile kfOut;
 	kfOut.SetUnixLF();
 
 	// Write all the lines, but prevent more then one blank line at a time
@@ -49,7 +47,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 	size_t cBlankLines = 0;
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos)	{
 		char* pszLine = (char*) m_lstOriginal[pos];	// since we're reducing the size, and about to delete it, okay to modify
-		trim(pszLine);
+		tt::trim_right(pszLine);
 		if (*pszLine)
 		   cBlankLines = 0;
 		else if (cBlankLines > 0)	// ignore if last line was also blank
@@ -68,10 +66,10 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 
 bool CWriteSrcFiles::WriteNew(const char* pszFile)
 {
-	m_lstOriginal.SetFlags(CStrList::FLG_ADD_DUPLICATES);	// required to add blank lines
+	m_lstOriginal.SetFlags(ttList::FLG_ADD_DUPLICATES);	// required to add blank lines
 	m_lstOriginal += "Options:";
 	if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() ||  m_cszRcName.IsNonEmpty()) {
-		CStr cszFile;
+		ttString cszFile;
 		m_lstOriginal += "";
 		m_lstOriginal += "Files:";
 		if (m_cszRcName.IsNonEmpty()) {
@@ -92,7 +90,7 @@ bool CWriteSrcFiles::WriteNew(const char* pszFile)
 	}
 
 	UpdateOptionsSection();
-	CKeyFile kfOut;
+	ttFile kfOut;
 	kfOut.SetUnixLF();
 
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos)
@@ -100,10 +98,10 @@ bool CWriteSrcFiles::WriteNew(const char* pszFile)
 	return kfOut.WriteFile(pszFile);
 }
 
-ptrdiff_t CWriteSrcFiles::FindOption(const char* pszOption, CStr& cszDst)
+ptrdiff_t CWriteSrcFiles::FindOption(const char* pszOption, ttString& cszDst)
 {
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos) {
-		if (isSameSubString(FindNonSpace(m_lstOriginal[pos]), pszOption)) {
+		if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), pszOption)) {
 			cszDst = m_lstOriginal[pos];
 			return (ptrdiff_t) pos;
 		}
@@ -114,7 +112,7 @@ ptrdiff_t CWriteSrcFiles::FindOption(const char* pszOption, CStr& cszDst)
 ptrdiff_t CWriteSrcFiles::FindSection(const char* pszSection)
 {
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos) {
-		if (isSameSubString(m_lstOriginal[pos], pszSection)) {
+		if (tt::samesubstri(m_lstOriginal[pos], pszSection)) {
 			return (ptrdiff_t) pos;
 		}
 	}
@@ -142,9 +140,9 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		// Set the insertion point at the first blank line, or before the next Section
 
 		for (m_posInsert = m_posOptions + 1; m_posInsert < (ptrdiff_t) m_lstOriginal.GetCount(); ++m_posInsert) {
-			if (kstrlen(m_lstOriginal[m_posInsert]) < 1)
+			if (tt::strlen(m_lstOriginal[m_posInsert]) < 1)
 				break;
-			else if (IsAlpha(m_lstOriginal[m_posInsert][0])) {
+			else if (tt::isalpha(m_lstOriginal[m_posInsert][0])) {
 				m_lstOriginal.InsertAt(m_posInsert, "");	// insert a blank line
 				break;
 			}
@@ -153,11 +151,11 @@ void CWriteSrcFiles::UpdateOptionsSection()
 
 	UpdateLongOption("Project:", GetProjectName(), "project target name");
 
-	CStr cszTargets;
+	ttString cszTargets;
 	CreateTargetsString(cszTargets);
 	UpdateLongOption("TargetDirs:", cszTargets);
-	if (m_cszSourcePattern.IsNonEmpty())
-		UpdateOption("Sources:", m_cszSourcePattern, "source file patterns", true);
+	if (m_cszSrcPattern.IsNonEmpty())
+		UpdateOption("Sources:", m_cszSrcPattern, "source file patterns", true);
 	UpdateOption("exe_type:", GetExeType(), "[window | console | lib | dll]", true);
 
 	if (m_b64bit)
@@ -168,7 +166,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	UpdateOption("bit_suffix:", m_bBitSuffix ? "true" : "false", "add \"64\" to the end of target directory or project (e.g., ../bin64/)", m_bBitSuffix);
 	{
 		char szNum[10];
-		Utoa(m_WarningLevel > 0 ? m_WarningLevel : WARNLEVEL_DEFAULT, szNum, sizeof(szNum));
+		tt::utoa(m_WarningLevel > 0 ? m_WarningLevel : WARNLEVEL_DEFAULT, szNum, sizeof(szNum));
 		UpdateOption("WarnLevel:", szNum, "compiler warning level (1-4)", m_WarningLevel != WARNLEVEL_DEFAULT);
 	}
 
@@ -190,7 +188,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	UpdateLongOption("IncDirs:", 	(char*) m_cszIncDirs);
 	UpdateLongOption("LibDirs:", 	(char*) m_cszLibDirs);
 
-	CStr cszTmp;
+	ttString cszTmp;
 	if (m_CompilerType & COMPILER_CLANG)
 		cszTmp = "CLANG ";
 	if (m_CompilerType & COMPILER_MSVC)
@@ -214,7 +212,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	if (m_IDE & IDE_VS)
 		cszTmp += "VisualStudio";
 	if (cszTmp.IsNonEmpty())
-		trim(cszTmp);
+		tt::trim_right(cszTmp);
 	UpdateLongOption("IDE:", cszTmp, "[CodeBlocks and/or CodeLite and/or VisualStudio]");
 }
 
@@ -246,7 +244,7 @@ void CWriteSrcFiles::UpdateLongOption(const char* pszOption, const char* pszVal,
 		if (m_cszOptComment.IsEmpty() && pszComment)	// we keep any comment that was previously used
 			m_cszOptComment = pszComment;				// otherwise we use our own if supplied
 
-		if (kstrlen(pszVal) <= 12 && m_cszOptComment.IsNonEmpty()) {	// can we use the shorter formatted version?
+		if (tt::strlen(pszVal) <= 12 && m_cszOptComment.IsNonEmpty()) {	// can we use the shorter formatted version?
 			sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
 			m_lstOriginal.Replace(posOption, szLine);
 			return;
@@ -255,13 +253,13 @@ void CWriteSrcFiles::UpdateLongOption(const char* pszOption, const char* pszVal,
 		sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt, pszOption, pszVal);
 
 		if (m_cszOptComment.IsNonEmpty()) { 			// we keep any comment that was previously used
-			kstrcat(szLine, sizeof(szLine), "    # ");
-			kstrcat(szLine, sizeof(szLine), m_cszOptComment);
+			tt::strcat_s(szLine, sizeof(szLine), "    # ");
+			tt::strcat_s(szLine, sizeof(szLine), m_cszOptComment);
 		}
 		m_lstOriginal.Replace(posOption, szLine);
 	}
 	else if (pszVal && *pszVal) {
-		if (kstrlen(pszVal) <= 12 && m_cszOptComment.IsNonEmpty()) {	// can we use the shorter formatted version?
+		if (tt::strlen(pszVal) <= 12 && m_cszOptComment.IsNonEmpty()) {	// can we use the shorter formatted version?
 			sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
 			m_lstOriginal.Replace(posOption, szLine);
 		}
@@ -278,20 +276,20 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
 {
 	m_cszOptComment.Delete();
 	for (ptrdiff_t pos = m_posOptions + 1; pos < (ptrdiff_t) m_lstOriginal.GetCount(); ++pos) {
-		if (IsAlpha(*m_lstOriginal[pos]))
+		if (tt::isalpha(*m_lstOriginal[pos]))
 			break;	// New sections start with an alphabetical character in the first column
 
-		const char* pszLine = FindNonSpace(m_lstOriginal[pos]);
-		if (isSameSubString(pszLine, pszOption)) {
-			const char* pszComment = kstrchr(pszLine, '#');
+		const char* pszLine = tt::nextnonspace(m_lstOriginal[pos]);
+		if (tt::samesubstri(pszLine, pszOption)) {
+			const char* pszComment = tt::strchr(pszLine, '#');
 			if (pszComment)
-				m_cszOptComment = FindNonSpace(pszComment + 1);
+				m_cszOptComment = tt::nextnonspace(pszComment + 1);
 			else
 				m_cszOptComment.Delete();
 			return pos;
 		}
 		// Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a new section
-		else if (IsAlpha(*m_lstOriginal[pos]))
+		else if (tt::isalpha(*m_lstOriginal[pos]))
 			break;
 	}
 	return -1;
@@ -319,31 +317,31 @@ const char* CWriteSrcFiles::GetExeType()
 	}
 }
 
-void CWriteSrcFiles::CreateTargetsString(CStr& cszTargets)
+void CWriteSrcFiles::CreateTargetsString(ttString& cszTargets)
 {
 	if (m_cszTarget32.IsEmpty() && m_cszTarget64.IsEmpty()) {
 		if (m_exeType == EXE_LIB) {
-			if (DirExists("../lib")) {
+			if (tt::DirExists("../lib")) {
 				m_cszTarget32 = "../lib";
-				if (DirExists("../lib64"))
+				if (tt::DirExists("../lib64"))
 					m_cszTarget64 = "../lib64";
 			}
 			else {
 				m_cszTarget32 = "lib";
-				if (DirExists("lib64"))
+				if (tt::DirExists("lib64"))
 					m_cszTarget64 = "lib64";
 			}
 		}
 
 		else {
-			if (DirExists("../bin")) {
+			if (tt::DirExists("../bin")) {
 				m_cszTarget32 = "../bin";
-				if (DirExists("../bin64"))
+				if (tt::DirExists("../bin64"))
 					m_cszTarget64 = "../bin64";
 			}
 			else {
 				m_cszTarget32 = "bin";
-				if (DirExists("bin64"))
+				if (tt::DirExists("bin64"))
 					m_cszTarget64 = "bin64";
 			}
 		}

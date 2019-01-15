@@ -2,13 +2,13 @@
 // Name:		CDlgSrcOptions
 // Purpose:		Class for displaying a dialog allowing for modification of .SrcFiles
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 1998-2018 KeyWorks Software (Ralph Walden)
-// License:     Apache License (see ../LICENSE)
+// Copyright:	Copyright (c) 1998-2019 KeyWorks Software (Ralph Walden)
+// License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include "../ttLib/include/cttdlg.h"	// CTTDlg
+#include "../ttLib/include/ttdlg.h" 	// ttDlg, ttComboBox, ttListBox, ttListView
 
 #include "../common/writesrcfiles.h"	// CWriteSrcFiles
 
@@ -16,7 +16,7 @@
 	#include "res.h"
 #endif
 
-class CDlgSrcOptions : public CTTDlg, public CWriteSrcFiles
+class CDlgSrcOptions : public ttDlg, public CWriteSrcFiles
 {
 public:
 	CDlgSrcOptions(const char* pszSrcDir = nullptr);
@@ -42,9 +42,9 @@ protected:
 
 	// Class members
 
-	CDlgListBox m_lb;
-	CStr m_cszSrcDir;
-	CStr m_cszOptComment;
-	CStrList m_lstOriginal;
+	ttListBox m_lb;
+	ttString m_cszSrcDir;
+	ttString m_cszOptComment;
+	ttList m_lstOriginal;
 	ptrdiff_t m_posProject;
 };

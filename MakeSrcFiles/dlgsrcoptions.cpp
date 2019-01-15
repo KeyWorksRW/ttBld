@@ -2,15 +2,15 @@
 // Name:		CDlgSrcOptions
 // Purpose:		Class for displaying a dialog allowing for modification of .srcfiles
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 1998-2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 1998-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precomp.h"
+#include "pch.h"
 
-#include "../ttLib/include/cstr.h"		// CStr
-#include "../ttLib/include/filedlg.h"	// CFileDlg
-#include "../ttLib/include/findfile.h"	// CTTFindFile
+#include "../ttLib/include/ttstring.h"	// ttString
+#include "../ttLib/include/filedlg.h"	// ttFileDlg
+#include "../ttLib/include/findfile.h"	// ttFindFile
 
 #include "dlgsrcoptions.h"
 
@@ -23,7 +23,7 @@ void SetSrcFileOptions()
 
 void CreateNewSrcFiles()
 {
-	if (FileExists(".srcfiles")) {
+	if (tt::FileExists(".srcfiles")) {
 		puts(".srcfiles already exists! Delete it before using -new option, or use the -overwrite option.");
 		return;
 	}
@@ -34,7 +34,7 @@ void CreateNewSrcFiles()
 		// option, we first create a .srcfiles with nothing but a Files: section, and then call SaveChanges() to add the
 		// Options: section.
 
-		CKeyFile kfOut;
+		ttFile kfOut;
 		kfOut.WriteEol("Files:");
 
 		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.c;*.rc;*.idl;*.hhp;");
@@ -51,7 +51,7 @@ void CreateNewSrcFiles()
 	}
 }
 
-CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : CTTDlg(IDDLG_SRCFILES), CWriteSrcFiles()
+CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttDlg(IDDLG_SRCFILES), CWriteSrcFiles()
 {
 	ReadFile();	// read in any existing .srcfiles
 
@@ -63,30 +63,24 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : CTTDlg(IDDLG_SRCFILES), 
 	}
 
 	if (m_cszPCHheader.IsEmpty()) {
-		if (FileExists("stdafx.h"))	{
+		if (tt::FileExists("stdafx.h"))
 			m_cszPCHheader = "stdafx.h";
-		}
-		else if (FileExists("pch.h")) {
+		else if (tt::FileExists("pch.h"))
 			m_cszPCHheader = "pch.h";
-		}
-		else if (FileExists("pch.hh")) {
+		else if (tt::FileExists("pch.hh"))
 			m_cszPCHheader = "pch.hh";
-		}
-		else if (FileExists("pch.hpp")) {
+		else if (tt::FileExists("pch.hpp"))
 			m_cszPCHheader = "pch.hpp";
-		}
-		else if (FileExists("pch.hxx")) {
+		else if (tt::FileExists("pch.hxx"))
 			m_cszPCHheader = "pch.hxx";
-		}
-		else if (FileExists("precomp.h")) {
-			m_cszPCHheader = "precomp.h";
-		}
+		else if (tt::FileExists("pch.h"))
+			m_cszPCHheader = "pch.h";
 	}
 }
 
 void CDlgSrcOptions::SaveChanges()
 {
-	if (FileExists(txtSrcFilesFileName)) {
+	if (tt::FileExists(txtSrcFilesFileName)) {
 		if (WriteUpdates())
 			puts(".srcfiles Options: section updated");
 	}
@@ -98,7 +92,7 @@ void CDlgSrcOptions::SaveChanges()
 
 void CDlgSrcOptions::OnBegin(void)
 {
-	CStr cszTitle(txtSrcFilesFileName);
+	ttString cszTitle(txtSrcFilesFileName);
 	cszTitle += " Options";
 	SetWindowText(*this, cszTitle);
 
@@ -107,11 +101,11 @@ void CDlgSrcOptions::OnBegin(void)
 	else {
 		char szCwd[MAX_PATH];
 		GetCurrentDirectory(sizeof(szCwd), szCwd);
-		char* pszProject = FindFilePortion(szCwd);
-		if (IsSameString(pszProject, "src")) {
+		char* pszProject = tt::fndFilename(szCwd);
+		if (tt::samestri(pszProject, "src")) {
 			pszProject--;
 			*pszProject = 0;
-			pszProject = FindFilePortion(szCwd);
+			pszProject = tt::fndFilename(szCwd);
 		}
 		SetControlText(DLG_ID(IDEDIT_PROJ_NAME), pszProject);
 	}
@@ -232,9 +226,9 @@ void CDlgSrcOptions::OnEnd(void)
 
 void CDlgSrcOptions::OnBtnChangePch()
 {
-	CFileDlg fdlg(*this);
+	ttFileDlg fdlg(*this);
 	fdlg.SetFilter("Header Files|*.h");
-	CStr cszCWD;
+	ttString cszCWD;
 	cszCWD.GetCWD();
 	cszCWD.AddTrailingSlash();
 	fdlg.SetInitialDir(cszCWD);
@@ -245,24 +239,24 @@ void CDlgSrcOptions::OnBtnChangePch()
 			pszFileName++;
 			pszCWD++;
 		}
-		CStr cszFile(pszFileName);
+		ttString cszFile(pszFileName);
 		cszFile.ChangeExtension(".cpp");
-		if (FileExists(cszFile)) {
+		if (tt::FileExists(cszFile)) {
 			SetControlText(DLG_ID(IDEDIT_PCH), pszFileName);
 			return;
 		}
 		cszFile.ChangeExtension(".cxx");
-		if (FileExists(cszFile)) {
+		if (tt::FileExists(cszFile)) {
 			SetControlText(DLG_ID(IDEDIT_PCH), pszFileName);
 			return;
 		}
 		cszFile.ChangeExtension(".ccc");
-		if (FileExists(cszFile)) {
+		if (tt::FileExists(cszFile)) {
 			SetControlText(DLG_ID(IDEDIT_PCH), pszFileName);
 			return;
 		}
 		cszFile.Delete();
 		cszFile.printf("%s does not have a matching C++ source file -- precompiled header will fail without it!", (char*) pszFileName);
-		MsgBox(cszFile);
+		tt::MsgBox(cszFile);
 	}
 }

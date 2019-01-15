@@ -12,13 +12,13 @@
 
 #include "../ttLib/include/ttmem.h" // ttMem
 
-#include "bldmaster.h"	// CBldMaster
 #include "ninja.h"		// CNinja
 #include "vcxproj.h"	// CVcxProj
 
 int MakeNinja(int argc, char* argv[])
 {
 	bool bReadPrivate = true;	// read .private/.srcfiles in addition to .srcfiles
+	CNinja cNinja;
 
 	if (argc > 1) {
 		for (int argpos = 1; argpos < argc; argpos++) {
@@ -34,6 +34,14 @@ int MakeNinja(int argc, char* argv[])
 				else if (tt::samesubstri(argv[argpos] + 1, "np")) {
 					bReadPrivate = false;
 				}
+
+				// This option isn't shown in Usage because it's really just for debugging -- i.e., you can make some
+				// changes to the code then run MakeNinja -dryrun to make certain it is doing what you expect. It's not
+				// under _DEBUG so you can test retail release.
+
+				else if (tt::samesubstri(argv[argpos] + 1, "dryrun")) {
+					cNinja.EnableDryRun();
+				}
 				else {
 					printf("%s is an unknown option.\n", argv[argpos]);
 					return 1;
@@ -42,7 +50,6 @@ int MakeNinja(int argc, char* argv[])
 		}
 	}
 
-	CNinja cNinja;
 	cNinja.CreateMakeFile();	// this will create/update it if .srcfiles has a Makefile: section
 
 	int countNinjas = 0;

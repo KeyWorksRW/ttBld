@@ -1,6 +1,6 @@
 // Contains various function declarations
 
 void	CreateNewSrcFiles();
-void AddFiles(CStrList& lstFiles);
-bool ConvertBuildScript(const char* pszBldFile);
-void SetSrcFileOptions();
+void	AddFiles(ttList& lstFiles);
+bool	ConvertBuildScript(const char* pszBldFile);
+void	SetSrcFileOptions();

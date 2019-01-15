@@ -2,16 +2,17 @@
 // Name:		main.cpp
 // Purpose:		Entry point and Usage information
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precomp.h"
+#include "pch.h"
 
-#include "../ttLib/include/strlist.h"	// CStrList
+#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
 #include <iostream>
 
 #include "version.txt"	// Version (txtVersion) and Copyright (txtCopyRight) information
+
 #include "funcs.h"
 
 void DisplayUsage()
@@ -29,14 +30,14 @@ void DisplayUsage()
 
 int main(int argc, char* argv[])
 {
-	InitCaller(NULL, NULL, txtVersion);
+	tt::InitCaller(txtVersion);
 
 	for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos) {
-		if (argv[argpos][1] == '?')	{
+		if (argv[argpos][1] == '?') {
 			DisplayUsage();
 			return 1;
 		}
-		else if (isSameString(argv[argpos] + 1, "convert")) {
+		else if (tt::samestri(argv[argpos] + 1, "convert")) {
 			if (ConvertBuildScript(argpos + 1 > argc ? nullptr : argv[argpos + 1])) {
 				// SetSrcFileOptions();
 				return 1;
@@ -44,15 +45,15 @@ int main(int argc, char* argv[])
 			else
 				return 0;
 		}
-		else if (isSameString(argv[argpos] + 1, "add")) {
-			CStrList lstFiles;
+		else if (tt::samestri(argv[argpos] + 1, "add")) {
+			ttList lstFiles;
 			for (++argpos; argpos < argc; ++argpos) {
 				lstFiles += argv[argpos];
 			}
 			AddFiles(lstFiles);
 			return 1;
 		}
-		else if (isSameString(argv[argpos] + 1, "new")) {
+		else if (tt::samestri(argv[argpos] + 1, "new")) {
 			CreateNewSrcFiles();
 			return 1;
 		}
@@ -61,6 +62,6 @@ int main(int argc, char* argv[])
 			return 0;
 		}
 	}
-	SetSrcFileOptions();
-	return 1;
+	// SetSrcFileOptions();
+	// return 1;
 }

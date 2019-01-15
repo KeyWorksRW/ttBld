@@ -2,18 +2,18 @@
 // Name:		addfiles.cpp
 // Purpose:
 // Author:		Ralph Walden
-// Copyright:   Copyright (c) 2018 KeyWorks Software (Ralph Walden)
-// License:     Apache License (see ../LICENSE)
+// Copyright:	Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
+// License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precomp.h"
+#include "pch.h"
 
-#include "../ttLib/include/strlist.h"	// CStrList
-#include "../ttLib/include/keyfile.h"	// CKeyFile
+#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
+#include "../ttLib/include/ttfile.h"	// ttFile
 
 #include "../common/csrcfiles.h"		// CSrcFiles
 
-void AddFiles(CStrList& lstFiles)
+void AddFiles(ttList& lstFiles)
 {
 	if (lstFiles.GetCount() < 1) {
 		puts("You didn't specify any files to add!");
@@ -32,19 +32,19 @@ void AddFiles(CStrList& lstFiles)
 
 	size_t cFilesAdded = 0;
 
-	CKeyFile kfIn, kfOut;
+	ttFile kfIn, kfOut;
 	if (!kfIn.ReadFile(".srcfiles")) {
 		puts("Cannot read .srcfiles!");
 		return;
 	}
 
-	while (kfIn.readline() && !isSameSubString(kfIn, "Files:"))
+	while (kfIn.readline() && !tt::samesubstri(kfIn, "Files:"))
 		kfOut.WriteEol(kfIn);
 
 	if (kfOut.IsEndOfFile()) {	// means there was no Files: section
 		kfOut.WriteEol("Files:");
 		for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos) {
-			if (!FileExists(lstFiles[pos]))	{
+			if (!tt::FileExists(lstFiles[pos]))	{
 				printf("%s doesn't exist -- not added\n", lstFiles[pos]);
 				continue;
 			}
@@ -59,7 +59,7 @@ void AddFiles(CStrList& lstFiles)
 		// Use CStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files -- 1
 		// file is singular
 
-		CStr cszResults;
+		ttStr cszResults;
 		cszResults.printf("%u file%ks added.", cFilesAdded, cFilesAdded);
 		puts(cszResults);
 		return;
@@ -67,9 +67,9 @@ void AddFiles(CStrList& lstFiles)
 
 	kfOut.WriteEol(kfIn);	// This will be the Files: line
 	while (kfIn.readline()) {
-		if (IsAlpha(*(const char*)kfIn))	// Alphabetical character in first column is a new section
+		if (tt::isalpha(*(const char*)kfIn))	// Alphabetical character in first column is a new section
 			break;
-		else if (!FindNonSpace(kfIn)) {		// blank line, insert after it
+		else if (!tt::nextnonspace(kfIn)) {		// blank line, insert after it
 			kfOut.WriteEol(kfIn);
 			break;
 		}
@@ -80,7 +80,7 @@ void AddFiles(CStrList& lstFiles)
 	// We are now after a blank line, at the beginning of a section, or at the end of the file
 
 	for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos) {
-		if (!FileExists(lstFiles[pos]))	{
+		if (!tt::FileExists(lstFiles[pos]))	{
 			printf("%s doesn't exist -- not added\n", lstFiles[pos]);
 			continue;
 		}
@@ -98,10 +98,9 @@ void AddFiles(CStrList& lstFiles)
 		return;
 	}
 
-	// Use CStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files -- 1
-	// file is singular
+	// Use ttString to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files
 
-	CStr cszResults;
+	ttStr cszResults;
 	cszResults.printf("%u file%ks added.", cFilesAdded, cFilesAdded);
 	puts(cszResults);
 }
