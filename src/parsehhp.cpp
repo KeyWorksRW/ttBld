@@ -297,10 +297,15 @@ bool CNinja::CreateHelpFile()
 	// We don't want to touch the build script if it hasn't changed, since that would change the timestamp causing git
 	// and other tools that check timestamp to think something is different.
 
-	ttFile kfOrg;
-	if (kfOrg.ReadFile(txtHelpNinja)) {
-		if (strcmp(kfOrg, file) == 0)
+	ttFile fileOrg;
+	if (fileOrg.ReadFile(txtHelpNinja)) {
+		if (strcmp(fileOrg, file) == 0)
 			return false;
+		else if (dryrun.isEnabled()) {
+			dryrun.NewFile(txtHelpNinja);
+			dryrun.DisplayFileDiff(fileOrg, file);
+			return false;	// we didn't actually write anything
+		}
 	}
 
 	if (!file.WriteFile(txtHelpNinja)) {

@@ -22,3 +22,4 @@ Files:
   vcxproj.cpp
 
   ../common/csrcfiles.cpp
+  ../common/dryrun.cpp

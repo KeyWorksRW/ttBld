@@ -52,6 +52,8 @@ build $outdir/vcxproj.obj: compile vcxproj.cpp | $outdir/pch.obj
 
 build $outdir/csrcfiles.obj: compile ../common/csrcfiles.cpp | $outdir/pch.obj
 
+build $outdir/dryrun.obj: compile ../common/dryrun.cpp | $outdir/pch.obj
+
 build $resout/makeninja.res: rc makeninja.rc | $
   resource.h $
   res/cdlprojectpre.txt $
@@ -70,5 +72,6 @@ build ../bin/MakeNinjaD.exe : link $resout/makeninja.res ../ttLib/lib/ttLibD.lib
   $outdir/ninja.obj $
   $outdir/parsehhp.obj $
   $outdir/vcxproj.obj $
-  $outdir/csrcfiles.obj
+  $outdir/csrcfiles.obj $
+  $outdir/dryrun.obj
 

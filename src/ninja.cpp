@@ -234,10 +234,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 	// We don't want to touch the build script if it hasn't changed, since that would change the timestamp causing git
 	// and other tools that check timestamp to think something is different.
 
-	ttFile kfOrg;
-	if (kfOrg.ReadFile(cszTmp)) {
-		if (strcmp(kfOrg, file) == 0)
+	ttFile fileOrg;
+	if (fileOrg.ReadFile(cszTmp)) {
+		if (strcmp(fileOrg, file) == 0)
 			return false;
+		else if (dryrun.isEnabled()) {
+			dryrun.NewFile(cszTmp);
+			dryrun.DisplayFileDiff(fileOrg, file);
+			return false;	// we didn't actually write anything
+		}
 	}
 
 	if (!file.WriteFile(cszTmp)) {

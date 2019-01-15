@@ -18,6 +18,7 @@
 #include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
 
 #include "../common/csrcfiles.h"		// CSrcFiles
+#include "../common/dryrun.h"			// CDryRun
 
 class CBldMaster : public CSrcFiles
 {
@@ -90,6 +91,8 @@ public:
 	const char* GetTargetRelease();
 	const char* GetTargetRelease64();
 
+	void EnableDryRun() { dryrun.Enable(); }
+
 	ttList m_lstRcDependencies;
 
 protected:
@@ -102,6 +105,8 @@ protected:
 	ttString cszTargetDebug64;
 	ttString cszTargetRelease;
 	ttString cszTargetRelease64;
+
+	CDryRun dryrun;
 
 	bool m_bBin64Exists;	// if true, the directory ../bin64 exists
 };

@@ -105,7 +105,11 @@ bool CBldMaster::CreateMakeFile()
 	if (tt::FileExists("makefile"))	{
 		ttFile kfOrg;
 		if (!kfOrg.ReadFile("makefile") || strcmp(kfOrg, kfOut) != 0) {
-			if (kfOut.WriteFile("makefile")) {
+			if (dryrun.isEnabled())	{
+				dryrun.NewFile("makefile");
+				dryrun.DisplayFileDiff(kfOrg, kfOut);
+			}
+			else if (kfOut.WriteFile("makefile")) {
 				puts("makefile updated");
 				return true;
 			}
