@@ -131,14 +131,14 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 	if (m_exeType == EXE_UNSPECIFIED)
 		m_exeType= EXE_WINDOW;
 
-	AddSourcePattern(m_cszSourcePattern);
+	AddSourcePattern(m_cszSrcPattern);
 
 	// If no Files: or Sources: we're specified, then we still won't have any files to build. Default to every type of C++
 	// source file in the current directory.
 
 	if (m_lstSrcFiles.GetCount() < 1) {
-		m_cszSourcePattern = "*.cpp;*.cc;*.cxx;*.rc";
-		AddSourcePattern(m_cszSourcePattern);
+		m_cszSrcPattern = "*.cpp;*.cc;*.cxx;*.rc";
+		AddSourcePattern(m_cszSrcPattern);
 	}
 
 	return true;
@@ -229,6 +229,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		m_bBuildForSpeed = tt::samesubstri(pszVal, "speed");
 		return;
 	}
+
 	if (tt::samesubstri(pszLine, "PCH:")) {
 		if (*pszVal) {
 			if (tt::samestri(pszVal, "none")) {
@@ -242,7 +243,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	}
 
 	if (tt::samesubstri(pszLine, "Sources:") && *pszVal) {
-		m_cszSourcePattern = pszVal;
+		m_cszSrcPattern = pszVal;
 		return;
 	}
 
@@ -365,7 +366,7 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
 void CSrcFiles::ProcessFile(char* pszFile)
 {
 	if (tt::samesubstri(pszFile, ".include")) {
-		char* pszIncFile = tt::nextnonspace(tt::nextspace(pszFile));
+		const char* pszIncFile = tt::nextnonspace(tt::nextspace(pszFile));
 		ProcessInclude(pszIncFile, m_lstAddSrcFiles, true);
 		return;
 	}
@@ -399,7 +400,7 @@ void CSrcFiles::ProcessFile(char* pszFile)
 void CSrcFiles::ProcessInclude(const char* pszFile, ttStrIntList& lstAddSrcFiles, bool bFileSection)
 {
 	if (tt::samesubstri(pszFile, ".include")) {
-		char* pszIncFile = tt::nextnonspace(tt::nextspace(pszFile));
+		const char* pszIncFile = tt::nextnonspace(tt::nextspace(pszFile));
 		ProcessInclude(pszIncFile, m_lstLibAddSrcFiles, false);
 		return;
 	}
@@ -449,7 +450,7 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 	while (enumstr.Enum(&pszPattern)) {
 		ttFindFile ff(pszPattern);
 		while (ff.isValid()) {
-			char* psz = tt::findlastchr(ff, '.');
+			char* psz = tt::strchrR(ff, '.');
 			if (psz) {
 				if (
 						tt::samestri(psz, ".c") ||

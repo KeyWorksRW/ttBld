@@ -11,8 +11,8 @@
 #ifndef __CSRCFILES_H__
 #define __CSRCFILES_H__
 
-#include "../ttLib/include/ttlist.h"	// ttList
-#include "../ttLib/include/ttstr.h"		// ttString
+#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
+#include "../ttLib/include/ttstring.h"	// ttString
 #include "../ttLib/include/ttfile.h"	// ttFile
 
 extern const char* txtSrcFilesFileName;
@@ -123,15 +123,15 @@ public:
 	ttString m_cszProjectName;		// name of the project
 	ttString m_cszRcName;			// resource file to build (if any)
 	ttString m_cszHHPName;			// HTML Help project file
-	ttString m_cszSourcePattern;	// Specifies one or more wildcards to add to Files: section
+	ttString m_cszSrcPattern;		// Specifies one or more wildcards to add to Files: section
 
 	ttList m_lstSrcFiles;
 	ttList m_lstLibFiles;		// list of any files used to build additional library
 	ttList m_lstIdlFiles;		// list of any idl files to compile with midl compiler
 
-	ttDblList m_lstDepLibs;	// key is library, val is src (if any)
+	ttDblList m_lstDepLibs; 	// key is library, val is src (if any)
 
-	ttList m_lstErrors;		// list of any errors that occurred during processing
+	ttList m_lstErrors; 		// list of any errors that occurred during processing
 
 	ttStrIntList m_lstAddSrcFiles;		// additional .srcfiles to read into Files: section
 	ttStrIntList m_lstLibAddSrcFiles;	// additional .srcfiles to read into Lib: section
