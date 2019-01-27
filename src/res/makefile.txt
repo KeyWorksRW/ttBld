@@ -58,14 +58,20 @@ endif
 
 ########## release section ##########
 
-release: %project%
+release: build/$(cmplr)Build$(bits).ninja %project%
+
+build/$(cmplr)Build$(bits).ninja: .srcfiles
+	MakeNinja -force
 
 %project%:
 	ninja -f build/$(cmplr)Build$(bits).ninja
 
 ########## debug section ##########
 
-debug: %project%D
+debug: build/$(cmplr)Build$(bits)D.ninja %project%D
+
+build/$(cmplr)Build$(bits)D.ninja: .srcfiles
+	MakeNinja -force
 
 %project%D:
 	ninja -f build/$(cmplr)Build$(bits)D.ninja
