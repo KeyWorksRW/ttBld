@@ -23,15 +23,7 @@ int MakeNinja(int argc, char* argv[])
 	if (argc > 1) {
 		for (int argpos = 1; argpos < argc; argpos++) {
 			if (argv[argpos][0] == '-' || argv[argpos][0] == '/') {
-				if (tolower(argv[argpos][1]) == '?') {
-					puts(txtVersion);
-					puts(txtCopyRight);
-					puts("\nUsage: MakeNinja [-np]");
-					puts("\tprocesses .srcfiles in the current directory, creates ninja scripts in build/ subdirectory");
-					puts("\t-np ignore any .private/.srcfiles (default is this file overrides anything specified in the master .srcfiles)");
-					return 1;
-				}
-				else if (tt::samesubstri(argv[argpos] + 1, "np")) {
+				if (tt::samesubstri(argv[argpos] + 1, "noprivate")) {
 					bReadPrivate = false;
 				}
 
@@ -41,6 +33,9 @@ int MakeNinja(int argc, char* argv[])
 
 				else if (tt::samesubstri(argv[argpos] + 1, "dryrun")) {
 					cNinja.EnableDryRun();
+				}
+				else if (tt::samesubstri(argv[argpos] + 1, "force")) {
+					cNinja.ForceOutput();
 				}
 				else {
 					printf("%s is an unknown option.\n", argv[argpos]);
