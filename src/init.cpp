@@ -15,8 +15,11 @@ void Usage()
 	puts(txtVersion);
 	puts(txtCopyRight);
 
-	puts("\nMakeNinja\n\tparses .srcfiles and produces ninja build scripts\n");
-	puts("MakeNinja file(s)\n\tAdds file(s) to .srcfiles");
+	puts("\nMakeNinja [options] -- parses .srcfiles and produces ninja build scripts\n");
+	// puts("\t-add [file(s)] -- Adds file(s) to .srcfiles");
+	puts("\t-dryrun -- displays what would have happened, but doesn't change anything");
+	puts("\t-force -- writes new ninja build scripts even if nothing changed");
+	puts("\t-noprivate -- do not look for .private/.srcfiles");
 }
 
 int main(int argc, char* argv[])
