@@ -13,7 +13,7 @@
 class CNinja : public CBldMaster
 {
 public:
-	CNinja() : CBldMaster(true) {}
+	CNinja() : CBldMaster(true) { m_bForceOutput = false; }
 
 	typedef enum {
 		GEN_NONE,
@@ -25,6 +25,7 @@ public:
 
 	bool CreateBuildFile(GEN_TYPE gentype, size_t Compiler = CSrcFiles::COMPILER_MSVC);
 	bool CreateHelpFile();
+	void ForceOutput(bool bForceOutput = true) { m_bForceOutput = bForceOutput; }
 
 protected:
 	// Class functions
@@ -54,4 +55,6 @@ protected:
 	ttString m_cszCPP_PCH;		// the .cpp name that will be used to create the .pch file
 	ttString m_cszPCHObj;		// the .obj file that is built to create the .pch file
 	ttString m_cszChmFile;		// set if a .hhp file was specified in .srcfiles
+
+	bool	m_bForceOutput;
 };

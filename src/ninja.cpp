@@ -236,7 +236,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 
 	ttFile fileOrg;
 	if (fileOrg.ReadFile(cszTmp)) {
-		if (strcmp(fileOrg, file) == 0)
+		if (!m_bForceOutput && strcmp(fileOrg, file) == 0)
 			return false;
 		else if (dryrun.isEnabled()) {
 			dryrun.NewFile(cszTmp);
