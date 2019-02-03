@@ -38,7 +38,7 @@ protected:
 	// Msg functions
 
 	void OnBegin(void);
-	void OnEnd(void);
+	void OnOK(void);
 
 	// Class members
 

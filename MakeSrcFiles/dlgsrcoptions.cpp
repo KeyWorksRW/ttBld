@@ -180,7 +180,7 @@ void CDlgSrcOptions::OnBegin(void)
 	}
 }
 
-void CDlgSrcOptions::OnEnd(void)
+void CDlgSrcOptions::OnOK(void)
 {
 	m_cszProjectName.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
 	m_cszCFlags.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
