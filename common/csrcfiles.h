@@ -125,6 +125,7 @@ public:
 	ttString m_cszHHPName;			// HTML Help project file
 	ttString m_cszSrcPattern;		// Specifies one or more wildcards to add to Files: section
 
+	ttHeap m_ttHeap;			// all the ttList files will be attatched to this heap
 	ttList m_lstSrcFiles;
 	ttList m_lstLibFiles;		// list of any files used to build additional library
 	ttList m_lstIdlFiles;		// list of any idl files to compile with midl compiler

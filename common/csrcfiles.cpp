@@ -25,7 +25,10 @@ typedef enum {
 	SECTION_LIB,
 } SRC_SECTION;
 
-CSrcFiles::CSrcFiles()
+CSrcFiles::CSrcFiles() : m_ttHeap(true),
+	// make all ttList classes use the same sub-heap
+	m_lstSrcFiles(m_ttHeap), m_lstLibFiles(m_ttHeap), m_lstIdlFiles(m_ttHeap), m_lstDepLibs(m_ttHeap),
+	m_lstErrors(m_ttHeap), m_lstLibAddSrcFiles(m_ttHeap), m_lstSrcIncluded(m_ttHeap)
 {
 	m_bRead = false;
 	m_bReadingPrivate = false;
