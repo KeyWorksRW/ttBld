@@ -13,6 +13,7 @@
 #include "../ttLib/include/findfile.h"	// ttFindFile
 
 #include "dlgsrcoptions.h"
+#include "ttlibicons.h" 				// Icons for use on 3D shaded buttons (ttShadeBtn)
 
 void SetSrcFileOptions(bool bDryRun)
 {
@@ -56,6 +57,7 @@ void CreateNewSrcFiles()
 
 CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttDlg(IDDLG_SRCFILES), CWriteSrcFiles()
 {
+	EnableShadeBtns();
 	ReadFile();	// read in any existing .srcfiles
 
 	if (pszSrcDir && *pszSrcDir)
@@ -95,6 +97,9 @@ void CDlgSrcOptions::SaveChanges()
 
 void CDlgSrcOptions::OnBegin(void)
 {
+	m_ShadedBtns.SetIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
+	m_ShadedBtns.SetIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
+
 	ttString cszTitle(txtSrcFilesFileName);
 	cszTitle += " Options";
 	SetWindowText(*this, cszTitle);
