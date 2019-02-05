@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "../ttLib/include/ttmsgmap.h"
 #include "../ttLib/include/ttdlg.h" 	// ttDlg, ttComboBox, ttListBox, ttListView
 
 #include "../common/writesrcfiles.h"	// CWriteSrcFiles
@@ -22,7 +23,7 @@ public:
 	CDlgSrcOptions(const char* pszSrcDir = nullptr);
 
 	BEGIN_TTMSG_MAP()
-		MSG_BUTTON_CLICK(IDBTN_PCH, OnBtnChangePch)
+		TTMSG_BUTTON_CLICK(IDBTN_PCH, OnBtnChangePch)
 	END_TTMSG_MAP()
 
 	void SaveChanges();
