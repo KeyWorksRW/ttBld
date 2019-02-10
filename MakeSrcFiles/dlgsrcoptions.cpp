@@ -28,8 +28,8 @@ void SetSrcFileOptions(bool bDryRun)
 void CreateNewSrcFiles()
 {
 	if (tt::FileExists(".srcfiles")) {
-		puts(".srcfiles already exists! Delete it before using -new option, or use the -overwrite option.");
-		return;
+		if (tt::MsgBox(".srcfiles already exists. Are you certain you want to replace it with a new one?", MB_YESNO) != IDYES)
+			return;
 	}
 
 	CDlgSrcOptions dlg;
