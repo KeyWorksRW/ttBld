@@ -272,8 +272,15 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	}
 
 	if (tt::samesubstri(pszLine, "BuildLibs:")) {
-		if (pszVal)
+		if (pszVal) {
 			m_cszBuildLibs = tt::nextnonspace(pszVal);
+			// Remove any .lib extension--we are looking for the target name, not the library name
+			char* pszLibExt = tt::findstri(m_cszBuildLibs, ".lib");
+			while (pszLibExt) {
+				tt::strcpy(pszLibExt, pszLibExt + 4);
+				pszLibExt = tt::findstri(pszLibExt, ".lib");
+			}
+		}
 		return;
 	}
 
