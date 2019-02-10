@@ -8,8 +8,10 @@
 
 #include "pch.h"
 
-#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
 #include <iostream>
+
+#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
+#include "../ttLib/include/findfile.h"	// ttFindFile
 
 #include "version.txt"	// Version (txtVersion) and Copyright (txtCopyRight) information
 
@@ -69,6 +71,26 @@ int main(int argc, char* argv[])
 			return 0;
 		}
 	}
-	SetSrcFileOptions(bDryRun);
-	return 1;
+	if (tt::FileExists(".srcfiles")) {
+		SetSrcFileOptions(bDryRun);
+		return 1;
+	}
+	// if we get here, there's no .srcfiles and the user didn't tell us what to do. Start by looking for a build script
+	// to convert. If that doesn't exist than create a new .srcfiles file.
+
+	else {
+		ttFindFile ff("*.vcxproj");
+		if (ff.isValid())
+			return ConvertBuildScript(ff);
+		else if (ff.NewPattern("*.vcproj"))
+			return ConvertBuildScript(ff);
+		else if (ff.NewPattern("*.project"))
+			return ConvertBuildScript(ff);
+		else if (ff.NewPattern("*.cbp"))
+			return ConvertBuildScript(ff);
+		else {
+			CreateNewSrcFiles();
+			return 1;
+		}
+	}
 }
