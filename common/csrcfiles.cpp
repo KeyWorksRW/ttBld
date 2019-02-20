@@ -466,12 +466,24 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 						tt::samestri(psz, ".c") ||
 						tt::samestri(psz, ".cpp") ||
 						tt::samestri(psz, ".cc") ||
-						tt::samestri(psz, ".cxx") ||
-						tt::samestri(psz, ".hhp") ||
-						tt::samestri(psz, ".idl") ||
-						tt::samestri(psz, ".rc")
+						tt::samestri(psz, ".cxx")
 					) {
-						m_lstSrcFiles.Add(ff);
+						m_lstSrcFiles += ff;
+
+				}
+				else if (tt::samestri(psz, ".rc")) {
+					m_lstSrcFiles += ff;
+					if (m_cszRcName.isempty())
+						m_cszRcName = ff;
+				}
+				else if (tt::samestri(psz, ".hhp")) {
+					m_lstSrcFiles += ff;
+					if (m_cszHHPName.isempty())
+						m_cszHHPName = ff;
+				}
+				else if (tt::samestri(psz, ".idl")) {
+					m_lstSrcFiles += ff;
+					m_lstIdlFiles += ff;
 				}
 			}
 			if (!ff.NextFile())
