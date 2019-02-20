@@ -42,7 +42,40 @@ void CreateNewSrcFiles()
 		kfOut.WriteEol("Files:");
 
 		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.c;*.rc;*.idl;*.hhp;");
+		ttString cszPCHSrc;
+		bool bSpecialFiles = false;
+		if (dlg.m_cszPCHheader.isnonempty()) {
+			cszPCHSrc = dlg.m_cszPCHheader;
+			cszPCHSrc.ChangeExtension(".cpp");
+			if (!tt::FileExists(cszPCHSrc)) {
+				cszPCHSrc.ChangeExtension(".c");
+				if (!tt::FileExists(cszPCHSrc))
+					cszPCHSrc.Delete();
+			}
+			if (cszPCHSrc.isnonempty())	{
+				kfOut.printf("  %s\n", (char*) cszPCHSrc);
+				bSpecialFiles = true;
+			}
+		}
+		if (dlg.m_cszHHPName.isnonempty()) {
+			kfOut.printf("  %s\n", (char*) dlg.m_cszHHPName);
+			bSpecialFiles = true;
+		}
+		if (dlg.m_cszRcName.isnonempty()) {
+			kfOut.printf("  %s\n", (char*) dlg.m_cszRcName);
+			bSpecialFiles = true;
+		}
+		if (bSpecialFiles)
+			kfOut.WriteEol();	// add a blank line
+
 		for (size_t pos = 0; pos < dlg.m_lstSrcFiles.GetCount(); ++pos) {
+			if (cszPCHSrc.isnonempty() && cszPCHSrc.samestri(dlg.m_lstSrcFiles[pos]))
+				continue;	// we already added it
+			else if (dlg.m_cszRcName.isnonempty() && dlg.m_cszRcName.samestri(dlg.m_lstSrcFiles[pos]))
+				continue;	// we already added it
+			else if (dlg.m_cszHHPName.isnonempty() && dlg.m_cszHHPName.samestri(dlg.m_lstSrcFiles[pos]))
+				continue;	// we already added it
+
 			kfOut.printf("  %s\n", dlg.m_lstSrcFiles[pos]);
 		}
 		if (!kfOut.WriteFile(".srcfiles")) {
@@ -72,14 +105,15 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttDlg(IDDLG_SRCFILES), C
 			m_cszPCHheader = "stdafx.h";
 		else if (tt::FileExists("pch.h"))
 			m_cszPCHheader = "pch.h";
+		else if (tt::FileExists("precomp.h"))
+			m_cszPCHheader = "precomp.h";
+
 		else if (tt::FileExists("pch.hh"))
 			m_cszPCHheader = "pch.hh";
 		else if (tt::FileExists("pch.hpp"))
 			m_cszPCHheader = "pch.hpp";
 		else if (tt::FileExists("pch.hxx"))
 			m_cszPCHheader = "pch.hxx";
-		else if (tt::FileExists("pch.h"))
-			m_cszPCHheader = "pch.h";
 	}
 }
 
