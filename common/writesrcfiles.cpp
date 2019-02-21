@@ -44,6 +44,77 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 	ttFile kfOut;
 	kfOut.SetUnixLF();
 
+	// Do a bit of reorganizing, trying to group the options likely to have comments together, and the options that are long together
+
+	size_t posProject = 0;
+	size_t posPch = 0;
+	size_t posFilesSecion = 0;
+	size_t posTargetDirs = 0;
+	size_t posBuildLibs = 0;
+
+	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos) {
+		if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "Project:"))
+			posProject = pos;
+		else if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "PCH:"))
+			posPch = pos;
+		else if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "TargetDirs:"))
+			posTargetDirs = pos;
+		else if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "BuildLibs:"))
+			posBuildLibs = pos;
+		else if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "Files:"))
+			posFilesSecion = pos;
+	}
+
+	if (posProject != 0 && posFilesSecion > posProject)	{
+		for (;;) {
+			for (size_t pos = posProject; pos < posFilesSecion; ++pos) {
+				if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "Project:"))
+					posProject = pos;
+				else if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "PCH:"))
+					posPch = pos;
+				else if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "TargetDirs:"))
+					posTargetDirs = pos;
+				else if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "BuildLibs:"))
+					posBuildLibs = pos;
+				else if (tt::samesubstri(tt::nextnonspace(m_lstOriginal[pos]), "Files:"))
+					posFilesSecion = pos;
+			}
+
+			// Position PCH option right after Project option
+
+			if (posPch != 0 && posPch != posProject + 1) {
+				size_t posTmp = posProject + 1;
+				ttStr csz(m_lstOriginal[posTmp]);
+				m_lstOriginal.Replace(posTmp, m_lstOriginal[posPch]);
+				m_lstOriginal.Replace(posPch, csz);
+				continue;	// reparse to get the new positions
+			}
+
+			if (posBuildLibs != 0 && posBuildLibs != posFilesSecion - 2) {
+				size_t posTmp = posFilesSecion - 2;
+				ttStr csz(m_lstOriginal[posTmp]);
+				m_lstOriginal.Replace(posTmp, m_lstOriginal[posBuildLibs]);
+				m_lstOriginal.Replace(posBuildLibs, csz);
+				continue;	// reparse to get the new positions
+			}
+
+			if (posTargetDirs != 0) {
+				size_t posTmp = posFilesSecion - 2;
+				if (posBuildLibs != 0)
+					--posTmp;
+				if (posTargetDirs != posTmp) {
+					ttStr csz(m_lstOriginal[posTmp]);
+					m_lstOriginal.Replace(posTmp, m_lstOriginal[posTargetDirs]);
+					m_lstOriginal.Replace(posTargetDirs, csz);
+					continue;	// reparse to get the new positions
+				}
+			}
+
+			// If we made it here, we're done
+			break;
+		}
+	}
+
 	// Write all the lines, but prevent more then one blank line at a time
 
 	size_t cBlankLines = 0;
