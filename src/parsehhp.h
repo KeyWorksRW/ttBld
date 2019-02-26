@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "../ttLib/include/ttlist.h"	// ttList
-#include "../ttLib/include/ttstr.h"		// ttString
+#include <ttlist.h> 	// ttCList, ttCDblList, ttCStrIntList
+#include <ttstr.h>		// ttCStr
 
 class CParseHHP
 {
@@ -28,17 +28,17 @@ public:
 
 	void ParseHhpFile(const char* pszHHP = nullptr);
 
-	ttList	m_lstDependencies;
-	ttString		m_cszChmFile;
+	ttCList		m_lstDependencies;
+	ttCStr		m_cszChmFile;
 
 protected:
 	void AddDependency(const char* pszHHP, const char* pszFile);
 
 	// Class members
 
-	ttString	m_cszCWD;
-	ttString	m_cszRoot;		// root directory to base all filenames and includes to
-	ttString	m_cszHHPName;	// root level HHP filename
+	ttCStr	m_cszCWD;
+	ttCStr	m_cszRoot;		// root directory to base all filenames and includes to
+	ttCStr	m_cszHHPName;	// root level HHP filename
 
 	size_t		m_section;
 };

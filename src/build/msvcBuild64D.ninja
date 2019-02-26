@@ -12,7 +12,7 @@ msvc_deps_prefix = Note: including file:
 # -MDd	// Multithreaded debug dll (MSVCRTD)
 # -Z7	// produces object files with full symbolic debugging information
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MDd -Od -Z7 -GS- -I"../src" /Fp$outdir/MakeNinja.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MDd -Od -Z7 -GS- -I"../../ttLib/include" -I"../src" /Fp$outdir/MakeNinja.pch
 
 rule compilePCH
   deps = msvc
@@ -62,7 +62,7 @@ build $resout/makeninja.res: rc makeninja.rc | $
   res/vcxproj.xml $
   res/vcxproj.filters.xml
 
-build ../bin64/MakeNinjaD.exe : link $resout/makeninja.res ../ttLib/lib/ttLib64D.lib $
+build ../bin64/MakeNinjaD.exe : link $resout/makeninja.res ../../ttLib/lib/ttLib64D.lib $
   $outdir/pch.obj $
   $outdir/bldmaster.obj $
   $outdir/codelite.obj $

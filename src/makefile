@@ -15,6 +15,10 @@
 # If you are using the MSVC compiler, then you should also set a PATH64 environment variable ahead of time to point to
 # the 64-bit compiler/linker.
 
+# Remove the '#' character in the following line to always build 64-bit targets
+
+#b64=1
+
 # \
 !ifndef 0 # \
 # Following section is for nmake \
@@ -54,20 +58,26 @@ endif
 
 ########## release section ##########
 
-release: ttLib MakeNinja
+release: ttLib build/$(cmplr)Build$(bits).ninja MakeNinja
 
 ttLib:
-	cd ../ttLib/src & ninja -f build/$(cmplr)Build$(bits).ninja
+	cd ../../ttLib/src & ninja -f build/$(cmplr)Build$(bits).ninja
+
+build/$(cmplr)Build$(bits).ninja: .srcfiles
+	MakeNinja -force
 
 MakeNinja:
 	ninja -f build/$(cmplr)Build$(bits).ninja
 
 ########## debug section ##########
 
-debug: ttLibD MakeNinjaD
+debug: ttLibD build/$(cmplr)Build$(bits)D.ninja MakeNinjaD
 
 ttLibD:
-	cd ../ttLib//src & ninja -f build/$(cmplr)Build$(bits)D.ninja
+	cd ../../ttLib/src & ninja -f build/$(cmplr)Build$(bits)D.ninja
+
+build/$(cmplr)Build$(bits)D.ninja: .srcfiles
+	MakeNinja -force
 
 MakeNinjaD:
 	ninja -f build/$(cmplr)Build$(bits)D.ninja

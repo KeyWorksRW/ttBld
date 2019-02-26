@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-#include "../ttLib/include/ttfile.h"	// ttFile
+#include <ttfile.h> 					// ttCFile
 
 #include "../common/csrcfiles.h"		// CSrcFiles
 
@@ -53,7 +53,7 @@ size_t CreateCodeLiteProject()
 		return CLP_NO_PROJECT;
 	}
 
-	ttString cszProjFile(cSrcFiles.GetProjectName());
+	ttCStr cszProjFile(cSrcFiles.GetProjectName());
 	cszProjFile.ChangeExtension(".project");
 	if (tt::FileExists(cszProjFile)) {
 		// TODO: [randalphwa - 10/8/2018] We could call a function here to update the .project file, adding any src files that
@@ -61,7 +61,7 @@ size_t CreateCodeLiteProject()
 		return CLP_EXISTS;
 	}
 
-	ttFile kf;
+	ttCFile kf;
 	if (!kf.ReadResource(IDR_PRE_PROJECT)) {
 		puts("MakeNinja.exe is corrupted -- cannot read the necessary resource");
 		return CLP_MISSING_RES;
@@ -70,7 +70,7 @@ size_t CreateCodeLiteProject()
 	while (kf.ReplaceStr("%projname%", cSrcFiles.GetProjectName()));
 
 	kf.WriteEol("\t\t<File Name=\042.srcfiles\042/>");
-	if (cSrcFiles.m_cszPCHheader.isnonempty())
+	if (cSrcFiles.m_cszPCHheader.isNonEmpty())
 		kf.printf("\t\t<File Name=\042%s\042/>\n", (char*) cSrcFiles.m_cszPCHheader);
 
 	cSrcFiles.m_lstSrcFiles.Sort();
@@ -82,25 +82,25 @@ size_t CreateCodeLiteProject()
 
 	kf.WriteEol("\t</VirtualDirectory>");
 
-	ttFile kfPost;
+	ttCFile kfPost;
 	if (!kfPost.ReadResource(IDR_POST_PROJECT)) {
 		puts("MakeNinja.exe is corrupted -- cannot read the necessary resource");
 		return CLP_MISSING_RES;
 	}
 
-	ttString cszCWD;
+	ttCStr cszCWD;
 	cszCWD.getCWD();
 
 	while (kfPost.ReplaceStr("%cwd%", cszCWD));
-	ttString cszExe(cszCWD);
+	ttCStr cszExe(cszCWD);
 	cszExe.AppendFileName("../bin/");
 	cszExe += (char*) cSrcFiles.m_cszProjectName;
 	cszExe += "D.exe";
-	cszExe.GetFullPathName();
+	cszExe.getFullPathName();
 	tt::BackslashToForwardslash(cszExe);
 	while (kfPost.ReplaceStr("%exepath%", cszExe));
 
-	while (kfPost.readline())
+	while (kfPost.ReadLine())
 		kf.WriteEol(kfPost);
 
 	if (!kf.WriteFile(cszProjFile)) {

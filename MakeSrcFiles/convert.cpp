@@ -8,9 +8,9 @@
 
 #include "pch.h"
 
-#include "../ttLib/include/ttxml.h" 	// ttXMLBranch, ttXML
-#include "../ttLib/include/findfile.h"	// ttFindFile
-#include "../ttLib/include/enumstr.h"	// ttEnumStr
+#include <ttxml.h>			// ttCXMLBranch, ttCParseXML
+#include <ttfindfile.h> 	// ttCFindFile
+#include <ttenumstr.h>		// ttCEnumStr
 
 #include "../common/writesrcfiles.h"	// CWriteSrcFiles
 
@@ -20,7 +20,7 @@ bool ConvertVcProj(const char* pszBldFile);
 bool ConvertVcxProj(const char* pszBldFile);
 bool ConvertVcxProj(const char* pszBldFile);
 
-static void AddCodeLiteFiles(ttXMLBranch* pParent, CWriteSrcFiles& cSrcFiles);
+static void AddCodeLiteFiles(ttCXMLBranch* pParent, CWriteSrcFiles& cSrcFiles);
 static bool isValidSrcFile(const char* pszFile);
 
 bool ConvertBuildScript(const char* pszBldFile)
@@ -33,7 +33,7 @@ bool ConvertBuildScript(const char* pszBldFile)
 #endif
 
 	if (!pszBldFile || !*pszBldFile) {
-		ttFindFile ff("*.vcxproj");
+		ttCFindFile ff("*.vcxproj");
 		if (ff.isValid())
 			return ConvertVcxProj(ff);
 		else if (ff.NewPattern("*.vcproj"))
@@ -47,9 +47,9 @@ bool ConvertBuildScript(const char* pszBldFile)
 		return false;
 	}
 
-	const char* pszExt = tt::findlastchr(pszBldFile, '.');
+	const char* pszExt = tt::findLastChar(pszBldFile, '.');
 	if (!pszExt) {
-		ttString cszBuild(pszBldFile);
+		ttCStr cszBuild(pszBldFile);
 		cszBuild.ChangeExtension(".vcxproj");
 		if (tt::FileExists(cszBuild))
 			return ConvertVcxProj(cszBuild);
@@ -67,13 +67,13 @@ bool ConvertBuildScript(const char* pszBldFile)
 		return false;
 	}
 
-	if (tt::samestri(pszExt, ".project"))
+	if (tt::isSameStri(pszExt, ".project"))
 		return ConvertCodeLite(pszBldFile);
-	else if (tt::samestri(pszExt, ".cbp"))
+	else if (tt::isSameStri(pszExt, ".cbp"))
 		return ConvertCodeBlocks(pszBldFile);
-	else if (tt::samestri(pszExt, ".vcproj"))
+	else if (tt::isSameStri(pszExt, ".vcproj"))
 		return ConvertVcProj(pszBldFile);
-	else if (tt::samestri(pszExt, ".vcxproj"))
+	else if (tt::isSameStri(pszExt, ".vcxproj"))
 		return ConvertVcxProj(pszBldFile);
 	else {
 		printf("%s is an unrecognized project type!", pszBldFile);
@@ -89,13 +89,13 @@ bool ConvertCodeLite(const char* pszBldFile)
 	}
 
 	CWriteSrcFiles cSrcFiles;
-	ttXML xml;
+	ttCParseXML xml;
 
 	HRESULT hr = xml.ParseXmlFile(pszBldFile);
 	if (hr == S_OK)	{
-		ttXMLBranch* pProject = xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
+		ttCXMLBranch* pProject = xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
 		if (!pProject)	{
-			ttStr cszMsg;
+			ttCStr cszMsg;
 			puts(cszMsg.printf("Cannot locate <CodeLite_Project> in %s", pszBldFile));
 			return false;
 		}
@@ -104,14 +104,14 @@ bool ConvertCodeLite(const char* pszBldFile)
 			cSrcFiles.m_cszProjectName = pszProject;
 
 		for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
-			ttXMLBranch* pItem = pProject->GetChildAt(item);
-			if (tt::samestri(pItem->GetName(), "VirtualDirectory"))
+			ttCXMLBranch* pItem = pProject->GetChildAt(item);
+			if (tt::isSameStri(pItem->GetName(), "VirtualDirectory"))
 				AddCodeLiteFiles(pItem, cSrcFiles);
-			else if (tt::samestri(pItem->GetName(), "Settings")) {
+			else if (tt::isSameStri(pItem->GetName(), "Settings")) {
 				const char* pszType = pItem->GetAttribute("Type");
-				if (tt::samestri(pszType, "Dynamic Library"))
+				if (tt::isSameStri(pszType, "Dynamic Library"))
 					cSrcFiles.m_exeType = CSrcFiles::EXE_DLL;
-				else if (tt::samestri(pszType, "Static Library"))
+				else if (tt::isSameStri(pszType, "Static Library"))
 					cSrcFiles.m_exeType = CSrcFiles::EXE_LIB;
 			}
 		}
@@ -131,23 +131,23 @@ bool ConvertCodeBlocks(const char* pszBldFile)
 	}
 
 	CWriteSrcFiles cSrcFiles;
-	ttXML xml;
+	ttCParseXML xml;
 
 	HRESULT hr = xml.ParseXmlFile(pszBldFile);
 	if (hr == S_OK)	{
-		ttXMLBranch* pProject = xml.GetRootBranch()->FindFirstElement("Project");
+		ttCXMLBranch* pProject = xml.GetRootBranch()->FindFirstElement("Project");
 		if (!pProject)	{
-			ttStr cszMsg;
+			ttCStr cszMsg;
 			puts(cszMsg.printf("Cannot locate <Project> in %s", pszBldFile));
 			return false;
 		}
 		for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
-			ttXMLBranch* pItem = pProject->GetChildAt(item);
-			if (tt::samestri(pItem->GetName(), "Option")) {
+			ttCXMLBranch* pItem = pProject->GetChildAt(item);
+			if (tt::isSameStri(pItem->GetName(), "Option")) {
 				if (pItem->GetAttribute("title"))
 					cSrcFiles.m_cszProjectName = pItem->GetAttribute("title");
 			}
-			else if (tt::samestri(pItem->GetName(), "Unit")) {
+			else if (tt::isSameStri(pItem->GetName(), "Unit")) {
 				if (isValidSrcFile(pItem->GetAttribute("filename")))
 					cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("filename");
 			}
@@ -171,27 +171,27 @@ bool ConvertVcxProj(const char* pszBldFile)
 		return false;
 	}
 
-	ttString cszFilters(pszBldFile);
-	if (!tt::samestri(cszFilters.FindExt(), ".filters"))
+	ttCStr cszFilters(pszBldFile);
+	if (!tt::isSameStri(cszFilters.findExt(), ".filters"))
 		cszFilters += ".filters";
 
 	CWriteSrcFiles cSrcFiles;
-	ttXML xml;
+	ttCParseXML xml;
 
 	HRESULT hr = xml.ParseXmlFile(cszFilters);
 	if (hr == S_OK)	{
-		ttXMLBranch* pProject = xml.GetRootBranch()->FindFirstElement("Project");
+		ttCXMLBranch* pProject = xml.GetRootBranch()->FindFirstElement("Project");
 		if (!pProject)	{
-			ttStr cszMsg;
+			ttCStr cszMsg;
 			puts(cszMsg.printf("Cannot locate <Project> in %s", (char*) cszFilters));
 			return false;
 		}
 		for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
-			ttXMLBranch* pItem = pProject->GetChildAt(item);
-			if (tt::samestri(pItem->GetName(), "ItemGroup")) {
+			ttCXMLBranch* pItem = pProject->GetChildAt(item);
+			if (tt::isSameStri(pItem->GetName(), "ItemGroup")) {
 				for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++) {
-					ttXMLBranch* pCmd = pItem->GetChildAt(cmd);
-					if (tt::samestri(pCmd->GetName(), "ClCompile") || tt::samestri(pCmd->GetName(), "ResourceCompile")) {
+					ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
+					if (tt::isSameStri(pCmd->GetName(), "ClCompile") || tt::isSameStri(pCmd->GetName(), "ResourceCompile")) {
 						const char* pszFile = pCmd->GetAttribute("Include");
 						if (pszFile && *pszFile)
 							cSrcFiles.m_lstSrcFiles += pszFile;
@@ -215,13 +215,13 @@ bool ConvertVcProj(const char* pszBldFile)
 	}
 
 	CWriteSrcFiles cSrcFiles;
-	ttXML xml;
+	ttCParseXML xml;
 
 	HRESULT hr = xml.ParseXmlFile(pszBldFile);
 	if (hr == S_OK)	{
-		ttXMLBranch* pProject = xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
+		ttCXMLBranch* pProject = xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
 		if (!pProject)	{
-			ttStr cszMsg;
+			ttCStr cszMsg;
 			puts(cszMsg.printf("Cannot locate <VisualStudioProject> in %s", pszBldFile));
 			return false;
 		}
@@ -229,21 +229,21 @@ bool ConvertVcProj(const char* pszBldFile)
 		if (pProject->GetAttribute("Name"))
 			cSrcFiles.m_cszProjectName = pProject->GetAttribute("Name");
 
-		ttXMLBranch* pFiles = pProject->FindFirstElement("Files");
+		ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
 		if (!pFiles)	{
-			ttStr cszMsg;
+			ttCStr cszMsg;
 			puts(cszMsg.printf("Cannot locate <pFiles> in %s", pszBldFile));
 			return false;
 		}
-		ttXMLBranch* pFilter = pFiles->FindFirstElement("Filter");
+		ttCXMLBranch* pFilter = pFiles->FindFirstElement("Filter");
 		if (!pFilter) {
-			ttStr cszMsg;
+			ttCStr cszMsg;
 			puts(cszMsg.printf("Cannot locate <Filter> in %s", pszBldFile));
 			return false;
 		}
 		for (size_t item = 0; item < pFilter->GetChildrenCount(); item++) {
-			ttXMLBranch* pItem = pFilter->GetChildAt(item);
-			if (tt::samestri(pItem->GetName(), "File")) {
+			ttCXMLBranch* pItem = pFilter->GetChildAt(item);
+			if (tt::isSameStri(pItem->GetName(), "File")) {
 				if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
 					cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("RelativePath");
 			}
@@ -251,44 +251,44 @@ bool ConvertVcProj(const char* pszBldFile)
 		pFilter = pFiles->FindFirstAttribute("Name", "Resource Files");
 		if (pFilter) {
 			for (size_t item = 0; item < pFilter->GetChildrenCount(); item++) {
-				ttXMLBranch* pItem = pFilter->GetChildAt(item);
-				if (tt::samestri(pItem->GetName(), "File")) {
+				ttCXMLBranch* pItem = pFilter->GetChildAt(item);
+				if (tt::isSameStri(pItem->GetName(), "File")) {
 					if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
 						cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("RelativePath");
 				}
 			}
 		}
 
-		ttXMLBranch* pConfigurations = pProject->FindFirstElement("Configurations");
-		ttXMLBranch* pConfiguration = pConfigurations ? pConfigurations->FindFirstElement("Configuration") : nullptr;
+		ttCXMLBranch* pConfigurations = pProject->FindFirstElement("Configurations");
+		ttCXMLBranch* pConfiguration = pConfigurations ? pConfigurations->FindFirstElement("Configuration") : nullptr;
 		if (pConfiguration) {
 			// REVIEW: [randalphwa - 12/12/2018] Unusual, but possible to have 64-bit projects in an old .vcproj file,
 			// but we should look for it and set the output directory to match 32 and 64 bit builds.
 
-			ttXMLBranch* pOption = pConfiguration->FindFirstAttribute("OutputFile");
+			ttCXMLBranch* pOption = pConfiguration->FindFirstAttribute("OutputFile");
 			if (pOption) {
-				ttString cszOutDir(pOption->GetAttribute("OutputFile"));	// will typically be something like: "../bin/$(ProjectName).exe"
-				char* pszFile = tt::fndFilename(cszOutDir);
+				ttCStr cszOutDir(pOption->GetAttribute("OutputFile"));	// will typically be something like: "../bin/$(ProjectName).exe"
+				char* pszFile = tt::findFilePortion(cszOutDir);
 				if (pszFile)
 					*pszFile = 0;
 				cSrcFiles.m_cszTarget32 = (const char*) cszOutDir;
 			}
 			do {
-				if (tt::findstri(pConfiguration->GetAttribute("Name"), "Release"))
+				if (tt::findStri(pConfiguration->GetAttribute("Name"), "Release"))
 					break;
 				pConfiguration = pConfigurations->FindNextElement("Configuration");
 			} while(pConfiguration);
 
-			ttXMLBranch* pRelease = pConfiguration ? pConfiguration->FindFirstAttribute("Name") : nullptr;
+			ttCXMLBranch* pRelease = pConfiguration ? pConfiguration->FindFirstAttribute("Name") : nullptr;
 
 			if (pRelease) {
 				const char* pszOption = pRelease->GetAttribute("FavorSizeOrSpeed");
-				if (pszOption && tt::samesubstri(pszOption, "1"))
+				if (pszOption && tt::isSameSubStri(pszOption, "1"))
 					cSrcFiles.m_bBuildForSpeed = true;
 
 				pszOption = pRelease->GetAttribute("WarningLevel");
-				if (pszOption && !tt::samesubstri(pszOption, "4"))
-					cSrcFiles.m_WarningLevel = tt::atoi(pszOption);
+				if (pszOption && !tt::isSameSubStri(pszOption, "4"))
+					cSrcFiles.m_WarningLevel = tt::Atoi(pszOption);
 
 				pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
 				if (pszOption)
@@ -296,21 +296,21 @@ bool ConvertVcProj(const char* pszBldFile)
 
 				pszOption = pRelease->GetAttribute("PreprocessorDefinitions");
 				if (pszOption) {
-					ttEnumStr enumFlags(pszOption);
+					ttCEnumStr enumFlags(pszOption);
 					while (enumFlags.Enum()) {
-						if (tt::samestri(enumFlags, "NDEBUG"))
+						if (tt::isSameStri(enumFlags, "NDEBUG"))
 							continue;	// we already add this
-						if (tt::samestri(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
+						if (tt::isSameStri(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
 							cSrcFiles.m_exeType = CSrcFiles::EXE_CONSOLE;
 							continue;	// we already add this
 						}
-						if (tt::samestri(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
+						if (tt::isSameStri(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
 							cSrcFiles.m_exeType = CSrcFiles::EXE_DLL;
 							continue;	// do we need to add this?
 						}
-						if (tt::samesubstri(enumFlags, "$("))	// Visual Studio specific, ignore it
+						if (tt::isSameSubStri(enumFlags, "$("))	// Visual Studio specific, ignore it
 							continue;
-						if (cSrcFiles.m_cszCFlags.isnonempty())
+						if (cSrcFiles.m_cszCFlags.isNonEmpty())
 							cSrcFiles.m_cszCFlags += " ";
 						cSrcFiles.m_cszCFlags += "-D";
 						cSrcFiles.m_cszCFlags += enumFlags;
@@ -328,16 +328,16 @@ bool ConvertVcProj(const char* pszBldFile)
 		return false;
 }
 
-static void AddCodeLiteFiles(ttXMLBranch* pParent, CWriteSrcFiles& cSrcFiles)
+static void AddCodeLiteFiles(ttCXMLBranch* pParent, CWriteSrcFiles& cSrcFiles)
 {
 	for (size_t child = 0; child < pParent->GetChildrenCount(); child++) {
-		ttXMLBranch* pFile = pParent->GetChildAt(child);
-		if (tt::samestri(pFile->GetName(), "File")) {
+		ttCXMLBranch* pFile = pParent->GetChildAt(child);
+		if (tt::isSameStri(pFile->GetName(), "File")) {
 			if (isValidSrcFile(pFile->GetAttribute("Name")))
 				cSrcFiles.m_lstSrcFiles += pFile->GetAttribute("Name");
 		}
 		// CodeLite nests resources in a sub <VirtualDirectory> tag
-		else if (tt::samestri(pFile->GetName(), "VirtualDirectory")) {
+		else if (tt::isSameStri(pFile->GetName(), "VirtualDirectory")) {
 			AddCodeLiteFiles(pFile, cSrcFiles);
 		}
 	}
@@ -348,13 +348,13 @@ static bool isValidSrcFile(const char* pszFile)
 	if (!pszFile)
 		return false;
 
-	char* psz = tt::findlastchr(pszFile, '.');
+	char* psz = tt::findLastChar(pszFile, '.');
 	if (psz) {
-		if (	tt::samestri(psz, ".cpp") ||
-				tt::samestri(psz, ".cc") ||
-				tt::samestri(psz, ".cxx") ||
-				tt::samestri(psz, ".c") ||
-				tt::samestri(psz, ".rc"))
+		if (	tt::isSameStri(psz, ".cpp") ||
+				tt::isSameStri(psz, ".cc") ||
+				tt::isSameStri(psz, ".cxx") ||
+				tt::isSameStri(psz, ".c") ||
+				tt::isSameStri(psz, ".rc"))
 			return true;
 	}
 	return false;

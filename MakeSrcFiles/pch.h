@@ -41,8 +41,8 @@
 	#pragma comment(lib, "gdi32.lib")
 #endif	// _WINDOWS_
 
-#define __TTLIB_INCLUDE_MAJOR__	// tell ttLib.h to include other major ttLib header files
-#include "../ttLib/include/ttlib.h"
+#include <ttlib.h>		// Master header file for ttLib
+#include <ttdebug.h>	// ttASSERT macros
 
 extern const char* txtVersion;
 extern const char* txtCopyRight;

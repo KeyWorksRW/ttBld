@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "../ttLib/include/ttstr.h" 	// ttStr
-#include "../ttLib/include/ttfile.h"	// ttFile
+#include <ttstr.h>		// ttCStr
+#include <ttfile.h> 	// ttCFile
 
 class CDryRun
 {
@@ -22,11 +22,11 @@ public:
 	bool isEnabled() { return m_bEnabled; }
 
 	void NewFile(const char* pszFile);	// will delete m_lstOut and replace m_cszFilename
-	void DisplayFileDiff(ttFile& fileOrg, ttFile& fileNew);
+	void DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew);
 
 protected:
 	// Class members
 
-	ttStr	m_cszFilename;
+	ttCStr	m_cszFilename;
 	bool	m_bEnabled;
 };

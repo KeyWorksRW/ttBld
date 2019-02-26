@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "../ttLib/include/ttmsgmap.h"
-#include "../ttLib/include/ttdlg.h" 	// ttDlg, ttComboBox, ttListBox, ttListView
+#include <ttmsgmap.h>					// Macros for mapping Windows messages to functions
+#include <ttdlg.h>						// ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 #include "../common/writesrcfiles.h"	// CWriteSrcFiles
 
@@ -17,7 +17,7 @@
 	#include "res.h"
 #endif
 
-class CDlgSrcOptions : public ttDlg, public CWriteSrcFiles
+class CDlgSrcOptions : public ttCDlg, public CWriteSrcFiles
 {
 public:
 	CDlgSrcOptions(const char* pszSrcDir = nullptr);
@@ -43,9 +43,9 @@ protected:
 
 	// Class members
 
-	ttListBox	m_lb;
-	ttString	m_cszSrcDir;
-	ttString	m_cszOptComment;
-	ttList		m_lstOriginal;
+	ttCListBox	m_lb;
+	ttCStr		m_cszSrcDir;
+	ttCStr		m_cszOptComment;
+	ttCList		m_lstOriginal;
 	ptrdiff_t	m_posProject;
 };

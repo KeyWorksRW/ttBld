@@ -44,8 +44,8 @@
 extern const char* txtVersion;
 extern const char* txtCopyRight;
 
-#define __TTLIB_INCLUDE_MAJOR__	// tell ttLib.h to include other major ttLib header files
-#include "../ttLib/include/ttlib.h"
+#include <ttlib.h>		// Master header file for ttLib
+#include <ttdebug.h>	// ttASSERT macros
 
 using namespace ttch;	// For the CH_ constants
 

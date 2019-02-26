@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	if (argc > 1 && (tt::samestri(argv[1], "-?") || tt::samestri(argv[1], "/?"))) {
+	if (argc > 1 && (tt::isSameStri(argv[1], "-?") || tt::isSameStri(argv[1], "/?"))) {
 		Usage();
 		return 1;
 	}

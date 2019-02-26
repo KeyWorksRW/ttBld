@@ -47,14 +47,14 @@ protected:
 
 	// The members below are reset every time CreateBuildFile() is called
 
-	ttFile* m_pkfOut;
+	ttCFile* m_pkfOut;
 	GEN_TYPE m_gentype;
 	size_t	 m_Compiler;
 
-	ttString m_cszPCH;			// the .pch name that will be generated
-	ttString m_cszCPP_PCH;		// the .cpp name that will be used to create the .pch file
-	ttString m_cszPCHObj;		// the .obj file that is built to create the .pch file
-	ttString m_cszChmFile;		// set if a .hhp file was specified in .srcfiles
+	ttCStr m_cszPCH;			// the .pch name that will be generated
+	ttCStr m_cszCPP_PCH;		// the .cpp name that will be used to create the .pch file
+	ttCStr m_cszPCHObj;		// the .obj file that is built to create the .pch file
+	ttCStr m_cszChmFile;		// set if a .hhp file was specified in .srcfiles
 
 	bool	m_bForceOutput;
 };

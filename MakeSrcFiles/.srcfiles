@@ -1,23 +1,25 @@
 Options:
-  Project: MakeSrcFiles
-  PCH:        pch.h     # "none" or name of header file to use for precompilation
-  exe_type:   console   # [window | console | lib | dll]
-  64Bit:      true      # create 64-bit project
-  bit_suffix: true      # add "64" to the end of the project name (e.g., ../bin64/MakeSrcFiles.exe)
-  IncDirs: ../MakeSrcFiles
+	Project: MakeSrcFiles
+	PCH:		pch.h	  # "none" or name of header file to use for precompilation
+	exe_type:	console	  # [window | console | lib | dll]
+	64Bit:		true	  # create 64-bit project
+	bit_suffix: true	  # add "64" to the end of the project name (e.g., ../bin64/MakeSrcFiles.exe)
 
-  TargetDirs:  ../bin; ../bin64
-  BuildLibs: ../ttLib/lib/ttLib
+# Before making pulblic, change ../../ttLib to ../ttLib to use sub module instead of actual repository
+
+	IncDirs: ../MakeSrcFiles;../../ttLib/include	# ../MakeSrcFiles so that files in ../common can locate pch.h
+	TargetDirs:	 ../bin; ../bin64
+	BuildLibs: ../../ttLib/lib/ttLib
 
 Files:
-  pch.cpp
-  makesrcfiles.rc
+	pch.cpp
+	makesrcfiles.rc
 
-  main.cpp
-  addfiles.cpp
-  convert.cpp
-  dlgsrcoptions.cpp
+	main.cpp
+	addfiles.cpp
+	convert.cpp
+	dlgsrcoptions.cpp
 
-  ../common/csrcfiles.cpp
-  ../common/dryrun.cpp
-  ../common/writesrcfiles.cpp
+	../common/csrcfiles.cpp
+	../common/dryrun.cpp
+	../common/writesrcfiles.cpp

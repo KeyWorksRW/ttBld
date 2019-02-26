@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
+#include <ttlist.h> 					// ttCList, ttCDblList, ttCStrIntList
 
 #include "../common/csrcfiles.h"		// CSrcFiles
 #include "../common/dryrun.h"			// CDryRun
@@ -58,9 +58,9 @@ public:
 	const char* getDir32()	{ return m_cszTarget32; }	// 32-bit target directory
 	const char* getDir64()	{ return m_cszTarget64; }	// 64-bit target directory
 
-	ttList* getSrcFileList()  { return &m_lstSrcFiles; }
-	ttList* getLibFileList()  { return &m_lstLibFiles; }
-	ttList* getRcDepList()  	{ return &m_lstRcDependencies; }
+	ttCList* getSrcFileList()  { return &m_lstSrcFiles; }
+	ttCList* getLibFileList()  { return &m_lstLibFiles; }
+	ttCList* getRcDepList()  	{ return &m_lstRcDependencies; }
 
 	bool is64BitBuild()		{ return m_b64bit; }
 	bool is64BitSuffix()	{ return m_bBitSuffix; }
@@ -93,18 +93,18 @@ public:
 
 	void EnableDryRun() { dryrun.Enable(); }
 
-	ttList m_lstRcDependencies;
+	ttCList m_lstRcDependencies;
 
 protected:
 	bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
-	const char* NormalizeHeader(const char* pszBaseFile, ttString& cszHeader);
+	const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);
 
 	// Class members
 
-	ttString cszTargetDebug;
-	ttString cszTargetDebug64;
-	ttString cszTargetRelease;
-	ttString cszTargetRelease64;
+	ttCStr cszTargetDebug;
+	ttCStr cszTargetDebug64;
+	ttCStr cszTargetRelease;
+	ttCStr cszTargetRelease64;
 
 	CDryRun dryrun;
 

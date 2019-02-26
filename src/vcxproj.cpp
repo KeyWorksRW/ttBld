@@ -13,13 +13,13 @@
 #pragma comment(lib, "Rpcrt4.lib")
 #endif
 
-#include "../ttLib/include/ttfile.h"		// ttFile
-#include "../ttLib/include/findfile.h"		// ttFindFile
+#include <ttfile.h> 		// ttCFile
+#include <ttfindfile.h> 	// ttCFindFile
 
 #include "resource.h"
-#include "vcxproj.h"						// CVcxProj
+#include "vcxproj.h"		// CVcxProj
 
-static bool CreateGuid(ttString& cszGuid)
+static bool CreateGuid(ttCStr& cszGuid)
 {
 	UUID uuid;
 	RPC_STATUS ret_val = ::UuidCreate(&uuid);
@@ -31,7 +31,7 @@ static bool CreateGuid(ttString& cszGuid)
 			::RpcStringFreeA(&pszUuid);
 		}
 	}
-	return cszGuid.isnonempty();
+	return cszGuid.isNonEmpty();
 }
 
 bool CVcxProj::CreateBuildFile()
@@ -44,16 +44,16 @@ bool CVcxProj::CreateBuildFile()
 	return false;
 #endif	// _WINDOWS_
 
-	ttString cszGuid;
+	ttCStr cszGuid;
 	if (!CreateGuid(cszGuid)) {
 		AddError("Unable to create a UUID -- cannot create .vcxproj without it.");
 		return false;
 	}
 
-	ttString cszProjVC(getProjName());
+	ttCStr cszProjVC(getProjName());
 	cszProjVC.ChangeExtension(".vcxproj");
 	if (!tt::FileExists(cszProjVC))	{
-		ttFile kf;
+		ttCFile kf;
 		kf.ReadResource(IDR_VCXPROJ_MASTER);
 		while (kf.ReplaceStr("%guid%", cszGuid));
 		while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug()));
@@ -61,19 +61,19 @@ bool CVcxProj::CreateBuildFile()
 		while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug64()));
 		while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease64()));
 
-		ttString cszSrcFile;
+		ttCStr cszSrcFile;
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			if (tt::findstri(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
+			if (tt::findStri(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
 				cszSrcFile.printf(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>", m_lstSrcFiles[pos]);
 				kf.WriteEol(cszSrcFile);
 			}
 		}
-		if (m_cszRcName.isnonempty()) {
+		if (m_cszRcName.isNonEmpty()) {
 			cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>", (char*) m_cszRcName);
 			kf.WriteEol(cszSrcFile);
 		}
 
-		ttFindFile ff("*.h");	// add all header files in current directory
+		ttCFindFile ff("*.h");	// add all header files in current directory
 		if (ff.isValid()) {
 			do {
 				cszSrcFile.printf(" <ItemGroup>\n    <ClInclude Include=%kq />\n  </ItemGroup>", (const char*) ff);
@@ -87,7 +87,7 @@ bool CVcxProj::CreateBuildFile()
 		kf.WriteEol("</Project>");
 
 		if (!kf.WriteFile(cszProjVC)) {
-			ttString cszMsg;
+			ttCStr cszMsg;
 			cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
 			AddError(cszMsg);
 			return false;
@@ -107,7 +107,7 @@ bool CVcxProj::CreateBuildFile()
 		kf.WriteEol("  <ItemGroup>");
 
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			if (tt::findstri(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
+			if (tt::findStri(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
 				cszSrcFile.printf("    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>", m_lstSrcFiles[pos]);
 				kf.WriteEol(cszSrcFile);
 			}
@@ -116,7 +116,7 @@ bool CVcxProj::CreateBuildFile()
 		kf.WriteEol("</Project>");
 		cszProjVC += ".filters";
 		if (!kf.WriteFile(cszProjVC)) {
-			ttString cszMsg;
+			ttCStr cszMsg;
 			cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
 			AddError(cszMsg);
 			return false;

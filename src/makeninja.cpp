@@ -10,7 +10,7 @@
 
 #include "pch.h"
 
-#include "../ttLib/include/ttmem.h" // ttMem
+#include <ttmem.h>		// ttCMem, ttCTMem
 
 #include "ninja.h"		// CNinja
 #include "vcxproj.h"	// CVcxProj
@@ -23,7 +23,7 @@ int MakeNinja(int argc, char* argv[])
 	if (argc > 1) {
 		for (int argpos = 1; argpos < argc; argpos++) {
 			if (argv[argpos][0] == '-' || argv[argpos][0] == '/') {
-				if (tt::samesubstri(argv[argpos] + 1, "noprivate")) {
+				if (tt::isSameSubStri(argv[argpos] + 1, "noprivate")) {
 					bReadPrivate = false;
 				}
 
@@ -31,10 +31,10 @@ int MakeNinja(int argc, char* argv[])
 				// changes to the code then run MakeNinja -dryrun to make certain it is doing what you expect. It's not
 				// under _DEBUG so you can test retail release.
 
-				else if (tt::samesubstri(argv[argpos] + 1, "dryrun")) {
+				else if (tt::isSameSubStri(argv[argpos] + 1, "dryrun")) {
 					cNinja.EnableDryRun();
 				}
-				else if (tt::samesubstri(argv[argpos] + 1, "force")) {
+				else if (tt::isSameSubStri(argv[argpos] + 1, "force")) {
 					cNinja.ForceOutput();
 				}
 				else {
@@ -77,7 +77,7 @@ int MakeNinja(int argc, char* argv[])
 		}
 	}
 
-	if (tt::isnonempty(cNinja.getHHPName()))
+	if (tt::isNonEmpty(cNinja.getHHPName()))
 		cNinja.CreateHelpFile();
 
 	// Display any errors that occurred during processing
@@ -107,21 +107,21 @@ int MakeNinja(int argc, char* argv[])
 
 bool isSystemHeaderFile(const char* pszHeaderFile)
 {
-	ttTMem<char*> pszEnvironment(4096);
+	ttCTMem<char*> pszEnvironment(4096);
 	GetEnvironmentVariable("INCLUDE", pszEnvironment, 4094);	// leave room for appending a ';' character and NULL
-	tt::strcat(pszEnvironment, ";");
-	char* pszSemi = tt::findchr(pszEnvironment, ';');
+	tt::strCat(pszEnvironment, ";");
+	char* pszSemi = tt::findChar(pszEnvironment, ';');
 	char* pszPath = pszEnvironment;
 	while (pszSemi) {
 		*pszSemi = 0;
-		ttString cszFile(pszPath);
+		ttCStr cszFile(pszPath);
 		cszFile.AddTrailingSlash();
 		cszFile += pszHeaderFile;
 		if (tt::FileExists(cszFile))
 			return true;
 
 		pszPath = pszSemi + 1;
-		pszSemi = tt::findchr(pszPath, ';');
+		pszSemi = tt::findChar(pszPath, ';');
 	}
 	return false;
 }

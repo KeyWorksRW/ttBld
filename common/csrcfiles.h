@@ -11,9 +11,9 @@
 #ifndef __CSRCFILES_H__
 #define __CSRCFILES_H__
 
-#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
-#include "../ttLib/include/ttstring.h"	// ttString
-#include "../ttLib/include/ttfile.h"	// ttFile
+#include <ttlist.h> 					// ttCList, ttCDblList, ttCStrIntList
+#include <ttstr.h>						// ttStr, ttCWD
+#include <ttfile.h> 					// ttCFile
 
 extern const char* txtSrcFilesFileName;
 
@@ -79,7 +79,7 @@ public:
 
 protected:
 	void ProcessFile(char* pszFile);
-	void ProcessInclude(const char* pszFile, ttStrIntList& lstAddSrcFiles, bool bFileSection);
+	void ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFiles, bool bFileSection);
 	void ProcessLibSection(char* pszLibFile);
 	void ProcessOption(char* pszLine);
 	void ProcessTarget(char* pszLine);
@@ -104,39 +104,39 @@ public:
 	size_t m_CompilerType;		// COMPILER_CLANG, COMPILER_MSVC or COMPILER_DEFAULT
 	size_t m_IDE;				// IDE_CODEBLOCK, IDE_CODELITE, IDE_VS or IDE_NONE
 
-	ttString m_cszLibs;				// additional libraries to link to
-	ttString m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
+	ttCStr m_cszLibs;				// additional libraries to link to
+	ttCStr m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
 
-	ttString m_cszLibDirs;			// additional library directories to search
-	ttString m_cszIncDirs;			// additional include directories to search
+	ttCStr m_cszLibDirs;			// additional library directories to search
+	ttCStr m_cszIncDirs;			// additional include directories to search
 
-	ttString m_cszCFlags;			// additional flags to pass to the compiler in all build targets
-	ttString m_cszLinkFlags;		// additional flags to pass to the linker in all build targets
+	ttCStr m_cszCFlags;			// additional flags to pass to the compiler in all build targets
+	ttCStr m_cszLinkFlags;		// additional flags to pass to the linker in all build targets
 
-	ttString m_cszTarget32;			// target directory for non-64 bit builds
-	ttString m_cszTarget64;			// target directory for 64 bit builds
+	ttCStr m_cszTarget32;			// target directory for non-64 bit builds
+	ttCStr m_cszTarget64;			// target directory for 64 bit builds
 
-	ttString m_cszMidlFlags;		// flags to pass to the midl compiler
-	ttString m_cszLibName;			// name and location of any additional library to build (used by Lib: section)
-	ttString m_cszLibPCHheader;		// header file to use for Lib precompilation
-	ttString m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
-	ttString m_cszProjectName;		// name of the project
-	ttString m_cszRcName;			// resource file to build (if any)
-	ttString m_cszHHPName;			// HTML Help project file
-	ttString m_cszSrcPattern;		// Specifies one or more wildcards to add to Files: section
+	ttCStr m_cszMidlFlags;		// flags to pass to the midl compiler
+	ttCStr m_cszLibName;			// name and location of any additional library to build (used by Lib: section)
+	ttCStr m_cszLibPCHheader;		// header file to use for Lib precompilation
+	ttCStr m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
+	ttCStr m_cszProjectName;		// name of the project
+	ttCStr m_cszRcName;			// resource file to build (if any)
+	ttCStr m_cszHHPName;			// HTML Help project file
+	ttCStr m_cszSrcPattern;		// Specifies one or more wildcards to add to Files: section
 
-	ttHeap m_ttHeap;			// all the ttList files will be attatched to this heap
-	ttList m_lstSrcFiles;
-	ttList m_lstLibFiles;		// list of any files used to build additional library
-	ttList m_lstIdlFiles;		// list of any idl files to compile with midl compiler
+	ttCHeap m_ttHeap;			// all the ttCList files will be attatched to this heap
+	ttCList m_lstSrcFiles;
+	ttCList m_lstLibFiles;		// list of any files used to build additional library
+	ttCList m_lstIdlFiles;		// list of any idl files to compile with midl compiler
 
-	ttDblList m_lstDepLibs; 	// key is library, val is src (if any)
+	ttCDblList m_lstDepLibs; 	// key is library, val is src (if any)
 
-	ttList m_lstErrors; 		// list of any errors that occurred during processing
+	ttCList m_lstErrors; 		// list of any errors that occurred during processing
 
-	ttStrIntList m_lstAddSrcFiles;		// additional .srcfiles to read into Files: section
-	ttStrIntList m_lstLibAddSrcFiles;	// additional .srcfiles to read into Lib: section
-	ttList		 m_lstSrcIncluded;		// the names of all files included by all ".include path/.srcfiles" directives
+	ttCStrIntList m_lstAddSrcFiles;		// additional .srcfiles to read into Files: section
+	ttCStrIntList m_lstLibAddSrcFiles;	// additional .srcfiles to read into Lib: section
+	ttCList		 m_lstSrcIncluded;		// the names of all files included by all ".include path/.srcfiles" directives
 
 	// Following are for the makefile: section
 

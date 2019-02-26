@@ -14,7 +14,7 @@ msvc_deps_prefix = Note: including file:
 # -MD	// DLL version of multi-threaded library
 # -O1	// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)
 
-cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -I"../src" -GL /Fp$outdir/MakeNinja.pch
+cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -I"../../ttLib/include" -I"../src" -GL /Fp$outdir/MakeNinja.pch
 
 rule compilePCH
   deps = msvc
@@ -64,7 +64,7 @@ build $resout/makeninja.res: rc makeninja.rc | $
   res/vcxproj.xml $
   res/vcxproj.filters.xml
 
-build ../bin/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib.lib $
+build ../bin/MakeNinja.exe : link $resout/makeninja.res ../../ttLib/lib/ttLib.lib $
   $outdir/pch.obj $
   $outdir/bldmaster.obj $
   $outdir/codelite.obj $

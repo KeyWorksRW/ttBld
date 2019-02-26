@@ -8,13 +8,13 @@
 
 #include "pch.h"
 
-#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
-#include "../ttLib/include/ttfile.h"	// ttFile
+#include <ttlist.h> 					// ttCList, ttCDblList, ttCStrIntList
+#include <ttfile.h> 					// ttCFile
 
 #include "../common/csrcfiles.h"		// CSrcFiles
 #include "../common/dryrun.h"			// CDryRun
 
-void AddFiles(ttList& lstFiles, bool bDryRun)
+void AddFiles(ttCList& lstFiles, bool bDryRun)
 {
 	if (lstFiles.GetCount() < 1) {
 		puts("You didn't specify any files to add!");
@@ -33,14 +33,14 @@ void AddFiles(ttList& lstFiles, bool bDryRun)
 
 	size_t cFilesAdded = 0;
 
-	ttFile kfIn, kfOut;
+	ttCFile kfIn, kfOut;
 	if (!kfIn.ReadFile(".srcfiles")) {
 		puts("Cannot read .srcfiles!");
 		return;
 	}
 	kfIn.MakeCopy();
 
-	while (kfIn.readline() && !tt::samesubstri(kfIn, "Files:"))
+	while (kfIn.ReadLine() && !tt::isSameSubStri(kfIn, "Files:"))
 		kfOut.WriteEol(kfIn);
 
 	if (kfOut.IsEndOfFile()) {	// means there was no Files: section
@@ -58,20 +58,20 @@ void AddFiles(ttList& lstFiles, bool bDryRun)
 			return;
 		}
 
-		// Use ttStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files -- 1
+		// Use ttCStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files -- 1
 		// file is singular
 
-		ttStr cszResults;
+		ttCStr cszResults;
 		cszResults.printf("%u file%ks added.", cFilesAdded, cFilesAdded);
 		puts(cszResults);
 		return;
 	}
 
 	kfOut.WriteEol(kfIn);	// This will be the Files: line
-	while (kfIn.readline()) {
-		if (tt::isalpha(*(const char*)kfIn))	// Alphabetical character in first column is a new section
+	while (kfIn.ReadLine()) {
+		if (tt::isAlpha(*(const char*)kfIn))	// Alphabetical character in first column is a new section
 			break;
-		else if (!tt::nextnonspace(kfIn)) {		// blank line, insert after it
+		else if (!tt::findNonSpace(kfIn)) {		// blank line, insert after it
 			kfOut.WriteEol(kfIn);
 			break;
 		}
@@ -92,7 +92,7 @@ void AddFiles(ttList& lstFiles, bool bDryRun)
 
 	// Now that the file(s) have been inserted, add everything else
 
-	while (kfIn.readline())
+	while (kfIn.ReadLine())
 		kfOut.WriteEol(kfIn);
 
 	if (bDryRun) {
@@ -108,9 +108,9 @@ void AddFiles(ttList& lstFiles, bool bDryRun)
 		return;
 	}
 
-	// Use ttString to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files
+	// Use ttCStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files
 
-	ttStr cszResults;
+	ttCStr cszResults;
 	cszResults.printf("%u file%ks added.", cFilesAdded, cFilesAdded);
 	puts(cszResults);
 }

@@ -10,8 +10,8 @@
 
 #include <iostream>
 
-#include "../ttLib/include/ttlist.h"	// ttList, ttDblList, ttStrIntList
-#include "../ttLib/include/findfile.h"	// ttFindFile
+#include <ttlist.h> 					// ttCList, ttDblList, ttCStrIntList
+#include <ttfindfile.h>					// ttFindFile
 
 #include "version.txt"	// Version (txtVersion) and Copyright (txtCopyRight) information
 
@@ -43,9 +43,9 @@ int main(int argc, char* argv[])
 		// The dryrun option isn't shown in Usage because it's really just for debugging -- i.e., you can make some
 		// changes to the code then run MakeNinja -dryrun to make certain it is doing what you expect. It's not under
 		// _DEBUG so you can test retail release.
-		else if (tt::samestri(argv[argpos] + 1, "dryrun"))
+		else if (tt::isSameStri(argv[argpos] + 1, "dryrun"))
 			bDryRun = true;
-		else if (tt::samestri(argv[argpos] + 1, "convert")) {
+		else if (tt::isSameStri(argv[argpos] + 1, "convert")) {
 			if (ConvertBuildScript(argpos + 1 > argc ? nullptr : argv[argpos + 1])) {
 				// SetSrcFileOptions();
 				return 1;
@@ -53,15 +53,15 @@ int main(int argc, char* argv[])
 			else
 				return 0;
 		}
-		else if (tt::samestri(argv[argpos] + 1, "add")) {
-			ttList lstFiles;
+		else if (tt::isSameStri(argv[argpos] + 1, "add")) {
+			ttCList lstFiles;
 			for (++argpos; argpos < argc; ++argpos) {
 				lstFiles += argv[argpos];
 			}
 			AddFiles(lstFiles, bDryRun);
 			return 1;
 		}
-		else if (tt::samestri(argv[argpos] + 1, "new")) {
+		else if (tt::isSameStri(argv[argpos] + 1, "new")) {
 			CreateNewSrcFiles();
 			return 1;
 		}
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 	// to convert. If that doesn't exist than create a new .srcfiles file.
 
 	else {
-		ttFindFile ff("*.vcxproj");
+		ttCFindFile ff("*.vcxproj");
 		if (ff.isValid())
 			return ConvertBuildScript(ff);
 		else if (ff.NewPattern("*.vcproj"))

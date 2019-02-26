@@ -19,15 +19,15 @@ void CDryRun::NewFile(const char* pszFile)
 	m_cszFilename = pszFile;
 }
 
-void CDryRun::DisplayFileDiff(ttFile& fileOrg, ttFile& fileNew)
+void CDryRun::DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew)
 {
-	if (m_cszFilename.isnonempty())
+	if (m_cszFilename.isNonEmpty())
 		printf("%s dryrun changes:\n", (char*) m_cszFilename);
 
 	fileNew.PrepForReadLine();
-	while (fileNew.readline()) {
-		fileOrg.readline();
-		if (!tt::samestr(fileOrg, fileNew))	{
+	while (fileNew.ReadLine()) {
+		fileOrg.ReadLine();
+		if (!tt::isSameStr(fileOrg, fileNew))	{
 			printf("    old: %s\n", (char*) fileOrg);
 			printf("    new: %s\n", (char*) fileNew);
 		}

@@ -8,9 +8,9 @@
 
 #include "pch.h"
 
-#include "../ttLib/include/ttstring.h"	// ttString
-#include "../ttLib/include/filedlg.h"	// ttFileDlg
-#include "../ttLib/include/findfile.h"	// ttFindFile
+#include <ttstr.h>		// ttCStr
+#include <ttfiledlg.h>	// ttCFileDlg
+#include <ttfindfile.h> // ttCFindFile
 
 #include "dlgsrcoptions.h"
 #include "ttlibicons.h" 				// Icons for use on 3D shaded buttons (ttShadeBtn)
@@ -38,13 +38,13 @@ void CreateNewSrcFiles()
 		// option, we first create a .srcfiles with nothing but a Files: section, and then call SaveChanges() to add the
 		// Options: section.
 
-		ttFile kfOut;
+		ttCFile kfOut;
 		kfOut.WriteEol("Files:");
 
 		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.c;*.rc;*.idl;*.hhp;");
-		ttString cszPCHSrc;
+		ttCStr cszPCHSrc;
 		bool bSpecialFiles = false;
-		if (dlg.m_cszPCHheader.isnonempty()) {
+		if (dlg.m_cszPCHheader.isNonEmpty()) {
 			cszPCHSrc = dlg.m_cszPCHheader;
 			cszPCHSrc.ChangeExtension(".cpp");
 			if (!tt::FileExists(cszPCHSrc)) {
@@ -52,16 +52,16 @@ void CreateNewSrcFiles()
 				if (!tt::FileExists(cszPCHSrc))
 					cszPCHSrc.Delete();
 			}
-			if (cszPCHSrc.isnonempty())	{
+			if (cszPCHSrc.isNonEmpty())	{
 				kfOut.printf("  %s\n", (char*) cszPCHSrc);
 				bSpecialFiles = true;
 			}
 		}
-		if (dlg.m_cszHHPName.isnonempty()) {
+		if (dlg.m_cszHHPName.isNonEmpty()) {
 			kfOut.printf("  %s\n", (char*) dlg.m_cszHHPName);
 			bSpecialFiles = true;
 		}
-		if (dlg.m_cszRcName.isnonempty()) {
+		if (dlg.m_cszRcName.isNonEmpty()) {
 			kfOut.printf("  %s\n", (char*) dlg.m_cszRcName);
 			bSpecialFiles = true;
 		}
@@ -69,11 +69,11 @@ void CreateNewSrcFiles()
 			kfOut.WriteEol();	// add a blank line
 
 		for (size_t pos = 0; pos < dlg.m_lstSrcFiles.GetCount(); ++pos) {
-			if (cszPCHSrc.isnonempty() && cszPCHSrc.samestri(dlg.m_lstSrcFiles[pos]))
+			if (cszPCHSrc.isNonEmpty() && cszPCHSrc.isSameStri(dlg.m_lstSrcFiles[pos]))
 				continue;	// we already added it
-			else if (dlg.m_cszRcName.isnonempty() && dlg.m_cszRcName.samestri(dlg.m_lstSrcFiles[pos]))
+			else if (dlg.m_cszRcName.isNonEmpty() && dlg.m_cszRcName.isSameStri(dlg.m_lstSrcFiles[pos]))
 				continue;	// we already added it
-			else if (dlg.m_cszHHPName.isnonempty() && dlg.m_cszHHPName.samestri(dlg.m_lstSrcFiles[pos]))
+			else if (dlg.m_cszHHPName.isNonEmpty() && dlg.m_cszHHPName.isSameStri(dlg.m_lstSrcFiles[pos]))
 				continue;	// we already added it
 
 			kfOut.printf("  %s\n", dlg.m_lstSrcFiles[pos]);
@@ -88,7 +88,7 @@ void CreateNewSrcFiles()
 	}
 }
 
-CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttDlg(IDDLG_SRCFILES), CWriteSrcFiles()
+CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttCDlg(IDDLG_SRCFILES), CWriteSrcFiles()
 {
 	EnableShadeBtns();
 	ReadFile();	// read in any existing .srcfiles
@@ -100,7 +100,7 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttDlg(IDDLG_SRCFILES), C
 		m_WarningLevel = WARNLEVEL_DEFAULT;
 	}
 
-	if (m_cszPCHheader.isempty()) {
+	if (m_cszPCHheader.isEmpty()) {
 		if (tt::FileExists("stdafx.h"))
 			m_cszPCHheader = "stdafx.h";
 		else if (tt::FileExists("pch.h"))
@@ -134,7 +134,7 @@ void CDlgSrcOptions::OnBegin(void)
 	m_ShadedBtns.SetIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
 	m_ShadedBtns.SetIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
 
-	ttString cszTitle(txtSrcFilesFileName);
+	ttCStr cszTitle(txtSrcFilesFileName);
 	cszTitle += " Options";
 	SetWindowText(*this, cszTitle);
 
@@ -143,28 +143,28 @@ void CDlgSrcOptions::OnBegin(void)
 	else {
 		char szCwd[MAX_PATH];
 		GetCurrentDirectory(sizeof(szCwd), szCwd);
-		char* pszProject = tt::fndFilename(szCwd);
-		if (tt::samestri(pszProject, "src")) {
+		char* pszProject = tt::findFilePortion(szCwd);
+		if (tt::isSameStri(pszProject, "src")) {
 			pszProject--;
 			*pszProject = 0;
-			pszProject = tt::fndFilename(szCwd);
+			pszProject = tt::findFilePortion(szCwd);
 		}
 		SetControlText(DLG_ID(IDEDIT_PROJ_NAME), pszProject);
 	}
 
-	if (m_cszPCHheader.isnonempty())
+	if (m_cszPCHheader.isNonEmpty())
 		SetControlText(DLG_ID(IDEDIT_PCH), m_cszPCHheader);
-	if (m_cszCFlags.isnonempty())
+	if (m_cszCFlags.isNonEmpty())
 		SetControlText(DLG_ID(IDEDIT_CFLAGS), m_cszCFlags);
-	if (m_cszLinkFlags.isnonempty())
+	if (m_cszLinkFlags.isNonEmpty())
 		SetControlText(DLG_ID(IDEDIT_LINK_FLAGS), m_cszLinkFlags);
-	if (m_cszLibs.isnonempty())
+	if (m_cszLibs.isNonEmpty())
 		SetControlText(DLG_ID(IDEDIT_LIBS), m_cszLibs);
-	if (m_cszBuildLibs.isnonempty())
+	if (m_cszBuildLibs.isNonEmpty())
 		SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), m_cszBuildLibs);
-	if (m_cszIncDirs.isnonempty())
+	if (m_cszIncDirs.isNonEmpty())
 		SetControlText(DLG_ID(IDEDIT_INCDIRS), m_cszIncDirs);
-	if (m_cszLibDirs.isnonempty())
+	if (m_cszLibDirs.isNonEmpty())
 		SetControlText(DLG_ID(IDEDIT_LIBDIRS), m_cszLibDirs);
 
 	if (m_exeType == EXE_CONSOLE)
@@ -176,11 +176,11 @@ void CDlgSrcOptions::OnBegin(void)
 	else
 		SetCheck(DLG_ID(IDRADIO_NORMAL));
 
-	KDDX_Check(DLG_ID(IDCHECK_64BIT), m_b64bit);
-	KDDX_Check(DLG_ID(IDCHECK_BITEXT), m_bBitSuffix);
-	KDDX_Check(DLG_ID(IDCHECK_STATIC_CRT), m_bStaticCrt);
-	KDDX_Check(DLG_ID(IDC_CHECK_PERMISSIVE), m_bPermissive);
-	KDDX_Check(DLG_ID(IDCHECK_MSLINKER), m_bUseMsvcLinker);
+	ttDDX_Check(DLG_ID(IDCHECK_64BIT), m_b64bit);
+	ttDDX_Check(DLG_ID(IDCHECK_BITEXT), m_bBitSuffix);
+	ttDDX_Check(DLG_ID(IDCHECK_STATIC_CRT), m_bStaticCrt);
+	ttDDX_Check(DLG_ID(IDC_CHECK_PERMISSIVE), m_bPermissive);
+	ttDDX_Check(DLG_ID(IDCHECK_MSLINKER), m_bUseMsvcLinker);
 
 	SetCheck(DLG_ID(m_bBuildForSpeed ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
 	SetCheck(DLG_ID(m_bStdcall ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
@@ -221,13 +221,13 @@ void CDlgSrcOptions::OnBegin(void)
 
 void CDlgSrcOptions::OnOK(void)
 {
-	m_cszProjectName.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
-	m_cszCFlags.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
-	m_cszLinkFlags.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LINK_FLAGS)));
-	m_cszLibs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
-	m_cszBuildLibs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
-	m_cszIncDirs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
-	m_cszLibDirs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
+	m_cszProjectName.getWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
+	m_cszCFlags.getWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
+	m_cszLinkFlags.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LINK_FLAGS)));
+	m_cszLibs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
+	m_cszBuildLibs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
+	m_cszIncDirs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
+	m_cszLibDirs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
 
 	if (GetCheck(DLG_ID(IDRADIO_CONSOLE)))
 		m_exeType = EXE_CONSOLE;
@@ -238,11 +238,11 @@ void CDlgSrcOptions::OnOK(void)
 	else
 		m_exeType = EXE_WINDOW;
 
-	KDDX_Check(DLG_ID(IDCHECK_64BIT), m_b64bit);
-	KDDX_Check(DLG_ID(IDCHECK_BITEXT), m_bBitSuffix);
-	KDDX_Check(DLG_ID(IDCHECK_STATIC_CRT), m_bStaticCrt);
-	KDDX_Check(DLG_ID(IDC_CHECK_PERMISSIVE), m_bPermissive);
-	KDDX_Check(DLG_ID(IDCHECK_MSLINKER), m_bUseMsvcLinker);
+	ttDDX_Check(DLG_ID(IDCHECK_64BIT), m_b64bit);
+	ttDDX_Check(DLG_ID(IDCHECK_BITEXT), m_bBitSuffix);
+	ttDDX_Check(DLG_ID(IDCHECK_STATIC_CRT), m_bStaticCrt);
+	ttDDX_Check(DLG_ID(IDC_CHECK_PERMISSIVE), m_bPermissive);
+	ttDDX_Check(DLG_ID(IDCHECK_MSLINKER), m_bUseMsvcLinker);
 
 	m_bBuildForSpeed = GetCheck(DLG_ID(IDC_RADIO_SPEED));
 	m_bStdcall = GetCheck(DLG_ID(IDC_RADIO_STDCALL));
@@ -268,9 +268,9 @@ void CDlgSrcOptions::OnOK(void)
 
 void CDlgSrcOptions::OnBtnChangePch()
 {
-	ttFileDlg fdlg(*this);
+	ttCFileDlg fdlg(*this);
 	fdlg.SetFilter("Header Files|*.h");
-	ttString cszCWD;
+	ttCStr cszCWD;
 	cszCWD.getCWD();
 	cszCWD.AddTrailingSlash();
 	fdlg.SetInitialDir(cszCWD);
@@ -281,7 +281,7 @@ void CDlgSrcOptions::OnBtnChangePch()
 			pszFileName++;
 			pszCWD++;
 		}
-		ttString cszFile(pszFileName);
+		ttCStr cszFile(pszFileName);
 		cszFile.ChangeExtension(".cpp");
 		if (tt::FileExists(cszFile)) {
 			SetControlText(DLG_ID(IDEDIT_PCH), pszFileName);

@@ -8,14 +8,14 @@
 
 #include "pch.h"
 
-#include "../ttLib/include/ttfile.h"	// ttFile
-#include "../ttLib/include/enumstr.h"	// ttEnumStr
-#include "../ttLib/include/findfile.h"	// ttFindFile
+#include <ttfile.h> 	// ttCFile
+#include <ttenumstr.h>	// ttCEnumStr
+#include <ttfindfile.h> // ttCFindFile
 
 #include "bldmaster.h"	// CBldMaster
 #include "resource.h"	// IDR_MAKEFILE
 
-static bool FindBuildSrc(const char* pszBuildTarget, ttString& cszDir);
+static bool FindBuildSrc(const char* pszBuildTarget, ttCStr& cszDir);
 
 extern const char* txtHelpNinja;
 
@@ -30,7 +30,7 @@ bool CBldMaster::CreateMakeFile()
 
 	// We get here if MAKEMAKE_ALWAYS is set, or MAKEMAKE_MISSING is set and the makefile doesn't exist
 
-	ttFile kf;
+	ttCFile kf;
 	if (!kf.ReadResource(IDR_MAKEFILE)) {
 		m_lstErrors += "MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile!";
 		return false;
@@ -39,38 +39,38 @@ bool CBldMaster::CreateMakeFile()
 
 	// Now we parse the file as if we had read it, changing or adding as needed
 
-	ttFile kfOut;
-	while (kf.readline()) {
-		if (tt::samesubstri(kf, "#b64")) {
+	ttCFile kfOut;
+	while (kf.ReadLine()) {
+		if (tt::isSameSubStri(kf, "#b64")) {
 			if (m_b64bit && !m_bBitSuffix)
 				kfOut.WriteEol("b64=1");
 			else
 				kfOut.WriteEol(kf);
 		}
-		else if (tt::samesubstri(kf, "release:") || tt::samesubstri(kf, "debug:")) {
-			bool bDebugTarget = tt::samesubstri(kf, "debug:");	// so we don't have to keep parsing the line
-			ttString cszNewLine(kf);
-			if (!tt::isempty(getHHPName())) {
+		else if (tt::isSameSubStri(kf, "release:") || tt::isSameSubStri(kf, "debug:")) {
+			bool bDebugTarget = tt::isSameSubStri(kf, "debug:");	// so we don't have to keep parsing the line
+			ttCStr cszNewLine(kf);
+			if (!tt::isEmpty(getHHPName())) {
 				cszNewLine.ReplaceStr(" ", " ChmHelp ");
-				if (m_cszBuildLibs.isempty()) {
+				if (m_cszBuildLibs.isEmpty()) {
 					kfOut.WriteEol(cszNewLine);
 					kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
 				}
 			}
 
-			if (m_cszBuildLibs.isnonempty()) {
-				ttEnumStr cEnumStr(m_cszBuildLibs, ';');
+			if (m_cszBuildLibs.isNonEmpty()) {
+				ttCEnumStr cEnumStr(m_cszBuildLibs, ';');
 				const char* pszBuildLib;
 				while (cEnumStr.Enum(&pszBuildLib)) {
-					ttString cszTarget;
-					cszTarget.printf(" %s%s ", tt::FindFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
+					ttCStr cszTarget;
+					cszTarget.printf(" %s%s ", tt::findFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
 
 					// Line is "release: project" so we simply replace the first space with our additional target (which begins and ends with a space
 
 					cszNewLine.ReplaceStr(" ", cszTarget);
 				}
 				kfOut.WriteEol(cszNewLine);
-				if (!tt::isempty(getHHPName())) {
+				if (!tt::isEmpty(getHHPName())) {
 					kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
 				}
 
@@ -78,14 +78,14 @@ bool CBldMaster::CreateMakeFile()
 
 				cEnumStr.SetNewStr(m_cszBuildLibs, ';');
 				while (cEnumStr.Enum(&pszBuildLib)) {
-					kfOut.printf("\n%s%s:\n", tt::FindFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
-					ttString cszCWD;
+					kfOut.printf("\n%s%s:\n", tt::findFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
+					ttCStr cszCWD;
 					if (!FindBuildSrc(pszBuildLib, cszCWD)) {
-						ttString cszMsg;
-						cszMsg.printf("Unable to find build/ directory for %s library", tt::FindFilePortion(pszBuildLib));
+						ttCStr cszMsg;
+						cszMsg.printf("Unable to find build/ directory for %s library", tt::findFilePortion(pszBuildLib));
 						m_lstErrors += cszMsg;
 						cszCWD = pszBuildLib;
-						char* pszLibName = tt::FindFilePortion(cszCWD);
+						char* pszLibName = tt::findFilePortion(cszCWD);
 						if (pszLibName)
 							*pszLibName = 0;
 					}
@@ -103,7 +103,7 @@ bool CBldMaster::CreateMakeFile()
 	// If the makefile already exists, don't write to it unless something has actually changed
 
 	if (tt::FileExists("makefile"))	{
-		ttFile kfOrg;
+		ttCFile kfOrg;
 		if (!kfOrg.ReadFile("makefile") || strcmp(kfOrg, kfOut) != 0) {
 			if (dryrun.isEnabled())	{
 				dryrun.NewFile("makefile");
@@ -133,7 +133,7 @@ bool CBldMaster::CreateMakeFile()
 	return true;
 }
 
-static bool FindBuildSrc(const char* pszBuildTarget, ttString& cszDir)
+static bool FindBuildSrc(const char* pszBuildTarget, ttCStr& cszDir)
 {
 	ttASSERT_MSG(pszBuildTarget, "NULL pointer!");
 	ttASSERT_MSG(*pszBuildTarget, "Empty string!");
@@ -152,16 +152,16 @@ static bool FindBuildSrc(const char* pszBuildTarget, ttString& cszDir)
 	 */
 
 	cszDir = pszBuildTarget;
-	char* pszName = tt::FindFilePortion(cszDir);
+	char* pszName = tt::findFilePortion(cszDir);
 	if (!pszName)
 		return false;	// means a bogus BuildLibs: line in .srcfiles
-	ttString cszName(pszName);
+	ttCStr cszName(pszName);
 
-	if (pszName > cszDir.getptr())
+	if (pszName > cszDir.getPtr())
 		--pszName;		// so that we also remove any trailing backslash
 	*pszName = 0;
-	pszName = tt::FindFilePortion(cszDir);
-	if (pszName && tt::samestri(pszName, "lib")) {
+	pszName = tt::findFilePortion(cszDir);
+	if (pszName && tt::isSameStri(pszName, "lib")) {
 		*pszName = 0;
 
 		// If BuildTarget is "../lib/name" then removing "lib" will leave us with "../" which is unlikely to be what the
@@ -169,22 +169,22 @@ static bool FindBuildSrc(const char* pszBuildTarget, ttString& cszDir)
 		// "../../name", etc.
 
 		tt::BackslashToForwardslash(cszDir);
-		pszName = tt::findstr(cszDir, "../");
-		while (pszName && tt::samesubstri(pszName + 3, "../"))
+		pszName = tt::findStr(cszDir, "../");
+		while (pszName && tt::isSameSubStri(pszName + 3, "../"))
 			pszName += 3;
 		if (pszName && !pszName[3])		// catch case where removing "lib" leaves "../ "
 			cszDir.AppendFileName(cszName);
 	}
 
-	ttString cszPattern((const char*) cszDir);
+	ttCStr cszPattern((const char*) cszDir);
 	cszPattern.AppendFileName("*");
-	ttFindFile ff(cszPattern);
+	ttCFindFile ff(cszPattern);
 	if (ff.isValid()) {
 		do {
-			if (ff.isDir() && tt::IsValidFileChar(ff, 0)) {
-				if (tt::samestri(ff, "build"))
+			if (ff.isDir() && tt::isValidFileChar(ff, 0)) {
+				if (tt::isSameStri(ff, "build"))
 					return true;	// we found it, presumably after "lib" was removed from the path
-				ttString cszPossible((const char*) cszDir);
+				ttCStr cszPossible((const char*) cszDir);
 				cszPossible.AppendFileName(ff);
 				cszPossible.AddTrailingSlash();
 				cszPossible.AppendFileName("build");
