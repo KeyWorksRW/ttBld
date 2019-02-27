@@ -44,6 +44,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 	ttCFile kfOut;
 	kfOut.SetUnixLF();
 
+#if 0	// [ralphw - 2/26/2019] interesting idea, but doesn't honor hand editing, and tends to duplicate some lines
+
 	// Do a bit of reorganizing, trying to group the options likely to have comments together, and the options that are long together
 
 	size_t posProject = 0;
@@ -114,6 +116,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 			break;
 		}
 	}
+#endif
 
 	// Write all the lines, but prevent more then one blank line at a time
 
