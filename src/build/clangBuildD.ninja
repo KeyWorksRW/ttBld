@@ -56,6 +56,8 @@ build $outdir/dryrun.obj: compile ../common/dryrun.cpp | $outdir/pch.obj
 
 build $resout/makeninja.res: rc makeninja.rc | $
   resource.h $
+  ../common/strtable.rc2 $
+  ../common/strtable.h $
   res/cdlprojectpre.txt $
   res/cdlprojectpost.txt $
   res/makefile.txt $
