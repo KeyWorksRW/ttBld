@@ -114,6 +114,7 @@ public:
 
 	ttCStr m_cszCFlags;			// additional flags to pass to the compiler in all build targets
 	ttCStr m_cszLinkFlags;		// additional flags to pass to the linker in all build targets
+	ttCStr m_cszRCFlags;		// additional flags to pass to the resource compiler in all build targets
 	ttCStr m_cszMidlFlags;		// flags to pass to the midl compiler
 
 	ttCStr m_cszTarget32;		// target directory for non-64 bit builds

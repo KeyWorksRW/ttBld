@@ -67,6 +67,7 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	AddOptVal("CFlags:",    &m_cszCFlags);
 	AddOptVal("MidlFlags:", &m_cszMidlFlags);
 	AddOptVal("LinkFlags:", &m_cszLinkFlags);
+	AddOptVal("RCFlags:",   &m_cszRCFlags);
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
