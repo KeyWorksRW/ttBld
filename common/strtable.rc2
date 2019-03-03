@@ -1,0 +1,12 @@
+// STRTABLE.RC2 - resources Microsoft Visual C++ does not edit directly
+
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+#include "strtable.h"
+
+STRINGTABLE
+BEGIN
+	IDS_UNKNOWN_OPTION	"%s is an unknown option"
+END

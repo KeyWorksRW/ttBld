@@ -8,6 +8,7 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "winres.h"
+#include "../common/strtable.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -35,12 +36,14 @@ END
 2 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""winres.h""\r\n"
+	"#include ""../common/strtable.h""\r\n"
     "\0"
 END
 
 3 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""ttlibicons.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+	"#include ""../common/strtable.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "\0"
 END
 
@@ -200,7 +203,7 @@ END
 // Generated from the TEXTINCLUDE 3 resource.
 //
 #include "ttlibicons.rc2"  // non-Microsoft Visual C++ edited resources
-
+#include "../common/strtable.rc2"  // non-Microsoft Visual C++ edited resources
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
