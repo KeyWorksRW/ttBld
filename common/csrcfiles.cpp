@@ -15,6 +15,7 @@
 #include <ttmem.h>			// ttCMem, ttCTMem
 
 #include "csrcfiles.h"		// CSrcFiles
+#include "strtable.h"		// String resource IDs
 
 const char* txtSrcFilesFileName = ".srcfiles";
 
@@ -56,18 +57,26 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	// options. To add a new option, add the ttCStr member in csrcfiles.h,	then add the option name and the ttCStr
 	// member here.
 
-	AddOptVal("Project:", &m_cszProjectName);
-	AddOptVal("PCH:", &m_cszPCHheader);
+	AddOptVal("Project", &m_cszProjectName);
+	AddOptVal("PCH", &m_cszPCHheader);
 
-	AddOptVal("Sources:",   &m_cszSrcPattern);
-	AddOptVal("LibPCH:",    &m_cszLibPCHheader);
-	AddOptVal("Libs:",      &m_cszLibs);
-	AddOptVal("IncDirs:",   &m_cszIncDirs);
-	AddOptVal("LibDirs:",   &m_cszLibDirs);
-	AddOptVal("CFlags:",    &m_cszCFlags);
-	AddOptVal("MidlFlags:", &m_cszMidlFlags);
-	AddOptVal("LinkFlags:", &m_cszLinkFlags);
-	AddOptVal("RCFlags:",   &m_cszRCFlags);
+	AddOptVal("CFlags",    &m_cszCFlags);
+	AddOptVal("MidlFlags", &m_cszMidlFlags);
+	AddOptVal("LinkFlags", &m_cszLinkFlags);
+	AddOptVal("RCFlags",   &m_cszRCFlags);
+
+	AddOptVal("IncDirs",   &m_cszIncDirs);
+	AddOptVal("LibPCH",    &m_cszLibPCHheader);
+	AddOptVal("Libs",      &m_cszLibs);
+	AddOptVal("LibDirs",   &m_cszLibDirs);
+	AddOptVal("Sources",   &m_cszSrcPattern);
+
+	AddOptVal("64Bit", &m_b64bit);
+	AddOptVal("bit_suffix", &m_bBitSuffix);
+	AddOptVal("permissive", &m_bPermissive);
+	AddOptVal("stdcall", &m_bStdcall);
+	AddOptVal("static_crt", &m_bStaticCrt);
+	AddOptVal("ms_linker", &m_bUseMsvcLinker);
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
@@ -170,8 +179,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
 	if (!pszVal)
 		return;
-	if (*pszVal == '=')
-		*pszVal = ':';		// convert old seperator to YAML seperator
+	*pszVal = 0;
 	pszVal = tt::findNonSpace(pszVal + 1);
 
 	// remove any comment
@@ -185,7 +193,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	if (UpdateOptVal(pszLine, pszVal))	// process all options that have a string value
 		return;
 
-	if (tt::isSameSubStri(pszLine, "IDE:")) {
+	if (tt::isSameStri(pszLine, "IDE")) {
 		ttCEnumStr cenum(pszVal, ' ');
 		m_IDE = 0;
 		while (cenum.Enum()) {
@@ -199,7 +207,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "Compilers:")) {
+	if (tt::isSameStri(pszLine, "Compilers")) {
 		ttCEnumStr cenum(pszVal, ' ');
 		m_CompilerType = 0;
 		while (cenum.Enum()) {
@@ -211,7 +219,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "Makefile:")) {
+	if (tt::isSameStri(pszLine, "Makefile")) {
 		m_fCreateMakefile = MAKEMAKE_DEFAULT;
 		if (tt::isSameSubStri(pszVal, "never"))
 			m_fCreateMakefile = MAKEMAKE_NEVER;
@@ -222,7 +230,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "TargetDirs:")) {
+	if (tt::isSameStri(pszLine, "TargetDirs")) {
 		ttCEnumStr cenum(pszVal, ';');
 		if (cenum.Enum())
 			m_cszTarget32 = cenum;
@@ -231,7 +239,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "exe_type:") || tt::isSameSubStri(pszLine, "EXE:")) {
+	if (tt::isSameStri(pszLine, "exe_type")) {
 		if (tt::isSameSubStri(pszVal, "window"))
 			m_exeType = EXE_WINDOW;
 		else if (tt::isSameSubStri(pszVal, "console"))
@@ -243,12 +251,12 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "optimize:")) {
+	if (tt::isSameStri(pszLine, "optimize")) {
 		m_bBuildForSpeed = tt::isSameSubStri(pszVal, "speed");
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "BuildLibs:")) {
+	if (tt::isSameStri(pszLine, "BuildLibs")) {
 		if (pszVal) {
 			m_cszBuildLibs = tt::findNonSpace(pszVal);
 			// Remove any .lib extension--we are looking for the target name, not the library name
@@ -261,25 +269,18 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "WarnLevel:")) {
+	if (tt::isSameStri(pszLine, "WarnLevel")) {
 		m_WarningLevel = tt::Atoi(pszVal);
 		return;
 	}
 
-	bool bYesNo = tt::isSameSubStri(pszVal, "true") || tt::isSameSubStri(pszVal, "YES");
+	bool bYesNo = tt::isSameSubStri(pszVal, "true") || tt::isSameSubStri(pszVal, "yes");
+	if (UpdateOptVal(pszLine, bYesNo))	// process all options that have a boolean value
+		return;
 
-	if (tt::isSameSubStri(pszLine, "64Bit:"))
-		m_b64bit = bYesNo;
-	else if (tt::isSameSubStri(pszLine, "bit_suffix:"))
-		m_bBitSuffix = bYesNo;
-	else if (tt::isSameSubStri(pszLine, "permissive:"))
-		m_bPermissive = bYesNo;
-	else if (tt::isSameSubStri(pszLine, "stdcall:"))
-		m_bStdcall = bYesNo;
-	else if (tt::isSameSubStri(pszLine, "static_crt:"))
-		m_bStaticCrt = bYesNo;
-	else if (tt::isSameSubStri(pszLine, "ms_linker:"))
-		m_bUseMsvcLinker = bYesNo;
+	ttCStr csz;
+	csz.printf(tt::getResString(IDS_UNKNOWN_OPTION), pszLine);
+	m_lstErrors += csz;
 }
 
 void CSrcFiles::AddCompilerFlag(const char* pszFlag)
@@ -460,6 +461,26 @@ bool CSrcFiles::ReadTwoFiles(const char* pszMaster, const char* pszPrivate)
 	return true;
 }
 
+void CSrcFiles::AddOptVal(const char* pszOption, bool* pbVal)
+{
+	OPT_BOOL optBool;
+	optBool.pszOption = pszOption;
+	optBool.pbVal = pbVal;
+	m_aOptBool += optBool;
+}
+
+bool CSrcFiles::UpdateOptVal(const char* pszKey, bool bVal)
+{
+	ttASSERT(pszKey);
+	for (size_t pos = 0; pos < m_aOptBool.GetCount(); ++pos) {
+		if (tt::isSameStri(pszKey, m_aOptBool[pos].pszOption)) {
+			*m_aOptBool[pos].pbVal = bVal;
+			return true;
+		}
+	}
+	return false;
+}
+
 void CSrcFiles::AddOptVal(const char* pszOption, ttCStr* pcszVal)
 {
 	OPT_VAL optVal;
@@ -472,7 +493,7 @@ bool CSrcFiles::UpdateOptVal(const char* pszKey, const char* pszVal)
 {
 	ttASSERT(pszKey && pszVal);
 	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
-		if (tt::isSameSubStri(pszKey, m_aOptVal[pos].pszOption)) {
+		if (tt::isSameStri(pszKey, m_aOptVal[pos].pszOption)) {
 			m_aOptVal[pos].pcszVal->strCopy(pszVal);
 			return true;
 		}

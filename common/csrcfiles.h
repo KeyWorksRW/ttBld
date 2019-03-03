@@ -151,11 +151,20 @@ protected:
 
 	typedef struct {
 		const char* pszOption;
+		bool*	pbVal;
+	} OPT_BOOL;
+	ttCArray<OPT_BOOL> m_aOptBool;
+
+	typedef struct {
+		const char* pszOption;
 		ttCStr*	pcszVal;
 	} OPT_VAL;
 	ttCArray<OPT_VAL> m_aOptVal;
 
-	void AddOptVal(const char* pszOption, ttCStr*	pcszVal);
+	void AddOptVal(const char* pszOption, bool*	pbVal);
+	bool UpdateOptVal(const char* pszKey, bool bVal);
+
+	void AddOptVal(const char* pszOption, ttCStr* pcszVal);
 	bool UpdateOptVal(const char* pszKey, const char* pszVal);
 };
 
