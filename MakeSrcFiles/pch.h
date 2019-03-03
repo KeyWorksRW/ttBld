@@ -44,5 +44,7 @@
 #include <ttlib.h>		// Master header file for ttLib
 #include <ttdebug.h>	// ttASSERT macros
 
+using namespace ttch;	// We want the CH_ characters
+
 extern const char* txtVersion;
 extern const char* txtCopyRight;
