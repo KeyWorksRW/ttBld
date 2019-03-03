@@ -51,6 +51,22 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
+
+	// Add all options that are strings and don't need special handling below. This will automatically read and write the
+	// options. To add a new option, add the ttCStr member in csrcfiles.h,	then add the option name and the ttCStr
+	// member here.
+
+	AddOptVal("Project:", &m_cszProjectName);
+	AddOptVal("PCH:", &m_cszPCHheader);
+
+	AddOptVal("Sources:",   &m_cszSrcPattern);
+	AddOptVal("LibPCH:",    &m_cszLibPCHheader);
+	AddOptVal("Libs:",      &m_cszLibs);
+	AddOptVal("IncDirs:",   &m_cszIncDirs);
+	AddOptVal("LibDirs:",   &m_cszLibDirs);
+	AddOptVal("CFlags:",    &m_cszCFlags);
+	AddOptVal("MidlFlags:", &m_cszMidlFlags);
+	AddOptVal("LinkFlags:", &m_cszLinkFlags);
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
@@ -165,6 +181,9 @@ void CSrcFiles::ProcessOption(char* pszLine)
 
 	tt::trimRight(pszVal);	// remove any trailing whitespace
 
+	if (UpdateOptVal(pszLine, pszVal))	// process all options that have a string value
+		return;
+
 	if (tt::isSameSubStri(pszLine, "IDE:")) {
 		ttCEnumStr cenum(pszVal, ' ');
 		m_IDE = 0;
@@ -202,11 +221,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "Project:")) {
-		m_cszProjectName = pszVal;
-		return;
-	}
-
 	if (tt::isSameSubStri(pszLine, "TargetDirs:")) {
 		ttCEnumStr cenum(pszVal, ';');
 		if (cenum.Enum())
@@ -233,44 +247,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameSubStri(pszLine, "PCH:")) {
-		if (*pszVal) {
-			if (tt::isSameStri(pszVal, "none")) {
-				m_cszPCHheader.Delete();
-			}
-			else if (!tt::isSameStri(m_cszPCHheader, pszVal)) {
-				m_cszPCHheader = pszVal;
-			}
-		}
-		return;
-	}
-
-	if (tt::isSameSubStri(pszLine, "Sources:") && *pszVal) {
-		m_cszSrcPattern = pszVal;
-		return;
-	}
-
-	if (tt::isSameSubStri(pszLine, "LibPCH:")) {		// REVIEW: [randalphwa - 10/25/2018] currently, MakeNinja doesn't use this
-		if (*pszVal) {
-			if (tt::isSameStri(pszVal, "none")) {
-				m_cszLibPCHheader.Delete();
-			}
-			else if (!tt::isSameStri(m_cszLibPCHheader, pszVal)) {
-				m_cszLibPCHheader = pszVal;
-			}
-		}
-		return;
-	}
-
-	// Note that .private/.srcfiles can override these -- which could mean using a debug library instead of a release library, or a
-	// beta header file, -DBETA flag, stricter warning level, etc.
-
-	if (tt::isSameSubStri(pszLine, "Libs:")) {
-		if (pszVal)
-			m_cszLibs = tt::findNonSpace(pszVal);
-		return;
-	}
-
 	if (tt::isSameSubStri(pszLine, "BuildLibs:")) {
 		if (pszVal) {
 			m_cszBuildLibs = tt::findNonSpace(pszVal);
@@ -281,33 +257,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
 				pszLibExt = tt::findStri(pszLibExt, ".lib");
 			}
 		}
-		return;
-	}
-
-	if (tt::isSameSubStri(pszLine, "IncDirs:")) {
-		if (pszVal)
-			m_cszIncDirs = tt::findNonSpace(pszVal);
-		return;
-	}
-
-	if (tt::isSameSubStri(pszLine, "LibDirs:")) {
-		if (pszVal)
-			m_cszLibDirs = tt::findNonSpace(pszVal);
-		return;
-	}
-
-	if (tt::isSameSubStri(pszLine, "CFlags:")) {
-		m_cszCFlags = pszVal;
-		return;
-	}
-
-	if (tt::isSameSubStri(pszLine, "MidlFlags:")) {
-		m_cszMidlFlags = pszVal;
-		return;
-	}
-
-	if (tt::isSameSubStri(pszLine, "LinkFlags:") || tt::isSameSubStri(pszLine, "LINK:")) {
-		m_cszLinkFlags = pszVal;
 		return;
 	}
 
@@ -508,4 +457,24 @@ bool CSrcFiles::ReadTwoFiles(const char* pszMaster, const char* pszPrivate)
 	// successfully read.
 
 	return true;
+}
+
+void CSrcFiles::AddOptVal(const char* pszOption, ttCStr* pcszVal)
+{
+	OPT_VAL optVal;
+	optVal.pszOption = pszOption;
+	optVal.pcszVal = pcszVal;
+	m_aOptVal += optVal;
+}
+
+bool CSrcFiles::UpdateOptVal(const char* pszKey, const char* pszVal)
+{
+	ttASSERT(pszKey && pszVal);
+	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
+		if (tt::isSameSubStri(pszKey, m_aOptVal[pos].pszOption)) {
+			m_aOptVal[pos].pcszVal->strCopy(pszVal);
+			return true;
+		}
+	}
+	return false;
 }

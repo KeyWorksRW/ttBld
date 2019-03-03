@@ -14,6 +14,7 @@
 #include <ttlist.h> 					// ttCList, ttCDblList, ttCStrIntList
 #include <ttstr.h>						// ttStr, ttCWD
 #include <ttfile.h> 					// ttCFile
+#include <ttarray.h>					// ttCArray
 
 extern const char* txtSrcFilesFileName;
 
@@ -97,6 +98,7 @@ public:
 	bool m_bStaticCrt;			// true means link to static CRT
 	bool m_bStdcall;			// use stdcall calling convention
 	bool m_bUseMsvcLinker;		// use link.exe even when compiling with CLANG
+	bool m_bDebugRC;			// indicates where or not to build a _DEBUG version of the resource file
 
 	EXE_TYPE m_exeType;			// EXE_WINDOW, EXE_CONSOLE, EXE_LIB, EXE_DLL or EXE_DEFAULT
 
@@ -104,25 +106,25 @@ public:
 	size_t m_CompilerType;		// COMPILER_CLANG, COMPILER_MSVC or COMPILER_DEFAULT
 	size_t m_IDE;				// IDE_CODEBLOCK, IDE_CODELITE, IDE_VS or IDE_NONE
 
-	ttCStr m_cszLibs;				// additional libraries to link to
+	ttCStr m_cszLibs;			// additional libraries to link to
 	ttCStr m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
 
-	ttCStr m_cszLibDirs;			// additional library directories to search
-	ttCStr m_cszIncDirs;			// additional include directories to search
+	ttCStr m_cszLibDirs;		// additional library directories to search
+	ttCStr m_cszIncDirs;		// additional include directories to search
 
 	ttCStr m_cszCFlags;			// additional flags to pass to the compiler in all build targets
 	ttCStr m_cszLinkFlags;		// additional flags to pass to the linker in all build targets
-
-	ttCStr m_cszTarget32;			// target directory for non-64 bit builds
-	ttCStr m_cszTarget64;			// target directory for 64 bit builds
-
 	ttCStr m_cszMidlFlags;		// flags to pass to the midl compiler
-	ttCStr m_cszLibName;			// name and location of any additional library to build (used by Lib: section)
-	ttCStr m_cszLibPCHheader;		// header file to use for Lib precompilation
+
+	ttCStr m_cszTarget32;		// target directory for non-64 bit builds
+	ttCStr m_cszTarget64;		// target directory for 64 bit builds
+
+	ttCStr m_cszLibName;		// name and location of any additional library to build (used by Lib: section)
+	ttCStr m_cszLibPCHheader;	// header file to use for Lib precompilation
 	ttCStr m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
-	ttCStr m_cszProjectName;		// name of the project
+	ttCStr m_cszProjectName;	// name of the project
 	ttCStr m_cszRcName;			// resource file to build (if any)
-	ttCStr m_cszHHPName;			// HTML Help project file
+	ttCStr m_cszHHPName;		// HTML Help project file
 	ttCStr m_cszSrcPattern;		// Specifies one or more wildcards to add to Files: section
 
 	ttCHeap m_ttHeap;			// all the ttCList files will be attatched to this heap
@@ -145,6 +147,15 @@ public:
 protected:
 	bool m_bRead;				// file has been read and processed
 	bool m_bReadingPrivate;		// true if we are reading a private file
+
+	typedef struct {
+		const char* pszOption;
+		ttCStr*	pcszVal;
+	} OPT_VAL;
+	ttCArray<OPT_VAL> m_aOptVal;
+
+	void AddOptVal(const char* pszOption, ttCStr*	pcszVal);
+	bool UpdateOptVal(const char* pszKey, const char* pszVal);
 };
 
 #endif	// __CSRCFILES_H__
