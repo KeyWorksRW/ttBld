@@ -11,6 +11,7 @@
 #include <ttstr.h>					// ttCStr
 
 #include "bldmaster.h"				// CBldMaster
+#include "../common/strtable.h" 	// String resource IDs
 
 CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 {
@@ -94,7 +95,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 	if (!kf.ReadFile(pszHdr ? pszHdr : pszRcFile)) {
 		if (!pszHdr) {	// we should have already reported a problem with a missing header file
 			ttCStr cszErrMsg;
-			cszErrMsg.printf("Cannot open %s", pszRcFile);
+			cszErrMsg.printf(tt::getResString(IDS_CANNOT_OPEN), pszRcFile);
 			m_lstErrors += cszErrMsg;
 		}
 		return false;
@@ -147,7 +148,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 				if (!tt::FileExists(cszHeader)) {
 					ttCStr cszErrMsg;
-					cszErrMsg.printf("%s(%kt,%kt):  warning: cannot locate include file %s",
+					cszErrMsg.printf(tt::getResString(IDS_MISSING_INCLUDE),
 						pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
 					m_lstErrors += cszErrMsg;
 					continue;
@@ -215,7 +216,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 						if (!tt::FileExists(cszFile)) {
 							ttCStr cszErrMsg;
-							cszErrMsg.printf("%s(%kt,%kt):  warning: cannot locate include file %s",
+							cszErrMsg.printf(tt::getResString(IDS_MISSING_INCLUDE),
 								pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (pszFileName - kf.GetLnPtr()),  (char*) cszFile);
 							m_lstErrors += cszErrMsg;
 							break;
