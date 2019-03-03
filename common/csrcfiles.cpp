@@ -57,8 +57,8 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	// options. To add a new option, add the ttCStr member in csrcfiles.h,	then add the option name and the ttCStr
 	// member here.
 
-	AddOptVal("Project", &m_cszProjectName);
-	AddOptVal("PCH", &m_cszPCHheader);
+	AddOptVal("Project",   &m_cszProjectName);
+	AddOptVal("PCH",       &m_cszPCHheader);
 
 	AddOptVal("CFlags",    &m_cszCFlags);
 	AddOptVal("MidlFlags", &m_cszMidlFlags);
@@ -71,12 +71,13 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	AddOptVal("LibDirs",   &m_cszLibDirs);
 	AddOptVal("Sources",   &m_cszSrcPattern);
 
-	AddOptVal("64Bit", &m_b64bit);
+	AddOptVal("64Bit",      &m_b64bit);
 	AddOptVal("bit_suffix", &m_bBitSuffix);
+	AddOptVal("DebugRC",    &m_bDebugRC);
 	AddOptVal("permissive", &m_bPermissive);
-	AddOptVal("stdcall", &m_bStdcall);
+	AddOptVal("stdcall",    &m_bStdcall);
 	AddOptVal("static_crt", &m_bStaticCrt);
-	AddOptVal("ms_linker", &m_bUseMsvcLinker);
+	AddOptVal("ms_linker",  &m_bUseMsvcLinker);
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
