@@ -5,11 +5,9 @@ Options:
 	64Bit:		true	  # create 64-bit project
 	bit_suffix: true	  # add "64" to the end of the project name (e.g., ../bin64/MakeSrcFiles.exe)
 
-# Before making pulblic, change ../../ttLib to ../ttLib to use sub module instead of actual repository
-
-	IncDirs: ../MakeSrcFiles;../../ttLib/include	# ../MakeSrcFiles so that files in ../common can locate pch.h
+	IncDirs: ../MakeSrcFiles;../ttLib/include	# ../MakeSrcFiles so that files in ../common can locate pch.h
 	TargetDirs:	 ../bin; ../bin64
-	BuildLibs: ../../ttLib/lib/ttLib
+	BuildLibs: ../ttLib/lib/ttLib
 
 Files:
 	pch.cpp
