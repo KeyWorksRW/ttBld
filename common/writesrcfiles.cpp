@@ -152,6 +152,11 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		}
 	}
 
+	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
+		CSrcOption* pcls = m_aOptions.GetValueAt(pos);	// just to make the code look a bit cleaner
+		UpdateShortOption(pcls->getName(), pcls->getStringOption(), pcls->getComment(), pcls->isRequired());
+	}
+
 	// Long options don't have default comments, though we will keep any comments the user may have added. If we pass a
 	// null or empty pointer for the value then we completely delete the option if there already was one
 

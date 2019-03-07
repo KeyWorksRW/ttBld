@@ -40,7 +40,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 		cszExtraLib.ChangeExtension(".lib");
 	}
 
-	ttCStr cszProj(getProjName());	// If needed, add a suffix to the project name
+	ttCStr cszProj(GetProjectName());	// If needed, add a suffix to the project name
 
 	// Don't add the 'D' to the end of DLL's -- it is perfectly viable for a release app to use a debug dll and that
 	// won't work if the filename has changed. Under MSVC Linker, it will also generate a LNK4070 error if the dll name
@@ -99,7 +99,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 	// Figure out the filenames to use for the source and output for a precompiled header
 
 	if (getPchName()) {
-		m_cszPCH = getProjName();
+		m_cszPCH = GetProjectName();
 		m_cszPCH.ChangeExtension(".pch");
 		m_cszCPP_PCH = getPchName();
 
@@ -380,7 +380,7 @@ void CNinja::WriteCompilerDirectives()
 					"rule compilePCH\n"
 					"  deps = msvc\n"
 					"  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
-					getProjName(),
+					GetProjectName(),
 					getPchName() 					// typically stdafx.h or precomp.h
 					);
 			m_pkfOut->WriteEol("  description = compiling $in\n");
@@ -393,7 +393,7 @@ void CNinja::WriteCompilerDirectives()
 					"rule compile\n"
 					"  deps = msvc\n"
 					"  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
-					getProjName(),
+					GetProjectName(),
 					getPchName() ? "-Yu" : "", getPchName() ? getPchName() : ""
 					);
 		}
@@ -414,7 +414,7 @@ void CNinja::WriteCompilerDirectives()
 					"rule compilePCH\n"
 					"  deps = msvc\n"
 					"  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
-					getProjName(),
+					GetProjectName(),
 					getPchName() 					// typically stdafx.h or precomp.h
 					);
 			m_pkfOut->WriteEol("  description = compiling $in\n");
@@ -427,7 +427,7 @@ void CNinja::WriteCompilerDirectives()
 					"rule compile\n"
 					"  deps = msvc\n"	// clang-cl supports -showIncludes, same as msvc
 					"  command = clang-cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
-					getProjName(),
+					GetProjectName(),
 					getPchName() ? "-Yu" : "", getPchName() ? getPchName() : ""
 					);
 		}
@@ -460,7 +460,7 @@ void CNinja::WriteLinkDirective()
 
 		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
 			cszRule +=" /DEBUG /PDB:$outdir/";
-			cszRule += getProjName();
+			cszRule += GetProjectName();
 			cszRule += ".pdb";
 		}
 		else
@@ -485,7 +485,7 @@ void CNinja::WriteLinkDirective()
 
 		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
 			cszRule +=" /debug /pdb:$outdir/";
-			cszRule += getProjName();
+			cszRule += GetProjectName();
 			cszRule += ".pdb";
 		}
 		else {

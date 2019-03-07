@@ -19,6 +19,11 @@
 
 #include "srcoptions.h" 	// CSrcOption
 
+typedef enum {
+	OPT_ERROR = 0,
+	OPT_PROJECT
+} OPT_INDEX;
+
 extern const char* txtSrcFilesFileName;
 
 class CSrcFiles
@@ -78,18 +83,19 @@ public:
 	bool isLibApp() { return m_exeType == EXE_LIB; }
 	bool isDllApp() { return m_exeType == EXE_DLL; }
 
-	const char* GetProjectName() { return m_cszProjectName; }
-
 	void AddSourcePattern(const char* pszFilePattern);
 
 public:
-	typedef enum {
-		OPT_ERROR = 0,
-		OPT_PROJECT
-	} OPT_INDEX;
 
 	bool		GetBoolOption(OPT_INDEX index);
 	const char* GetStringOption(OPT_INDEX index);
+
+	OPT_INDEX   UpdateOption(const char* pszName, const char* pszValue, const char* pszComment = nullptr);
+	void        UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment = nullptr);
+
+	// These are just for convenience--it's fine to call GetStringOption directly
+
+	const char* GetProjectName() { return GetStringOption(OPT_PROJECT); }
 
 protected:
 	void ProcessFile(char* pszFile);
@@ -136,7 +142,6 @@ public:
 	ttCStr m_cszLibName;		// name and location of any additional library to build (used by Lib: section)
 	ttCStr m_cszLibPCHheader;	// header file to use for Lib precompilation
 	ttCStr m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
-	ttCStr m_cszProjectName;	// name of the project
 	ttCStr m_cszRcName;			// resource file to build (if any)
 	ttCStr m_cszHHPName;		// HTML Help project file
 	ttCStr m_cszSrcPattern;		// Specifies one or more wildcards to add to Files: section
@@ -189,8 +194,6 @@ protected:
 	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;
 
 	void AddOption(OPT_INDEX opt, const char* pszName, bool bRequired = false);
-	OPT_INDEX UpdateOption(const char* pszName, const char* pszValue, const char* pszComment = nullptr);
-
 };
 
 #endif	// __CSRCFILES_H__

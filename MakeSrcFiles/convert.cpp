@@ -101,7 +101,7 @@ bool ConvertCodeLite(const char* pszBldFile)
 		}
 		const char* pszProject = pProject->GetAttribute("Name");
 		if (pszProject && *pszProject)
-			cSrcFiles.m_cszProjectName = pszProject;
+			cSrcFiles.UpdateOption(OPT_PROJECT, pszProject);
 
 		for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 			ttCXMLBranch* pItem = pProject->GetChildAt(item);
@@ -145,7 +145,7 @@ bool ConvertCodeBlocks(const char* pszBldFile)
 			ttCXMLBranch* pItem = pProject->GetChildAt(item);
 			if (tt::isSameStri(pItem->GetName(), "Option")) {
 				if (pItem->GetAttribute("title"))
-					cSrcFiles.m_cszProjectName = pItem->GetAttribute("title");
+					cSrcFiles.UpdateOption(OPT_PROJECT, pItem->GetAttribute("title"));
 			}
 			else if (tt::isSameStri(pItem->GetName(), "Unit")) {
 				if (isValidSrcFile(pItem->GetAttribute("filename")))
@@ -227,7 +227,7 @@ bool ConvertVcProj(const char* pszBldFile)
 		}
 
 		if (pProject->GetAttribute("Name"))
-			cSrcFiles.m_cszProjectName = pProject->GetAttribute("Name");
+			cSrcFiles.UpdateOption(OPT_PROJECT, pProject->GetAttribute("Name"));
 
 		ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
 		if (!pFiles)	{

@@ -33,7 +33,6 @@ public:
 
 	size_t getSrcCount() { return m_lstSrcFiles.GetCount(); }
 
-	void setProjName(const char* pszName) { if (pszName && *pszName) m_cszProjectName = pszName; }
 	bool CreateMakeFile();
 
 	bool isPermissive()	{ return m_bPermissive; }
@@ -82,7 +81,6 @@ public:
 	const char* getLibName()	{ return m_cszLibName; }		// name and location of any additional library to build
 	const char* getLinkFlags()	{ return m_cszLinkFlags; }
 
-	const char* getProjName()	{ return m_cszProjectName; }
 	const char* getPchName()	{ return m_cszPCHheader; }
 	const char* getHHPName()	{ return m_cszHHPName; }
 

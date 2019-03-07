@@ -58,7 +58,7 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	// If the option value is a simple string or true/false value, it can be added here and it will automatically be read
 	// and written.
 
-	AddOptVal("Project",   &m_cszProjectName, "project target name");
+//	AddOptVal("Project",   &m_cszProjectName, "project target name");
 	AddOptVal("PCH",       &m_cszPCHheader);
 
 	AddOptVal("CFlags",    &m_cszCFlags);
@@ -150,19 +150,19 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
 	// Everything has been processed, if options were not specified that are needed, make some default assumptions
 
-	if (m_cszProjectName.isEmpty())	{
+	if (tt::isEmpty(GetProjectName())) {
 		ttCStr cszProj;
 		cszProj.getCWD();
 		char* pszProj = tt::findFilePortion(cszProj);
 		if (pszProj && !tt::isSameStri(pszProj, "src"))
-			m_cszProjectName = pszProj;
+			UpdateOption(OPT_PROJECT, pszProj);
 		else {
 			if (pszProj > cszProj.getPtr())
 				--pszProj;
 			*pszProj = 0;
 			pszProj = tt::findFilePortion(cszProj);
 			if (pszProj)
-				m_cszProjectName = pszProj;
+				UpdateOption(OPT_PROJECT, pszProj);
 		}
 	}
 
@@ -189,7 +189,8 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
 		return;
 
-	OPT_INDEX index = UpdateOption(cszName, cszVal, cszComment);
+	if (UpdateOption(cszName, cszVal, cszComment) != OPT_ERROR)
+		return;
 
 	if (UpdateOptVal(cszName, (const char*) cszVal, cszComment))	// process all options that have a string value
 		return;
@@ -573,7 +574,7 @@ void CSrcFiles::AddOption(OPT_INDEX opt, const char* pszName, bool bRequired)
 	m_aOptions.GetValueAt(pos)->AddOption(pszName, bRequired);
 }
 
-CSrcFiles::OPT_INDEX CSrcFiles::UpdateOption(const char* pszName, const char* pszValue, const char* pszComment)
+OPT_INDEX CSrcFiles::UpdateOption(const char* pszName, const char* pszValue, const char* pszComment)
 {
 	ttASSERT_NONEMPTY(pszName);
 	if (tt::isEmpty(pszName))
@@ -587,6 +588,14 @@ CSrcFiles::OPT_INDEX CSrcFiles::UpdateOption(const char* pszName, const char* ps
 	}
 
 	return OPT_ERROR;
+}
+
+void CSrcFiles::UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment)
+{
+	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+	ptrdiff_t pos = m_aOptions.FindKey(index);
+	if (pos >= 0)
+		m_aOptions.GetValueAt(pos)->UpdateOption(pszValue, pszComment);
 }
 
 bool CSrcFiles::GetBoolOption(OPT_INDEX index)

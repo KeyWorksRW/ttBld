@@ -31,7 +31,7 @@ public:
 	// The following two functions assume you already know if the option uses a string value or a boolean value
 
 	const char* getStringOption() { return m_pszVal; }
-	bool 		getBoolOption()   { return (m_pszVal ? true : false); }
+	bool 		getBoolOption()   { return (m_pszVal ? m_pszVal[0] == 't' : false); }
 
 	void AddOption(const char* pszName, bool bRequired = false);
 	void UpdateOption(bool bValue, const char* pszComment = nullptr);

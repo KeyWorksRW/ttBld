@@ -28,7 +28,27 @@ void CSrcOption::AddOption(const char* pszName, bool bRequired)
 
 void CSrcOption::UpdateOption(bool bValue, const char* pszComment)
 {
-	m_pszVal = (bValue ? (char*) 1 : (char*) 0);
+	if (bValue) {
+		if (m_pszVal) {
+			if (m_pszVal[0] != 't') {
+				tt::FreeAlloc(m_pszVal);
+				m_pszVal = tt::StrDup("true");
+			}
+		}
+		else
+			m_pszVal = tt::StrDup("true");
+	}
+	else {
+		if (m_pszVal) {
+			if (m_pszVal[0] != 'f') {
+				tt::FreeAlloc(m_pszVal);
+				m_pszVal = tt::StrDup("false");
+			}
+		}
+		else
+			m_pszVal = tt::StrDup("false");
+	}
+
 	if (!pszComment) {
 		if (m_pszComment) {
 			tt::FreeAlloc(m_pszComment);

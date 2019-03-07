@@ -221,7 +221,10 @@ void CDlgSrcOptions::OnBegin(void)
 
 void CDlgSrcOptions::OnOK(void)
 {
-	m_cszProjectName.getWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
+	ttCStr csz;
+	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
+	UpdateOption(OPT_PROJECT, csz);
+
 	m_cszCFlags.getWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
 	m_cszLinkFlags.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LINK_FLAGS)));
 	m_cszLibs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));

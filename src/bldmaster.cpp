@@ -48,7 +48,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 		}
 	}
 
-	if (!getProjName()) {
+	if (!GetProjectName()) {
 		ttCStr cszCwd;
 		cszCwd.getCWD();
 		char* pszTmp = (char*) cszCwd.findLastSlash();
@@ -63,7 +63,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 				pszProj = tt::findFilePortion(cszCwd);
 			}
 		}
-		setProjName(pszProj);
+		UpdateOption(OPT_PROJECT, pszProj);
 	}
 
 	m_lstRcDependencies.SetFlags(ttCList::FLG_URL_STRINGS);
@@ -257,7 +257,7 @@ const char* CBldMaster::GetTargetDebug()
 			cszTargetDebug = m_cszTarget32;
 		else
 			cszTargetDebug = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetDebug.AppendFileName(getProjName());
+		cszTargetDebug.AppendFileName(GetProjectName());
 		cszTargetDebug += "D.lib";
 		return cszTargetDebug;
 	}
@@ -267,7 +267,7 @@ const char* CBldMaster::GetTargetDebug()
 			cszTargetDebug = m_cszTarget32;
 		else
 			cszTargetDebug = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetDebug.AppendFileName(getProjName());
+		cszTargetDebug.AppendFileName(GetProjectName());
 		cszTargetDebug += ".dll";	// Note that we do NOT add a 'D' to the end of the dll name
 		return cszTargetDebug;
 	}
@@ -276,7 +276,7 @@ const char* CBldMaster::GetTargetDebug()
 			cszTargetDebug = m_cszTarget32;
 		else
 			cszTargetDebug = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetDebug.AppendFileName(getProjName());
+		cszTargetDebug.AppendFileName(GetProjectName());
 		cszTargetDebug += "D.exe";
 		return cszTargetDebug;
 	}
@@ -292,7 +292,7 @@ const char* CBldMaster::GetTargetRelease()
 			cszTargetRelease = m_cszTarget32;
 		else
 			cszTargetRelease = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetRelease.AppendFileName(getProjName());
+		cszTargetRelease.AppendFileName(GetProjectName());
 		cszTargetRelease += ".lib";
 		return cszTargetRelease;
 	}
@@ -302,7 +302,7 @@ const char* CBldMaster::GetTargetRelease()
 			cszTargetRelease = m_cszTarget32;
 		else
 			cszTargetRelease = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetRelease.AppendFileName(getProjName());
+		cszTargetRelease.AppendFileName(GetProjectName());
 		cszTargetRelease += ".dll";
 		return cszTargetRelease;
 	}
@@ -311,7 +311,7 @@ const char* CBldMaster::GetTargetRelease()
 			cszTargetRelease = m_cszTarget32;
 		else
 			cszTargetRelease = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetRelease.AppendFileName(getProjName());
+		cszTargetRelease.AppendFileName(GetProjectName());
 		cszTargetRelease += ".exe";
 		return cszTargetRelease;
 	}
@@ -327,7 +327,7 @@ const char* CBldMaster::GetTargetDebug64()
 			cszTargetDebug64 = m_cszTarget64;
 		else
 			cszTargetDebug64 = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetDebug64.AppendFileName(getProjName());
+		cszTargetDebug64.AppendFileName(GetProjectName());
 		cszTargetDebug64 += is64BitSuffix() ? "64D.lib" : "D.lib";
 		return cszTargetDebug64;
 	}
@@ -337,7 +337,7 @@ const char* CBldMaster::GetTargetDebug64()
 			cszTargetDebug64 = m_cszTarget64;
 		else
 			cszTargetDebug64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetDebug64.AppendFileName(getProjName());
+		cszTargetDebug64.AppendFileName(GetProjectName());
 		cszTargetDebug64 = (isBin64() || !is64BitSuffix()) ? ".dll" : "64.dll";
 		return cszTargetDebug64;
 	}
@@ -346,7 +346,7 @@ const char* CBldMaster::GetTargetDebug64()
 			cszTargetDebug64 = m_cszTarget64;
 		else
 			cszTargetDebug64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetDebug64.AppendFileName(getProjName());
+		cszTargetDebug64.AppendFileName(GetProjectName());
 		cszTargetDebug64 += (isBin64() || !is64BitSuffix()) ? "D.exe" : "64D.exe";
 		return cszTargetDebug64;
 	}
@@ -362,7 +362,7 @@ const char* CBldMaster::GetTargetRelease64()
 			cszTargetRelease64 = m_cszTarget64;
 		else
 			cszTargetRelease64 = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetRelease64.AppendFileName(getProjName());
+		cszTargetRelease64.AppendFileName(GetProjectName());
 		cszTargetRelease64 += is64BitSuffix() ? "64.lib" : ".lib";
 		return cszTargetRelease64;
 	}
@@ -372,7 +372,7 @@ const char* CBldMaster::GetTargetRelease64()
 			cszTargetRelease64 = m_cszTarget64;
 		else
 			cszTargetRelease64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetRelease64.AppendFileName(getProjName());
+		cszTargetRelease64.AppendFileName(GetProjectName());
 		cszTargetRelease64 = (isBin64() || !is64BitSuffix()) ? ".dll" : "64.dll";
 		return cszTargetRelease64;
 	}
@@ -381,7 +381,7 @@ const char* CBldMaster::GetTargetRelease64()
 			cszTargetRelease64 = m_cszTarget64;
 		else
 			cszTargetRelease64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetRelease64.AppendFileName(getProjName());
+		cszTargetRelease64.AppendFileName(GetProjectName());
 		cszTargetRelease64 += (isBin64() || !is64BitSuffix()) ? ".exe" : "64.exe";;
 		return cszTargetRelease64;
 	}
