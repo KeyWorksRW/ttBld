@@ -28,7 +28,7 @@ public:
 	ttCList* GetOrgList() { return &m_lstOriginal; }
 	void UpdateOptionsSection();
 	void UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment = nullptr);
-	void UpdateOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite = false);
+	void UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite = false);
 
 	void EnableDryRun() { m_dryrun.Enable(); }
 

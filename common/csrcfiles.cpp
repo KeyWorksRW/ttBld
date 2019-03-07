@@ -53,11 +53,12 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
 
-	// Add all options that are strings and don't need special handling below. This will automatically read and write the
-	// options. To add a new option, add the ttCStr member in csrcfiles.h,	then add the option name and the ttCStr
-	// member here.
+	AddOption(OPT_PROJECT, "Project", true);
 
-	AddOptVal("Project",   &m_cszProjectName);
+	// If the option value is a simple string or true/false value, it can be added here and it will automatically be read
+	// and written.
+
+	AddOptVal("Project",   &m_cszProjectName, "project target name");
 	AddOptVal("PCH",       &m_cszPCHheader);
 
 	AddOptVal("CFlags",    &m_cszCFlags);
@@ -80,6 +81,14 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	AddOptVal("ms_linker",  &m_bUseMsvcLinker);
 }
 
+CSrcFiles::~CSrcFiles()
+{
+	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
+		if (m_aOptVal[pos].pszComment)
+			tt::FreeAlloc(m_aOptVal[pos].pszComment);
+	}
+}
+
 bool CSrcFiles::ReadFile(const char* pszFile)
 {
 	ttCFile kfSrcFiles;
@@ -95,11 +104,6 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 		char* pszBegin = tt::findNonSpace(pszLine);	// ignore any leading spaces
 		if (tt::isEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-')) {	// ignore empty, comment or divider lines
 			continue;
-		}
-		char* pszComment = tt::findChar(pszBegin, '#');	// strip off any comments
-		if (pszComment) {
-			*pszComment = 0;
-			tt::trimRight(pszBegin);		// remove any trailing white space
 		}
 
 		if (tt::isSameSubStri(pszBegin, "%YAML")) {	// not required, but possible a YAML editor could add this
@@ -176,26 +180,22 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
 void CSrcFiles::ProcessOption(char* pszLine)
 {
-	char* pszVal = strpbrk(pszLine, ":=");
-	ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
-	if (!pszVal)
-		return;
-	*pszVal = 0;
-	pszVal = tt::findNonSpace(pszVal + 1);
+	ttCStr cszName, cszVal, cszComment;
 
-	// remove any comment
-
-	char* pszTmp = tt::findChar(pszVal, '#');
-	if (pszTmp)
-		*pszTmp = 0;
-
-	tt::trimRight(pszVal);	// remove any trailing whitespace
-
-	if (UpdateOptVal(pszLine, pszVal))	// process all options that have a string value
+	if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
 		return;
 
-	if (tt::isSameStri(pszLine, "IDE")) {
-		ttCEnumStr cenum(pszVal, ' ');
+	if (UpdateOptVal(cszName, (const char*) cszVal, cszComment))	// process all options that have a string value
+		return;
+
+	bool bYesNo = tt::isSameStri(cszVal, "true") || tt::isSameStri(cszVal, "yes");
+	if (UpdateOptVal(cszName, bYesNo, cszComment))	// process all options that have a boolean value
+		return;
+
+	// Everything below requires special handling
+
+	if (tt::isSameStri(cszName, "IDE")) {
+		ttCEnumStr cenum(cszVal, ' ');
 		m_IDE = 0;
 		while (cenum.Enum()) {
 			if (tt::isSameStri(cenum, "CodeBlocks"))
@@ -208,8 +208,8 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameStri(pszLine, "Compilers")) {
-		ttCEnumStr cenum(pszVal, ' ');
+	if (tt::isSameStri(cszName, "Compilers")) {
+		ttCEnumStr cenum(cszVal, ' ');
 		m_CompilerType = 0;
 		while (cenum.Enum()) {
 			if (tt::isSameStri(cenum, "CLANG"))
@@ -220,19 +220,19 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameStri(pszLine, "Makefile")) {
+	if (tt::isSameStri(cszName, "Makefile")) {
 		m_fCreateMakefile = MAKEMAKE_DEFAULT;
-		if (tt::isSameSubStri(pszVal, "never"))
+		if (tt::isSameSubStri(cszVal, "never"))
 			m_fCreateMakefile = MAKEMAKE_NEVER;
-		else if (tt::isSameSubStri(pszVal, "missing"))
+		else if (tt::isSameSubStri(cszVal, "missing"))
 			m_fCreateMakefile = MAKEMAKE_MISSING;
-		else if (tt::isSameSubStri(pszVal, "always"))
+		else if (tt::isSameSubStri(cszVal, "always"))
 			m_fCreateMakefile = MAKEMAKE_ALWAYS;
 		return;
 	}
 
-	if (tt::isSameStri(pszLine, "TargetDirs")) {
-		ttCEnumStr cenum(pszVal, ';');
+	if (tt::isSameStri(cszName, "TargetDirs")) {	// first target is 32-bit directory, second is 64-bit directory
+		ttCEnumStr cenum(cszVal, ';');
 		if (cenum.Enum())
 			m_cszTarget32 = cenum;
 		if (cenum.Enum())
@@ -240,26 +240,26 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameStri(pszLine, "exe_type")) {
-		if (tt::isSameSubStri(pszVal, "window"))
+	if (tt::isSameStri(cszName, "exe_type")) {
+		if (tt::isSameSubStri(cszVal, "window"))
 			m_exeType = EXE_WINDOW;
-		else if (tt::isSameSubStri(pszVal, "console"))
+		else if (tt::isSameSubStri(cszVal, "console"))
 			m_exeType = EXE_CONSOLE;
-		else if (tt::isSameSubStri(pszVal, "lib"))
+		else if (tt::isSameSubStri(cszVal, "lib"))
 			m_exeType = EXE_LIB;
-		else if (tt::isSameSubStri(pszVal, "dll"))
+		else if (tt::isSameSubStri(cszVal, "dll"))
 			m_exeType = EXE_DLL;
 		return;
 	}
 
-	if (tt::isSameStri(pszLine, "optimize")) {
-		m_bBuildForSpeed = tt::isSameSubStri(pszVal, "speed");
+	if (tt::isSameStri(cszName, "optimize")) {
+		m_bBuildForSpeed = tt::isSameSubStri(cszVal, "speed");
 		return;
 	}
 
-	if (tt::isSameStri(pszLine, "BuildLibs")) {
-		if (pszVal) {
-			m_cszBuildLibs = tt::findNonSpace(pszVal);
+	if (tt::isSameStri(cszName, "BuildLibs")) {
+		if (cszVal.isNonEmpty()) {
+			m_cszBuildLibs = tt::findNonSpace(cszVal);
 			// Remove any .lib extension--we are looking for the target name, not the library name
 			char* pszLibExt = tt::findStri(m_cszBuildLibs, ".lib");
 			while (pszLibExt) {
@@ -270,17 +270,13 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 	}
 
-	if (tt::isSameStri(pszLine, "WarnLevel")) {
-		m_WarningLevel = tt::Atoi(pszVal);
+	if (tt::isSameStri(cszName, "WarnLevel")) {
+		m_WarningLevel = tt::Atoi(cszVal);
 		return;
 	}
 
-	bool bYesNo = tt::isSameSubStri(pszVal, "true") || tt::isSameSubStri(pszVal, "yes");
-	if (UpdateOptVal(pszLine, bYesNo))	// process all options that have a boolean value
-		return;
-
 	ttCStr csz;
-	csz.printf(tt::getResString(IDS_UNKNOWN_OPTION), pszLine);
+	csz.printf(tt::getResString(IDS_UNKNOWN_OPTION), (char*) cszName);
 	m_lstErrors += csz;
 }
 
@@ -462,42 +458,109 @@ bool CSrcFiles::ReadTwoFiles(const char* pszMaster, const char* pszPrivate)
 	return true;
 }
 
-void CSrcFiles::AddOptVal(const char* pszOption, bool* pbVal)
+void CSrcFiles::AddOptVal(const char* pszName, bool* pbVal, const char* pszComment)
 {
 	OPT_BOOL optBool;
-	optBool.pszOption = pszOption;
+	optBool.pszName = pszName;
 	optBool.pbVal = pbVal;
+	optBool.pszComment = pszComment ? tt::StrDup(pszComment) : nullptr;
 	m_aOptBool += optBool;
 }
 
-bool CSrcFiles::UpdateOptVal(const char* pszKey, bool bVal)
+bool CSrcFiles::UpdateOptVal(const char* pszName, bool bVal, const char* pszComment)
 {
-	ttASSERT(pszKey);
+	ttASSERT(pszName);
 	for (size_t pos = 0; pos < m_aOptBool.GetCount(); ++pos) {
-		if (tt::isSameStri(pszKey, m_aOptBool[pos].pszOption)) {
+		if (tt::isSameStri(pszName, m_aOptBool[pos].pszName)) {
 			*m_aOptBool[pos].pbVal = bVal;
+			if (pszComment) {
+				if (m_aOptBool[pos].pszComment && !tt::isSameStri(m_aOptBool[pos].pszComment, pszComment)) {
+					tt::FreeAlloc(m_aOptBool[pos].pszComment);
+					//m_aOptBool[pos].pszComment = tt::StrDup(pszComment);
+				}
+			}
 			return true;
 		}
 	}
 	return false;
 }
 
-void CSrcFiles::AddOptVal(const char* pszOption, ttCStr* pcszVal)
+void CSrcFiles::AddOptVal(const char* pszName, ttCStr* pcszVal, const char* pszComment)
 {
 	OPT_VAL optVal;
-	optVal.pszOption = pszOption;
+	optVal.pszName = pszName;
 	optVal.pcszVal = pcszVal;
+	optVal.pszComment = pszComment ? tt::StrDup(pszComment) : nullptr;
 	m_aOptVal += optVal;
 }
 
-bool CSrcFiles::UpdateOptVal(const char* pszKey, const char* pszVal)
+bool CSrcFiles::UpdateOptVal(const char* pszName, const char* pszVal, const char* pszComment)
 {
-	ttASSERT(pszKey && pszVal);
+	ttASSERT(pszName && pszVal);
 	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
-		if (tt::isSameStri(pszKey, m_aOptVal[pos].pszOption)) {
+		if (tt::isSameStri(pszName, m_aOptVal[pos].pszName)) {
 			m_aOptVal[pos].pcszVal->strCopy(pszVal);
+			if (pszComment) {
+				if (m_aOptVal[pos].pszComment && !tt::isSameStri(m_aOptVal[pos].pszComment, pszComment)) {
+					tt::FreeAlloc(m_aOptVal[pos].pszComment);
+					//m_aOptVal[pos].pszComment = tt::StrDup(pszComment);
+				}
+			}
 			return true;
 		}
 	}
 	return false;
+}
+
+// .srcfiles is a YAML file, so the value of the option may be within a single or double quote. That means we can't just
+// search for '#' to find the comment, we must first step over any opening/closing quote.
+
+bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment)
+{
+	char* pszVal = strpbrk(pszLine, ":=");
+	ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
+	if (!pszVal) {
+		ttCStr cszTmp;
+		cszTmp.printf(tt::getResString(IDS_OPT_MISSING_COLON), pszLine);
+		m_lstErrors += cszTmp;
+		return false;
+	}
+	*pszVal = 0;
+	cszName = pszLine;
+	pszVal = tt::findNonSpace(pszVal + 1);
+
+	if (*pszVal == CH_QUOTE || *pszVal == CH_SQUOTE || *pszVal == CH_START_QUOTE) {
+		cszVal.getQuotedString(pszVal);
+		pszVal += (cszVal.strLen() + 2);
+		char* pszComment = tt::findChar(pszVal + cszVal.strLen() + 2, '#');
+		if (pszComment)	{
+			pszComment = tt::stepOver(pszComment);
+			tt::trimRight(pszComment);	// remove any trailing whitespace
+			cszComment = pszComment;
+		}
+		else {
+			cszComment.Delete();
+		}
+	}
+	else {	// non-quoted option
+		char* pszComment = tt::findChar(pszVal, '#');
+		if (pszComment) {
+			*pszComment = 0;
+			pszComment = tt::stepOver(pszComment);
+			tt::trimRight(pszComment);	// remove any trailing whitespace
+			cszComment = pszComment;
+		}
+		else {
+			cszComment.Delete();
+		}
+		tt::trimRight(pszVal);	// remove any trailing whitespace
+		cszVal = pszVal;
+	}
+	return true;
+}
+
+void CSrcFiles::AddOption(OPT_INDEX opt, const char* pszName, bool bRequired)
+{
+	ptrdiff_t pos = m_aOptions.Add(opt, new CSrcOption);
+	m_aOptions.GetValueAt(pos)->AddOption(pszName, bRequired);
 }

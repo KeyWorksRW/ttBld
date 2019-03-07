@@ -11,10 +11,13 @@
 #ifndef __CSRCFILES_H__
 #define __CSRCFILES_H__
 
-#include <ttlist.h> 					// ttCList, ttCDblList, ttCStrIntList
-#include <ttstr.h>						// ttStr, ttCWD
-#include <ttfile.h> 					// ttCFile
-#include <ttarray.h>					// ttCArray
+#include <ttlist.h> 		// ttCList, ttCDblList, ttCStrIntList
+#include <ttstr.h>			// ttStr, ttCWD
+#include <ttfile.h> 		// ttCFile
+#include <ttarray.h>		// ttCArray
+#include <ttmap.h>			// ttCMap
+
+#include "srcoptions.h" 	// CSrcOption
 
 extern const char* txtSrcFilesFileName;
 
@@ -22,6 +25,7 @@ class CSrcFiles
 {
 public:
 	CSrcFiles();
+	~CSrcFiles();
 
 	typedef enum {
 		EXE_UNSPECIFIED,
@@ -139,33 +143,46 @@ public:
 
 	ttCStrIntList m_lstAddSrcFiles;		// additional .srcfiles to read into Files: section
 	ttCStrIntList m_lstLibAddSrcFiles;	// additional .srcfiles to read into Lib: section
-	ttCList		 m_lstSrcIncluded;		// the names of all files included by all ".include path/.srcfiles" directives
+	ttCList		  m_lstSrcIncluded;		// the names of all files included by all ".include path/.srcfiles" directives
 
 	// Following are for the makefile: section
 
 	size_t	m_fCreateMakefile;		// MAKEMAKE_NEVER, MAKEMAKE_MISSING or MAKEMAKE_ALWAYS
 
 protected:
+	bool GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment);
+
 	bool m_bRead;				// file has been read and processed
 	bool m_bReadingPrivate;		// true if we are reading a private file
 
 	typedef struct {
-		const char* pszOption;
-		bool*	pbVal;
+		const char* pszName;
+		bool* pbVal;
+		char* pszComment;
 	} OPT_BOOL;
 	ttCArray<OPT_BOOL> m_aOptBool;
 
 	typedef struct {
-		const char* pszOption;
+		const char* pszName;
 		ttCStr*	pcszVal;
+		char*   pszComment;
+		bool	bRequired;
 	} OPT_VAL;
 	ttCArray<OPT_VAL> m_aOptVal;
 
-	void AddOptVal(const char* pszOption, bool*	pbVal);
-	bool UpdateOptVal(const char* pszKey, bool bVal);
+	typedef enum {
+		OPT_PROJECT
+	} OPT_INDEX;
 
-	void AddOptVal(const char* pszOption, ttCStr* pcszVal);
-	bool UpdateOptVal(const char* pszKey, const char* pszVal);
+	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;
+
+	void AddOptVal(const char* pszName, bool*	pbVal, const char* pszComment = nullptr);
+	bool UpdateOptVal(const char* pszName, bool bVal, const char* pszComment);
+
+	void AddOptVal(const char* pszName, ttCStr* pcszVal, const char* pszComment = nullptr);
+	bool UpdateOptVal(const char* pszName, const char* pszVal, const char* pszComment);
+
+	void AddOption(OPT_INDEX opt, const char* pszName, bool bRequired = false);
 };
 
 #endif	// __CSRCFILES_H__
