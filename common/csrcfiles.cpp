@@ -83,6 +83,10 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 
 CSrcFiles::~CSrcFiles()
 {
+	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
+		delete m_aOptions.GetValueAt(pos);
+	}
+
 	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
 		if (m_aOptVal[pos].pszComment)
 			tt::FreeAlloc(m_aOptVal[pos].pszComment);
@@ -184,6 +188,8 @@ void CSrcFiles::ProcessOption(char* pszLine)
 
 	if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
 		return;
+
+	OPT_INDEX index = UpdateOption(cszName, cszVal, cszComment);
 
 	if (UpdateOptVal(cszName, (const char*) cszVal, cszComment))	// process all options that have a string value
 		return;
@@ -496,6 +502,8 @@ void CSrcFiles::AddOptVal(const char* pszName, ttCStr* pcszVal, const char* pszC
 
 bool CSrcFiles::UpdateOptVal(const char* pszName, const char* pszVal, const char* pszComment)
 {
+
+
 	ttASSERT(pszName && pszVal);
 	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
 		if (tt::isSameStri(pszName, m_aOptVal[pos].pszName)) {
@@ -563,4 +571,36 @@ void CSrcFiles::AddOption(OPT_INDEX opt, const char* pszName, bool bRequired)
 {
 	ptrdiff_t pos = m_aOptions.Add(opt, new CSrcOption);
 	m_aOptions.GetValueAt(pos)->AddOption(pszName, bRequired);
+}
+
+CSrcFiles::OPT_INDEX CSrcFiles::UpdateOption(const char* pszName, const char* pszValue, const char* pszComment)
+{
+	ttASSERT_NONEMPTY(pszName);
+	if (tt::isEmpty(pszName))
+		return OPT_ERROR;
+
+	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
+		if (tt::isSameStri(m_aOptions.GetValueAt(pos)->getName(), pszName)) {
+			m_aOptions.GetValueAt(pos)->UpdateOption(pszValue, pszComment);
+			return m_aOptions.GetKeyAt(pos);
+		}
+	}
+
+	return OPT_ERROR;
+}
+
+bool CSrcFiles::GetBoolOption(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+
+	ptrdiff_t pos = m_aOptions.FindKey(index);
+	return (pos >= 0 ? m_aOptions.GetValueAt(pos)->getBoolOption() : false);
+}
+
+const char* CSrcFiles::GetStringOption(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+
+	ptrdiff_t pos = m_aOptions.FindKey(index);
+	return (pos >= 0 ? m_aOptions.GetValueAt(pos)->getStringOption() : nullptr);
 }

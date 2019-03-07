@@ -82,6 +82,15 @@ public:
 
 	void AddSourcePattern(const char* pszFilePattern);
 
+public:
+	typedef enum {
+		OPT_ERROR = 0,
+		OPT_PROJECT
+	} OPT_INDEX;
+
+	bool		GetBoolOption(OPT_INDEX index);
+	const char* GetStringOption(OPT_INDEX index);
+
 protected:
 	void ProcessFile(char* pszFile);
 	void ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFiles, bool bFileSection);
@@ -170,19 +179,18 @@ protected:
 	} OPT_VAL;
 	ttCArray<OPT_VAL> m_aOptVal;
 
-	typedef enum {
-		OPT_PROJECT
-	} OPT_INDEX;
-
-	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;
-
 	void AddOptVal(const char* pszName, bool*	pbVal, const char* pszComment = nullptr);
 	bool UpdateOptVal(const char* pszName, bool bVal, const char* pszComment);
 
 	void AddOptVal(const char* pszName, ttCStr* pcszVal, const char* pszComment = nullptr);
 	bool UpdateOptVal(const char* pszName, const char* pszVal, const char* pszComment);
 
+protected:
+	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;
+
 	void AddOption(OPT_INDEX opt, const char* pszName, bool bRequired = false);
+	OPT_INDEX UpdateOption(const char* pszName, const char* pszValue, const char* pszComment = nullptr);
+
 };
 
 #endif	// __CSRCFILES_H__
