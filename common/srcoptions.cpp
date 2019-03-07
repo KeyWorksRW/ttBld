@@ -26,6 +26,8 @@ void CSrcOption::AddOption(const char* pszName, bool bRequired)
 	m_bRequired = bRequired;
 }
 
+// The true/false strings MUST be lowercase! And yes, they must be strings--their value can be written out without have to convert to a string first
+
 void CSrcOption::UpdateOption(bool bValue, const char* pszComment)
 {
 	if (bValue) {
@@ -61,26 +63,43 @@ void CSrcOption::UpdateOption(bool bValue, const char* pszComment)
 	m_pszComment = tt::StrDup(pszComment);
 }
 
+// It's important that if a zero-length string is passed in, then the matching value or comment should be set to a
+// nullptr. This makes it so that callers only need to check for a nullptr to determine if there is a valid value or
+// comment.
+
 void CSrcOption::UpdateOption(const char* pszVal, const char* pszComment)
 {
-	ttASSERT_MSG(pszVal, "Option value not specified!");
-	if (!pszVal)
-		throw;	// updating an option with a nullptr is going to break reading the option later on
+	if (!pszVal || !*pszVal) {
+		if (m_pszVal) {
+			tt::FreeAlloc(m_pszVal);
+			m_pszVal = nullptr;
+		}
+	}
+	else {
+		if (m_pszVal) {
+			if (!tt::isSameStr(m_pszVal, pszVal)) {		// don't allocate if nothing will change
+				tt::FreeAlloc(m_pszVal);
+				m_pszVal = tt::StrDup(pszVal);
+			}
+		}
+		else
+			m_pszVal = tt::StrDup(pszVal);
+	}
 
-	ttASSERT_MSG(m_pszVal != (char*) 1, "Attempting to update a boolean option with a string value!");
-
-	if (m_pszVal > (char*) 1)
-		tt::FreeAlloc(m_pszVal);
-	m_pszVal = tt::StrDup(pszVal);
-
-	if (!pszComment) {
+	if (!pszComment || !*pszComment) {
 		if (m_pszComment) {
 			tt::FreeAlloc(m_pszComment);
 			m_pszComment = nullptr;
 		}
 	}
-	else if (m_pszComment)
-		tt::FreeAlloc(m_pszComment);
-
-	m_pszComment = tt::StrDup(pszComment);
+	else {
+		if (m_pszComment) {
+			if (!tt::isSameStr(m_pszComment, pszComment)) {		// don't allocate if nothing will change
+				tt::FreeAlloc(m_pszComment);
+				m_pszComment = tt::StrDup(pszComment);
+			}
+		}
+		else
+			m_pszComment = tt::StrDup(pszComment);
+	}
 }
