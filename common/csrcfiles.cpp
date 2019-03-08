@@ -38,7 +38,6 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 
 	m_WarningLevel = WARNLEVEL_DEFAULT;
 	m_IDE = IDE_NONE;
-	m_CompilerType = COMPILER_DEFAULT;
 	m_exeType = EXE_DEFAULT;
 
 	m_fCreateMakefile = MAKEMAKE_DEFAULT;	// create makefile only if it doesn't already exist
@@ -56,6 +55,7 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	AddOption(OPT_BIT_SUFFIX, "bit_suffix", true);
 	AddOption(OPT_DEBUG_RC, "DebugRC", true);
 
+	AddOption(OPT_COMPILERS, "Compilers");
 	AddOption(OPT_CFLAGS, "CFlags");
 	AddOption(OPT_MIDL_FLAGS, "MidlFlags");
 	AddOption(OPT_LINK_FLAGS, "LinkFlags");
@@ -178,13 +178,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	if (UpdateOption(cszName, cszVal, cszComment) != OPT_ERROR)
 		return;
 
-	if (UpdateOptVal(cszName, (const char*) cszVal, cszComment))	// process all options that have a string value
-		return;
-
-	bool bYesNo = tt::isSameStri(cszVal, "true") || tt::isSameStri(cszVal, "yes");
-	if (UpdateOptVal(cszName, bYesNo, cszComment))	// process all options that have a boolean value
-		return;
-
 	// Everything below requires special handling
 
 	if (tt::isSameStri(cszName, "IDE")) {
@@ -197,18 +190,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
 				m_IDE |= IDE_CODELITE;
 			else if (tt::isSameStri(cenum, "VisualStudio"))
 				m_IDE |= IDE_VS;
-		}
-		return;
-	}
-
-	if (tt::isSameStri(cszName, "Compilers")) {
-		ttCEnumStr cenum(cszVal, ' ');
-		m_CompilerType = 0;
-		while (cenum.Enum()) {
-			if (tt::isSameStri(cenum, "CLANG"))
-				m_CompilerType |= COMPILER_CLANG;
-			else if (tt::isSameStri(cenum, "MSVC"))
-				m_CompilerType |= COMPILER_MSVC;
 		}
 		return;
 	}
@@ -457,62 +438,6 @@ bool CSrcFiles::ReadTwoFiles(const char* pszMaster, const char* pszPrivate)
 	// successfully read.
 
 	return true;
-}
-
-void CSrcFiles::AddOptVal(const char* pszName, bool* pbVal, const char* pszComment)
-{
-	OPT_BOOL optBool;
-	optBool.pszName = pszName;
-	optBool.pbVal = pbVal;
-	optBool.pszComment = pszComment ? tt::StrDup(pszComment) : nullptr;
-	m_aOptBool += optBool;
-}
-
-bool CSrcFiles::UpdateOptVal(const char* pszName, bool bVal, const char* pszComment)
-{
-	ttASSERT(pszName);
-	for (size_t pos = 0; pos < m_aOptBool.GetCount(); ++pos) {
-		if (tt::isSameStri(pszName, m_aOptBool[pos].pszName)) {
-			*m_aOptBool[pos].pbVal = bVal;
-			if (pszComment) {
-				if (m_aOptBool[pos].pszComment && !tt::isSameStri(m_aOptBool[pos].pszComment, pszComment)) {
-					tt::FreeAlloc(m_aOptBool[pos].pszComment);
-					//m_aOptBool[pos].pszComment = tt::StrDup(pszComment);
-				}
-			}
-			return true;
-		}
-	}
-	return false;
-}
-
-void CSrcFiles::AddOptVal(const char* pszName, ttCStr* pcszVal, const char* pszComment)
-{
-	OPT_VAL optVal;
-	optVal.pszName = pszName;
-	optVal.pcszVal = pcszVal;
-	optVal.pszComment = pszComment ? tt::StrDup(pszComment) : nullptr;
-	m_aOptVal += optVal;
-}
-
-bool CSrcFiles::UpdateOptVal(const char* pszName, const char* pszVal, const char* pszComment)
-{
-
-
-	ttASSERT(pszName && pszVal);
-	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
-		if (tt::isSameStri(pszName, m_aOptVal[pos].pszName)) {
-			m_aOptVal[pos].pcszVal->strCopy(pszVal);
-			if (pszComment) {
-				if (m_aOptVal[pos].pszComment && !tt::isSameStri(m_aOptVal[pos].pszComment, pszComment)) {
-					tt::FreeAlloc(m_aOptVal[pos].pszComment);
-					//m_aOptVal[pos].pszComment = tt::StrDup(pszComment);
-				}
-			}
-			return true;
-		}
-	}
-	return false;
 }
 
 // .srcfiles is a YAML file, so the value of the option may be within a single or double quote. That means we can't just

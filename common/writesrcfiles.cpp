@@ -208,12 +208,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	UpdateLongOption("LibDirs:", 	(char*) m_cszLibDirs);
 #endif
 
-	ttCStr cszTmp;
-	if (m_CompilerType & COMPILER_CLANG)
-		cszTmp = "CLANG ";
-	if (m_CompilerType & COMPILER_MSVC)
-		cszTmp += "MSVC ";
-	UpdateShortOption("Compilers:", cszTmp, "[CLANG and/or MSVC]", m_CompilerType != COMPILER_DEFAULT);
+	UpdateShortOption(GetOptionName(OPT_COMPILERS), GetOption(OPT_COMPILERS), "[CLANG and/or MSVC]", GetOption(OPT_COMPILERS));
 
 	const char* pszVal;
 	if (m_fCreateMakefile == MAKEMAKE_NEVER)
@@ -224,7 +219,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		pszVal = "missing";
 	UpdateShortOption("Makefile:", pszVal, "[never | missing | always]", m_fCreateMakefile != MAKEMAKE_DEFAULT);
 
-	cszTmp.Delete();
+	ttCStr cszTmp;
 	if (m_IDE & IDE_CODEBLOCK)
 		cszTmp += "CodeBlocks ";
 	if (m_IDE & IDE_CODELITE)

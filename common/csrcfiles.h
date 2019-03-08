@@ -25,6 +25,8 @@ typedef enum {
 	OPT_PROJECT,		// name of the project--will be used as the base target name (i.e., project: foo, target: foo.exe, fooD.exe, etc.)
 	OPT_PCH,			// name of precompiled header file, or "none" if not using precompiled headers
 
+	// The following are boolean options (true or false)
+
 	OPT_64BIT,			// if true, enable 64-bit support (link with 64-bit libraries).
 	OPT_BIT_SUFFIX,		// true means append "64" to target's directory or .exe name
 	OPT_DEBUG_RC,		// true means build a -D_DEBUG version of the project's rc file
@@ -33,6 +35,9 @@ typedef enum {
 	OPT_STATIC_CRT,		// true means link to static CRT
 	OPT_MS_LINKER,		// use link.exe even when compiling with CLANG
 
+	// The following are strings--multiple strings are separated with a semi-colon
+
+	OPT_COMPILERS,		// [MSVC or CLANG] default is both, set this option to limit it to one
 	OPT_CFLAGS,			// additional flags to pass to the compiler in all build targets
 	OPT_MIDL_FLAGS,		// flags to pass to the midl compiler
 	OPT_LINK_FLAGS,		// additional flags to pass to the linker in all build targets
@@ -60,12 +65,6 @@ public:
 		EXE_DLL,			// CSrcFiles::EXE_DLL
 		EXE_DEFAULT = EXE_CONSOLE
 	} EXE_TYPE;
-
-	enum {
-		COMPILER_CLANG	 = 1 << 0,
-		COMPILER_MSVC	 = 1 << 1,
-		COMPILER_DEFAULT = (COMPILER_CLANG | COMPILER_MSVC)
-	};
 
 	enum {
 		IDE_NONE	  = 0,
@@ -139,7 +138,6 @@ public:
 	EXE_TYPE m_exeType;			// EXE_WINDOW, EXE_CONSOLE, EXE_LIB, EXE_DLL or EXE_DEFAULT
 
 	size_t m_WarningLevel;		// warning level to use (1-4) -- can also use WARNLVL_1-4 and WARNLEVEL_DEFAULT
-	size_t m_CompilerType;		// COMPILER_CLANG, COMPILER_MSVC or COMPILER_DEFAULT
 	size_t m_IDE;				// IDE_CODEBLOCK, IDE_CODELITE, IDE_VS or IDE_NONE
 
 	ttCStr m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
@@ -188,12 +186,6 @@ protected:
 		bool	bRequired;
 	} OPT_VAL;
 	ttCArray<OPT_VAL> m_aOptVal;
-
-	void AddOptVal(const char* pszName, bool*	pbVal, const char* pszComment = nullptr);
-	bool UpdateOptVal(const char* pszName, bool bVal, const char* pszComment);
-
-	void AddOptVal(const char* pszName, ttCStr* pcszVal, const char* pszComment = nullptr);
-	bool UpdateOptVal(const char* pszName, const char* pszVal, const char* pszComment);
 
 protected:
 	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;

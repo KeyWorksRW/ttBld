@@ -39,8 +39,9 @@ public:
 
 	size_t getWarnLevel() { return m_WarningLevel > 0 ? m_WarningLevel : WARNLEVEL_DEFAULT; }
 
-	bool isCompilerMSVC()	{ return (m_CompilerType & COMPILER_MSVC); }
-	bool isCompilerClang()	{ return (m_CompilerType & COMPILER_CLANG); }
+	// if not specified, both compilers are used
+	bool isCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || tt::findStri(GetOption(OPT_COMPILERS), "MSVC")); }
+	bool isCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || tt::findStri(GetOption(OPT_COMPILERS), "CLANG")); }
 
 	bool isCodeBlockIDE()	 { return (m_IDE & IDE_CODEBLOCK); }
 	bool isCodeLiteIDE()	 { return (m_IDE & IDE_CODELITE); }

@@ -26,12 +26,12 @@ const char* aCppExt[] = {
 	nullptr
 };
 
-bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
+bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 {
 	ttCFile file;
 	m_pkfOut = &file;
 	m_gentype = gentype;
-	m_Compiler = Compiler;
+	m_bClang = bClang;
 
 	ttCStr cszExtraLib;		// used to specify the exact name/path of the "extra" library (if any)
 	if (GetOption(OPT_LIB_DIRS)) {		// start with the extra lib if there is one
@@ -217,17 +217,17 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 
 	switch (gentype) {
 		case GEN_DEBUG:
-			cszTmp.AppendFileName((m_Compiler == CSrcFiles::COMPILER_CLANG) ? "build/clangBuildD.ninja" : "build/msvcBuildD.ninja");
+			cszTmp.AppendFileName(m_bClang ?  "build/clangBuildD.ninja" : "build/msvcBuildD.ninja");
 			break;
 		case GEN_DEBUG64:
-			cszTmp.AppendFileName((m_Compiler == CSrcFiles::COMPILER_CLANG) ? "build/clangBuild64D.ninja" : "build/msvcBuild64D.ninja");
+			cszTmp.AppendFileName(m_bClang ? "build/clangBuild64D.ninja" : "build/msvcBuild64D.ninja");
 			break;
 		case GEN_RELEASE64:
-			cszTmp.AppendFileName((m_Compiler == CSrcFiles::COMPILER_CLANG) ? "build/clangBuild64.ninja" : "build/msvcBuild64.ninja");
+			cszTmp.AppendFileName(m_bClang ? "build/clangBuild64.ninja" : "build/msvcBuild64.ninja");
 			break;
 		case GEN_RELEASE:
 		default:
-			cszTmp.AppendFileName((m_Compiler == CSrcFiles::COMPILER_CLANG) ? "build/clangBuild.ninja" : "build/msvcBuild.ninja");
+			cszTmp.AppendFileName(m_bClang ? "build/clangBuild.ninja" : "build/msvcBuild.ninja");
 			break;
 	}
 
@@ -256,7 +256,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 
 void CNinja::WriteCompilerComments()
 {
-	if (m_Compiler == CSrcFiles::COMPILER_MSVC) {
+	if (!m_bClang) {
 		m_pkfOut->WriteEol("msvc_deps_prefix = Note: including file:\n");
 
 		// Write comment section explaining the compiler flags in use
@@ -283,7 +283,7 @@ void CNinja::WriteCompilerComments()
 			m_pkfOut->WriteEol("# -Z7\t// produces object files with full symbolic debugging information");
 		}
 	}
-	else if (m_Compiler == CSrcFiles::COMPILER_CLANG) {
+	else if (m_bClang) {
 		m_pkfOut->WriteEol("msvc_deps_prefix = Note: including file:\n");
 
 		// Write comment section explaining the compiler flags in use
@@ -351,14 +351,14 @@ void CNinja::WriteCompilerFlags()
 
 	// Now write out the compiler-specific flags
 
-	if (m_Compiler == CSrcFiles::COMPILER_MSVC) {
+	if (!m_bClang) {
 		if (GetBoolOption(OPT_PERMISSIVE))
 			m_pkfOut->WriteStr(" -permissive-");
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)
 			m_pkfOut->WriteStr(" -GL");	// whole program optimization
 	}
 
-	else if (m_Compiler == CSrcFiles::COMPILER_CLANG) {
+	else if (m_bClang) {
 		m_pkfOut->WriteStr(" -D__clang__");	// unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
 		m_pkfOut->WriteStr(" -fms-compatibility-version=19");	// Version of MSVC to be compatible with
 		m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" : " -m32");	// specify the platform
@@ -374,7 +374,7 @@ void CNinja::WriteCompilerFlags()
 
 void CNinja::WriteCompilerDirectives()
 {
-	if (m_Compiler == CSrcFiles::COMPILER_MSVC) {
+	if (!m_bClang) {
 		if (GetPchHeader()) {
 			m_pkfOut->printf(
 					"rule compilePCH\n"
@@ -408,7 +408,7 @@ void CNinja::WriteCompilerDirectives()
 		}
 		m_pkfOut->WriteEol("  description = compiling $in\n");
 	}
-	else if (m_Compiler == CSrcFiles::COMPILER_CLANG) {
+	else if (m_bClang) {
 		if (GetPchHeader()) {
 			m_pkfOut->printf(
 					"rule compilePCH\n"
@@ -449,7 +449,7 @@ void CNinja::WriteLinkDirective()
 	if (isExeTypeLib())
 		return;	// lib directive should be used if the project is a library
 
-	if (m_Compiler == CSrcFiles::COMPILER_MSVC || GetOption(OPT_MS_LINKER)) {
+	if (!m_bClang || GetOption(OPT_MS_LINKER)) {
 		ttCStr cszRule("rule link\n  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO ");
 		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? "/MACHINE:x64" : "/MACHINE:x86");
 
@@ -471,7 +471,7 @@ void CNinja::WriteLinkDirective()
 		m_pkfOut->WriteEol(cszRule);
 		m_pkfOut->WriteEol("  description = linking $out\n");
 	}
-	else if (m_Compiler == CSrcFiles::COMPILER_CLANG) {
+	else if (m_bClang) {
 		ttCStr cszRule("rule link\n  command = lld-link.exe");
 		if (isExeTypeDll())
 			cszRule += " /dll";
@@ -501,14 +501,14 @@ void CNinja::WriteLinkDirective()
 
 void CNinja::WriteLibDirective()
 {
-	if (m_Compiler == CSrcFiles::COMPILER_MSVC) {
+	if (!m_bClang) {
 		if (isExeTypeLib() || GetOption(OPT_LIB_DIRS))	{
 			m_pkfOut->printf("rule lib\n  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in\n",
 				(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
 			m_pkfOut->WriteEol("  description = creating library $out\n");
 		}
 	}
-	else if (m_Compiler == CSrcFiles::COMPILER_CLANG) {
+	else if (m_bClang) {
 		if (isExeTypeLib() || GetOption(OPT_LIB_DIRS))	{
 			// MSVC -LTCG option is not supported by lld
 			m_pkfOut->printf("rule lib\n  command = lld-link.exe /lib /machine:%s /out:$out $in\n",
@@ -522,7 +522,7 @@ void CNinja::WriteRcDirective()
 {
 	if (tt::FileExists(getRcFile())) {
 // REVIEW: [randalphwa - 10/12/2018] Currently the llvm-rc has a LOT of trouble reading rc files generated by Visual Studio
-//		if (m_Compiler == CSrcFiles::COMPILER_CLANG)
+//		if (m_bClang)
 //			m_pkfOut->WriteEol("rule rc\n  command = llvm-rc.exe -nologo -r /l 0x409 -fo$resout $in");
 //		else
 			m_pkfOut->WriteEol("rule rc\n  command = rc.exe -nologo -r /l 0x409 -fo$out $in");
