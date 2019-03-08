@@ -28,6 +28,7 @@ public:
 	void UpdateOptionsSection();
 	void UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment = nullptr);
 	void UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite = false);
+	void UpdateWriteOption(OPT_INDEX index, bool bAlwaysWrite = false);
 
 	void EnableDryRun() { m_dryrun.Enable(); }
 

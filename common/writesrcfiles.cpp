@@ -153,10 +153,14 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	}
 
 	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
-		CSrcOption* pcls = m_aOptions.GetValueAt(pos);	// just to make the code look a bit cleaner
-		UpdateShortOption(pcls->getName(), pcls->getOption(), pcls->getComment(), pcls->isRequired());
+		OPT_INDEX index = m_aOptions.GetKeyAt(pos);
+		if (index == OPT_ERROR)
+			continue;
+		else if (index == OPT_OVERFLOW)
+			break;
+		UpdateWriteOption(index);
 	}
-
+#if 0
 	UpdateShortOption(GetOptionName(OPT_EXE_TYPE), GetOptionName(OPT_EXE_TYPE), "[window | console | lib | dll]", true);
 	UpdateShortOption(GetOptionName(OPT_TARGET_DIR32), GetOptionName(OPT_TARGET_DIR32), nullptr, false);
 	UpdateShortOption(GetOptionName(OPT_TARGET_DIR64), GetOptionName(OPT_TARGET_DIR64), nullptr, false);
@@ -182,6 +186,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	UpdateShortOption(GetOptionName(OPT_IDE), GetOption(OPT_IDE), "[CodeBlocks and/or CodeLite and/or VisualStudio]", GetOptionName(OPT_IDE));
 	UpdateShortOption(GetOptionName(OPT_OPTIMIZE), GetOption(OPT_OPTIMIZE), "[space | speed] (default is space)", GetOptionName(OPT_OPTIMIZE) && tt::findStri(GetOptionName(OPT_OPTIMIZE), "speed"));
 	UpdateShortOption(GetOptionName(OPT_WARN_LEVEL), GetOption(OPT_WARN_LEVEL), "[1-4] default, if not specified, is 4", GetOption(OPT_WARN_LEVEL) && !tt::findStri(GetOption(OPT_WARN_LEVEL), "4"));
+#endif
 }
 
 void CWriteSrcFiles::UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite)
@@ -196,6 +201,27 @@ void CWriteSrcFiles::UpdateShortOption(const char* pszOption, const char* pszVal
 	}
 	else if (bAlwaysWrite) {
 		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, pszComment);
+		m_lstOriginal.InsertAt(m_posInsert++, szLine);
+	}
+}
+
+// If the option already exists then update it. If it doesn't exist, only write it if bAlwaysWrite is true
+
+void CWriteSrcFiles::UpdateWriteOption(OPT_INDEX index, bool bAlwaysWrite)
+{
+	if (index == OPT_ERROR || index == OPT_OVERFLOW)
+		return;
+
+	char szLine[4096];
+	ptrdiff_t posOption = GetOptionLine(GetOptionName(index));
+	if (posOption >= 0) {
+		if (m_cszOptComment.isEmpty())		// we keep any comment that was previously used
+			m_cszOptComment = GetOptionComment(index);
+		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, GetOptionName(index), GetOption(index), (char*) m_cszOptComment);
+		m_lstOriginal.Replace(posOption, szLine);
+	}
+	else if (bAlwaysWrite) {
+		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, GetOptionName(index), GetOption(index), GetOptionComment(index));
 		m_lstOriginal.InsertAt(m_posInsert++, szLine);
 	}
 }
