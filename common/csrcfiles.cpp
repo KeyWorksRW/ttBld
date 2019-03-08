@@ -34,6 +34,8 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_bRead = false;
 	m_bReadingPrivate = false;
 
+	m_lastIndex = OPT_OVERFLOW;
+
 	m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
@@ -454,54 +456,79 @@ OPT_INDEX CSrcFiles::UpdateOption(const char* pszName, const char* pszValue, con
 
 void CSrcFiles::UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment)
 {
-	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
-	ptrdiff_t pos = m_aOptions.FindKey(index);
-	if (pos >= 0)
-		m_aOptions.GetValueAt(pos)->UpdateOption(pszValue, pszComment);
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	if (m_pos >= 0)
+		m_aOptions.GetValueAt(m_pos)->UpdateOption(pszValue, pszComment);
 }
 
 void CSrcFiles::UpdateOption(OPT_INDEX index, bool bValue, const char* pszComment)
 {
-	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
-	ptrdiff_t pos = m_aOptions.FindKey(index);
-	if (pos >= 0)
-		m_aOptions.GetValueAt(pos)->UpdateOption(bValue, pszComment);
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	if (m_pos >= 0)
+		m_aOptions.GetValueAt(m_pos)->UpdateOption(bValue, pszComment);
 }
 
 const char* CSrcFiles::GetOption(OPT_INDEX index)
 {
-	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
 
-	ptrdiff_t pos = m_aOptions.FindKey(index);
-	return (pos >= 0 ? m_aOptions.GetValueAt(pos)->getOption() : nullptr);
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	return (m_pos >= 0 ? m_aOptions.GetValueAt(m_pos)->getOption() : nullptr);
 }
 
 // Only needed if you must check for bool. Otherwise, call GetOption() and check for nullptr for false, non-nullptr for true
 
 bool CSrcFiles::GetBoolOption(OPT_INDEX index)
 {
-	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
 
-	ptrdiff_t pos = m_aOptions.FindKey(index);
-	return (pos >= 0 ? m_aOptions.GetValueAt(pos)->getBoolOption() : false);
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	return (m_pos >= 0 ? m_aOptions.GetValueAt(m_pos)->getBoolOption() : false);
 }
 
 const char* CSrcFiles::GetOptionName(OPT_INDEX index)
 {
-	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
 
-	ptrdiff_t pos = m_aOptions.FindKey(index);
-	ttASSERT_MSG(pos >= 0, "Unable to find the specified OPT_ index");
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
 
-	return m_aOptions.GetValueAt(pos)->getName();
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	return m_aOptions.GetValueAt(m_pos)->getName();
 }
 
 const char* CSrcFiles::GetOptionComment(OPT_INDEX index)
 {
-	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
 
-	ptrdiff_t pos = m_aOptions.FindKey(index);
-	ttASSERT_MSG(pos >= 0, "Unable to find the specified OPT_ index");
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
 
-	return m_aOptions.GetValueAt(pos)->getComment();
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	return m_aOptions.GetValueAt(m_pos)->getComment();
 }

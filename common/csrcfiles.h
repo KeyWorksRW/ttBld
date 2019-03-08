@@ -145,6 +145,8 @@ protected:
 
 protected:
 	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;
+	OPT_INDEX m_lastIndex;
+	ptrdiff_t m_pos;
 
 	void AddOption(OPT_INDEX opt, const char* pszName, bool bBoolean = false, bool bRequired = false);
 };
