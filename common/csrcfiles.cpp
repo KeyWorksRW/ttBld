@@ -37,7 +37,6 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_bBuildForSpeed = false;
 
 	m_WarningLevel = WARNLEVEL_DEFAULT;
-	m_IDE = IDE_NONE;
 	m_exeType = EXE_DEFAULT;
 
 	m_fCreateMakefile = MAKEMAKE_DEFAULT;	// create makefile only if it doesn't already exist
@@ -64,6 +63,7 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	AddOption(OPT_STDCALL, "stdcall");
 	AddOption(OPT_STATIC_CRT, "static_crt");
 	AddOption(OPT_MS_LINKER, "ms_linker");
+	AddOption(OPT_IDE, "IDE");
 
 	AddOption(OPT_INC_DIRS, "IncDirs");
 	AddOption(OPT_LIB_DIRS, "LibDirs");
@@ -179,20 +179,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		return;
 
 	// Everything below requires special handling
-
-	if (tt::isSameStri(cszName, "IDE")) {
-		ttCEnumStr cenum(cszVal, ' ');
-		m_IDE = 0;
-		while (cenum.Enum()) {
-			if (tt::isSameStri(cenum, "CodeBlocks"))
-				m_IDE |= IDE_CODEBLOCK;
-			else if (tt::isSameStri(cenum, "CodeLite"))
-				m_IDE |= IDE_CODELITE;
-			else if (tt::isSameStri(cenum, "VisualStudio"))
-				m_IDE |= IDE_VS;
-		}
-		return;
-	}
 
 	if (tt::isSameStri(cszName, "Makefile")) {
 		m_fCreateMakefile = MAKEMAKE_DEFAULT;

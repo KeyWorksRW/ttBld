@@ -43,10 +43,6 @@ public:
 	bool isCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || tt::findStri(GetOption(OPT_COMPILERS), "MSVC")); }
 	bool isCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || tt::findStri(GetOption(OPT_COMPILERS), "CLANG")); }
 
-	bool isCodeBlockIDE()	 { return (m_IDE & IDE_CODEBLOCK); }
-	bool isCodeLiteIDE()	 { return (m_IDE & IDE_CODELITE); }
-	bool isVisualStudioIDE() { return (m_IDE & IDE_VS); }
-
 	const char* getRcFile()		{ return m_cszRcName; }
 
 	const char* getDir32()	{ return m_cszTarget32; }	// 32-bit target directory

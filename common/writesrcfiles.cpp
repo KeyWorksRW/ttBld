@@ -194,21 +194,8 @@ void CWriteSrcFiles::UpdateOptionsSection()
 
 	UpdateLongOption("TargetDirs:", cszTargets);
 
-	// Long options don't have default comments, though we will keep any comments the user may have added. If we pass a
-	// null or empty pointer for the value then we completely delete the option if there already was one
-
-#if 0
-	UpdateLongOption("PCH:", 		(char*) m_cszPCHheader);
-	UpdateLongOption("Cflags:", 	(char*) m_cszCFlags);
-	UpdateLongOption("Midlflags:", 	(char*) m_cszMidlFlags);
-	UpdateLongOption("LinkFlags:",	(char*) m_cszLinkFlags);
-	UpdateLongOption("Libs:", 		(char*) m_cszLibs);
-	UpdateLongOption("BuildLibs:", 	(char*) m_cszBuildLibs);
-	UpdateLongOption("IncDirs:", 	(char*) m_cszIncDirs);
-	UpdateLongOption("LibDirs:", 	(char*) m_cszLibDirs);
-#endif
-
 	UpdateShortOption(GetOptionName(OPT_COMPILERS), GetOption(OPT_COMPILERS), "[CLANG and/or MSVC]", GetOption(OPT_COMPILERS));
+	UpdateShortOption(GetOptionName(OPT_IDE), GetOption(OPT_IDE), "[CodeBlocks and/or CodeLite and/or VisualStudio]", GetOptionName(OPT_IDE));
 
 	const char* pszVal;
 	if (m_fCreateMakefile == MAKEMAKE_NEVER)
@@ -218,17 +205,6 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	else
 		pszVal = "missing";
 	UpdateShortOption("Makefile:", pszVal, "[never | missing | always]", m_fCreateMakefile != MAKEMAKE_DEFAULT);
-
-	ttCStr cszTmp;
-	if (m_IDE & IDE_CODEBLOCK)
-		cszTmp += "CodeBlocks ";
-	if (m_IDE & IDE_CODELITE)
-		cszTmp += "CodeLite ";
-	if (m_IDE & IDE_VS)
-		cszTmp += "VisualStudio";
-	if (cszTmp.isNonEmpty())
-		tt::trimRight(cszTmp);
-	UpdateLongOption("IDE:", cszTmp, "[CodeBlocks and/or CodeLite and/or VisualStudio]");
 }
 
 void CWriteSrcFiles::UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite)

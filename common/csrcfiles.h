@@ -45,6 +45,7 @@ typedef enum {
 	OPT_INC_DIRS,		// additional directories for header files
 	OPT_LIB_DIRS,		// additional directores for lib files
 	OPT_LIBS,			// additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
+	OPT_IDE,			// [CodeBlocks CodeLite VisualStudio] -- specifies one or more IDE go generate project files for
 
 	OPT_OVERFLOW
 } OPT_INDEX;
@@ -65,13 +66,6 @@ public:
 		EXE_DLL,			// CSrcFiles::EXE_DLL
 		EXE_DEFAULT = EXE_CONSOLE
 	} EXE_TYPE;
-
-	enum {
-		IDE_NONE	  = 0,
-		IDE_CODEBLOCK = 1 << 1,
-		IDE_CODELITE  = 1 << 2,
-		IDE_VS		  = 1 << 3,
-	};
 
 	enum {
 		MAKEMAKE_NEVER = 0,
@@ -101,6 +95,10 @@ public:
 	bool isConsoleApp() { return m_exeType == EXE_CONSOLE; }
 	bool isLibApp() { return m_exeType == EXE_LIB; }
 	bool isDllApp() { return m_exeType == EXE_DLL; }
+
+	bool isCodeBlockIDE()	 { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "CodeBlocks")); }
+	bool isCodeLiteIDE()	 { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "CodeLite")); }
+	bool isVisualStudioIDE() { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "VisualStudio")); }
 
 	void AddSourcePattern(const char* pszFilePattern);
 
@@ -138,7 +136,6 @@ public:
 	EXE_TYPE m_exeType;			// EXE_WINDOW, EXE_CONSOLE, EXE_LIB, EXE_DLL or EXE_DEFAULT
 
 	size_t m_WarningLevel;		// warning level to use (1-4) -- can also use WARNLVL_1-4 and WARNLEVEL_DEFAULT
-	size_t m_IDE;				// IDE_CODEBLOCK, IDE_CODELITE, IDE_VS or IDE_NONE
 
 	ttCStr m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
 
