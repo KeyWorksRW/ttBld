@@ -24,6 +24,7 @@ typedef enum {
 
 	OPT_PROJECT,		// name of the project--will be used as the base target name (i.e., project: foo, target: foo.exe, fooD.exe, etc.)
 	OPT_PCH,			// name of precompiled header file, or "none" if not using precompiled headers
+	OPT_EXE_TYPE,		// [window | console | lib | dll]
 
 	// The following are boolean options (true or false)
 
@@ -46,6 +47,12 @@ typedef enum {
 	OPT_LIB_DIRS,		// additional directores for lib files
 	OPT_LIBS,			// additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
 	OPT_IDE,			// [CodeBlocks CodeLite VisualStudio] -- specifies one or more IDE go generate project files for
+	OPT_MAKEFILE,		// [never | missing | always] -- default, if not specified, is missing
+	OPT_OPTIMIZE,		// [space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues) -- default, if not specified, is space
+	OPT_WARN_LEVEL,		// [1-4] default, if not specified, is 4
+	OPT_TARGET_DIR32,	// 32-bit target directory (default is bin)
+	OPT_TARGET_DIR64,	// 32-bit target directory (default is bin64)
+	OPT_BUILD_LIBS,		// libraries that need to be built (added to makefile generation)
 
 	OPT_OVERFLOW
 } OPT_INDEX;
@@ -58,31 +65,6 @@ public:
 	CSrcFiles();
 	~CSrcFiles();
 
-	typedef enum {
-		EXE_UNSPECIFIED,
-		EXE_WINDOW,			// CSrcFiles::EXE_WINDOW
-		EXE_CONSOLE,		// CSrcFiles::EXE_CONSOLE
-		EXE_LIB,			// CSrcFiles::EXE_LIB
-		EXE_DLL,			// CSrcFiles::EXE_DLL
-		EXE_DEFAULT = EXE_CONSOLE
-	} EXE_TYPE;
-
-	enum {
-		MAKEMAKE_NEVER = 0,
-		MAKEMAKE_MISSING = 1,
-		MAKEMAKE_ALWAYS = 2,
-		MAKEMAKE_DEFAULT = MAKEMAKE_MISSING		// ../MakeSrcFiles/writeupdates.cpp doesn't fully this, so if it's not MAKEMAKE_MISSING, will need to be changed
-	};
-
-	enum {
-		WARNLEVEL_1 = 1,
-		WARNLEVEL_2 = 2,
-		WARNLEVEL_3 = 3,
-		WARNLEVEL_4 = 4,
-		WARNLEVEL_DEFAULT = WARNLEVEL_4
-	};
-
-public:
 	// Class functions
 
 	void AddFile(const char* pszFile) { m_lstSrcFiles += pszFile; }
@@ -91,18 +73,25 @@ public:
 
 	bool IsProcessed() { return m_bRead; }
 
-	bool isWindowApp() { return m_exeType == EXE_WINDOW; }
-	bool isConsoleApp() { return m_exeType == EXE_CONSOLE; }
-	bool isLibApp() { return m_exeType == EXE_LIB; }
-	bool isDllApp() { return m_exeType == EXE_DLL; }
-
 	bool isCodeBlockIDE()	 { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "CodeBlocks")); }
 	bool isCodeLiteIDE()	 { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "CodeLite")); }
 	bool isVisualStudioIDE() { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "VisualStudio")); }
 
+	bool isExeTypeConsole()	 { return (!GetOption(OPT_EXE_TYPE) || tt::findStri(GetOption(OPT_EXE_TYPE), "console")); }	// this is the default
+	bool isExeTypeDll()		 { return (GetOption(OPT_EXE_TYPE) && tt::findStri(GetOption(OPT_EXE_TYPE), "dll")); }
+	bool isExeTypeLib()		 { return (GetOption(OPT_EXE_TYPE) && tt::findStri(GetOption(OPT_EXE_TYPE), "lib")); }
+	bool isExeTypeWindow()	 { return (GetOption(OPT_EXE_TYPE) && tt::findStri(GetOption(OPT_EXE_TYPE), "window")); }
+
+	bool isMakeMissing()	 { return (!GetOption(OPT_MAKEFILE) || tt::findStri(GetOption(OPT_MAKEFILE), "missing")); }	// this is the default
+	bool isMakeNever()		 { return (GetOption(OPT_MAKEFILE) && tt::findStri(GetOption(OPT_MAKEFILE), "never")); }
+	bool isMakeAlways()		 { return (GetOption(OPT_MAKEFILE) && tt::findStri(GetOption(OPT_MAKEFILE), "always")); }
+
+	bool isOptimizeSpeed()	 { return (GetOption(OPT_OPTIMIZE) && tt::findStri(GetOption(OPT_OPTIMIZE), "speed")); }
+
+	const char* getBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
+
 	void AddSourcePattern(const char* pszFilePattern);
 
-public:
 	const char* GetOption(OPT_INDEX index);
 	bool		GetBoolOption(OPT_INDEX index);	 // boolean options are strings ("true" or "false") but this makes checking the value easier
 
@@ -131,17 +120,6 @@ protected:
 	// Class members (note that these are NOT marked protected or private -- too many callers need to access individual members)
 
 public:
-	bool m_bBuildForSpeed;		// optimize for fast code instead of small code (optimizing for speed can actually make the code run slower due to caching issues)
-
-	EXE_TYPE m_exeType;			// EXE_WINDOW, EXE_CONSOLE, EXE_LIB, EXE_DLL or EXE_DEFAULT
-
-	size_t m_WarningLevel;		// warning level to use (1-4) -- can also use WARNLVL_1-4 and WARNLEVEL_DEFAULT
-
-	ttCStr m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
-
-	ttCStr m_cszTarget32;		// target directory for non-64 bit builds
-	ttCStr m_cszTarget64;		// target directory for 64 bit builds
-
 	ttCStr m_cszLibName;		// name and location of any additional library to build (used by Lib: section)
 	ttCStr m_cszRcName;			// resource file to build (if any)
 	ttCStr m_cszHHPName;		// HTML Help project file
@@ -159,30 +137,11 @@ public:
 	ttCStrIntList m_lstLibAddSrcFiles;	// additional .srcfiles to read into Lib: section
 	ttCList		  m_lstSrcIncluded;		// the names of all files included by all ".include path/.srcfiles" directives
 
-	// Following are for the makefile: section
-
-	size_t	m_fCreateMakefile;		// MAKEMAKE_NEVER, MAKEMAKE_MISSING or MAKEMAKE_ALWAYS
-
 protected:
 	bool GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment);
 
 	bool m_bRead;				// file has been read and processed
 	bool m_bReadingPrivate;		// true if we are reading a private file
-
-	typedef struct {
-		const char* pszName;
-		bool* pbVal;
-		char* pszComment;
-	} OPT_BOOL;
-	ttCArray<OPT_BOOL> m_aOptBool;
-
-	typedef struct {
-		const char* pszName;
-		ttCStr*	pcszVal;
-		char*   pszComment;
-		bool	bRequired;
-	} OPT_VAL;
-	ttCArray<OPT_VAL> m_aOptVal;
 
 protected:
 	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;

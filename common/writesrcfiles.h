@@ -23,7 +23,6 @@ public:
 
 	bool WriteUpdates(const char* pszFile = txtSrcFilesFileName);	// write updates to the [OPTIONS] section
 	bool WriteNew(const char* pszFile = txtSrcFilesFileName);		// write complete .srcfiles file (replacing any file that already exists)
-	void CreateTargetsString(ttCStr& cszTargets);	// will set m_cszTarget32 and maybe m_cszTarget64 if they are both empty
 
 	ttCList* GetOrgList() { return &m_lstOriginal; }
 	void UpdateOptionsSection();
@@ -33,9 +32,6 @@ public:
 	void EnableDryRun() { m_dryrun.Enable(); }
 
 protected:
-
-	const char* GetExeType();
-
 	ptrdiff_t GetOptionLine(const char* pszOption);		// on success m_cszOptComment will be filled in
 	ptrdiff_t FindOption(const char* pszOption, ttCStr& cszDst);
 	ptrdiff_t FindSection(const char* pszSection);

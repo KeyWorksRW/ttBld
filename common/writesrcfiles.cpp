@@ -157,17 +157,9 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		UpdateShortOption(pcls->getName(), pcls->getOption(), pcls->getComment(), pcls->isRequired());
 	}
 
-	// Long options don't have default comments, though we will keep any comments the user may have added. If we pass a
-	// null or empty pointer for the value then we completely delete the option if there already was one
-
-	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos)
-		UpdateLongOption(m_aOptVal[pos].pszName, m_aOptVal[pos].pcszVal->getPtr(), m_aOptVal[pos].pszComment);
-
-//	UpdateLongOption("Project:", GetProjectName(), "project target name");
-
-	ttCStr cszTargets;
-	CreateTargetsString(cszTargets);
-	UpdateShortOption("exe_type:", GetExeType(), "[window | console | lib | dll]", true);
+	UpdateShortOption(GetOptionName(OPT_EXE_TYPE), GetOptionName(OPT_EXE_TYPE), "[window | console | lib | dll]", true);
+	UpdateShortOption(GetOptionName(OPT_TARGET_DIR32), GetOptionName(OPT_TARGET_DIR32), nullptr, false);
+	UpdateShortOption(GetOptionName(OPT_TARGET_DIR64), GetOptionName(OPT_TARGET_DIR64), nullptr, false);
 
 	if (GetOption(OPT_64BIT)) {
 		UpdateShortOption("64Bit:", "true", "create 64-bit project", true);
@@ -180,31 +172,16 @@ void CWriteSrcFiles::UpdateOptionsSection()
 			"add \"64\" to the end of target directory or project (e.g., ../bin64/)", false);
 	}
 
-	{
-		char szNum[10];
-		tt::Utoa(m_WarningLevel > 0 ? m_WarningLevel : WARNLEVEL_DEFAULT, szNum, sizeof(szNum));
-		UpdateShortOption("WarnLevel:", szNum, "compiler warning level (1-4)", m_WarningLevel != WARNLEVEL_DEFAULT);
-	}
-
-	UpdateShortOption("optimize:", m_bBuildForSpeed ? "speed" : "space", "speed or space (default)", m_bBuildForSpeed);
 	UpdateShortOption(GetOptionName(OPT_STATIC_CRT), GetBoolOption(OPT_STATIC_CRT) ? "true" : "false", "link to static (true) or DLL (false) version of CRT", GetBoolOption(OPT_STATIC_CRT));
 	UpdateShortOption(GetOptionName(OPT_PERMISSIVE), GetBoolOption(OPT_PERMISSIVE) ? "true" : "false", "permissive compiler option", GetBoolOption(OPT_PERMISSIVE));
 	UpdateShortOption(GetOptionName(OPT_STDCALL), GetBoolOption(OPT_STDCALL) ? "true" : "false", "use stdcall calling convention (default is cdecl)", GetBoolOption(OPT_STDCALL));
 	UpdateShortOption(GetOptionName(OPT_MS_LINKER), GetBoolOption(OPT_MS_LINKER) ? "true" : "false", "use MS link.exe even when compiling with CLANG", GetBoolOption(OPT_MS_LINKER));
 
-	UpdateLongOption("TargetDirs:", cszTargets);
-
 	UpdateShortOption(GetOptionName(OPT_COMPILERS), GetOption(OPT_COMPILERS), "[CLANG and/or MSVC]", GetOption(OPT_COMPILERS));
+	UpdateShortOption(GetOptionName(OPT_MAKEFILE), GetOption(OPT_MAKEFILE), "[never | missing | always]", GetOption(OPT_MAKEFILE) && !tt::findStri(GetOption(OPT_MAKEFILE), "never"));
 	UpdateShortOption(GetOptionName(OPT_IDE), GetOption(OPT_IDE), "[CodeBlocks and/or CodeLite and/or VisualStudio]", GetOptionName(OPT_IDE));
-
-	const char* pszVal;
-	if (m_fCreateMakefile == MAKEMAKE_NEVER)
-		pszVal = "never";
-	else if (m_fCreateMakefile == MAKEMAKE_ALWAYS)
-		pszVal = "always";
-	else
-		pszVal = "missing";
-	UpdateShortOption("Makefile:", pszVal, "[never | missing | always]", m_fCreateMakefile != MAKEMAKE_DEFAULT);
+	UpdateShortOption(GetOptionName(OPT_OPTIMIZE), GetOption(OPT_OPTIMIZE), "[space | speed] (default is space)", GetOptionName(OPT_OPTIMIZE) && tt::findStri(GetOptionName(OPT_OPTIMIZE), "speed"));
+	UpdateShortOption(GetOptionName(OPT_WARN_LEVEL), GetOption(OPT_WARN_LEVEL), "[1-4] default, if not specified, is 4", GetOption(OPT_WARN_LEVEL) && !tt::findStri(GetOption(OPT_WARN_LEVEL), "4"));
 }
 
 void CWriteSrcFiles::UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite)
@@ -290,70 +267,4 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
 			break;
 	}
 	return -1;
-}
-
-const char* CWriteSrcFiles::GetExeType()
-{
-	switch (m_exeType) {
-		case EXE_CONSOLE:
-			return "console";
-			break;
-
-		case EXE_LIB:
-			return "lib";
-			break;
-
-		case EXE_DLL:
-			return "dll";
-			break;
-
-		case EXE_WINDOW:
-		default:
-			return "window";
-			break;
-	}
-}
-
-void CWriteSrcFiles::CreateTargetsString(ttCStr& cszTargets)
-{
-	if (m_cszTarget32.isEmpty() && m_cszTarget64.isEmpty()) {
-		if (m_exeType == EXE_LIB) {
-			if (tt::DirExists("../lib")) {
-				m_cszTarget32 = "../lib";
-				if (tt::DirExists("../lib64"))
-					m_cszTarget64 = "../lib64";
-			}
-			else {
-				m_cszTarget32 = "lib";
-				if (tt::DirExists("lib64"))
-					m_cszTarget64 = "lib64";
-			}
-		}
-
-		else {
-			if (tt::DirExists("../bin")) {
-				m_cszTarget32 = "../bin";
-				if (tt::DirExists("../bin64"))
-					m_cszTarget64 = "../bin64";
-			}
-			else {
-				m_cszTarget32 = "bin";
-				if (tt::DirExists("bin64"))
-					m_cszTarget64 = "bin64";
-			}
-		}
-	}
-
-	if (m_cszTarget32.isNonEmpty())	{
-		if (!GetOption(OPT_64BIT) && !GetOption(OPT_BIT_SUFFIX))	// m_b64bit with no suffix means 64-bit only target
-			cszTargets = (char*) m_cszTarget32;
-		if (GetOption(OPT_64BIT) && m_cszTarget64.isNonEmpty())	{
-			cszTargets += "; ";
-			cszTargets += (char*) m_cszTarget64;
-		}
-	}
-	else if (GetOption(OPT_64BIT) && m_cszTarget64.isNonEmpty()) {
-		cszTargets = "; ";
-		cszTargets += (char*) m_cszTarget64;
-	}
 }

@@ -21,9 +21,9 @@ extern const char* txtHelpNinja;
 
 bool CBldMaster::CreateMakeFile()
 {
-	if (m_fCreateMakefile == MAKEMAKE_NEVER)
+	if (isMakeNever())
 		return true;	// user doesn't want makefile created at all
-	else if (m_fCreateMakefile == MAKEMAKE_MISSING) {
+	else if (isMakeMissing()) {
 		if (tt::FileExists("makefile"))
 			return true;	// file exists, user doesn't want us to update it
 	}
@@ -52,14 +52,14 @@ bool CBldMaster::CreateMakeFile()
 			ttCStr cszNewLine(kf);
 			if (!tt::isEmpty(getHHPName())) {
 				cszNewLine.ReplaceStr(" ", " ChmHelp ");
-				if (m_cszBuildLibs.isEmpty()) {
+				if (!getBuildLibs()) {
 					kfOut.WriteEol(cszNewLine);
 					kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
 				}
 			}
 
-			if (m_cszBuildLibs.isNonEmpty()) {
-				ttCEnumStr cEnumStr(m_cszBuildLibs, ';');
+			if (getBuildLibs()) {
+				ttCEnumStr cEnumStr(getBuildLibs(), ';');
 				const char* pszBuildLib;
 				while (cEnumStr.Enum(&pszBuildLib)) {
 					ttCStr cszTarget;
@@ -76,7 +76,7 @@ bool CBldMaster::CreateMakeFile()
 
 				// Now that we've added the targets to the release: or debug: line, we need to add the rule
 
-				cEnumStr.SetNewStr(m_cszBuildLibs, ';');
+				cEnumStr.SetNewStr(getBuildLibs(), ';');
 				while (cEnumStr.Enum(&pszBuildLib)) {
 					kfOut.printf("\n%s%s:\n", tt::findFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
 					ttCStr cszCWD;

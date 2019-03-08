@@ -35,31 +35,20 @@ public:
 
 	bool CreateMakeFile();
 
-	bool isBuildSpeed()	{ return m_bBuildForSpeed; }
-
-	size_t getWarnLevel() { return m_WarningLevel > 0 ? m_WarningLevel : WARNLEVEL_DEFAULT; }
-
 	// if not specified, both compilers are used
 	bool isCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || tt::findStri(GetOption(OPT_COMPILERS), "MSVC")); }
 	bool isCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || tt::findStri(GetOption(OPT_COMPILERS), "CLANG")); }
 
 	const char* getRcFile()		{ return m_cszRcName; }
 
-	const char* getDir32()	{ return m_cszTarget32; }	// 32-bit target directory
-	const char* getDir64()	{ return m_cszTarget64; }	// 64-bit target directory
+	const char* getDir32()	{ return GetOption(OPT_TARGET_DIR32); }	// 32-bit target directory
+	const char* getDir64()	{ return GetOption(OPT_TARGET_DIR64); }	// 64-bit target directory
 
 	ttCList* getSrcFileList()  { return &m_lstSrcFiles; }
 	ttCList* getLibFileList()  { return &m_lstLibFiles; }
 	ttCList* getRcDepList()  	{ return &m_lstRcDependencies; }
 
-	bool isExeTypeConsole()	{ return (m_exeType == EXE_CONSOLE); }
-	bool isExeTypeDll()		{ return (m_exeType == EXE_DLL); }
-	bool isExeTypeLib()		{ return (m_exeType == EXE_LIB); }
-	bool isExeTypeWindow()	{ return (m_exeType == EXE_WINDOW); }
-
 	bool isBin64()			{ return m_bBin64Exists; }
-
-	const char* getBuildLibs()	{ return m_cszBuildLibs; }
 
 	const char* getLibName()	{ return m_cszLibName; }		// name and location of any additional library to build
 

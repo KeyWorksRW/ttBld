@@ -110,9 +110,9 @@ bool ConvertCodeLite(const char* pszBldFile)
 			else if (tt::isSameStri(pItem->GetName(), "Settings")) {
 				const char* pszType = pItem->GetAttribute("Type");
 				if (tt::isSameStri(pszType, "Dynamic Library"))
-					cSrcFiles.m_exeType = CSrcFiles::EXE_DLL;
+					cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
 				else if (tt::isSameStri(pszType, "Static Library"))
-					cSrcFiles.m_exeType = CSrcFiles::EXE_LIB;
+					cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
 			}
 		}
 		if (cSrcFiles.WriteNew())
@@ -271,7 +271,7 @@ bool ConvertVcProj(const char* pszBldFile)
 				char* pszFile = tt::findFilePortion(cszOutDir);
 				if (pszFile)
 					*pszFile = 0;
-				cSrcFiles.m_cszTarget32 = (const char*) cszOutDir;
+				cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszOutDir);
 			}
 			do {
 				if (tt::findStri(pConfiguration->GetAttribute("Name"), "Release"))
@@ -284,11 +284,11 @@ bool ConvertVcProj(const char* pszBldFile)
 			if (pRelease) {
 				const char* pszOption = pRelease->GetAttribute("FavorSizeOrSpeed");
 				if (pszOption && tt::isSameSubStri(pszOption, "1"))
-					cSrcFiles.m_bBuildForSpeed = true;
+					cSrcFiles.UpdateOption(OPT_OPTIMIZE, "speed");
 
 				pszOption = pRelease->GetAttribute("WarningLevel");
 				if (pszOption && !tt::isSameSubStri(pszOption, "4"))
-					cSrcFiles.m_WarningLevel = tt::Atoi(pszOption);
+					cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszOption);
 
 				pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
 				if (pszOption) {
@@ -305,11 +305,11 @@ bool ConvertVcProj(const char* pszBldFile)
 						if (tt::isSameStri(enumFlags, "NDEBUG"))
 							continue;	// we already add this
 						if (tt::isSameStri(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
-							cSrcFiles.m_exeType = CSrcFiles::EXE_CONSOLE;
+							cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
 							continue;	// we already add this
 						}
 						if (tt::isSameStri(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
-							cSrcFiles.m_exeType = CSrcFiles::EXE_DLL;
+							cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
 							continue;	// do we need to add this?
 						}
 						if (tt::isSameSubStri(enumFlags, "$("))	// Visual Studio specific, ignore it

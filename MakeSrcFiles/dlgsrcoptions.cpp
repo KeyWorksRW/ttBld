@@ -96,10 +96,6 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttCDlg(IDDLG_SRCFILES), 
 	if (pszSrcDir && *pszSrcDir)
 		m_cszSrcDir = pszSrcDir;
 
-	if (m_WarningLevel == 0) {
-		m_WarningLevel = WARNLEVEL_DEFAULT;
-	}
-
 	if (tt::isEmpty(GetPchHeader())) {
 		if (tt::FileExists("stdafx.h"))
 			UpdateOption(OPT_PCH, "stdafx.h");
@@ -160,18 +156,18 @@ void CDlgSrcOptions::OnBegin(void)
 		SetControlText(DLG_ID(IDEDIT_LINK_FLAGS), GetOption(OPT_LINK_FLAGS));
 	if (GetOption(OPT_LIBS))
 		SetControlText(DLG_ID(IDEDIT_LIBS), GetOption(OPT_LIBS));
-	if (m_cszBuildLibs.isNonEmpty())
-		SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), m_cszBuildLibs);
+	if (GetOption(OPT_BUILD_LIBS))
+		SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), GetOption(OPT_BUILD_LIBS));
 	if (GetOption(OPT_INC_DIRS))
 		SetControlText(DLG_ID(IDEDIT_INCDIRS), GetOption(OPT_INC_DIRS));
 	if (GetOption(OPT_LIB_DIRS))
 		SetControlText(DLG_ID(IDEDIT_LIBDIRS), GetOption(OPT_LIB_DIRS));
 
-	if (m_exeType == EXE_CONSOLE)
+	if (isExeTypeConsole())
 		SetCheck(DLG_ID(IDRADIO_CONSOLE));
-	else if (m_exeType == EXE_DLL)
+	else if (isExeTypeDll())
 		SetCheck(DLG_ID(IDRADIO_DLL));
-	else if (m_exeType == EXE_LIB)
+	else if (isExeTypeLib())
 		SetCheck(DLG_ID(IDRADIO_LIB));
 	else
 		SetCheck(DLG_ID(IDRADIO_NORMAL));
@@ -182,20 +178,23 @@ void CDlgSrcOptions::OnBegin(void)
 	SetCheck(DLG_ID(IDCHECK_STATIC_CRT), GetBoolOption(OPT_STATIC_CRT));
 	SetCheck(DLG_ID(IDCHECK_MSLINKER), GetBoolOption(OPT_MS_LINKER));
 
-	SetCheck(DLG_ID(m_bBuildForSpeed ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
+	SetCheck(DLG_ID(isOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
+	SetCheck(DLG_ID(IDCHECK_MSLINKER), GetBoolOption(OPT_MS_LINKER));
 	SetCheck(DLG_ID(GetBoolOption(OPT_STDCALL) ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
 
-	switch (m_WarningLevel) {
-		case WARNLEVEL_1:
+	int warnLevel = GetOption(OPT_WARN_LEVEL) ? tt::Atoi(GetOption(OPT_WARN_LEVEL)) : 4;
+
+	switch (warnLevel) {
+		case 1:
 			SetCheck(DLG_ID(IDRADIO_WARN1));
 			break;
-		case WARNLEVEL_2:
+		case 2:
 			SetCheck(DLG_ID(IDRADIO_WARN2));
 			break;
-		case WARNLEVEL_3:
+		case 3:
 			SetCheck(DLG_ID(IDRADIO_WARN3));
 			break;
-		case WARNLEVEL_4:
+		case 4:
 		default:
 			SetCheck(DLG_ID(IDRADIO_WARN4));
 			break;
@@ -203,20 +202,13 @@ void CDlgSrcOptions::OnBegin(void)
 
 	// Makefile: section options
 
-	switch (m_fCreateMakefile) {
-		case MAKEMAKE_NEVER:
-			SetCheck(DLG_ID(IDRADIO_MF_NEVER));
-			break;
+	if (isMakeNever())
+		SetCheck(DLG_ID(IDRADIO_MF_NEVER));
 
-		case MAKEMAKE_ALWAYS:
-			SetCheck(DLG_ID(IDRADIO_MF_ALWAYS));
-			break;
-
-		case MAKEMAKE_MISSING:
-		default:
-			SetCheck(DLG_ID(IDRADIO_MF_MISSING));
-			break;
-	}
+	else if (isMakeAlways())
+		SetCheck(DLG_ID(IDRADIO_MF_ALWAYS));
+	else
+		SetCheck(DLG_ID(IDRADIO_MF_MISSING));
 }
 
 void CDlgSrcOptions::OnOK(void)
@@ -241,16 +233,22 @@ void CDlgSrcOptions::OnOK(void)
 	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
 	UpdateOption(OPT_LIBS, (char*) csz);
 
-	m_cszBuildLibs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
+	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
+	UpdateOption(OPT_BUILD_LIBS, (char*) csz);
 
 	if (GetCheck(DLG_ID(IDRADIO_CONSOLE)))
-		m_exeType = EXE_CONSOLE;
+		UpdateOption(OPT_EXE_TYPE, "console");
 	else if (GetCheck(DLG_ID(IDRADIO_DLL)))
-		m_exeType = EXE_DLL;
+		UpdateOption(OPT_EXE_TYPE, "dll");
 	else if (GetCheck(DLG_ID(IDRADIO_LIB)))
-		m_exeType = EXE_LIB;
+		UpdateOption(OPT_EXE_TYPE, "lib");
 	else
-		m_exeType = EXE_WINDOW;
+		UpdateOption(OPT_EXE_TYPE, "window");
+
+	if (GetCheck(DLG_ID(IDC_RADIO_SPEED)))
+		UpdateOption(OPT_OPTIMIZE, "speed");
+	else
+		UpdateOption(OPT_OPTIMIZE, "space");
 
 	UpdateOption(OPT_64BIT, GetCheck(DLG_ID(IDCHECK_64BIT)));
 	UpdateOption(OPT_BIT_SUFFIX, GetCheck(DLG_ID(IDCHECK_BITEXT)));
@@ -259,25 +257,23 @@ void CDlgSrcOptions::OnOK(void)
 	UpdateOption(OPT_STATIC_CRT, GetCheck(DLG_ID(IDCHECK_STATIC_CRT)));
 	UpdateOption(OPT_MS_LINKER, GetCheck(DLG_ID(IDCHECK_MSLINKER)));
 
-	m_bBuildForSpeed = GetCheck(DLG_ID(IDC_RADIO_SPEED));
-
 	if (GetCheck(DLG_ID(IDRADIO_WARN1)))
-		m_WarningLevel = 1;
+		UpdateOption(OPT_WARN_LEVEL, "1");
 	else if (GetCheck(DLG_ID(IDRADIO_WARN2)))
-		m_WarningLevel = 2;
+		UpdateOption(OPT_WARN_LEVEL, "2");
 	else if (GetCheck(DLG_ID(IDRADIO_WARN3)))
-		m_WarningLevel = 3;
+		UpdateOption(OPT_WARN_LEVEL, "3");
 	else if (GetCheck(DLG_ID(IDRADIO_WARN4)))
-		m_WarningLevel = 4;
+		UpdateOption(OPT_WARN_LEVEL, "4");
 
 	// Makefile: section options
 
 	if (GetCheck(DLG_ID(IDRADIO_MF_NEVER)))
-		m_fCreateMakefile = MAKEMAKE_NEVER;
+		UpdateOption(OPT_MAKEFILE, "never");
 	else if (GetCheck(DLG_ID(IDRADIO_MF_ALWAYS)))
-		m_fCreateMakefile = MAKEMAKE_ALWAYS;
+		UpdateOption(OPT_MAKEFILE, "always");
 	else
-		m_fCreateMakefile = MAKEMAKE_MISSING;
+		UpdateOption(OPT_MAKEFILE, "missing");
 }
 
 void CDlgSrcOptions::OnBtnChangePch()

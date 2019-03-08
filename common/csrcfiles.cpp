@@ -34,13 +34,6 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_bRead = false;
 	m_bReadingPrivate = false;
 
-	m_bBuildForSpeed = false;
-
-	m_WarningLevel = WARNLEVEL_DEFAULT;
-	m_exeType = EXE_DEFAULT;
-
-	m_fCreateMakefile = MAKEMAKE_DEFAULT;	// create makefile only if it doesn't already exist
-
 	m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
@@ -49,36 +42,46 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 
 	AddOption(OPT_PROJECT, "Project", false, true); // AddOption(index, name, boolean_type(false), required(false))
 	AddOption(OPT_PCH, "PCH", false, true);
+	AddOption(OPT_EXE_TYPE, "exe_type", false, true);
 
 	AddOption(OPT_64BIT, "64Bit", true);
 	AddOption(OPT_BIT_SUFFIX, "bit_suffix", true);
 	AddOption(OPT_DEBUG_RC, "DebugRC", true);
 
+	AddOption(OPT_PERMISSIVE, "permissive");
+	AddOption(OPT_STDCALL, "stdcall");
+	AddOption(OPT_OPTIMIZE, "optimize");
+	AddOption(OPT_WARN_LEVEL, "WarnLevel");
+
 	AddOption(OPT_COMPILERS, "Compilers");
+	AddOption(OPT_MAKEFILE, "Makefile");
 	AddOption(OPT_CFLAGS, "CFlags");
 	AddOption(OPT_MIDL_FLAGS, "MidlFlags");
 	AddOption(OPT_LINK_FLAGS, "LinkFlags");
 	AddOption(OPT_RC_FLAGS, "RCFlags");
-	AddOption(OPT_PERMISSIVE, "permissive");
-	AddOption(OPT_STDCALL, "stdcall");
 	AddOption(OPT_STATIC_CRT, "static_crt");
 	AddOption(OPT_MS_LINKER, "ms_linker");
 	AddOption(OPT_IDE, "IDE");
 
 	AddOption(OPT_INC_DIRS, "IncDirs");
+	AddOption(OPT_TARGET_DIR32, "TargetDir32");
+	AddOption(OPT_TARGET_DIR64, "TargetDir64");
+	AddOption(OPT_BUILD_LIBS, "BuildLibs");
 	AddOption(OPT_LIB_DIRS, "LibDirs");
 	AddOption(OPT_LIBS, "Libs");
+
+	// Set default option values here
+
+	UpdateOption(OPT_PCH, "none", "name of precompiled header file, or \042none\042 if not using precompiled headers");
+	UpdateOption(OPT_EXE_TYPE, "console", "[window | console | lib | dll]");
+	UpdateOption(OPT_MAKEFILE, "missing", "[never | missing | always]");
+	UpdateOption(OPT_WARN_LEVEL, "4", "[1 | 2 | 3 | 4]");
 }
 
 CSrcFiles::~CSrcFiles()
 {
 	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
 		delete m_aOptions.GetValueAt(pos);
-	}
-
-	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
-		if (m_aOptVal[pos].pszComment)
-			tt::FreeAlloc(m_aOptVal[pos].pszComment);
 	}
 }
 
@@ -155,9 +158,6 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 		}
 	}
 
-	if (m_exeType == EXE_UNSPECIFIED)
-		m_exeType= EXE_WINDOW;
-
 	// If no Files: were specified, then we still won't have any files to build. Default to every type of C++ source file
 	// in the current directory.
 
@@ -175,63 +175,20 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
 		return;
 
+	if (tt::isSameStri(cszName, "BuildLibs"))
+		while (cszVal.ReplaceStr(".lib", ""));	// we want the target name, not the library filename
+
 	if (UpdateOption(cszName, cszVal, cszComment) != OPT_ERROR)
 		return;
 
-	// Everything below requires special handling
-
-	if (tt::isSameStri(cszName, "Makefile")) {
-		m_fCreateMakefile = MAKEMAKE_DEFAULT;
-		if (tt::isSameSubStri(cszVal, "never"))
-			m_fCreateMakefile = MAKEMAKE_NEVER;
-		else if (tt::isSameSubStri(cszVal, "missing"))
-			m_fCreateMakefile = MAKEMAKE_MISSING;
-		else if (tt::isSameSubStri(cszVal, "always"))
-			m_fCreateMakefile = MAKEMAKE_ALWAYS;
-		return;
-	}
+	// If you need to support reading old options, add the code here to convert them into the new options
 
 	if (tt::isSameStri(cszName, "TargetDirs")) {	// first target is 32-bit directory, second is 64-bit directory
 		ttCEnumStr cenum(cszVal, ';');
 		if (cenum.Enum())
-			m_cszTarget32 = cenum;
+			UpdateOption(OPT_TARGET_DIR32, (char*) cenum);
 		if (cenum.Enum())
-			m_cszTarget64 = cenum;
-		return;
-	}
-
-	if (tt::isSameStri(cszName, "exe_type")) {
-		if (tt::isSameSubStri(cszVal, "window"))
-			m_exeType = EXE_WINDOW;
-		else if (tt::isSameSubStri(cszVal, "console"))
-			m_exeType = EXE_CONSOLE;
-		else if (tt::isSameSubStri(cszVal, "lib"))
-			m_exeType = EXE_LIB;
-		else if (tt::isSameSubStri(cszVal, "dll"))
-			m_exeType = EXE_DLL;
-		return;
-	}
-
-	if (tt::isSameStri(cszName, "optimize")) {
-		m_bBuildForSpeed = tt::isSameSubStri(cszVal, "speed");
-		return;
-	}
-
-	if (tt::isSameStri(cszName, "BuildLibs")) {
-		if (cszVal.isNonEmpty()) {
-			m_cszBuildLibs = tt::findNonSpace(cszVal);
-			// Remove any .lib extension--we are looking for the target name, not the library name
-			char* pszLibExt = tt::findStri(m_cszBuildLibs, ".lib");
-			while (pszLibExt) {
-				tt::strCopy(pszLibExt, pszLibExt + 4);
-				pszLibExt = tt::findStri(pszLibExt, ".lib");
-			}
-		}
-		return;
-	}
-
-	if (tt::isSameStri(cszName, "WarnLevel")) {
-		m_WarningLevel = tt::Atoi(cszVal);
+			UpdateOption(OPT_TARGET_DIR64, (char*) cenum);
 		return;
 	}
 

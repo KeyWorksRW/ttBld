@@ -273,7 +273,7 @@ void CNinja::WriteCompilerComments()
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
 			if (isExeTypeLib())
 				m_pkfOut->WriteEol("# -Zl\t// Don't specify default runtime library in .obj file");
-			if (isBuildSpeed())
+			if (isOptimizeSpeed())
 				m_pkfOut->WriteEol("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
 			else
 				m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
@@ -298,7 +298,7 @@ void CNinja::WriteCompilerComments()
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
 			if (isExeTypeLib())
 				m_pkfOut->WriteEol("# -Zl\t// Don't specify default runtime library in .obj file");
-			if (isBuildSpeed())
+			if (isOptimizeSpeed())
 				m_pkfOut->WriteEol("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
 			else
 				m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
@@ -318,23 +318,21 @@ void CNinja::WriteCompilerFlags()
 	// First we write the flags common to both compilers
 
 	if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)
-		m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%d%s%s -Od -Z7 -GS-",
+		m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7 -GS-",
 				isExeTypeConsole() ? " -D_CONSOLE" : "",
 
-				(int) getWarnLevel(),
-
-				GetOptionName(OPT_STDCALL) ?	 " -Gz" : "",
+				GetOption(OPT_WARN_LEVEL),
+				GetOptionName(OPT_STDCALL) ? " -Gz" : "",
 				isExeTypeLib() ? " -Zl" : " -MDd"   // Note use of -MDd -- assumption is to always use this for debug builds. Release builds track GetOptionName(OPT_STATIC_CRT)
 			);
 	else	// Presumably GEN_RELEASE or GEN_RELEASE64
-		m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%d%s%s%s",
+		m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s",
 				isExeTypeConsole() ? " -D_CONSOLE" : "",
 
-				(int) getWarnLevel(),
-
+				GetOption(OPT_WARN_LEVEL),
 				GetOptionName(OPT_STDCALL) ?    " -Gz" : "",
 				isExeTypeLib() ? " -Zl" :  (GetOptionName(OPT_STATIC_CRT) ? " -MT" : " -MD"),
-				isBuildSpeed() ? " -O2" : " -O1"
+				isOptimizeSpeed() ? " -O2" : " -O1"
 			);
 
 	if (GetOption(OPT_INC_DIRS)) {
