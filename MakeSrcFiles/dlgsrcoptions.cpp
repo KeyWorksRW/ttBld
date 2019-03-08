@@ -44,8 +44,8 @@ void CreateNewSrcFiles()
 		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.c;*.rc;*.idl;*.hhp;");
 		ttCStr cszPCHSrc;
 		bool bSpecialFiles = false;
-		if (dlg.m_cszPCHheader.isNonEmpty()) {
-			cszPCHSrc = dlg.m_cszPCHheader;
+		if (tt::isEmpty(dlg.GetPchHeader())) {
+			cszPCHSrc = dlg.GetPchHeader();
 			cszPCHSrc.ChangeExtension(".cpp");
 			if (!tt::FileExists(cszPCHSrc)) {
 				cszPCHSrc.ChangeExtension(".c");
@@ -100,20 +100,20 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttCDlg(IDDLG_SRCFILES), 
 		m_WarningLevel = WARNLEVEL_DEFAULT;
 	}
 
-	if (m_cszPCHheader.isEmpty()) {
+	if (tt::isEmpty(GetPchHeader())) {
 		if (tt::FileExists("stdafx.h"))
-			m_cszPCHheader = "stdafx.h";
+			UpdateOption(OPT_PCH, "stdafx.h");
 		else if (tt::FileExists("pch.h"))
-			m_cszPCHheader = "pch.h";
+			UpdateOption(OPT_PCH, "pch.h");
 		else if (tt::FileExists("precomp.h"))
-			m_cszPCHheader = "precomp.h";
+			UpdateOption(OPT_PCH, "precomp.h");
 
 		else if (tt::FileExists("pch.hh"))
-			m_cszPCHheader = "pch.hh";
+			UpdateOption(OPT_PCH, "pch.hh");
 		else if (tt::FileExists("pch.hpp"))
-			m_cszPCHheader = "pch.hpp";
+			UpdateOption(OPT_PCH, "pch.hpp");
 		else if (tt::FileExists("pch.hxx"))
-			m_cszPCHheader = "pch.hxx";
+			UpdateOption(OPT_PCH, "pch.hxx");
 	}
 }
 
@@ -152,20 +152,20 @@ void CDlgSrcOptions::OnBegin(void)
 		SetControlText(DLG_ID(IDEDIT_PROJ_NAME), pszProject);
 	}
 
-	if (m_cszPCHheader.isNonEmpty())
-		SetControlText(DLG_ID(IDEDIT_PCH), m_cszPCHheader);
-	if (m_cszCFlags.isNonEmpty())
-		SetControlText(DLG_ID(IDEDIT_CFLAGS), m_cszCFlags);
-	if (m_cszLinkFlags.isNonEmpty())
-		SetControlText(DLG_ID(IDEDIT_LINK_FLAGS), m_cszLinkFlags);
-	if (m_cszLibs.isNonEmpty())
-		SetControlText(DLG_ID(IDEDIT_LIBS), m_cszLibs);
+	if (GetPchHeader())
+		SetControlText(DLG_ID(IDEDIT_PCH), GetPchHeader());
+	if (GetOption(OPT_CFLAGS))
+		SetControlText(DLG_ID(IDEDIT_CFLAGS), GetOption(OPT_CFLAGS));
+	if (GetOption(OPT_LINK_FLAGS))
+		SetControlText(DLG_ID(IDEDIT_LINK_FLAGS), GetOption(OPT_LINK_FLAGS));
+	if (GetOption(OPT_LIBS))
+		SetControlText(DLG_ID(IDEDIT_LIBS), GetOption(OPT_LIBS));
 	if (m_cszBuildLibs.isNonEmpty())
 		SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), m_cszBuildLibs);
-	if (m_cszIncDirs.isNonEmpty())
-		SetControlText(DLG_ID(IDEDIT_INCDIRS), m_cszIncDirs);
-	if (m_cszLibDirs.isNonEmpty())
-		SetControlText(DLG_ID(IDEDIT_LIBDIRS), m_cszLibDirs);
+	if (GetOption(OPT_INC_DIRS))
+		SetControlText(DLG_ID(IDEDIT_INCDIRS), GetOption(OPT_INC_DIRS));
+	if (GetOption(OPT_LIB_DIRS))
+		SetControlText(DLG_ID(IDEDIT_LIBDIRS), GetOption(OPT_LIB_DIRS));
 
 	if (m_exeType == EXE_CONSOLE)
 		SetCheck(DLG_ID(IDRADIO_CONSOLE));
@@ -176,14 +176,14 @@ void CDlgSrcOptions::OnBegin(void)
 	else
 		SetCheck(DLG_ID(IDRADIO_NORMAL));
 
-	ttDDX_Check(DLG_ID(IDCHECK_64BIT), m_b64bit);
-	ttDDX_Check(DLG_ID(IDCHECK_BITEXT), m_bBitSuffix);
-	ttDDX_Check(DLG_ID(IDCHECK_STATIC_CRT), m_bStaticCrt);
-	ttDDX_Check(DLG_ID(IDC_CHECK_PERMISSIVE), m_bPermissive);
-	ttDDX_Check(DLG_ID(IDCHECK_MSLINKER), m_bUseMsvcLinker);
+	SetCheck(DLG_ID(IDCHECK_64BIT), GetBoolOption(OPT_64BIT));
+	SetCheck(DLG_ID(IDCHECK_BITEXT), GetBoolOption(OPT_BIT_SUFFIX));
+	SetCheck(DLG_ID(IDC_CHECK_PERMISSIVE), GetBoolOption(OPT_PERMISSIVE));
+	SetCheck(DLG_ID(IDCHECK_STATIC_CRT), GetBoolOption(OPT_STATIC_CRT));
+	SetCheck(DLG_ID(IDCHECK_MSLINKER), GetBoolOption(OPT_MS_LINKER));
 
 	SetCheck(DLG_ID(m_bBuildForSpeed ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
-	SetCheck(DLG_ID(m_bStdcall ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
+	SetCheck(DLG_ID(GetBoolOption(OPT_STDCALL) ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
 
 	switch (m_WarningLevel) {
 		case WARNLEVEL_1:
@@ -222,15 +222,26 @@ void CDlgSrcOptions::OnBegin(void)
 void CDlgSrcOptions::OnOK(void)
 {
 	ttCStr csz;
-	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
-	UpdateOption(OPT_PROJECT, csz);
 
-	m_cszCFlags.getWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
-	m_cszLinkFlags.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LINK_FLAGS)));
-	m_cszLibs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
+	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
+	UpdateOption(OPT_PROJECT, (char*) csz);
+
+	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
+	UpdateOption(OPT_CFLAGS, (char*) csz);
+
+	csz.getWindowText(GetDlgItem(DLG_ID(OPT_LINK_FLAGS)));
+	UpdateOption(OPT_LINK_FLAGS, (char*) csz);
+
+	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
+	UpdateOption(OPT_INC_DIRS, (char*) csz);
+
+	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
+	UpdateOption(OPT_LIB_DIRS, (char*) csz);
+
+	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
+	UpdateOption(OPT_LIBS, (char*) csz);
+
 	m_cszBuildLibs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
-	m_cszIncDirs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
-	m_cszLibDirs.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
 
 	if (GetCheck(DLG_ID(IDRADIO_CONSOLE)))
 		m_exeType = EXE_CONSOLE;
@@ -241,14 +252,14 @@ void CDlgSrcOptions::OnOK(void)
 	else
 		m_exeType = EXE_WINDOW;
 
-	ttDDX_Check(DLG_ID(IDCHECK_64BIT), m_b64bit);
-	ttDDX_Check(DLG_ID(IDCHECK_BITEXT), m_bBitSuffix);
-	ttDDX_Check(DLG_ID(IDCHECK_STATIC_CRT), m_bStaticCrt);
-	ttDDX_Check(DLG_ID(IDC_CHECK_PERMISSIVE), m_bPermissive);
-	ttDDX_Check(DLG_ID(IDCHECK_MSLINKER), m_bUseMsvcLinker);
+	UpdateOption(OPT_64BIT, GetCheck(DLG_ID(IDCHECK_64BIT)));
+	UpdateOption(OPT_BIT_SUFFIX, GetCheck(DLG_ID(IDCHECK_BITEXT)));
+	UpdateOption(OPT_PERMISSIVE, GetCheck(DLG_ID(IDC_CHECK_PERMISSIVE)));
+	UpdateOption(OPT_STDCALL, GetCheck(DLG_ID(IDC_RADIO_STDCALL)));
+	UpdateOption(OPT_STATIC_CRT, GetCheck(DLG_ID(IDCHECK_STATIC_CRT)));
+	UpdateOption(OPT_MS_LINKER, GetCheck(DLG_ID(IDCHECK_MSLINKER)));
 
 	m_bBuildForSpeed = GetCheck(DLG_ID(IDC_RADIO_SPEED));
-	m_bStdcall = GetCheck(DLG_ID(IDC_RADIO_STDCALL));
 
 	if (GetCheck(DLG_ID(IDRADIO_WARN1)))
 		m_WarningLevel = 1;

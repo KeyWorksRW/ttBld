@@ -34,9 +34,9 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 	m_Compiler = Compiler;
 
 	ttCStr cszExtraLib;		// used to specify the exact name/path of the "extra" library (if any)
-	if (getLibName()) {		// start with the extra lib if there is one
+	if (GetOption(OPT_LIB_DIRS)) {		// start with the extra lib if there is one
 		cszExtraLib = "$libout/";
-		cszExtraLib += tt::findFilePortion(getLibName());
+		cszExtraLib += tt::findFilePortion(GetOption(OPT_LIB_DIRS));
 		cszExtraLib.ChangeExtension(".lib");
 	}
 
@@ -48,15 +48,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 	// indicates if it is a debug or release version.
 
 	if (isExeTypeDll())	{
-		if (is64BitSuffix())
+		if (GetBoolOption(OPT_BIT_SUFFIX))
 			cszProj += "64";
 	}
 	else {
-		if (gentype == GEN_DEBUG64 && is64BitSuffix())
+		if (gentype == GEN_DEBUG64 && GetBoolOption(OPT_BIT_SUFFIX))
 			cszProj += isBin64() ? "D" : "64D";		// isBin64() checks to see if ../bin64 exists
 		else if (gentype == GEN_DEBUG)
 			cszProj += "D";
-		else if (gentype == GEN_RELEASE64 && is64BitSuffix() && !isBin64())
+		else if (gentype == GEN_RELEASE64 && GetBoolOption(OPT_BIT_SUFFIX) && !isBin64())
 			cszProj += "64";
 	}
 
@@ -77,7 +77,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 	file.WriteEol(cszTmp);
 	file.WriteEol("resout = build/res");
 
-	if (getLibName()) {
+	if (GetOption(OPT_LIB_DIRS)) {
 		cszTmp.Delete();
 		if (gentype == GEN_DEBUG)
 			cszTmp.printf("libout = build/debugLib");
@@ -98,10 +98,10 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 
 	// Figure out the filenames to use for the source and output for a precompiled header
 
-	if (getPchName()) {
+	if (GetPchHeader()) {
 		m_cszPCH = GetProjectName();
 		m_cszPCH.ChangeExtension(".pch");
-		m_cszCPP_PCH = getPchName();
+		m_cszCPP_PCH = GetPchHeader();
 
 		size_t pos;
 		for (pos = 0; aCppExt[pos]; pos++) {		// find out what type of C++ extension is being used
@@ -109,10 +109,10 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 			if (tt::FileExists(m_cszCPP_PCH))
 				break;
 		}
-		ttASSERT_MSG(aCppExt[pos], "No C++ source file found to generate precompiled header.");	// Probably means getPchName() is pointing to an invalid header file
+		ttASSERT_MSG(aCppExt[pos], "No C++ source file found to generate precompiled header.");	// Probably means GetPchHeader() is pointing to an invalid header file
 		if (!aCppExt[pos]) {
 			ttCStr cszErrorMsg;
-			cszErrorMsg.printf("No C++ source file found that matches %s -- precompiled header will not build correctly.\n", getPchName());
+			cszErrorMsg.printf("No C++ source file found that matches %s -- precompiled header will not build correctly.\n", GetPchHeader());
 			puts(cszErrorMsg);
 
 			for (pos = 0; pos < getSrcFileList()->GetCount(); pos++) {
@@ -138,7 +138,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 
 	// Write the build rule for the precompiled header
 
-	if (getPchName()) {
+	if (GetPchHeader()) {
 		ttCStr cszPchObj = m_cszCPP_PCH;
 		cszPchObj.ChangeExtension(".obj");
 		file.printf("build $outdir/%s: compilePCH %s\n\n", (char*) m_cszPCHObj, (char*) m_cszCPP_PCH);
@@ -193,7 +193,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, size_t Compiler)
 
 	// Write the final build rules to complete the project
 
-	if (!isExeTypeLib() && getLibName()) {	// If an extra library was specified, add it's build rule first
+	if (!isExeTypeLib() && GetOption(OPT_LIB_DIRS)) {	// If an extra library was specified, add it's build rule first
 		file.printf("build %s : lib", (char*) cszExtraLib);
 		for (size_t posLib = 0; posLib < getLibFileList()->GetCount(); posLib++) {
 			ttCStr cszFile(tt::findFilePortion(getLibFileList()->GetAt(posLib)));
@@ -265,9 +265,9 @@ void CNinja::WriteCompilerComments()
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)	{
 			m_pkfOut->WriteEol("# -GL\t// Whole program optimization");
 			m_pkfOut->WriteEol("# -GS-\t// Turn off buffer security checks");
-			if (isStdcall())
+			if (GetOptionName(OPT_STDCALL))
 				m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-			if (isStaticCrt())
+			if (GetOptionName(OPT_STATIC_CRT))
 				m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
 			else
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -290,9 +290,9 @@ void CNinja::WriteCompilerComments()
 
 		m_pkfOut->WriteEol("# -EHsc\t// Structured exception handling");
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)	{
-			if (isStdcall())
+			if (GetOptionName(OPT_STDCALL))
 				m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-			if (isStaticCrt())
+			if (GetOptionName(OPT_STATIC_CRT))
 				m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
 			else
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -323,8 +323,8 @@ void CNinja::WriteCompilerFlags()
 
 				(int) getWarnLevel(),
 
-				isStdcall() ?	 " -Gz" : "",
-				isExeTypeLib() ? " -Zl" : " -MDd"   // Note use of -MDd -- assumption is to always use this for debug builds. Release builds track isStaticCrt()
+				GetOptionName(OPT_STDCALL) ?	 " -Gz" : "",
+				isExeTypeLib() ? " -Zl" : " -MDd"   // Note use of -MDd -- assumption is to always use this for debug builds. Release builds track GetOptionName(OPT_STATIC_CRT)
 			);
 	else	// Presumably GEN_RELEASE or GEN_RELEASE64
 		m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%d%s%s%s",
@@ -332,27 +332,27 @@ void CNinja::WriteCompilerFlags()
 
 				(int) getWarnLevel(),
 
-				isStdcall() ?    " -Gz" : "",
-				isExeTypeLib() ? " -Zl" :  (isStaticCrt() ? " -MT" : " -MD"),
+				GetOptionName(OPT_STDCALL) ?    " -Gz" : "",
+				isExeTypeLib() ? " -Zl" :  (GetOptionName(OPT_STATIC_CRT) ? " -MT" : " -MD"),
 				isBuildSpeed() ? " -O2" : " -O1"
 			);
 
-	if (getIncDirs()) {
-		ttCEnumStr cEnumStr(getIncDirs());
+	if (GetOption(OPT_INC_DIRS)) {
+		ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
 		while (cEnumStr.Enum()) {
 			m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
 		}
 	}
 
-	if (getCFlags()) {
+	if (GetOption(OPT_CFLAGS)) {
 		m_pkfOut->WriteChar(' ');
-		m_pkfOut->WriteStr(getCFlags());
+		m_pkfOut->WriteStr(GetOption(OPT_CFLAGS));
 	}
 
 	// Now write out the compiler-specific flags
 
 	if (m_Compiler == CSrcFiles::COMPILER_MSVC) {
-		if (isPermissive())
+		if (GetBoolOption(OPT_PERMISSIVE))
 			m_pkfOut->WriteStr(" -permissive-");
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)
 			m_pkfOut->WriteStr(" -GL");	// whole program optimization
@@ -366,7 +366,7 @@ void CNinja::WriteCompilerFlags()
 			m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");	// whole program optimization
 	}
 
-	if (getPchName())
+	if (GetPchHeader())
 		m_pkfOut->printf(" /Fp$outdir/%s", (char*) m_cszPCH);
 
 	m_pkfOut->WriteEol("\n");
@@ -375,13 +375,13 @@ void CNinja::WriteCompilerFlags()
 void CNinja::WriteCompilerDirectives()
 {
 	if (m_Compiler == CSrcFiles::COMPILER_MSVC) {
-		if (getPchName()) {
+		if (GetPchHeader()) {
 			m_pkfOut->printf(
 					"rule compilePCH\n"
 					"  deps = msvc\n"
 					"  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
 					GetProjectName(),
-					getPchName() 					// typically stdafx.h or precomp.h
+					GetPchHeader() 					// typically stdafx.h or precomp.h
 					);
 			m_pkfOut->WriteEol("  description = compiling $in\n");
 		}
@@ -394,7 +394,7 @@ void CNinja::WriteCompilerDirectives()
 					"  deps = msvc\n"
 					"  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
 					GetProjectName(),
-					getPchName() ? "-Yu" : "", getPchName() ? getPchName() : ""
+					GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : ""
 					);
 		}
 		else {
@@ -402,20 +402,20 @@ void CNinja::WriteCompilerDirectives()
 					"rule compile\n"
 					"  deps = msvc\n"
 					"  command = cl.exe -c $cflags -Fo$out $in %s%s\n",
-					getPchName() ? "-Yu" : "",
-					getPchName() ? getPchName() : ""
+					GetPchHeader() ? "-Yu" : "",
+					GetPchHeader() ? GetPchHeader() : ""
 					);
 		}
 		m_pkfOut->WriteEol("  description = compiling $in\n");
 	}
 	else if (m_Compiler == CSrcFiles::COMPILER_CLANG) {
-		if (getPchName()) {
+		if (GetPchHeader()) {
 			m_pkfOut->printf(
 					"rule compilePCH\n"
 					"  deps = msvc\n"
 					"  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
 					GetProjectName(),
-					getPchName() 					// typically stdafx.h or precomp.h
+					GetPchHeader() 					// typically stdafx.h or precomp.h
 					);
 			m_pkfOut->WriteEol("  description = compiling $in\n");
 		}
@@ -428,7 +428,7 @@ void CNinja::WriteCompilerDirectives()
 					"  deps = msvc\n"	// clang-cl supports -showIncludes, same as msvc
 					"  command = clang-cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
 					GetProjectName(),
-					getPchName() ? "-Yu" : "", getPchName() ? getPchName() : ""
+					GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : ""
 					);
 		}
 		else {
@@ -436,8 +436,8 @@ void CNinja::WriteCompilerDirectives()
 					"rule compile\n"
 					"  deps = msvc\n"
 					"  command = clang-cl.exe -c $cflags -Fo$out $in %s%s\n",
-					getPchName() ? "-Yu" : "",
-					getPchName() ? getPchName() : ""
+					GetPchHeader() ? "-Yu" : "",
+					GetPchHeader() ? GetPchHeader() : ""
 					);
 		}
 		m_pkfOut->WriteEol("  description = compiling $in\n");
@@ -449,13 +449,13 @@ void CNinja::WriteLinkDirective()
 	if (isExeTypeLib())
 		return;	// lib directive should be used if the project is a library
 
-	if (m_Compiler == CSrcFiles::COMPILER_MSVC || m_bUseMsvcLinker) {
+	if (m_Compiler == CSrcFiles::COMPILER_MSVC || GetOption(OPT_MS_LINKER)) {
 		ttCStr cszRule("rule link\n  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO ");
 		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? "/MACHINE:x64" : "/MACHINE:x86");
 
-		if (getLinkFlags()) {
+		if (GetOption(OPT_LINK_FLAGS)) {
 			cszRule += " ";
-			cszRule += getLinkFlags();
+			cszRule += GetOption(OPT_LINK_FLAGS);
 		}
 
 		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
@@ -478,9 +478,9 @@ void CNinja::WriteLinkDirective()
 		cszRule += " /out:$out /manifest:no";
 		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /machine:x64" : " /machine:x86");
 
-		if (getLinkFlags()) {
+		if (GetOption(OPT_LINK_FLAGS)) {
 			cszRule += " ";
-			cszRule += getLinkFlags();
+			cszRule += GetOption(OPT_LINK_FLAGS);
 		}
 
 		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
@@ -502,14 +502,14 @@ void CNinja::WriteLinkDirective()
 void CNinja::WriteLibDirective()
 {
 	if (m_Compiler == CSrcFiles::COMPILER_MSVC) {
-		if (isExeTypeLib() || getLibName())	{
+		if (isExeTypeLib() || GetOption(OPT_LIB_DIRS))	{
 			m_pkfOut->printf("rule lib\n  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in\n",
 				(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
 			m_pkfOut->WriteEol("  description = creating library $out\n");
 		}
 	}
 	else if (m_Compiler == CSrcFiles::COMPILER_CLANG) {
-		if (isExeTypeLib() || getLibName())	{
+		if (isExeTypeLib() || GetOption(OPT_LIB_DIRS))	{
 			// MSVC -LTCG option is not supported by lld
 			m_pkfOut->printf("rule lib\n  command = lld-link.exe /lib /machine:%s /out:$out $in\n",
 				(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
@@ -554,9 +554,9 @@ void CNinja::WriteMidlTargets()
 
 		cszIdlC.RemoveExtension();
 		cszIdlC += "_i.c";
-		if (m_cszMidlFlags.isNonEmpty())
+		if (GetOption(OPT_MIDL_FLAGS))
 			m_pkfOut->printf("build %s : midl %s /tlb %s %s\n\n",
-				(char*) cszIdlC, (char*) m_cszMidlFlags, (char*) cszTypeLib, m_lstIdlFiles[pos]);
+				(char*) cszIdlC, GetOption(OPT_MIDL_FLAGS), (char*) cszTypeLib, m_lstIdlFiles[pos]);
 		else
 			m_pkfOut->printf("build %s : midl /tlb %s %s\n\n",
 				(char*) cszIdlC, (char*) cszTypeLib, m_lstIdlFiles[pos]);
@@ -599,9 +599,9 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 		m_pkfOut->printf(" $resout/%s", (char*) cszRes);
 	}
 
-	if (!isExeTypeLib() && getLibName()) {
+	if (!isExeTypeLib() && GetOption(OPT_LIB_DIRS)) {
 		ttCStr cszExtraLib("$libout/");
-		cszExtraLib += tt::findFilePortion(getLibName());
+		cszExtraLib += tt::findFilePortion(GetOption(OPT_LIB_DIRS));
 		cszExtraLib.ChangeExtension(".lib");
 
 		m_pkfOut->WriteChar(CH_SPACE);

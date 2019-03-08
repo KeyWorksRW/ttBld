@@ -291,12 +291,16 @@ bool ConvertVcProj(const char* pszBldFile)
 					cSrcFiles.m_WarningLevel = tt::Atoi(pszOption);
 
 				pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
-				if (pszOption)
-					cSrcFiles.m_cszIncDirs += pszOption;
+				if (pszOption) {
+					ttCStr csz(cSrcFiles.GetOption(OPT_INC_DIRS));
+					csz += pszOption;
+					cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) csz);
+				}
 
 				pszOption = pRelease->GetAttribute("PreprocessorDefinitions");
 				if (pszOption) {
 					ttCEnumStr enumFlags(pszOption);
+					ttCStr cszCFlags;
 					while (enumFlags.Enum()) {
 						if (tt::isSameStri(enumFlags, "NDEBUG"))
 							continue;	// we already add this
@@ -310,11 +314,14 @@ bool ConvertVcProj(const char* pszBldFile)
 						}
 						if (tt::isSameSubStri(enumFlags, "$("))	// Visual Studio specific, ignore it
 							continue;
-						if (cSrcFiles.m_cszCFlags.isNonEmpty())
-							cSrcFiles.m_cszCFlags += " ";
-						cSrcFiles.m_cszCFlags += "-D";
-						cSrcFiles.m_cszCFlags += enumFlags;
+
+
+						if (cszCFlags.isNonEmpty())
+							cszCFlags += " ";
+						cszCFlags += "-D";
+						cszCFlags += enumFlags;
 					}
+					cSrcFiles.UpdateOption(OPT_CFLAGS, (char*) cszCFlags);
 				}
 			}
 		}

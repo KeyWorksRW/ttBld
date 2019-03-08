@@ -34,13 +34,7 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_bRead = false;
 	m_bReadingPrivate = false;
 
-	m_b64bit = false;
-	m_bBitSuffix = false;
 	m_bBuildForSpeed = false;
-	m_bPermissive = false;
-	m_bStaticCrt = false;
-	m_bStdcall = false;
-	m_bUseMsvcLinker = false;
 
 	m_WarningLevel = WARNLEVEL_DEFAULT;
 	m_IDE = IDE_NONE;
@@ -53,32 +47,27 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
 
-	AddOption(OPT_PROJECT, "Project", true);
+	// Add these in the order you want them written in a new .srcfiles files.
 
-	// If the option value is a simple string or true/false value, it can be added here and it will automatically be read
-	// and written.
+	AddOption(OPT_PROJECT, "Project", false, true); // AddOption(index, name, boolean_type(false), required(false))
+	AddOption(OPT_PCH, "PCH", false, true);
 
-//	AddOptVal("Project",   &m_cszProjectName, "project target name");
-	AddOptVal("PCH",       &m_cszPCHheader);
+	AddOption(OPT_64BIT, "64Bit", true);
+	AddOption(OPT_BIT_SUFFIX, "bit_suffix", true);
+	AddOption(OPT_DEBUG_RC, "DebugRC", true);
 
-	AddOptVal("CFlags",    &m_cszCFlags);
-	AddOptVal("MidlFlags", &m_cszMidlFlags);
-	AddOptVal("LinkFlags", &m_cszLinkFlags);
-	AddOptVal("RCFlags",   &m_cszRCFlags);
+	AddOption(OPT_CFLAGS, "CFlags");
+	AddOption(OPT_MIDL_FLAGS, "MidlFlags");
+	AddOption(OPT_LINK_FLAGS, "LinkFlags");
+	AddOption(OPT_RC_FLAGS, "RCFlags");
+	AddOption(OPT_PERMISSIVE, "permissive");
+	AddOption(OPT_STDCALL, "stdcall");
+	AddOption(OPT_STATIC_CRT, "static_crt");
+	AddOption(OPT_MS_LINKER, "ms_linker");
 
-	AddOptVal("IncDirs",   &m_cszIncDirs);
-	AddOptVal("LibPCH",    &m_cszLibPCHheader);
-	AddOptVal("Libs",      &m_cszLibs);
-	AddOptVal("LibDirs",   &m_cszLibDirs);
-	AddOptVal("Sources",   &m_cszSrcPattern);
-
-	AddOptVal("64Bit",      &m_b64bit);
-	AddOptVal("bit_suffix", &m_bBitSuffix);
-	AddOptVal("DebugRC",    &m_bDebugRC);
-	AddOptVal("permissive", &m_bPermissive);
-	AddOptVal("stdcall",    &m_bStdcall);
-	AddOptVal("static_crt", &m_bStaticCrt);
-	AddOptVal("ms_linker",  &m_bUseMsvcLinker);
+	AddOption(OPT_INC_DIRS, "IncDirs");
+	AddOption(OPT_LIB_DIRS, "LibDirs");
+	AddOption(OPT_LIBS, "Libs");
 }
 
 CSrcFiles::~CSrcFiles()
@@ -169,14 +158,11 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 	if (m_exeType == EXE_UNSPECIFIED)
 		m_exeType= EXE_WINDOW;
 
-	AddSourcePattern(m_cszSrcPattern);
-
-	// If no Files: or Sources: we're specified, then we still won't have any files to build. Default to every type of C++
-	// source file in the current directory.
+	// If no Files: were specified, then we still won't have any files to build. Default to every type of C++ source file
+	// in the current directory.
 
 	if (m_lstSrcFiles.GetCount() < 1) {
-		m_cszSrcPattern = "*.cpp;*.cc;*.cxx;*.rc";
-		AddSourcePattern(m_cszSrcPattern);
+		AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc");
 	}
 
 	return true;
@@ -289,17 +275,25 @@ void CSrcFiles::ProcessOption(char* pszLine)
 
 void CSrcFiles::AddCompilerFlag(const char* pszFlag)
 {
-	if (m_cszCFlags.isEmpty() || !tt::findStri(m_cszCFlags, pszFlag))	{
-		m_cszCFlags += pszFlag;
-		m_cszCFlags += " ";
+	if (!GetOption(OPT_CFLAGS))
+		UpdateOption(OPT_CFLAGS, pszFlag);
+	// else append the flag if it hasn't already been added
+	else if (!tt::findStri(GetOption(OPT_CFLAGS), pszFlag)) {
+		ttCStr csz(GetOption(OPT_CFLAGS));
+		csz += " ";
+		csz += pszFlag;
+		UpdateOption(OPT_CFLAGS, (char*) csz);
 	}
 }
 
 void CSrcFiles::AddLibrary(const char* pszName)
 {
-	if (m_cszLibs.isEmpty() || !tt::findStri(m_cszLibs, pszName)) {
-		m_cszLibs += pszName;
-		m_cszLibs += " ";
+	if (!tt::findStri(GetOption(OPT_LIBS), pszName)) {
+		ttCStr csz(GetOption(OPT_LIBS));
+		if (csz.isNonEmpty())
+			csz += " ";
+		csz += pszName;
+		UpdateOption(OPT_LIBS, (char*) csz);
 	}
 }
 
@@ -568,10 +562,10 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
 	return true;
 }
 
-void CSrcFiles::AddOption(OPT_INDEX opt, const char* pszName, bool bRequired)
+void CSrcFiles::AddOption(OPT_INDEX opt, const char* pszName, bool bBoolean, bool bRequired)
 {
 	ptrdiff_t pos = m_aOptions.Add(opt, new CSrcOption);
-	m_aOptions.GetValueAt(pos)->AddOption(pszName, bRequired);
+	m_aOptions.GetValueAt(pos)->AddOption(pszName, bBoolean, bRequired);
 }
 
 OPT_INDEX CSrcFiles::UpdateOption(const char* pszName, const char* pszValue, const char* pszComment)
@@ -598,6 +592,24 @@ void CSrcFiles::UpdateOption(OPT_INDEX index, const char* pszValue, const char* 
 		m_aOptions.GetValueAt(pos)->UpdateOption(pszValue, pszComment);
 }
 
+void CSrcFiles::UpdateOption(OPT_INDEX index, bool bValue, const char* pszComment)
+{
+	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+	ptrdiff_t pos = m_aOptions.FindKey(index);
+	if (pos >= 0)
+		m_aOptions.GetValueAt(pos)->UpdateOption(bValue, pszComment);
+}
+
+const char* CSrcFiles::GetOption(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+
+	ptrdiff_t pos = m_aOptions.FindKey(index);
+	return (pos >= 0 ? m_aOptions.GetValueAt(pos)->getOption() : nullptr);
+}
+
+// Only needed if you must check for bool. Otherwise, call GetOption() and check for nullptr for false, non-nullptr for true
+
 bool CSrcFiles::GetBoolOption(OPT_INDEX index)
 {
 	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
@@ -606,10 +618,22 @@ bool CSrcFiles::GetBoolOption(OPT_INDEX index)
 	return (pos >= 0 ? m_aOptions.GetValueAt(pos)->getBoolOption() : false);
 }
 
-const char* CSrcFiles::GetStringOption(OPT_INDEX index)
+const char* CSrcFiles::GetOptionName(OPT_INDEX index)
 {
 	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
 
 	ptrdiff_t pos = m_aOptions.FindKey(index);
-	return (pos >= 0 ? m_aOptions.GetValueAt(pos)->getStringOption() : nullptr);
+	ttASSERT_MSG(pos >= 0, "Unable to find the specified OPT_ index");
+
+	return m_aOptions.GetValueAt(pos)->getName();
+}
+
+const char* CSrcFiles::GetOptionComment(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR, "Invalid index!");
+
+	ptrdiff_t pos = m_aOptions.FindKey(index);
+	ttASSERT_MSG(pos >= 0, "Unable to find the specified OPT_ index");
+
+	return m_aOptions.GetValueAt(pos)->getComment();
 }

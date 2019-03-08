@@ -154,7 +154,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 
 	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
 		CSrcOption* pcls = m_aOptions.GetValueAt(pos);	// just to make the code look a bit cleaner
-		UpdateShortOption(pcls->getName(), pcls->getStringOption(), pcls->getComment(), pcls->isRequired());
+		UpdateShortOption(pcls->getName(), pcls->getOption(), pcls->getComment(), pcls->isRequired());
 	}
 
 	// Long options don't have default comments, though we will keep any comments the user may have added. If we pass a
@@ -167,16 +167,19 @@ void CWriteSrcFiles::UpdateOptionsSection()
 
 	ttCStr cszTargets;
 	CreateTargetsString(cszTargets);
-	if (m_cszSrcPattern.isNonEmpty())
-		UpdateShortOption("Sources:", m_cszSrcPattern, "source file patterns", true);
 	UpdateShortOption("exe_type:", GetExeType(), "[window | console | lib | dll]", true);
 
-	if (m_b64bit)
+	if (GetOption(OPT_64BIT)) {
 		UpdateShortOption("64Bit:", "true", "create 64-bit project", true);
-	else
+		UpdateShortOption(GetOptionName(OPT_BIT_SUFFIX), GetBoolOption(OPT_BIT_SUFFIX) ? "true" : "false",
+			"add \"64\" to the end of target directory or project (e.g., ../bin64/)", GetBoolOption(OPT_BIT_SUFFIX));
+	}
+	else {
 		UpdateShortOption("64Bit:", "false", "create 64-bit project", false);	// only update if it already exists
+		UpdateShortOption(GetOptionName(OPT_BIT_SUFFIX), GetBoolOption(OPT_BIT_SUFFIX) ? "true" : "false",
+			"add \"64\" to the end of target directory or project (e.g., ../bin64/)", false);
+	}
 
-	UpdateShortOption("bit_suffix:", m_bBitSuffix ? "true" : "false", "add \"64\" to the end of target directory or project (e.g., ../bin64/)", m_bBitSuffix);
 	{
 		char szNum[10];
 		tt::Utoa(m_WarningLevel > 0 ? m_WarningLevel : WARNLEVEL_DEFAULT, szNum, sizeof(szNum));
@@ -184,10 +187,10 @@ void CWriteSrcFiles::UpdateOptionsSection()
 	}
 
 	UpdateShortOption("optimize:", m_bBuildForSpeed ? "speed" : "space", "speed or space (default)", m_bBuildForSpeed);
-	UpdateShortOption("static_crt:", m_bStaticCrt ? "true" : "false", "link to static (true) or DLL (false) version of CRT", m_bStaticCrt);
-	UpdateShortOption("permissive:", m_bPermissive ? "true" : "false", "permissive compiler option", m_bPermissive);
-	UpdateShortOption("stdcall:", m_bStdcall ? "true" : "false", "use stdcall calling convention (default is cdecl)", m_bStdcall);
-	UpdateShortOption("ms_linker:", m_bUseMsvcLinker ? "true" : "false", "use MS link.exe even when compiling with CLANG", m_bUseMsvcLinker);
+	UpdateShortOption(GetOptionName(OPT_STATIC_CRT), GetBoolOption(OPT_STATIC_CRT) ? "true" : "false", "link to static (true) or DLL (false) version of CRT", GetBoolOption(OPT_STATIC_CRT));
+	UpdateShortOption(GetOptionName(OPT_PERMISSIVE), GetBoolOption(OPT_PERMISSIVE) ? "true" : "false", "permissive compiler option", GetBoolOption(OPT_PERMISSIVE));
+	UpdateShortOption(GetOptionName(OPT_STDCALL), GetBoolOption(OPT_STDCALL) ? "true" : "false", "use stdcall calling convention (default is cdecl)", GetBoolOption(OPT_STDCALL));
+	UpdateShortOption(GetOptionName(OPT_MS_LINKER), GetBoolOption(OPT_MS_LINKER) ? "true" : "false", "use MS link.exe even when compiling with CLANG", GetBoolOption(OPT_MS_LINKER));
 
 	UpdateLongOption("TargetDirs:", cszTargets);
 
@@ -371,14 +374,14 @@ void CWriteSrcFiles::CreateTargetsString(ttCStr& cszTargets)
 	}
 
 	if (m_cszTarget32.isNonEmpty())	{
-		if (!(m_b64bit && !m_bBitSuffix))	// m_b64bit with no suffix means 64-bit only target
+		if (!GetOption(OPT_64BIT) && !GetOption(OPT_BIT_SUFFIX))	// m_b64bit with no suffix means 64-bit only target
 			cszTargets = (char*) m_cszTarget32;
-		if (m_b64bit && m_cszTarget64.isNonEmpty())	{
+		if (GetOption(OPT_64BIT) && m_cszTarget64.isNonEmpty())	{
 			cszTargets += "; ";
 			cszTargets += (char*) m_cszTarget64;
 		}
 	}
-	else if (m_b64bit && m_cszTarget64.isNonEmpty()) {
+	else if (GetOption(OPT_64BIT) && m_cszTarget64.isNonEmpty()) {
 		cszTargets = "; ";
 		cszTargets += (char*) m_cszTarget64;
 	}

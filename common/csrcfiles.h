@@ -21,7 +21,27 @@
 
 typedef enum {
 	OPT_ERROR = 0,
-	OPT_PROJECT
+
+	OPT_PROJECT,		// name of the project--will be used as the base target name (i.e., project: foo, target: foo.exe, fooD.exe, etc.)
+	OPT_PCH,			// name of precompiled header file, or "none" if not using precompiled headers
+
+	OPT_64BIT,			// if true, enable 64-bit support (link with 64-bit libraries).
+	OPT_BIT_SUFFIX,		// true means append "64" to target's directory or .exe name
+	OPT_DEBUG_RC,		// true means build a -D_DEBUG version of the project's rc file
+	OPT_PERMISSIVE, 	// true means add -permissive- compiler flag
+	OPT_STDCALL,		// use stdcall calling convention
+	OPT_STATIC_CRT,		// true means link to static CRT
+	OPT_MS_LINKER,		// use link.exe even when compiling with CLANG
+
+	OPT_CFLAGS,			// additional flags to pass to the compiler in all build targets
+	OPT_MIDL_FLAGS,		// flags to pass to the midl compiler
+	OPT_LINK_FLAGS,		// additional flags to pass to the linker in all build targets
+	OPT_RC_FLAGS,		// additional flags to pass to the resource compiler in all build targets
+	OPT_INC_DIRS,		// additional directories for header files
+	OPT_LIB_DIRS,		// additional directores for lib files
+	OPT_LIBS,			// additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
+
+	OPT_OVERFLOW
 } OPT_INDEX;
 
 extern const char* txtSrcFilesFileName;
@@ -86,16 +106,20 @@ public:
 	void AddSourcePattern(const char* pszFilePattern);
 
 public:
+	const char* GetOption(OPT_INDEX index);
+	bool		GetBoolOption(OPT_INDEX index);	 // boolean options are strings ("true" or "false") but this makes checking the value easier
 
-	bool		GetBoolOption(OPT_INDEX index);
-	const char* GetStringOption(OPT_INDEX index);
+	const char* GetOptionComment(OPT_INDEX index);
+	const char* GetOptionName(OPT_INDEX index);
 
 	OPT_INDEX   UpdateOption(const char* pszName, const char* pszValue, const char* pszComment = nullptr);
 	void        UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment = nullptr);
+	void        UpdateOption(OPT_INDEX index, bool bValue, const char* pszComment = nullptr);
 
-	// These are just for convenience--it's fine to call GetStringOption directly
+	// These are just for convenience--it's fine to call GetOption directly
 
-	const char* GetProjectName() { return GetStringOption(OPT_PROJECT); }
+	const char* GetProjectName() { return GetOption(OPT_PROJECT); }
+	const char* GetPchHeader()   { return GetOption(OPT_PCH); }
 
 protected:
 	void ProcessFile(char* pszFile);
@@ -110,14 +134,7 @@ protected:
 	// Class members (note that these are NOT marked protected or private -- too many callers need to access individual members)
 
 public:
-	bool m_b64bit;				// if true, enable 64-bit support (link with 64-bit libraries).
-	bool m_bBitSuffix;			// true means append "64" to target's directory or .exe name
 	bool m_bBuildForSpeed;		// optimize for fast code instead of small code (optimizing for speed can actually make the code run slower due to caching issues)
-	bool m_bPermissive;			// true means add -permissive- compiler flag
-	bool m_bStaticCrt;			// true means link to static CRT
-	bool m_bStdcall;			// use stdcall calling convention
-	bool m_bUseMsvcLinker;		// use link.exe even when compiling with CLANG
-	bool m_bDebugRC;			// indicates where or not to build a _DEBUG version of the resource file
 
 	EXE_TYPE m_exeType;			// EXE_WINDOW, EXE_CONSOLE, EXE_LIB, EXE_DLL or EXE_DEFAULT
 
@@ -125,26 +142,14 @@ public:
 	size_t m_CompilerType;		// COMPILER_CLANG, COMPILER_MSVC or COMPILER_DEFAULT
 	size_t m_IDE;				// IDE_CODEBLOCK, IDE_CODELITE, IDE_VS or IDE_NONE
 
-	ttCStr m_cszLibs;			// additional libraries to link to
 	ttCStr m_cszBuildLibs;		// libraries that need to be built (added to makefile generation)
-
-	ttCStr m_cszLibDirs;		// additional library directories to search
-	ttCStr m_cszIncDirs;		// additional include directories to search
-
-	ttCStr m_cszCFlags;			// additional flags to pass to the compiler in all build targets
-	ttCStr m_cszLinkFlags;		// additional flags to pass to the linker in all build targets
-	ttCStr m_cszRCFlags;		// additional flags to pass to the resource compiler in all build targets
-	ttCStr m_cszMidlFlags;		// flags to pass to the midl compiler
 
 	ttCStr m_cszTarget32;		// target directory for non-64 bit builds
 	ttCStr m_cszTarget64;		// target directory for 64 bit builds
 
 	ttCStr m_cszLibName;		// name and location of any additional library to build (used by Lib: section)
-	ttCStr m_cszLibPCHheader;	// header file to use for Lib precompilation
-	ttCStr m_cszPCHheader;		// header file to use for precompilation (defaults to precomp.h). Assumes <name>.cpp is the file to compile
 	ttCStr m_cszRcName;			// resource file to build (if any)
 	ttCStr m_cszHHPName;		// HTML Help project file
-	ttCStr m_cszSrcPattern;		// Specifies one or more wildcards to add to Files: section
 
 	ttCHeap m_ttHeap;			// all the ttCList files will be attatched to this heap
 	ttCList m_lstSrcFiles;
@@ -193,7 +198,7 @@ protected:
 protected:
 	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;
 
-	void AddOption(OPT_INDEX opt, const char* pszName, bool bRequired = false);
+	void AddOption(OPT_INDEX opt, const char* pszName, bool bBoolean = false, bool bRequired = false);
 };
 
 #endif	// __CSRCFILES_H__

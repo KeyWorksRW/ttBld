@@ -28,25 +28,6 @@ void CSrcOption::AddOption(const char* pszName, bool bBoolean, bool bRequired)
 	m_bRequired = bRequired;
 }
 
-// The true/false strings MUST be lowercase! And yes, they must be strings--their value can be written out without have to convert to a string first
-
-void CSrcOption::UpdateOption(bool bValue, const char* pszComment)
-{
-	m_bBoolean = true;
-	m_bVal = bValue;
-
-	if (!pszComment) {
-		if (m_pszComment) {
-			tt::FreeAlloc(m_pszComment);
-			m_pszComment = nullptr;
-		}
-	}
-	else if (m_pszComment)
-		tt::FreeAlloc(m_pszComment);
-
-	m_pszComment = tt::StrDup(pszComment);
-}
-
 // It's important that if a zero-length string is passed in for either parameter, then the matching value or comment
 // should be set to a nullptr. This makes it so that callers only need to check for a nullptr to determine if there is a
 // valid value or comment.
@@ -78,7 +59,16 @@ void CSrcOption::UpdateOption(const char* pszVal, const char* pszComment)
 		}
 	}
 
-	if (!pszComment || !*pszComment) {
+	// We assume that a comment was either entered by hand in the .srcfiles, or set as part of a default value. In either
+	// case, we don't want to remove it. A nullptr will be common if called by some UI such as MakeSrcFiles, because it
+	// won't display the comment and doesn't need to track it.
+
+	if (!pszComment)
+		return;
+
+	// If a comment really must be removed, pass in an empty string (as opposed to a nullptr) and we remove the comment.
+
+	if (!*pszComment) {
 		if (m_pszComment) {
 			tt::FreeAlloc(m_pszComment);
 			m_pszComment = nullptr;
@@ -94,6 +84,28 @@ void CSrcOption::UpdateOption(const char* pszVal, const char* pszComment)
 		else
 			m_pszComment = tt::StrDup(pszComment);
 	}
+}
+
+// The true/false strings MUST be lowercase! And yes, they must be strings--their value can be written out without have to convert to a string first
+
+void CSrcOption::UpdateOption(bool bValue, const char* pszComment)
+{
+	m_bBoolean = true;
+	m_bVal = bValue;
+
+	if (!pszComment)
+		return;
+
+	if (!*pszComment) {
+		if (m_pszComment) {
+			tt::FreeAlloc(m_pszComment);
+			m_pszComment = nullptr;
+		}
+	}
+	else if (m_pszComment)
+		tt::FreeAlloc(m_pszComment);
+
+	m_pszComment = tt::StrDup(pszComment);
 }
 
 const char* CSrcOption::getOption()
