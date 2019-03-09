@@ -264,6 +264,12 @@ void CSrcFiles::ProcessFile(char* pszFile)
 		return;
 	}
 
+	char* pszComment = tt::findChar(pszFile, '#');
+	if (pszComment) {
+		*pszComment = 0;
+		tt::trimRight(pszFile);
+	}
+
 	m_lstSrcFiles += pszFile;
 	if (!tt::FileExists(pszFile)) {
 		ttCStr cszErrMsg;
