@@ -48,31 +48,31 @@ int MakeNinja(int argc, char* argv[])
 	cNinja.CreateMakeFile();	// this will create/update it if .srcfiles has a Makefile: section
 
 	int countNinjas = 0;
-	if (!cNinja.is64BitBuild() || cNinja.is64BitSuffix()) {	// if not 64-bit only
+	if (!cNinja.GetOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_BIT_SUFFIX)) {	// if not 64-bit only
 		if (cNinja.isCompilerMSVC())	{
-			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CSrcFiles::COMPILER_MSVC))
+			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, false))
 				countNinjas++;
-			if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CSrcFiles::COMPILER_MSVC))
+			if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, false))
 				countNinjas++;
 		}
 		if (cNinja.isCompilerClang())	{
-			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CSrcFiles::COMPILER_CLANG))
+			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, true))
 				countNinjas++;
-			if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CSrcFiles::COMPILER_CLANG))
+			if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, true))
 				countNinjas++;
 		}
 	}
-	if (cNinja.is64BitBuild()) {
+	if (cNinja.GetOption(OPT_64BIT)) {
 		if (cNinja.isCompilerMSVC())	{
-			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CSrcFiles::COMPILER_MSVC))
+			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
 				countNinjas++;
-			if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CSrcFiles::COMPILER_MSVC))
+			if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
 				countNinjas++;
 		}
 		if (cNinja.isCompilerClang())	{
-			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CSrcFiles::COMPILER_CLANG))
+			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
 				countNinjas++;
-			if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CSrcFiles::COMPILER_CLANG))
+			if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
 				countNinjas++;
 		}
 	}

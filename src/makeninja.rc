@@ -2,11 +2,13 @@
 
 #include "resource.h"
 
-IDR_PRE_PROJECT         RCDATA  MOVEABLE PURE   "res/cdlprojectpre.txt"
-IDR_POST_PROJECT        RCDATA  MOVEABLE PURE   "res/cdlprojectpost.txt"
-IDR_MAKEFILE	        RCDATA  MOVEABLE PURE   "res/makefile.txt"
-IDR_VCXPROJ_MASTER      RCDATA  MOVEABLE PURE   "res/vcxproj.xml"
-IDR_VCXPROJ_FILTERS     RCDATA  MOVEABLE PURE   "res/vcxproj.filters.xml"
+#include "../common/strtable.rc2"
+
+IDR_PRE_PROJECT         RCDATA "res/cdlprojectpre.txt"
+IDR_POST_PROJECT        RCDATA "res/cdlprojectpost.txt"
+IDR_MAKEFILE	        RCDATA "res/makefile.txt"
+IDR_VCXPROJ_MASTER      RCDATA "res/vcxproj.xml"
+IDR_VCXPROJ_FILTERS     RCDATA "res/vcxproj.filters.xml"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION 2,0,8295

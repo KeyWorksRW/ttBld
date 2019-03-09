@@ -70,8 +70,8 @@ size_t CreateCodeLiteProject()
 	while (kf.ReplaceStr("%projname%", cSrcFiles.GetProjectName()));
 
 	kf.WriteEol("\t\t<File Name=\042.srcfiles\042/>");
-	if (cSrcFiles.m_cszPCHheader.isNonEmpty())
-		kf.printf("\t\t<File Name=\042%s\042/>\n", (char*) cSrcFiles.m_cszPCHheader);
+	if (cSrcFiles.GetPchHeader())
+		kf.printf("\t\t<File Name=\042%s\042/>\n", (char*) cSrcFiles.GetPchHeader());
 
 	cSrcFiles.m_lstSrcFiles.Sort();
 	cSrcFiles.m_lstSrcFiles.BeginEnum();
@@ -94,7 +94,7 @@ size_t CreateCodeLiteProject()
 	while (kfPost.ReplaceStr("%cwd%", cszCWD));
 	ttCStr cszExe(cszCWD);
 	cszExe.AppendFileName("../bin/");
-	cszExe += (char*) cSrcFiles.m_cszProjectName;
+	cszExe += (char*) cSrcFiles.GetProjectName();
 	cszExe += "D.exe";
 	cszExe.getFullPathName();
 	tt::BackslashToForwardslash(cszExe);

@@ -25,12 +25,15 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 {
 	m_lstOriginal.SetFlags(ttCList::FLG_ADD_DUPLICATES);
 	ttCFile kfIn;
-	if (!kfIn.ReadFile(pszFile)) {
+	if (!kfIn.ReadFile(pszFile))
 		return false;
-	}
 	kfIn.MakeCopy();
 
 	while (kfIn.ReadLine()) {
+		// Don't add any old options that have been replaced
+		if (tt::findStr(kfIn, "TargetDirs:"))
+			continue;
+
 		m_lstOriginal += (const char*) kfIn;
 	}
 
@@ -42,81 +45,6 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 	UpdateOptionsSection();
 
 	ttCFile kfOut;
-	kfOut.SetUnixLF();
-
-#if 0	// [ralphw - 2/26/2019] interesting idea, but doesn't honor hand editing, and tends to duplicate some lines
-
-	// Do a bit of reorganizing, trying to group the options likely to have comments together, and the options that are long together
-
-	size_t posProject = 0;
-	size_t posPch = 0;
-	size_t posFilesSecion = 0;
-	size_t posTargetDirs = 0;
-	size_t posBuildLibs = 0;
-
-	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos) {
-		if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "Project:"))
-			posProject = pos;
-		else if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "PCH:"))
-			posPch = pos;
-		else if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "TargetDirs:"))
-			posTargetDirs = pos;
-		else if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "BuildLibs:"))
-			posBuildLibs = pos;
-		else if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "Files:"))
-			posFilesSecion = pos;
-	}
-
-	if (posProject != 0 && posFilesSecion > posProject)	{
-		for (;;) {
-			for (size_t pos = posProject; pos < posFilesSecion; ++pos) {
-				if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "Project:"))
-					posProject = pos;
-				else if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "PCH:"))
-					posPch = pos;
-				else if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "TargetDirs:"))
-					posTargetDirs = pos;
-				else if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "BuildLibs:"))
-					posBuildLibs = pos;
-				else if (tt::isSameSubStri(tt::findNonSpace(m_lstOriginal[pos]), "Files:"))
-					posFilesSecion = pos;
-			}
-
-			// Position PCH option right after Project option
-
-			if (posPch != 0 && posPch != posProject + 1) {
-				size_t posTmp = posProject + 1;
-				ttCStr csz(m_lstOriginal[posTmp]);
-				m_lstOriginal.Replace(posTmp, m_lstOriginal[posPch]);
-				m_lstOriginal.Replace(posPch, csz);
-				continue;	// reparse to get the new positions
-			}
-
-			if (posBuildLibs != 0 && posBuildLibs != posFilesSecion - 2) {
-				size_t posTmp = posFilesSecion - 2;
-				ttCStr csz(m_lstOriginal[posTmp]);
-				m_lstOriginal.Replace(posTmp, m_lstOriginal[posBuildLibs]);
-				m_lstOriginal.Replace(posBuildLibs, csz);
-				continue;	// reparse to get the new positions
-			}
-
-			if (posTargetDirs != 0) {
-				size_t posTmp = posFilesSecion - 2;
-				if (posBuildLibs != 0)
-					--posTmp;
-				if (posTargetDirs != posTmp) {
-					ttCStr csz(m_lstOriginal[posTmp]);
-					m_lstOriginal.Replace(posTmp, m_lstOriginal[posTargetDirs]);
-					m_lstOriginal.Replace(posTargetDirs, csz);
-					continue;	// reparse to get the new positions
-				}
-			}
-
-			// If we made it here, we're done
-			break;
-		}
-	}
-#endif
 
 	// Write all the lines, but prevent more then one blank line at a time
 
@@ -199,9 +127,6 @@ ptrdiff_t CWriteSrcFiles::FindSection(const char* pszSection)
 	return -1;
 }
 
-static const char* pszOptionFmt = "  %-12s %-12s # %s";
-static const char* pszLongOptionFmt = "  %-12s %s";
-
 // The goal here is to see if an option was already specified, and if so update it to it's new value. If the option
 // already had a comment, we leave it intact, otherwise we add our own.
 
@@ -229,124 +154,43 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		}
 	}
 
-	UpdateLongOption("Project:", GetProjectName(), "project target name");
-
-	ttCStr cszTargets;
-	CreateTargetsString(cszTargets);
-	UpdateLongOption("TargetDirs:", cszTargets);
-	if (m_cszSrcPattern.isNonEmpty())
-		UpdateOption("Sources:", m_cszSrcPattern, "source file patterns", true);
-	UpdateOption("exe_type:", GetExeType(), "[window | console | lib | dll]", true);
-
-	if (m_b64bit)
-		UpdateOption("64Bit:", "true", "create 64-bit project", true);
-	else
-		UpdateOption("64Bit:", "false", "create 64-bit project", false);	// only update if it already exists
-
-	UpdateOption("bit_suffix:", m_bBitSuffix ? "true" : "false", "add \"64\" to the end of target directory or project (e.g., ../bin64/)", m_bBitSuffix);
-	{
-		char szNum[10];
-		tt::Utoa(m_WarningLevel > 0 ? m_WarningLevel : WARNLEVEL_DEFAULT, szNum, sizeof(szNum));
-		UpdateOption("WarnLevel:", szNum, "compiler warning level (1-4)", m_WarningLevel != WARNLEVEL_DEFAULT);
+	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
+		OPT_INDEX index = m_aOptions.GetKeyAt(pos);
+		if (index == OPT_ERROR)
+			continue;
+		else if (index == OPT_OVERFLOW)
+			break;
+		UpdateWriteOption(index);
 	}
-
-	UpdateOption("optimize:", m_bBuildForSpeed ? "speed" : "space", "speed or space (default)", m_bBuildForSpeed);
-	UpdateOption("static_crt:", m_bStaticCrt ? "true" : "false", "link to static (true) or DLL (false) version of CRT", m_bStaticCrt);
-	UpdateOption("permissive:", m_bPermissive ? "true" : "false", "permissive compiler option", m_bPermissive);
-	UpdateOption("stdcall:", m_bStdcall ? "true" : "false", "use stdcall calling convention (default is cdecl)", m_bStdcall);
-	UpdateOption("ms_linker:", m_bUseMsvcLinker ? "true" : "false", "use MS link.exe even when compiling with CLANG", m_bUseMsvcLinker);
-
-	// Long options don't have default comments, though we will keep any comments the user may have added. If we pass a
-	// null or empty pointer for the value then we completely delete the option if there already was one
-
-	UpdateLongOption("PCH:", 		(char*) m_cszPCHheader);
-	UpdateLongOption("Cflags:", 	(char*) m_cszCFlags);
-	UpdateLongOption("Midlflags:", 	(char*) m_cszMidlFlags);
-	UpdateLongOption("LinkFlags:",	(char*) m_cszLinkFlags);
-	UpdateLongOption("Libs:", 		(char*) m_cszLibs);
-	UpdateLongOption("BuildLibs:", 	(char*) m_cszBuildLibs);
-	UpdateLongOption("IncDirs:", 	(char*) m_cszIncDirs);
-	UpdateLongOption("LibDirs:", 	(char*) m_cszLibDirs);
-
-	ttCStr cszTmp;
-	if (m_CompilerType & COMPILER_CLANG)
-		cszTmp = "CLANG ";
-	if (m_CompilerType & COMPILER_MSVC)
-		cszTmp += "MSVC ";
-	UpdateOption("Compilers:", cszTmp, "[CLANG and/or MSVC]", m_CompilerType != COMPILER_DEFAULT);
-
-	const char* pszVal;
-	if (m_fCreateMakefile == MAKEMAKE_NEVER)
-		pszVal = "never";
-	else if (m_fCreateMakefile == MAKEMAKE_ALWAYS)
-		pszVal = "always";
-	else
-		pszVal = "missing";
-	UpdateOption("Makefile:", pszVal, "[never | missing | always]", m_fCreateMakefile != MAKEMAKE_DEFAULT);
-
-	cszTmp.Delete();
-	if (m_IDE & IDE_CODEBLOCK)
-		cszTmp += "CodeBlocks ";
-	if (m_IDE & IDE_CODELITE)
-		cszTmp += "CodeLite ";
-	if (m_IDE & IDE_VS)
-		cszTmp += "VisualStudio";
-	if (cszTmp.isNonEmpty())
-		tt::trimRight(cszTmp);
-	UpdateLongOption("IDE:", cszTmp, "[CodeBlocks and/or CodeLite and/or VisualStudio]");
 }
 
-void CWriteSrcFiles::UpdateOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite)
+// If the option already exists then update it. If it doesn't exist, only write it if bAlwaysWrite is true
+
+static const char* pszOptionFmt =      "    %-12s %-12s # %s";
+static const char* pszNoCmtOptionFmt = "    %-12s %s";	// used when there isn't a comment
+
+void CWriteSrcFiles::UpdateWriteOption(OPT_INDEX index)
 {
+	if (index == OPT_ERROR || index == OPT_OVERFLOW)
+		return;
+
+	ttCStr cszName(GetOptionName(index));
+	cszName += ":";	   // add the colon that separates a YAML key/value pair
+
 	char szLine[4096];
-	ptrdiff_t posOption = GetOptionLine(pszOption);
+	ptrdiff_t posOption = GetOptionLine(GetOptionName(index));	// this will set m_cszOptComment
 	if (posOption >= 0) {
 		if (m_cszOptComment.isEmpty())		// we keep any comment that was previously used
-			m_cszOptComment = pszComment;	// otherwise we use our own
-		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
+			m_cszOptComment = GetOptionComment(index);
+		// we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
+		sprintf_s(szLine, sizeof(szLine), m_cszOptComment.isNonEmpty() ? pszOptionFmt : pszNoCmtOptionFmt,
+			(char*) cszName, GetOption(index), (char*) m_cszOptComment);
 		m_lstOriginal.Replace(posOption, szLine);
 	}
-	else if (bAlwaysWrite) {
-		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, pszComment);
+	else if (isOptionRequired(index)) {
+		sprintf_s(szLine, sizeof(szLine), GetOptionComment(index) ? pszOptionFmt : pszNoCmtOptionFmt,
+			(char*) cszName, GetOption(index), GetOptionComment(index));
 		m_lstOriginal.InsertAt(m_posInsert++, szLine);
-	}
-}
-
-void CWriteSrcFiles::UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment)
-{
-	char szLine[4096];
-	ptrdiff_t posOption = GetOptionLine(pszOption);
-	if (posOption >= 0) {
-		if (!pszVal || !*pszVal) {
-			m_lstOriginal.Remove(posOption);
-			return;
-		}
-		if (m_cszOptComment.isEmpty() && pszComment)	// we keep any comment that was previously used
-			m_cszOptComment = pszComment;				// otherwise we use our own if supplied
-
-		if (tt::strLen(pszVal) <= 12 && m_cszOptComment.isNonEmpty()) {	// can we use the shorter formatted version?
-			sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
-			m_lstOriginal.Replace(posOption, szLine);
-			return;
-		}
-
-		sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt, pszOption, pszVal);
-
-		if (m_cszOptComment.isNonEmpty()) { 			// we keep any comment that was previously used
-			tt::strCat_s(szLine, sizeof(szLine), "    # ");
-			tt::strCat_s(szLine, sizeof(szLine), m_cszOptComment);
-		}
-		m_lstOriginal.Replace(posOption, szLine);
-	}
-	else if (pszVal && *pszVal) {
-		if (tt::strLen(pszVal) <= 12 && m_cszOptComment.isNonEmpty()) {	// can we use the shorter formatted version?
-			sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
-			m_lstOriginal.Replace(posOption, szLine);
-		}
-		else {
-			sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt, pszOption, pszVal);
-			m_lstOriginal.InsertAt(m_posInsert++, szLine);
-		}
 	}
 }
 
@@ -373,70 +217,4 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
 			break;
 	}
 	return -1;
-}
-
-const char* CWriteSrcFiles::GetExeType()
-{
-	switch (m_exeType) {
-		case EXE_CONSOLE:
-			return "console";
-			break;
-
-		case EXE_LIB:
-			return "lib";
-			break;
-
-		case EXE_DLL:
-			return "dll";
-			break;
-
-		case EXE_WINDOW:
-		default:
-			return "window";
-			break;
-	}
-}
-
-void CWriteSrcFiles::CreateTargetsString(ttCStr& cszTargets)
-{
-	if (m_cszTarget32.isEmpty() && m_cszTarget64.isEmpty()) {
-		if (m_exeType == EXE_LIB) {
-			if (tt::DirExists("../lib")) {
-				m_cszTarget32 = "../lib";
-				if (tt::DirExists("../lib64"))
-					m_cszTarget64 = "../lib64";
-			}
-			else {
-				m_cszTarget32 = "lib";
-				if (tt::DirExists("lib64"))
-					m_cszTarget64 = "lib64";
-			}
-		}
-
-		else {
-			if (tt::DirExists("../bin")) {
-				m_cszTarget32 = "../bin";
-				if (tt::DirExists("../bin64"))
-					m_cszTarget64 = "../bin64";
-			}
-			else {
-				m_cszTarget32 = "bin";
-				if (tt::DirExists("bin64"))
-					m_cszTarget64 = "bin64";
-			}
-		}
-	}
-
-	if (m_cszTarget32.isNonEmpty())	{
-		if (!(m_b64bit && !m_bBitSuffix))	// m_b64bit with no suffix means 64-bit only target
-			cszTargets = (char*) m_cszTarget32;
-		if (m_b64bit && m_cszTarget64.isNonEmpty())	{
-			cszTargets += "; ";
-			cszTargets += (char*) m_cszTarget64;
-		}
-	}
-	else if (m_b64bit && m_cszTarget64.isNonEmpty()) {
-		cszTargets = "; ";
-		cszTargets += (char*) m_cszTarget64;
-	}
 }

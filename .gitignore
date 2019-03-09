@@ -1,18 +1,24 @@
 # Directories to ignore
-[Bb]in/
-[Bb]in64/
-[Ll]ib/
-[Ll]ib64/
+bin/
+bin64/
 build/
+lib/
+lib64/
 
 .private/
+backup/
+bonepile/
 tests/
 
-# General file extensions to ignore
+# remove ttLib/ when it switches to a submodule
+ttLib/
+
+# File extensions to ignore
 *.backup
 *.bak
 *.bat
 *.btm
+*.chm
 *.db
 *.dll
 *.exe
@@ -44,12 +50,26 @@ tests/
 *.project
 *.workspace
 
+# Eclipse project files
+.project
+.cproject
+
+# SublimeText project files
+*.sublime-project
+*.sublime-workspace
+
 # Visual Studio files and folders
 # Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 .vs/
 Backup*/
 _UpgradeReport_Files/
 ipch/
+
+# Visual Studio cache files
+# files ending in .cache can be ignored
+*.[Cc]ache
+# but keep track of directories ending in .cache
+!*.[Cc]ache/
 
 *.VC.VC.opendb
 *.VC.db

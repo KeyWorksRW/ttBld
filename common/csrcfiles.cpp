@@ -34,50 +34,58 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_bRead = false;
 	m_bReadingPrivate = false;
 
-	m_b64bit = false;
-	m_bBitSuffix = false;
-	m_bBuildForSpeed = false;
-	m_bPermissive = false;
-	m_bStaticCrt = false;
-	m_bStdcall = false;
-	m_bUseMsvcLinker = false;
-
-	m_WarningLevel = WARNLEVEL_DEFAULT;
-	m_IDE = IDE_NONE;
-	m_CompilerType = COMPILER_DEFAULT;
-	m_exeType = EXE_DEFAULT;
-
-	m_fCreateMakefile = MAKEMAKE_DEFAULT;	// create makefile only if it doesn't already exist
+	m_lastIndex = OPT_OVERFLOW;
 
 	m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
 
-	// Add all options that are strings and don't need special handling below. This will automatically read and write the
-	// options. To add a new option, add the ttCStr member in csrcfiles.h,	then add the option name and the ttCStr
-	// member here.
+	// Add these in the order you want them written in a new .srcfiles files. Be very careful about remembering to add
+	// the ", true" parameter to any option you want to retrieve as a boolean value.
 
-	AddOptVal("Project",   &m_cszProjectName);
-	AddOptVal("PCH",       &m_cszPCHheader);
+	AddOption(OPT_PROJECT, "Project", false, true); // AddOption(index, name, boolean_type(false), required(false))
+	AddOption(OPT_PCH, "PCH", false, true);
+	AddOption(OPT_EXE_TYPE, "exe_type", false, true);
 
-	AddOptVal("CFlags",    &m_cszCFlags);
-	AddOptVal("MidlFlags", &m_cszMidlFlags);
-	AddOptVal("LinkFlags", &m_cszLinkFlags);
-	AddOptVal("RCFlags",   &m_cszRCFlags);
+	AddOption(OPT_64BIT, "64Bit", true);
+	AddOption(OPT_BIT_SUFFIX, "bit_suffix", true);
 
-	AddOptVal("IncDirs",   &m_cszIncDirs);
-	AddOptVal("LibPCH",    &m_cszLibPCHheader);
-	AddOptVal("Libs",      &m_cszLibs);
-	AddOptVal("LibDirs",   &m_cszLibDirs);
-	AddOptVal("Sources",   &m_cszSrcPattern);
+	AddOption(OPT_PERMISSIVE, "permissive", true);
+	AddOption(OPT_STDCALL, "stdcall", true);
+	AddOption(OPT_OPTIMIZE, "optimize", true);
+	AddOption(OPT_WARN_LEVEL, "WarnLevel", true);
 
-	AddOptVal("64Bit",      &m_b64bit);
-	AddOptVal("bit_suffix", &m_bBitSuffix);
-	AddOptVal("DebugRC",    &m_bDebugRC);
-	AddOptVal("permissive", &m_bPermissive);
-	AddOptVal("stdcall",    &m_bStdcall);
-	AddOptVal("static_crt", &m_bStaticCrt);
-	AddOptVal("ms_linker",  &m_bUseMsvcLinker);
+	AddOption(OPT_COMPILERS, "Compilers");
+	AddOption(OPT_MAKEFILE, "Makefile");
+	AddOption(OPT_CFLAGS, "CFlags");
+	AddOption(OPT_MIDL_FLAGS, "MidlFlags");
+	AddOption(OPT_LINK_FLAGS, "LinkFlags");
+	AddOption(OPT_RC_FLAGS, "RCFlags");
+	AddOption(OPT_DEBUG_RC, "DebugRC", true);
+	AddOption(OPT_STATIC_CRT, "static_crt", true);
+	AddOption(OPT_MS_LINKER, "ms_linker", true);
+	AddOption(OPT_IDE, "IDE");
+
+	AddOption(OPT_INC_DIRS, "IncDirs");
+	AddOption(OPT_TARGET_DIR32, "TargetDir32");
+	AddOption(OPT_TARGET_DIR64, "TargetDir64");
+	AddOption(OPT_BUILD_LIBS, "BuildLibs");
+	AddOption(OPT_LIB_DIRS, "LibDirs");
+	AddOption(OPT_LIBS, "Libs");
+
+	// Set default option values here
+
+	UpdateOption(OPT_PCH, "none", "name of precompiled header file, or \042none\042 if not using precompiled headers");
+	UpdateOption(OPT_EXE_TYPE, "console", "[window | console | lib | dll]");
+	UpdateOption(OPT_MAKEFILE, "missing", "[never | missing | always]");
+	UpdateOption(OPT_WARN_LEVEL, "4", "[1 | 2 | 3 | 4]");
+}
+
+CSrcFiles::~CSrcFiles()
+{
+	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
+		delete m_aOptions.GetValueAt(pos);
+	}
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
@@ -95,11 +103,6 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 		char* pszBegin = tt::findNonSpace(pszLine);	// ignore any leading spaces
 		if (tt::isEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-')) {	// ignore empty, comment or divider lines
 			continue;
-		}
-		char* pszComment = tt::findChar(pszBegin, '#');	// strip off any comments
-		if (pszComment) {
-			*pszComment = 0;
-			tt::trimRight(pszBegin);		// remove any trailing white space
 		}
 
 		if (tt::isSameSubStri(pszBegin, "%YAML")) {	// not required, but possible a YAML editor could add this
@@ -142,33 +145,27 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
 	// Everything has been processed, if options were not specified that are needed, make some default assumptions
 
-	if (m_cszProjectName.isEmpty())	{
+	if (tt::isEmpty(GetProjectName())) {
 		ttCStr cszProj;
 		cszProj.getCWD();
 		char* pszProj = tt::findFilePortion(cszProj);
 		if (pszProj && !tt::isSameStri(pszProj, "src"))
-			m_cszProjectName = pszProj;
+			UpdateOption(OPT_PROJECT, pszProj);
 		else {
 			if (pszProj > cszProj.getPtr())
 				--pszProj;
 			*pszProj = 0;
 			pszProj = tt::findFilePortion(cszProj);
 			if (pszProj)
-				m_cszProjectName = pszProj;
+				UpdateOption(OPT_PROJECT, pszProj);
 		}
 	}
 
-	if (m_exeType == EXE_UNSPECIFIED)
-		m_exeType= EXE_WINDOW;
-
-	AddSourcePattern(m_cszSrcPattern);
-
-	// If no Files: or Sources: we're specified, then we still won't have any files to build. Default to every type of C++
-	// source file in the current directory.
+	// If no Files: were specified, then we still won't have any files to build. Default to every type of C++ source file
+	// in the current directory.
 
 	if (m_lstSrcFiles.GetCount() < 1) {
-		m_cszSrcPattern = "*.cpp;*.cc;*.cxx;*.rc";
-		AddSourcePattern(m_cszSrcPattern);
+		AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc");
 	}
 
 	return true;
@@ -176,127 +173,61 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
 void CSrcFiles::ProcessOption(char* pszLine)
 {
-	char* pszVal = strpbrk(pszLine, ":=");
-	ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
-	if (!pszVal)
-		return;
-	*pszVal = 0;
-	pszVal = tt::findNonSpace(pszVal + 1);
+	ttCStr cszName, cszVal, cszComment;
 
-	// remove any comment
-
-	char* pszTmp = tt::findChar(pszVal, '#');
-	if (pszTmp)
-		*pszTmp = 0;
-
-	tt::trimRight(pszVal);	// remove any trailing whitespace
-
-	if (UpdateOptVal(pszLine, pszVal))	// process all options that have a string value
+	if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
 		return;
 
-	if (tt::isSameStri(pszLine, "IDE")) {
-		ttCEnumStr cenum(pszVal, ' ');
-		m_IDE = 0;
-		while (cenum.Enum()) {
-			if (tt::isSameStri(cenum, "CodeBlocks"))
-				m_IDE |= IDE_CODEBLOCK;
-			else if (tt::isSameStri(cenum, "CodeLite"))
-				m_IDE |= IDE_CODELITE;
-			else if (tt::isSameStri(cenum, "VisualStudio"))
-				m_IDE |= IDE_VS;
+	if (tt::isSameStri(cszName, "BuildLibs"))
+		while (cszVal.ReplaceStr(".lib", ""));	// we want the target name, not the library filename
+
+	if (UpdateOption(cszName, cszVal, cszComment) != OPT_ERROR)
+		return;
+
+	// If you need to support reading old options, add the code here to convert them into the new options. You will also
+	// need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
+
+	if (tt::isSameStri(cszName, "TargetDirs")) {	// first target is 32-bit directory, second is 64-bit directory
+		ttCEnumStr cenum(cszVal, ';');
+		if (cenum.Enum()) {
+			UpdateOption(OPT_TARGET_DIR32, (char*) cenum);
+			if (tt::isNonEmpty(cenum.GetCurrent()))
+				SetRequired(OPT_TARGET_DIR32);
+		}
+		if (cenum.Enum()) {
+			UpdateOption(OPT_TARGET_DIR64, (char*) cenum);
+			if (tt::isNonEmpty(cenum.GetCurrent()))
+				SetRequired(OPT_TARGET_DIR64);
 		}
 		return;
 	}
-
-	if (tt::isSameStri(pszLine, "Compilers")) {
-		ttCEnumStr cenum(pszVal, ' ');
-		m_CompilerType = 0;
-		while (cenum.Enum()) {
-			if (tt::isSameStri(cenum, "CLANG"))
-				m_CompilerType |= COMPILER_CLANG;
-			else if (tt::isSameStri(cenum, "MSVC"))
-				m_CompilerType |= COMPILER_MSVC;
-		}
-		return;
-	}
-
-	if (tt::isSameStri(pszLine, "Makefile")) {
-		m_fCreateMakefile = MAKEMAKE_DEFAULT;
-		if (tt::isSameSubStri(pszVal, "never"))
-			m_fCreateMakefile = MAKEMAKE_NEVER;
-		else if (tt::isSameSubStri(pszVal, "missing"))
-			m_fCreateMakefile = MAKEMAKE_MISSING;
-		else if (tt::isSameSubStri(pszVal, "always"))
-			m_fCreateMakefile = MAKEMAKE_ALWAYS;
-		return;
-	}
-
-	if (tt::isSameStri(pszLine, "TargetDirs")) {
-		ttCEnumStr cenum(pszVal, ';');
-		if (cenum.Enum())
-			m_cszTarget32 = cenum;
-		if (cenum.Enum())
-			m_cszTarget64 = cenum;
-		return;
-	}
-
-	if (tt::isSameStri(pszLine, "exe_type")) {
-		if (tt::isSameSubStri(pszVal, "window"))
-			m_exeType = EXE_WINDOW;
-		else if (tt::isSameSubStri(pszVal, "console"))
-			m_exeType = EXE_CONSOLE;
-		else if (tt::isSameSubStri(pszVal, "lib"))
-			m_exeType = EXE_LIB;
-		else if (tt::isSameSubStri(pszVal, "dll"))
-			m_exeType = EXE_DLL;
-		return;
-	}
-
-	if (tt::isSameStri(pszLine, "optimize")) {
-		m_bBuildForSpeed = tt::isSameSubStri(pszVal, "speed");
-		return;
-	}
-
-	if (tt::isSameStri(pszLine, "BuildLibs")) {
-		if (pszVal) {
-			m_cszBuildLibs = tt::findNonSpace(pszVal);
-			// Remove any .lib extension--we are looking for the target name, not the library name
-			char* pszLibExt = tt::findStri(m_cszBuildLibs, ".lib");
-			while (pszLibExt) {
-				tt::strCopy(pszLibExt, pszLibExt + 4);
-				pszLibExt = tt::findStri(pszLibExt, ".lib");
-			}
-		}
-		return;
-	}
-
-	if (tt::isSameStri(pszLine, "WarnLevel")) {
-		m_WarningLevel = tt::Atoi(pszVal);
-		return;
-	}
-
-	bool bYesNo = tt::isSameSubStri(pszVal, "true") || tt::isSameSubStri(pszVal, "yes");
-	if (UpdateOptVal(pszLine, bYesNo))	// process all options that have a boolean value
-		return;
 
 	ttCStr csz;
-	csz.printf(tt::getResString(IDS_UNKNOWN_OPTION), pszLine);
+	csz.printf(tt::getResString(IDS_UNKNOWN_OPTION), (char*) cszName);
 	m_lstErrors += csz;
 }
 
 void CSrcFiles::AddCompilerFlag(const char* pszFlag)
 {
-	if (m_cszCFlags.isEmpty() || !tt::findStri(m_cszCFlags, pszFlag))	{
-		m_cszCFlags += pszFlag;
-		m_cszCFlags += " ";
+	if (!GetOption(OPT_CFLAGS))
+		UpdateOption(OPT_CFLAGS, pszFlag);
+	// else append the flag if it hasn't already been added
+	else if (!tt::findStri(GetOption(OPT_CFLAGS), pszFlag)) {
+		ttCStr csz(GetOption(OPT_CFLAGS));
+		csz += " ";
+		csz += pszFlag;
+		UpdateOption(OPT_CFLAGS, (char*) csz);
 	}
 }
 
 void CSrcFiles::AddLibrary(const char* pszName)
 {
-	if (m_cszLibs.isEmpty() || !tt::findStri(m_cszLibs, pszName)) {
-		m_cszLibs += pszName;
-		m_cszLibs += " ";
+	if (!tt::findStri(GetOption(OPT_LIBS), pszName)) {
+		ttCStr csz(GetOption(OPT_LIBS));
+		if (csz.isNonEmpty())
+			csz += " ";
+		csz += pszName;
+		UpdateOption(OPT_LIBS, (char*) csz);
 	}
 }
 
@@ -462,42 +393,179 @@ bool CSrcFiles::ReadTwoFiles(const char* pszMaster, const char* pszPrivate)
 	return true;
 }
 
-void CSrcFiles::AddOptVal(const char* pszOption, bool* pbVal)
-{
-	OPT_BOOL optBool;
-	optBool.pszOption = pszOption;
-	optBool.pbVal = pbVal;
-	m_aOptBool += optBool;
-}
+// .srcfiles is a YAML file, so the value of the option may be within a single or double quote. That means we can't just
+// search for '#' to find the comment, we must first step over any opening/closing quote.
 
-bool CSrcFiles::UpdateOptVal(const char* pszKey, bool bVal)
+bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment)
 {
-	ttASSERT(pszKey);
-	for (size_t pos = 0; pos < m_aOptBool.GetCount(); ++pos) {
-		if (tt::isSameStri(pszKey, m_aOptBool[pos].pszOption)) {
-			*m_aOptBool[pos].pbVal = bVal;
-			return true;
+	char* pszVal = strpbrk(pszLine, ":=");
+	ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
+	if (!pszVal) {
+		ttCStr cszTmp;
+		cszTmp.printf(tt::getResString(IDS_OPT_MISSING_COLON), pszLine);
+		m_lstErrors += cszTmp;
+		return false;
+	}
+	*pszVal = 0;
+	cszName = pszLine;
+	pszVal = tt::findNonSpace(pszVal + 1);
+
+	if (*pszVal == CH_QUOTE || *pszVal == CH_SQUOTE || *pszVal == CH_START_QUOTE) {
+		cszVal.getQuotedString(pszVal);
+		pszVal += (cszVal.strLen() + 2);
+		char* pszComment = tt::findChar(pszVal + cszVal.strLen() + 2, '#');
+		if (pszComment)	{
+			pszComment = tt::stepOver(pszComment);
+			tt::trimRight(pszComment);	// remove any trailing whitespace
+			cszComment = pszComment;
+		}
+		else {
+			cszComment.Delete();
 		}
 	}
-	return false;
+	else {	// non-quoted option
+		char* pszComment = tt::findChar(pszVal, '#');
+		if (pszComment) {
+			*pszComment = 0;
+			pszComment = tt::stepOver(pszComment);
+			tt::trimRight(pszComment);	// remove any trailing whitespace
+			cszComment = pszComment;
+		}
+		else {
+			cszComment.Delete();
+		}
+		tt::trimRight(pszVal);	// remove any trailing whitespace
+		cszVal = pszVal;
+	}
+	return true;
 }
 
-void CSrcFiles::AddOptVal(const char* pszOption, ttCStr* pcszVal)
+void CSrcFiles::AddOption(OPT_INDEX opt, const char* pszName, bool bBoolean, bool bRequired)
 {
-	OPT_VAL optVal;
-	optVal.pszOption = pszOption;
-	optVal.pcszVal = pcszVal;
-	m_aOptVal += optVal;
+	ptrdiff_t pos = m_aOptions.Add(opt, new CSrcOption);
+	m_aOptions.GetValueAt(pos)->AddOption(pszName, bBoolean, bRequired);
 }
 
-bool CSrcFiles::UpdateOptVal(const char* pszKey, const char* pszVal)
+OPT_INDEX CSrcFiles::UpdateOption(const char* pszName, const char* pszValue, const char* pszComment)
 {
-	ttASSERT(pszKey && pszVal);
-	for (size_t pos = 0; pos < m_aOptVal.GetCount(); ++pos) {
-		if (tt::isSameStri(pszKey, m_aOptVal[pos].pszOption)) {
-			m_aOptVal[pos].pcszVal->strCopy(pszVal);
-			return true;
+	ttASSERT_NONEMPTY(pszName);
+	if (tt::isEmpty(pszName))
+		return OPT_ERROR;
+
+	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
+		if (tt::isSameStri(m_aOptions.GetValueAt(pos)->getName(), pszName)) {
+			m_aOptions.GetValueAt(pos)->UpdateOption(pszValue, pszComment);
+			return m_aOptions.GetKeyAt(pos);
 		}
 	}
-	return false;
+
+	return OPT_ERROR;
+}
+
+void CSrcFiles::UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	if (m_pos >= 0)
+		m_aOptions.GetValueAt(m_pos)->UpdateOption(pszValue, pszComment);
+}
+
+void CSrcFiles::UpdateOption(OPT_INDEX index, bool bValue, const char* pszComment)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	if (m_pos >= 0)
+		m_aOptions.GetValueAt(m_pos)->UpdateOption(bValue, pszComment);
+}
+
+const char* CSrcFiles::GetOption(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	return (m_pos >= 0 ? m_aOptions.GetValueAt(m_pos)->getOption() : nullptr);
+}
+
+// Only needed if you must check for bool. Otherwise, call GetOption() and check for nullptr for false, non-nullptr for true
+
+bool CSrcFiles::GetBoolOption(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	return (m_pos >= 0 ? m_aOptions.GetValueAt(m_pos)->getBoolOption() : false);
+}
+
+const char* CSrcFiles::GetOptionName(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	return m_aOptions.GetValueAt(m_pos)->getName();
+}
+
+const char* CSrcFiles::GetOptionComment(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	return m_aOptions.GetValueAt(m_pos)->getComment();
+}
+
+bool CSrcFiles::isOptionRequired(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	return m_aOptions.GetValueAt(m_pos)->isRequired();
+}
+
+// Call this to force an option to be written even if it wasn't initialized that way. This is needed when converting old-style
+// options into newer options
+
+void CSrcFiles::SetRequired(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	m_aOptions.GetValueAt(m_pos)->setRequired();
 }

@@ -8,5 +8,8 @@
 
 STRINGTABLE
 BEGIN
-	IDS_UNKNOWN_OPTION	"%s is an unknown option"
+	IDS_MISSING_INCLUDE		"%s(%kt,%kt):  warning: cannot locate include file %s"
+	IDS_CANNOT_OPEN		 	"Cannot open \042%s\042."
+	IDS_UNKNOWN_OPTION		"%s is an unknown option"
+	IDS_OPT_MISSING_COLON	"Option name is missing a ':' (%s)"
 END

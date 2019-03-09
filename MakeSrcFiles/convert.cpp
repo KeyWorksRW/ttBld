@@ -101,7 +101,7 @@ bool ConvertCodeLite(const char* pszBldFile)
 		}
 		const char* pszProject = pProject->GetAttribute("Name");
 		if (pszProject && *pszProject)
-			cSrcFiles.m_cszProjectName = pszProject;
+			cSrcFiles.UpdateOption(OPT_PROJECT, pszProject);
 
 		for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 			ttCXMLBranch* pItem = pProject->GetChildAt(item);
@@ -110,9 +110,9 @@ bool ConvertCodeLite(const char* pszBldFile)
 			else if (tt::isSameStri(pItem->GetName(), "Settings")) {
 				const char* pszType = pItem->GetAttribute("Type");
 				if (tt::isSameStri(pszType, "Dynamic Library"))
-					cSrcFiles.m_exeType = CSrcFiles::EXE_DLL;
+					cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
 				else if (tt::isSameStri(pszType, "Static Library"))
-					cSrcFiles.m_exeType = CSrcFiles::EXE_LIB;
+					cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
 			}
 		}
 		if (cSrcFiles.WriteNew())
@@ -145,7 +145,7 @@ bool ConvertCodeBlocks(const char* pszBldFile)
 			ttCXMLBranch* pItem = pProject->GetChildAt(item);
 			if (tt::isSameStri(pItem->GetName(), "Option")) {
 				if (pItem->GetAttribute("title"))
-					cSrcFiles.m_cszProjectName = pItem->GetAttribute("title");
+					cSrcFiles.UpdateOption(OPT_PROJECT, pItem->GetAttribute("title"));
 			}
 			else if (tt::isSameStri(pItem->GetName(), "Unit")) {
 				if (isValidSrcFile(pItem->GetAttribute("filename")))
@@ -227,7 +227,7 @@ bool ConvertVcProj(const char* pszBldFile)
 		}
 
 		if (pProject->GetAttribute("Name"))
-			cSrcFiles.m_cszProjectName = pProject->GetAttribute("Name");
+			cSrcFiles.UpdateOption(OPT_PROJECT, pProject->GetAttribute("Name"));
 
 		ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
 		if (!pFiles)	{
@@ -271,7 +271,7 @@ bool ConvertVcProj(const char* pszBldFile)
 				char* pszFile = tt::findFilePortion(cszOutDir);
 				if (pszFile)
 					*pszFile = 0;
-				cSrcFiles.m_cszTarget32 = (const char*) cszOutDir;
+				cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszOutDir);
 			}
 			do {
 				if (tt::findStri(pConfiguration->GetAttribute("Name"), "Release"))
@@ -284,37 +284,44 @@ bool ConvertVcProj(const char* pszBldFile)
 			if (pRelease) {
 				const char* pszOption = pRelease->GetAttribute("FavorSizeOrSpeed");
 				if (pszOption && tt::isSameSubStri(pszOption, "1"))
-					cSrcFiles.m_bBuildForSpeed = true;
+					cSrcFiles.UpdateOption(OPT_OPTIMIZE, "speed");
 
 				pszOption = pRelease->GetAttribute("WarningLevel");
 				if (pszOption && !tt::isSameSubStri(pszOption, "4"))
-					cSrcFiles.m_WarningLevel = tt::Atoi(pszOption);
+					cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszOption);
 
 				pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
-				if (pszOption)
-					cSrcFiles.m_cszIncDirs += pszOption;
+				if (pszOption) {
+					ttCStr csz(cSrcFiles.GetOption(OPT_INC_DIRS));
+					csz += pszOption;
+					cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) csz);
+				}
 
 				pszOption = pRelease->GetAttribute("PreprocessorDefinitions");
 				if (pszOption) {
 					ttCEnumStr enumFlags(pszOption);
+					ttCStr cszCFlags;
 					while (enumFlags.Enum()) {
 						if (tt::isSameStri(enumFlags, "NDEBUG"))
 							continue;	// we already add this
 						if (tt::isSameStri(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
-							cSrcFiles.m_exeType = CSrcFiles::EXE_CONSOLE;
+							cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
 							continue;	// we already add this
 						}
 						if (tt::isSameStri(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
-							cSrcFiles.m_exeType = CSrcFiles::EXE_DLL;
+							cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
 							continue;	// do we need to add this?
 						}
 						if (tt::isSameSubStri(enumFlags, "$("))	// Visual Studio specific, ignore it
 							continue;
-						if (cSrcFiles.m_cszCFlags.isNonEmpty())
-							cSrcFiles.m_cszCFlags += " ";
-						cSrcFiles.m_cszCFlags += "-D";
-						cSrcFiles.m_cszCFlags += enumFlags;
+
+
+						if (cszCFlags.isNonEmpty())
+							cszCFlags += " ";
+						cszCFlags += "-D";
+						cszCFlags += enumFlags;
 					}
+					cSrcFiles.UpdateOption(OPT_CFLAGS, (char*) cszCFlags);
 				}
 			}
 		}

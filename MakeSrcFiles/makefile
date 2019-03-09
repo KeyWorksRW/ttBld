@@ -58,26 +58,32 @@ endif
 
 ########## release section ##########
 
-release: ttLib build/$(cmplr)Build$(bits).ninja MakeSrcFiles
+release: ttLib build/$(cmplr)Build$(bits).ninja MakeNinja MakeSrcFiles
 
 ttLib:
-	cd ../../ttLib/src & ninja -f build/$(cmplr)Build$(bits).ninja
+	cd ../ttLib/src & ninja -f build/$(cmplr)Build$(bits).ninja
 
 build/$(cmplr)Build$(bits).ninja: .srcfiles
 	MakeNinja -force
+
+MakeNinja:
+	cd ../src & ninja -f build/$(cmplr)Build$(bits).ninja
 
 MakeSrcFiles:
 	ninja -f build/$(cmplr)Build$(bits).ninja
 
 ########## debug section ##########
 
-debug: ttLibD build/$(cmplr)Build$(bits)D.ninja MakeSrcFilesD
+debug: ttLibD build/$(cmplr)Build$(bits)D.ninja MakeNinjaD MakeSrcFilesD
 
 ttLibD:
-	cd ../../ttLib/src & ninja -f build/$(cmplr)Build$(bits)D.ninja
+	cd ../ttLib/src & ninja -f build/$(cmplr)Build$(bits)D.ninja
 
 build/$(cmplr)Build$(bits)D.ninja: .srcfiles
 	MakeNinja -force
+
+MakeNinjaD:
+	cd ../src & ninja -f build/$(cmplr)Build$(bits)D.ninja
 
 MakeSrcFilesD:
 	ninja -f build/$(cmplr)Build$(bits)D.ninja

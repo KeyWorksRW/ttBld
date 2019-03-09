@@ -12,7 +12,7 @@ msvc_deps_prefix = Note: including file:
 # -MD	// DLL version of multi-threaded library
 # -O1	// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)
 
-cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -I"../../ttLib/include" -I"../src" -D__clang__ -fms-compatibility-version=19 -m32 -flto -fwhole-program-vtables /Fp$outdir/MakeNinja.pch
+cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -I"../ttLib/include" -I"../src" -D__clang__ -fms-compatibility-version=19 -m32 -flto -fwhole-program-vtables /Fp$outdir/MakeNinja.pch
 
 rule compilePCH
   deps = msvc
@@ -54,15 +54,19 @@ build $outdir/csrcfiles.obj: compile ../common/csrcfiles.cpp | $outdir/pch.obj
 
 build $outdir/dryrun.obj: compile ../common/dryrun.cpp | $outdir/pch.obj
 
+build $outdir/srcoptions.obj: compile ../common/srcoptions.cpp | $outdir/pch.obj
+
 build $resout/makeninja.res: rc makeninja.rc | $
   resource.h $
+  ../common/strtable.rc2 $
+  ../common/strtable.h $
   res/cdlprojectpre.txt $
   res/cdlprojectpost.txt $
   res/makefile.txt $
   res/vcxproj.xml $
   res/vcxproj.filters.xml
 
-build ../bin/MakeNinja.exe : link $resout/makeninja.res ../../ttLib/lib/ttLib.lib $
+build ../bin/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib.lib $
   $outdir/pch.obj $
   $outdir/bldmaster.obj $
   $outdir/codelite.obj $
@@ -73,5 +77,6 @@ build ../bin/MakeNinja.exe : link $resout/makeninja.res ../../ttLib/lib/ttLib.li
   $outdir/parsehhp.obj $
   $outdir/vcxproj.obj $
   $outdir/csrcfiles.obj $
-  $outdir/dryrun.obj
+  $outdir/dryrun.obj $
+  $outdir/srcoptions.obj
 

@@ -11,6 +11,7 @@
 #include <ttstr.h>					// ttCStr
 
 #include "bldmaster.h"				// CBldMaster
+#include "../common/strtable.h" 	// String resource IDs
 
 CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 {
@@ -19,35 +20,35 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 	// if they are both empty, fill them in with defaults. If only one is empty, then it's likely only a single platform
 	// is being build (32-bit or 64-bit)
 
-	if (m_cszTarget32.isEmpty() && m_cszTarget64.isEmpty()) {
-		if (m_exeType == EXE_LIB) {
+	if (!getDir32() && !getDir64()) {
+		if (isExeTypeLib()) {
 			if (tt::DirExists("../lib")) {
-				m_cszTarget32 = "../lib";
+				UpdateOption(OPT_TARGET_DIR32, "../lib");
 				if (tt::DirExists("../lib64"))
-					m_cszTarget64 = "../lib64";
+					UpdateOption(OPT_TARGET_DIR64, "../lib64");
 			}
 			else {
-				m_cszTarget32 = "lib";
+				UpdateOption(OPT_TARGET_DIR32, "lib");
 				if (tt::DirExists("lib64"))
-					m_cszTarget64 = "lib64";
+					UpdateOption(OPT_TARGET_DIR64, "lib64");
 			}
 		}
 
 		else {
 			if (tt::DirExists("../bin")) {
-				m_cszTarget32 = "../bin";
+				UpdateOption(OPT_TARGET_DIR32, "../bin");
 				if (tt::DirExists("../bin64"))
-					m_cszTarget64 = "../bin64";
+					UpdateOption(OPT_TARGET_DIR64, "../bin64");
 			}
 			else {
-				m_cszTarget32 = "bin";
+				UpdateOption(OPT_TARGET_DIR32, "bin");
 				if (tt::DirExists("bin64"))
-					m_cszTarget64 = "bin64";
+					UpdateOption(OPT_TARGET_DIR64, "bin64");
 			}
 		}
 	}
 
-	if (!getProjName()) {
+	if (!GetProjectName()) {
 		ttCStr cszCwd;
 		cszCwd.getCWD();
 		char* pszTmp = (char*) cszCwd.findLastSlash();
@@ -62,7 +63,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 				pszProj = tt::findFilePortion(cszCwd);
 			}
 		}
-		setProjName(pszProj);
+		UpdateOption(OPT_PROJECT, pszProj);
 	}
 
 	m_lstRcDependencies.SetFlags(ttCList::FLG_URL_STRINGS);
@@ -70,7 +71,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 	if (m_cszRcName.isNonEmpty())
 		FindRcDependencies(m_cszRcName);
 
-	m_bBin64Exists = (m_cszTarget64.isNonEmpty() && tt::findStr(m_cszTarget64, "64"));
+	m_bBin64Exists = tt::findStr(getDir64(), "64");
 }
 
 const char* lstRcKeywords[] = {		// list of keywords that load a file
@@ -94,7 +95,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 	if (!kf.ReadFile(pszHdr ? pszHdr : pszRcFile)) {
 		if (!pszHdr) {	// we should have already reported a problem with a missing header file
 			ttCStr cszErrMsg;
-			cszErrMsg.printf("Cannot open %s", pszRcFile);
+			cszErrMsg.printf(tt::getResString(IDS_CANNOT_OPEN), pszRcFile);
 			m_lstErrors += cszErrMsg;
 		}
 		return false;
@@ -147,7 +148,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 				if (!tt::FileExists(cszHeader)) {
 					ttCStr cszErrMsg;
-					cszErrMsg.printf("%s(%kt,%kt):  warning: cannot locate include file %s",
+					cszErrMsg.printf(tt::getResString(IDS_MISSING_INCLUDE),
 						pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
 					m_lstErrors += cszErrMsg;
 					continue;
@@ -215,7 +216,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 						if (!tt::FileExists(cszFile)) {
 							ttCStr cszErrMsg;
-							cszErrMsg.printf("%s(%kt,%kt):  warning: cannot locate include file %s",
+							cszErrMsg.printf(tt::getResString(IDS_MISSING_INCLUDE),
 								pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (pszFileName - kf.GetLnPtr()),  (char*) cszFile);
 							m_lstErrors += cszErrMsg;
 							break;
@@ -252,30 +253,30 @@ const char* CBldMaster::GetTargetDebug()
 		return cszTargetDebug;
 
 	if (isExeTypeLib())	{
-		if (m_cszTarget32.isNonEmpty())
-			cszTargetDebug = m_cszTarget32;
+		if (getDir32())
+			cszTargetDebug = getDir32();
 		else
 			cszTargetDebug = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetDebug.AppendFileName(getProjName());
+		cszTargetDebug.AppendFileName(GetProjectName());
 		cszTargetDebug += "D.lib";
 		return cszTargetDebug;
 	}
 
 	else if (isExeTypeDll()) {
-		if (m_cszTarget32.isNonEmpty())
-			cszTargetDebug = m_cszTarget32;
+		if (getDir32())
+			cszTargetDebug = getDir32();
 		else
 			cszTargetDebug = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetDebug.AppendFileName(getProjName());
+		cszTargetDebug.AppendFileName(GetProjectName());
 		cszTargetDebug += ".dll";	// Note that we do NOT add a 'D' to the end of the dll name
 		return cszTargetDebug;
 	}
 	else {
-		if (m_cszTarget32.isNonEmpty())
-			cszTargetDebug = m_cszTarget32;
+		if (getDir32())
+			cszTargetDebug = getDir32();
 		else
 			cszTargetDebug = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetDebug.AppendFileName(getProjName());
+		cszTargetDebug.AppendFileName(GetProjectName());
 		cszTargetDebug += "D.exe";
 		return cszTargetDebug;
 	}
@@ -287,30 +288,30 @@ const char* CBldMaster::GetTargetRelease()
 		return cszTargetRelease;
 
 	if (isExeTypeLib())	{
-		if (m_cszTarget32.isNonEmpty())
-			cszTargetRelease = m_cszTarget32;
+		if (getDir32())
+			cszTargetRelease = getDir32();
 		else
 			cszTargetRelease = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetRelease.AppendFileName(getProjName());
+		cszTargetRelease.AppendFileName(GetProjectName());
 		cszTargetRelease += ".lib";
 		return cszTargetRelease;
 	}
 
 	else if (isExeTypeDll()) {
-		if (m_cszTarget32.isNonEmpty())
-			cszTargetRelease = m_cszTarget32;
+		if (getDir32())
+			cszTargetRelease = getDir32();
 		else
 			cszTargetRelease = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetRelease.AppendFileName(getProjName());
+		cszTargetRelease.AppendFileName(GetProjectName());
 		cszTargetRelease += ".dll";
 		return cszTargetRelease;
 	}
 	else {
-		if (m_cszTarget32.isNonEmpty())
-			cszTargetRelease = m_cszTarget32;
+		if (getDir32())
+			cszTargetRelease = getDir32();
 		else
 			cszTargetRelease = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetRelease.AppendFileName(getProjName());
+		cszTargetRelease.AppendFileName(GetProjectName());
 		cszTargetRelease += ".exe";
 		return cszTargetRelease;
 	}
@@ -322,31 +323,31 @@ const char* CBldMaster::GetTargetDebug64()
 		return cszTargetDebug64;
 
 	if (isExeTypeLib())	{
-		if (m_cszTarget64.isNonEmpty())
-			cszTargetDebug64 = m_cszTarget64;
+		if (getDir32())
+			cszTargetDebug64 = getDir32();
 		else
 			cszTargetDebug64 = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetDebug64.AppendFileName(getProjName());
-		cszTargetDebug64 += is64BitSuffix() ? "64D.lib" : "D.lib";
+		cszTargetDebug64.AppendFileName(GetProjectName());
+		cszTargetDebug64 += GetBoolOption(OPT_BIT_SUFFIX) ? "64D.lib" : "D.lib";
 		return cszTargetDebug64;
 	}
 
 	else if (isExeTypeDll()) {
-		if (m_cszTarget64.isNonEmpty())
-			cszTargetDebug64 = m_cszTarget64;
+		if (getDir64())
+			cszTargetDebug64 = getDir64();
 		else
 			cszTargetDebug64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetDebug64.AppendFileName(getProjName());
-		cszTargetDebug64 = (isBin64() || !is64BitSuffix()) ? ".dll" : "64.dll";
+		cszTargetDebug64.AppendFileName(GetProjectName());
+		cszTargetDebug64 = (isBin64() || !GetBoolOption(OPT_BIT_SUFFIX)) ? ".dll" : "64.dll";
 		return cszTargetDebug64;
 	}
 	else {
-		if (m_cszTarget64.isNonEmpty())
-			cszTargetDebug64 = m_cszTarget64;
+		if (getDir64())
+			cszTargetDebug64 = getDir64();
 		else
 			cszTargetDebug64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetDebug64.AppendFileName(getProjName());
-		cszTargetDebug64 += (isBin64() || !is64BitSuffix()) ? "D.exe" : "64D.exe";
+		cszTargetDebug64.AppendFileName(GetProjectName());
+		cszTargetDebug64 += (isBin64() || !GetBoolOption(OPT_BIT_SUFFIX)) ? "D.exe" : "64D.exe";
 		return cszTargetDebug64;
 	}
 }
@@ -357,31 +358,31 @@ const char* CBldMaster::GetTargetRelease64()
 		return cszTargetRelease64;
 
 	if (isExeTypeLib())	{
-		if (m_cszTarget64.isNonEmpty())
-			cszTargetRelease64 = m_cszTarget64;
+		if (getDir64())
+			cszTargetRelease64 = getDir64();
 		else
 			cszTargetRelease64 = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetRelease64.AppendFileName(getProjName());
-		cszTargetRelease64 += is64BitSuffix() ? "64.lib" : ".lib";
+		cszTargetRelease64.AppendFileName(GetProjectName());
+		cszTargetRelease64 += GetBoolOption(OPT_BIT_SUFFIX) ? "64.lib" : ".lib";
 		return cszTargetRelease64;
 	}
 
 	else if (isExeTypeDll()) {
-		if (m_cszTarget64.isNonEmpty())
-			cszTargetRelease64 = m_cszTarget64;
+		if (getDir64())
+			cszTargetRelease64 = getDir64();
 		else
 			cszTargetRelease64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetRelease64.AppendFileName(getProjName());
-		cszTargetRelease64 = (isBin64() || !is64BitSuffix()) ? ".dll" : "64.dll";
+		cszTargetRelease64.AppendFileName(GetProjectName());
+		cszTargetRelease64 = (isBin64() || !GetBoolOption(OPT_BIT_SUFFIX)) ? ".dll" : "64.dll";
 		return cszTargetRelease64;
 	}
 	else {
-		if (m_cszTarget64.isNonEmpty())
-			cszTargetRelease64 = m_cszTarget64;
+		if (getDir64())
+			cszTargetRelease64 = getDir64();
 		else
 			cszTargetRelease64 = isBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetRelease64.AppendFileName(getProjName());
-		cszTargetRelease64 += (isBin64() || !is64BitSuffix()) ? ".exe" : "64.exe";;
+		cszTargetRelease64.AppendFileName(GetProjectName());
+		cszTargetRelease64 += (isBin64() || !GetBoolOption(OPT_BIT_SUFFIX)) ? ".exe" : "64.exe";;
 		return cszTargetRelease64;
 	}
 }

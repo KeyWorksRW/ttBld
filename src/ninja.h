@@ -23,7 +23,7 @@ public:
 		GEN_RELEASE64
 	} GEN_TYPE;
 
-	bool CreateBuildFile(GEN_TYPE gentype, size_t Compiler = CSrcFiles::COMPILER_MSVC);
+	bool CreateBuildFile(GEN_TYPE gentype, bool bClang = true);
 	bool CreateHelpFile();
 	void ForceOutput(bool bForceOutput = true) { m_bForceOutput = bForceOutput; }
 
@@ -49,7 +49,6 @@ protected:
 
 	ttCFile* m_pkfOut;
 	GEN_TYPE m_gentype;
-	size_t	 m_Compiler;
 
 	ttCStr m_cszPCH;			// the .pch name that will be generated
 	ttCStr m_cszCPP_PCH;		// the .cpp name that will be used to create the .pch file
@@ -57,4 +56,5 @@ protected:
 	ttCStr m_cszChmFile;		// set if a .hhp file was specified in .srcfiles
 
 	bool	m_bForceOutput;
+	bool	m_bClang;		// true if generating for CLANG compiler, false if generating for MSVC compiler
 };

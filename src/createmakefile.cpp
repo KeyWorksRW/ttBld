@@ -21,9 +21,9 @@ extern const char* txtHelpNinja;
 
 bool CBldMaster::CreateMakeFile()
 {
-	if (m_fCreateMakefile == MAKEMAKE_NEVER)
+	if (isMakeNever())
 		return true;	// user doesn't want makefile created at all
-	else if (m_fCreateMakefile == MAKEMAKE_MISSING) {
+	else if (isMakeMissing()) {
 		if (tt::FileExists("makefile"))
 			return true;	// file exists, user doesn't want us to update it
 	}
@@ -35,14 +35,14 @@ bool CBldMaster::CreateMakeFile()
 		m_lstErrors += "MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile!";
 		return false;
 	}
-	while (kf.ReplaceStr("%project%", m_cszProjectName));
+	while (kf.ReplaceStr("%project%", GetProjectName()));
 
 	// Now we parse the file as if we had read it, changing or adding as needed
 
 	ttCFile kfOut;
 	while (kf.ReadLine()) {
 		if (tt::isSameSubStri(kf, "#b64")) {
-			if (m_b64bit && !m_bBitSuffix)
+			if (GetOption(OPT_64BIT) && !GetBoolOption(OPT_BIT_SUFFIX))
 				kfOut.WriteEol("b64=1");
 			else
 				kfOut.WriteEol(kf);
@@ -52,14 +52,14 @@ bool CBldMaster::CreateMakeFile()
 			ttCStr cszNewLine(kf);
 			if (!tt::isEmpty(getHHPName())) {
 				cszNewLine.ReplaceStr(" ", " ChmHelp ");
-				if (m_cszBuildLibs.isEmpty()) {
+				if (!getBuildLibs()) {
 					kfOut.WriteEol(cszNewLine);
 					kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
 				}
 			}
 
-			if (m_cszBuildLibs.isNonEmpty()) {
-				ttCEnumStr cEnumStr(m_cszBuildLibs, ';');
+			if (getBuildLibs()) {
+				ttCEnumStr cEnumStr(getBuildLibs(), ';');
 				const char* pszBuildLib;
 				while (cEnumStr.Enum(&pszBuildLib)) {
 					ttCStr cszTarget;
@@ -76,7 +76,7 @@ bool CBldMaster::CreateMakeFile()
 
 				// Now that we've added the targets to the release: or debug: line, we need to add the rule
 
-				cEnumStr.SetNewStr(m_cszBuildLibs, ';');
+				cEnumStr.SetNewStr(getBuildLibs(), ';');
 				while (cEnumStr.Enum(&pszBuildLib)) {
 					kfOut.printf("\n%s%s:\n", tt::findFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
 					ttCStr cszCWD;

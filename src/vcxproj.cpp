@@ -50,7 +50,7 @@ bool CVcxProj::CreateBuildFile()
 		return false;
 	}
 
-	ttCStr cszProjVC(getProjName());
+	ttCStr cszProjVC(GetProjectName());
 	cszProjVC.ChangeExtension(".vcxproj");
 	if (!tt::FileExists(cszProjVC))	{
 		ttCFile kf;
