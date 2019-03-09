@@ -221,7 +221,7 @@ void CDlgSrcOptions::OnOK(void)
 	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
 	UpdateOption(OPT_CFLAGS, (char*) csz);
 
-	csz.getWindowText(GetDlgItem(DLG_ID(OPT_LINK_FLAGS)));
+	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LINK_FLAGS)));
 	UpdateOption(OPT_LINK_FLAGS, (char*) csz);
 
 	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));

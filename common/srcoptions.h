@@ -24,6 +24,7 @@ public:
 
 	bool isComment() { return (m_pszComment && *m_pszComment) ? true : false; }
 	bool isRequired() { return m_bRequired; }
+	void setRequired(bool bRequire = true) { m_bRequired = bRequire; }
 
 	const char* getName() { return m_pszName; }
 	const char* getComment() { return m_pszComment; }
@@ -41,8 +42,8 @@ protected:
 	const char* m_pszName;	// points to callers string, NOT allocated
 	char*		m_pszVal;	// only used if m_bBoolean is false
 	char*		m_pszComment;
-	bool		m_bVal;		// only used if m_bBoolean is true
 
+	bool	m_bVal; 		// only used if m_bBoolean is true
 	bool	m_bBoolean;		// argument is a boolean value
 	bool	m_bRequired;
 };

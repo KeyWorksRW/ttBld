@@ -18,6 +18,7 @@ CSrcOption::CSrcOption()
 	m_pszVal     = nullptr;
 	m_pszComment = nullptr;
 	m_bBoolean = false;
+	m_bVal = false;
 	m_bRequired = false;
 }
 

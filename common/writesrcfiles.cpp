@@ -29,8 +29,13 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 		return false;
 	kfIn.MakeCopy();
 
-	while (kfIn.ReadLine())
+	while (kfIn.ReadLine()) {
+		// Don't add any old options that have been replaced
+		if (tt::findStr(kfIn, "TargetDirs:"))
+			continue;
+
 		m_lstOriginal += (const char*) kfIn;
+	}
 
 	ttCStr cszOrg;
 	ttCStr cszComment;
@@ -122,9 +127,6 @@ ptrdiff_t CWriteSrcFiles::FindSection(const char* pszSection)
 	return -1;
 }
 
-static const char* pszOptionFmt = "    %-12s %-12s # %s";
-static const char* pszLongOptionFmt = "    %-12s %s";
-
 // The goal here is to see if an option was already specified, and if so update it to it's new value. If the option
 // already had a comment, we leave it intact, otherwise we add our own.
 
@@ -160,113 +162,35 @@ void CWriteSrcFiles::UpdateOptionsSection()
 			break;
 		UpdateWriteOption(index);
 	}
-#if 0
-	UpdateShortOption(GetOptionName(OPT_EXE_TYPE), GetOptionName(OPT_EXE_TYPE), "[window | console | lib | dll]", true);
-	UpdateShortOption(GetOptionName(OPT_TARGET_DIR32), GetOptionName(OPT_TARGET_DIR32), nullptr, false);
-	UpdateShortOption(GetOptionName(OPT_TARGET_DIR64), GetOptionName(OPT_TARGET_DIR64), nullptr, false);
-
-	if (GetOption(OPT_64BIT)) {
-		UpdateShortOption("64Bit:", "true", "create 64-bit project", true);
-		UpdateShortOption(GetOptionName(OPT_BIT_SUFFIX), GetBoolOption(OPT_BIT_SUFFIX) ? "true" : "false",
-			"add \"64\" to the end of target directory or project (e.g., ../bin64/)", GetBoolOption(OPT_BIT_SUFFIX));
-	}
-	else {
-		UpdateShortOption("64Bit:", "false", "create 64-bit project", false);	// only update if it already exists
-		UpdateShortOption(GetOptionName(OPT_BIT_SUFFIX), GetBoolOption(OPT_BIT_SUFFIX) ? "true" : "false",
-			"add \"64\" to the end of target directory or project (e.g., ../bin64/)", false);
-	}
-
-	UpdateShortOption(GetOptionName(OPT_STATIC_CRT), GetBoolOption(OPT_STATIC_CRT) ? "true" : "false", "link to static (true) or DLL (false) version of CRT", GetBoolOption(OPT_STATIC_CRT));
-	UpdateShortOption(GetOptionName(OPT_PERMISSIVE), GetBoolOption(OPT_PERMISSIVE) ? "true" : "false", "permissive compiler option", GetBoolOption(OPT_PERMISSIVE));
-	UpdateShortOption(GetOptionName(OPT_STDCALL), GetBoolOption(OPT_STDCALL) ? "true" : "false", "use stdcall calling convention (default is cdecl)", GetBoolOption(OPT_STDCALL));
-	UpdateShortOption(GetOptionName(OPT_MS_LINKER), GetBoolOption(OPT_MS_LINKER) ? "true" : "false", "use MS link.exe even when compiling with CLANG", GetBoolOption(OPT_MS_LINKER));
-
-	UpdateShortOption(GetOptionName(OPT_COMPILERS), GetOption(OPT_COMPILERS), "[CLANG and/or MSVC]", GetOption(OPT_COMPILERS));
-	UpdateShortOption(GetOptionName(OPT_MAKEFILE), GetOption(OPT_MAKEFILE), "[never | missing | always]", GetOption(OPT_MAKEFILE) && !tt::findStri(GetOption(OPT_MAKEFILE), "never"));
-	UpdateShortOption(GetOptionName(OPT_IDE), GetOption(OPT_IDE), "[CodeBlocks and/or CodeLite and/or VisualStudio]", GetOptionName(OPT_IDE));
-	UpdateShortOption(GetOptionName(OPT_OPTIMIZE), GetOption(OPT_OPTIMIZE), "[space | speed] (default is space)", GetOptionName(OPT_OPTIMIZE) && tt::findStri(GetOptionName(OPT_OPTIMIZE), "speed"));
-	UpdateShortOption(GetOptionName(OPT_WARN_LEVEL), GetOption(OPT_WARN_LEVEL), "[1-4] default, if not specified, is 4", GetOption(OPT_WARN_LEVEL) && !tt::findStri(GetOption(OPT_WARN_LEVEL), "4"));
-#endif
-}
-
-void CWriteSrcFiles::UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite)
-{
-	char szLine[4096];
-	ptrdiff_t posOption = GetOptionLine(pszOption);
-	if (posOption >= 0) {
-		if (m_cszOptComment.isEmpty())		// we keep any comment that was previously used
-			m_cszOptComment = pszComment;	// otherwise we use our own
-		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
-		m_lstOriginal.Replace(posOption, szLine);
-	}
-	else if (bAlwaysWrite) {
-		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, pszComment);
-		m_lstOriginal.InsertAt(m_posInsert++, szLine);
-	}
 }
 
 // If the option already exists then update it. If it doesn't exist, only write it if bAlwaysWrite is true
 
-void CWriteSrcFiles::UpdateWriteOption(OPT_INDEX index, bool bAlwaysWrite)
+static const char* pszOptionFmt =      "    %-12s %-12s # %s";
+static const char* pszNoCmtOptionFmt = "    %-12s %s";	// used when there isn't a comment
+
+void CWriteSrcFiles::UpdateWriteOption(OPT_INDEX index)
 {
 	if (index == OPT_ERROR || index == OPT_OVERFLOW)
 		return;
 
+	ttCStr cszName(GetOptionName(index));
+	cszName += ":";	   // add the colon that separates a YAML key/value pair
+
 	char szLine[4096];
-	ptrdiff_t posOption = GetOptionLine(GetOptionName(index));
+	ptrdiff_t posOption = GetOptionLine(GetOptionName(index));	// this will set m_cszOptComment
 	if (posOption >= 0) {
 		if (m_cszOptComment.isEmpty())		// we keep any comment that was previously used
 			m_cszOptComment = GetOptionComment(index);
-		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, GetOptionName(index), GetOption(index), (char*) m_cszOptComment);
+		// we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
+		sprintf_s(szLine, sizeof(szLine), m_cszOptComment.isNonEmpty() ? pszOptionFmt : pszNoCmtOptionFmt,
+			(char*) cszName, GetOption(index), (char*) m_cszOptComment);
 		m_lstOriginal.Replace(posOption, szLine);
 	}
-	else if (bAlwaysWrite) {
-		sprintf_s(szLine, sizeof(szLine), pszOptionFmt, GetOptionName(index), GetOption(index), GetOptionComment(index));
+	else if (isOptionRequired(index)) {
+		sprintf_s(szLine, sizeof(szLine), GetOptionComment(index) ? pszOptionFmt : pszNoCmtOptionFmt,
+			(char*) cszName, GetOption(index), GetOptionComment(index));
 		m_lstOriginal.InsertAt(m_posInsert++, szLine);
-	}
-}
-
-void CWriteSrcFiles::UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment)
-{
-	// Need to be certain all options are followed with a ':' character
-	ttCStr cszOption(pszOption);
-	if (!cszOption.findChar(':'))
-		cszOption += ":";
-	pszOption = cszOption;	// purely for convenience
-
-	char szLine[4096];
-	ptrdiff_t posOption = GetOptionLine(pszOption);
-	if (posOption >= 0) {
-		if (!pszVal || !*pszVal) {
-			m_lstOriginal.Remove(posOption);
-			return;
-		}
-		if (m_cszOptComment.isEmpty() && pszComment)	// we keep any comment that was previously used
-			m_cszOptComment = pszComment;				// otherwise we use our own if supplied
-
-		if (tt::strLen(pszVal) <= 12 && m_cszOptComment.isNonEmpty()) {	// can we use the shorter formatted version?
-			sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
-			m_lstOriginal.Replace(posOption, szLine);
-			return;
-		}
-
-		sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt, pszOption, pszVal);
-
-		if (m_cszOptComment.isNonEmpty()) { 			// we keep any comment that was previously used
-			tt::strCat_s(szLine, sizeof(szLine), "    # ");
-			tt::strCat_s(szLine, sizeof(szLine), m_cszOptComment);
-		}
-		m_lstOriginal.Replace(posOption, szLine);
-	}
-	else if (pszVal && *pszVal) {
-		if (tt::strLen(pszVal) <= 12 && m_cszOptComment.isNonEmpty()) {	// can we use the shorter formatted version?
-			sprintf_s(szLine, sizeof(szLine), pszOptionFmt, pszOption, pszVal, (char*) m_cszOptComment);
-			m_lstOriginal.Replace(posOption, szLine);
-		}
-		else {
-			sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt, pszOption, pszVal);
-			m_lstOriginal.InsertAt(m_posInsert++, szLine);
-		}
 	}
 }
 

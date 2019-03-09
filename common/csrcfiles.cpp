@@ -40,7 +40,8 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
 
-	// Add these in the order you want them written in a new .srcfiles files.
+	// Add these in the order you want them written in a new .srcfiles files. Be very careful about remembering to add
+	// the ", true" parameter to any option you want to retrieve as a boolean value.
 
 	AddOption(OPT_PROJECT, "Project", false, true); // AddOption(index, name, boolean_type(false), required(false))
 	AddOption(OPT_PCH, "PCH", false, true);
@@ -48,12 +49,11 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 
 	AddOption(OPT_64BIT, "64Bit", true);
 	AddOption(OPT_BIT_SUFFIX, "bit_suffix", true);
-	AddOption(OPT_DEBUG_RC, "DebugRC", true);
 
-	AddOption(OPT_PERMISSIVE, "permissive");
-	AddOption(OPT_STDCALL, "stdcall");
-	AddOption(OPT_OPTIMIZE, "optimize");
-	AddOption(OPT_WARN_LEVEL, "WarnLevel");
+	AddOption(OPT_PERMISSIVE, "permissive", true);
+	AddOption(OPT_STDCALL, "stdcall", true);
+	AddOption(OPT_OPTIMIZE, "optimize", true);
+	AddOption(OPT_WARN_LEVEL, "WarnLevel", true);
 
 	AddOption(OPT_COMPILERS, "Compilers");
 	AddOption(OPT_MAKEFILE, "Makefile");
@@ -61,8 +61,9 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	AddOption(OPT_MIDL_FLAGS, "MidlFlags");
 	AddOption(OPT_LINK_FLAGS, "LinkFlags");
 	AddOption(OPT_RC_FLAGS, "RCFlags");
-	AddOption(OPT_STATIC_CRT, "static_crt");
-	AddOption(OPT_MS_LINKER, "ms_linker");
+	AddOption(OPT_DEBUG_RC, "DebugRC", true);
+	AddOption(OPT_STATIC_CRT, "static_crt", true);
+	AddOption(OPT_MS_LINKER, "ms_linker", true);
 	AddOption(OPT_IDE, "IDE");
 
 	AddOption(OPT_INC_DIRS, "IncDirs");
@@ -183,14 +184,21 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	if (UpdateOption(cszName, cszVal, cszComment) != OPT_ERROR)
 		return;
 
-	// If you need to support reading old options, add the code here to convert them into the new options
+	// If you need to support reading old options, add the code here to convert them into the new options. You will also
+	// need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
 
 	if (tt::isSameStri(cszName, "TargetDirs")) {	// first target is 32-bit directory, second is 64-bit directory
 		ttCEnumStr cenum(cszVal, ';');
-		if (cenum.Enum())
+		if (cenum.Enum()) {
 			UpdateOption(OPT_TARGET_DIR32, (char*) cenum);
-		if (cenum.Enum())
+			if (tt::isNonEmpty(cenum.GetCurrent()))
+				SetRequired(OPT_TARGET_DIR32);
+		}
+		if (cenum.Enum()) {
 			UpdateOption(OPT_TARGET_DIR64, (char*) cenum);
+			if (tt::isNonEmpty(cenum.GetCurrent()))
+				SetRequired(OPT_TARGET_DIR64);
+		}
 		return;
 	}
 
@@ -531,4 +539,33 @@ const char* CSrcFiles::GetOptionComment(OPT_INDEX index)
 
 	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
 	return m_aOptions.GetValueAt(m_pos)->getComment();
+}
+
+bool CSrcFiles::isOptionRequired(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	return m_aOptions.GetValueAt(m_pos)->isRequired();
+}
+
+// Call this to force an option to be written even if it wasn't initialized that way. This is needed when converting old-style
+// options into newer options
+
+void CSrcFiles::SetRequired(OPT_INDEX index)
+{
+	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
+
+	if (m_lastIndex != index) {
+		m_pos = m_aOptions.FindKey(index);
+		m_lastIndex = index;
+	}
+
+	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
+	m_aOptions.GetValueAt(m_pos)->setRequired();
 }

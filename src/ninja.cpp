@@ -265,9 +265,9 @@ void CNinja::WriteCompilerComments()
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)	{
 			m_pkfOut->WriteEol("# -GL\t// Whole program optimization");
 			m_pkfOut->WriteEol("# -GS-\t// Turn off buffer security checks");
-			if (GetOptionName(OPT_STDCALL))
+			if (GetOption(OPT_STDCALL))
 				m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-			if (GetOptionName(OPT_STATIC_CRT))
+			if (GetOption(OPT_STATIC_CRT))
 				m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
 			else
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -290,9 +290,9 @@ void CNinja::WriteCompilerComments()
 
 		m_pkfOut->WriteEol("# -EHsc\t// Structured exception handling");
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)	{
-			if (GetOptionName(OPT_STDCALL))
+			if (GetOption(OPT_STDCALL))
 				m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-			if (GetOptionName(OPT_STATIC_CRT))
+			if (GetOption(OPT_STATIC_CRT))
 				m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
 			else
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -321,17 +321,17 @@ void CNinja::WriteCompilerFlags()
 		m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7 -GS-",
 				isExeTypeConsole() ? " -D_CONSOLE" : "",
 
-				GetOption(OPT_WARN_LEVEL),
-				GetOptionName(OPT_STDCALL) ? " -Gz" : "",
+				GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
+				GetOption(OPT_STDCALL) ? " -Gz" : "",
 				isExeTypeLib() ? " -Zl" : " -MDd"   // Note use of -MDd -- assumption is to always use this for debug builds. Release builds track GetOptionName(OPT_STATIC_CRT)
 			);
 	else	// Presumably GEN_RELEASE or GEN_RELEASE64
 		m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s",
 				isExeTypeConsole() ? " -D_CONSOLE" : "",
 
-				GetOption(OPT_WARN_LEVEL),
-				GetOptionName(OPT_STDCALL) ?    " -Gz" : "",
-				isExeTypeLib() ? " -Zl" :  (GetOptionName(OPT_STATIC_CRT) ? " -MT" : " -MD"),
+				GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
+				GetOption(OPT_STDCALL) ?    " -Gz" : "",
+				isExeTypeLib() ? " -Zl" :  (GetOption(OPT_STATIC_CRT) ? " -MT" : " -MD"),
 				isOptimizeSpeed() ? " -O2" : " -O1"
 			);
 

@@ -97,6 +97,7 @@ public:
 
 	const char* GetOptionComment(OPT_INDEX index);
 	const char* GetOptionName(OPT_INDEX index);
+	bool		isOptionRequired(OPT_INDEX index);	// use to determine if option must be written when .srcfiles is saved
 
 	OPT_INDEX   UpdateOption(const char* pszName, const char* pszValue, const char* pszComment = nullptr);
 	void        UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment = nullptr);
@@ -149,6 +150,7 @@ protected:
 	ptrdiff_t m_pos;
 
 	void AddOption(OPT_INDEX opt, const char* pszName, bool bBoolean = false, bool bRequired = false);
+	void SetRequired(OPT_INDEX index);
 };
 
 #endif	// __CSRCFILES_H__
