@@ -11,13 +11,13 @@
 #ifndef __CSRCFILES_H__
 #define __CSRCFILES_H__
 
-#include <ttlist.h> 		// ttCList, ttCDblList, ttCStrIntList
+#include <ttlist.h>			// ttCList, ttCDblList, ttCStrIntList
 #include <ttstr.h>			// ttStr, ttCWD
-#include <ttfile.h> 		// ttCFile
+#include <ttfile.h>			// ttCFile
 #include <ttarray.h>		// ttCArray
 #include <ttmap.h>			// ttCMap
 
-#include "srcoptions.h" 	// CSrcOption
+#include "srcoptions.h"		// CSrcOption
 
 typedef enum {
 	OPT_ERROR = 0,
@@ -31,7 +31,7 @@ typedef enum {
 	OPT_64BIT,			// if true, enable 64-bit support (link with 64-bit libraries).
 	OPT_BIT_SUFFIX,		// true means append "64" to target's directory or .exe name
 	OPT_DEBUG_RC,		// true means build a -D_DEBUG version of the project's rc file
-	OPT_PERMISSIVE, 	// true means add -permissive- compiler flag
+	OPT_PERMISSIVE,		// true means add -permissive- compiler flag
 	OPT_STDCALL,		// use stdcall calling convention
 	OPT_STATIC_CRT,		// true means link to static CRT
 	OPT_MS_LINKER,		// use link.exe even when compiling with CLANG
@@ -99,14 +99,15 @@ public:
 	const char* GetOptionName(OPT_INDEX index);
 	bool		isOptionRequired(OPT_INDEX index);	// use to determine if option must be written when .srcfiles is saved
 
-	OPT_INDEX   UpdateOption(const char* pszName, const char* pszValue, const char* pszComment = nullptr);
-	void        UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment = nullptr);
-	void        UpdateOption(OPT_INDEX index, bool bValue, const char* pszComment = nullptr);
+	OPT_INDEX	UpdateOption(const char* pszName, const char* pszValue, const char* pszComment = nullptr);
+	void		UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment = nullptr);
+	void		UpdateOption(OPT_INDEX index, bool bValue, const char* pszComment = nullptr);
+	void		SetRequired(OPT_INDEX index);	// sets the flag to indicate that the option must be written
 
 	// These are just for convenience--it's fine to call GetOption directly
 
 	const char* GetProjectName() { return GetOption(OPT_PROJECT); }
-	const char* GetPchHeader()   { return GetOption(OPT_PCH); }
+	const char* GetPchHeader()	 { return GetOption(OPT_PCH); }
 
 protected:
 	void ProcessFile(char* pszFile);
@@ -130,9 +131,9 @@ public:
 	ttCList m_lstLibFiles;		// list of any files used to build additional library
 	ttCList m_lstIdlFiles;		// list of any idl files to compile with midl compiler
 
-	ttCDblList m_lstDepLibs; 	// key is library, val is src (if any)
+	ttCDblList m_lstDepLibs;	// key is library, val is src (if any)
 
-	ttCList m_lstErrors; 		// list of any errors that occurred during processing
+	ttCList m_lstErrors;		// list of any errors that occurred during processing
 
 	ttCStrIntList m_lstAddSrcFiles;		// additional .srcfiles to read into Files: section
 	ttCStrIntList m_lstLibAddSrcFiles;	// additional .srcfiles to read into Lib: section
@@ -150,7 +151,6 @@ protected:
 	ptrdiff_t m_pos;
 
 	void AddOption(OPT_INDEX opt, const char* pszName, bool bBoolean = false, bool bRequired = false);
-	void SetRequired(OPT_INDEX index);
 };
 
 #endif	// __CSRCFILES_H__
