@@ -11,8 +11,10 @@
 #include <ttxml.h>			// ttCXMLBranch, ttCParseXML
 #include <ttfindfile.h> 	// ttCFindFile
 #include <ttenumstr.h>		// ttCEnumStr
+#include <ttfiledlg.h>		// ttCFileDlg
 
 #include "../common/writesrcfiles.h"	// CWriteSrcFiles
+#include "ttlibicons.h" 				// Icons for use on 3D shaded buttons (ttShadeBtn)
 
 bool ConvertCodeBlocks(const char* pszBldFile);
 bool ConvertCodeLite(const char* pszBldFile);
@@ -32,6 +34,8 @@ bool ConvertBuildScript(const char* pszBldFile)
 	}
 #endif
 
+	ttCStr cszFile;
+
 	if (!pszBldFile || !*pszBldFile) {
 		ttCFindFile ff("*.vcxproj");
 		if (ff.isValid())
@@ -43,8 +47,21 @@ bool ConvertBuildScript(const char* pszBldFile)
 		else if (ff.NewPattern("*.cbp"))
 			return ConvertCodeBlocks(ff);
 
-		puts("Could not locate a supported build script to convert.");
-		return false;
+		ttCFileDlg open;
+		open.SetOpenIcon(IDICON_TTLIB_OK);
+		open.SetCancelIcon(IDICON_TTLIB_CANCEL);
+		open.EnableShadeBtns();
+		open.SetFilter("VisualStudio Projects|*.vcproj;*.vcxproj;|CodeLite Project|*.project|CodeBlock Project|*.cbp||");
+
+		ttCStr cszCWD;
+		cszCWD.getCWD();
+		open.SetInitialDir(cszCWD);
+		open.AddFlags(OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR);
+		if (!open.GetOpenFileName())	// means the user cancelled
+			return false;
+		cszFile = open;
+		cszCWD.getCWD();
+		pszBldFile = cszFile;
 	}
 
 	const char* pszExt = tt::findLastChar(pszBldFile, '.');
@@ -75,10 +92,10 @@ bool ConvertBuildScript(const char* pszBldFile)
 		return ConvertVcProj(pszBldFile);
 	else if (tt::isSameStri(pszExt, ".vcxproj"))
 		return ConvertVcxProj(pszBldFile);
-	else {
+	else
 		printf("%s is an unrecognized project type!", pszBldFile);
-		return false;
-	}
+
+	return false;
 }
 
 bool ConvertCodeLite(const char* pszBldFile)
