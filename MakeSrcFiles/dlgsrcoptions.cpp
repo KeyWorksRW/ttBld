@@ -21,7 +21,7 @@ void SetSrcFileOptions(bool bDryRun)
 	if (bDryRun)
 		dlg.EnableDryRun();
 
-	if (dlg.DoModal() == IDOK)
+	if (dlg.DoModal(NULL) == IDOK)
 		dlg.SaveChanges();
 }
 
@@ -33,7 +33,7 @@ void CreateNewSrcFiles()
 	}
 
 	CDlgSrcOptions dlg;
-	if (dlg.DoModal() == IDOK) {
+	if (dlg.DoModal(NULL) == IDOK) {
 		// CWriteSrcFiles only writes out the Options: section since that's all that's needed by MakeNinja. For the -new
 		// option, we first create a .srcfiles with nothing but a Files: section, and then call SaveChanges() to add the
 		// Options: section.
