@@ -28,14 +28,16 @@ CParseHHP::CParseHHP(const char* pszHHPName)
 	m_cszCWD.getCWD();
 }
 
-static const char* aOptions[] = {	// array of options that specify files that will be compiled
-	"Contents file",
-	"Index file",
-	"DAT FILE",
-	"Default topic",
+namespace {
+	const char* aOptions[] = {	// array of options that specify files that will be compiled
+		"Contents file",
+		"Index file",
+		"DAT FILE",
+		"Default topic",
 
-	nullptr
-};
+		nullptr
+	};
+}
 
 // This function can be called recursively if the .HHP file has a #include directive to #include another .hhp file
 

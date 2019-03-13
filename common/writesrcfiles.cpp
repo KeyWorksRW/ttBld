@@ -154,14 +154,8 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		}
 	}
 
-	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
-		OPT_INDEX index = m_aOptions.GetKeyAt(pos);
-		if (index == OPT_ERROR)
-			continue;
-		else if (index == OPT_OVERFLOW)
-			break;
-		UpdateWriteOption(index);
-	}
+	for (size_t pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos)
+		UpdateWriteOption(pos);
 }
 
 // If the option already exists then update it. If it doesn't exist, only write it if bAlwaysWrite is true
@@ -169,27 +163,29 @@ void CWriteSrcFiles::UpdateOptionsSection()
 static const char* pszOptionFmt =      "    %-12s %-12s # %s";
 static const char* pszNoCmtOptionFmt = "    %-12s %s";	// used when there isn't a comment
 
-void CWriteSrcFiles::UpdateWriteOption(OPT_INDEX index)
+void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 {
-	if (index == OPT_ERROR || index == OPT_OVERFLOW)
-		return;
-
-	ttCStr cszName(GetOptionName(index));
+	ttCStr cszName(sfarray::aOptions[pos].pszName);
 	cszName += ":";	   // add the colon that separates a YAML key/value pair
 
 	char szLine[4096];
-	ptrdiff_t posOption = GetOptionLine(GetOptionName(index));	// this will set m_cszOptComment
+	ptrdiff_t posOption = GetOptionLine(sfarray::aOptions[pos].pszName);	// this will set m_cszOptComment
 	if (posOption >= 0) {
+		// The option already exists, so add any changes that might have been made
+
 		if (m_cszOptComment.isEmpty())		// we keep any comment that was previously used
-			m_cszOptComment = GetOptionComment(index);
+			// REVIEW: [randalphwa - 3/13/2019] we don't allow changing the comment after it has been read in
+			m_cszOptComment = sfarray::aOptions[pos].pszComment;
+
 		// we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
 		sprintf_s(szLine, sizeof(szLine), m_cszOptComment.isNonEmpty() ? pszOptionFmt : pszNoCmtOptionFmt,
-			(char*) cszName, GetOption(index), (char*) m_cszOptComment);
-		m_lstOriginal.Replace(posOption, szLine);
+			(char*) cszName, m_aUpdateOpts[pos].pszVal, (char*) m_cszOptComment);
+
+		m_lstOriginal.Replace(posOption, szLine);	// replace the original line
 	}
-	else if (isOptionRequired(index)) {
-		sprintf_s(szLine, sizeof(szLine), GetOptionComment(index) ? pszOptionFmt : pszNoCmtOptionFmt,
-			(char*) cszName, GetOption(index), GetOptionComment(index));
+	else if (GetChanged(sfarray::aOptions[pos].opt)) {
+		sprintf_s(szLine, sizeof(szLine), pszOptionFmt,
+			(char*) cszName, m_aUpdateOpts[pos].pszVal, sfarray::aOptions[pos].pszComment);
 		m_lstOriginal.InsertAt(m_posInsert++, szLine);
 	}
 }

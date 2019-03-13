@@ -70,7 +70,12 @@ namespace sfopt {	// .srcfiles otpion
 		char*	pszVal;
 		char*	pszComment;
 	} OPT_UPDATE;
+
 } // end of sfopt namespace
+
+namespace sfarray {
+	extern const sfopt::OPT_SETTING aOptions[];
+}
 
 class CSrcOptions
 {
@@ -86,6 +91,7 @@ public:
 	bool 		GetChanged(sfopt::OPT_INDEX index);
 
 	bool UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);	// fine to call this for boolean options if pszVal == "true/false" or "yes/no"
+	bool UpdateOption(sfopt::OPT_INDEX index, bool bVal);
 
 protected:
 	// Class members

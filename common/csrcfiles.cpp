@@ -34,58 +34,9 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
 	m_bRead = false;
 	m_bReadingPrivate = false;
 
-	m_lastIndex = OPT_OVERFLOW;
-
 	m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
 	m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
-
-	// Add these in the order you want them written in a new .srcfiles files. Be very careful about remembering to add
-	// the ", true" parameter to any option you want to retrieve as a boolean value.
-
-	AddOption(OPT_PROJECT, "Project", false, true); // AddOption(index, name, boolean_type(false), required(false))
-	AddOption(OPT_PCH, "PCH", false, true);
-	AddOption(OPT_EXE_TYPE, "exe_type", false, true);
-
-	AddOption(OPT_64BIT, "64Bit", true);
-	AddOption(OPT_BIT_SUFFIX, "bit_suffix", true);
-
-	AddOption(OPT_PERMISSIVE, "permissive", true);
-	AddOption(OPT_STDCALL, "stdcall", true);
-	AddOption(OPT_OPTIMIZE, "optimize", true);
-	AddOption(OPT_WARN_LEVEL, "WarnLevel", true);
-
-	AddOption(OPT_COMPILERS, "Compilers");
-	AddOption(OPT_MAKEFILE, "Makefile");
-	AddOption(OPT_CFLAGS, "CFlags");
-	AddOption(OPT_MIDL_FLAGS, "MidlFlags");
-	AddOption(OPT_LINK_FLAGS, "LinkFlags");
-	AddOption(OPT_RC_FLAGS, "RCFlags");
-	AddOption(OPT_DEBUG_RC, "DebugRC", true);
-	AddOption(OPT_STATIC_CRT, "static_crt", true);
-	AddOption(OPT_MS_LINKER, "ms_linker", true);
-	AddOption(OPT_IDE, "IDE");
-
-	AddOption(OPT_INC_DIRS, "IncDirs");
-	AddOption(OPT_TARGET_DIR32, "TargetDir32");
-	AddOption(OPT_TARGET_DIR64, "TargetDir64");
-	AddOption(OPT_BUILD_LIBS, "BuildLibs");
-	AddOption(OPT_LIB_DIRS, "LibDirs");
-	AddOption(OPT_LIBS, "Libs");
-
-	// Set default option values here
-
-	UpdateOption(OPT_PCH, "none", "name of precompiled header file, or \042none\042 if not using precompiled headers");
-	UpdateOption(OPT_EXE_TYPE, "console", "[window | console | lib | dll]");
-	UpdateOption(OPT_MAKEFILE, "missing", "[never | missing | always]");
-	UpdateOption(OPT_WARN_LEVEL, "4", "[1 | 2 | 3 | 4]");
-}
-
-CSrcFiles::~CSrcFiles()
-{
-	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
-		delete m_aOptions.GetValueAt(pos);
-	}
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
@@ -181,7 +132,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	if (tt::isSameStri(cszName, "BuildLibs"))
 		while (cszVal.ReplaceStr(".lib", ""));	// we want the target name, not the library filename
 
-	if (UpdateOption(cszName, cszVal, cszComment) != OPT_ERROR)
+	if (UpdateReadOption(cszName, cszVal, cszComment))
 		return;
 
 	// If you need to support reading old options, add the code here to convert them into the new options. You will also
@@ -191,13 +142,9 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		ttCEnumStr cenum(cszVal, ';');
 		if (cenum.Enum()) {
 			UpdateOption(OPT_TARGET_DIR32, (char*) cenum);
-			if (tt::isNonEmpty(cenum.GetCurrent()))
-				SetRequired(OPT_TARGET_DIR32);
 		}
 		if (cenum.Enum()) {
 			UpdateOption(OPT_TARGET_DIR64, (char*) cenum);
-			if (tt::isNonEmpty(cenum.GetCurrent()))
-				SetRequired(OPT_TARGET_DIR64);
 		}
 		return;
 	}
@@ -446,132 +393,24 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
 	return true;
 }
 
-void CSrcFiles::AddOption(OPT_INDEX opt, const char* pszName, bool bBoolean, bool bRequired)
-{
-	ptrdiff_t pos = m_aOptions.Add(opt, new CSrcOption);
-	m_aOptions.GetValueAt(pos)->AddOption(pszName, bBoolean, bRequired);
-}
-
-OPT_INDEX CSrcFiles::UpdateOption(const char* pszName, const char* pszValue, const char* pszComment)
+bool CSrcFiles::UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment)
 {
 	ttASSERT_NONEMPTY(pszName);
-	if (tt::isEmpty(pszName))
-		return OPT_ERROR;
+	ttASSERT_MSG(pszVal, "NULL pointer!");
 
-	for (ptrdiff_t pos = 0; pos < m_aOptions.GetCount(); ++pos) {
-		if (tt::isSameStri(m_aOptions.GetValueAt(pos)->getName(), pszName)) {
-			m_aOptions.GetValueAt(pos)->UpdateOption(pszValue, pszComment);
-			return m_aOptions.GetKeyAt(pos);
-		}
+	size_t pos;
+	for (pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (tt::isSameStri(sfarray::aOptions[pos].pszName, pszName))
+			break;
 	}
+	if (sfarray::aOptions[pos].opt == OPT_OVERFLOW)
+		return false;	// unknown option
 
-	return OPT_ERROR;
-}
+	UpdateOption(sfarray::aOptions[pos].opt, pszVal);	// we call this so that "yes" or "no" options get converted to "true" or "false"
 
-void CSrcFiles::UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment)
-{
-	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
-
-	if (m_lastIndex != index) {
-		m_pos = m_aOptions.FindKey(index);
-		m_lastIndex = index;
+	if (pszComment)	{
+		tt::Delete(m_aUpdateOpts[pos].pszComment);
+		m_aUpdateOpts[pos].pszComment = tt::StrDup(pszComment);
 	}
-
-	if (m_pos >= 0)
-		m_aOptions.GetValueAt(m_pos)->UpdateOption(pszValue, pszComment);
-}
-
-void CSrcFiles::UpdateOption(OPT_INDEX index, bool bValue, const char* pszComment)
-{
-	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
-
-	if (m_lastIndex != index) {
-		m_pos = m_aOptions.FindKey(index);
-		m_lastIndex = index;
-	}
-
-	if (m_pos >= 0)
-		m_aOptions.GetValueAt(m_pos)->UpdateOption(bValue, pszComment);
-}
-
-const char* CSrcFiles::GetOption(OPT_INDEX index)
-{
-	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
-
-	if (m_lastIndex != index) {
-		m_pos = m_aOptions.FindKey(index);
-		m_lastIndex = index;
-	}
-
-	return (m_pos >= 0 ? m_aOptions.GetValueAt(m_pos)->getOption() : nullptr);
-}
-
-// Only needed if you must check for bool. Otherwise, call GetOption() and check for nullptr for false, non-nullptr for true
-
-bool CSrcFiles::GetBoolOption(OPT_INDEX index)
-{
-	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
-
-	if (m_lastIndex != index) {
-		m_pos = m_aOptions.FindKey(index);
-		m_lastIndex = index;
-	}
-
-	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
-	return (m_pos >= 0 ? m_aOptions.GetValueAt(m_pos)->getBoolOption() : false);
-}
-
-const char* CSrcFiles::GetOptionName(OPT_INDEX index)
-{
-	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
-
-	if (m_lastIndex != index) {
-		m_pos = m_aOptions.FindKey(index);
-		m_lastIndex = index;
-	}
-
-	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
-	return m_aOptions.GetValueAt(m_pos)->getName();
-}
-
-const char* CSrcFiles::GetOptionComment(OPT_INDEX index)
-{
-	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
-
-	if (m_lastIndex != index) {
-		m_pos = m_aOptions.FindKey(index);
-		m_lastIndex = index;
-	}
-
-	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
-	return m_aOptions.GetValueAt(m_pos)->getComment();
-}
-
-bool CSrcFiles::isOptionRequired(OPT_INDEX index)
-{
-	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
-
-	if (m_lastIndex != index) {
-		m_pos = m_aOptions.FindKey(index);
-		m_lastIndex = index;
-	}
-
-	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
-	return m_aOptions.GetValueAt(m_pos)->isRequired();
-}
-
-// Call this to force an option to be written even if it wasn't initialized that way. This is needed when converting old-style
-// options into newer options
-
-void CSrcFiles::SetRequired(OPT_INDEX index)
-{
-	ttASSERT_MSG(index != OPT_ERROR && index != OPT_OVERFLOW, "Invalid index!");
-
-	if (m_lastIndex != index) {
-		m_pos = m_aOptions.FindKey(index);
-		m_lastIndex = index;
-	}
-
-	ttASSERT_MSG(m_pos >= 0, "Unable to find the specified OPT_ index");
-	m_aOptions.GetValueAt(m_pos)->setRequired();
+	return true;
 }

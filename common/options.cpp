@@ -9,11 +9,12 @@
 #include "pch.h"
 
 #include "options.h"
+
 using namespace sfopt;
 
 // Add these in the order you want them written in a new .srcfiles files.
 
-namespace sfopt {	// .srcfiles otpion
+namespace sfarray {	// .srcfiles otpion
 	const OPT_SETTING aOptions[] = {
 	 // { OPT_xxx,			"name",			"value", boolean type, required, "comment" }
 
@@ -38,33 +39,36 @@ namespace sfopt {	// .srcfiles otpion
 		{ OPT_DEBUG_RC,     "DebugRC", 	    "false",	true,  false,  "true means build a -D_DEBUG version of the project's rc file" },
 		{ OPT_STATIC_CRT,   "static_crt", 	"false",	true,  false,  "true means link to static CRT" },
 		{ OPT_MS_LINKER,    "ms_linker", 	"false",	true,  false,  "true means use link.exe even when compiling with CLANG" },
-		{ OPT_IDE,          "IDE", 			"",			false,  false,  "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
+		{ OPT_IDE,          "IDE", 			"",			false, false,  "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
 
-		{ OPT_INC_DIRS,     "IncDirs",		"",			false,  false,  "additional directories for header files" },
-		{ OPT_TARGET_DIR32, "TargetDir32",	"",			false,  false,  "32-bit target directory (default is bin)" },
-		{ OPT_TARGET_DIR64, "TargetDir64",	"",			false,  false,  "32-bit target directory (default is bin64)" },
-		{ OPT_BUILD_LIBS,   "BuildLibs",	"",			false,  false,  "libraries that need to be built (added to makefile generation)" },
-		{ OPT_LIB_DIRS,     "LibDirs",		"",			false,  false,  "additional directores for lib files" },
-		{ OPT_LIBS,         "Libs",			"",			false,  false,  "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
+		{ OPT_INC_DIRS,     "IncDirs",		"",			false, false,  "additional directories for header files" },
+		{ OPT_TARGET_DIR32, "TargetDir32",	"",			false, false,  "32-bit target directory (default is bin)" },
+		{ OPT_TARGET_DIR64, "TargetDir64",	"",			false, false,  "32-bit target directory (default is bin64)" },
+		{ OPT_BUILD_LIBS,   "BuildLibs",	"",			false, false,  "libraries that need to be built (added to makefile generation)" },
+		{ OPT_LIB_DIRS,     "LibDirs",		"",			false, false,  "additional directores for lib files" },
+		{ OPT_LIBS,         "Libs",			"",			false, false,  "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
 
 		{ OPT_OVERFLOW, "", "", false, false, "" },
 	};
+
 }; // end of sfopt namespace
+
+using namespace sfarray;
 
 CSrcOptions::CSrcOptions()
 {
-	// By adding OPT_UPDATE structures in the same order as OPT_SETTING, a position in m_aUpdateOpts matches the same position in sfopt::aOptions
+	// By adding OPT_UPDATE structures in the same order as OPT_SETTING, a position in m_aUpdateOpts matches the same position in sfarray::aOptions
 
-	for (size_t pos = 0; sfopt::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+	for (size_t pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		size_t posOpt = m_aUpdateOpts.Add();
-		m_aUpdateOpts[posOpt].pszVal = tt::StrDup(sfopt::aOptions[pos].pszName);
-		m_aUpdateOpts[posOpt].pszComment = tt::isNonEmpty(sfopt::aOptions[pos].pszComment) ?  tt::StrDup(sfopt::aOptions[pos].pszComment) : nullptr;
+		m_aUpdateOpts[posOpt].pszVal = tt::StrDup(sfarray::aOptions[pos].pszName);
+		m_aUpdateOpts[posOpt].pszComment = tt::isNonEmpty(sfarray::aOptions[pos].pszComment) ?  tt::StrDup(sfarray::aOptions[pos].pszComment) : nullptr;
 	}
 }
 
 CSrcOptions::~CSrcOptions()
 {
-	for (size_t pos = 0; sfopt::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+	for (size_t pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		tt::Delete(m_aUpdateOpts[pos].pszVal);
 		tt::Delete(m_aUpdateOpts[pos].pszComment);
 	}
@@ -77,12 +81,12 @@ bool CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* pszVal)	// fi
 		return false;
 
 	size_t pos;
-	for (pos = 0; sfopt::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		if (sfopt::aOptions[pos].opt == index)
+	for (pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (sfarray::aOptions[pos].opt == index)
 			break;
 	}
-	ttASSERT(sfopt::aOptions[pos].opt != OPT_OVERFLOW);
-	if (sfopt::aOptions[pos].opt == OPT_OVERFLOW)
+	ttASSERT(sfarray::aOptions[pos].opt != OPT_OVERFLOW);
+	if (sfarray::aOptions[pos].opt == OPT_OVERFLOW)
 		return false;	// invalid option
 	tt::Delete(m_aUpdateOpts[pos].pszVal);
 
@@ -97,10 +101,26 @@ bool CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* pszVal)	// fi
 	return true;
 }
 
+bool CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, bool bVal)
+{
+	size_t pos;
+	for (pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (sfarray::aOptions[pos].opt == index)
+			break;
+	}
+	ttASSERT(sfarray::aOptions[pos].opt != OPT_OVERFLOW);
+	if (sfarray::aOptions[pos].opt == OPT_OVERFLOW)
+		return false;	// invalid option
+
+	tt::Delete(m_aUpdateOpts[pos].pszVal);
+	m_aUpdateOpts[pos].pszVal = tt::StrDup(bVal ? "true" : "false");
+	return true;
+}
+
 const char* CSrcOptions::GetOption(sfopt::OPT_INDEX index)
 {
-	for (size_t pos = 0; sfopt::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		if (sfopt::aOptions[pos].opt == index)
+	for (size_t pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (sfarray::aOptions[pos].opt == index)
 			return m_aUpdateOpts[pos].pszVal;
 	}
 	return nullptr;
@@ -108,8 +128,8 @@ const char* CSrcOptions::GetOption(sfopt::OPT_INDEX index)
 
 const char* CSrcOptions::GetComment(sfopt::OPT_INDEX index)
 {
-	for (size_t pos = 0; sfopt::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		if (sfopt::aOptions[pos].opt == index)
+	for (size_t pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (sfarray::aOptions[pos].opt == index)
 			return m_aUpdateOpts[pos].pszComment;
 	}
 	return nullptr;
@@ -117,8 +137,8 @@ const char* CSrcOptions::GetComment(sfopt::OPT_INDEX index)
 
 bool CSrcOptions::GetBoolOption(sfopt::OPT_INDEX index)
 {
-	for (size_t pos = 0; sfopt::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		if (sfopt::aOptions[pos].opt == index)
+	for (size_t pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (sfarray::aOptions[pos].opt == index)
 			return tt::isSameStri(m_aUpdateOpts[pos].pszVal, "true");
 	}
 	return false;
@@ -126,9 +146,9 @@ bool CSrcOptions::GetBoolOption(sfopt::OPT_INDEX index)
 
 bool CSrcOptions::GetChanged(sfopt::OPT_INDEX index)
 {
-	for (size_t pos = 0; sfopt::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		if (sfopt::aOptions[pos].opt == index)
-			return !tt::isSameStri(m_aUpdateOpts[pos].pszVal, sfopt::aOptions[pos].pszVal);
+	for (size_t pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (sfarray::aOptions[pos].opt == index)
+			return !tt::isSameStri(m_aUpdateOpts[pos].pszVal, sfarray::aOptions[pos].pszVal);
 	}
 	return false;
 }

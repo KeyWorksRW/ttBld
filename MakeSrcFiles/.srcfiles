@@ -21,5 +21,4 @@ Files:
 	../common/csrcfiles.cpp
 	../common/dryrun.cpp
 	../common/options.cpp
-	../common/srcoptions.cpp
 	../common/writesrcfiles.cpp

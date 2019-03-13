@@ -17,53 +17,16 @@
 #include <ttarray.h>		// ttCArray
 #include <ttmap.h>			// ttCMap
 
-#include "srcoptions.h"		// CSrcOption
+#include "options.h"		// CSrcOptions
 
-typedef enum {
-	OPT_ERROR = 0,
-
-	OPT_PROJECT,		// name of the project--will be used as the base target name (i.e., project: foo, target: foo.exe, fooD.exe, etc.)
-	OPT_PCH,			// name of precompiled header file, or "none" if not using precompiled headers
-	OPT_EXE_TYPE,		// [window | console | lib | dll]
-
-	// The following are boolean options (true or false)
-
-	OPT_64BIT,			// if true, enable 64-bit support (link with 64-bit libraries).
-	OPT_BIT_SUFFIX,		// true means append "64" to target's directory or .exe name
-	OPT_DEBUG_RC,		// true means build a -D_DEBUG version of the project's rc file
-	OPT_PERMISSIVE,		// true means add -permissive- compiler flag
-	OPT_STDCALL,		// use stdcall calling convention
-	OPT_STATIC_CRT,		// true means link to static CRT
-	OPT_MS_LINKER,		// use link.exe even when compiling with CLANG
-
-	// The following are strings--multiple strings are separated with a semi-colon
-
-	OPT_COMPILERS,		// [MSVC or CLANG] default is both, set this option to limit it to one
-	OPT_CFLAGS,			// additional flags to pass to the compiler in all build targets
-	OPT_MIDL_FLAGS,		// flags to pass to the midl compiler
-	OPT_LINK_FLAGS,		// additional flags to pass to the linker in all build targets
-	OPT_RC_FLAGS,		// additional flags to pass to the resource compiler in all build targets
-	OPT_INC_DIRS,		// additional directories for header files
-	OPT_LIB_DIRS,		// additional directores for lib files
-	OPT_LIBS,			// additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
-	OPT_IDE,			// [CodeBlocks CodeLite VisualStudio] -- specifies one or more IDE go generate project files for
-	OPT_MAKEFILE,		// [never | missing | always] -- default, if not specified, is missing
-	OPT_OPTIMIZE,		// [space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues) -- default, if not specified, is space
-	OPT_WARN_LEVEL,		// [1-4] default, if not specified, is 4
-	OPT_TARGET_DIR32,	// 32-bit target directory (default is bin)
-	OPT_TARGET_DIR64,	// 32-bit target directory (default is bin64)
-	OPT_BUILD_LIBS,		// libraries that need to be built (added to makefile generation)
-
-	OPT_OVERFLOW
-} OPT_INDEX;
+using namespace sfopt;		// OPT_ options are used extensively, hence using the namespace in the header file
 
 extern const char* txtSrcFilesFileName;
 
-class CSrcFiles
+class CSrcFiles : public CSrcOptions
 {
 public:
 	CSrcFiles();
-	~CSrcFiles();
 
 	// Class functions
 
@@ -73,36 +36,24 @@ public:
 
 	bool IsProcessed() { return m_bRead; }
 
-	bool isCodeBlockIDE()	 { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "CodeBlocks")); }
-	bool isCodeLiteIDE()	 { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "CodeLite")); }
-	bool isVisualStudioIDE() { return (GetOption(OPT_IDE) && tt::findStri(GetOption(OPT_IDE), "VisualStudio")); }
+	bool isCodeBlockIDE()	 { return (tt::findStri(GetOption(OPT_IDE), "CodeBlocks")); }
+	bool isCodeLiteIDE()	 { return (tt::findStri(GetOption(OPT_IDE), "CodeLite")); }
+	bool isVisualStudioIDE() { return (tt::findStri(GetOption(OPT_IDE), "VisualStudio")); }
 
-	bool isExeTypeConsole()	 { return (!GetOption(OPT_EXE_TYPE) || tt::findStri(GetOption(OPT_EXE_TYPE), "console")); }	// this is the default
-	bool isExeTypeDll()		 { return (GetOption(OPT_EXE_TYPE) && tt::findStri(GetOption(OPT_EXE_TYPE), "dll")); }
-	bool isExeTypeLib()		 { return (GetOption(OPT_EXE_TYPE) && tt::findStri(GetOption(OPT_EXE_TYPE), "lib")); }
-	bool isExeTypeWindow()	 { return (GetOption(OPT_EXE_TYPE) && tt::findStri(GetOption(OPT_EXE_TYPE), "window")); }
+	bool isExeTypeConsole()	 { return (tt::findStri(GetOption(OPT_EXE_TYPE), "console")); }	// this is the default
+	bool isExeTypeDll()		 { return (tt::findStri(GetOption(OPT_EXE_TYPE), "dll")); }
+	bool isExeTypeLib()		 { return (tt::findStri(GetOption(OPT_EXE_TYPE), "lib")); }
+	bool isExeTypeWindow()	 { return (tt::findStri(GetOption(OPT_EXE_TYPE), "window")); }
 
-	bool isMakeMissing()	 { return (!GetOption(OPT_MAKEFILE) || tt::findStri(GetOption(OPT_MAKEFILE), "missing")); }	// this is the default
-	bool isMakeNever()		 { return (GetOption(OPT_MAKEFILE) && tt::findStri(GetOption(OPT_MAKEFILE), "never")); }
-	bool isMakeAlways()		 { return (GetOption(OPT_MAKEFILE) && tt::findStri(GetOption(OPT_MAKEFILE), "always")); }
+	bool isMakeMissing()	 { return (tt::findStri(GetOption(OPT_MAKEFILE), "missing")); }	// this is the default
+	bool isMakeNever()		 { return (tt::findStri(GetOption(OPT_MAKEFILE), "never")); }
+	bool isMakeAlways()		 { return (tt::findStri(GetOption(OPT_MAKEFILE), "always")); }
 
-	bool isOptimizeSpeed()	 { return (GetOption(OPT_OPTIMIZE) && tt::findStri(GetOption(OPT_OPTIMIZE), "speed")); }
+	bool isOptimizeSpeed()	 { return (tt::findStri(GetOption(OPT_OPTIMIZE), "speed")); }
 
 	const char* getBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
 
 	void AddSourcePattern(const char* pszFilePattern);
-
-	const char* GetOption(OPT_INDEX index);
-	bool		GetBoolOption(OPT_INDEX index);	 // boolean options are strings ("true" or "false") but this makes checking the value easier
-
-	const char* GetOptionComment(OPT_INDEX index);
-	const char* GetOptionName(OPT_INDEX index);
-	bool		isOptionRequired(OPT_INDEX index);	// use to determine if option must be written when .srcfiles is saved
-
-	OPT_INDEX	UpdateOption(const char* pszName, const char* pszValue, const char* pszComment = nullptr);
-	void		UpdateOption(OPT_INDEX index, const char* pszValue, const char* pszComment = nullptr);
-	void		UpdateOption(OPT_INDEX index, bool bValue, const char* pszComment = nullptr);
-	void		SetRequired(OPT_INDEX index);	// sets the flag to indicate that the option must be written
 
 	// These are just for convenience--it's fine to call GetOption directly
 
@@ -118,6 +69,8 @@ protected:
 
 	void AddCompilerFlag(const char* pszFlag);
 	void AddLibrary(const char* pszName);
+
+	bool UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment);
 
 	// Class members (note that these are NOT marked protected or private -- too many callers need to access individual members)
 
@@ -144,13 +97,6 @@ protected:
 
 	bool m_bRead;				// file has been read and processed
 	bool m_bReadingPrivate;		// true if we are reading a private file
-
-protected:
-	ttCMap<OPT_INDEX, CSrcOption*> m_aOptions;
-	OPT_INDEX m_lastIndex;
-	ptrdiff_t m_pos;
-
-	void AddOption(OPT_INDEX opt, const char* pszName, bool bBoolean = false, bool bRequired = false);
 };
 
 #endif	// __CSRCFILES_H__
