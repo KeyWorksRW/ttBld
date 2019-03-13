@@ -56,6 +56,8 @@ build $outdir/dryrun.obj: compile ../common/dryrun.cpp | $outdir/pch.obj
 
 build $outdir/srcoptions.obj: compile ../common/srcoptions.cpp | $outdir/pch.obj
 
+build $outdir/options.obj: compile ../common/options.cpp | $outdir/pch.obj
+
 build $resout/makeninja.res: rc makeninja.rc | $
   resource.h $
   ../common/strtable.rc2 $
@@ -78,5 +80,6 @@ build ../bin64/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib64.l
   $outdir/vcxproj.obj $
   $outdir/csrcfiles.obj $
   $outdir/dryrun.obj $
-  $outdir/srcoptions.obj
+  $outdir/srcoptions.obj $
+  $outdir/options.obj
 
