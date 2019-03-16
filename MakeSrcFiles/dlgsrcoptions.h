@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <ttmsgmap.h>					// Macros for mapping Windows messages to functions
 #include <ttdlg.h>						// ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 #include "../common/writesrcfiles.h"	// CWriteSrcFiles
@@ -22,8 +21,8 @@ class CDlgSrcOptions : public ttCDlg, public CWriteSrcFiles
 public:
 	CDlgSrcOptions(const char* pszSrcDir = nullptr);
 
-	BEGIN_TTMSG_MAP()
-		TTMSG_BUTTON_CLICK(IDBTN_PCH, OnBtnChangePch)
+	BEGIN_TTCMD_MAP()
+		TTCASE_CMD(IDBTN_PCH, OnBtnChangePch)
 	END_TTMSG_MAP()
 
 	void SaveChanges();
