@@ -182,7 +182,7 @@ void CDlgSrcOptions::OnBegin(void)
 	SetCheck(DLG_ID(IDCHECK_MSLINKER), GetBoolOption(OPT_MS_LINKER));
 	SetCheck(DLG_ID(GetBoolOption(OPT_STDCALL) ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
 
-	int warnLevel = GetOption(OPT_WARN_LEVEL) ? tt::Atoi(GetOption(OPT_WARN_LEVEL)) : 4;
+	ptrdiff_t warnLevel = GetOption(OPT_WARN_LEVEL) ? tt::Atoi(GetOption(OPT_WARN_LEVEL)) : 4;
 
 	switch (warnLevel) {
 		case 1:
