@@ -154,38 +154,46 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		}
 	}
 
-	for (size_t pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos)
+	const sfopt::OPT_SETTING* aOptions = GetOrgOptions();
+	for (size_t pos = 0; aOptions[pos].opt != OPT_OVERFLOW; ++pos)
 		UpdateWriteOption(pos);
 }
 
 // If the option already exists then update it. If it doesn't exist, only write it if bAlwaysWrite is true
 
 static const char* pszOptionFmt =      "    %-12s %-12s # %s";
+static const char* pszLongOptionFmt =  "    %-12s %-30s    # %s";
 static const char* pszNoCmtOptionFmt = "    %-12s %s";	// used when there isn't a comment
 
 void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 {
-	ttCStr cszName(sfarray::aOptions[pos].pszName);
+	const sfopt::OPT_SETTING* aOptions = GetOrgOptions();
+	ttCStr cszName(aOptions[pos].pszName);
 	cszName += ":";	   // add the colon that separates a YAML key/value pair
 
 	char szLine[4096];
-	ptrdiff_t posOption = GetOptionLine(sfarray::aOptions[pos].pszName);	// this will set m_cszOptComment
+	ptrdiff_t posOption = GetOptionLine(aOptions[pos].pszName);	// this will set m_cszOptComment
 	if (posOption >= 0) {
 		// The option already exists, so add any changes that might have been made
 
 		if (m_cszOptComment.isEmpty())		// we keep any comment that was previously used
 			// REVIEW: [randalphwa - 3/13/2019] we don't allow changing the comment after it has been read in
-			m_cszOptComment = sfarray::aOptions[pos].pszComment;
+			m_cszOptComment = aOptions[pos].pszComment;
 
-		// we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
-		sprintf_s(szLine, sizeof(szLine), m_cszOptComment.isNonEmpty() ? pszOptionFmt : pszNoCmtOptionFmt,
-			(char*) cszName, m_aUpdateOpts[pos].pszVal, (char*) m_cszOptComment);
+		if (m_cszOptComment.isNonEmpty() && tt::strLen(m_aUpdateOpts[pos].pszVal) > 12)
+			// we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
+			sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt,
+				(char*) cszName, m_aUpdateOpts[pos].pszVal, (char*) m_cszOptComment);
+		else
+			// we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
+			sprintf_s(szLine, sizeof(szLine), m_cszOptComment.isNonEmpty() ? pszOptionFmt : pszNoCmtOptionFmt,
+				(char*) cszName, m_aUpdateOpts[pos].pszVal, (char*) m_cszOptComment);
 
 		m_lstOriginal.Replace(posOption, szLine);	// replace the original line
 	}
-	else if (GetChanged(sfarray::aOptions[pos].opt)) {
-		sprintf_s(szLine, sizeof(szLine), pszOptionFmt,
-			(char*) cszName, m_aUpdateOpts[pos].pszVal, sfarray::aOptions[pos].pszComment);
+	else if (GetChanged(aOptions[pos].opt)) {
+		sprintf_s(szLine, sizeof(szLine), tt::strLen(m_aUpdateOpts[pos].pszVal) > 12 ? pszLongOptionFmt : pszOptionFmt,
+			(char*) cszName, m_aUpdateOpts[pos].pszVal, aOptions[pos].pszComment);
 		m_lstOriginal.InsertAt(m_posInsert++, szLine);
 	}
 }

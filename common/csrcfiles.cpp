@@ -392,25 +392,3 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
 	}
 	return true;
 }
-
-bool CSrcFiles::UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment)
-{
-	ttASSERT_NONEMPTY(pszName);
-	ttASSERT_MSG(pszVal, "NULL pointer!");
-
-	size_t pos;
-	for (pos = 0; sfarray::aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		if (tt::isSameStri(sfarray::aOptions[pos].pszName, pszName))
-			break;
-	}
-	if (sfarray::aOptions[pos].opt == OPT_OVERFLOW)
-		return false;	// unknown option
-
-	UpdateOption(sfarray::aOptions[pos].opt, pszVal);	// we call this so that "yes" or "no" options get converted to "true" or "false"
-
-	if (pszComment)	{
-		tt::Delete(m_aUpdateOpts[pos].pszComment);
-		m_aUpdateOpts[pos].pszComment = tt::StrDup(pszComment);
-	}
-	return true;
-}

@@ -73,10 +73,6 @@ namespace sfopt {	// .srcfiles otpion
 
 } // end of sfopt namespace
 
-namespace sfarray {
-	extern const sfopt::OPT_SETTING aOptions[];
-}
-
 class CSrcOptions
 {
 public:
@@ -87,11 +83,14 @@ public:
 
 	const char* GetOption(sfopt::OPT_INDEX index);
 	bool 		GetBoolOption(sfopt::OPT_INDEX index);
-	const char* GetComment(sfopt::OPT_INDEX index);
+	const char* GetOptComment(sfopt::OPT_INDEX index);
 	bool 		GetChanged(sfopt::OPT_INDEX index);
 
 	bool UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);	// fine to call this for boolean options if pszVal == "true/false" or "yes/no"
 	bool UpdateOption(sfopt::OPT_INDEX index, bool bVal);
+	bool UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment);
+
+	const sfopt::OPT_SETTING* GetOrgOptions();
 
 protected:
 	// Class members

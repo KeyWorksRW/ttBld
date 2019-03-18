@@ -70,8 +70,6 @@ protected:
 	void AddCompilerFlag(const char* pszFlag);
 	void AddLibrary(const char* pszName);
 
-	bool UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment);
-
 	// Class members (note that these are NOT marked protected or private -- too many callers need to access individual members)
 
 public:
