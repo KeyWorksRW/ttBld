@@ -30,7 +30,7 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_EXE_TYPE, 	"exe_type", 	"console",	false, true,  "[window | console | lib | dll]" },
 
 	{ OPT_64BIT,    	"64Bit", 		"false",	true,  false,  "if true, enable 64-bit support (link with 64-bit libraries)" },
-	{ OPT_BIT_SUFFIX,   "bit_suffix", 	"false",	true,  false,  "true means append \04264\042 to target's directory or .exe name" },
+	{ OPT_BIT_SUFFIX,   "bit_suffix", 	"false",	true,  false,  "true means append '64' to target's directory or .exe name" },
 
 	{ OPT_PERMISSIVE,   "permissive", 	"false",	true,  false,  "true means add -permissive- compiler flag" },
 	{ OPT_STDCALL,      "stdcall", 		"false",	true,  false,  "true to use stdcall calling convention, false for cdecl (default)" },
