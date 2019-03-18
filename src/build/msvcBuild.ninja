@@ -11,10 +11,11 @@ msvc_deps_prefix = Note: including file:
 # -EHsc	// Structured exception handling
 # -GL	// Whole program optimization
 # -GS-	// Turn off buffer security checks
-# -MD	// DLL version of multi-threaded library
+# -Gz	// __stdcall calling convention
+# -MT	// Static multi-threaded library
 # -O1	// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)
 
-cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -I"../ttLib/include" -I"../src" -GL /Fp$outdir/MakeNinja.pch
+cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -Gz -MT -O1 -I"../ttLib/include" -I"../src" -GL /Fp$outdir/MakeNinja.pch
 
 rule compilePCH
   deps = msvc
@@ -56,8 +57,6 @@ build $outdir/csrcfiles.obj: compile ../common/csrcfiles.cpp | $outdir/pch.obj
 
 build $outdir/dryrun.obj: compile ../common/dryrun.cpp | $outdir/pch.obj
 
-build $outdir/srcoptions.obj: compile ../common/srcoptions.cpp | $outdir/pch.obj
-
 build $outdir/options.obj: compile ../common/options.cpp | $outdir/pch.obj
 
 build $resout/makeninja.res: rc makeninja.rc | $
@@ -82,6 +81,5 @@ build ../bin/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib.lib $
   $outdir/vcxproj.obj $
   $outdir/csrcfiles.obj $
   $outdir/dryrun.obj $
-  $outdir/srcoptions.obj $
   $outdir/options.obj
 
