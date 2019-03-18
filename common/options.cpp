@@ -38,22 +38,22 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_WARN_LEVEL,   "WarnLevel", 	"4",	    false, false,  "[1-4] default is 4" },
 
 	{ OPT_MAKEFILE, 	"Makefile", 	"missing", 	false, false, "[never | missing | always]" },
-	{ OPT_COMPILERS,    "Compilers", 	"",	        false, false,  "[MSVC or CLANG] default is both, set this option to limit it to one" },
-	{ OPT_CFLAGS,       "CFlags", 	    "",	        false, false,  "additional flags to pass to the compiler in all build targets" },
-	{ OPT_MIDL_FLAGS,   "MidlFlags", 	"",	        false, false,  "flags to pass to the midl compiler" },
-	{ OPT_LINK_FLAGS,   "LinkFlags", 	"",	        false, false,  "additional flags to pass to the linker in all build targets" },
-	{ OPT_RC_FLAGS,     "RCFlags", 	    "",	        false, false,  "additional flags to pass to the resource compiler in all build targets" },
+	{ OPT_COMPILERS,    "Compilers", 	nullptr,	false, false,  "[MSVC or CLANG] default is both, set this option to limit it to one" },
+	{ OPT_CFLAGS,       "CFlags", 	    nullptr,	false, false,  "additional flags to pass to the compiler in all build targets" },
+	{ OPT_MIDL_FLAGS,   "MidlFlags", 	nullptr,	false, false,  "flags to pass to the midl compiler" },
+	{ OPT_LINK_FLAGS,   "LinkFlags", 	nullptr,	false, false,  "additional flags to pass to the linker in all build targets" },
+	{ OPT_RC_FLAGS,     "RCFlags", 	    nullptr,	false, false,  "additional flags to pass to the resource compiler in all build targets" },
 	{ OPT_DEBUG_RC,     "DebugRC", 	    "false",	true,  false,  "true means build a -D_DEBUG version of the project's rc file" },
 	{ OPT_STATIC_CRT,   "static_crt", 	"false",	true,  false,  "true means link to static CRT" },
 	{ OPT_MS_LINKER,    "ms_linker", 	"false",	true,  false,  "true means use link.exe even when compiling with CLANG" },
-	{ OPT_IDE,          "IDE", 			"",			false, false,  "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
+	{ OPT_IDE,          "IDE", 			nullptr,	false, false,  "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
 
-	{ OPT_INC_DIRS,     "IncDirs",		"",			false, false,  "additional directories for header files" },
-	{ OPT_TARGET_DIR32, "TargetDir32",	"",			false, false,  "32-bit target directory (default is bin)" },
-	{ OPT_TARGET_DIR64, "TargetDir64",	"",			false, false,  "32-bit target directory (default is bin64)" },
-	{ OPT_BUILD_LIBS,   "BuildLibs",	"",			false, false,  "libraries that need to be built (added to makefile generation)" },
-	{ OPT_LIB_DIRS,     "LibDirs",		"",			false, false,  "additional directores for lib files" },
-	{ OPT_LIBS,         "Libs",			"",			false, false,  "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
+	{ OPT_INC_DIRS,     "IncDirs",		nullptr,	false, false,  "additional directories for header files" },
+	{ OPT_TARGET_DIR32, "TargetDir32",	nullptr,	false, false,  "32-bit target directory (default is bin)" },
+	{ OPT_TARGET_DIR64, "TargetDir64",	nullptr,	false, false,  "32-bit target directory (default is bin64)" },
+	{ OPT_BUILD_LIBS,   "BuildLibs",	nullptr,	false, false,  "libraries that need to be built (added to makefile generation)" },
+	{ OPT_LIB_DIRS,     "LibDirs",		nullptr,	false, false,  "additional directores for lib files" },
+	{ OPT_LIBS,         "Libs",			nullptr,	false, false,  "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
 
 	{ OPT_OVERFLOW, "", "", false, false, "" },
 };
@@ -69,7 +69,7 @@ CSrcOptions::CSrcOptions()
 
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		size_t posOpt = m_aUpdateOpts.Add();
-		m_aUpdateOpts[posOpt].pszVal = tt::StrDup(s_aOptions[pos].pszVal ? s_aOptions[pos].pszVal : "");
+		m_aUpdateOpts[posOpt].pszVal = s_aOptions[pos].pszVal ? tt::StrDup(s_aOptions[pos].pszVal) : nullptr;
 		m_aUpdateOpts[posOpt].pszComment = tt::isNonEmpty(s_aOptions[pos].pszComment) ?  tt::StrDup(s_aOptions[pos].pszComment) : nullptr;
 	}
 }
@@ -155,8 +155,12 @@ bool CSrcOptions::GetBoolOption(sfopt::OPT_INDEX index)
 bool CSrcOptions::GetChanged(sfopt::OPT_INDEX index)
 {
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		if (s_aOptions[pos].opt == index)
-			return !tt::isSameStri(m_aUpdateOpts[pos].pszVal, s_aOptions[pos].pszVal);
+		if (s_aOptions[pos].opt == index) {
+			if (!s_aOptions[pos].pszVal)
+				return tt::isNonEmpty(m_aUpdateOpts[pos].pszVal);
+			else
+				return !tt::isSameStri(m_aUpdateOpts[pos].pszVal, s_aOptions[pos].pszVal);
+		}
 	}
 	return false;
 }
