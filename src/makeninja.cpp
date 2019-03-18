@@ -48,7 +48,7 @@ int MakeNinja(int argc, char* argv[])
 	cNinja.CreateMakeFile();	// this will create/update it if .srcfiles has a Makefile: section
 
 	int countNinjas = 0;
-	if (!cNinja.GetOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_BIT_SUFFIX)) {	// if not 64-bit only
+	if (!cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_BIT_SUFFIX)) {	// if not 64-bit only
 		if (cNinja.isCompilerMSVC())	{
 			if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, false))
 				countNinjas++;

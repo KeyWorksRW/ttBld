@@ -265,9 +265,9 @@ void CNinja::WriteCompilerComments()
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)	{
 			m_pkfOut->WriteEol("# -GL\t// Whole program optimization");
 			m_pkfOut->WriteEol("# -GS-\t// Turn off buffer security checks");
-			if (GetOption(OPT_STDCALL))
+			if (GetBoolOption(OPT_STDCALL))
 				m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-			if (GetOption(OPT_STATIC_CRT))
+			if (GetBoolOption(OPT_STATIC_CRT))
 				m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
 			else
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -290,9 +290,9 @@ void CNinja::WriteCompilerComments()
 
 		m_pkfOut->WriteEol("# -EHsc\t// Structured exception handling");
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)	{
-			if (GetOption(OPT_STDCALL))
+			if (GetBoolOption(OPT_STDCALL))
 				m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-			if (GetOption(OPT_STATIC_CRT))
+			if (GetBoolOption(OPT_STATIC_CRT))
 				m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
 			else
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -322,7 +322,7 @@ void CNinja::WriteCompilerFlags()
 				isExeTypeConsole() ? " -D_CONSOLE" : "",
 
 				GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
-				GetOption(OPT_STDCALL) ? " -Gz" : "",
+				GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
 				isExeTypeLib() ? " -Zl" : " -MDd"   // Note use of -MDd -- assumption is to always use this for debug builds. Release builds track GetOptionName(OPT_STATIC_CRT)
 			);
 	else	// Presumably GEN_RELEASE or GEN_RELEASE64
@@ -330,8 +330,8 @@ void CNinja::WriteCompilerFlags()
 				isExeTypeConsole() ? " -D_CONSOLE" : "",
 
 				GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
-				GetOption(OPT_STDCALL) ?    " -Gz" : "",
-				isExeTypeLib() ? " -Zl" :  (GetOption(OPT_STATIC_CRT) ? " -MT" : " -MD"),
+				GetBoolOption(OPT_STDCALL) ?    " -Gz" : "",
+				isExeTypeLib() ? " -Zl" :  (GetBoolOption(OPT_STATIC_CRT) ? " -MT" : " -MD"),
 				isOptimizeSpeed() ? " -O2" : " -O1"
 			);
 
@@ -447,7 +447,7 @@ void CNinja::WriteLinkDirective()
 	if (isExeTypeLib())
 		return;	// lib directive should be used if the project is a library
 
-	if (!m_bClang || GetOption(OPT_MS_LINKER)) {
+	if (!m_bClang || GetBoolOption(OPT_MS_LINKER)) {
 		ttCStr cszRule("rule link\n  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO ");
 		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? "/MACHINE:x64" : "/MACHINE:x86");
 
