@@ -11,11 +11,10 @@ msvc_deps_prefix = Note: including file:
 # -EHsc	// Structured exception handling
 # -GL	// Whole program optimization
 # -GS-	// Turn off buffer security checks
-# -Gz	// __stdcall calling convention
-# -MT	// Static multi-threaded library
+# -MD	// DLL version of multi-threaded library
 # -O1	// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)
 
-cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -Gz -MT -O1 -I"../ttLib/include" -I"../src" -GL /Fp$outdir/MakeNinja.pch
+cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -I"../ttLib/include" -I"../src" -GL /Fp$outdir/MakeNinja.pch
 
 rule compilePCH
   deps = msvc

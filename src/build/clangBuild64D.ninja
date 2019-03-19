@@ -12,7 +12,7 @@ msvc_deps_prefix = Note: including file:
 # -MDd	// Multithreaded debug dll (MSVCRTD)
 # -Z7	// produces object files with full symbolic debugging information
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -Gz -MDd -Od -Z7 -GS- -I"../ttLib/include" -I"../src" -D__clang__ -fms-compatibility-version=19 -m64 /Fp$outdir/MakeNinja.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MDd -Od -Z7 -GS- -I"../ttLib/include" -I"../src" -D__clang__ -fms-compatibility-version=19 -m64 /Fp$outdir/MakeNinja.pch
 
 rule compilePCH
   deps = msvc
@@ -29,7 +29,7 @@ rule rc
   description = resource compiler... $in
 
 rule link
-  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO /MACHINE:x64 /DEBUG /PDB:$outdir/MakeNinja.pdb /SUBSYSTEM:CONSOLE $in
+  command = lld-link.exe /out:$out /manifest:no /machine:x64 /debug /pdb:$outdir/MakeNinja.pdb /subsystem:console $in
   description = linking $out
 
 build $outdir/pch.obj: compilePCH pch.cpp

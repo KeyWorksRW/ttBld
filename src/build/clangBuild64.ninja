@@ -9,11 +9,10 @@ resout = build/res
 msvc_deps_prefix = Note: including file:
 
 # -EHsc	// Structured exception handling
-# -Gz	// __stdcall calling convention
-# -MT	// Static multi-threaded library
+# -MD	// DLL version of multi-threaded library
 # -O1	// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)
 
-cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -Gz -MT -O1 -I"../ttLib/include" -I"../src" -D__clang__ -fms-compatibility-version=19 -m64 -flto -fwhole-program-vtables /Fp$outdir/MakeNinja.pch
+cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -I"../ttLib/include" -I"../src" -D__clang__ -fms-compatibility-version=19 -m64 -flto -fwhole-program-vtables /Fp$outdir/MakeNinja.pch
 
 rule compilePCH
   deps = msvc
@@ -30,7 +29,7 @@ rule rc
   description = resource compiler... $in
 
 rule link
-  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO /MACHINE:x64 /LTCG /OPT:REF /OPT:ICF /SUBSYSTEM:CONSOLE $in
+  command = lld-link.exe /out:$out /manifest:no /machine:x64 /opt:ref /opt:icf /subsystem:console $in
   description = linking $out
 
 build $outdir/pch.obj: compilePCH pch.cpp
