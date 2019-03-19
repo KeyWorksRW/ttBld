@@ -150,7 +150,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	}
 
 	ttCStr csz;
-	csz.printf(tt::getResString(IDS_UNKNOWN_OPTION), (char*) cszName);
+	csz.printf(tt::getResString(IDS_CS_UNKNOWN_OPTION), (char*) cszName);
 	m_lstErrors += csz;
 }
 
@@ -355,7 +355,7 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
 	ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
 	if (!pszVal) {
 		ttCStr cszTmp;
-		cszTmp.printf(tt::getResString(IDS_OPT_MISSING_COLON), pszLine);
+		cszTmp.printf(tt::getResString(IDS_CS_OPT_MISSING_COLON), pszLine);
 		m_lstErrors += cszTmp;
 		return false;
 	}
