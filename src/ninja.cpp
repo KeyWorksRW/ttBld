@@ -448,8 +448,8 @@ void CNinja::WriteLinkDirective()
 		return;	// lib directive should be used if the project is a library
 
 	if (!m_bClang || GetBoolOption(OPT_MS_LINKER)) {
-		ttCStr cszRule("rule link\n  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO ");
-		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? "/MACHINE:x64" : "/MACHINE:x86");
+		ttCStr cszRule("rule link\n  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO");
+		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /MACHINE:x64" : " /MACHINE:x86");
 
 		if (GetOption(OPT_LINK_FLAGS)) {
 			cszRule += " ";
@@ -457,6 +457,10 @@ void CNinja::WriteLinkDirective()
 		}
 
 		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
+			if (GetOption(OPT_NATVIS)) {
+				cszRule += " /NATVIS:";
+				cszRule += GetOption(OPT_NATVIS);
+			}
 			cszRule +=" /DEBUG /PDB:$outdir/";
 			cszRule += GetProjectName();
 			cszRule += ".pdb";

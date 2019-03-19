@@ -42,6 +42,7 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_CFLAGS,       "CFlags", 	    nullptr,	false, false,  "additional flags to pass to the compiler in all build targets" },
 	{ OPT_MIDL_FLAGS,   "MidlFlags", 	nullptr,	false, false,  "flags to pass to the midl compiler" },
 	{ OPT_LINK_FLAGS,   "LinkFlags", 	nullptr,	false, false,  "additional flags to pass to the linker in all build targets" },
+	{ OPT_NATVIS,   	"Natvis", 	    nullptr,	false, false,  "Specifies a .natvis file to link into the pdb file" },
 	{ OPT_RC_FLAGS,     "RCFlags", 	    nullptr,	false, false,  "additional flags to pass to the resource compiler in all build targets" },
 	{ OPT_DEBUG_RC,     "DebugRC", 	    "false",	true,  false,  "true means build a -D_DEBUG version of the project's rc file" },
 	{ OPT_STATIC_CRT,   "static_crt", 	"false",	true,  false,  "true means link to static CRT" },

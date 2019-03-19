@@ -40,6 +40,7 @@ namespace sfopt {	// .srcfiles otpion
 		OPT_CFLAGS,			// additional flags to pass to the compiler in all build targets
 		OPT_MIDL_FLAGS,		// flags to pass to the midl compiler
 		OPT_LINK_FLAGS,		// additional flags to pass to the linker in all build targets
+		OPT_NATVIS,			// Specifies a .natvis file to link into the pdb file
 		OPT_RC_FLAGS,		// additional flags to pass to the resource compiler in all build targets
 		OPT_INC_DIRS,		// additional directories for header files
 		OPT_LIB_DIRS,		// additional directores for lib files
