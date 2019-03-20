@@ -486,6 +486,10 @@ void CNinja::WriteLinkDirective()
 		}
 
 		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
+			if (GetOption(OPT_NATVIS)) {
+				cszRule += " /natvis:";
+				cszRule += GetOption(OPT_NATVIS);
+			}
 			cszRule +=" /debug /pdb:$outdir/";
 			cszRule += GetProjectName();
 			cszRule += ".pdb";
