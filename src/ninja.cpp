@@ -318,6 +318,10 @@ void CNinja::WriteCompilerFlags()
 	// First we write the flags common to both compilers
 
 	if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)
+		// For MSVC compiler you can either use -Z7 or -FS -Zf -Zi. My testing of the two approaches is that -Z7 yields
+		// larger object files but reduces compile/link time by about 20% (compile speed is faster because no serialized
+		// writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not recognize -Zf.
+
 		m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7 -GS-",
 				isExeTypeConsole() ? " -D_CONSOLE" : "",
 
