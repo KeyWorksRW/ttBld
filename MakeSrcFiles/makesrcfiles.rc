@@ -28,22 +28,22 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE
+1 TEXTINCLUDE DISCARDABLE 
 BEGIN
     "res.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE
+2 TEXTINCLUDE DISCARDABLE 
 BEGIN
     "#include ""winres.h""\r\n"
-	"#include ""../common/strtable.h""\r\n"
+    "#include ""../common/strtable.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE
+3 TEXTINCLUDE DISCARDABLE 
 BEGIN
     "#include ""ttlibicons.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
-	"#include ""../common/strtable.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""../common/strtable.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "\0"
 END
 
@@ -109,22 +109,22 @@ BEGIN
     LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
     EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
     GROUPBOX        "Target",IDC_STATIC,7,25,147,43
-    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,21,37,42,10
-    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,75,37,41,10
-    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,21,51,37,10
-    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,75,51,29,10
     GROUPBOX        "Compiler Options",IDC_STATIC,6,77,147,141
     LTEXT           "Optimize for:",IDC_STATIC,16,92,40,8
-    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,61,92,35,10
     CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,105,
                     92,35,10
     LTEXT           "Convention:",IDC_STATIC,16,108,39,8
-    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,61,108,33,10
     CONTROL         "stdcall",IDC_RADIO_STDCALL,"Button",BS_AUTORADIOBUTTON,
                     105,108,36,10
@@ -147,24 +147,24 @@ BEGIN
     CONTROL         "Permissive",IDC_CHECK_PERMISSIVE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,200,49,10
     GROUPBOX        "Linker Options",IDC_STATIC,177,44,147,82
-    CONTROL         "&64-bit builds",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "&64-bit builds",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,186,57,53,10
-    CONTROL         "'64' suffix",IDCHECK_BITEXT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "'64' suffix",IDCHECK_BITEXT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,268,57,45,10
-    CONTROL         "Static CRT",IDCHECK_STATIC_CRT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "Static CRT",IDCHECK_STATIC_CRT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,186,73,51,10
-    CONTROL         "MS-Link",IDCHECK_MSLINKER,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "MS-Link",IDCHECK_MSLINKER,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,268,73,42,10
     LTEXT           "Link Flags:",IDC_STATIC,184,89,35,8
     EDITTEXT        IDEDIT_LINK_FLAGS,224,87,89,14,ES_AUTOHSCROLL
     LTEXT           "LibDirs:",IDC_STATIC,186,105,24,8
     EDITTEXT        IDEDIT_LIBDIRS,224,103,89,14,ES_AUTOHSCROLL
     GROUPBOX        "Create Makefile",IDC_STATIC,177,3,147,30
-    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,188,18,37,10
-    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,229,18,37,10
-    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,270,18,37,10
     GROUPBOX        "Libraries",IDC_STATIC,177,139,147,78
     LTEXT           "Build these:",IDC_STATIC,182,153,38,8
@@ -175,6 +175,27 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,271,238,50,14
 END
 
+IDDDLG_CONVERT DIALOG DISCARDABLE  0, 0, 219, 173
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create new .srcfiles file"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "C&reate .srcfiles in:",IDC_STATIC,6,6,56,8
+    EDITTEXT        IDEDIT_OUT_DIR,6,23,144,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Change...",IDBTN_CHANGE_OUT,163,23,50,14
+    LTEXT           "L&ocation of C/C++ files:",IDC_STATIC,6,50,75,8
+    EDITTEXT        IDEDIT_IN_DIR,6,62,144,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "C&hange...",IDBTN_CHANGE_IN,163,62,50,14
+    CONTROL         "Co&nvert script:",IDCHECK_SCRIPT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,6,99,61,10
+    COMBOBOX        IDCOMBO_SCRIPTS,20,116,131,45,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Locate...",IDBTN_LOCATE_SCRIPT,163,115,50,14
+    DEFPUSHBUTTON   "OK",IDOK,101,153,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,163,153,50,14
+    LTEXT           "%kn file%ks located",IDTXT_FILES_FOUND,20,80,129,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -182,12 +203,20 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE
+GUIDELINES DESIGNINFO DISCARDABLE 
 BEGIN
     IDDLG_SRCFILES, DIALOG
     BEGIN
         RIGHTMARGIN, 324
         BOTTOMMARGIN, 252
+    END
+
+    IDDDLG_CONVERT, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 213
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 167
     END
 END
 #endif    // APSTUDIO_INVOKED

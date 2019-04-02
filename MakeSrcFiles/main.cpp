@@ -16,6 +16,7 @@
 #include "version.txt"	// Version (txtVersion) and Copyright (txtCopyRight) information
 
 #include "funcs.h"
+#include "convertdlg.h"	// CConvertDlg
 
 void DisplayUsage()
 {
@@ -46,12 +47,17 @@ int main(int argc, char* argv[])
 		else if (tt::isSameStri(argv[argpos] + 1, "dryrun"))
 			bDryRun = true;
 		else if (tt::isSameStri(argv[argpos] + 1, "convert")) {
+			CConvertDlg dlg;
+			if (dlg.DoModal(NULL) == IDOK) {
+			}
+#if 0
 			if (ConvertBuildScript(argpos + 1 > argc ? nullptr : argv[argpos + 1])) {
 				// SetSrcFileOptions();
 				return 1;
 			}
 			else
 				return 0;
+#endif
 		}
 		else if (tt::isSameStri(argv[argpos] + 1, "add")) {
 			ttCList lstFiles;

@@ -3,6 +3,7 @@
 // Used by makesrcfiles.rc
 //
 #define IDDLG_SRCFILES                  100
+#define IDDDLG_CONVERT                  101
 #define IDEDIT_PROJ_NAME                1024
 #define IDRADIO_NORMAL                  1025
 #define IDRADIO_CONSOLE                 1026
@@ -40,20 +41,28 @@
 #define IDC_RADIO_CDECL                 1058
 #define IDC_RADIO_STDCALL               1059
 #define IDEDIT_INCDIRS                  1060
-#define IDCHECK_MSLINKER         1061
+#define IDCHECK_MSLINKER                1061
 #define IDEDIT_LIBDIRS                  1062
 #define IDEDIT_LIBS_LINK                1063
 #define IDC_BTN_HELP                    1064
 #define IDRADIO_MF_DEBUG                1065
+#define IDEDIT_OUT_DIR                  1065
 #define IDRADIO_MF_RELEASE              1066
+#define IDBTN_CHANGE_OUT                1066
+#define IDEDIT_IN_DIR                   1067
+#define IDBTN_CHANGE_IN                 1068
+#define IDCHECK_SCRIPT                  1069
+#define IDCOMBO_SCRIPTS                 1070
+#define IDBTN_LOCATE_SCRIPT             1071
+#define IDTXT_FILES_FOUND               1072
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        101
+#define _APS_NEXT_RESOURCE_VALUE        102
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1065
+#define _APS_NEXT_CONTROL_VALUE         1073
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

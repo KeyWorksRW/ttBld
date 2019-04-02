@@ -16,6 +16,7 @@ Files:
 	main.cpp
 	addfiles.cpp
 	convert.cpp
+	convertdlg.cpp
 	dlgsrcoptions.cpp
 
 	../common/csrcfiles.cpp
