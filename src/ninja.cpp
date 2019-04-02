@@ -631,6 +631,10 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 		cszFile.ChangeExtension(".obj");
 		m_pkfOut->printf(" $\n  $outdir/%s", (char*) cszFile);
 	}
+
+	if ((m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) && GetOption(OPT_NATVIS))
+		m_pkfOut->printf(" $\n  | %s", GetOption(OPT_NATVIS));
+
 	m_pkfOut->WriteEol("\n");
 }
 
