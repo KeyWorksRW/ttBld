@@ -46,5 +46,4 @@ protected:
 	ttCStr		m_cszSrcDir;
 	ttCStr		m_cszOptComment;
 	ttCList		m_lstOriginal;
-	ptrdiff_t	m_posProject;
 };

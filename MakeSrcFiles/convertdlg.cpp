@@ -17,6 +17,10 @@
 #include "convertdlg.h"
 #include "ttlibicons.h"
 
+#ifdef _MSC_VER
+	#pragma warning(disable: 6031)	// Return value ignored: '_chdir'.
+#endif // _MSC_VER
+
 static const char* atxtSrcTypes[] = {
 	"*.cpp",
 	"*.cc",

@@ -17,7 +17,7 @@
 class CWriteSrcFiles : public CSrcFiles
 {
 public:
-	CWriteSrcFiles() : CSrcFiles() { }
+	CWriteSrcFiles() : CSrcFiles() { m_posOptions = -1; m_posInsert = 0; }
 
 	// Class methods
 
