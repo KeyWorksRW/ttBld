@@ -56,8 +56,9 @@ protected:
 
 	void CreateNewSrcFiles();
 
-	void AddCodeLiteFiles(ttCXMLBranch* pParent);
-	bool isValidSrcFile(const char* pszFile) const;
+	char* MakeSrcRelative(const char* pszFile);
+	void  AddCodeLiteFiles(ttCXMLBranch* pParent);
+	bool  isValidSrcFile(const char* pszFile) const;
 
 	// Class members
 
@@ -68,4 +69,8 @@ protected:
 	ttCStr m_cszDirOutput;		// where .srcfiles should be created
 	ttCStr m_cszDirSrcFiles;
 	ttCStr m_cszConvertScript;
+
+	ttCStr m_cszScriptRoot;
+	ttCStr m_cszOutRoot;
+	ttCStr m_cszRelative;		// used to create a relative location for a source file
 };

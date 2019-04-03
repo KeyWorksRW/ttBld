@@ -6,6 +6,14 @@
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
+/*
+
+	Source files specified in a build script are relative to the location of that build script. The .srcfiles file we are
+	creating may be in an entirely different directory. So before we add a file to .srcfiles, we must first make it
+	relative to the location of the build script, and then make it relative to the location of .srcfiles.
+
+*/
+
 #include "pch.h"
 
 #include <direct.h>		// Functions for directory handling and creation
@@ -235,7 +243,7 @@ bool CConvertDlg::ConvertCodeBlocks()
 		}
 		else if (tt::isSameStri(pItem->GetName(), "Unit")) {
 			if (isValidSrcFile(pItem->GetAttribute("filename")))
-				m_cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("filename");
+				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("filename"));
 		}
 	}
 
@@ -426,4 +434,31 @@ void CConvertDlg::CreateNewSrcFiles()
 			} while(ff.NextFile());
 		}
 	}
+}
+
+// This function first converts the file relative to the location of the build script, and then relative to the location of .srcfiles
+
+char* CConvertDlg::MakeSrcRelative(const char* pszFile)
+{
+	ttASSERT(m_cszConvertScript.isNonEmpty());
+
+	if (m_cszScriptRoot.isEmpty()) {
+		m_cszScriptRoot = (char*) m_cszConvertScript;
+		char* pszFilePortion = tt::findFilePortion(m_cszScriptRoot);
+		ttASSERT_MSG(pszFilePortion, "No filename in m_cszScriptRoot--things will go badly without it.");
+		if (pszFilePortion)
+			*pszFilePortion = 0;
+	}
+
+	if (m_cszOutRoot.isEmpty()) {
+		m_cszOutRoot = (char*) m_cszDirOutput;
+		char* pszFilePortion = m_cszOutRoot.findStri(".srcfiles");
+		if (pszFilePortion)
+			*pszFilePortion = 0;
+	}
+
+	ttCStr cszTmp;
+	tt::ConvertToRelative(m_cszScriptRoot, pszFile, cszTmp);
+	tt::ConvertToRelative(m_cszOutRoot, cszTmp, m_cszRelative);
+	return m_cszRelative;
 }
