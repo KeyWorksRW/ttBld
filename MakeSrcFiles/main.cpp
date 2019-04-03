@@ -23,11 +23,10 @@ void DisplayUsage()
 	puts(txtVersion);
 	puts(txtCopyRight);
 
-	puts("\nMakeSrcFiles [option] [files]");
+	puts("\nMakeSrcFiles [option]");
 	puts("\twith no arguments, displays a dialog allowing you to modify .srcfiles in current directory");
-	puts("\t-add filename(s) <-- will add the filename(s) to the Files: section of the current .srcfiles file");
-	puts("\t-convert filename <-- will convert the build script (file.vcxproj, file.project, or file.cbp) into a .srcfiles file in current directory");
-	puts("\t-new <-- creates a new .srcfiles file (unless one already exists)");
+//	puts("\t-add filename(s) <-- will add the filename(s) to the Files: section of the current .srcfiles file");
+	puts("\t-new <-- displays a dialog allowing you to create a .srcfiles file");
 }
 
 int main(int argc, char* argv[])
@@ -46,10 +45,19 @@ int main(int argc, char* argv[])
 		// _DEBUG so you can test retail release.
 		else if (tt::isSameStri(argv[argpos] + 1, "dryrun"))
 			bDryRun = true;
-		else if (tt::isSameStri(argv[argpos] + 1, "convert")) {
+
+		else if (tt::isSameStri(argv[argpos] + 1, "new")) {
 			CConvertDlg dlg;
 			if (dlg.DoModal(NULL) == IDOK) {
+				if (tt::FileExists(".srcfiles")) {
+					SetSrcFileOptions(bDryRun);
+					return 1;
+				}
 			}
+			else
+				return 0;
+		}
+
 #if 0
 			if (ConvertBuildScript(argpos + 1 > argc ? nullptr : argv[argpos + 1])) {
 				// SetSrcFileOptions();
@@ -57,8 +65,9 @@ int main(int argc, char* argv[])
 			}
 			else
 				return 0;
-#endif
 		}
+#endif
+
 		else if (tt::isSameStri(argv[argpos] + 1, "add")) {
 			ttCList lstFiles;
 			for (++argpos; argpos < argc; ++argpos) {
@@ -67,10 +76,12 @@ int main(int argc, char* argv[])
 			AddFiles(lstFiles, bDryRun);
 			return 1;
 		}
+#if 0
 		else if (tt::isSameStri(argv[argpos] + 1, "new")) {
 			CreateNewSrcFiles();
 			return 1;
 		}
+#endif
 		else {
 			printf("%s is an unknown option\n", argv[argpos]);
 			return 0;
