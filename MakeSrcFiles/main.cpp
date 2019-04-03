@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
 		else if (tt::isSameStri(argv[argpos] + 1, "new")) {
 			CConvertDlg dlg;
-			if (dlg.DoModal(NULL) == IDOK) {
+			if (dlg.CreateSrcFiles()) {
 				if (tt::FileExists(".srcfiles")) {
 					SetSrcFileOptions(bDryRun);
 					return 1;
