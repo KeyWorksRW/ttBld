@@ -25,7 +25,7 @@ void DisplayUsage()
 
 	puts("\nMakeSrcFiles [option]");
 	puts("\twith no arguments, displays a dialog allowing you to modify .srcfiles in current directory");
-//	puts("\t-add filename(s) <-- will add the filename(s) to the Files: section of the current .srcfiles file");
+	puts("\t-add filename(s) <-- will add the filename(s) to the Files: section of the current .srcfiles file");
 	puts("\t-new <-- displays a dialog allowing you to create a .srcfiles file");
 }
 
@@ -57,17 +57,6 @@ int main(int argc, char* argv[])
 			else
 				return 0;
 		}
-
-#if 0
-			if (ConvertBuildScript(argpos + 1 > argc ? nullptr : argv[argpos + 1])) {
-				// SetSrcFileOptions();
-				return 1;
-			}
-			else
-				return 0;
-		}
-#endif
-
 		else if (tt::isSameStri(argv[argpos] + 1, "add")) {
 			ttCList lstFiles;
 			for (++argpos; argpos < argc; ++argpos) {
@@ -76,12 +65,6 @@ int main(int argc, char* argv[])
 			AddFiles(lstFiles, bDryRun);
 			return 1;
 		}
-#if 0
-		else if (tt::isSameStri(argv[argpos] + 1, "new")) {
-			CreateNewSrcFiles();
-			return 1;
-		}
-#endif
 		else {
 			printf("%s is an unknown option\n", argv[argpos]);
 			return 0;
@@ -90,23 +73,5 @@ int main(int argc, char* argv[])
 	if (tt::FileExists(".srcfiles")) {
 		SetSrcFileOptions(bDryRun);
 		return 1;
-	}
-	// if we get here, there's no .srcfiles and the user didn't tell us what to do. Start by looking for a build script
-	// to convert. If that doesn't exist than create a new .srcfiles file.
-
-	else {
-		ttCFindFile ff("*.vcxproj");
-		if (ff.isValid())
-			return ConvertBuildScript(ff);
-		else if (ff.NewPattern("*.vcproj"))
-			return ConvertBuildScript(ff);
-		else if (ff.NewPattern("*.project"))
-			return ConvertBuildScript(ff);
-		else if (ff.NewPattern("*.cbp"))
-			return ConvertBuildScript(ff);
-		else {
-			CreateNewSrcFiles();
-			return 1;
-		}
 	}
 }
