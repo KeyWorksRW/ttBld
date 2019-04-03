@@ -13,6 +13,7 @@
 #endif
 
 #include <ttdlg.h>		// ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttxml.h>		// ttCXMLBranch, ttCParseXML
 
 #include "../common/writesrcfiles.h"	// CWriteSrcFiles
 
@@ -24,6 +25,8 @@ public:
 	}
 
 	// Class functions
+
+	bool  CreateSrcFiles();
 
 	char* GetDirOutput() { return m_cszDirOutput; }
 	char* GetDirSrcFiles() { return m_cszDirSrcFiles; }
@@ -47,10 +50,18 @@ protected:
 	// Protected functions
 
 	bool ConvertCodeLite();
+	bool ConvertCodeBlocks();
+	bool ConvertVcxProj();
+	bool ConvertVcProj();
+
+	void AddCodeLiteFiles(ttCXMLBranch* pParent);
+	bool isValidSrcFile(const char* pszFile) const;
 
 	// Class members
 
 	ttCComboBox m_comboScripts;
+	ttCParseXML m_xml;
+	CWriteSrcFiles m_cSrcFiles;
 
 	ttCStr m_cszDirOutput;		// where .srcfiles should be created
 	ttCStr m_cszDirSrcFiles;
