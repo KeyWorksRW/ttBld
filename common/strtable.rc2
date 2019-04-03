@@ -12,4 +12,8 @@ BEGIN
 	IDS_CS_CANNOT_OPEN		 	"Cannot open \042%s\042."
 	IDS_CS_UNKNOWN_OPTION		"%s is an unknown option"
 	IDS_CS_OPT_MISSING_COLON	"Option name is missing a ':' (%s)"
+	IDS_CS_PARSE_ERROR			"An internal error occurred attempting to parse the file %s"
+	IDS_CS_INVALID_PROJECT		"Cannot locate <CodeLite_Project> in %s"
+	IDS_CS_SRCFILES_CREATED		".srcfiles created using %s as the template"
+	IDS_CS_CANT_WRITE			"Unable to create or write to %s"
 END

@@ -14,6 +14,8 @@
 
 #include <ttdlg.h>		// ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
+#include "../common/writesrcfiles.h"	// CWriteSrcFiles
+
 class CConvertDlg : public ttCDlg
 {
 public:
@@ -41,6 +43,10 @@ protected:
 	void OnBtnLocateScript();
 	void OnBegin(void);
 	void OnOK(void);
+
+	// Protected functions
+
+	bool ConvertCodeLite();
 
 	// Class members
 
