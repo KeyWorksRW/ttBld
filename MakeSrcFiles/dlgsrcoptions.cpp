@@ -25,69 +25,6 @@ void SetSrcFileOptions(bool bDryRun)
 		dlg.SaveChanges();
 }
 
-void CreateNewSrcFiles()
-{
-	if (tt::FileExists(".srcfiles")) {
-		if (tt::MsgBox(".srcfiles already exists. Are you certain you want to replace it with a new one?", MB_YESNO) != IDYES)
-			return;
-	}
-
-	CDlgSrcOptions dlg;
-	if (dlg.DoModal(NULL) == IDOK) {
-		// CWriteSrcFiles only writes out the Options: section since that's all that's needed by MakeNinja. For the -new
-		// option, we first create a .srcfiles with nothing but a Files: section, and then call SaveChanges() to add the
-		// Options: section.
-
-		ttCFile kfOut;
-		kfOut.WriteEol("Files:");
-
-		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.c;*.rc;*.idl;*.hhp;");
-		ttCStr cszPCHSrc;
-		bool bSpecialFiles = false;
-		if (tt::isEmpty(dlg.GetPchHeader())) {
-			cszPCHSrc = dlg.GetPchHeader();
-			cszPCHSrc.ChangeExtension(".cpp");
-			if (!tt::FileExists(cszPCHSrc)) {
-				cszPCHSrc.ChangeExtension(".c");
-				if (!tt::FileExists(cszPCHSrc))
-					cszPCHSrc.Delete();
-			}
-			if (cszPCHSrc.isNonEmpty())	{
-				kfOut.printf("  %s\n", (char*) cszPCHSrc);
-				bSpecialFiles = true;
-			}
-		}
-		if (dlg.m_cszHHPName.isNonEmpty()) {
-			kfOut.printf("  %s\n", (char*) dlg.m_cszHHPName);
-			bSpecialFiles = true;
-		}
-		if (dlg.m_cszRcName.isNonEmpty()) {
-			kfOut.printf("  %s\n", (char*) dlg.m_cszRcName);
-			bSpecialFiles = true;
-		}
-		if (bSpecialFiles)
-			kfOut.WriteEol();	// add a blank line
-
-		for (size_t pos = 0; pos < dlg.m_lstSrcFiles.GetCount(); ++pos) {
-			if (cszPCHSrc.isNonEmpty() && cszPCHSrc.isSameStri(dlg.m_lstSrcFiles[pos]))
-				continue;	// we already added it
-			else if (dlg.m_cszRcName.isNonEmpty() && dlg.m_cszRcName.isSameStri(dlg.m_lstSrcFiles[pos]))
-				continue;	// we already added it
-			else if (dlg.m_cszHHPName.isNonEmpty() && dlg.m_cszHHPName.isSameStri(dlg.m_lstSrcFiles[pos]))
-				continue;	// we already added it
-
-			kfOut.printf("  %s\n", dlg.m_lstSrcFiles[pos]);
-		}
-		if (!kfOut.WriteFile(".srcfiles")) {
-			puts("Unable to write to .srcfiles!");
-			return;
-		}
-
-		puts(".srcfiles created");
-		dlg.SaveChanges();	// now add the Options: section
-	}
-}
-
 CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttCDlg(IDDLG_SRCFILES), CWriteSrcFiles()
 {
 	EnableShadeBtns();
