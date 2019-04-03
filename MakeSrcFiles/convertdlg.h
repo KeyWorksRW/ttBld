@@ -53,6 +53,7 @@ protected:
 	bool ConvertCodeBlocks();
 	bool ConvertVcxProj();
 	bool ConvertVcProj();
+	bool CreateNewSrcFiles();
 
 	void AddCodeLiteFiles(ttCXMLBranch* pParent);
 	bool isValidSrcFile(const char* pszFile) const;
