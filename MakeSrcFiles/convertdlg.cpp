@@ -179,8 +179,11 @@ void CConvertDlg::OnOK(void)
 		}
 	}
 	else {	// We get here if the user didn't specify anything to convert from.
-		if (!CreateNewSrcFiles())
+		CreateNewSrcFiles();
+		if (!m_cSrcFiles.WriteNew(m_cszDirOutput)) {
+			tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
 			CancelEnd();
+		}
 	}
 }
 
@@ -403,67 +406,24 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 	return false;
 }
 
-bool CConvertDlg::CreateNewSrcFiles()
+void CConvertDlg::CreateNewSrcFiles()
 {
-	CDlgSrcOptions dlg;
-	if (dlg.DoModal(NULL) == IDOK) {
-		// CWriteSrcFiles only writes out the Options: section since that's all that's needed by MakeNinja. For the -new
-		// option, we first create a .srcfiles with nothing but a Files: section, and then call SaveChanges() to add the
-		// Options: section.
+	char szPath[MAX_PATH];
+	tt::strCopy(szPath, m_cszDirSrcFiles);
+	tt::AddTrailingSlash(szPath);
+	size_t cbRoot = tt::strByteLen(szPath);
 
-		ttCFile kfOut;
-		kfOut.WriteEol("Files:");
+	ttCStr cszRelPath;
 
-		// BUGBUG: [randalphwa - 4/3/2019] This adds the pattern to the
-
-		dlg.AddSourcePattern("*.cpp;*.cc;*.cxx;*.c;*.rc;*.idl;*.hhp;");
-		ttCStr cszPCHSrc;
-		bool bSpecialFiles = false;
-		if (tt::isEmpty(dlg.GetPchHeader())) {
-			cszPCHSrc = dlg.GetPchHeader();
-			cszPCHSrc.ChangeExtension(".cpp");
-			if (!tt::FileExists(cszPCHSrc)) {
-				cszPCHSrc.ChangeExtension(".c");
-				if (!tt::FileExists(cszPCHSrc))
-					cszPCHSrc.Delete();
-			}
-			if (cszPCHSrc.isNonEmpty())	{
-				kfOut.printf("  %s\n", (char*) cszPCHSrc);
-				bSpecialFiles = true;
-			}
+	for (size_t pos = 0; atxtSrcTypes[pos]; ++pos) {
+		tt::strCopy(szPath + cbRoot, atxtSrcTypes[pos]);
+		ttCFindFile ff(szPath);
+		if (ff.isValid()) {
+			do {
+				tt::strCopy(szPath + cbRoot, sizeof(szPath) - cbRoot, ff);
+				tt::ConvertToRelative(m_cszDirOutput, szPath, cszRelPath);
+				m_cSrcFiles.m_lstSrcFiles += cszRelPath;
+			} while(ff.NextFile());
 		}
-		if (dlg.m_cszHHPName.isNonEmpty()) {
-			kfOut.printf("  %s\n", (char*) dlg.m_cszHHPName);
-			bSpecialFiles = true;
-		}
-		if (dlg.m_cszRcName.isNonEmpty()) {
-			kfOut.printf("  %s\n", (char*) dlg.m_cszRcName);
-			bSpecialFiles = true;
-		}
-		if (bSpecialFiles)
-			kfOut.WriteEol();	// add a blank line
-
-		for (size_t pos = 0; pos < dlg.m_lstSrcFiles.GetCount(); ++pos) {
-			if (cszPCHSrc.isNonEmpty() && cszPCHSrc.isSameStri(dlg.m_lstSrcFiles[pos]))
-				continue;	// we already added it
-			else if (dlg.m_cszRcName.isNonEmpty() && dlg.m_cszRcName.isSameStri(dlg.m_lstSrcFiles[pos]))
-				continue;	// we already added it
-			else if (dlg.m_cszHHPName.isNonEmpty() && dlg.m_cszHHPName.isSameStri(dlg.m_lstSrcFiles[pos]))
-				continue;	// we already added it
-
-			kfOut.printf("  %s\n", dlg.m_lstSrcFiles[pos]);
-		}
-
-		if (!m_cSrcFiles.WriteNew(m_cszDirOutput)) {
-			tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
-			CancelEnd();
-		}
-
-		// BUGBUG: [randalphwa - 4/3/2019] This will add the default options, but in the wrong location
-
-		dlg.SaveChanges();	// now add the Options: section
-		return false;
 	}
-	else
-		return false;
 }
