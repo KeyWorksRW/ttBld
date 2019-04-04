@@ -55,6 +55,8 @@
 #define IDCOMBO_SCRIPTS                 1070
 #define IDBTN_LOCATE_SCRIPT             1071
 #define IDTXT_FILES_FOUND               1072
+#define IDRADIO_FILES                   1073
+#define IDRADIO_CONVERT                 1074
 
 // Next default values for new objects
 // 
@@ -62,7 +64,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        102
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1073
+#define _APS_NEXT_CONTROL_VALUE         1075
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
