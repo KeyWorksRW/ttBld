@@ -24,6 +24,7 @@
 #include <ttenumstr.h>	// ttCEnumStr
 
 #include "ttlibicons.h" 			// Icons for use on 3D shaded buttons (ttShadeBtn)
+#include "strtable.h"				// String resource IDs
 #include "../common/strtable.h" 	// String resource IDs
 #include "dlgsrcoptions.h"			// CDlgSrcOptions
 
@@ -55,12 +56,12 @@ static const char* atxtProjects[] = {
 bool CConvertDlg::CreateSrcFiles()
 {
 	if (tt::FileExists(".srcfiles")) {
-		if (tt::MsgBox(IDS_CS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
+		if (tt::MsgBox(IDS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
 			return false;
 	}
 
 	if (DoModal(NULL) == IDOK) {
-		tt::MsgBoxFmt(IDS_CS_SRCFILES_CREATED, MB_OK, (char*) tt::findFilePortion(m_cszConvertScript));
+		tt::MsgBoxFmt(IDS_SRCFILES_CREATED, MB_OK, (char*) tt::findFilePortion(m_cszConvertScript));
 		return true;
 	}
 	else
@@ -153,7 +154,7 @@ void CConvertDlg::OnBtnChangeOut()	// change the directory to write .srcfiles to
 		ttCStr cszSrcFiles(dlg);
 		cszSrcFiles.AppendFileName(".srcfiles");
 		if (tt::FileExists(cszSrcFiles)) {
-			if (tt::MsgBox(IDS_CS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
+			if (tt::MsgBox(IDS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
 				return;
 		}
 		SetControlText(DLG_ID(IDEDIT_OUT_DIR), dlg);
@@ -207,7 +208,7 @@ void CConvertDlg::OnOK(void)
 		if (pszExt) {
 			HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
 			if (hr != S_OK) {
-				tt::MsgBoxFmt(IDS_CS_PARSE_ERROR, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+				tt::MsgBoxFmt(IDS_PARSE_ERROR, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 				CancelEnd();
 			}
 			m_cszDirOutput.AppendFileName(".srcfiles");
@@ -247,7 +248,7 @@ bool CConvertDlg::ConvertCodeLite()
 {
 	ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
 	if (!pProject) {
-		tt::MsgBoxFmt(IDS_CS_INVALID_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		tt::MsgBoxFmt(IDS_INVALID_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
@@ -279,7 +280,7 @@ bool CConvertDlg::ConvertCodeBlocks()
 
 	ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
 	if (!pProject)	{
-		tt::MsgBoxFmt(IDS_CS_MISSING_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		tt::MsgBoxFmt(IDS_MISSING_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
@@ -302,7 +303,7 @@ bool CConvertDlg::ConvertVcxProj()
 {
 	ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
 	if (!pProject)	{
-		tt::MsgBoxFmt(IDS_CS_MISSING_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		tt::MsgBoxFmt(IDS_MISSING_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
@@ -326,7 +327,7 @@ bool CConvertDlg::ConvertVcProj()
 {
 	ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
 	if (!pProject)	{
-		tt::MsgBoxFmt(IDS_CS_MISSING_VSP, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		tt::MsgBoxFmt(IDS_MISSING_VSP, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
@@ -335,12 +336,12 @@ bool CConvertDlg::ConvertVcProj()
 
 	ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
 	if (!pFiles)	{
-		tt::MsgBoxFmt(IDS_CS_MISSING_FILES, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		tt::MsgBoxFmt(IDS_MISSING_FILES, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 	ttCXMLBranch* pFilter = pFiles->FindFirstElement("Filter");
 	if (!pFilter) {
-		tt::MsgBoxFmt(IDS_CS_MISSING_FILTER, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		tt::MsgBoxFmt(IDS_MISSING_FILTER, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 	for (size_t item = 0; item < pFilter->GetChildrenCount(); item++) {

@@ -1,0 +1,19 @@
+// STRTABLE.RC2 - resources Microsoft Visual C++ does not edit directly
+
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+#include "strtable.h"
+
+STRINGTABLE
+BEGIN
+	IDS_SRCFILES_CREATED	".srcfiles created using %s as the template"
+	IDS_PARSE_ERROR			"An internal error occurred attempting to parse the file %s"
+	IDS_INVALID_PROJECT		"Cannot locate <CodeLite_Project> in %s"
+	IDS_MISSING_PROJECT		"Cannot locate <Project> in %s"
+	IDS_MISSING_VSP			"Cannot locate <VisualStudioProject> in %s"
+	IDS_MISSING_FILES		"Cannot locate <Files> in %s"
+	IDS_MISSING_FILTER		"Cannot locate <Filter> in %s"
+	IDS_SRCFILES_EXISTS		".srcfiles already exists in this directory. Are you sure you want to replace it?"
+END
