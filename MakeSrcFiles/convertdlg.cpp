@@ -244,6 +244,15 @@ void CConvertDlg::OnOK(void)
 			if (bResult) {
 				ttCStr cszHdr;
 				cszHdr.printf("# Converted from %s", (char*) m_cszConvertScript);
+
+				if (tt::isEmpty(m_cSrcFiles.GetOption(OPT_PROJECT))) {
+					ttCStr cszProject(m_cszDirOutput);
+					char* pszFilePortion = tt::findFilePortion(cszProject);
+					if (pszFilePortion)
+						*pszFilePortion = 0;
+					m_cSrcFiles.UpdateOption(OPT_PROJECT, tt::findFilePortion(cszProject));
+				}
+
 				if (!m_cSrcFiles.WriteNew(m_cszDirOutput, cszHdr)) {
 					tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
 					CancelEnd();
