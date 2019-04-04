@@ -20,4 +20,5 @@ BEGIN
 	IDS_CS_MISSING_VSP			"Cannot locate <VisualStudioProject> in %s"
 	IDS_CS_MISSING_FILES		"Cannot locate <Files> in %s"
 	IDS_CS_MISSING_FILTER		"Cannot locate <Filter> in %s"
+	IDS_CS_SRCFILES_EXISTS		".srcfiles already exists in this directory. Are you sure you want to replace it?"
 END

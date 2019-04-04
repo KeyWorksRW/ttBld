@@ -55,8 +55,8 @@ static const char* atxtProjects[] = {
 bool CConvertDlg::CreateSrcFiles()
 {
 	if (tt::FileExists(".srcfiles")) {
-		if (tt::MsgBox(".srcfiles already exists in this directory. Click Yes to edit it, No to create a new one.", MB_YESNO) == IDYES)
-			return true;
+		if (tt::MsgBox(IDS_CS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
+			return false;
 	}
 
 	if (DoModal(NULL) == IDOK) {
@@ -149,8 +149,15 @@ void CConvertDlg::OnBtnChangeOut()	// change the directory to write .srcfiles to
 	ttCStr cszCWD;
 	cszCWD.getCWD();
 	dlg.SetStartingDir(cszCWD);
-	if (dlg.GetFolderName(*this))
+	if (dlg.GetFolderName(*this)) {
+		ttCStr cszSrcFiles(dlg);
+		cszSrcFiles.AppendFileName(".srcfiles");
+		if (tt::FileExists(cszSrcFiles)) {
+			if (tt::MsgBox(IDS_CS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
+				return;
+		}
 		SetControlText(DLG_ID(IDEDIT_OUT_DIR), dlg);
+	}
 }
 
 void CConvertDlg::OnBtnChangeIn()
