@@ -58,6 +58,18 @@ bool CConvertDlg::CreateSrcFiles()
 	if (tt::FileExists(".srcfiles")) {
 		if (tt::MsgBox(IDS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
 			return false;
+
+		// If we converted this before, grab the name of the project we converted from
+
+		ttCFile file;
+		if (file.ReadFile(".srcfiles")) {
+			if (file.ReadLine()) {
+				if (tt::isSameSubStri(file, "# Converted from")) {
+					char* psz = tt::findNonSpace((char*) file + sizeof("# Converted from"));
+					m_cszConvertScript = psz;
+				}
+			}
+		}
 	}
 
 	if (DoModal(NULL) == IDOK) {
@@ -79,35 +91,41 @@ void CConvertDlg::OnBegin(void)
 	SetControlText(DLG_ID(IDEDIT_IN_DIR), csz);
 
 	m_comboScripts.Initialize(*this, DLG_ID(IDCOMBO_SCRIPTS));
-
 	ttCFindFile ff(atxtProjects[0]);
-	for (size_t pos = 1; !ff.isValid() && atxtProjects[pos]; ++pos)
-		ff.NewPattern(atxtProjects[pos]);
-	if (ff.isValid())
-		m_comboScripts.Add((char*) ff);
 
-	if (m_comboScripts.GetCount() < 1) {	// no scripts found, let's check sub directories
-		ff.NewPattern("*.*");
-		do {
-			if (ff.isDir()) {
-				if (!tt::isValidFileChar(ff, 0))	// this will skip over . and ..
-					continue;
-				ttCStr cszDir((char*) ff);
-				cszDir.AppendFileName(atxtProjects[0]);
-				ttCFindFile ffFilter(cszDir);
-				for (size_t pos = 1; !ffFilter.isValid() && atxtProjects[pos]; ++pos)	{
-					cszDir = ff;
-					cszDir.AppendFileName(atxtProjects[pos]);
-					ffFilter.NewPattern(cszDir);
-				}
+	// If we converted once before, then default to that script
 
-				if (ffFilter.isValid()) {
-					cszDir = ff;
-					cszDir.AppendFileName(ffFilter);
-					m_comboScripts.Add(cszDir);
+	if (m_cszConvertScript.isNonEmpty())
+		m_comboScripts.Add(m_cszConvertScript);
+	else {
+		for (size_t pos = 1; !ff.isValid() && atxtProjects[pos]; ++pos)
+			ff.NewPattern(atxtProjects[pos]);
+		if (ff.isValid())
+			m_comboScripts.Add((char*) ff);
+
+		if (m_comboScripts.GetCount() < 1) {	// no scripts found, let's check sub directories
+			ff.NewPattern("*.*");
+			do {
+				if (ff.isDir()) {
+					if (!tt::isValidFileChar(ff, 0))	// this will skip over . and ..
+						continue;
+					ttCStr cszDir((char*) ff);
+					cszDir.AppendFileName(atxtProjects[0]);
+					ttCFindFile ffFilter(cszDir);
+					for (size_t pos = 1; !ffFilter.isValid() && atxtProjects[pos]; ++pos)	{
+						cszDir = ff;
+						cszDir.AppendFileName(atxtProjects[pos]);
+						ffFilter.NewPattern(cszDir);
+					}
+
+					if (ffFilter.isValid()) {
+						cszDir = ff;
+						cszDir.AppendFileName(ffFilter);
+						m_comboScripts.Add(cszDir);
+					}
 				}
-			}
-		} while(ff.NextFile());
+			} while(ff.NextFile());
+		}
 	}
 	if (m_comboScripts.GetCount() > 0) {
 		m_comboScripts.SetCurSel();
@@ -224,7 +242,9 @@ void CConvertDlg::OnOK(void)
 				bResult = ConvertVcProj();
 
 			if (bResult) {
-				if (!m_cSrcFiles.WriteNew(m_cszDirOutput)) {
+				ttCStr cszHdr;
+				cszHdr.printf("# Converted from %s", (char*) m_cszConvertScript);
+				if (!m_cSrcFiles.WriteNew(m_cszDirOutput, cszHdr)) {
 					tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
 					CancelEnd();
 				}

@@ -72,9 +72,13 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 	return kfOut.WriteFile(pszFile);
 }
 
-bool CWriteSrcFiles::WriteNew(const char* pszFile)
+bool CWriteSrcFiles::WriteNew(const char* pszFile, const char* pszCommentHdr)
 {
 	m_lstOriginal.SetFlags(ttCList::FLG_ADD_DUPLICATES);	// required to add blank lines
+	if (pszCommentHdr) {
+		m_lstOriginal += pszCommentHdr;
+		m_lstOriginal += "";
+	}
 	m_lstOriginal += "Options:";
 	if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() ||  m_cszRcName.isNonEmpty()) {
 		ttCStr cszFile;
