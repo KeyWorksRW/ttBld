@@ -9,6 +9,11 @@
 #include "pch.h"
 
 #include <iostream>
+#include <direct.h>		// Functions for directory handling and creation
+
+#ifdef _MSC_VER
+	#pragma warning(disable: 6031)	// Return value ignored: '_chdir'.
+#endif // _MSC_VER
 
 #include <ttlist.h> 					// ttCList, ttDblList, ttCStrIntList
 #include <ttfindfile.h>					// ttFindFile
@@ -49,6 +54,11 @@ int main(int argc, char* argv[])
 		else if (tt::isSameStri(argv[argpos] + 1, "new")) {
 			CConvertDlg dlg;
 			if (dlg.CreateSrcFiles()) {
+				ttCStr csz(dlg.GetDirOutput());
+				char* pszTmp = csz.findStri(".srcfiles");
+				if (pszTmp)
+					*pszTmp = 0;
+				_chdir(csz);
 				if (tt::FileExists(".srcfiles")) {
 					SetSrcFileOptions(bDryRun);
 					return 1;
