@@ -25,7 +25,7 @@ using namespace sfopt;
 static const OPT_SETTING s_aOptions[] = {
 	// { OPT_xxx,			"name",			"value", boolean type, required, "comment" }
 
-	{ OPT_PROJECT,  	"Project",		nullptr,	false, true,  "" },
+	{ OPT_PROJECT,  	"Project",		nullptr,	false, true,  "project name" },
 	{ OPT_PCH,	    	"PCH",			"none",		false, true,  "name of precompiled header file, or \042none\042 if not using precompiled headers" },
 	{ OPT_EXE_TYPE, 	"exe_type", 	"console",	false, true,  "[window | console | lib | dll]" },
 
@@ -162,6 +162,15 @@ bool CSrcOptions::GetChanged(sfopt::OPT_INDEX index)
 			else
 				return !tt::isSameStri(m_aUpdateOpts[pos].pszVal, s_aOptions[pos].pszVal);
 		}
+	}
+	return false;
+}
+
+bool CSrcOptions::GetRequired(sfopt::OPT_INDEX index)
+{
+	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (s_aOptions[pos].opt == index)
+			return s_aOptions[pos].bRequired;
 	}
 	return false;
 }

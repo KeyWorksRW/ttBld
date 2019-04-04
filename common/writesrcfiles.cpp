@@ -191,7 +191,7 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 
 		m_lstOriginal.Replace(posOption, szLine);	// replace the original line
 	}
-	else if (GetChanged(aOptions[pos].opt)) {
+	else if (GetChanged(aOptions[pos].opt) || GetRequired(aOptions[pos].opt)) {
 		sprintf_s(szLine, sizeof(szLine), tt::strLen(m_aUpdateOpts[pos].pszVal) > 12 ? pszLongOptionFmt : pszOptionFmt,
 			(char*) cszName, m_aUpdateOpts[pos].pszVal, aOptions[pos].pszComment);
 		m_lstOriginal.InsertAt(m_posInsert++, szLine);
