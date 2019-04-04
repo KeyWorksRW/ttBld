@@ -42,6 +42,16 @@ static const char* atxtSrcTypes[] = {
 	nullptr
 };
 
+static const char* atxtProjects[] = {
+	"*.filters",
+	"*.vcproj",
+	"*.project",	// CodeLite
+	"*.cbp",		// CodeBlocks
+
+	nullptr
+};
+
+
 bool CConvertDlg::CreateSrcFiles()
 {
 	if (tt::FileExists(".srcfiles")) {
@@ -69,26 +79,54 @@ void CConvertDlg::OnBegin(void)
 
 	m_comboScripts.Initialize(*this, DLG_ID(IDCOMBO_SCRIPTS));
 
-	ttCFindFile ff("*.filters");
+	ttCFindFile ff(atxtProjects[0]);
+	for (size_t pos = 1; !ff.isValid() && atxtProjects[pos]; ++pos)
+		ff.NewPattern(atxtProjects[pos]);
 	if (ff.isValid())
 		m_comboScripts.Add((char*) ff);
-	if (ff.NewPattern("*.vcproj"))
-		m_comboScripts.Add((char*) ff);
-	if (ff.NewPattern("*.project"))
-		m_comboScripts.Add((char*) ff);
-	if (ff.NewPattern("*.cbp"))
-		m_comboScripts.Add((char*) ff);
 
-	size_t cFilesFound = 0;
-	for (size_t pos = 0; atxtSrcTypes[pos]; ++pos) {
-		if (ff.NewPattern(atxtSrcTypes[pos])) {
-			do {
-			   ++cFilesFound;
-			} while(ff.NextFile());
-		}
+	if (m_comboScripts.GetCount() < 1) {	// no scripts found, let's check sub directories
+		ff.NewPattern("*.*");
+		do {
+			if (ff.isDir()) {
+				if (!tt::isValidFileChar(ff, 0))	// this will skip over . and ..
+					continue;
+				ttCStr cszDir((char*) ff);
+				cszDir.AppendFileName(atxtProjects[0]);
+				ttCFindFile ffFilter(cszDir);
+				for (size_t pos = 1; !ffFilter.isValid() && atxtProjects[pos]; ++pos)	{
+					cszDir = ff;
+					cszDir.AppendFileName(atxtProjects[pos]);
+					ffFilter.NewPattern(cszDir);
+				}
+
+				if (ffFilter.isValid()) {
+					cszDir = ff;
+					cszDir.AppendFileName(ffFilter);
+					m_comboScripts.Add(cszDir);
+				}
+			}
+		} while(ff.NextFile());
 	}
-	csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
-	SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);
+	if (m_comboScripts.GetCount() > 0) {
+		m_comboScripts.SetCurSel();
+		SetCheck(DLG_ID(IDRADIO_CONVERT));
+	}
+	else {
+		size_t cFilesFound = 0;
+		for (size_t pos = 0; atxtSrcTypes[pos]; ++pos) {
+			if (ff.NewPattern(atxtSrcTypes[pos])) {
+				do {
+				   ++cFilesFound;
+				} while(ff.NextFile());
+			}
+		}
+		csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
+		SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);
+		if (cFilesFound)
+			SetCheck(DLG_ID(IDRADIO_FILES));
+	}
+
 }
 
 void CConvertDlg::OnBtnLocateScript()
@@ -99,7 +137,8 @@ void CConvertDlg::OnBtnLocateScript()
 	if (dlg.GetOpenFileName()) {
 		auto item = m_comboScripts.Add(dlg.GetFileName());
 		m_comboScripts.SetCurSel(item);
-		SetCheck(DLG_ID(IDCHECK_SCRIPT));
+		UnCheck(DLG_ID(IDRADIO_FILES));
+		SetCheck(DLG_ID(IDRADIO_CONVERT));
 		// TODO: [randalphwa - 4/2/2019] Need to decide how to handle IDEDIT_IN_DIR since this may no longer be correct
 	}
 }
@@ -136,6 +175,8 @@ void CConvertDlg::OnBtnChangeIn()
 		ttCStr csz;
 		csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
 		SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);
+		UnCheck(DLG_ID(IDRADIO_CONVERT));
+		SetCheck(DLG_ID(IDRADIO_FILES));
 	}
 }
 
@@ -143,7 +184,7 @@ void CConvertDlg::OnOK(void)
 {
 	m_cszDirOutput.getWindowText(GetDlgItem(DLG_ID(IDEDIT_OUT_DIR)));
 	m_cszDirSrcFiles.getWindowText(GetDlgItem(DLG_ID(IDEDIT_IN_DIR)));
-	if (GetCheck(DLG_ID(IDCHECK_SCRIPT)))
+	if (GetCheck(DLG_ID(IDRADIO_CONVERT)))
 		m_cszConvertScript.getWindowText(GetDlgItem(DLG_ID(IDCOMBO_SCRIPTS)));
 	else
 		m_cszConvertScript.Delete();
@@ -266,7 +307,7 @@ bool CConvertDlg::ConvertVcxProj()
 				if (tt::isSameStri(pCmd->GetName(), "ClCompile") || tt::isSameStri(pCmd->GetName(), "ResourceCompile")) {
 					const char* pszFile = pCmd->GetAttribute("Include");
 					if (pszFile && *pszFile)
-						m_cSrcFiles.m_lstSrcFiles += pszFile;
+						m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pszFile);
 				}
 			}
 		}
@@ -299,7 +340,7 @@ bool CConvertDlg::ConvertVcProj()
 		ttCXMLBranch* pItem = pFilter->GetChildAt(item);
 		if (tt::isSameStri(pItem->GetName(), "File")) {
 			if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
-				m_cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("RelativePath");
+				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("RelativePath"));
 		}
 	}
 	pFilter = pFiles->FindFirstAttribute("Name", "Resource Files");
@@ -308,7 +349,7 @@ bool CConvertDlg::ConvertVcProj()
 			ttCXMLBranch* pItem = pFilter->GetChildAt(item);
 			if (tt::isSameStri(pItem->GetName(), "File")) {
 				if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
-					m_cSrcFiles.m_lstSrcFiles += pItem->GetAttribute("RelativePath");
+					m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("RelativePath"));
 			}
 		}
 	}
@@ -388,7 +429,7 @@ void CConvertDlg::AddCodeLiteFiles(ttCXMLBranch* pParent)
 		ttCXMLBranch* pFile = pParent->GetChildAt(child);
 		if (tt::isSameStri(pFile->GetName(), "File")) {
 			if (isValidSrcFile(pFile->GetAttribute("Name")))
-				m_cSrcFiles.m_lstSrcFiles += pFile->GetAttribute("Name");
+				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pFile->GetAttribute("Name"));
 		}
 		// CodeLite nests resources in a sub <VirtualDirectory> tag
 		else if (tt::isSameStri(pFile->GetName(), "VirtualDirectory")) {
