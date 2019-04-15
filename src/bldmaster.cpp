@@ -8,10 +8,10 @@
 
 #include "pch.h"
 
-#include <ttstr.h>					// ttCStr
+#include <ttstr.h>		// ttCStr
 
-#include "bldmaster.h"				// CBldMaster
-#include "../common/strtable.h" 	// String resource IDs
+#include "bldmaster.h"	// CBldMaster
+#include "strtable.h" 	// String resource IDs
 
 CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 {

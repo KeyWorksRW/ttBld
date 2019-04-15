@@ -64,7 +64,6 @@ build $outdir/writesrcfiles.obj: compile writesrcfiles.cpp | $outdir/pch.obj
 
 build $resout/makeninja.res: rc makeninja.rc | $
   resource.h $
-  ../common/strtable.h $
   strtable.h $
   res/cdlprojectpre.txt $
   res/cdlprojectpost.txt $
@@ -75,7 +74,6 @@ build $resout/makeninja.res: rc makeninja.rc | $
   ttlibicons.h $
   ../ttlib/icons/cancel.ico $
   ../ttlib/icons/ok.ico $
-  ../common/strtable.rc2 $
   strtable.rc2
 
 build ../bin/MakeNinjaD.exe : link $resout/makeninja.res ../ttLib/lib/ttLibD.lib $
