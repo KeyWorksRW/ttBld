@@ -58,7 +58,7 @@ public:
 	// These are just for convenience--it's fine to call GetOption directly
 
 	const char* GetProjectName() { return GetOption(OPT_PROJECT); }
-	const char* GetPchHeader()	 { return GetOption(OPT_PCH); }
+	const char* GetPchHeader();
 
 protected:
 	void ProcessFile(char* pszFile);

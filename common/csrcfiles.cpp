@@ -392,3 +392,11 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
 	}
 	return true;
 }
+
+const char* CSrcFiles::GetPchHeader()
+{
+	const char* pszPch = GetOption(OPT_PCH);
+	if (pszPch && tt::isSameStri(pszPch, "none"))
+		return nullptr;
+	return pszPch;
+}
