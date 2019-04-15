@@ -27,7 +27,6 @@ void SetSrcFileOptions(bool bDryRun)
 
 CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttCDlg(IDDLG_SRCFILES), CWriteSrcFiles()
 {
-	EnableShadeBtns();
 	ReadFile();	// read in any existing .srcfiles
 
 	if (pszSrcDir && *pszSrcDir)
@@ -61,11 +60,12 @@ void CDlgSrcOptions::SaveChanges()
 			puts(".srcfiles created");
 	}
 }
-
 void CDlgSrcOptions::OnBegin(void)
 {
-	m_ShadedBtns.SetIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
-	m_ShadedBtns.SetIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
+	EnableShadeBtns();
+	CenterWindow(true);
+	SetBtnIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
+	SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
 
 	ttCStr cszTitle(txtSrcFilesFileName);
 	cszTitle += " Options";

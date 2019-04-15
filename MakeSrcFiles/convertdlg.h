@@ -20,9 +20,7 @@
 class CConvertDlg : public ttCDlg
 {
 public:
-	CConvertDlg() : ttCDlg(IDDDLG_CONVERT) {
-		EnableShadeBtns();
-	}
+	CConvertDlg() : ttCDlg(IDDDLG_CONVERT) { }
 
 	// Class functions
 

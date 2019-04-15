@@ -82,8 +82,10 @@ bool CConvertDlg::CreateSrcFiles()
 
 void CConvertDlg::OnBegin(void)
 {
-	m_ShadedBtns.SetIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
-	m_ShadedBtns.SetIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
+	CenterWindow(true);
+	EnableShadeBtns();
+	SetBtnIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
+	SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
 
 	ttCStr csz;
 	csz.getCWD();
