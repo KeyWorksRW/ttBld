@@ -10,10 +10,10 @@
 
 #include <ttdlg.h>						// ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
-#include "../common/writesrcfiles.h"	// CWriteSrcFiles
+#include "writesrcfiles.h"	// CWriteSrcFiles
 
 #ifndef IDDLG_SRCFILES
-	#include "res.h"
+	#include "resource.h"
 #endif
 
 class CDlgSrcOptions : public ttCDlg, public CWriteSrcFiles

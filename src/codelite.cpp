@@ -10,7 +10,7 @@
 
 #include <ttfile.h> 					// ttCFile
 
-#include "../common/csrcfiles.h"		// CSrcFiles
+#include "csrcfiles.h"		// CSrcFiles
 
 #include "resource.h"
 

@@ -9,13 +9,13 @@
 #pragma once
 
 #ifndef IDDDLG_CONVERT
-	#include "res.h"
+	#include "resource.h"
 #endif
 
 #include <ttdlg.h>		// ttCDlg, ttCComboBox, ttCListBox, ttCListView
 #include <ttxml.h>		// ttCXMLBranch, ttCParseXML
 
-#include "../common/writesrcfiles.h"	// CWriteSrcFiles
+#include "writesrcfiles.h"	// CWriteSrcFiles
 
 class CConvertDlg : public ttCDlg
 {

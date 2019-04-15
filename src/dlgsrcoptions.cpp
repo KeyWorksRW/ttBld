@@ -15,14 +15,18 @@
 #include "dlgsrcoptions.h"
 #include "ttlibicons.h" 				// Icons for use on 3D shaded buttons (ttShadeBtn)
 
-void SetSrcFileOptions(bool bDryRun)
+bool SetSrcFileOptions(bool bDryRun)
 {
 	CDlgSrcOptions dlg;
 	if (bDryRun)
 		dlg.EnableDryRun();
 
-	if (dlg.DoModal(NULL) == IDOK)
+	if (dlg.DoModal(NULL) == IDOK) {
 		dlg.SaveChanges();
+		return true;
+	}
+	else
+		return false;
 }
 
 CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttCDlg(IDDLG_SRCFILES), CWriteSrcFiles()

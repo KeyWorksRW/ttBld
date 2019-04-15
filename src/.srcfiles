@@ -13,15 +13,17 @@ Files:
 	pch.cpp
 	makeninja.rc
 
+	addfiles.cpp
 	bldmaster.cpp
 	codelite.cpp
+	convertdlg.cpp
 	createmakefile.cpp
+	csrcfiles.cpp
+	dlgsrcoptions.cpp
+	dryrun.cpp
 	init.cpp
-	makeninja.cpp
 	ninja.cpp
+	options.cpp
 	parsehhp.cpp
 	vcxproj.cpp
-
-	../common/csrcfiles.cpp
-	../common/dryrun.cpp
-	../common/options.cpp
+	writesrcfiles.cpp

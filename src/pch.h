@@ -49,4 +49,4 @@ extern const char* txtCopyRight;
 
 using namespace ttch;	// For the CH_ constants
 
-#include "funcs.h"
+#include "funcs.h"		// List of function declarations

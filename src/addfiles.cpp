@@ -11,8 +11,8 @@
 #include <ttlist.h> 					// ttCList, ttCDblList, ttCStrIntList
 #include <ttfile.h> 					// ttCFile
 
-#include "../common/csrcfiles.h"		// CSrcFiles
-#include "../common/dryrun.h"			// CDryRun
+#include "csrcfiles.h"		// CSrcFiles
+#include "dryrun.h"			// CDryRun
 
 void AddFiles(ttCList& lstFiles, bool bDryRun)
 {

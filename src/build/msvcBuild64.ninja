@@ -36,49 +36,64 @@ rule link
 
 build $outdir/pch.obj: compilePCH pch.cpp
 
+build $outdir/addfiles.obj: compile addfiles.cpp | $outdir/pch.obj
+
 build $outdir/bldmaster.obj: compile bldmaster.cpp | $outdir/pch.obj
 
 build $outdir/codelite.obj: compile codelite.cpp | $outdir/pch.obj
 
+build $outdir/convertdlg.obj: compile convertdlg.cpp | $outdir/pch.obj
+
 build $outdir/createmakefile.obj: compile createmakefile.cpp | $outdir/pch.obj
+
+build $outdir/csrcfiles.obj: compile csrcfiles.cpp | $outdir/pch.obj
+
+build $outdir/dlgsrcoptions.obj: compile dlgsrcoptions.cpp | $outdir/pch.obj
+
+build $outdir/dryrun.obj: compile dryrun.cpp | $outdir/pch.obj
 
 build $outdir/init.obj: compile init.cpp | $outdir/pch.obj
 
-build $outdir/makeninja.obj: compile makeninja.cpp | $outdir/pch.obj
-
 build $outdir/ninja.obj: compile ninja.cpp | $outdir/pch.obj
+
+build $outdir/options.obj: compile options.cpp | $outdir/pch.obj
 
 build $outdir/parsehhp.obj: compile parsehhp.cpp | $outdir/pch.obj
 
 build $outdir/vcxproj.obj: compile vcxproj.cpp | $outdir/pch.obj
 
-build $outdir/csrcfiles.obj: compile ../common/csrcfiles.cpp | $outdir/pch.obj
-
-build $outdir/dryrun.obj: compile ../common/dryrun.cpp | $outdir/pch.obj
-
-build $outdir/options.obj: compile ../common/options.cpp | $outdir/pch.obj
+build $outdir/writesrcfiles.obj: compile writesrcfiles.cpp | $outdir/pch.obj
 
 build $resout/makeninja.res: rc makeninja.rc | $
   resource.h $
-  ../common/strtable.rc2 $
   ../common/strtable.h $
+  strtable.h $
   res/cdlprojectpre.txt $
   res/cdlprojectpost.txt $
   res/makefile.txt $
   res/vcxproj.xml $
-  res/vcxproj.filters.xml
+  res/vcxproj.filters.xml $
+  ttlibicons.rc2 $
+  ttlibicons.h $
+  ../ttlib/icons/cancel.ico $
+  ../ttlib/icons/ok.ico $
+  ../common/strtable.rc2 $
+  strtable.rc2
 
 build ../bin64/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib64.lib $
   $outdir/pch.obj $
+  $outdir/addfiles.obj $
   $outdir/bldmaster.obj $
   $outdir/codelite.obj $
+  $outdir/convertdlg.obj $
   $outdir/createmakefile.obj $
+  $outdir/csrcfiles.obj $
+  $outdir/dlgsrcoptions.obj $
+  $outdir/dryrun.obj $
   $outdir/init.obj $
-  $outdir/makeninja.obj $
   $outdir/ninja.obj $
+  $outdir/options.obj $
   $outdir/parsehhp.obj $
   $outdir/vcxproj.obj $
-  $outdir/csrcfiles.obj $
-  $outdir/dryrun.obj $
-  $outdir/options.obj
+  $outdir/writesrcfiles.obj
 

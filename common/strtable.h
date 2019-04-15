@@ -1,7 +1,0 @@
-// Purpose:		String resource IDs
-
-#define IDS_CS_CANNOT_OPEN			28000
-#define IDS_CS_UNKNOWN_OPTION		28001
-#define IDS_CS_OPT_MISSING_COLON	28002
-#define IDS_CS_MISSING_INCLUDE		28003
-#define IDS_CS_CANT_WRITE			28004

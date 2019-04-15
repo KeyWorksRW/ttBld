@@ -17,8 +17,8 @@
 
 #include <ttlist.h> 					// ttCList, ttCDblList, ttCStrIntList
 
-#include "../common/csrcfiles.h"		// CSrcFiles
-#include "../common/dryrun.h"			// CDryRun
+#include "csrcfiles.h"		// CSrcFiles
+#include "dryrun.h"			// CDryRun
 
 class CBldMaster : public CSrcFiles
 {
