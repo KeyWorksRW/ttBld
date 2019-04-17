@@ -31,7 +31,7 @@ static bool CreateGuid(ttCStr& cszGuid)
 			::RpcStringFreeA(&pszUuid);
 		}
 	}
-	return cszGuid.isNonEmpty();
+	return cszGuid.IsNonEmpty();
 }
 
 bool CVcxProj::CreateBuildFile()
@@ -63,18 +63,18 @@ bool CVcxProj::CreateBuildFile()
 
 		ttCStr cszSrcFile;
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			if (tt::findStri(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
+			if (tt::FindStrI(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
 				cszSrcFile.printf(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>", m_lstSrcFiles[pos]);
 				kf.WriteEol(cszSrcFile);
 			}
 		}
-		if (m_cszRcName.isNonEmpty()) {
+		if (m_cszRcName.IsNonEmpty()) {
 			cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>", (char*) m_cszRcName);
 			kf.WriteEol(cszSrcFile);
 		}
 
 		ttCFindFile ff("*.h");	// add all header files in current directory
-		if (ff.isValid()) {
+		if (ff.IsValid()) {
 			do {
 				cszSrcFile.printf(" <ItemGroup>\n    <ClInclude Include=%kq />\n  </ItemGroup>", (const char*) ff);
 				kf.WriteEol(cszSrcFile);
@@ -107,7 +107,7 @@ bool CVcxProj::CreateBuildFile()
 		kf.WriteEol("  <ItemGroup>");
 
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			if (tt::findStri(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
+			if (tt::FindStrI(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
 				cszSrcFile.printf("    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>", m_lstSrcFiles[pos]);
 				kf.WriteEol(cszSrcFile);
 			}

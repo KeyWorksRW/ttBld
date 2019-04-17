@@ -36,22 +36,22 @@ public:
 
 	bool IsProcessed() { return m_bRead; }
 
-	bool isCodeBlockIDE()	 { return (tt::findStri(GetOption(OPT_IDE), "CodeBlocks")); }
-	bool isCodeLiteIDE()	 { return (tt::findStri(GetOption(OPT_IDE), "CodeLite")); }
-	bool isVisualStudioIDE() { return (tt::findStri(GetOption(OPT_IDE), "VisualStudio")); }
+	bool IsCodeBlockIDE()	 { return (tt::FindStrI(GetOption(OPT_IDE), "CodeBlocks")); }
+	bool IsCodeLiteIDE()	 { return (tt::FindStrI(GetOption(OPT_IDE), "CodeLite")); }
+	bool IsVisualStudioIDE() { return (tt::FindStrI(GetOption(OPT_IDE), "VisualStudio")); }
 
-	bool isExeTypeConsole()	 { return (tt::findStri(GetOption(OPT_EXE_TYPE), "console")); }	// this is the default
-	bool isExeTypeDll()		 { return (tt::findStri(GetOption(OPT_EXE_TYPE), "dll")); }
-	bool isExeTypeLib()		 { return (tt::findStri(GetOption(OPT_EXE_TYPE), "lib")); }
-	bool isExeTypeWindow()	 { return (tt::findStri(GetOption(OPT_EXE_TYPE), "window")); }
+	bool IsExeTypeConsole()	 { return (tt::FindStrI(GetOption(OPT_EXE_TYPE), "console")); }	// this is the default
+	bool IsExeTypeDll()		 { return (tt::FindStrI(GetOption(OPT_EXE_TYPE), "dll")); }
+	bool IsExeTypeLib()		 { return (tt::FindStrI(GetOption(OPT_EXE_TYPE), "lib")); }
+	bool IsExeTypeWindow()	 { return (tt::FindStrI(GetOption(OPT_EXE_TYPE), "window")); }
 
-	bool isMakeMissing()	 { return (tt::findStri(GetOption(OPT_MAKEFILE), "missing")); }	// this is the default
-	bool isMakeNever()		 { return (tt::findStri(GetOption(OPT_MAKEFILE), "never")); }
-	bool isMakeAlways()		 { return (tt::findStri(GetOption(OPT_MAKEFILE), "always")); }
+	bool IsMakeMissing()	 { return (tt::FindStrI(GetOption(OPT_MAKEFILE), "missing")); }	// this is the default
+	bool IsMakeNever()		 { return (tt::FindStrI(GetOption(OPT_MAKEFILE), "never")); }
+	bool IsMakeAlways()		 { return (tt::FindStrI(GetOption(OPT_MAKEFILE), "always")); }
 
-	bool isOptimizeSpeed()	 { return (tt::findStri(GetOption(OPT_OPTIMIZE), "speed")); }
+	bool IsOptimizeSpeed()	 { return (tt::FindStrI(GetOption(OPT_OPTIMIZE), "speed")); }
 
-	const char* getBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
+	const char* GetBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
 
 	void AddSourcePattern(const char* pszFilePattern);
 

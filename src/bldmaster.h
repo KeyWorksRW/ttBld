@@ -36,23 +36,23 @@ public:
 	bool CreateMakeFile();
 
 	// if not specified, both compilers are used
-	bool isCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || tt::findStri(GetOption(OPT_COMPILERS), "MSVC")); }
-	bool isCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || tt::findStri(GetOption(OPT_COMPILERS), "CLANG")); }
+	bool IsCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || tt::FindStrI(GetOption(OPT_COMPILERS), "MSVC")); }
+	bool IsCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || tt::FindStrI(GetOption(OPT_COMPILERS), "CLANG")); }
 
-	const char* getRcFile()		{ return m_cszRcName; }
+	const char* GetRcFile()		{ return m_cszRcName; }
 
-	const char* getDir32()	{ return GetOption(OPT_TARGET_DIR32); }	// 32-bit target directory
-	const char* getDir64()	{ return GetOption(OPT_TARGET_DIR64); }	// 64-bit target directory
+	const char* GetDir32()	{ return GetOption(OPT_TARGET_DIR32); }	// 32-bit target directory
+	const char* GetDir64()	{ return GetOption(OPT_TARGET_DIR64); }	// 64-bit target directory
 
-	ttCList* getSrcFileList()  { return &m_lstSrcFiles; }
-	ttCList* getLibFileList()  { return &m_lstLibFiles; }
-	ttCList* getRcDepList()  	{ return &m_lstRcDependencies; }
+	ttCList* GetSrcFileList()  { return &m_lstSrcFiles; }
+	ttCList* GetLibFileList()  { return &m_lstLibFiles; }
+	ttCList* GetRcDepList()  	{ return &m_lstRcDependencies; }
 
-	bool isBin64()			{ return m_bBin64Exists; }
+	bool IsBin64()			{ return m_bBin64Exists; }
 
-	const char* getLibName()	{ return m_cszLibName; }		// name and location of any additional library to build
+	const char* GetLibName()	{ return m_cszLibName; }		// name and location of any additional library to build
 
-	const char* getHHPName()	{ return m_cszHHPName; }
+	const char* GetHHPName()	{ return m_cszHHPName; }
 
 	const char* GetTargetDebug();
 	const char* GetTargetDebug64();

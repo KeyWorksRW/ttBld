@@ -36,7 +36,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	ttCStr cszExtraLib;		// used to specify the exact name/path of the "extra" library (if any)
 	if (GetOption(OPT_LIB_DIRS)) {		// start with the extra lib if there is one
 		cszExtraLib = "$libout/";
-		cszExtraLib += tt::findFilePortion(GetOption(OPT_LIB_DIRS));
+		cszExtraLib += tt::FindFilePortion(GetOption(OPT_LIB_DIRS));
 		cszExtraLib.ChangeExtension(".lib");
 	}
 
@@ -47,16 +47,16 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	// is specified in the matching .def file. The downside, of course, is that without the 'D' only the size of the dll
 	// indicates if it is a debug or release version.
 
-	if (isExeTypeDll())	{
+	if (IsExeTypeDll())	{
 		if (GetBoolOption(OPT_BIT_SUFFIX))
 			cszProj += "64";
 	}
 	else {
 		if (gentype == GEN_DEBUG64 && GetBoolOption(OPT_BIT_SUFFIX))
-			cszProj += isBin64() ? "D" : "64D";		// isBin64() checks to see if ../bin64 exists
+			cszProj += IsBin64() ? "D" : "64D";		// isBin64() checks to see if ../bin64 exists
 		else if (gentype == GEN_DEBUG)
 			cszProj += "D";
-		else if (gentype == GEN_RELEASE64 && GetBoolOption(OPT_BIT_SUFFIX) && !isBin64())
+		else if (gentype == GEN_RELEASE64 && GetBoolOption(OPT_BIT_SUFFIX) && !IsBin64())
 			cszProj += "64";
 	}
 
@@ -115,15 +115,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 			cszErrorMsg.printf("No C++ source file found that matches %s -- precompiled header will not build correctly.\n", GetPchHeader());
 			puts(cszErrorMsg);
 
-			for (pos = 0; pos < getSrcFileList()->GetCount(); pos++) {
-				const char* pszExt = tt::findStri(getSrcFileList()->GetAt(pos), ".c");
+			for (pos = 0; pos < GetSrcFileList()->GetCount(); pos++) {
+				const char* pszExt = tt::FindStrI(GetSrcFileList()->GetAt(pos), ".c");
 				if (pszExt) {
 					m_cszCPP_PCH.ChangeExtension(pszExt);	// match extension used by other source files
 					break;
 				}
 			}
 		}
-		if (m_cszCPP_PCH.isNonEmpty()) {
+		if (m_cszCPP_PCH.IsNonEmpty()) {
 			m_cszPCHObj = m_cszCPP_PCH;
 			m_cszPCHObj.ChangeExtension(".obj");
 		}
@@ -148,56 +148,56 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 
 	// Write the build rules for all source files
 
-	for (size_t iPos = 0; iPos < getSrcFileList()->GetCount(); iPos++) {
-		ttCStr cszFile(tt::findFilePortion(getSrcFileList()->GetAt(iPos)));
-		if (!tt::findStri(cszFile, ".c") || (m_cszCPP_PCH.isNonEmpty() &&  tt::isSameStri(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
+	for (size_t iPos = 0; iPos < GetSrcFileList()->GetCount(); iPos++) {
+		ttCStr cszFile(tt::FindFilePortion(GetSrcFileList()->GetAt(iPos)));
+		if (!tt::FindStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() &&  tt::IsSameStrI(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
 			continue;	// we already handled this
 		cszFile.ChangeExtension(".obj");
 
-		if (m_cszPCH.isNonEmpty())
-			file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, getSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
+		if (m_cszPCH.IsNonEmpty())
+			file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
 		else
-			file.printf("build $outdir/%s: compile %s\n\n", (char*) cszFile, getSrcFileList()->GetAt(iPos));
+			file.printf("build $outdir/%s: compile %s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos));
 	}
 
 	// Write the build rules for all lib files
 
-	for (size_t iPos = 0; iPos < getLibFileList()->GetCount(); iPos++) {
-		ttCStr cszFile(tt::findFilePortion(getLibFileList()->GetAt(iPos)));
-		if (!tt::findStri(cszFile, ".c") || (m_cszCPP_PCH.isNonEmpty() && tt::isSameStri(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
+	for (size_t iPos = 0; iPos < GetLibFileList()->GetCount(); iPos++) {
+		ttCStr cszFile(tt::FindFilePortion(GetLibFileList()->GetAt(iPos)));
+		if (!tt::FindStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() && tt::IsSameStrI(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
 			continue;	// we already handled this
 		cszFile.ChangeExtension(".obj");
 
-		if (m_cszPCH.isNonEmpty())
-			file.printf("build $libout/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, getLibFileList()->GetAt(iPos), (char*) m_cszPCHObj);
+		if (m_cszPCH.IsNonEmpty())
+			file.printf("build $libout/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetLibFileList()->GetAt(iPos), (char*) m_cszPCHObj);
 		else
-			file.printf("build $libout/%s: compile %s\n\n", (char*) cszFile, tt::findFilePortion(getLibFileList()->GetAt(iPos)));
+			file.printf("build $libout/%s: compile %s\n\n", (char*) cszFile, tt::FindFilePortion(GetLibFileList()->GetAt(iPos)));
 	}
 
 	// Write the build rule for the resource compiler if an .rc file was specified as a source
 
 	ttCStr cszRES;
-	if (tt::FileExists(getRcFile())) {
-		cszRES = getRcFile();
+	if (tt::FileExists(GetRcFile())) {
+		cszRES = GetRcFile();
 		cszRES.ChangeExtension(".res");
-		file.printf("build $resout/%s: rc %s", (char*) cszRES, getRcFile());
+		file.printf("build $resout/%s: rc %s", (char*) cszRES, GetRcFile());
 
-		if (getRcDepList()->GetCount())
+		if (GetRcDepList()->GetCount())
 			file.WriteStr(" |");
-		for (size_t nPos = 0; nPos < getRcDepList()->GetCount(); nPos++) {
+		for (size_t nPos = 0; nPos < GetRcDepList()->GetCount(); nPos++) {
 			file.WriteStr(" $\n  ");
-			file.WriteStr(getRcDepList()->Get(nPos));
+			file.WriteStr(GetRcDepList()->Get(nPos));
 		}
 		file.WriteEol("\n");
 	}
 
 	// Write the final build rules to complete the project
 
-	if (!isExeTypeLib() && GetOption(OPT_LIB_DIRS)) {	// If an extra library was specified, add it's build rule first
+	if (!IsExeTypeLib() && GetOption(OPT_LIB_DIRS)) {	// If an extra library was specified, add it's build rule first
 		file.printf("build %s : lib", (char*) cszExtraLib);
-		for (size_t posLib = 0; posLib < getLibFileList()->GetCount(); posLib++) {
-			ttCStr cszFile(tt::findFilePortion(getLibFileList()->GetAt(posLib)));
-			if (!tt::findStri(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file
+		for (size_t posLib = 0; posLib < GetLibFileList()->GetCount(); posLib++) {
+			ttCStr cszFile(tt::FindFilePortion(GetLibFileList()->GetAt(posLib)));
+			if (!tt::FindStrI(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file
 				continue;
 			cszFile.ChangeExtension(".obj");
 			file.printf(" $\n  $libout/%s", (char*) cszFile);
@@ -238,7 +238,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	if (fileOrg.ReadFile(cszTmp)) {
 		if (!m_bForceOutput && strcmp(fileOrg, file) == 0)
 			return false;
-		else if (dryrun.isEnabled()) {
+		else if (dryrun.IsEnabled()) {
 			dryrun.NewFile(cszTmp);
 			dryrun.DisplayFileDiff(fileOrg, file);
 			return false;	// we didn't actually write anything
@@ -271,9 +271,9 @@ void CNinja::WriteCompilerComments()
 				m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
 			else
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
-			if (isExeTypeLib())
+			if (IsExeTypeLib())
 				m_pkfOut->WriteEol("# -Zl\t// Don't specify default runtime library in .obj file");
-			if (isOptimizeSpeed())
+			if (IsOptimizeSpeed())
 				m_pkfOut->WriteEol("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
 			else
 				m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
@@ -296,9 +296,9 @@ void CNinja::WriteCompilerComments()
 				m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
 			else
 				m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
-			if (isExeTypeLib())
+			if (IsExeTypeLib())
 				m_pkfOut->WriteEol("# -Zl\t// Don't specify default runtime library in .obj file");
-			if (isOptimizeSpeed())
+			if (IsOptimizeSpeed())
 				m_pkfOut->WriteEol("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
 			else
 				m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
@@ -323,20 +323,20 @@ void CNinja::WriteCompilerFlags()
 		// writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not recognize -Zf.
 
 		m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7 -GS-",
-				isExeTypeConsole() ? " -D_CONSOLE" : "",
+				IsExeTypeConsole() ? " -D_CONSOLE" : "",
 
 				GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
 				GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-				isExeTypeLib() ? " -Zl" : " -MDd"   // Note use of -MDd -- assumption is to always use this for debug builds. Release builds track GetOptionName(OPT_STATIC_CRT)
+				IsExeTypeLib() ? " -Zl" : " -MDd"   // Note use of -MDd -- assumption is to always use this for debug builds. Release builds track GetOptionName(OPT_STATIC_CRT)
 			);
 	else	// Presumably GEN_RELEASE or GEN_RELEASE64
 		m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s",
-				isExeTypeConsole() ? " -D_CONSOLE" : "",
+				IsExeTypeConsole() ? " -D_CONSOLE" : "",
 
 				GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
 				GetBoolOption(OPT_STDCALL) ?    " -Gz" : "",
-				isExeTypeLib() ? " -Zl" :  (GetBoolOption(OPT_STATIC_CRT) ? " -MT" : " -MD"),
-				isOptimizeSpeed() ? " -O2" : " -O1"
+				IsExeTypeLib() ? " -Zl" :  (GetBoolOption(OPT_STATIC_CRT) ? " -MT" : " -MD"),
+				IsOptimizeSpeed() ? " -O2" : " -O1"
 			);
 
 	if (GetOption(OPT_INC_DIRS)) {
@@ -448,7 +448,7 @@ void CNinja::WriteCompilerDirectives()
 
 void CNinja::WriteLinkDirective()
 {
-	if (isExeTypeLib())
+	if (IsExeTypeLib())
 		return;	// lib directive should be used if the project is a library
 
 	if (!m_bClang || GetBoolOption(OPT_MS_LINKER)) {
@@ -472,14 +472,14 @@ void CNinja::WriteLinkDirective()
 		else
 			cszRule += " /LTCG /OPT:REF /OPT:ICF";
 
-		cszRule += isExeTypeConsole() ? " /SUBSYSTEM:CONSOLE" : " /SUBSYSTEM:WINDOWS";
+		cszRule += IsExeTypeConsole() ? " /SUBSYSTEM:CONSOLE" : " /SUBSYSTEM:WINDOWS";
 		cszRule += " $in";
 		m_pkfOut->WriteEol(cszRule);
 		m_pkfOut->WriteEol("  description = linking $out\n");
 	}
 	else if (m_bClang) {
 		ttCStr cszRule("rule link\n  command = lld-link.exe");
-		if (isExeTypeDll())
+		if (IsExeTypeDll())
 			cszRule += " /dll";
 		cszRule += " /out:$out /manifest:no";
 		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /machine:x64" : " /machine:x86");
@@ -502,7 +502,7 @@ void CNinja::WriteLinkDirective()
 			// MSVC -LTCG option is not supported by lld
 			cszRule += " /opt:ref /opt:icf";
 		}
-		cszRule += isExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
+		cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
 		cszRule += " $in";
 		m_pkfOut->WriteEol(cszRule);
 		m_pkfOut->WriteEol("  description = linking $out\n");
@@ -512,14 +512,14 @@ void CNinja::WriteLinkDirective()
 void CNinja::WriteLibDirective()
 {
 	if (!m_bClang) {
-		if (isExeTypeLib() || GetOption(OPT_LIB_DIRS))	{
+		if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))	{
 			m_pkfOut->printf("rule lib\n  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in\n",
 				(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
 			m_pkfOut->WriteEol("  description = creating library $out\n");
 		}
 	}
 	else if (m_bClang) {
-		if (isExeTypeLib() || GetOption(OPT_LIB_DIRS))	{
+		if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))	{
 			// MSVC -LTCG option is not supported by lld
 			m_pkfOut->printf("rule lib\n  command = lld-link.exe /lib /machine:%s /out:$out $in\n",
 				(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
@@ -530,7 +530,7 @@ void CNinja::WriteLibDirective()
 
 void CNinja::WriteRcDirective()
 {
-	if (tt::FileExists(getRcFile())) {
+	if (tt::FileExists(GetRcFile())) {
 // REVIEW: [randalphwa - 10/12/2018] Currently the llvm-rc has a LOT of trouble reading rc files generated by Visual Studio
 //		if (m_bClang)
 //			m_pkfOut->WriteEol("rule rc\n  command = llvm-rc.exe -nologo -r /l 0x409 -fo$resout $in");
@@ -596,37 +596,37 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 			break;
 	}
 
-	if (isExeTypeLib())	{
+	if (IsExeTypeLib())	{
 		m_pkfOut->printf("build %s : lib", pszTarget);
 	}
 	else {
 		m_pkfOut->printf("build %s : link", pszTarget);
 	}
 
-	if (tt::FileExists(getRcFile())) {
-		ttCStr cszRes(getRcFile());
+	if (tt::FileExists(GetRcFile())) {
+		ttCStr cszRes(GetRcFile());
 		cszRes.ChangeExtension(".res");
 		m_pkfOut->printf(" $resout/%s", (char*) cszRes);
 	}
 
-	if (!isExeTypeLib() && GetOption(OPT_LIB_DIRS)) {
+	if (!IsExeTypeLib() && GetOption(OPT_LIB_DIRS)) {
 		ttCStr cszExtraLib("$libout/");
-		cszExtraLib += tt::findFilePortion(GetOption(OPT_LIB_DIRS));
+		cszExtraLib += tt::FindFilePortion(GetOption(OPT_LIB_DIRS));
 		cszExtraLib.ChangeExtension(".lib");
 
 		m_pkfOut->WriteChar(CH_SPACE);
 		m_pkfOut->WriteStr(cszExtraLib);
 	}
 
-	if (getBuildLibs()) {
-		ttCEnumStr enumLib(tt::findNonSpace(getBuildLibs()), ';');
+	if (GetBuildLibs()) {
+		ttCEnumStr enumLib(tt::FindNonSpace(GetBuildLibs()), ';');
 		while (enumLib.Enum())
 			AddDependentLibrary(enumLib, gentype);
 	}
 
 	for (size_t iPos = 0; iPos < getSrcCount(); iPos++) {
-		ttCStr cszFile(tt::findFilePortion(getSrcFileList()->GetAt(iPos)));
-		if (!tt::findStri(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file
+		ttCStr cszFile(tt::FindFilePortion(GetSrcFileList()->GetAt(iPos)));
+		if (!tt::FindStrI(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file
 			continue;
 		cszFile.ChangeExtension(".obj");
 		m_pkfOut->printf(" $\n  $outdir/%s", (char*) cszFile);
@@ -641,7 +641,7 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 {
 	ttCStr cszLib(pszLib);
-	char* pszTmp = tt::findStri(pszLib, ".lib");
+	char* pszTmp = tt::FindStrI(pszLib, ".lib");
 	if (pszTmp)
 		*pszTmp = 0;
 
@@ -653,14 +653,14 @@ void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 			cszLib += "D.lib";
 			break;
 		case GEN_DEBUG64:
-			cszLib += !tt::findStr(cszLib, "64") ? "64D.lib" : "D.lib";
+			cszLib += !tt::FindStr(cszLib, "64") ? "64D.lib" : "D.lib";
 			break;
 		case GEN_RELEASE:
 			cszLib += ".lib";
 			break;
 		case GEN_RELEASE64:
 		default:
-			cszLib += !tt::findStr(cszLib, "64") ? "64.lib" : ".lib";
+			cszLib += !tt::FindStr(cszLib, "64") ? "64.lib" : ".lib";
 			break;
 	}
 

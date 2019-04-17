@@ -48,22 +48,22 @@ int main(int argc, char* argv[])
 			Usage();
 			return 1;
 		}
-		else if (tt::isSameSubStri(argv[argpos] + 1, "dry"))
+		else if (tt::IsSameSubStrI(argv[argpos] + 1, "dry"))
 			bDryRun = true;
-		else if (tt::isSameStri(argv[argpos] + 1, "new")) {
+		else if (tt::IsSameStrI(argv[argpos] + 1, "new")) {
 			CConvertDlg dlg;
 			if (!dlg.CreateSrcFiles())
 				return 0;	// means .srcfiles wasn't created, so nothing further that we can do
 
 			ttCStr csz(dlg.GetDirOutput());
-			char* pszTmp = csz.findStri(".srcfiles");
+			char* pszTmp = csz.FindStrI(".srcfiles");
 			if (pszTmp)
 				*pszTmp = 0;
 			_chdir(csz);
 			if (!SetSrcFileOptions(bDryRun))
 				return 1;
 		}
-		else if (tt::isSameStri(argv[argpos] + 1, "add")) {
+		else if (tt::IsSameStrI(argv[argpos] + 1, "add")) {
 			ttCList lstFiles;
 			for (++argpos; argpos < argc; ++argpos) {
 				lstFiles += argv[argpos];
@@ -71,14 +71,14 @@ int main(int argc, char* argv[])
 			AddFiles(lstFiles, bDryRun);
 			return 1;
 		}
-		else if (tt::isSameSubStri(argv[argpos] + 1, "opt")) {
+		else if (tt::IsSameSubStrI(argv[argpos] + 1, "opt")) {
 			if (!SetSrcFileOptions(bDryRun))
 				return 1;
 		}
-		else if (tt::isSameSubStri(argv[argpos] + 1, "nop")) {
+		else if (tt::IsSameSubStrI(argv[argpos] + 1, "nop")) {
 			bReadPrivate = false;
 		}
-		else if (tt::isSameSubStri(argv[argpos] + 1, "force")) {
+		else if (tt::IsSameSubStrI(argv[argpos] + 1, "force")) {
 			bForce = false;
 		}
 	}
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 		if (!dlg.CreateSrcFiles())
 			return 0;	// means .srcfiles wasn't created, so nothing further that we can do
 		ttCStr csz(dlg.GetDirOutput());
-		char* pszTmp = csz.findStri(".srcfiles");
+		char* pszTmp = csz.FindStrI(".srcfiles");
 		if (pszTmp)
 			*pszTmp = 0;
 		_chdir(csz);
@@ -107,13 +107,13 @@ int main(int argc, char* argv[])
 
 		int countNinjas = 0;
 		if (!cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_BIT_SUFFIX)) {	// if not 64-bit only
-			if (cNinja.isCompilerMSVC())	{
+			if (cNinja.IsCompilerMSVC())	{
 				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, false))
 					countNinjas++;
 				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, false))
 					countNinjas++;
 			}
-			if (cNinja.isCompilerClang())	{
+			if (cNinja.IsCompilerClang())	{
 				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, true))
 					countNinjas++;
 				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, true))
@@ -121,13 +121,13 @@ int main(int argc, char* argv[])
 			}
 		}
 		if (cNinja.GetOption(OPT_64BIT)) {
-			if (cNinja.isCompilerMSVC())	{
+			if (cNinja.IsCompilerMSVC())	{
 				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
 					countNinjas++;
 				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
 					countNinjas++;
 			}
-			if (cNinja.isCompilerClang())	{
+			if (cNinja.IsCompilerClang())	{
 				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
 					countNinjas++;
 				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		if (tt::isNonEmpty(cNinja.getHHPName()))
+		if (tt::IsNonEmpty(cNinja.GetHHPName()))
 			cNinja.CreateHelpFile();
 
 		// Display any errors that occurred during processing
@@ -152,10 +152,10 @@ int main(int argc, char* argv[])
 		else
 			puts("All ninja scripts are up to date.");
 
-		if (cNinja.isCodeLiteIDE())
+		if (cNinja.IsCodeLiteIDE())
 			CreateCodeLiteProject();
 
-		if (cNinja.isVisualStudioIDE())	{
+		if (cNinja.IsVisualStudioIDE())	{
 			CVcxProj vcxProj;
 			vcxProj.CreateBuildFile();
 		}

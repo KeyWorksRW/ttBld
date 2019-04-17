@@ -51,23 +51,23 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
 	// kfSrcFiles.PrepForReadLine();
 	while (kfSrcFiles.ReadLine(&pszLine)) {
-		char* pszBegin = tt::findNonSpace(pszLine);	// ignore any leading spaces
-		if (tt::isEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-')) {	// ignore empty, comment or divider lines
+		char* pszBegin = tt::FindNonSpace(pszLine);	// ignore any leading spaces
+		if (tt::IsEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-')) {	// ignore empty, comment or divider lines
 			continue;
 		}
 
-		if (tt::isSameSubStri(pszBegin, "%YAML")) {	// not required, but possible a YAML editor could add this
+		if (tt::IsSameSubStrI(pszBegin, "%YAML")) {	// not required, but possible a YAML editor could add this
 			continue;
 		}
 
-		if (tt::isAlpha(*pszLine)) { 	// sections always begin with an alphabetical character
-			if (tt::isSameSubStri(pszBegin, "Files:") || tt::isSameSubStri(pszBegin, "[FILES]")) {
+		if (tt::IsAlpha(*pszLine)) { 	// sections always begin with an alphabetical character
+			if (tt::IsSameSubStrI(pszBegin, "Files:") || tt::IsSameSubStrI(pszBegin, "[FILES]")) {
 				section = SECTION_FILES;
 			}
-			else if (tt::isSameSubStri(pszBegin, "Options:") || tt::isSameSubStri(pszBegin, "[OPTIONS]")) {
+			else if (tt::IsSameSubStrI(pszBegin, "Options:") || tt::IsSameSubStrI(pszBegin, "[OPTIONS]")) {
 				section = SECTION_OPTIONS;
 			}
-			else if (tt::isSameSubStri(pszBegin, "Lib:")) {
+			else if (tt::IsSameSubStrI(pszBegin, "Lib:")) {
 				section = SECTION_LIB;
 			}
 			else
@@ -96,17 +96,17 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
 	// Everything has been processed, if options were not specified that are needed, make some default assumptions
 
-	if (tt::isEmpty(GetProjectName())) {
+	if (tt::IsEmpty(GetProjectName())) {
 		ttCStr cszProj;
-		cszProj.getCWD();
-		char* pszProj = tt::findFilePortion(cszProj);
-		if (pszProj && !tt::isSameStri(pszProj, "src"))
+		cszProj.GetCWD();
+		char* pszProj = tt::FindFilePortion(cszProj);
+		if (pszProj && !tt::IsSameStrI(pszProj, "src"))
 			UpdateOption(OPT_PROJECT, pszProj);
 		else {
-			if (pszProj > cszProj.getPtr())
+			if (pszProj > cszProj.GetPtr())
 				--pszProj;
 			*pszProj = 0;
-			pszProj = tt::findFilePortion(cszProj);
+			pszProj = tt::FindFilePortion(cszProj);
 			if (pszProj)
 				UpdateOption(OPT_PROJECT, pszProj);
 		}
@@ -129,7 +129,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
 		return;
 
-	if (tt::isSameStri(cszName, "BuildLibs"))
+	if (tt::IsSameStrI(cszName, "BuildLibs"))
 		while (cszVal.ReplaceStr(".lib", ""));	// we want the target name, not the library filename
 
 	if (UpdateReadOption(cszName, cszVal, cszComment))
@@ -138,7 +138,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	// If you need to support reading old options, add the code here to convert them into the new options. You will also
 	// need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
 
-	if (tt::isSameStri(cszName, "TargetDirs")) {	// first target is 32-bit directory, second is 64-bit directory
+	if (tt::IsSameStrI(cszName, "TargetDirs")) {	// first target is 32-bit directory, second is 64-bit directory
 		ttCEnumStr cenum(cszVal, ';');
 		if (cenum.Enum()) {
 			UpdateOption(OPT_TARGET_DIR32, (char*) cenum);
@@ -150,7 +150,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 	}
 
 	ttCStr csz;
-	csz.printf(tt::getResString(IDS_CS_UNKNOWN_OPTION), (char*) cszName);
+	csz.printf(tt::GetResString(IDS_CS_UNKNOWN_OPTION), (char*) cszName);
 	m_lstErrors += csz;
 }
 
@@ -159,7 +159,7 @@ void CSrcFiles::AddCompilerFlag(const char* pszFlag)
 	if (!GetOption(OPT_CFLAGS))
 		UpdateOption(OPT_CFLAGS, pszFlag);
 	// else append the flag if it hasn't already been added
-	else if (!tt::findStri(GetOption(OPT_CFLAGS), pszFlag)) {
+	else if (!tt::FindStrI(GetOption(OPT_CFLAGS), pszFlag)) {
 		ttCStr csz(GetOption(OPT_CFLAGS));
 		csz += " ";
 		csz += pszFlag;
@@ -169,9 +169,9 @@ void CSrcFiles::AddCompilerFlag(const char* pszFlag)
 
 void CSrcFiles::AddLibrary(const char* pszName)
 {
-	if (!tt::findStri(GetOption(OPT_LIBS), pszName)) {
+	if (!tt::FindStrI(GetOption(OPT_LIBS), pszName)) {
 		ttCStr csz(GetOption(OPT_LIBS));
-		if (csz.isNonEmpty())
+		if (csz.IsNonEmpty())
 			csz += " ";
 		csz += pszName;
 		UpdateOption(OPT_LIBS, (char*) csz);
@@ -184,13 +184,13 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
 	// "tmplib". The name is also to indicate that this is a temporary library -- it's not designed to be linked to outside of the
 	// scope of the current project.
 
-	if (m_cszLibName.isEmpty())
+	if (m_cszLibName.IsEmpty())
 		m_cszLibName = "tmplib";
 
-	if (tt::findStri(pszLibFile, ".lib"))	// this was used before we created a default name
+	if (tt::FindStrI(pszLibFile, ".lib"))	// this was used before we created a default name
 		return;
-	else if (tt::isSameSubStri(pszLibFile, ".include")) {
-		char* pszIncFile = tt::findNonSpace(tt::findSpace(pszLibFile));
+	else if (tt::IsSameSubStrI(pszLibFile, ".include")) {
+		char* pszIncFile = tt::FindNonSpace(tt::FindSpace(pszLibFile));
 		ProcessInclude(pszIncFile, m_lstLibAddSrcFiles, false);
 	}
 	else {
@@ -205,16 +205,16 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
 
 void CSrcFiles::ProcessFile(char* pszFile)
 {
-	if (tt::isSameSubStri(pszFile, ".include")) {
-		const char* pszIncFile = tt::findNonSpace(tt::findSpace(pszFile));
+	if (tt::IsSameSubStrI(pszFile, ".include")) {
+		const char* pszIncFile = tt::FindNonSpace(tt::FindSpace(pszFile));
 		ProcessInclude(pszIncFile, m_lstAddSrcFiles, true);
 		return;
 	}
 
-	char* pszComment = tt::findChar(pszFile, '#');
+	char* pszComment = tt::FindChar(pszFile, '#');
 	if (pszComment) {
 		*pszComment = 0;
-		tt::trimRight(pszFile);
+		tt::TrimRight(pszFile);
 	}
 
 	m_lstSrcFiles += pszFile;
@@ -224,19 +224,19 @@ void CSrcFiles::ProcessFile(char* pszFile)
 		m_lstErrors += cszErrMsg;
 	}
 
-	char* pszExt = tt::findStri(pszFile, ".idl");
+	char* pszExt = tt::FindStrI(pszFile, ".idl");
 	if (pszExt)	{
 		m_lstIdlFiles += pszFile;
 		return;
 	}
 
-	pszExt = tt::findStri(pszFile, ".rc");
+	pszExt = tt::FindStrI(pszFile, ".rc");
 	if (pszExt && !pszExt[3]) {	// ignore .rc2, .resources, etc.
 		m_cszRcName = pszFile;
 		return;
 	}
 
-	pszExt = tt::findStri(pszFile, ".hhp");
+	pszExt = tt::FindStrI(pszFile, ".hhp");
 	if (pszExt) {	// ignore .rc2, .resources, etc.
 		m_cszHHPName = pszFile;
 		return;
@@ -245,8 +245,8 @@ void CSrcFiles::ProcessFile(char* pszFile)
 
 void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFiles, bool bFileSection)
 {
-	if (tt::isSameSubStri(pszFile, ".include")) {
-		const char* pszIncFile = tt::findNonSpace(tt::findSpace(pszFile));
+	if (tt::IsSameSubStrI(pszFile, ".include")) {
+		const char* pszIncFile = tt::FindNonSpace(tt::FindSpace(pszFile));
 		ProcessInclude(pszIncFile, m_lstLibAddSrcFiles, false);
 		return;
 	}
@@ -260,19 +260,19 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
 	}
 
 	ttCStr cszCWD;
-	cszCWD.getCWD();
+	cszCWD.GetCWD();
 
 	ttCStr cszFullPath(pszFile);
-	cszFullPath.getFullPathName();
+	cszFullPath.GetFullPathName();
 
 	ttCTMem<char*> szPath(1024);
-	tt::strCopy_s(szPath, 1024, cszFullPath);
-	char* pszFilePortion = tt::findFilePortion(szPath);
+	tt::StrCopy(szPath, 1024, cszFullPath);
+	char* pszFilePortion = tt::FindFilePortion(szPath);
 
 	ttCStr cszRelative;
 
 	for (size_t pos = 0; pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.GetCount() : cIncSrcFiles.m_lstLibFiles.GetCount()); ++pos) {
-		tt::strCopy(pszFilePortion, bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos] : cIncSrcFiles.m_lstLibFiles[pos]);
+		tt::StrCopy(pszFilePortion, bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos] : cIncSrcFiles.m_lstLibFiles[pos]);
 		tt::ConvertToRelative(cszCWD, szPath, cszRelative);
 		size_t posAdd;
 		posAdd = m_lstSrcIncluded.Add(cszRelative);
@@ -295,29 +295,29 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 
 	while (enumstr.Enum(&pszPattern)) {
 		ttCFindFile ff(pszPattern);
-		while (ff.isValid()) {
-			char* psz = tt::findLastChar(ff, '.');
+		while (ff.IsValid()) {
+			char* psz = tt::FindLastChar(ff, '.');
 			if (psz) {
 				if (
-						tt::isSameStri(psz, ".c") ||
-						tt::isSameStri(psz, ".cpp") ||
-						tt::isSameStri(psz, ".cc") ||
-						tt::isSameStri(psz, ".cxx")
+						tt::IsSameStrI(psz, ".c") ||
+						tt::IsSameStrI(psz, ".cpp") ||
+						tt::IsSameStrI(psz, ".cc") ||
+						tt::IsSameStrI(psz, ".cxx")
 					) {
 						m_lstSrcFiles += ff;
 
 				}
-				else if (tt::isSameStri(psz, ".rc")) {
+				else if (tt::IsSameStrI(psz, ".rc")) {
 					m_lstSrcFiles += ff;
-					if (m_cszRcName.isEmpty())
+					if (m_cszRcName.IsEmpty())
 						m_cszRcName = ff;
 				}
-				else if (tt::isSameStri(psz, ".hhp")) {
+				else if (tt::IsSameStrI(psz, ".hhp")) {
 					m_lstSrcFiles += ff;
-					if (m_cszHHPName.isEmpty())
+					if (m_cszHHPName.IsEmpty())
 						m_cszHHPName = ff;
 				}
-				else if (tt::isSameStri(psz, ".idl")) {
+				else if (tt::IsSameStrI(psz, ".idl")) {
 					m_lstSrcFiles += ff;
 					m_lstIdlFiles += ff;
 				}
@@ -355,21 +355,21 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
 	ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
 	if (!pszVal) {
 		ttCStr cszTmp;
-		cszTmp.printf(tt::getResString(IDS_CS_OPT_MISSING_COLON), pszLine);
+		cszTmp.printf(tt::GetResString(IDS_CS_OPT_MISSING_COLON), pszLine);
 		m_lstErrors += cszTmp;
 		return false;
 	}
 	*pszVal = 0;
 	cszName = pszLine;
-	pszVal = tt::findNonSpace(pszVal + 1);
+	pszVal = tt::FindNonSpace(pszVal + 1);
 
 	if (*pszVal == CH_QUOTE || *pszVal == CH_SQUOTE || *pszVal == CH_START_QUOTE) {
-		cszVal.getQuotedString(pszVal);
-		pszVal += (cszVal.strLen() + 2);
-		char* pszComment = tt::findChar(pszVal + cszVal.strLen() + 2, '#');
+		cszVal.GetQuotedString(pszVal);
+		pszVal += (cszVal.StrLen() + 2);
+		char* pszComment = tt::FindChar(pszVal + cszVal.StrLen() + 2, '#');
 		if (pszComment)	{
-			pszComment = tt::stepOver(pszComment);
-			tt::trimRight(pszComment);	// remove any trailing whitespace
+			pszComment = tt::StepOver(pszComment);
+			tt::TrimRight(pszComment);	// remove any trailing whitespace
 			cszComment = pszComment;
 		}
 		else {
@@ -377,17 +377,17 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
 		}
 	}
 	else {	// non-quoted option
-		char* pszComment = tt::findChar(pszVal, '#');
+		char* pszComment = tt::FindChar(pszVal, '#');
 		if (pszComment) {
 			*pszComment = 0;
-			pszComment = tt::stepOver(pszComment);
-			tt::trimRight(pszComment);	// remove any trailing whitespace
+			pszComment = tt::StepOver(pszComment);
+			tt::TrimRight(pszComment);	// remove any trailing whitespace
 			cszComment = pszComment;
 		}
 		else {
 			cszComment.Delete();
 		}
-		tt::trimRight(pszVal);	// remove any trailing whitespace
+		tt::TrimRight(pszVal);	// remove any trailing whitespace
 		cszVal = pszVal;
 	}
 	return true;
@@ -396,7 +396,7 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
 const char* CSrcFiles::GetPchHeader()
 {
 	const char* pszPch = GetOption(OPT_PCH);
-	if (pszPch && tt::isSameStri(pszPch, "none"))
+	if (pszPch && tt::IsSameStrI(pszPch, "none"))
 		return nullptr;
 	return pszPch;
 }

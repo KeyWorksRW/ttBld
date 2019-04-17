@@ -89,14 +89,14 @@ size_t CreateCodeLiteProject()
 	}
 
 	ttCStr cszCWD;
-	cszCWD.getCWD();
+	cszCWD.GetCWD();
 
 	while (kfPost.ReplaceStr("%cwd%", cszCWD));
 	ttCStr cszExe(cszCWD);
 	cszExe.AppendFileName("../bin/");
 	cszExe += (char*) cSrcFiles.GetProjectName();
 	cszExe += "D.exe";
-	cszExe.getFullPathName();
+	cszExe.GetFullPathName();
 	tt::BackslashToForwardslash(cszExe);
 	while (kfPost.ReplaceStr("%exepath%", cszExe));
 

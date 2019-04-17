@@ -19,7 +19,7 @@ public:
 	// Class functions
 
 	void Enable() { m_bEnabled = true; }
-	bool isEnabled() { return m_bEnabled; }
+	bool IsEnabled() { return m_bEnabled; }
 
 	void NewFile(const char* pszFile);	// will delete m_lstOut and replace m_cszFilename
 	void DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew);

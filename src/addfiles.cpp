@@ -40,7 +40,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 	}
 	kfIn.MakeCopy();
 
-	while (kfIn.ReadLine() && !tt::isSameSubStri(kfIn, "Files:"))
+	while (kfIn.ReadLine() && !tt::IsSameSubStrI(kfIn, "Files:"))
 		kfOut.WriteEol(kfIn);
 
 	if (kfOut.IsEndOfFile()) {	// means there was no Files: section
@@ -69,9 +69,9 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 
 	kfOut.WriteEol(kfIn);	// This will be the Files: line
 	while (kfIn.ReadLine()) {
-		if (tt::isAlpha(*(const char*)kfIn))	// Alphabetical character in first column is a new section
+		if (tt::IsAlpha(*(const char*)kfIn))	// Alphabetical character in first column is a new section
 			break;
-		else if (!tt::findNonSpace(kfIn)) {		// blank line, insert after it
+		else if (!tt::FindNonSpace(kfIn)) {		// blank line, insert after it
 			kfOut.WriteEol(kfIn);
 			break;
 		}

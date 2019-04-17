@@ -64,8 +64,8 @@ bool CConvertDlg::CreateSrcFiles()
 		ttCFile file;
 		if (file.ReadFile(".srcfiles")) {
 			if (file.ReadLine()) {
-				if (tt::isSameSubStri(file, "# Converted from")) {
-					char* psz = tt::findNonSpace((char*) file + sizeof("# Converted from"));
+				if (tt::IsSameSubStrI(file, "# Converted from")) {
+					char* psz = tt::FindNonSpace((char*) file + sizeof("# Converted from"));
 					m_cszConvertScript = psz;
 				}
 			}
@@ -73,7 +73,7 @@ bool CConvertDlg::CreateSrcFiles()
 	}
 
 	if (DoModal(NULL) == IDOK) {
-		tt::MsgBoxFmt(IDS_SRCFILES_CREATED, MB_OK, (char*) tt::findFilePortion(m_cszConvertScript));
+		tt::MsgBoxFmt(IDS_SRCFILES_CREATED, MB_OK, (char*) tt::FindFilePortion(m_cszConvertScript));
 		return true;
 	}
 	else
@@ -88,7 +88,7 @@ void CConvertDlg::OnBegin(void)
 	SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
 
 	ttCStr csz;
-	csz.getCWD();
+	csz.GetCWD();
 	SetControlText(DLG_ID(IDEDIT_OUT_DIR), csz);
 	SetControlText(DLG_ID(IDEDIT_IN_DIR), csz);
 
@@ -97,30 +97,30 @@ void CConvertDlg::OnBegin(void)
 
 	// If we converted once before, then default to that script
 
-	if (m_cszConvertScript.isNonEmpty())
+	if (m_cszConvertScript.IsNonEmpty())
 		m_comboScripts.Add(m_cszConvertScript);
 	else {
-		for (size_t pos = 1; !ff.isValid() && atxtProjects[pos]; ++pos)
+		for (size_t pos = 1; !ff.IsValid() && atxtProjects[pos]; ++pos)
 			ff.NewPattern(atxtProjects[pos]);
-		if (ff.isValid())
+		if (ff.IsValid())
 			m_comboScripts.Add((char*) ff);
 
 		if (m_comboScripts.GetCount() < 1) {	// no scripts found, let's check sub directories
 			ff.NewPattern("*.*");
 			do {
-				if (ff.isDir()) {
-					if (!tt::isValidFileChar(ff, 0))	// this will skip over . and ..
+				if (ff.IsDir()) {
+					if (!tt::IsValidFileChar(ff, 0))	// this will skip over . and ..
 						continue;
 					ttCStr cszDir((char*) ff);
 					cszDir.AppendFileName(atxtProjects[0]);
 					ttCFindFile ffFilter(cszDir);
-					for (size_t pos = 1; !ffFilter.isValid() && atxtProjects[pos]; ++pos)	{
+					for (size_t pos = 1; !ffFilter.IsValid() && atxtProjects[pos]; ++pos)	{
 						cszDir = ff;
 						cszDir.AppendFileName(atxtProjects[pos]);
 						ffFilter.NewPattern(cszDir);
 					}
 
-					if (ffFilter.isValid()) {
+					if (ffFilter.IsValid()) {
 						cszDir = ff;
 						cszDir.AppendFileName(ffFilter);
 						m_comboScripts.Add(cszDir);
@@ -168,7 +168,7 @@ void CConvertDlg::OnBtnChangeOut()	// change the directory to write .srcfiles to
 {
 	ttCDirDlg dlg;
 	ttCStr cszCWD;
-	cszCWD.getCWD();
+	cszCWD.GetCWD();
 	dlg.SetStartingDir(cszCWD);
 	if (dlg.GetFolderName(*this)) {
 		ttCStr cszSrcFiles(dlg);
@@ -185,7 +185,7 @@ void CConvertDlg::OnBtnChangeIn()
 {
 	ttCDirDlg dlg;
 	ttCStr cszCWD;
-	cszCWD.getCWD();
+	cszCWD.GetCWD();
 	dlg.SetStartingDir(cszCWD);
 	if (dlg.GetFolderName(*this)) {
 		SetControlText(DLG_ID(IDEDIT_IN_DIR), dlg);
@@ -210,21 +210,21 @@ void CConvertDlg::OnBtnChangeIn()
 
 void CConvertDlg::OnOK(void)
 {
-	m_cszDirOutput.getWindowText(GetDlgItem(DLG_ID(IDEDIT_OUT_DIR)));
-	m_cszDirSrcFiles.getWindowText(GetDlgItem(DLG_ID(IDEDIT_IN_DIR)));
+	m_cszDirOutput.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_OUT_DIR)));
+	m_cszDirSrcFiles.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_IN_DIR)));
 	if (GetCheck(DLG_ID(IDRADIO_CONVERT)))
-		m_cszConvertScript.getWindowText(GetDlgItem(DLG_ID(IDCOMBO_SCRIPTS)));
+		m_cszConvertScript.GetWindowText(GetDlgItem(DLG_ID(IDCOMBO_SCRIPTS)));
 	else
 		m_cszConvertScript.Delete();
 
-	if (m_cszConvertScript.isNonEmpty()) {
+	if (m_cszConvertScript.IsNonEmpty()) {
 		if (!tt::FileExists(m_cszConvertScript)) {
 			tt::MsgBoxFmt(IDS_CS_CANNOT_OPEN, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 			CancelEnd();
 			return;
 		}
 
-		const char* pszExt = tt::findLastChar(m_cszConvertScript, '.');
+		const char* pszExt = tt::FindLastChar(m_cszConvertScript, '.');
 		if (pszExt) {
 			HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
 			if (hr != S_OK) {
@@ -234,25 +234,25 @@ void CConvertDlg::OnOK(void)
 			m_cszDirOutput.AppendFileName(".srcfiles");
 
 			bool bResult = false;
-			if (tt::isSameStri(pszExt, ".project"))
+			if (tt::IsSameStrI(pszExt, ".project"))
 				bResult = ConvertCodeLite();
-			else if (tt::isSameStri(pszExt, ".cdb"))
+			else if (tt::IsSameStrI(pszExt, ".cdb"))
 				bResult = ConvertCodeBlocks();
-			else if (tt::isSameStri(pszExt, ".filters"))
+			else if (tt::IsSameStrI(pszExt, ".filters"))
 				bResult = ConvertVcxProj();
-			else if (tt::isSameStri(pszExt, ".vcproj"))
+			else if (tt::IsSameStrI(pszExt, ".vcproj"))
 				bResult = ConvertVcProj();
 
 			if (bResult) {
 				ttCStr cszHdr;
 				cszHdr.printf("# Converted from %s", (char*) m_cszConvertScript);
 
-				if (tt::isEmpty(m_cSrcFiles.GetOption(OPT_PROJECT))) {
+				if (tt::IsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT))) {
 					ttCStr cszProject(m_cszDirOutput);
-					char* pszFilePortion = tt::findFilePortion(cszProject);
+					char* pszFilePortion = tt::FindFilePortion(cszProject);
 					if (pszFilePortion)
 						*pszFilePortion = 0;
-					m_cSrcFiles.UpdateOption(OPT_PROJECT, tt::findFilePortion(cszProject));
+					m_cSrcFiles.UpdateOption(OPT_PROJECT, tt::FindFilePortion(cszProject));
 				}
 
 				if (!m_cSrcFiles.WriteNew(m_cszDirOutput, cszHdr)) {
@@ -289,13 +289,13 @@ bool CConvertDlg::ConvertCodeLite()
 
 	for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pProject->GetChildAt(item);
-		if (tt::isSameStri(pItem->GetName(), "VirtualDirectory"))
+		if (tt::IsSameStrI(pItem->GetName(), "VirtualDirectory"))
 			AddCodeLiteFiles(pItem);
-		else if (tt::isSameStri(pItem->GetName(), "Settings")) {
+		else if (tt::IsSameStrI(pItem->GetName(), "Settings")) {
 			const char* pszType = pItem->GetAttribute("Type");
-			if (tt::isSameStri(pszType, "Dynamic Library"))
+			if (tt::IsSameStrI(pszType, "Dynamic Library"))
 				m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
-			else if (tt::isSameStri(pszType, "Static Library"))
+			else if (tt::IsSameStrI(pszType, "Static Library"))
 				m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
 		}
 	}
@@ -317,11 +317,11 @@ bool CConvertDlg::ConvertCodeBlocks()
 
 	for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pProject->GetChildAt(item);
-		if (tt::isSameStri(pItem->GetName(), "Option")) {
+		if (tt::IsSameStrI(pItem->GetName(), "Option")) {
 			if (pItem->GetAttribute("title"))
 				m_cSrcFiles.UpdateOption(OPT_PROJECT, pItem->GetAttribute("title"));
 		}
-		else if (tt::isSameStri(pItem->GetName(), "Unit")) {
+		else if (tt::IsSameStrI(pItem->GetName(), "Unit")) {
 			if (isValidSrcFile(pItem->GetAttribute("filename")))
 				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("filename"));
 		}
@@ -340,10 +340,10 @@ bool CConvertDlg::ConvertVcxProj()
 
 	for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pProject->GetChildAt(item);
-		if (tt::isSameStri(pItem->GetName(), "ItemGroup")) {
+		if (tt::IsSameStrI(pItem->GetName(), "ItemGroup")) {
 			for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++) {
 				ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
-				if (tt::isSameStri(pCmd->GetName(), "ClCompile") || tt::isSameStri(pCmd->GetName(), "ResourceCompile")) {
+				if (tt::IsSameStrI(pCmd->GetName(), "ClCompile") || tt::IsSameStrI(pCmd->GetName(), "ResourceCompile")) {
 					const char* pszFile = pCmd->GetAttribute("Include");
 					if (pszFile && *pszFile)
 						m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pszFile);
@@ -377,7 +377,7 @@ bool CConvertDlg::ConvertVcProj()
 	}
 	for (size_t item = 0; item < pFilter->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pFilter->GetChildAt(item);
-		if (tt::isSameStri(pItem->GetName(), "File")) {
+		if (tt::IsSameStrI(pItem->GetName(), "File")) {
 			if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
 				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("RelativePath"));
 		}
@@ -386,7 +386,7 @@ bool CConvertDlg::ConvertVcProj()
 	if (pFilter) {
 		for (size_t item = 0; item < pFilter->GetChildrenCount(); item++) {
 			ttCXMLBranch* pItem = pFilter->GetChildAt(item);
-			if (tt::isSameStri(pItem->GetName(), "File")) {
+			if (tt::IsSameStrI(pItem->GetName(), "File")) {
 				if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
 					m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("RelativePath"));
 			}
@@ -402,13 +402,13 @@ bool CConvertDlg::ConvertVcProj()
 		ttCXMLBranch* pOption = pConfiguration->FindFirstAttribute("OutputFile");
 		if (pOption) {
 			ttCStr cszOutDir(pOption->GetAttribute("OutputFile"));	// will typically be something like: "../bin/$(ProjectName).exe"
-			char* pszFile = tt::findFilePortion(cszOutDir);
+			char* pszFile = tt::FindFilePortion(cszOutDir);
 			if (pszFile)
 				*pszFile = 0;
 			m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszOutDir);
 		}
 		do {
-			if (tt::findStri(pConfiguration->GetAttribute("Name"), "Release"))
+			if (tt::FindStrI(pConfiguration->GetAttribute("Name"), "Release"))
 				break;
 			pConfiguration = pConfigurations->FindNextElement("Configuration");
 		} while(pConfiguration);
@@ -417,11 +417,11 @@ bool CConvertDlg::ConvertVcProj()
 
 		if (pRelease) {
 			const char* pszOption = pRelease->GetAttribute("FavorSizeOrSpeed");
-			if (pszOption && tt::isSameSubStri(pszOption, "1"))
+			if (pszOption && tt::IsSameSubStrI(pszOption, "1"))
 				m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, "speed");
 
 			pszOption = pRelease->GetAttribute("WarningLevel");
-			if (pszOption && !tt::isSameSubStri(pszOption, "4"))
+			if (pszOption && !tt::IsSameSubStrI(pszOption, "4"))
 				m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszOption);
 
 			pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
@@ -436,21 +436,21 @@ bool CConvertDlg::ConvertVcProj()
 				ttCEnumStr enumFlags(pszOption);
 				ttCStr cszCFlags;
 				while (enumFlags.Enum()) {
-					if (tt::isSameStri(enumFlags, "NDEBUG"))
+					if (tt::IsSameStrI(enumFlags, "NDEBUG"))
 						continue;	// we already added this
-					if (tt::isSameStri(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
+					if (tt::IsSameStrI(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
 						m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
 						continue;
 					}
-					if (tt::isSameStri(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
+					if (tt::IsSameStrI(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
 						m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
 						continue;	// do we need to add this?
 					}
-					if (tt::isSameSubStri(enumFlags, "$("))	// Visual Studio specific, ignore it
+					if (tt::IsSameSubStrI(enumFlags, "$("))	// Visual Studio specific, ignore it
 						continue;
 
 
-					if (cszCFlags.isNonEmpty())
+					if (cszCFlags.IsNonEmpty())
 						cszCFlags += " ";
 					cszCFlags += "-D";
 					cszCFlags += enumFlags;
@@ -466,12 +466,12 @@ void CConvertDlg::AddCodeLiteFiles(ttCXMLBranch* pParent)
 {
 	for (size_t child = 0; child < pParent->GetChildrenCount(); child++) {
 		ttCXMLBranch* pFile = pParent->GetChildAt(child);
-		if (tt::isSameStri(pFile->GetName(), "File")) {
+		if (tt::IsSameStrI(pFile->GetName(), "File")) {
 			if (isValidSrcFile(pFile->GetAttribute("Name")))
 				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pFile->GetAttribute("Name"));
 		}
 		// CodeLite nests resources in a sub <VirtualDirectory> tag
-		else if (tt::isSameStri(pFile->GetName(), "VirtualDirectory")) {
+		else if (tt::IsSameStrI(pFile->GetName(), "VirtualDirectory")) {
 			AddCodeLiteFiles(pFile);
 		}
 	}
@@ -482,13 +482,13 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 	if (!pszFile)
 		return false;
 
-	char* psz = tt::findLastChar(pszFile, '.');
+	char* psz = tt::FindLastChar(pszFile, '.');
 	if (psz) {
-		if (	tt::isSameStri(psz, ".cpp") ||
-				tt::isSameStri(psz, ".cc") ||
-				tt::isSameStri(psz, ".cxx") ||
-				tt::isSameStri(psz, ".c") ||
-				tt::isSameSubStri(psz, ".rc"))
+		if (	tt::IsSameStrI(psz, ".cpp") ||
+				tt::IsSameStrI(psz, ".cc") ||
+				tt::IsSameStrI(psz, ".cxx") ||
+				tt::IsSameStrI(psz, ".c") ||
+				tt::IsSameSubStrI(psz, ".rc"))
 			return true;
 	}
 	return false;
@@ -497,18 +497,18 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 void CConvertDlg::CreateNewSrcFiles()
 {
 	char szPath[MAX_PATH];
-	tt::strCopy(szPath, m_cszDirSrcFiles);
+	tt::StrCopy(szPath, m_cszDirSrcFiles);
 	tt::AddTrailingSlash(szPath);
-	size_t cbRoot = tt::strByteLen(szPath);
+	size_t cbRoot = tt::StrByteLen(szPath);
 
 	ttCStr cszRelPath;
 
 	for (size_t pos = 0; atxtSrcTypes[pos]; ++pos) {
-		tt::strCopy(szPath + cbRoot, atxtSrcTypes[pos]);
+		tt::StrCopy(szPath + cbRoot, atxtSrcTypes[pos]);
 		ttCFindFile ff(szPath);
-		if (ff.isValid()) {
+		if (ff.IsValid()) {
 			do {
-				tt::strCopy(szPath + cbRoot, sizeof(szPath) - cbRoot, ff);
+				tt::StrCopy(szPath + cbRoot, sizeof(szPath) - cbRoot, ff);
 				tt::ConvertToRelative(m_cszDirOutput, szPath, cszRelPath);
 				m_cSrcFiles.m_lstSrcFiles += cszRelPath;
 			} while(ff.NextFile());
@@ -520,19 +520,19 @@ void CConvertDlg::CreateNewSrcFiles()
 
 char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 {
-	ttASSERT(m_cszConvertScript.isNonEmpty());
+	ttASSERT(m_cszConvertScript.IsNonEmpty());
 
-	if (m_cszScriptRoot.isEmpty()) {
+	if (m_cszScriptRoot.IsEmpty()) {
 		m_cszScriptRoot = (char*) m_cszConvertScript;
-		char* pszFilePortion = tt::findFilePortion(m_cszScriptRoot);
+		char* pszFilePortion = tt::FindFilePortion(m_cszScriptRoot);
 		ttASSERT_MSG(pszFilePortion, "No filename in m_cszScriptRoot--things will go badly without it.");
 		if (pszFilePortion)
 			*pszFilePortion = 0;
 	}
 
-	if (m_cszOutRoot.isEmpty()) {
+	if (m_cszOutRoot.IsEmpty()) {
 		m_cszOutRoot = (char*) m_cszDirOutput;
-		char* pszFilePortion = m_cszOutRoot.findStri(".srcfiles");
+		char* pszFilePortion = m_cszOutRoot.FindStrI(".srcfiles");
 		if (pszFilePortion)
 			*pszFilePortion = 0;
 	}

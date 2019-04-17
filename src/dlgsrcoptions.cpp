@@ -36,7 +36,7 @@ CDlgSrcOptions::CDlgSrcOptions(const char* pszSrcDir) : ttCDlg(IDDLG_SRCFILES), 
 	if (pszSrcDir && *pszSrcDir)
 		m_cszSrcDir = pszSrcDir;
 
-	if (tt::isEmpty(GetPchHeader())) {
+	if (tt::IsEmpty(GetPchHeader())) {
 		if (tt::FileExists("stdafx.h"))
 			UpdateOption(OPT_PCH, "stdafx.h");
 		else if (tt::FileExists("pch.h"))
@@ -80,11 +80,11 @@ void CDlgSrcOptions::OnBegin(void)
 	else {
 		char szCwd[MAX_PATH];
 		GetCurrentDirectory(sizeof(szCwd), szCwd);
-		char* pszProject = tt::findFilePortion(szCwd);
-		if (tt::isSameStri(pszProject, "src")) {
+		char* pszProject = tt::FindFilePortion(szCwd);
+		if (tt::IsSameStrI(pszProject, "src")) {
 			pszProject--;
 			*pszProject = 0;
-			pszProject = tt::findFilePortion(szCwd);
+			pszProject = tt::FindFilePortion(szCwd);
 		}
 		SetControlText(DLG_ID(IDEDIT_PROJ_NAME), pszProject);
 	}
@@ -104,11 +104,11 @@ void CDlgSrcOptions::OnBegin(void)
 	if (GetOption(OPT_LIB_DIRS))
 		SetControlText(DLG_ID(IDEDIT_LIBDIRS), GetOption(OPT_LIB_DIRS));
 
-	if (isExeTypeConsole())
+	if (IsExeTypeConsole())
 		SetCheck(DLG_ID(IDRADIO_CONSOLE));
-	else if (isExeTypeDll())
+	else if (IsExeTypeDll())
 		SetCheck(DLG_ID(IDRADIO_DLL));
-	else if (isExeTypeLib())
+	else if (IsExeTypeLib())
 		SetCheck(DLG_ID(IDRADIO_LIB));
 	else
 		SetCheck(DLG_ID(IDRADIO_NORMAL));
@@ -119,7 +119,7 @@ void CDlgSrcOptions::OnBegin(void)
 	SetCheck(DLG_ID(IDCHECK_STATIC_CRT), GetBoolOption(OPT_STATIC_CRT));
 	SetCheck(DLG_ID(IDCHECK_MSLINKER), GetBoolOption(OPT_MS_LINKER));
 
-	SetCheck(DLG_ID(isOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
+	SetCheck(DLG_ID(IsOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
 	SetCheck(DLG_ID(IDCHECK_MSLINKER), GetBoolOption(OPT_MS_LINKER));
 	SetCheck(DLG_ID(GetBoolOption(OPT_STDCALL) ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
 
@@ -143,10 +143,10 @@ void CDlgSrcOptions::OnBegin(void)
 
 	// Makefile: section options
 
-	if (isMakeNever())
+	if (IsMakeNever())
 		SetCheck(DLG_ID(IDRADIO_MF_NEVER));
 
-	else if (isMakeAlways())
+	else if (IsMakeAlways())
 		SetCheck(DLG_ID(IDRADIO_MF_ALWAYS));
 	else
 		SetCheck(DLG_ID(IDRADIO_MF_MISSING));
@@ -156,25 +156,25 @@ void CDlgSrcOptions::OnOK(void)
 {
 	ttCStr csz;
 
-	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
 	UpdateOption(OPT_PROJECT, (char*) csz);
 
-	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
 	UpdateOption(OPT_CFLAGS, (char*) csz);
 
-	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LINK_FLAGS)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LINK_FLAGS)));
 	UpdateOption(OPT_LINK_FLAGS, (char*) csz);
 
-	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
 	UpdateOption(OPT_INC_DIRS, (char*) csz);
 
-	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
 	UpdateOption(OPT_LIB_DIRS, (char*) csz);
 
-	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
 	UpdateOption(OPT_LIBS, (char*) csz);
 
-	csz.getWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
 	UpdateOption(OPT_BUILD_LIBS, (char*) csz);
 
 	if (GetCheck(DLG_ID(IDRADIO_CONSOLE)))
@@ -222,7 +222,7 @@ void CDlgSrcOptions::OnBtnChangePch()
 	ttCFileDlg fdlg(*this);
 	fdlg.SetFilter("Header Files|*.h");
 	ttCStr cszCWD;
-	cszCWD.getCWD();
+	cszCWD.GetCWD();
 	cszCWD.AddTrailingSlash();
 	fdlg.SetInitialDir(cszCWD);
 	if (fdlg.GetOpenFileName()) {
