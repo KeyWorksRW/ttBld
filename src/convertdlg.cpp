@@ -497,18 +497,18 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 void CConvertDlg::CreateNewSrcFiles()
 {
 	char szPath[MAX_PATH];
-	tt::StrCopy(szPath, m_cszDirSrcFiles);
+	ttstrcpy(szPath, m_cszDirSrcFiles);
 	tt::AddTrailingSlash(szPath);
 	size_t cbRoot = tt::StrByteLen(szPath);
 
 	ttCStr cszRelPath;
 
 	for (size_t pos = 0; atxtSrcTypes[pos]; ++pos) {
-		tt::StrCopy(szPath + cbRoot, atxtSrcTypes[pos]);
+		ttstrcpy(szPath + cbRoot, atxtSrcTypes[pos]);
 		ttCFindFile ff(szPath);
 		if (ff.IsValid()) {
 			do {
-				tt::StrCopy(szPath + cbRoot, sizeof(szPath) - cbRoot, ff);
+				ttstrcpy(szPath + cbRoot, sizeof(szPath) - cbRoot, ff);
 				tt::ConvertToRelative(m_cszDirOutput, szPath, cszRelPath);
 				m_cSrcFiles.m_lstSrcFiles += cszRelPath;
 			} while(ff.NextFile());

@@ -70,16 +70,16 @@ CSrcOptions::CSrcOptions()
 
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		size_t posOpt = m_aUpdateOpts.Add();
-		m_aUpdateOpts[posOpt].pszVal = s_aOptions[pos].pszVal ? tt::StrDup(s_aOptions[pos].pszVal) : nullptr;
-		m_aUpdateOpts[posOpt].pszComment = tt::IsNonEmpty(s_aOptions[pos].pszComment) ?  tt::StrDup(s_aOptions[pos].pszComment) : nullptr;
+		m_aUpdateOpts[posOpt].pszVal = s_aOptions[pos].pszVal ? ttstrdup(s_aOptions[pos].pszVal) : nullptr;
+		m_aUpdateOpts[posOpt].pszComment = tt::IsNonEmpty(s_aOptions[pos].pszComment) ?  ttstrdup(s_aOptions[pos].pszComment) : nullptr;
 	}
 }
 
 CSrcOptions::~CSrcOptions()
 {
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		tt::Delete(m_aUpdateOpts[pos].pszVal);
-		tt::Delete(m_aUpdateOpts[pos].pszComment);
+		ttfree(m_aUpdateOpts[pos].pszVal);
+		ttfree(m_aUpdateOpts[pos].pszComment);
 	}
 }
 
@@ -97,7 +97,7 @@ bool CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* pszVal)	// fi
 	ttASSERT(s_aOptions[pos].opt != OPT_OVERFLOW);
 	if (s_aOptions[pos].opt == OPT_OVERFLOW)
 		return false;	// invalid option
-	tt::Delete(m_aUpdateOpts[pos].pszVal);
+	ttfree(m_aUpdateOpts[pos].pszVal);
 
 	// We want boolean values to be consistent, so if "yes" or "no" is specified, convert to "true" or "false"
 
@@ -106,7 +106,7 @@ bool CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* pszVal)	// fi
 	else if (tt::IsSameStrI(pszVal, "no"))
 		pszVal = "false";
 
-	m_aUpdateOpts[pos].pszVal = tt::StrDup(pszVal);
+	m_aUpdateOpts[pos].pszVal = ttstrdup(pszVal);
 	return true;
 }
 
@@ -121,8 +121,8 @@ bool CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, bool bVal)
 	if (s_aOptions[pos].opt == OPT_OVERFLOW)
 		return false;	// invalid option
 
-	tt::Delete(m_aUpdateOpts[pos].pszVal);
-	m_aUpdateOpts[pos].pszVal = tt::StrDup(bVal ? "true" : "false");
+	ttfree(m_aUpdateOpts[pos].pszVal);
+	m_aUpdateOpts[pos].pszVal = ttstrdup(bVal ? "true" : "false");
 	return true;
 }
 
@@ -191,8 +191,8 @@ bool CSrcOptions::UpdateReadOption(const char* pszName, const char* pszVal, cons
 	UpdateOption(s_aOptions[pos].opt, pszVal);	// we call this so that "yes" or "no" options get converted to "true" or "false"
 
 	if (pszComment)	{
-		tt::Delete(m_aUpdateOpts[pos].pszComment);
-		m_aUpdateOpts[pos].pszComment = tt::StrDup(pszComment);
+		ttfree(m_aUpdateOpts[pos].pszComment);
+		m_aUpdateOpts[pos].pszComment = ttstrdup(pszComment);
 	}
 	return true;
 }

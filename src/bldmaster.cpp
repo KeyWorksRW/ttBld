@@ -179,11 +179,11 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 
 			for (size_t pos = 0; lstRcKeywords[pos] ; ++pos) {
 				if (tt::IsSameSubStr(pszKeyWord, lstRcKeywords[pos])) {
-					const char* pszFileName = tt::FindChar(pszKeyWord, CH_QUOTE);
+					const char* pszFileName = ttstrchr(pszKeyWord, CH_QUOTE);
 
 					// Some keywords use quotes which aren't actually filenames -- e.g., RCDATA { "string" }
 
-					if (pszFileName && tt::FindChar(pszFileName + 1, CH_QUOTE) && !tt::FindChar(pszFileName, '{')) {
+					if (pszFileName && ttstrchr(pszFileName + 1, CH_QUOTE) && !ttstrchr(pszFileName, '{')) {
 						ttCStr cszFile;
 						cszFile.GetQuotedString(pszFileName);
 
@@ -193,8 +193,8 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 						if (pszSlash) {
 							do {
 								*pszSlash++ = '/';
-								tt::StrCopy(pszSlash, pszSlash + 1);
-								pszSlash = tt::FindStr(pszSlash, "\\\\");
+								ttstrcpy(pszSlash, pszSlash + 1);
+								pszSlash = ttstrstr(pszSlash, "\\\\");
 							} while(pszSlash);
 						}
 

@@ -266,13 +266,13 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
 	cszFullPath.GetFullPathName();
 
 	ttCTMem<char*> szPath(1024);
-	tt::StrCopy(szPath, 1024, cszFullPath);
+	ttstrcpy(szPath, 1024, cszFullPath);
 	char* pszFilePortion = tt::FindFilePortion(szPath);
 
 	ttCStr cszRelative;
 
 	for (size_t pos = 0; pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.GetCount() : cIncSrcFiles.m_lstLibFiles.GetCount()); ++pos) {
-		tt::StrCopy(pszFilePortion, bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos] : cIncSrcFiles.m_lstLibFiles[pos]);
+		ttstrcpy(pszFilePortion, bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos] : cIncSrcFiles.m_lstLibFiles[pos]);
 		tt::ConvertToRelative(cszCWD, szPath, cszRelative);
 		size_t posAdd;
 		posAdd = m_lstSrcIncluded.Add(cszRelative);

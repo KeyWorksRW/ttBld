@@ -149,7 +149,7 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		// Set the insertion point at the first blank line, or before the next Section
 
 		for (m_posInsert = m_posOptions + 1; m_posInsert < (ptrdiff_t) m_lstOriginal.GetCount(); ++m_posInsert) {
-			if (tt::StrLen(m_lstOriginal[m_posInsert]) < 1)
+			if (ttstrlen(m_lstOriginal[m_posInsert]) < 1)
 				break;
 			else if (tt::IsAlpha(m_lstOriginal[m_posInsert][0])) {
 				m_lstOriginal.InsertAt(m_posInsert, "");	// insert a blank line
@@ -184,7 +184,7 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 			// REVIEW: [randalphwa - 3/13/2019] we don't allow changing the comment after it has been read in
 			m_cszOptComment = aOptions[pos].pszComment;
 
-		if (m_cszOptComment.IsNonEmpty() && tt::StrLen(m_aUpdateOpts[pos].pszVal) > 12)
+		if (m_cszOptComment.IsNonEmpty() && ttstrlen(m_aUpdateOpts[pos].pszVal) > 12)
 			// we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
 			sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt,
 				(char*) cszName, m_aUpdateOpts[pos].pszVal, (char*) m_cszOptComment);
@@ -196,7 +196,7 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 		m_lstOriginal.Replace(posOption, szLine);	// replace the original line
 	}
 	else if (GetChanged(aOptions[pos].opt) || GetRequired(aOptions[pos].opt)) {
-		sprintf_s(szLine, sizeof(szLine), tt::StrLen(m_aUpdateOpts[pos].pszVal) > 12 ? pszLongOptionFmt : pszOptionFmt,
+		sprintf_s(szLine, sizeof(szLine), ttstrlen(m_aUpdateOpts[pos].pszVal) > 12 ? pszLongOptionFmt : pszOptionFmt,
 			(char*) cszName, m_aUpdateOpts[pos].pszVal, aOptions[pos].pszComment);
 		m_lstOriginal.InsertAt(m_posInsert++, szLine);
 	}
