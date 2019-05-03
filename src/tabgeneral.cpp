@@ -11,11 +11,9 @@
 
 void CTabGeneral::OnBegin(void)
 {
-	CenterWindow();
 }
 
 void CTabGeneral::OnOK(void)
 {
-
 }
 

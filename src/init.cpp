@@ -72,8 +72,13 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 		else if (tt::IsSameSubStrI(argv[argpos] + 1, "opt")) {
+#if 1
+			if (!ChangeOptions(bDryRun))
+				return 1;
+#else
 			if (!SetSrcFileOptions(bDryRun))
 				return 1;
+#endif
 		}
 		else if (tt::IsSameSubStrI(argv[argpos] + 1, "nop")) {
 			bReadPrivate = false;

@@ -11,9 +11,10 @@
 class ttCList;	// forward definition
 
 void	AddFiles(ttCList& lstFiles, bool bDryRun);
+bool	ChangeOptions(bool bDryRun);
 bool	ConvertBuildScript(const char* pszBldFile);
 size_t	CreateCodeLiteProject();	// returns 0 - no errors, 1 - file already exists, 2 - other error
-int		MakeNinja(int argc, char* argv[]);
+int 	MakeNinja(int argc, char* argv[]);
 bool	SetSrcFileOptions(bool bDryRun);
 bool	isSystemHeaderFile(const char* pszHeaderFile);
 size_t	CreateCodeLiteProject();	// returns 0 - no errors, 1 - file already exists, 2 - other error
