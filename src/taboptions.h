@@ -24,9 +24,11 @@
 class CTabOptions : public ttCDlg, public CWriteSrcFiles
 {
 public:
-	CTabOptions() : ttCDlg(IDDLG_OPTIONS) { }
+	CTabOptions();
 
 	// Class functions
+
+	void SaveChanges();
 
 protected:
 	BEGIN_TTMSG_MAP()

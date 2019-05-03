@@ -14,6 +14,8 @@
 
 #include <ttdlg.h>		// ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
+class CTabOptions;
+
 class CTabLinker : public ttCDlg
 {
 public:
@@ -21,6 +23,7 @@ public:
 
 	// Class functions
 
+	void SetParentClass(CTabOptions* pclsOptions) { m_pOpts = pclsOptions; }
 
 protected:
 	// Message handlers
@@ -30,5 +33,5 @@ protected:
 
 	// Class members
 
-
+	CTabOptions* m_pOpts;
 };

@@ -7,7 +7,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#include "tablinker.h"
+
+#include "taboptions.h"
 
 void CTabLinker::OnBegin(void)
 {

@@ -7,7 +7,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#include "tabscripts.h"
+
+#include "taboptions.h"
 
 void CTabScripts::OnBegin(void)
 {

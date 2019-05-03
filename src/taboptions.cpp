@@ -34,11 +34,37 @@ bool ChangeOptions(bool bDryRun)
 	auto result = (msg.message == WM_QUIT) ? msg.wParam : IDCANCEL;
 
 	if (result == IDOK) {
-		// dlg.SaveChanges();
+		dlg.SaveChanges();
 		return true;
 	}
 	else
 		return false;
+}
+
+CTabOptions::CTabOptions() : ttCDlg(IDDLG_OPTIONS)
+{
+	m_tabGeneral.SetParentClass(this);
+	m_tabCompiler.SetParentClass(this);
+	m_tabLinker.SetParentClass(this);
+	m_tabScripts.SetParentClass(this);
+
+	ReadFile();	// read in any existing .srcfiles
+
+	if (tt::IsEmpty(GetPchHeader())) {
+		if (tt::FileExists("stdafx.h"))
+			UpdateOption(OPT_PCH, "stdafx.h");
+		else if (tt::FileExists("pch.h"))
+			UpdateOption(OPT_PCH, "pch.h");
+		else if (tt::FileExists("precomp.h"))
+			UpdateOption(OPT_PCH, "precomp.h");
+
+		else if (tt::FileExists("pch.hh"))
+			UpdateOption(OPT_PCH, "pch.hh");
+		else if (tt::FileExists("pch.hpp"))
+			UpdateOption(OPT_PCH, "pch.hpp");
+		else if (tt::FileExists("pch.hxx"))
+			UpdateOption(OPT_PCH, "pch.hxx");
+	}
 }
 
 void CTabOptions::OnBegin(void)
@@ -86,6 +112,18 @@ void CTabOptions::OnCancel(void)
 	::SendMessage(m_hwndTabSub, WM_CLOSE, 0, 0);
 	DestroyWindow(*this);
 	PostQuitMessage(IDCANCEL);
+}
+
+void CTabOptions::SaveChanges()
+{
+	if (tt::FileExists(txtSrcFilesFileName)) {
+		if (WriteUpdates())
+			puts(".srcfiles Options: section updated");
+	}
+	else {
+		if (WriteUpdates())
+			puts(".srcfiles created");
+	}
 }
 
 LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
