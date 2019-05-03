@@ -27,3 +27,9 @@ Files:
 	parsehhp.cpp
 	vcxproj.cpp
 	writesrcfiles.cpp
+
+	taboptions.cpp
+	tabgeneral.cpp
+	tabcompiler.cpp
+	tablinker.cpp
+	tabscripts.cpp

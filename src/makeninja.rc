@@ -36,25 +36,30 @@ END
 2 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""winres.h""\r\n"
-	"#include ""strtable.h""\r\n"
+    "#include ""strtable.h""\r\n"
     "\0"
 END
 
 3 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""ttlibicons.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
-	"#include ""strtable.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""strtable.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
 
-IDR_PRE_PROJECT         RCDATA "res/cdlprojectpre.txt"
-IDR_POST_PROJECT        RCDATA "res/cdlprojectpost.txt"
-IDR_MAKEFILE	        RCDATA "res/makefile.txt"
-IDR_VCXPROJ_MASTER      RCDATA "res/vcxproj.xml"
-IDR_VCXPROJ_FILTERS     RCDATA "res/vcxproj.filters.xml"
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Data
+//
+
+IDR_PRE_PROJECT         RCDATA  MOVEABLE PURE   "res/cdlprojectpre.txt"
+IDR_POST_PROJECT        RCDATA  MOVEABLE PURE   "res/cdlprojectpost.txt"
+IDR_MAKEFILE            RCDATA  MOVEABLE PURE   "res/makefile.txt"
+IDR_VCXPROJ_MASTER      RCDATA  MOVEABLE PURE   "res/vcxproj.xml"
+IDR_VCXPROJ_FILTERS     RCDATA  MOVEABLE PURE   "res/vcxproj.filters.xml"
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -63,16 +68,16 @@ IDR_VCXPROJ_FILTERS     RCDATA "res/vcxproj.filters.xml"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,8295
- PRODUCTVERSION 2,0
+ FILEVERSION 2,0,8295,0
+ PRODUCTVERSION 2,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
- FILEFLAGS VS_FF_DEBUG
+ FILEFLAGS 0x1L
 #else
  FILEFLAGS 0x0L
 #endif
  FILEOS 0x4L
- FILETYPE VFT_APP
+ FILETYPE 0x1L
  FILESUBTYPE 0x0L
 BEGIN
     BLOCK "StringFileInfo"
@@ -100,6 +105,7 @@ BEGIN
 END
 
 #endif    // !_MAC
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -183,7 +189,7 @@ END
 IDDDLG_CONVERT DIALOG DISCARDABLE  0, 0, 233, 194
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Create new .srcfiles file"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT           "C&reate .srcfiles in:",IDC_STATIC,6,6,56,8
     EDITTEXT        IDEDIT_OUT_DIR,6,23,157,14,ES_AUTOHSCROLL
@@ -200,6 +206,104 @@ BEGIN
     DEFPUSHBUTTON   "Create",IDOK,115,174,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,177,174,50,14
     LTEXT           "%kn file%ks located",IDTXT_FILES_FOUND,19,96,129,8
+END
+
+IDDLG_OPTIONS DIALOG DISCARDABLE  0, 0, 246, 223
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_CAPTION |
+    WS_SYSMENU
+CAPTION ".srcfiles Options"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,131,203,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,190,203,50,14
+    CONTROL         "",IDTAB,"SysTabControl32",0x0,6,6,234,186
+END
+
+IDTAB_GENERAL DIALOG DISCARDABLE  0, 0, 210, 154
+STYLE DS_CONTROL | DS_CENTER | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
+    EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
+    GROUPBOX        "Target",IDC_STATIC,7,25,147,43
+    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,21,37,42,10
+    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,75,37,41,10
+    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,21,51,37,10
+    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,75,51,29,10
+END
+
+IDTAB_COMPILER DIALOG DISCARDABLE  0, 0, 210, 154
+STYLE DS_CONTROL | DS_CENTER | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "Optimize for:",IDC_STATIC,16,8,40,8
+    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,61,8,35,10
+    CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,105,
+                    8,35,10
+    LTEXT           "Convention:",IDC_STATIC,16,24,39,8
+    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,61,24,33,10
+    CONTROL         "stdcall",IDC_RADIO_STDCALL,"Button",BS_AUTORADIOBUTTON,
+                    105,24,36,10
+    LTEXT           "&Warning:",IDC_STATIC,16,40,30,8
+    CONTROL         "4",IDRADIO_WARN4,"Button",BS_AUTORADIOBUTTON,61,40,20,
+                    10
+    CONTROL         "3",IDRADIO_WARN3,"Button",BS_AUTORADIOBUTTON,86,40,20,
+                    10
+    CONTROL         "2",IDRADIO_WARN2,"Button",BS_AUTORADIOBUTTON,110,40,20,
+                    10
+    CONTROL         "1",IDRADIO_WARN1,"Button",BS_AUTORADIOBUTTON,130,40,20,
+                    10
+    LTEXT           "PC&H:",IDC_STATIC,16,58,18,8
+    EDITTEXT        IDEDIT_PCH,39,57,45,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Change...",IDBTN_PCH,94,57,51,14
+    LTEXT           "CFlags:",IDC_STATIC,15,80,24,8
+    EDITTEXT        IDEDIT_CFLAGS,45,77,100,14,ES_AUTOHSCROLL
+    LTEXT           "IncDirs:",IDC_STATIC,15,97,25,8
+    EDITTEXT        IDEDIT_INCDIRS,45,95,100,14,ES_AUTOHSCROLL
+    CONTROL         "Permissive",IDC_CHECK_PERMISSIVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,116,49,10
+END
+
+IDTAB_LINKER DIALOG DISCARDABLE  0, 0, 210, 154
+STYLE DS_CONTROL | DS_CENTER | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    CONTROL         "&64-bit builds",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,9,7,53,10
+    CONTROL         "'64' suffix",IDCHECK_BITEXT,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,91,7,45,10
+    CONTROL         "Static CRT",IDCHECK_STATIC_CRT,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,9,23,51,10
+    CONTROL         "MS-Link",IDCHECK_MSLINKER,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,91,23,42,10
+    LTEXT           "Link Flags:",IDC_STATIC,7,39,35,8
+    EDITTEXT        IDEDIT_LINK_FLAGS,47,36,89,14,ES_AUTOHSCROLL
+    LTEXT           "LibDirs:",IDC_STATIC,9,55,24,8
+    EDITTEXT        IDEDIT_LIBDIRS,47,52,89,14,ES_AUTOHSCROLL
+    GROUPBOX        "Libraries",IDC_STATIC,7,69,147,78
+    LTEXT           "Build these:",IDC_STATIC,12,83,38,8
+    EDITTEXT        IDEDIT_LIBS_BUILD,25,96,114,14,ES_AUTOHSCROLL
+    LTEXT           "Link these:",IDC_STATIC,12,112,36,8
+    EDITTEXT        IDEDIT_LIBS_LINK,25,124,114,14,ES_AUTOHSCROLL
+END
+
+IDTAB_SCRIPTS DIALOG DISCARDABLE  0, 0, 210, 154
+STYLE DS_CONTROL | DS_CENTER | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    GROUPBOX        "Create Makefile",IDC_STATIC,7,7,147,30
+    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON |
+                    WS_GROUP | WS_TABSTOP,18,22,37,10
+    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,59,22,37,10
+    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON |
+                    WS_TABSTOP,100,22,37,10
 END
 
 
@@ -223,6 +327,46 @@ BEGIN
         RIGHTMARGIN, 227
         TOPMARGIN, 6
         BOTTOMMARGIN, 188
+    END
+
+    IDDLG_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 240
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 217
+    END
+
+    IDTAB_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 203
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
+    END
+
+    IDTAB_COMPILER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 203
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
+    END
+
+    IDTAB_LINKER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 203
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
+    END
+
+    IDTAB_SCRIPTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 203
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
     END
 END
 #endif    // APSTUDIO_INVOKED

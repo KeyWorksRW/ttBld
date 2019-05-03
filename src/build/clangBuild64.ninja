@@ -62,6 +62,16 @@ build $outdir/vcxproj.obj: compile vcxproj.cpp | $outdir/pch.obj
 
 build $outdir/writesrcfiles.obj: compile writesrcfiles.cpp | $outdir/pch.obj
 
+build $outdir/taboptions.obj: compile taboptions.cpp | $outdir/pch.obj
+
+build $outdir/tabgeneral.obj: compile tabgeneral.cpp | $outdir/pch.obj
+
+build $outdir/tabcompiler.obj: compile tabcompiler.cpp | $outdir/pch.obj
+
+build $outdir/tablinker.obj: compile tablinker.cpp | $outdir/pch.obj
+
+build $outdir/tabscripts.obj: compile tabscripts.cpp | $outdir/pch.obj
+
 build $resout/makeninja.res: rc makeninja.rc | $
   resource.h $
   strtable.h $
@@ -91,5 +101,10 @@ build ../bin64/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib64.l
   $outdir/options.obj $
   $outdir/parsehhp.obj $
   $outdir/vcxproj.obj $
-  $outdir/writesrcfiles.obj
+  $outdir/writesrcfiles.obj $
+  $outdir/taboptions.obj $
+  $outdir/tabgeneral.obj $
+  $outdir/tabcompiler.obj $
+  $outdir/tablinker.obj $
+  $outdir/tabscripts.obj
 

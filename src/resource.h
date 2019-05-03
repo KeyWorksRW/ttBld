@@ -1,23 +1,26 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
-// Used by makesrcfiles.rc
+// Used by makeninja.rc
 //
-#define IDR_PRE_PROJECT			1024
-#define IDR_POST_PROJECT		1025
-#define IDR_MAKEFILE			1026
-
-#define IDR_VCXPROJ_MASTER		1030
-#define IDR_VCXPROJ_FILTERS		1031
-
 #define IDDLG_SRCFILES                  100
 #define IDDDLG_CONVERT                  101
+#define IDDLG_OPTIONS                   102
+#define IDTAB_GENERAL                   103
+#define IDTAB_COMPILER                  104
+#define IDTAB_LINKER                    105
+#define IDTAB_SCRIPTS                   106
+#define IDR_PRE_PROJECT                 1024
 #define IDEDIT_PROJ_NAME                1024
+#define IDR_POST_PROJECT                1025
 #define IDRADIO_NORMAL                  1025
+#define IDR_MAKEFILE                    1026
 #define IDRADIO_CONSOLE                 1026
 #define IDRADIO_LIB                     1027
 #define IDRADIO_DLL                     1028
 #define IDCHECK_CODEBLOCKS              1029
+#define IDR_VCXPROJ_MASTER              1030
 #define IDCHECK_VCXPROJ                 1030
+#define IDR_VCXPROJ_FILTERS             1031
 #define IDCHECK_CODELITE                1031
 #define IDCHECK_CLANG                   1032
 #define IDCHECK_MSVC                    1033
@@ -64,14 +67,15 @@
 #define IDTXT_FILES_FOUND               1072
 #define IDRADIO_FILES                   1073
 #define IDRADIO_CONVERT                 1074
+#define IDTAB                           1075
 
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        102
+#define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1075
+#define _APS_NEXT_CONTROL_VALUE         1076
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
