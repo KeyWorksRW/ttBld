@@ -14,6 +14,7 @@
 
 void CTabCompiler::OnBegin(void)
 {
+	EnableShadeBtns();
 	SetCheck(DLG_ID(m_pOpts->IsOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
 	SetCheck(DLG_ID(m_pOpts->GetBoolOption(OPT_STDCALL) ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
 
