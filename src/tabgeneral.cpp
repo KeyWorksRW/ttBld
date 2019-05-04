@@ -8,7 +8,10 @@
 
 #include "pch.h"
 
+#include <ttdirdlg.h>	// ttCDirDlg
+
 #include "dlgoptions.h"
+#include "strtable.h"
 
 void CTabGeneral::OnBegin(void)
 {
@@ -37,6 +40,26 @@ void CTabGeneral::OnBegin(void)
 		SetCheck(DLG_ID(IDRADIO_LIB));
 	else
 		SetCheck(DLG_ID(IDRADIO_NORMAL));
+
+	if (!m_pOpts->GetBoolOption(OPT_64BIT)) {
+		SetCheck(DLG_ID(IDCHECK_32BIT));
+		if (m_pOpts->GetOption(OPT_TARGET_DIR32))
+			SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
+		else
+			SetControlText(DLG_ID(IDEDIT_DIR32), "bin");
+	}
+	else {
+		SetCheck(DLG_ID(IDCHECK_64BIT));
+		if (m_pOpts->GetOption(OPT_TARGET_DIR64))
+			SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
+		else
+			SetControlText(DLG_ID(IDEDIT_DIR64), "bin64");
+
+		if (m_pOpts->GetOption(OPT_TARGET_DIR32)) {
+			SetCheck(DLG_ID(IDCHECK_32BIT));
+			SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
+		}
+	}
 }
 
 void CTabGeneral::OnOK(void)
@@ -54,5 +77,58 @@ void CTabGeneral::OnOK(void)
 		m_pOpts->UpdateOption(OPT_EXE_TYPE, "lib");
 	else
 		m_pOpts->UpdateOption(OPT_EXE_TYPE, "window");
+
+	if (GetCheck(DLG_ID(IDCHECK_32BIT))) {
+		m_pOpts->UpdateOption(OPT_32BIT, true);
+		csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
+		if (csz.IsNonEmpty())
+			m_pOpts->UpdateOption(OPT_TARGET_DIR32, (char*) csz);
+	}
+
+	if (GetCheck(DLG_ID(IDCHECK_64BIT))) {
+		m_pOpts->UpdateOption(OPT_64BIT, true);
+		csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
+		if (csz.IsNonEmpty())
+			m_pOpts->UpdateOption(OPT_TARGET_DIR64, (char*) csz);
+	}
 }
 
+void CTabGeneral::OnBtnDir32()
+{
+	ttCDirDlg dlg;
+	dlg.SetTitle(tt::GetResString(IDS_32BIT_DIR));
+
+	ttCStr cszDir;
+	cszDir.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
+	cszDir.GetFullPathName();
+	if (!tt::DirExists(cszDir))	// SHCreateItemFromParsingName will fail if the folder doesn't already exist
+		cszDir.GetCWD();
+
+	dlg.SetStartingDir(cszDir);
+	if (dlg.GetFolderName(*this)) {
+		ttCStr cszCWD;
+		cszCWD.GetCWD();
+		tt::ConvertToRelative(cszCWD, dlg, cszDir);
+		SetControlText(DLG_ID(IDEDIT_DIR32), cszDir);
+	}
+}
+
+void CTabGeneral::OnBtnDir64()
+{
+	ttCDirDlg dlg;
+	dlg.SetTitle(tt::GetResString(IDS_64BIT_DIR));
+
+	ttCStr cszDir;
+	cszDir.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
+	cszDir.GetFullPathName();
+	if (!tt::DirExists(cszDir))	// SHCreateItemFromParsingName will fail if the folder doesn't already exist
+		cszDir.GetCWD();
+
+	dlg.SetStartingDir(cszDir);
+	if (dlg.GetFolderName(*this)) {
+		ttCStr cszCWD;
+		cszCWD.GetCWD();
+		tt::ConvertToRelative(cszCWD, dlg, cszDir);
+		SetControlText(DLG_ID(IDEDIT_DIR64), cszDir);
+	}
+}

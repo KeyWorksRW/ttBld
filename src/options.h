@@ -27,6 +27,7 @@ namespace sfopt {	// .srcfiles otpion
 		// The following are boolean options (true or false)
 
 		OPT_64BIT,			// if true, enable 64-bit support (link with 64-bit libraries).
+		OPT_32BIT,			// if true, enable 32-bit support (link with 32-bit libraries).
 		OPT_BIT_SUFFIX,		// true means append "64" to target's directory or .exe name
 		OPT_DEBUG_RC,		// true means build a -D_DEBUG version of the project's rc file
 		OPT_PERMISSIVE,		// true means add -permissive- compiler flag

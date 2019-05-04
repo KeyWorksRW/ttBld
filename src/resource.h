@@ -68,14 +68,19 @@
 #define IDRADIO_FILES                   1073
 #define IDRADIO_CONVERT                 1074
 #define IDTAB                           1075
+#define IDCHECK_32BIT                   1076
+#define IDEDIT_DIR32                    1077
+#define IDBTN_DIR32                     1078
+#define IDEDIT_DIR64                    1080
+#define IDBTN_DIR64                     1081
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1076
+#define _APS_NEXT_CONTROL_VALUE         1079
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

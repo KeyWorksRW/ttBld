@@ -151,15 +151,26 @@ FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
     EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
-    GROUPBOX        "Target",IDC_STATIC,7,25,147,43
+    GROUPBOX        "Project Type",IDC_STATIC,7,25,147,45
     CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,21,37,42,10
+                    WS_GROUP | WS_TABSTOP,19,40,42,10
     CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,75,37,41,10
+                    WS_TABSTOP,73,40,41,10
     CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,21,51,37,10
+                    WS_TABSTOP,19,54,37,10
     CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,75,51,29,10
+                    WS_TABSTOP,73,54,29,10
+    GROUPBOX        "Platform",IDC_STATIC,7,83,196,59
+    CONTROL         "32-bit",IDCHECK_32BIT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,17,98,33,10
+    LTEXT           "Dir:",IDC_STATIC,61,99,12,8
+    EDITTEXT        IDEDIT_DIR32,77,95,83,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Dir...",IDBTN_DIR32,167,94,29,16
+    CONTROL         "64-bit",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,17,120,33,10
+    LTEXT           "Dir:",IDC_STATIC,61,121,12,8
+    EDITTEXT        IDEDIT_DIR64,77,117,83,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Dir...",IDBTN_DIR64,167,116,29,16
 END
 
 IDTAB_COMPILER DIALOG DISCARDABLE  8, 20, 210, 190
@@ -262,7 +273,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 203
         TOPMARGIN, 7
-        BOTTOMMARGIN, 147
+        BOTTOMMARGIN, 180
     END
 
     IDTAB_COMPILER, DIALOG
