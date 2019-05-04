@@ -9,6 +9,8 @@
 #define IDTAB_COMPILER                  104
 #define IDTAB_LINKER                    105
 #define IDTAB_SCRIPTS                   106
+#define IDTAB_RCMIDL                    107
+#define IDTAB_CLANG                     108
 #define IDR_PRE_PROJECT                 1024
 #define IDEDIT_PROJ_NAME                1024
 #define IDR_POST_PROJECT                1025
@@ -71,8 +73,14 @@
 #define IDCHECK_32BIT                   1076
 #define IDEDIT_DIR32                    1077
 #define IDBTN_DIR32                     1078
+#define IDEDIT_COMMON                   1079
 #define IDEDIT_DIR64                    1080
+#define IDEDIT_RELEASE                  1080
 #define IDBTN_DIR64                     1081
+#define IDEDIT_DEBUG                    1081
+#define IDEDIT_COMMON_MIDL              1085
+#define IDEDIT_RELEASE_MIDL             1086
+#define IDEDIT_DEBUG_MIDL               1087
 
 // Next default values for new objects
 // 
@@ -80,7 +88,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1079
+#define _APS_NEXT_CONTROL_VALUE         1082
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

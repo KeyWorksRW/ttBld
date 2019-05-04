@@ -45,7 +45,9 @@ CTabOptions::CTabOptions() : ttCDlg(IDDLG_OPTIONS)
 {
 	m_tabGeneral.SetParentClass(this);
 	m_tabCompiler.SetParentClass(this);
+	m_tabCLang.SetParentClass(this);
 	m_tabLinker.SetParentClass(this);
+	m_tabRcMidl.SetParentClass(this);
 	m_tabScripts.SetParentClass(this);
 
 	ReadFile();	// read in any existing .srcfiles
@@ -89,8 +91,14 @@ void CTabOptions::OnBegin(void)
 	ti.pszText = (char*) tt::GetResString(IDS_TAB_COMPILER);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_COMPILER, (LPARAM) &ti);
 
+	ti.pszText = (char*) tt::GetResString(IDS_TAB_CLANG);
+	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_CLANG, (LPARAM) &ti);
+
 	ti.pszText = (char*) tt::GetResString(IDS_TAB_LINKER);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_LINKER, (LPARAM) &ti);
+
+	ti.pszText = (char*) tt::GetResString(IDS_TAB_RC_MIDL);
+	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_RC_MIDL, (LPARAM) &ti);
 
 	ti.pszText = (char*) tt::GetResString(IDS_TAB_SCRIPTS);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_SCRIPTS, (LPARAM) &ti);
@@ -145,8 +153,16 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
 						m_hwndTabSub = m_tabCompiler.DoModeless(*this);
 						break;
 
+					case TAB_CLANG:
+						m_hwndTabSub = m_tabCLang.DoModeless(*this);
+						break;
+
 					case TAB_LINKER:
 						m_hwndTabSub = m_tabLinker.DoModeless(*this);
+						break;
+
+					case TAB_RC_MIDL:
+						m_hwndTabSub = m_tabRcMidl.DoModeless(*this);
 						break;
 
 					case TAB_SCRIPTS:

@@ -68,7 +68,11 @@ build $outdir/tabgeneral.obj: compile tabgeneral.cpp | $outdir/pch.obj
 
 build $outdir/tabcompiler.obj: compile tabcompiler.cpp | $outdir/pch.obj
 
+build $outdir/tabclang.obj: compile tabclang.cpp | $outdir/pch.obj
+
 build $outdir/tablinker.obj: compile tablinker.cpp | $outdir/pch.obj
+
+build $outdir/tabrcmidl.obj: compile tabrcmidl.cpp | $outdir/pch.obj
 
 build $outdir/tabscripts.obj: compile tabscripts.cpp | $outdir/pch.obj
 
@@ -104,6 +108,8 @@ build ../bin/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib.lib $
   $outdir/dlgoptions.obj $
   $outdir/tabgeneral.obj $
   $outdir/tabcompiler.obj $
+  $outdir/tabclang.obj $
   $outdir/tablinker.obj $
+  $outdir/tabrcmidl.obj $
   $outdir/tabscripts.obj
 

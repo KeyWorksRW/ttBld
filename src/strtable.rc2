@@ -8,6 +8,8 @@
 
 STRINGTABLE
 BEGIN
+	IDS_TAB_CLANG			"CLang"
+	IDS_TAB_RC_MIDL			"Rc/Midl"
 	IDS_64BIT_DIR			"Select 64-bit target directory"
 	IDS_32BIT_DIR			"Select 32-bit Target directory"
 	IDS_TAB_SCRIPTS			"Scripts"
