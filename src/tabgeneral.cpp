@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-#include "taboptions.h"
+#include "dlgoptions.h"
 
 void CTabGeneral::OnBegin(void)
 {
@@ -28,6 +28,15 @@ void CTabGeneral::OnBegin(void)
 		}
 		SetControlText(DLG_ID(IDEDIT_PROJ_NAME), pszProject);
 	}
+
+	if (m_pOpts->IsExeTypeConsole())
+		SetCheck(DLG_ID(IDRADIO_CONSOLE));
+	else if (m_pOpts->IsExeTypeDll())
+		SetCheck(DLG_ID(IDRADIO_DLL));
+	else if (m_pOpts->IsExeTypeLib())
+		SetCheck(DLG_ID(IDRADIO_LIB));
+	else
+		SetCheck(DLG_ID(IDRADIO_NORMAL));
 }
 
 void CTabGeneral::OnOK(void)
@@ -36,5 +45,14 @@ void CTabGeneral::OnOK(void)
 
 	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
 	m_pOpts->UpdateOption(OPT_PROJECT, (char*) csz);
+
+	if (GetCheck(DLG_ID(IDRADIO_CONSOLE)))
+		m_pOpts->UpdateOption(OPT_EXE_TYPE, "console");
+	else if (GetCheck(DLG_ID(IDRADIO_DLL)))
+		m_pOpts->UpdateOption(OPT_EXE_TYPE, "dll");
+	else if (GetCheck(DLG_ID(IDRADIO_LIB)))
+		m_pOpts->UpdateOption(OPT_EXE_TYPE, "lib");
+	else
+		m_pOpts->UpdateOption(OPT_EXE_TYPE, "window");
 }
 

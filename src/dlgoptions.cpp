@@ -11,7 +11,7 @@
 #include "ttlibicons.h"
 #include "strtable.h"
 
-#include "taboptions.h"
+#include "dlgoptions.h"
 
 bool ChangeOptions(bool bDryRun)
 {

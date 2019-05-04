@@ -28,19 +28,19 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE
+1 TEXTINCLUDE DISCARDABLE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE
+2 TEXTINCLUDE DISCARDABLE 
 BEGIN
     "#include ""winres.h""\r\n"
     "#include ""strtable.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE
+3 TEXTINCLUDE DISCARDABLE 
 BEGIN
     "#include ""ttlibicons.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""strtable.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -112,80 +112,6 @@ END
 // Dialog
 //
 
-IDDLG_SRCFILES DIALOG DISCARDABLE  0, 0, 330, 260
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION ".srcfiles Options"
-FONT 8, "MS Shell Dlg"
-BEGIN
-    LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
-    EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
-    GROUPBOX        "Target",IDC_STATIC,7,25,147,43
-    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON |
-                    WS_GROUP | WS_TABSTOP,21,37,42,10
-    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON |
-                    WS_TABSTOP,75,37,41,10
-    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON |
-                    WS_TABSTOP,21,51,37,10
-    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
-                    WS_TABSTOP,75,51,29,10
-    GROUPBOX        "Compiler Options",IDC_STATIC,6,77,147,141
-    LTEXT           "Optimize for:",IDC_STATIC,16,92,40,8
-    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON |
-                    WS_GROUP | WS_TABSTOP,61,92,35,10
-    CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,105,
-                    92,35,10
-    LTEXT           "Convention:",IDC_STATIC,16,108,39,8
-    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON |
-                    WS_GROUP | WS_TABSTOP,61,108,33,10
-    CONTROL         "stdcall",IDC_RADIO_STDCALL,"Button",BS_AUTORADIOBUTTON,
-                    105,108,36,10
-    LTEXT           "&Warning:",IDC_STATIC,16,124,30,8
-    CONTROL         "4",IDRADIO_WARN4,"Button",BS_AUTORADIOBUTTON,61,124,20,
-                    10
-    CONTROL         "3",IDRADIO_WARN3,"Button",BS_AUTORADIOBUTTON,86,124,20,
-                    10
-    CONTROL         "2",IDRADIO_WARN2,"Button",BS_AUTORADIOBUTTON,110,124,20,
-                    10
-    CONTROL         "1",IDRADIO_WARN1,"Button",BS_AUTORADIOBUTTON,130,124,20,
-                    10
-    LTEXT           "PC&H:",IDC_STATIC,16,143,18,8
-    EDITTEXT        IDEDIT_PCH,39,141,45,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Change...",IDBTN_PCH,94,141,51,14
-    LTEXT           "CFlags:",IDC_STATIC,15,164,24,8
-    EDITTEXT        IDEDIT_CFLAGS,45,161,100,14,ES_AUTOHSCROLL
-    LTEXT           "IncDirs:",IDC_STATIC,15,181,25,8
-    EDITTEXT        IDEDIT_INCDIRS,45,179,100,14,ES_AUTOHSCROLL
-    CONTROL         "Permissive",IDC_CHECK_PERMISSIVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,15,200,49,10
-    GROUPBOX        "Linker Options",IDC_STATIC,177,44,147,82
-    CONTROL         "&64-bit builds",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,186,57,53,10
-    CONTROL         "'64' suffix",IDCHECK_BITEXT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,268,57,45,10
-    CONTROL         "Static CRT",IDCHECK_STATIC_CRT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,186,73,51,10
-    CONTROL         "MS-Link",IDCHECK_MSLINKER,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,268,73,42,10
-    LTEXT           "Link Flags:",IDC_STATIC,184,89,35,8
-    EDITTEXT        IDEDIT_LINK_FLAGS,224,87,89,14,ES_AUTOHSCROLL
-    LTEXT           "LibDirs:",IDC_STATIC,186,105,24,8
-    EDITTEXT        IDEDIT_LIBDIRS,224,103,89,14,ES_AUTOHSCROLL
-    GROUPBOX        "Create Makefile",IDC_STATIC,177,3,147,30
-    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON |
-                    WS_GROUP | WS_TABSTOP,188,18,37,10
-    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON |
-                    WS_TABSTOP,229,18,37,10
-    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON |
-                    WS_TABSTOP,270,18,37,10
-    GROUPBOX        "Libraries",IDC_STATIC,177,139,147,78
-    LTEXT           "Build these:",IDC_STATIC,182,153,38,8
-    EDITTEXT        IDEDIT_LIBS_BUILD,195,166,114,14,ES_AUTOHSCROLL
-    LTEXT           "Link these:",IDC_STATIC,182,182,36,8
-    EDITTEXT        IDEDIT_LIBS_LINK,195,194,114,14,ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,212,238,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,271,238,50,14
-END
-
 IDDDLG_CONVERT DIALOG DISCARDABLE  0, 0, 233, 194
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Create new .srcfiles file"
@@ -200,7 +126,7 @@ BEGIN
     PUSHBUTTON      "C&hange...",IDBTN_CHANGE_IN,177,76,50,14
     CONTROL         "Create using &project file:",IDRADIO_CONVERT,"Button",
                     BS_AUTORADIOBUTTON,6,121,91,10
-    COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT |
+    COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "&Locate...",IDBTN_LOCATE_SCRIPT,177,135,50,14
     DEFPUSHBUTTON   "Create",IDOK,115,174,50,14
@@ -209,7 +135,7 @@ BEGIN
 END
 
 IDDLG_OPTIONS DIALOG DISCARDABLE  0, 0, 246, 223
-STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_VISIBLE |
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
 CAPTION ".srcfiles Options"
 FONT 8, "MS Shell Dlg"
@@ -226,13 +152,13 @@ BEGIN
     LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
     EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
     GROUPBOX        "Target",IDC_STATIC,7,25,147,43
-    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,21,37,42,10
-    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,75,37,41,10
-    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,21,51,37,10
-    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,75,51,29,10
 END
 
@@ -240,51 +166,51 @@ IDTAB_COMPILER DIALOG DISCARDABLE  20, 20, 210, 154
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "Optimize for:",IDC_STATIC,16,8,40,8
-    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON |
-                    WS_GROUP | WS_TABSTOP,61,8,35,10
-    CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,105,
-                    8,35,10
-    LTEXT           "Convention:",IDC_STATIC,16,24,39,8
-    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON |
-                    WS_GROUP | WS_TABSTOP,61,24,33,10
+    LTEXT           "Optimize for:",IDC_STATIC,8,7,40,8
+    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,53,7,35,10
+    CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,97,7,
+                    35,10
+    LTEXT           "Convention:",IDC_STATIC,8,23,39,8
+    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,53,23,33,10
     CONTROL         "stdcall",IDC_RADIO_STDCALL,"Button",BS_AUTORADIOBUTTON,
-                    105,24,36,10
-    LTEXT           "&Warning:",IDC_STATIC,16,40,30,8
-    CONTROL         "4",IDRADIO_WARN4,"Button",BS_AUTORADIOBUTTON,61,40,20,
+                    97,23,36,10
+    LTEXT           "&Warning:",IDC_STATIC,8,39,30,8
+    CONTROL         "4",IDRADIO_WARN4,"Button",BS_AUTORADIOBUTTON,53,39,20,
                     10
-    CONTROL         "3",IDRADIO_WARN3,"Button",BS_AUTORADIOBUTTON,86,40,20,
+    CONTROL         "3",IDRADIO_WARN3,"Button",BS_AUTORADIOBUTTON,78,39,20,
                     10
-    CONTROL         "2",IDRADIO_WARN2,"Button",BS_AUTORADIOBUTTON,110,40,20,
+    CONTROL         "2",IDRADIO_WARN2,"Button",BS_AUTORADIOBUTTON,102,39,20,
                     10
-    CONTROL         "1",IDRADIO_WARN1,"Button",BS_AUTORADIOBUTTON,130,40,20,
+    CONTROL         "1",IDRADIO_WARN1,"Button",BS_AUTORADIOBUTTON,122,39,20,
                     10
-    LTEXT           "PC&H:",IDC_STATIC,16,58,18,8
-    EDITTEXT        IDEDIT_PCH,39,57,45,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Change...",IDBTN_PCH,94,57,51,14
-    LTEXT           "CFlags:",IDC_STATIC,15,80,24,8
-    EDITTEXT        IDEDIT_CFLAGS,45,77,100,14,ES_AUTOHSCROLL
-    LTEXT           "IncDirs:",IDC_STATIC,15,97,25,8
-    EDITTEXT        IDEDIT_INCDIRS,45,95,100,14,ES_AUTOHSCROLL
+    LTEXT           "PC&H:",IDC_STATIC,8,57,18,8
+    EDITTEXT        IDEDIT_PCH,31,56,45,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Change...",IDBTN_PCH,86,56,51,14
+    LTEXT           "CFlags:",IDC_STATIC,7,79,24,8
+    EDITTEXT        IDEDIT_CFLAGS,37,76,100,14,ES_AUTOHSCROLL
+    LTEXT           "IncDirs:",IDC_STATIC,7,96,25,8
+    EDITTEXT        IDEDIT_INCDIRS,37,94,100,14,ES_AUTOHSCROLL
     CONTROL         "Permissive",IDC_CHECK_PERMISSIVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,15,116,49,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,115,49,10
 END
 
 IDTAB_LINKER DIALOG DISCARDABLE  20, 20, 210, 154
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
-    CONTROL         "&64-bit builds",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,9,7,53,10
-    CONTROL         "'64' suffix",IDCHECK_BITEXT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,91,7,45,10
-    CONTROL         "Static CRT",IDCHECK_STATIC_CRT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,9,23,51,10
-    CONTROL         "MS-Link",IDCHECK_MSLINKER,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,91,23,42,10
+    CONTROL         "&64-bit builds",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,53,10
+    CONTROL         "'64' suffix",IDCHECK_BITEXT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,89,7,45,10
+    CONTROL         "Static CRT",IDCHECK_STATIC_CRT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,23,51,10
+    CONTROL         "MS-Link",IDCHECK_MSLINKER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,89,23,42,10
     LTEXT           "Link Flags:",IDC_STATIC,7,39,35,8
     EDITTEXT        IDEDIT_LINK_FLAGS,47,36,89,14,ES_AUTOHSCROLL
-    LTEXT           "LibDirs:",IDC_STATIC,9,55,24,8
+    LTEXT           "LibDirs:",IDC_STATIC,7,55,24,8
     EDITTEXT        IDEDIT_LIBDIRS,47,52,89,14,ES_AUTOHSCROLL
     GROUPBOX        "Libraries",IDC_STATIC,7,69,147,78
     LTEXT           "Build these:",IDC_STATIC,12,83,38,8
@@ -298,11 +224,11 @@ STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Create Makefile",IDC_STATIC,7,7,147,30
-    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,18,22,37,10
-    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,59,22,37,10
-    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,100,22,37,10
 END
 
@@ -313,14 +239,8 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE
+GUIDELINES DESIGNINFO DISCARDABLE 
 BEGIN
-    IDDLG_SRCFILES, DIALOG
-    BEGIN
-        RIGHTMARGIN, 324
-        BOTTOMMARGIN, 252
-    END
-
     IDDDLG_CONVERT, DIALOG
     BEGIN
         LEFTMARGIN, 6

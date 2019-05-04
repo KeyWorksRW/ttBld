@@ -16,7 +16,6 @@
 #endif // _MSC_VER
 
 #include "convertdlg.h" 	// CConvertDlg
-#include "dlgsrcoptions.h"	// CDlgSrcOptions
 #include "ninja.h"			// CNinja
 #include "vcxproj.h"		// CVcxProj
 
@@ -60,7 +59,7 @@ int main(int argc, char* argv[])
 			if (pszTmp)
 				*pszTmp = 0;
 			_chdir(csz);
-			if (!SetSrcFileOptions(bDryRun))
+			if (!ChangeOptions(bDryRun))
 				return 1;
 		}
 		else if (tt::IsSameStrI(argv[argpos] + 1, "add")) {
@@ -72,13 +71,8 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 		else if (tt::IsSameSubStrI(argv[argpos] + 1, "opt")) {
-#if 1
 			if (!ChangeOptions(bDryRun))
 				return 1;
-#else
-			if (!SetSrcFileOptions(bDryRun))
-				return 1;
-#endif
 		}
 		else if (tt::IsSameSubStrI(argv[argpos] + 1, "nop")) {
 			bReadPrivate = false;
@@ -97,7 +91,7 @@ int main(int argc, char* argv[])
 		if (pszTmp)
 			*pszTmp = 0;
 		_chdir(csz);
-		if (!SetSrcFileOptions(bDryRun))
+		if (!ChangeOptions(bDryRun))
 			return 1;
 	}
 

@@ -26,7 +26,13 @@ public:
 	void SetParentClass(CTabOptions* pclsOptions) { m_pOpts = pclsOptions; }
 
 protected:
+	BEGIN_TTCMD_MAP()
+		TTCASE_CMD(IDBTN_PCH, OnBtnChangePch)
+	END_TTMSG_MAP()
+
 	// Message handlers
+
+	void OnBtnChangePch();
 
 	void OnBegin(void);
 	void OnOK(void);

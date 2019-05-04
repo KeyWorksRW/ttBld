@@ -19,7 +19,6 @@ Files:
 	convertdlg.cpp
 	createmakefile.cpp
 	csrcfiles.cpp
-	dlgsrcoptions.cpp
 	dryrun.cpp
 	init.cpp
 	ninja.cpp
@@ -28,7 +27,9 @@ Files:
 	vcxproj.cpp
 	writesrcfiles.cpp
 
-	taboptions.cpp
+# Modules for creating the Options UI
+
+	dlgoptions.cpp
 	tabgeneral.cpp
 	tabcompiler.cpp
 	tablinker.cpp

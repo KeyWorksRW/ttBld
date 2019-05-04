@@ -46,8 +46,6 @@ build $outdir/createmakefile.obj: compile createmakefile.cpp | $outdir/pch.obj
 
 build $outdir/csrcfiles.obj: compile csrcfiles.cpp | $outdir/pch.obj
 
-build $outdir/dlgsrcoptions.obj: compile dlgsrcoptions.cpp | $outdir/pch.obj
-
 build $outdir/dryrun.obj: compile dryrun.cpp | $outdir/pch.obj
 
 build $outdir/init.obj: compile init.cpp | $outdir/pch.obj
@@ -62,7 +60,7 @@ build $outdir/vcxproj.obj: compile vcxproj.cpp | $outdir/pch.obj
 
 build $outdir/writesrcfiles.obj: compile writesrcfiles.cpp | $outdir/pch.obj
 
-build $outdir/taboptions.obj: compile taboptions.cpp | $outdir/pch.obj
+build $outdir/dlgoptions.obj: compile dlgoptions.cpp | $outdir/pch.obj
 
 build $outdir/tabgeneral.obj: compile tabgeneral.cpp | $outdir/pch.obj
 
@@ -94,7 +92,6 @@ build ../bin/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib.lib $
   $outdir/convertdlg.obj $
   $outdir/createmakefile.obj $
   $outdir/csrcfiles.obj $
-  $outdir/dlgsrcoptions.obj $
   $outdir/dryrun.obj $
   $outdir/init.obj $
   $outdir/ninja.obj $
@@ -102,7 +99,7 @@ build ../bin/MakeNinja.exe : link $resout/makeninja.res ../ttLib/lib/ttLib.lib $
   $outdir/parsehhp.obj $
   $outdir/vcxproj.obj $
   $outdir/writesrcfiles.obj $
-  $outdir/taboptions.obj $
+  $outdir/dlgoptions.obj $
   $outdir/tabgeneral.obj $
   $outdir/tabcompiler.obj $
   $outdir/tablinker.obj $

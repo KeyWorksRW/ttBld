@@ -26,7 +26,6 @@
 #include "ttlibicons.h" 			// Icons for use on 3D shaded buttons (ttShadeBtn)
 #include "strtable.h"				// String resource IDs
 #include "strtable.h"				// String resource IDs
-#include "dlgsrcoptions.h"			// CDlgSrcOptions
 
 #include "convertdlg.h" 			// CConvertDlg
 
