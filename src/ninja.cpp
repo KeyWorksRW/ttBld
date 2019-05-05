@@ -346,9 +346,9 @@ void CNinja::WriteCompilerFlags()
 		}
 	}
 
-	if (GetOption(OPT_CFLAGS)) {
+	if (GetOption(OPT_CFLAGS_CMN)) {
 		m_pkfOut->WriteChar(' ');
-		m_pkfOut->WriteStr(GetOption(OPT_CFLAGS));
+		m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_CMN));
 	}
 
 	// Now write out the compiler-specific flags

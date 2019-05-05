@@ -29,10 +29,11 @@ namespace sfopt {			// .srcfiles otpions
 		OPT_STATIC_CRT,		// true means link to static CRT
 		OPT_MS_LINKER,		// use link.exe even when compiling with CLANG
 
-		// The following are strings--multiple strings are separated with a semi-colon
+		OPT_CFLAGS_CMN,		// flags to pass to the compiler in all build targets
+		OPT_CFLAGS_REL,		// flags to pass to the compiler in release builds
+		OPT_CFLAGS_DBG,		// flags to pass to the compiler in debug builds
 
 		OPT_COMPILERS,		// [MSVC or CLANG] default is both, set this option to limit it to one
-		OPT_CFLAGS,			// additional flags to pass to the compiler in all build targets
 		OPT_LINK_FLAGS,		// additional flags to pass to the linker in all build targets
 		OPT_NATVIS,			// Specifies a .natvis file to link into the pdb file
 
@@ -43,6 +44,10 @@ namespace sfopt {			// .srcfiles otpions
 		OPT_MDL_CMN,		// flags to pass to the midl compiler in all build targets
 		OPT_MDL_REL,		// flags to pass to the midl compiler in release builds
 		OPT_MDL_DBG,		// flags to pass to the midl compiler in debug builds
+
+		OPT_CLANG_CMN,		// flags to pass to the CLANG compiler in all build targets
+		OPT_CLANG_REL,		// flags to pass to the CLANG compiler in release builds
+		OPT_CLANG_DBG,		// flags to pass to the CLANG compiler in debug builds
 
 		OPT_INC_DIRS,		// additional directories for header files
 		OPT_LIB_DIRS,		// additional directores for lib files

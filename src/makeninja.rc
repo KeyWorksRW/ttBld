@@ -267,10 +267,17 @@ FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         "Generate CLANG ninja scripts",IDCHECK_CLANG,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,7,133,10
-    LTEXT           "Unique CLANG Flags:",IDC_STATIC,7,30,70,8
-    EDITTEXT        IDEDIT_CFLAGS,17,43,185,14,ES_AUTOHSCROLL
+    CONTROL         "Do NOT generate MSVC ninja scripts",IDCHECK_NO_MSVC,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,21,19,133,10
     CONTROL         "Use MS Linker with CLANG compiler",IDCHECK_MSLINKER,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,67,131,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,38,131,10
+    GROUPBOX        "CLANG-only flags",IDC_STATIC,7,58,196,90
+    LTEXT           "Common:",IDC_STATIC,19,78,30,8
+    EDITTEXT        IDEDIT_COMMON,59,77,133,14,ES_AUTOHSCROLL
+    LTEXT           "Release:",IDC_STATIC,19,99,29,8
+    EDITTEXT        IDEDIT_RELEASE,59,98,133,14,ES_AUTOHSCROLL
+    LTEXT           "Debug:",IDC_STATIC,19,122,24,8
+    EDITTEXT        IDEDIT_DEBUG,59,121,133,14,ES_AUTOHSCROLL
 END
 
 
@@ -343,7 +350,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 203
         TOPMARGIN, 7
-        BOTTOMMARGIN, 147
+        BOTTOMMARGIN, 182
     END
 END
 #endif    // APSTUDIO_INVOKED

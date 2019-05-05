@@ -454,7 +454,7 @@ bool CConvertDlg::ConvertVcProj()
 					cszCFlags += "-D";
 					cszCFlags += enumFlags;
 				}
-				m_cSrcFiles.UpdateOption(OPT_CFLAGS, (char*) cszCFlags);
+				m_cSrcFiles.UpdateOption(OPT_CFLAGS_CMN, (char*) cszCFlags);
 			}
 		}
 	}

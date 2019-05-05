@@ -78,6 +78,7 @@
 #define IDEDIT_RELEASE                  1080
 #define IDBTN_DIR64                     1081
 #define IDEDIT_DEBUG                    1081
+#define IDCHECK_NO_MSVC                 1082
 #define IDEDIT_COMMON_MIDL              1085
 #define IDEDIT_RELEASE_MIDL             1086
 #define IDEDIT_DEBUG_MIDL               1087
@@ -88,7 +89,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1082
+#define _APS_NEXT_CONTROL_VALUE         1083
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

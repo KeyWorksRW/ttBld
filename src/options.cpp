@@ -38,7 +38,11 @@ static const OPT_SETTING s_aOptions[] = {
 
 	{ OPT_MAKEFILE,		"Makefile",		"missing",	false, false, "[never | missing | always]" },
 	{ OPT_COMPILERS,	"Compilers",	nullptr,	false, false,  "[MSVC or CLANG] default is both, set this option to limit it to one" },
-	{ OPT_CFLAGS,		"CFlags",		nullptr,	false, false,  "additional flags to pass to the compiler in all build targets" },
+
+	{ OPT_CFLAGS_CMN,	"CFlags",		nullptr,	false, false,  "flags to pass to the compiler in all build targets" },
+	{ OPT_CFLAGS_CMN,	"CFlagsR",		nullptr,	false, false,  "flags to pass to the compiler in release builds" },
+	{ OPT_CFLAGS_CMN,	"CFlagsD",		nullptr,	false, false,  "flags to pass to the compiler in debug builds" },
+
 	{ OPT_LINK_FLAGS,	"LinkFlags",	nullptr,	false, false,  "additional flags to pass to the linker in all build targets" },
 	{ OPT_NATVIS,		"Natvis",		nullptr,	false, false,  "Specifies a .natvis file to link into the pdb file" },
 
@@ -49,6 +53,10 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_MDL_CMN,		"MIDL_CMD",		nullptr,	false, false,  "flags to pass to the midl compiler in all build targets" },
 	{ OPT_MDL_REL,		"MIDL_REL",		nullptr,	false, false,  "flags to pass to the midl compiler in release builds" },
 	{ OPT_MDL_DBG,		"MIDL_DBG",		nullptr,	false, false,  "flags to pass to the midl compiler in debug builds" },
+
+	{ OPT_CLANG_CMN,	"CLANG_CMD",	nullptr,	false, false,  "flags to pass to the CLANG compiler in all build targets" },
+	{ OPT_CLANG_REL,	"CLANG_REL",	nullptr,	false, false,  "flags to pass to the CLANG compiler in release builds" },
+	{ OPT_CLANG_DBG,	"CLANG_DBG",	nullptr,	false, false,  "flags to pass to the CLANG compiler in debug builds" },
 
 	{ OPT_DEBUG_RC,		"DebugRC",		"false",	true,  false,  "true means build a -D_DEBUG version of the project's rc file" },
 

@@ -38,8 +38,8 @@ void CTabCompiler::OnBegin(void)
 
 	if (m_pOpts->GetPchHeader())
 		SetControlText(DLG_ID(IDEDIT_PCH), m_pOpts->GetPchHeader());
-	if (m_pOpts->GetOption(OPT_CFLAGS))
-		SetControlText(DLG_ID(IDEDIT_CFLAGS), m_pOpts->GetOption(OPT_CFLAGS));
+	if (m_pOpts->GetOption(OPT_CFLAGS_CMN))
+		SetControlText(DLG_ID(IDEDIT_CFLAGS), m_pOpts->GetOption(OPT_CFLAGS_CMN));
 	if (m_pOpts->GetOption(OPT_INC_DIRS))
 		SetControlText(DLG_ID(IDEDIT_INCDIRS), m_pOpts->GetOption(OPT_INC_DIRS));
 
@@ -51,7 +51,7 @@ void CTabCompiler::OnOK(void)
 	ttCStr csz;
 
 	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_CFLAGS)));
-	m_pOpts->UpdateOption(OPT_CFLAGS, (char*) csz);
+	m_pOpts->UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
 
 	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
 	m_pOpts->UpdateOption(OPT_INC_DIRS, (char*) csz);

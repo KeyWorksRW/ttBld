@@ -156,14 +156,14 @@ void CSrcFiles::ProcessOption(char* pszLine)
 
 void CSrcFiles::AddCompilerFlag(const char* pszFlag)
 {
-	if (!GetOption(OPT_CFLAGS))
-		UpdateOption(OPT_CFLAGS, pszFlag);
+	if (!GetOption(OPT_CFLAGS_CMN))
+		UpdateOption(OPT_CFLAGS_CMN, pszFlag);
 	// else append the flag if it hasn't already been added
-	else if (!tt::FindStrI(GetOption(OPT_CFLAGS), pszFlag)) {
-		ttCStr csz(GetOption(OPT_CFLAGS));
+	else if (!tt::FindStrI(GetOption(OPT_CFLAGS_CMN), pszFlag)) {
+		ttCStr csz(GetOption(OPT_CFLAGS_CMN));
 		csz += " ";
 		csz += pszFlag;
-		UpdateOption(OPT_CFLAGS, (char*) csz);
+		UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
 	}
 }
 
