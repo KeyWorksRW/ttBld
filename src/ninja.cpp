@@ -564,9 +564,9 @@ void CNinja::WriteMidlTargets()
 
 		cszIdlC.RemoveExtension();
 		cszIdlC += "_i.c";
-		if (GetOption(OPT_MIDL_FLAGS))
+		if (GetOption(OPT_MDL_CMN))
 			m_pkfOut->printf("build %s : midl %s /tlb %s %s\n\n",
-				(char*) cszIdlC, GetOption(OPT_MIDL_FLAGS), (char*) cszTypeLib, m_lstIdlFiles[pos]);
+				(char*) cszIdlC, GetOption(OPT_MDL_CMN), (char*) cszTypeLib, m_lstIdlFiles[pos]);
 		else
 			m_pkfOut->printf("build %s : midl /tlb %s %s\n\n",
 				(char*) cszIdlC, (char*) cszTypeLib, m_lstIdlFiles[pos]);
