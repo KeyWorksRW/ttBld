@@ -19,6 +19,13 @@ void CTabScripts::OnBegin(void)
 		SetCheck(DLG_ID(IDRADIO_MF_ALWAYS));
 	else
 		SetCheck(DLG_ID(IDRADIO_MF_MISSING));
+
+	if (m_pOpts->IsCodeBlockIDE())
+		SetCheck(DLG_ID(IDCHECK_CODEBLOCKS));
+	if (m_pOpts->IsCodeLiteIDE())
+		SetCheck(DLG_ID(IDCHECK_CODELITE));
+	if (m_pOpts->IsVisualStudioIDE())
+		SetCheck(DLG_ID(IDCHECK_MSVC));
 }
 
 void CTabScripts::OnOK(void)
@@ -29,5 +36,19 @@ void CTabScripts::OnOK(void)
 		m_pOpts->UpdateOption(OPT_MAKEFILE, "always");
 	else
 		m_pOpts->UpdateOption(OPT_MAKEFILE, "missing");
+
+	ttCStr csz;
+
+	if (GetCheck(DLG_ID(IDCHECK_CODEBLOCKS)))
+		csz += "CodeBlocks ";
+	if (GetCheck(DLG_ID(IDCHECK_CODELITE)))
+		csz += "CodeLite ";
+	if (GetCheck(DLG_ID(IDCHECK_MSVC)))
+		csz += "VisualStudio ";
+
+	if (csz.IsNonEmpty()) {
+		csz.TrimRight();
+		m_pOpts->UpdateOption(OPT_IDE, (char*) csz);
+	}
 }
 

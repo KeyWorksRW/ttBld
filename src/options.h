@@ -34,8 +34,11 @@ namespace sfopt {			// .srcfiles otpions
 		OPT_CFLAGS_DBG,		// flags to pass to the compiler in debug builds
 
 		OPT_COMPILERS,		// [MSVC or CLANG] default is both, set this option to limit it to one
-		OPT_LINK_FLAGS,		// additional flags to pass to the linker in all build targets
 		OPT_NATVIS,			// Specifies a .natvis file to link into the pdb file
+
+		OPT_LINK_CMN,		// flags to pass to the linker in all build targets
+		OPT_LINK_REL,		// flags to pass to the linker in release builds
+		OPT_LINK_DBG,		// flags to pass to the linker in debug builds
 
 		OPT_RC_CMN,			// flags to pass to the resource compiler in all build targets
 		OPT_RC_REL,			// flags to pass to the resource compiler in release builds

@@ -455,9 +455,9 @@ void CNinja::WriteLinkDirective()
 		ttCStr cszRule("rule link\n  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO");
 		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /MACHINE:x64" : " /MACHINE:x86");
 
-		if (GetOption(OPT_LINK_FLAGS)) {
+		if (GetOption(OPT_LINK_CMN)) {
 			cszRule += " ";
-			cszRule += GetOption(OPT_LINK_FLAGS);
+			cszRule += GetOption(OPT_LINK_CMN);
 		}
 
 		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
@@ -484,9 +484,9 @@ void CNinja::WriteLinkDirective()
 		cszRule += " /out:$out /manifest:no";
 		cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /machine:x64" : " /machine:x86");
 
-		if (GetOption(OPT_LINK_FLAGS)) {
+		if (GetOption(OPT_LINK_CMN)) {
 			cszRule += " ";
-			cszRule += GetOption(OPT_LINK_FLAGS);
+			cszRule += GetOption(OPT_LINK_CMN);
 		}
 
 		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
