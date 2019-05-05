@@ -35,14 +35,7 @@ public:
 
 	bool CreateMakeFile();
 
-	// if not specified, both compilers are used
-	bool IsCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || tt::FindStrI(GetOption(OPT_COMPILERS), "MSVC")); }
-	bool IsCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || tt::FindStrI(GetOption(OPT_COMPILERS), "CLANG")); }
-
 	const char* GetRcFile()		{ return m_cszRcName; }
-
-	const char* GetDir32()	{ return GetOption(OPT_TARGET_DIR32); }	// 32-bit target directory
-	const char* GetDir64()	{ return GetOption(OPT_TARGET_DIR64); }	// 64-bit target directory
 
 	ttCList* GetSrcFileList()  { return &m_lstSrcFiles; }
 	ttCList* GetLibFileList()  { return &m_lstLibFiles; }

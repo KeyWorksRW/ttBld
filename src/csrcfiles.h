@@ -51,6 +51,13 @@ public:
 
 	bool IsOptimizeSpeed()	 { return (tt::FindStrI(GetOption(OPT_OPTIMIZE), "speed")); }
 
+	// if not specified, both compilers are used
+	bool IsCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || tt::FindStrI(GetOption(OPT_COMPILERS), "MSVC")); }
+	bool IsCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || tt::FindStrI(GetOption(OPT_COMPILERS), "CLANG")); }
+
+	const char* GetDir32()	{ return GetOption(OPT_TARGET_DIR32); }	// 32-bit target directory
+	const char* GetDir64()	{ return GetOption(OPT_TARGET_DIR64); }	// 64-bit target directory
+
 	const char* GetBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
 
 	void AddSourcePattern(const char* pszFilePattern);
