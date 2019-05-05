@@ -350,6 +350,14 @@ void CNinja::WriteCompilerFlags()
 		m_pkfOut->WriteChar(' ');
 		m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_CMN));
 	}
+	if (GetOption(OPT_CFLAGS_REL) && (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)) {
+		m_pkfOut->WriteChar(' ');
+		m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_REL));
+	}
+	if (GetOption(OPT_CFLAGS_DBG) && (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)) {
+		m_pkfOut->WriteChar(' ');
+		m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_REL));
+	}
 
 	// Now write out the compiler-specific flags
 
@@ -366,6 +374,19 @@ void CNinja::WriteCompilerFlags()
 		m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" : " -m32");	// specify the platform
 		if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)
 			m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");	// whole program optimization
+
+		if (GetOption(OPT_CLANG_CMN)) {
+			m_pkfOut->WriteChar(' ');
+			m_pkfOut->WriteStr(GetOption(OPT_CLANG_CMN));
+		}
+		if (GetOption(OPT_CLANG_REL) && (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)) {
+			m_pkfOut->WriteChar(' ');
+			m_pkfOut->WriteStr(GetOption(OPT_CLANG_REL));
+		}
+		if (GetOption(OPT_CLANG_DBG) && (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)) {
+			m_pkfOut->WriteChar(' ');
+			m_pkfOut->WriteStr(GetOption(OPT_CLANG_DBG));
+		}
 	}
 
 	if (GetPchHeader())
