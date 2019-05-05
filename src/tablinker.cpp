@@ -8,10 +8,14 @@
 
 #include "pch.h"
 
+#include <ttfiledlg.h>	// ttCFileDlg
+
 #include "dlgoptions.h"
 
 void CTabLinker::OnBegin(void)
 {
+	EnableShadeBtns();
+
 	SetCheck(DLG_ID(IDCHECK_STATIC_CRT), m_pOpts->GetBoolOption(OPT_STATIC_CRT));
 
 	if (m_pOpts->GetOption(OPT_LIBS))
@@ -27,6 +31,9 @@ void CTabLinker::OnBegin(void)
 		SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_LINK_REL));
 	if (m_pOpts->GetOption(OPT_LINK_DBG))
 		SetControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->GetOption(OPT_LINK_DBG));
+
+	if (m_pOpts->GetOption(OPT_NATVIS))
+		SetControlText(DLG_ID(IDEDIT_NATVIS), m_pOpts->GetOption(OPT_NATVIS));
 }
 
 void CTabLinker::OnOK(void)
@@ -52,5 +59,22 @@ void CTabLinker::OnOK(void)
 	m_pOpts->UpdateOption(OPT_BUILD_LIBS, (char*) csz);
 
 	m_pOpts->UpdateOption(OPT_STATIC_CRT, GetCheck(DLG_ID(IDCHECK_STATIC_CRT)));
+
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_NATVIS)));
+	m_pOpts->UpdateOption(OPT_NATVIS, (char*) csz);
 }
 
+void CTabLinker::OnBtnChange()
+{
+	ttCFileDlg fdlg(*this);
+	fdlg.SetFilter("Natvis Files|*.natvis");
+	ttCStr cszCWD;
+	cszCWD.GetCWD();
+	cszCWD.AddTrailingSlash();
+	fdlg.SetInitialDir(cszCWD);
+	if (fdlg.GetOpenFileName()) {
+		ttCStr cszFile;
+		tt::ConvertToRelative(cszCWD, fdlg, cszFile);
+		SetControlText(DLG_ID(IDEDIT_NATVIS), cszFile);
+	}
+}

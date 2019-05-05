@@ -81,7 +81,9 @@
 #define IDCHECK_NO_MSVC                 1082
 #define IDEDIT_COMMON_MIDL              1085
 #define IDEDIT_RELEASE_MIDL             1086
+#define IDEDIT_NATVIS                   1086
 #define IDEDIT_DEBUG_MIDL               1087
+#define IDBTN_CHANGE                    1087
 
 // Next default values for new objects
 // 
@@ -89,7 +91,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1086
+#define _APS_NEXT_CONTROL_VALUE         1088
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
