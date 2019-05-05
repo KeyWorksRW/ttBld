@@ -480,8 +480,17 @@ void CNinja::WriteLinkDirective()
 			cszRule += " ";
 			cszRule += GetOption(OPT_LINK_CMN);
 		}
+		if (GetOption(OPT_LINK_REL) && (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64)) {
+			cszRule += " ";
+			cszRule += GetOption(OPT_LINK_REL);
+		}
 
-		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
+		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) {
+			if (GetOption(OPT_LINK_DBG)) {
+				cszRule += " ";
+				cszRule += GetOption(OPT_LINK_DBG);
+			}
+
 			if (GetOption(OPT_NATVIS)) {
 				cszRule += " /NATVIS:";
 				cszRule += GetOption(OPT_NATVIS);
