@@ -104,21 +104,9 @@ int main(int argc, char* argv[])
 
 		cNinja.CreateMakeFile();	// this will create/update it if .srcfiles has a Makefile: section
 
+		ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT), "At least one platform build should have been set in CBldMaster (CNinja) constructor")
+
 		int countNinjas = 0;
-		if (!cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_64BIT_SUFFIX)) {	// if not 64-bit only
-			if (cNinja.IsCompilerMSVC())	{
-				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
-					countNinjas++;
-				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
-					countNinjas++;
-			}
-			if (cNinja.IsCompilerClang())	{
-				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
-					countNinjas++;
-				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
-					countNinjas++;
-			}
-		}
 		if (cNinja.GetOption(OPT_64BIT)) {
 			if (cNinja.IsCompilerMSVC())	{
 				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
@@ -130,6 +118,20 @@ int main(int argc, char* argv[])
 				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
 					countNinjas++;
 				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
+					countNinjas++;
+			}
+		}
+		if (cNinja.GetOption(OPT_32BIT)) {
+			if (cNinja.IsCompilerMSVC())	{
+				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
+					countNinjas++;
+				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
+					countNinjas++;
+			}
+			if (cNinja.IsCompilerClang())	{
+				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
+					countNinjas++;
+				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
 					countNinjas++;
 			}
 		}
