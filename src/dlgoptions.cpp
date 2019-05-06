@@ -110,6 +110,7 @@ void CTabOptions::OnBegin(void)
 
 void CTabOptions::OnOK(void)
 {
+	::SendMessage(m_hwndTabSub, WM_COMMAND, IDOK, 0);
 	::SendMessage(m_hwndTabSub, WM_CLOSE, 0, 0);
 	DestroyWindow(*this);
 	PostQuitMessage(IDOK);
