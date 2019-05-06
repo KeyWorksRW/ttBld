@@ -176,11 +176,13 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 
 	// Write the build rule for the resource compiler if an .rc file was specified as a source
 
-	ttCStr cszRES;
+	ttCStr cszRes;
 	if (tt::FileExists(GetRcFile())) {
-		cszRES = GetRcFile();
-		cszRES.ChangeExtension(".res");
-		file.printf("build $resout/%s: rc %s", (char*) cszRES, GetRcFile());
+		cszRes = GetRcFile();
+		cszRes.RemoveExtension();
+		cszRes += ((m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) ?  "D.res" : ".res");
+		cszRes.ChangeExtension(".res");
+		file.printf("build $resout/%s: rc %s", (char*) cszRes, GetRcFile());
 
 		if (GetRcDepList()->GetCount())
 			file.WriteStr(" |");
@@ -562,10 +564,23 @@ void CNinja::WriteRcDirective()
 {
 	if (tt::FileExists(GetRcFile())) {
 		if (m_bClang && !GetBoolOption(OPT_MS_RC))
-			m_pkfOut->WriteEol("rule rc\n  command = llvm-rc.exe -nologo -r /l 0x409 -fo$out $in");
+			m_pkfOut->WriteStr("rule rc\n  command = llvm-rc.exe -nologo");
 		else
-			m_pkfOut->WriteEol("rule rc\n  command = rc.exe -nologo -r /l 0x409 -fo$out $in");
-		m_pkfOut->WriteEol("  description = resource compiler... $in\n");
+			m_pkfOut->WriteStr("rule rc\n  command = rc.exe -nologo");
+
+		if (GetOption(OPT_RC_CMN)) {
+			m_pkfOut->WriteChar(CH_SPACE);
+			m_pkfOut->WriteStr(GetOption(OPT_RC_CMN));
+		}
+		if ((m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) && GetOption(OPT_RC_DBG)) {
+			m_pkfOut->WriteChar(CH_SPACE);
+			m_pkfOut->WriteStr(GetOption(OPT_RC_DBG));
+		}
+		else if ((m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64) && GetOption(OPT_RC_REL)) {
+			m_pkfOut->WriteChar(CH_SPACE);
+			m_pkfOut->WriteStr(GetOption(OPT_RC_REL));
+		}
+		m_pkfOut->WriteEol(" /l 0x409 -fo$out $in\n  description = resource compiler... $in\n");
 	}
 }
 
@@ -573,10 +588,23 @@ void CNinja::WriteMidlDirective(GEN_TYPE gentype)
 {
 	if (m_lstIdlFiles.GetCount()) {
 		if (gentype == GEN_DEBUG64 || gentype == GEN_RELEASE64)
-			m_pkfOut->WriteEol("rule midl\n  command = midl.exe /nologo /x64 /tlb $out $in");
+			m_pkfOut->WriteEol("rule midl\n  command = midl.exe /nologo /x64");
 		else
-			m_pkfOut->WriteEol("rule midl\n  command = midl.exe /nologo /win32 /tlb $out $in");
-		m_pkfOut->WriteEol("  description = midl compiler... $in\n");
+			m_pkfOut->WriteEol("rule midl\n  command = midl.exe /nologo /win32");
+
+		if (GetOption(OPT_MDL_CMN)) {
+			m_pkfOut->WriteChar(CH_SPACE);
+			m_pkfOut->WriteStr(GetOption(OPT_MDL_CMN));
+		}
+		if ((m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) && GetOption(OPT_MDL_DBG)) {
+			m_pkfOut->WriteChar(CH_SPACE);
+			m_pkfOut->WriteStr(GetOption(OPT_MDL_DBG));
+		}
+		else if ((m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64) && GetOption(OPT_MDL_REL)) {
+			m_pkfOut->WriteChar(CH_SPACE);
+			m_pkfOut->WriteStr(GetOption(OPT_MDL_REL));
+		}
+		m_pkfOut->WriteEol(" /tlb $out $in\n  description = midl compiler... $in\n");
 	}
 }
 
@@ -584,7 +612,8 @@ void CNinja::WriteMidlTargets()
 {
 	for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos) {
 		ttCStr cszTypeLib(m_lstIdlFiles[pos]);
-		cszTypeLib.ChangeExtension(".tlb");
+		cszTypeLib.RemoveExtension();
+		cszTypeLib += (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) ? "D.tlb" : ".tlb";
 		ttCStr cszIdlC(m_lstIdlFiles[pos]);
 
 		// By default, midl will generate a file_i.c file which gets #included in one of the source files. The C++
@@ -634,7 +663,8 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 
 	if (tt::FileExists(GetRcFile())) {
 		ttCStr cszRes(GetRcFile());
-		cszRes.ChangeExtension(".res");
+		cszRes.RemoveExtension();
+		cszRes += ((m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) ?  "D.res" : ".res");
 		m_pkfOut->printf(" $resout/%s", (char*) cszRes);
 	}
 
