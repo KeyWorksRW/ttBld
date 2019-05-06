@@ -572,9 +572,12 @@ void CNinja::WriteRcDirective()
 			m_pkfOut->WriteChar(CH_SPACE);
 			m_pkfOut->WriteStr(GetOption(OPT_RC_CMN));
 		}
-		if ((m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) && GetOption(OPT_RC_DBG)) {
-			m_pkfOut->WriteChar(CH_SPACE);
-			m_pkfOut->WriteStr(GetOption(OPT_RC_DBG));
+		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64)	{
+			m_pkfOut->WriteStr(" -d_DEBUG");
+			if (GetOption(OPT_RC_DBG)) {
+				m_pkfOut->WriteChar(CH_SPACE);
+				m_pkfOut->WriteStr(GetOption(OPT_RC_DBG));
+			}
 		}
 		else if ((m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64) && GetOption(OPT_RC_REL)) {
 			m_pkfOut->WriteChar(CH_SPACE);
@@ -596,9 +599,12 @@ void CNinja::WriteMidlDirective(GEN_TYPE gentype)
 			m_pkfOut->WriteChar(CH_SPACE);
 			m_pkfOut->WriteStr(GetOption(OPT_MDL_CMN));
 		}
-		if ((m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) && GetOption(OPT_MDL_DBG)) {
-			m_pkfOut->WriteChar(CH_SPACE);
-			m_pkfOut->WriteStr(GetOption(OPT_MDL_DBG));
+		if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG64) {
+			m_pkfOut->WriteStr(" -D_DEBUG");
+			if (GetOption(OPT_MDL_DBG)) {
+				m_pkfOut->WriteChar(CH_SPACE);
+				m_pkfOut->WriteStr(GetOption(OPT_MDL_DBG));
+			}
 		}
 		else if ((m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE64) && GetOption(OPT_MDL_REL)) {
 			m_pkfOut->WriteChar(CH_SPACE);
