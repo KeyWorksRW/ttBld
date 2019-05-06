@@ -67,15 +67,15 @@ void CTabGeneral::OnOK(void)
 	else
 		m_pOpts->UpdateOption(OPT_EXE_TYPE, "window");
 
+	m_pOpts->UpdateOption(OPT_32BIT, GetCheck(DLG_ID(IDCHECK_32BIT)));
 	if (GetCheck(DLG_ID(IDCHECK_32BIT))) {
-		m_pOpts->UpdateOption(OPT_32BIT, true);
 		csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
 		if (csz.IsNonEmpty())
 			m_pOpts->UpdateOption(OPT_TARGET_DIR32, (char*) csz);
 	}
 
+	m_pOpts->UpdateOption(OPT_64BIT, GetCheck(DLG_ID(IDCHECK_64BIT)));
 	if (GetCheck(DLG_ID(IDCHECK_64BIT))) {
-		m_pOpts->UpdateOption(OPT_64BIT, true);
 		csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
 		if (csz.IsNonEmpty())
 			m_pOpts->UpdateOption(OPT_TARGET_DIR64, (char*) csz);
