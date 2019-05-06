@@ -20,7 +20,6 @@ namespace sfopt {			// .srcfiles otpions
 
 		// The following are boolean options (true or false)
 
-		OPT_BIT_SUFFIX,		// true means append "64" to target's directory or .exe name
 		OPT_DEBUG_RC,		// true means build a -D_DEBUG version of the project's rc file
 		OPT_PERMISSIVE,		// true means add -permissive- compiler flag
 		OPT_STDCALL,		// use stdcall calling convention
@@ -56,6 +55,9 @@ namespace sfopt {			// .srcfiles otpions
 
 		OPT_32BIT,			// if true, build 32-bit target
 		OPT_TARGET_DIR32,	// 32-bit target directory
+
+		OPT_64BIT_SUFFIX,	// true means append "64" to target's directory or .exe name
+		OPT_32BIT_SUFFIX,	// true means append "32" to target's directory or .exe name
 
 		OPT_INC_DIRS,		// additional directories for header files
 		OPT_LIB_DIRS,		// additional directores for lib files

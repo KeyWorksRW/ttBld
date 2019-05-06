@@ -47,9 +47,9 @@ public:
 
 	const char* GetHHPName()	{ return m_cszHHPName; }
 
-	const char* GetTargetDebug();
+	const char* GetTargetDebug32();
 	const char* GetTargetDebug64();
-	const char* GetTargetRelease();
+	const char* GetTargetRelease32();
 	const char* GetTargetRelease64();
 
 	void EnableDryRun() { dryrun.Enable(); }
@@ -62,12 +62,13 @@ protected:
 
 	// Class members
 
-	ttCStr cszTargetDebug;
-	ttCStr cszTargetDebug64;
-	ttCStr cszTargetRelease;
-	ttCStr cszTargetRelease64;
+	ttCStr m_cszTargetDebug32;
+	ttCStr m_cszTargetDebug64;
+	ttCStr m_cszTargetRelease32;
+	ttCStr m_cszTargetRelease64;
 
 	CDryRun dryrun;
 
 	bool m_bBin64Exists;	// if true, the directory ../bin64 exists
+	bool m_bAddPlatformSuffix;	// true if 32-bit and 64-bit target directories are identical
 };

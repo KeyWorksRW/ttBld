@@ -6,8 +6,8 @@
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-// This will create one build?.ninja for each build target (debug, debug64, release, release64). Each build file will be
-// placed in a build directory with a compiler prefix (build/clangBuild.ninja or build/msvcBuild.ninja). The build
+// This will create one build?.ninja for each build target (debug32, debug64, release32, release64). Each build file will
+// be placed in a build directory with a compiler prefix (build/clangBuild.ninja or build/msvcBuild.ninja). The build
 // directory will also hold the dependency files that ninja creates.
 
 #include "pch.h"
@@ -48,15 +48,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	// indicates if it is a debug or release version.
 
 	if (IsExeTypeDll())	{
-		if (GetBoolOption(OPT_BIT_SUFFIX))
+		if (GetBoolOption(OPT_64BIT_SUFFIX))
 			cszProj += "64";
 	}
 	else {
-		if (gentype == GEN_DEBUG64 && GetBoolOption(OPT_BIT_SUFFIX))
+		if (gentype == GEN_DEBUG64 && GetBoolOption(OPT_64BIT_SUFFIX))
 			cszProj += IsBin64() ? "D" : "64D";		// isBin64() checks to see if ../bin64 exists
 		else if (gentype == GEN_DEBUG)
 			cszProj += "D";
-		else if (gentype == GEN_RELEASE64 && GetBoolOption(OPT_BIT_SUFFIX) && !IsBin64())
+		else if (gentype == GEN_RELEASE64 && GetBoolOption(OPT_64BIT_SUFFIX) && !IsBin64())
 			cszProj += "64";
 	}
 
@@ -646,13 +646,13 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 	const char* pszTarget;
 	switch (gentype) {
 		case GEN_DEBUG:
-			pszTarget = GetTargetDebug();
+			pszTarget = GetTargetDebug32();
 			break;
 		case GEN_DEBUG64:
 			pszTarget = GetTargetDebug64();
 			break;
 		case GEN_RELEASE:
-			pszTarget = GetTargetRelease();
+			pszTarget = GetTargetRelease32();
 			break;
 		case GEN_RELEASE64:
 		default:

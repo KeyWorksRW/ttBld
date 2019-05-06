@@ -42,7 +42,7 @@ bool CBldMaster::CreateMakeFile()
 	ttCFile kfOut;
 	while (kf.ReadLine()) {
 		if (tt::IsSameSubStrI(kf, "#b64")) {
-			if (GetBoolOption(OPT_64BIT) && !GetBoolOption(OPT_BIT_SUFFIX))
+			if (GetBoolOption(OPT_64BIT) && !GetBoolOption(OPT_64BIT_SUFFIX))
 				kfOut.WriteEol("b64=1");
 			else
 				kfOut.WriteEol(kf);

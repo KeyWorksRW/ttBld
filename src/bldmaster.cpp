@@ -17,36 +17,70 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 {
 	ReadTwoFiles(".srcfiles", bReadPrivate ? ".private/.srcfiles" : nullptr);
 
-	// if they are both empty, fill them in with defaults. If only one is empty, then it's likely only a single platform
-	// is being build (32-bit or 64-bit)
+	// If no platform was specified, default to 64-bit
 
-	if (!GetDir32() && !GetDir64()) {
-		if (IsExeTypeLib()) {
-			if (tt::DirExists("../lib")) {
-				UpdateOption(OPT_TARGET_DIR32, "../lib");
-				if (tt::DirExists("../lib64"))
-					UpdateOption(OPT_TARGET_DIR64, "../lib64");
-			}
-			else {
-				UpdateOption(OPT_TARGET_DIR32, "lib");
-				if (tt::DirExists("lib64"))
-					UpdateOption(OPT_TARGET_DIR64, "lib64");
-			}
+	if (!GetBoolOption(OPT_64BIT) && !GetBoolOption(OPT_32BIT)) {
+		UpdateOption(OPT_64BIT, true);			// default to 64-bit build
+		UpdateOption(OPT_64BIT_SUFFIX, false);	// no suffix
+	}
+
+	// Set default target directories if they are missing
+
+	if (GetBoolOption(OPT_64BIT) && !GetDir64()) {
+		ttCStr cszCWD, cszDir64;
+		cszCWD.GetCWD();
+		bool bSrcDir = ttstristr(tt::FindFilePortion(cszCWD), "src") ? true : false;
+		if (!bSrcDir) {
+			cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
+			if (tt::DirExists(cszCWD))
+				bSrcDir = true;
 		}
-
+		if (bSrcDir) {
+			ttCStr cszDir64(IsExeTypeLib() ? "../lib" : "../bin");
+			ttCStr cszTmp(cszDir64);
+			cszTmp += "64";
+			if (tt::DirExists(cszTmp))		// if there is a ../lib64 or ../bin64, then use that
+				cszDir64 = cszTmp;
+			UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
+		}
 		else {
-			if (tt::DirExists("../bin")) {
-				UpdateOption(OPT_TARGET_DIR32, "../bin");
-				if (tt::DirExists("../bin64"))
-					UpdateOption(OPT_TARGET_DIR64, "../bin64");
-			}
-			else {
-				UpdateOption(OPT_TARGET_DIR32, "bin");
-				if (tt::DirExists("bin64"))
-					UpdateOption(OPT_TARGET_DIR64, "bin64");
-			}
+			ttCStr cszDir64(IsExeTypeLib() ? "lib" : "bin");
+			ttCStr cszTmp(cszDir64);
+			cszTmp += "64";
+			if (tt::DirExists(cszTmp))		// if there is a ../lib64 or ../bin64, then use that
+				cszDir64 = cszTmp;
+			UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
 		}
 	}
+
+	if (GetBoolOption(OPT_32BIT) && !GetDir32()) {
+		ttCStr cszCWD, cszDir32;
+		cszCWD.GetCWD();
+		bool bSrcDir = ttstristr(tt::FindFilePortion(cszCWD), "src") ? true : false;
+		if (!bSrcDir) {
+			cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
+			if (tt::DirExists(cszCWD))
+				bSrcDir = true;
+		}
+		if (bSrcDir) {
+			ttCStr cszDir32(IsExeTypeLib() ? "../lib" : "../bin");
+			ttCStr cszTmp(cszDir32);
+			cszTmp += "32";
+			if (tt::DirExists(cszTmp))		// if there is a ../lib32 or ../bin32, then use that
+				cszDir32 = cszTmp;
+			UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
+		}
+		else {
+			ttCStr cszDir32(IsExeTypeLib() ? "lib" : "bin");
+			ttCStr cszTmp(cszDir32);
+			cszTmp += "32";
+			if (tt::DirExists(cszTmp))		// if there is a ../lib32 or ../bin32, then use that
+				cszDir32 = cszTmp;
+			UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
+		}
+	}
+
+	m_bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && tt::IsSameStr(GetDir64(), GetDir32())) ? true : false;
 
 	if (!GetProjectName()) {
 		ttCStr cszCwd;
@@ -247,142 +281,99 @@ const char* CBldMaster::NormalizeHeader(const char* pszRoot, ttCStr& cszHeader)
 	return cszHeader;
 }
 
-const char* CBldMaster::GetTargetDebug()
+// Don't add the 'D' to the end of DLL's -- it is perfectly viable for a release app to use a debug dll and that won't
+// work if the filename has changed. Under MSVC Linker, it will also generate a LNK4070 error if the dll name is
+// specified in the matching .def file. The downside, of course, is that without the 'D' only the size of the dll
+// indicates if it is a debug or release version.
+
+const char* CBldMaster::GetTargetDebug32()
 {
-	if (cszTargetDebug.IsNonEmpty())
-		return cszTargetDebug;
+	if (m_cszTargetDebug32.IsNonEmpty())
+		return m_cszTargetDebug32;
+
+	ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles");
+	m_cszTargetDebug32 = GetDir32();
 
 	if (IsExeTypeLib())	{
-		if (GetDir32())
-			cszTargetDebug = GetDir32();
-		else
-			cszTargetDebug = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetDebug.AppendFileName(GetProjectName());
-		cszTargetDebug += "D.lib";
-		return cszTargetDebug;
+		m_cszTargetDebug32.AppendFileName(GetProjectName());
+		m_cszTargetDebug32 += (m_bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32D.lib" : "D.lib";
 	}
-
 	else if (IsExeTypeDll()) {
-		if (GetDir32())
-			cszTargetDebug = GetDir32();
-		else
-			cszTargetDebug = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetDebug.AppendFileName(GetProjectName());
-		cszTargetDebug += ".dll";	// Note that we do NOT add a 'D' to the end of the dll name
-		return cszTargetDebug;
+		m_cszTargetDebug32.AppendFileName(GetProjectName());
+		m_cszTargetDebug32 += (m_bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.dll" : ".dll";
 	}
 	else {
-		if (GetDir32())
-			cszTargetDebug = GetDir32();
-		else
-			cszTargetDebug = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetDebug.AppendFileName(GetProjectName());
-		cszTargetDebug += "D.exe";
-		return cszTargetDebug;
+		m_cszTargetDebug32.AppendFileName(GetProjectName());
+		m_cszTargetDebug32 += (m_bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32D.exe" : "D.exe";
 	}
+	return m_cszTargetDebug32;
 }
 
-const char* CBldMaster::GetTargetRelease()
+const char* CBldMaster::GetTargetRelease32()
 {
-	if (cszTargetRelease.IsNonEmpty())
-		return cszTargetRelease;
+	if (m_cszTargetRelease32.IsNonEmpty())
+		return m_cszTargetRelease32;
+
+	ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles");
+	m_cszTargetRelease32 = GetDir32();
 
 	if (IsExeTypeLib())	{
-		if (GetDir32())
-			cszTargetRelease = GetDir32();
-		else
-			cszTargetRelease = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetRelease.AppendFileName(GetProjectName());
-		cszTargetRelease += ".lib";
-		return cszTargetRelease;
+		m_cszTargetRelease32.AppendFileName(GetProjectName());
+		m_cszTargetRelease32 += (m_bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.lib" : ".lib";
 	}
-
 	else if (IsExeTypeDll()) {
-		if (GetDir32())
-			cszTargetRelease = GetDir32();
-		else
-			cszTargetRelease = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetRelease.AppendFileName(GetProjectName());
-		cszTargetRelease += ".dll";
-		return cszTargetRelease;
+		m_cszTargetRelease32.AppendFileName(GetProjectName());
+		m_cszTargetRelease32 += (m_bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.dll" : ".dll";
 	}
 	else {
-		if (GetDir32())
-			cszTargetRelease = GetDir32();
-		else
-			cszTargetRelease = tt::DirExists("../bin") ? "../bin" : "bin";
-		cszTargetRelease.AppendFileName(GetProjectName());
-		cszTargetRelease += ".exe";
-		return cszTargetRelease;
+		m_cszTargetRelease32.AppendFileName(GetProjectName());
+		m_cszTargetRelease32 += (m_bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.exe" : ".exe";
 	}
+	return m_cszTargetRelease32;
 }
 
 const char* CBldMaster::GetTargetDebug64()
 {
-	if (cszTargetDebug64.IsNonEmpty())
-		return cszTargetDebug64;
+	if (m_cszTargetDebug64.IsNonEmpty())
+		return m_cszTargetDebug64;
+
+	ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles");
+	m_cszTargetDebug64 = GetDir64();
 
 	if (IsExeTypeLib())	{
-		if (GetDir32())
-			cszTargetDebug64 = GetDir32();
-		else
-			cszTargetDebug64 = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetDebug64.AppendFileName(GetProjectName());
-		cszTargetDebug64 += GetBoolOption(OPT_BIT_SUFFIX) ? "64D.lib" : "D.lib";
-		return cszTargetDebug64;
+		m_cszTargetDebug64.AppendFileName(GetProjectName());
+		m_cszTargetDebug64 += (m_bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64D.lib" : "D.lib";
 	}
-
 	else if (IsExeTypeDll()) {
-		if (GetDir64())
-			cszTargetDebug64 = GetDir64();
-		else
-			cszTargetDebug64 = IsBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetDebug64.AppendFileName(GetProjectName());
-		cszTargetDebug64 = (IsBin64() || !GetBoolOption(OPT_BIT_SUFFIX)) ? ".dll" : "64.dll";
-		return cszTargetDebug64;
+		m_cszTargetDebug64.AppendFileName(GetProjectName());
+		m_cszTargetDebug64 += (m_bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.dll" : ".dll";
 	}
 	else {
-		if (GetDir64())
-			cszTargetDebug64 = GetDir64();
-		else
-			cszTargetDebug64 = IsBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetDebug64.AppendFileName(GetProjectName());
-		cszTargetDebug64 += (IsBin64() || !GetBoolOption(OPT_BIT_SUFFIX)) ? "D.exe" : "64D.exe";
-		return cszTargetDebug64;
+		m_cszTargetDebug64.AppendFileName(GetProjectName());
+		m_cszTargetDebug64 += (m_bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64D.exe" : "D.exe";
 	}
+	return m_cszTargetDebug64;
 }
 
 const char* CBldMaster::GetTargetRelease64()
 {
-	if (cszTargetRelease64.IsNonEmpty())
-		return cszTargetRelease64;
+	if (m_cszTargetRelease64.IsNonEmpty())
+		return m_cszTargetRelease64;
+
+	ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles");
+	m_cszTargetRelease64 = GetDir64();
 
 	if (IsExeTypeLib())	{
-		if (GetDir64())
-			cszTargetRelease64 = GetDir64();
-		else
-			cszTargetRelease64 = tt::DirExists("../lib") ? "../lib" : "lib";
-		cszTargetRelease64.AppendFileName(GetProjectName());
-		cszTargetRelease64 += GetBoolOption(OPT_BIT_SUFFIX) ? "64.lib" : ".lib";
-		return cszTargetRelease64;
+		m_cszTargetRelease64.AppendFileName(GetProjectName());
+		m_cszTargetRelease64 += (m_bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.lib" : ".lib";
 	}
-
 	else if (IsExeTypeDll()) {
-		if (GetDir64())
-			cszTargetRelease64 = GetDir64();
-		else
-			cszTargetRelease64 = IsBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetRelease64.AppendFileName(GetProjectName());
-		cszTargetRelease64 = (IsBin64() || !GetBoolOption(OPT_BIT_SUFFIX)) ? ".dll" : "64.dll";
-		return cszTargetRelease64;
+		m_cszTargetRelease64.AppendFileName(GetProjectName());
+		m_cszTargetRelease64 += (m_bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.dll" : ".dll";
 	}
 	else {
-		if (GetDir64())
-			cszTargetRelease64 = GetDir64();
-		else
-			cszTargetRelease64 = IsBin64() ? "../bin64" : (tt::DirExists("../bin") ? "../bin" : "bin");
-		cszTargetRelease64.AppendFileName(GetProjectName());
-		cszTargetRelease64 += (IsBin64() || !GetBoolOption(OPT_BIT_SUFFIX)) ? ".exe" : "64.exe";;
-		return cszTargetRelease64;
+		m_cszTargetRelease64.AppendFileName(GetProjectName());
+		m_cszTargetRelease64 += (m_bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.exe" : ".exe";
 	}
+	return m_cszTargetRelease64;
 }

@@ -27,8 +27,6 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_PCH,			"PCH",			"none",		false, true,  "name of precompiled header file, or \042none\042 if not using precompiled headers" },
 	{ OPT_EXE_TYPE,		"exe_type",		"console",	false, true,  "[window | console | lib | dll]" },
 
-	{ OPT_BIT_SUFFIX,	"bit_suffix",	"false",	true,  false,  "true means append '64' to target's directory or .exe name" },
-
 	{ OPT_PERMISSIVE,	"permissive",	"false",	true,  false,  "true means add -permissive- compiler flag" },
 	{ OPT_STDCALL,		"stdcall",		"false",	true,  false,  "true to use stdcall calling convention, false for cdecl (default)" },
 	{ OPT_OPTIMIZE,		"optimize",		"space",	false, false,  "[space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues)" },
@@ -71,6 +69,9 @@ static const OPT_SETTING s_aOptions[] = {
 
 	{ OPT_32BIT,		"32Bit",		"false",	true,  false,  "if true, build 32-bit target" },
 	{ OPT_TARGET_DIR32, "TargetDir32",	nullptr,	false, false,  "32-bit target directory" },
+
+	{ OPT_64BIT_SUFFIX,	"b64_suffix",	"false",	true,  false,  "true means append '64' to target's directory or .exe name" },
+	{ OPT_32BIT_SUFFIX,	"b32_suffix",	"false",	true,  false,  "true means append '32' to target's directory or .exe name" },
 
 	{ OPT_INC_DIRS,		"IncDirs",		nullptr,	false, false,  "additional directories for header files" },
 	{ OPT_BUILD_LIBS,	"BuildLibs",	nullptr,	false, false,  "libraries that need to be built (added to makefile generation)" },
