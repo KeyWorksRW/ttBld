@@ -93,6 +93,7 @@ CSrcOptions::CSrcOptions()
 		size_t posOpt = m_aUpdateOpts.Add();
 		m_aUpdateOpts[posOpt].pszVal = s_aOptions[pos].pszVal ? ttstrdup(s_aOptions[pos].pszVal) : nullptr;
 		m_aUpdateOpts[posOpt].pszComment = tt::IsNonEmpty(s_aOptions[pos].pszComment) ?	 ttstrdup(s_aOptions[pos].pszComment) : nullptr;
+		m_aUpdateOpts[posOpt].bRequired = s_aOptions[pos].bRequired;
 	}
 }
 
@@ -191,9 +192,19 @@ bool CSrcOptions::GetRequired(sfopt::OPT_INDEX index)
 {
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		if (s_aOptions[pos].opt == index)
-			return s_aOptions[pos].bRequired;
+			return m_aUpdateOpts[pos].bRequired;
 	}
 	return false;
+}
+
+void CSrcOptions::SetRequired(sfopt::OPT_INDEX index, bool bVal)
+{
+	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
+		if (s_aOptions[pos].opt == index) {
+			m_aUpdateOpts[pos].bRequired = bVal;
+			break;
+		}
+	}
 }
 
 bool CSrcOptions::UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment)

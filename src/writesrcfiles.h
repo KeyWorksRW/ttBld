@@ -2,7 +2,7 @@
 // Name:		CWriteSrcFiles
 // Purpose:		Version of CSrcFiles that is capable of writing out a new or updated file
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -33,6 +33,7 @@ public:
 	void EnableDryRun() { m_dryrun.Enable(); }
 
 protected:
+	void 	  PreProcessOptions();
 	ptrdiff_t GetOptionLine(const char* pszOption);		// on success m_cszOptComment will be filled in
 	ptrdiff_t FindOption(const char* pszOption, ttCStr& cszDst);
 	ptrdiff_t FindSection(const char* pszSection);

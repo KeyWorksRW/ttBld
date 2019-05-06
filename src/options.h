@@ -83,6 +83,7 @@ namespace sfopt {			// .srcfiles otpions
 	typedef struct {	// the updated version of the option
 		char*	pszVal;
 		char*	pszComment;
+		bool	bRequired;
 	} OPT_UPDATE;
 
 } // end of sfopt namespace
@@ -99,7 +100,9 @@ public:
 	bool 		GetBoolOption(sfopt::OPT_INDEX index);
 	const char* GetOptComment(sfopt::OPT_INDEX index);
 	bool 		GetChanged(sfopt::OPT_INDEX index);		// returns true if the option has changed
+
 	bool 		GetRequired(sfopt::OPT_INDEX index);	// returns true if the option is required
+	void 		SetRequired(sfopt::OPT_INDEX index, bool bVal = true);
 
 	bool UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);	// fine to call this for boolean options if pszVal == "true/false" or "yes/no"
 	bool UpdateOption(sfopt::OPT_INDEX index, bool bVal);

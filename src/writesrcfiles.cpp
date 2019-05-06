@@ -42,6 +42,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 
 	// The calling order below will determine the order Sections appear (if they don't already exist)
 
+	PreProcessOptions();
 	UpdateOptionsSection();
 
 	ttCFile kfOut;
@@ -225,4 +226,16 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
 			break;
 	}
 	return -1;
+}
+
+void CWriteSrcFiles::PreProcessOptions()
+{
+	if (GetOption(OPT_64BIT)) {
+		SetRequired(OPT_64BIT, true);
+		SetRequired(OPT_TARGET_DIR64, true);
+	}
+	if (GetOption(OPT_32BIT)) {
+		SetRequired(OPT_32BIT, true);
+		SetRequired(OPT_TARGET_DIR32, true);
+	}
 }
