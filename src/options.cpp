@@ -27,8 +27,6 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_PCH,			"PCH",			"none",		false, true,  "name of precompiled header file, or \042none\042 if not using precompiled headers" },
 	{ OPT_EXE_TYPE,		"exe_type",		"console",	false, true,  "[window | console | lib | dll]" },
 
-	{ OPT_64BIT,		"64Bit",		"false",	true,  false,  "if true, enable 64-bit support (link with 64-bit libraries)" },
-	{ OPT_32BIT,		"32Bit",		"false",	true,  false,  "if true, enable 32-bit support (link with 32-bit libraries)" },
 	{ OPT_BIT_SUFFIX,	"bit_suffix",	"false",	true,  false,  "true means append '64' to target's directory or .exe name" },
 
 	{ OPT_PERMISSIVE,	"permissive",	"false",	true,  false,  "true means add -permissive- compiler flag" },
@@ -68,9 +66,13 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_MS_RC,		"ms_rc",		"true",		true,  false,  "use rc.exe even when compiling with CLANG" },
 	{ OPT_IDE,			"IDE",			nullptr,	false, false,  "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
 
+	{ OPT_64BIT,		"64Bit",		"false",	true,  false,  "if true, build 64-bit target" },
+	{ OPT_TARGET_DIR64, "TargetDir64",	nullptr,	false, false,  "64-bit target directory" },
+
+	{ OPT_32BIT,		"32Bit",		"false",	true,  false,  "if true, build 32-bit target" },
+	{ OPT_TARGET_DIR32, "TargetDir32",	nullptr,	false, false,  "32-bit target directory" },
+
 	{ OPT_INC_DIRS,		"IncDirs",		nullptr,	false, false,  "additional directories for header files" },
-	{ OPT_TARGET_DIR32, "TargetDir32",	nullptr,	false, false,  "32-bit target directory (default is bin)" },
-	{ OPT_TARGET_DIR64, "TargetDir64",	nullptr,	false, false,  "32-bit target directory (default is bin64)" },
 	{ OPT_BUILD_LIBS,	"BuildLibs",	nullptr,	false, false,  "libraries that need to be built (added to makefile generation)" },
 	{ OPT_LIB_DIRS,		"LibDirs",		nullptr,	false, false,  "additional directores for lib files" },
 	{ OPT_LIBS,			"Libs",			nullptr,	false, false,  "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },

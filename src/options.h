@@ -20,8 +20,6 @@ namespace sfopt {			// .srcfiles otpions
 
 		// The following are boolean options (true or false)
 
-		OPT_64BIT,			// if true, enable 64-bit support (link with 64-bit libraries).
-		OPT_32BIT,			// if true, enable 32-bit support (link with 32-bit libraries).
 		OPT_BIT_SUFFIX,		// true means append "64" to target's directory or .exe name
 		OPT_DEBUG_RC,		// true means build a -D_DEBUG version of the project's rc file
 		OPT_PERMISSIVE,		// true means add -permissive- compiler flag
@@ -53,6 +51,12 @@ namespace sfopt {			// .srcfiles otpions
 		OPT_CLANG_REL,		// flags to pass to the CLANG compiler in release builds
 		OPT_CLANG_DBG,		// flags to pass to the CLANG compiler in debug builds
 
+		OPT_64BIT,			// if true, build 64-bit target
+		OPT_TARGET_DIR64,	// 64-bit target directory
+
+		OPT_32BIT,			// if true, build 32-bit target
+		OPT_TARGET_DIR32,	// 32-bit target directory
+
 		OPT_INC_DIRS,		// additional directories for header files
 		OPT_LIB_DIRS,		// additional directores for lib files
 		OPT_LIBS,			// additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
@@ -60,8 +64,6 @@ namespace sfopt {			// .srcfiles otpions
 		OPT_MAKEFILE,		// [never | missing | always] -- default, if not specified, is missing
 		OPT_OPTIMIZE,		// [space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues) -- default, if not specified, is space
 		OPT_WARN_LEVEL,		// [1-4] default, if not specified, is 4
-		OPT_TARGET_DIR32,	// 32-bit target directory (default is bin)
-		OPT_TARGET_DIR64,	// 32-bit target directory (default is bin64)
 		OPT_BUILD_LIBS,		// libraries that need to be built (added to makefile generation)
 
 		OPT_OVERFLOW

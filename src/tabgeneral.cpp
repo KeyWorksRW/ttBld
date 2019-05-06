@@ -41,24 +41,23 @@ void CTabGeneral::OnBegin(void)
 	else
 		SetCheck(DLG_ID(IDRADIO_NORMAL));
 
-	if (!m_pOpts->GetBoolOption(OPT_64BIT)) {
-		SetCheck(DLG_ID(IDCHECK_32BIT));
-		if (m_pOpts->GetOption(OPT_TARGET_DIR32))
-			SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
-		else
-			SetControlText(DLG_ID(IDEDIT_DIR32), "bin");
-	}
-	else {
-		SetCheck(DLG_ID(IDCHECK_64BIT));
-		if (m_pOpts->GetOption(OPT_TARGET_DIR64))
-			SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
-		else
-			SetControlText(DLG_ID(IDEDIT_DIR64), "bin64");
+	// Start by setting default directories
 
-		if (m_pOpts->GetOption(OPT_TARGET_DIR32)) {
-			SetCheck(DLG_ID(IDCHECK_32BIT));
-			SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
-		}
+	if (m_pOpts->GetOption(OPT_TARGET_DIR32))
+		SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
+	else
+		SetControlText(DLG_ID(IDEDIT_DIR32), "bin32");
+
+	if (m_pOpts->GetOption(OPT_TARGET_DIR64))
+		SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
+	else
+		SetControlText(DLG_ID(IDEDIT_DIR64), "bin");
+
+	if (!m_pOpts->GetBoolOption(OPT_32BIT))
+		SetCheck(DLG_ID(IDCHECK_64BIT));	// default to 64-bit builds
+	else {
+		SetCheck(DLG_ID(IDCHECK_32BIT));
+		SetCheck(DLG_ID(IDCHECK_64BIT), m_pOpts->GetBoolOption(OPT_64BIT));
 	}
 }
 
