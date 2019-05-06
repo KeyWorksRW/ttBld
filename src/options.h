@@ -28,6 +28,7 @@ namespace sfopt {			// .srcfiles otpions
 		OPT_STDCALL,		// use stdcall calling convention
 		OPT_STATIC_CRT,		// true means link to static CRT
 		OPT_MS_LINKER,		// use link.exe even when compiling with CLANG
+		OPT_MS_RC,			// use rc.exe even when compiling with CLANG
 
 		OPT_CFLAGS_CMN,		// flags to pass to the compiler in all build targets
 		OPT_CFLAGS_REL,		// flags to pass to the compiler in release builds

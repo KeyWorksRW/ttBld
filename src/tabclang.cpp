@@ -21,7 +21,9 @@ void CTabCLang::OnBegin(void)
 
 	if (!m_pOpts->IsCompilerClang()) {
 		UnCheck(DLG_ID(IDCHECK_NO_MSVC));
+		UnCheck(DLG_ID(IDCHECK_MSRC));
 		DisableControl(DLG_ID(IDCHECK_MSLINKER));
+		DisableControl(DLG_ID(IDCHECK_MSRC));
 		DisableControl(DLG_ID(IDEDIT_CFLAGS));
 	}
 	else {
@@ -29,6 +31,7 @@ void CTabCLang::OnBegin(void)
 		if (!m_pOpts->IsCompilerMSVC())
 			SetCheck(DLG_ID(IDCHECK_NO_MSVC));
 		SetCheck(DLG_ID(IDCHECK_MSLINKER), m_pOpts->GetBoolOption(OPT_MS_LINKER));
+		SetCheck(DLG_ID(IDCHECK_MSRC), m_pOpts->GetBoolOption(OPT_MS_RC));
 	}
 }
 
@@ -53,6 +56,7 @@ void CTabCLang::OnOK(void)
 		if (GetCheck(DLG_ID(IDCHECK_NO_MSVC)))
 			m_pOpts->UpdateOption(OPT_COMPILERS, "CLANG");
 		m_pOpts->UpdateOption(OPT_MS_LINKER, GetCheck(DLG_ID(IDCHECK_MSLINKER)));
+		m_pOpts->UpdateOption(OPT_MS_RC, GetCheck(DLG_ID(IDCHECK_MSRC)));
 	}
 }
 

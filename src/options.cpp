@@ -65,6 +65,7 @@ static const OPT_SETTING s_aOptions[] = {
 
 	{ OPT_STATIC_CRT,	"static_crt",	"false",	true,  false,  "true means link to static CRT" },
 	{ OPT_MS_LINKER,	"ms_linker",	"false",	true,  false,  "true means use link.exe even when compiling with CLANG" },
+	{ OPT_MS_RC,		"ms_rc",		"true",		true,  false,  "use rc.exe even when compiling with CLANG" },
 	{ OPT_IDE,			"IDE",			nullptr,	false, false,  "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
 
 	{ OPT_INC_DIRS,		"IncDirs",		nullptr,	false, false,  "additional directories for header files" },

@@ -55,6 +55,7 @@
 #define IDEDIT_INCDIRS                  1060
 #define IDCHECK_MSLINKER                1061
 #define IDEDIT_LIBDIRS                  1062
+#define IDCHECK_MSRC                    1062
 #define IDEDIT_LIBS_LINK                1063
 #define IDC_BTN_HELP                    1064
 #define IDRADIO_MF_DEBUG                1065
