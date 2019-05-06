@@ -41,59 +41,7 @@ void CTabGeneral::OnBegin(void)
 	else
 		SetCheck(DLG_ID(IDRADIO_NORMAL));
 
-	// Start by setting default directories
-
-	ttCStr cszDir64, cszDir32;
-
-	ttCStr cszCWD;
-	cszCWD.GetCWD();
-	bool bSrcDir = ttstristr(tt::FindFilePortion(cszCWD), "src") ? true : false;
-	if (!bSrcDir) {
-		cszCWD.AppendFileName(m_pOpts->IsExeTypeLib() ? "../lib" : "../bin");
-		if (tt::DirExists(cszCWD))
-			bSrcDir = true;
-	}
-
-	if (bSrcDir) {
-		cszDir64 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
-		ttCStr cszTmp(cszDir64);
-		cszTmp += "64";
-		if (tt::DirExists(cszTmp)) {		// if there is a ../lib64 or ../bin64, then use that
-			cszDir64 = cszTmp;
-			cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
-			cszTmp = cszDir32;
-			cszTmp += "32";
-			if (tt::DirExists(cszTmp))
-				cszDir32 = cszTmp;
-		}
-		else
-			cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib32" : "../bin32";
-	}
-	else {
-		cszDir64 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
-		ttCStr cszTmp(cszDir64);
-		cszTmp += "64";
-		if (tt::DirExists(cszTmp)) {		// if there is a lib64 or bin64, then use that
-			cszDir64 = cszTmp;
-			cszDir32 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
-			cszTmp = cszDir32;
-			cszTmp += "32";
-			if (tt::DirExists(cszTmp))
-				cszDir32 = cszTmp;
-		}
-		else
-			cszDir32 = m_pOpts->IsExeTypeLib() ? "lib32" : "bin32";
-	}
-
-	if (m_pOpts->GetOption(OPT_TARGET_DIR32))
-		SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
-	else
-		SetControlText(DLG_ID(IDEDIT_DIR32), cszDir32);
-
-	if (m_pOpts->GetOption(OPT_TARGET_DIR64))
-		SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
-	else
-		SetControlText(DLG_ID(IDEDIT_DIR64), cszDir64);
+	SetTargetDirs();
 
 	if (!m_pOpts->GetBoolOption(OPT_32BIT))
 		SetCheck(DLG_ID(IDCHECK_64BIT));	// default to 64-bit builds
@@ -172,4 +120,80 @@ void CTabGeneral::OnBtnDir64()
 		tt::ConvertToRelative(cszCWD, dlg, cszDir);
 		SetControlText(DLG_ID(IDEDIT_DIR64), cszDir);
 	}
+}
+
+void CTabGeneral::OnCheckLib()
+{
+	m_pOpts->UpdateOption(OPT_EXE_TYPE, "lib");
+	SetTargetDirs();
+}
+
+void CTabGeneral::OnCheckExe()
+{
+	if (m_pOpts->IsExeTypeLib()) {
+		if (GetCheck(DLG_ID(IDRADIO_CONSOLE)))
+			m_pOpts->UpdateOption(OPT_EXE_TYPE, "console");
+		else if (GetCheck(DLG_ID(IDRADIO_DLL)))
+			m_pOpts->UpdateOption(OPT_EXE_TYPE, "dll");
+		else
+			m_pOpts->UpdateOption(OPT_EXE_TYPE, "window");
+		SetTargetDirs();
+	}
+}
+
+void CTabGeneral::SetTargetDirs()
+{
+	// Start by setting default directories
+
+	ttCStr cszDir64, cszDir32;
+
+	ttCStr cszCWD;
+	cszCWD.GetCWD();
+	bool bSrcDir = ttstristr(tt::FindFilePortion(cszCWD), "src") ? true : false;
+	if (!bSrcDir) {
+		cszCWD.AppendFileName(m_pOpts->IsExeTypeLib() ? "../lib" : "../bin");
+		if (tt::DirExists(cszCWD))
+			bSrcDir = true;
+	}
+
+	if (bSrcDir) {
+		cszDir64 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
+		ttCStr cszTmp(cszDir64);
+		cszTmp += "64";
+		if (tt::DirExists(cszTmp)) {		// if there is a ../lib64 or ../bin64, then use that
+			cszDir64 = cszTmp;
+			cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
+			cszTmp = cszDir32;
+			cszTmp += "32";
+			if (tt::DirExists(cszTmp))
+				cszDir32 = cszTmp;
+		}
+		else
+			cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib32" : "../bin32";
+	}
+	else {
+		cszDir64 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
+		ttCStr cszTmp(cszDir64);
+		cszTmp += "64";
+		if (tt::DirExists(cszTmp)) {		// if there is a lib64 or bin64, then use that
+			cszDir64 = cszTmp;
+			cszDir32 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
+			cszTmp = cszDir32;
+			cszTmp += "32";
+			if (tt::DirExists(cszTmp))
+				cszDir32 = cszTmp;
+		}
+		else
+			cszDir32 = m_pOpts->IsExeTypeLib() ? "lib32" : "bin32";
+	}
+
+	if (m_pOpts->GetOption(OPT_TARGET_DIR32))
+		SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
+	else
+		SetControlText(DLG_ID(IDEDIT_DIR32), cszDir32);
+
+	if (m_pOpts->GetOption(OPT_TARGET_DIR64))
+		SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
+	else
+		SetControlText(DLG_ID(IDEDIT_DIR64), cszDir64);
 }
