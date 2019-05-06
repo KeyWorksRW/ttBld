@@ -107,15 +107,15 @@ int main(int argc, char* argv[])
 		int countNinjas = 0;
 		if (!cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_64BIT_SUFFIX)) {	// if not 64-bit only
 			if (cNinja.IsCompilerMSVC())	{
-				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, false))
+				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
 					countNinjas++;
-				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, false))
+				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
 					countNinjas++;
 			}
 			if (cNinja.IsCompilerClang())	{
-				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, true))
+				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
 					countNinjas++;
-				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, true))
+				if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
 					countNinjas++;
 			}
 		}

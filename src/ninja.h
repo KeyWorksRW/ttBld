@@ -17,8 +17,8 @@ public:
 
 	typedef enum {
 		GEN_NONE,
-		GEN_DEBUG,
-		GEN_RELEASE,
+		GEN_DEBUG32,
+		GEN_RELEASE32,
 		GEN_DEBUG64,
 		GEN_RELEASE64
 	} GEN_TYPE;
