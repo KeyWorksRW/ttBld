@@ -148,8 +148,10 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		}
 		return;
 	}
-	if (tt::IsSameStrI(cszName, "LinkFlags"))
+	else if (tt::IsSameStrI(cszName, "LinkFlags"))
 		UpdateOption(OPT_LINK_CMN, (char*) cszVal);
+	else if (tt::IsSameStrI(cszName, "bit_suffix"))		// could convert this to b64_suffix, but with new logic, probably don't need it
+		return;
 
 	ttCStr csz;
 	csz.printf(tt::GetResString(IDS_CS_UNKNOWN_OPTION), (char*) cszName);

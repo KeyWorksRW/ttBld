@@ -35,6 +35,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 			continue;
 		else if (tt::FindStr(kfIn, "LinkFlags:"))
 			continue;
+		else if (tt::FindStr(kfIn, "bit_suffix:"))
+			continue;
 
 		m_lstOriginal += (const char*) kfIn;
 	}
