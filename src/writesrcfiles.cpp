@@ -33,6 +33,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 		// Don't add any old options that have been replaced
 		if (tt::FindStr(kfIn, "TargetDirs:"))
 			continue;
+		else if (tt::FindStr(kfIn, "LinkFlags:"))
+			continue;
 
 		m_lstOriginal += (const char*) kfIn;
 	}
@@ -230,11 +232,11 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
 
 void CWriteSrcFiles::PreProcessOptions()
 {
-	if (GetOption(OPT_64BIT)) {
+	if (GetBoolOption(OPT_64BIT)) {
 		SetRequired(OPT_64BIT, true);
 		SetRequired(OPT_TARGET_DIR64, true);
 	}
-	if (GetOption(OPT_32BIT)) {
+	if (GetBoolOption(OPT_32BIT)) {
 		SetRequired(OPT_32BIT, true);
 		SetRequired(OPT_TARGET_DIR32, true);
 	}

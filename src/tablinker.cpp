@@ -68,12 +68,10 @@ void CTabLinker::OnBtnChange()
 {
 	ttCFileDlg fdlg(*this);
 	fdlg.SetFilter("Natvis Files|*.natvis");
-	ttCStr cszCWD;
-	cszCWD.GetCWD();
-	cszCWD.AddTrailingSlash();
-	fdlg.SetInitialDir(cszCWD);
+	fdlg.UseCurrentDirectory();
 	if (fdlg.GetOpenFileName()) {
-		ttCStr cszFile;
+		ttCStr cszCWD, cszFile;
+		cszCWD.GetCWD();
 		tt::ConvertToRelative(cszCWD, fdlg, cszFile);
 		SetControlText(DLG_ID(IDEDIT_NATVIS), cszFile);
 	}

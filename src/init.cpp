@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 		ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT), "At least one platform build should have been set in CBldMaster (CNinja) constructor")
 
 		int countNinjas = 0;
-		if (cNinja.GetOption(OPT_64BIT)) {
+		if (cNinja.GetBoolOption(OPT_64BIT)) {
 			if (cNinja.IsCompilerMSVC())	{
 				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
 					countNinjas++;
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 					countNinjas++;
 			}
 		}
-		if (cNinja.GetOption(OPT_32BIT)) {
+		if (cNinja.GetBoolOption(OPT_32BIT)) {
 			if (cNinja.IsCompilerMSVC())	{
 				if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
 					countNinjas++;

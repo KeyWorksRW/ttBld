@@ -148,6 +148,8 @@ void CSrcFiles::ProcessOption(char* pszLine)
 		}
 		return;
 	}
+	if (tt::IsSameStrI(cszName, "LinkFlags"))
+		UpdateOption(OPT_LINK_CMN, (char*) cszVal);
 
 	ttCStr csz;
 	csz.printf(tt::GetResString(IDS_CS_UNKNOWN_OPTION), (char*) cszName);

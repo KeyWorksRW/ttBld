@@ -40,8 +40,8 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_CFLAGS_DBG,	"CFlagsD",		nullptr,	false, false,  "flags to pass to the compiler in debug builds" },
 
 	{ OPT_LINK_CMN,		"LFlags",		nullptr,	false, false,  "flags to pass to the linker in all build targets" },
-	{ OPT_LINK_REL,		"LFlags",		nullptr,	false, false,  "flags to pass to the linker in release builds" },
-	{ OPT_LINK_DBG,		"LFlags",		nullptr,	false, false,  "flags to pass to the linker in debug builds" },
+	{ OPT_LINK_REL,		"LFlagsR",		nullptr,	false, false,  "flags to pass to the linker in release builds" },
+	{ OPT_LINK_DBG,		"LFlagsD",		nullptr,	false, false,  "flags to pass to the linker in debug builds" },
 
 	{ OPT_NATVIS,		"Natvis",		nullptr,	false, false,  "Specifies a .natvis file to link into the pdb file" },
 
