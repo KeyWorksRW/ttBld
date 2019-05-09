@@ -307,6 +307,10 @@ bool CConvertDlg::ConvertVcxProj()
 		return false;
 	}
 
+	bool bDebugFlagsSeen = false;
+	bool bRelFlagsSeen = false;
+	bool bTypeSeen = false;
+
 	for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pProject->GetChildAt(item);
 		if (tt::IsSameStrI(pItem->GetName(), "ItemGroup")) {
@@ -319,7 +323,214 @@ bool CConvertDlg::ConvertVcxProj()
 				}
 			}
 		}
+		else if (tt::IsSameStrI(pItem->GetName(), "PropertyGroup")) {
+			if (bTypeSeen)
+				continue;
+			ttCXMLBranch* pFlags = pItem->FindFirstElement("ConfigurationType");
+			if (pFlags && pFlags->GetChildrenCount() > 0) {
+				ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+				if (pChild->GetData()) {
+					bTypeSeen = true;
+					if (tt::IsSameStrI(pChild->GetData(), "DynamicLibrary"))
+						m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
+					else if (tt::IsSameStrI(pChild->GetData(), "StaticLibrary"))
+						m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
+					// TODO: [randalphwa - 5/9/2019] What are the options for console and gui?
+				}
+			}
+		}
+		else if (tt::IsSameStrI(pItem->GetName(), "ItemDefinitionGroup")) {
+			const char* pszCondition = pItem->GetAttribute("Condition");
+			if (!bDebugFlagsSeen && pszCondition && (ttstristr(pszCondition, "Debug|Win32") || ttstristr(pszCondition, "Debug|x64"))) {
+				bDebugFlagsSeen = true;
+				for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++) {
+					ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
+					if (tt::IsSameStrI(pCmd->GetName(), "Midl")) {
+						ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								ttCStr cszFlags("-D");
+								cszFlags += pChild->GetData();
+								cszFlags.ReplaceStr("_DEBUG;", "");
+								cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+								while (cszFlags.ReplaceStr(";", " -D"));
+								m_cSrcFiles.UpdateOption(OPT_MDL_DBG, (char*) cszFlags);
+							}
+						}
+					}
+					else if (tt::IsSameStrI(pCmd->GetName(), "ResourceCompile")) {
+						ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								ttCStr cszFlags("-D");
+								cszFlags += pChild->GetData();
+								cszFlags.ReplaceStr("_DEBUG;", "");
+								cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+								while (cszFlags.ReplaceStr(";", " -D"));
+								m_cSrcFiles.UpdateOption(OPT_RC_DBG, (char*) cszFlags);
+							}
+						}
+					}
+					else if (tt::IsSameStrI(pCmd->GetName(), "ClCompile")) {
+						ttCXMLBranch* pFlags = pCmd->FindFirstElement("FavorSizeOrSpeed");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData())
+								m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, tt::IsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
+						}
+						pFlags = pCmd->FindFirstElement("AdditionalIncludeDirectories");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								const char* pszFirstSemi = ttstrchr(pChild->GetData(), ';');
+								if (pszFirstSemi)
+									++pszFirstSemi;
+								ttCStr cszFlags(tt::IsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi :  pChild->GetData());
+								cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
+								m_cSrcFiles.UpdateOption(OPT_INC_DIRS, cszFlags);
+							}
+						}
+						pFlags = pCmd->FindFirstElement("PrecompiledHeaderFile");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData())
+								m_cSrcFiles.UpdateOption(OPT_PCH, pChild->GetData());
+						}
+						pFlags = pCmd->FindFirstElement("WarningLevel");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								const char* pszTmp = pChild->GetData();
+								while (*pszTmp && !tt::IsDigit(*pszTmp))
+									++pszTmp;
+								m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszTmp);
+							}
+						}
+						pFlags = pCmd->FindFirstElement("CallingConvention");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData() && ttstristr(pChild->GetData(), "stdcall")) {
+								m_cSrcFiles.UpdateOption(OPT_STDCALL, true);
+							}
+						}
+						pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								ttCStr cszFlags("-D");
+								cszFlags += pChild->GetData();
+								cszFlags.ReplaceStr("_DEBUG;", "");
+								cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+								while (cszFlags.ReplaceStr(";", " -D"));
+								m_cSrcFiles.UpdateOption(OPT_CFLAGS_DBG, (char*) cszFlags);
+							}
+						}
+					}
+				}
+			}
+			else if (!bRelFlagsSeen && pszCondition && (ttstristr(pszCondition, "Release|Win32") || ttstristr(pszCondition, "Release|x64"))) {
+				bRelFlagsSeen = true;
+				for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++) {
+					ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
+					if (tt::IsSameStrI(pCmd->GetName(), "Midl")) {
+						ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								ttCStr cszFlags("-D");
+								cszFlags += pChild->GetData();
+								cszFlags.ReplaceStr("NDEBUG;", "");
+								cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+								while (cszFlags.ReplaceStr(";", " -D"));
+								m_cSrcFiles.UpdateOption(OPT_MDL_REL, (char*) cszFlags);
+							}
+						}
+					}
+					else if (tt::IsSameStrI(pCmd->GetName(), "ResourceCompile")) {
+						ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								ttCStr cszFlags("-D");
+								cszFlags += pChild->GetData();
+								cszFlags.ReplaceStr("NDEBUG;", "");
+								cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+								while (cszFlags.ReplaceStr(";", " -D"));
+								m_cSrcFiles.UpdateOption(OPT_RC_REL, (char*) cszFlags);
+							}
+						}
+					}
+					else if (tt::IsSameStrI(pCmd->GetName(), "ClCompile")) {
+						ttCXMLBranch* pFlags = pCmd->FindFirstElement("FavorSizeOrSpeed");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData())
+								m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, tt::IsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
+						}
+						pFlags = pCmd->FindFirstElement("PrecompiledHeaderFile");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData())
+								m_cSrcFiles.UpdateOption(OPT_PCH, pChild->GetData());
+						}
+						pFlags = pCmd->FindFirstElement("WarningLevel");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								const char* pszTmp = pChild->GetData();
+								while (*pszTmp && !tt::IsDigit(*pszTmp))
+									++pszTmp;
+								m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszTmp);
+							}
+						}
+						pFlags = pCmd->FindFirstElement("CallingConvention");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData() && ttstristr(pChild->GetData(), "stdcall")) {
+								m_cSrcFiles.UpdateOption(OPT_STDCALL, true);
+							}
+						}
+						pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
+						if (pFlags && pFlags->GetChildrenCount() > 0) {
+							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+							if (pChild->GetData()) {
+								ttCStr cszFlags("-D");
+								cszFlags += pChild->GetData();
+								cszFlags.ReplaceStr("NDEBUG;", "");
+								cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+								while (cszFlags.ReplaceStr(";", " -D"));
+								m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, (char*) cszFlags);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
+
+	// If Debug and Release flags are the same, then remove them and just use the common flag setting
+
+	if (m_cSrcFiles.GetOption(OPT_CFLAGS_REL) && m_cSrcFiles.GetOption(OPT_CFLAGS_DBG) &&
+				tt::IsSameStrI(m_cSrcFiles.GetOption(OPT_CFLAGS_REL), m_cSrcFiles.GetOption(OPT_CFLAGS_DBG)))	{
+		m_cSrcFiles.UpdateOption(OPT_CFLAGS_CMN, m_cSrcFiles.GetOption(OPT_CFLAGS_REL));
+		m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, "");
+		m_cSrcFiles.UpdateOption(OPT_CFLAGS_DBG, "");
+	}
+	if (m_cSrcFiles.GetOption(OPT_MDL_REL) && m_cSrcFiles.GetOption(OPT_MDL_DBG) &&
+				tt::IsSameStrI(m_cSrcFiles.GetOption(OPT_MDL_REL), m_cSrcFiles.GetOption(OPT_MDL_DBG)))	{
+		m_cSrcFiles.UpdateOption(OPT_MDL_CMN, m_cSrcFiles.GetOption(OPT_MDL_REL));
+		m_cSrcFiles.UpdateOption(OPT_MDL_REL, "");
+		m_cSrcFiles.UpdateOption(OPT_MDL_DBG, "");
+	}
+	if (m_cSrcFiles.GetOption(OPT_RC_REL) && m_cSrcFiles.GetOption(OPT_RC_DBG) &&
+				tt::IsSameStrI(m_cSrcFiles.GetOption(OPT_RC_REL), m_cSrcFiles.GetOption(OPT_RC_DBG)))	{
+		m_cSrcFiles.UpdateOption(OPT_RC_CMN, m_cSrcFiles.GetOption(OPT_RC_REL));
+		m_cSrcFiles.UpdateOption(OPT_RC_REL, "");
+		m_cSrcFiles.UpdateOption(OPT_RC_DBG, "");
+	}
+
 	return true;
 }
 
