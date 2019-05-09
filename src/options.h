@@ -50,10 +50,10 @@ namespace sfopt {			// .srcfiles otpions
 		OPT_CLANG_REL,		// flags to pass to the CLANG compiler in release builds
 		OPT_CLANG_DBG,		// flags to pass to the CLANG compiler in debug builds
 
-		OPT_64BIT,			// if true, build 64-bit target
+		OPT_64BIT,			// generate scripts for 64-bit build
 		OPT_TARGET_DIR64,	// 64-bit target directory
 
-		OPT_32BIT,			// if true, build 32-bit target
+		OPT_32BIT,			// generate scripts for 32-bit build
 		OPT_TARGET_DIR32,	// 32-bit target directory
 
 		OPT_64BIT_SUFFIX,	// true means append "64" to target's directory or .exe name

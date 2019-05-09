@@ -64,10 +64,10 @@ static const OPT_SETTING s_aOptions[] = {
 	{ OPT_MS_RC,		"ms_rc",		"true",		true,  false,  "use rc.exe even when compiling with CLANG" },
 	{ OPT_IDE,			"IDE",			nullptr,	false, false,  "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
 
-	{ OPT_64BIT,		"64Bit",		"false",	true,  false,  "if true, build 64-bit target" },
+	{ OPT_64BIT,		"64Bit",		"false",	true,  false,  "generate scripts for 64-bit build" },
 	{ OPT_TARGET_DIR64, "TargetDir64",	nullptr,	false, false,  "64-bit target directory" },
 
-	{ OPT_32BIT,		"32Bit",		"false",	true,  false,  "if true, build 32-bit target" },
+	{ OPT_32BIT,		"32Bit",		"false",	true,  false,  "generate scripts for 32-bit build" },
 	{ OPT_TARGET_DIR32, "TargetDir32",	nullptr,	false, false,  "32-bit target directory" },
 
 	{ OPT_64BIT_SUFFIX,	"b64_suffix",	"false",	true,  false,  "true means append '64' to target's directory or .exe name" },
