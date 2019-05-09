@@ -63,6 +63,13 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 			continue;
 		else
 			++cBlankLines;
+
+		// Add a blank line before 64Bit so that platform settings are a bit easier to spot
+
+		if (!cBlankLines && tt::IsSameSubStr(tt::FindNonSpace(m_lstOriginal[pos]), "64Bit")) {
+			++cBlankLines;
+			kfOut.WriteEol();
+		}
 		kfOut.WriteEol(m_lstOriginal[pos]);
 	}
 
@@ -90,17 +97,17 @@ bool CWriteSrcFiles::WriteNew(const char* pszFile, const char* pszCommentHdr)
 		m_lstOriginal += "";
 		m_lstOriginal += "Files:";
 		if (m_cszRcName.IsNonEmpty()) {
-			cszFile = "  ";
+			cszFile = "    ";
 			cszFile += (const char*) m_cszRcName;
 			m_lstOriginal += cszFile;
 		}
 		for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos) {
-			cszFile = "  ";
+			cszFile = "    ";
 			cszFile += m_lstIdlFiles[pos];
 			m_lstOriginal += cszFile;
 		}
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			cszFile = "  ";
+			cszFile = "    ";
 			cszFile += m_lstSrcFiles[pos];
 			m_lstOriginal += cszFile;
 		}
@@ -202,7 +209,9 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 	}
 	else if (GetChanged(aOptions[pos].opt) || GetRequired(aOptions[pos].opt)) {
 		sprintf_s(szLine, sizeof(szLine), ttstrlen(m_aUpdateOpts[pos].pszVal) > 12 ? pszLongOptionFmt : pszOptionFmt,
-			(char*) cszName, m_aUpdateOpts[pos].pszVal, aOptions[pos].pszComment);
+			(char*) cszName,
+				m_aUpdateOpts[pos].pszVal ? m_aUpdateOpts[pos].pszVal : "",
+				aOptions[pos].pszComment ? aOptions[pos].pszComment : "");
 		m_lstOriginal.InsertAt(m_posInsert++, szLine);
 	}
 }

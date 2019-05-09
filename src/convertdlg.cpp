@@ -72,7 +72,8 @@ bool CConvertDlg::CreateSrcFiles()
 	}
 
 	if (DoModal(NULL) == IDOK) {
-		tt::MsgBoxFmt(IDS_SRCFILES_CREATED, MB_OK, (char*) tt::FindFilePortion(m_cszConvertScript));
+		if (m_cszConvertScript.IsNonEmpty())
+			tt::MsgBoxFmt(IDS_SRCFILES_CREATED, MB_OK, (char*) tt::FindFilePortion(m_cszConvertScript));
 		return true;
 	}
 	else
@@ -267,8 +268,10 @@ void CConvertDlg::OnOK(void)
 	}
 	else {	// We get here if the user didn't specify anything to convert from.
 		CreateNewSrcFiles();
-		if (!m_cSrcFiles.WriteNew(m_cszDirOutput)) {
-			tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
+		ttCStr cszFile(m_cszDirOutput);
+		cszFile.AppendFileName(".srcfiles");
+		if (!m_cSrcFiles.WriteNew(cszFile)) {
+			tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) cszFile);
 			CancelEnd();
 		}
 	}
@@ -498,7 +501,7 @@ void CConvertDlg::CreateNewSrcFiles()
 	char szPath[MAX_PATH];
 	ttstrcpy(szPath, m_cszDirSrcFiles);
 	tt::AddTrailingSlash(szPath);
-	size_t cbRoot = tt::StrByteLen(szPath);
+	size_t cbRoot = ttstrlen(szPath);
 
 	ttCStr cszRelPath;
 

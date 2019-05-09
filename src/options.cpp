@@ -93,7 +93,7 @@ CSrcOptions::CSrcOptions()
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		size_t posOpt = m_aUpdateOpts.Add();
 		m_aUpdateOpts[posOpt].pszVal = s_aOptions[pos].pszVal ? ttstrdup(s_aOptions[pos].pszVal) : nullptr;
-		m_aUpdateOpts[posOpt].pszComment = tt::IsNonEmpty(s_aOptions[pos].pszComment) ?	 ttstrdup(s_aOptions[pos].pszComment) : nullptr;
+		m_aUpdateOpts[posOpt].pszComment = tt::IsNonEmpty(s_aOptions[pos].pszComment) ? ttstrdup(s_aOptions[pos].pszComment) : nullptr;
 		m_aUpdateOpts[posOpt].bRequired = s_aOptions[pos].bRequired;
 	}
 }
