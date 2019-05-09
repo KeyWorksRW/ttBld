@@ -20,15 +20,22 @@
 class CConvertDlg : public ttCDlg
 {
 public:
-	CConvertDlg() : ttCDlg(IDDDLG_CONVERT) { }
+	CConvertDlg();
 
-	// Class functions
+	// Public functions
 
 	bool  CreateSrcFiles();
+	bool  doConversion(const char* pszFile = nullptr);
 
 	char* GetDirOutput() { return m_cszDirOutput; }
 	char* GetDirSrcFiles() { return m_cszDirSrcFiles; }
 	char* GetConvertScript() { return m_cszConvertScript; }
+	void  SetConvertScritpt(const char* pszFile) { m_cszConvertScript = pszFile; }
+
+	bool ConvertCodeLite();
+	bool ConvertCodeBlocks();
+	bool ConvertVcxProj();
+	bool ConvertVcProj();
 
 protected:
 	BEGIN_TTCMD_MAP()
@@ -46,11 +53,6 @@ protected:
 	void OnOK(void);
 
 	// Protected functions
-
-	bool ConvertCodeLite();
-	bool ConvertCodeBlocks();
-	bool ConvertVcxProj();
-	bool ConvertVcProj();
 
 	void CreateNewSrcFiles();
 

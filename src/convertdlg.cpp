@@ -51,6 +51,10 @@ static const char* atxtProjects[] = {
 	nullptr
 };
 
+CConvertDlg::CConvertDlg() : ttCDlg(IDDDLG_CONVERT)
+{
+	m_cszDirOutput.GetCWD();
+}
 
 bool CConvertDlg::CreateSrcFiles()
 {
@@ -223,46 +227,8 @@ void CConvertDlg::OnOK(void)
 			CancelEnd();
 			return;
 		}
-
-		const char* pszExt = tt::FindLastChar(m_cszConvertScript, '.');
-		if (pszExt) {
-			HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
-			if (hr != S_OK) {
-				tt::MsgBoxFmt(IDS_PARSE_ERROR, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
-				CancelEnd();
-			}
-			m_cszDirOutput.AppendFileName(".srcfiles");
-
-			bool bResult = false;
-			if (tt::IsSameStrI(pszExt, ".project"))
-				bResult = ConvertCodeLite();
-			else if (tt::IsSameStrI(pszExt, ".cdb"))
-				bResult = ConvertCodeBlocks();
-			else if (tt::IsSameStrI(pszExt, ".filters"))
-				bResult = ConvertVcxProj();
-			else if (tt::IsSameStrI(pszExt, ".vcproj"))
-				bResult = ConvertVcProj();
-
-			if (bResult) {
-				ttCStr cszHdr;
-				cszHdr.printf("# Converted from %s", (char*) m_cszConvertScript);
-
-				if (tt::IsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT))) {
-					ttCStr cszProject(m_cszDirOutput);
-					char* pszFilePortion = tt::FindFilePortion(cszProject);
-					if (pszFilePortion)
-						*pszFilePortion = 0;
-					m_cSrcFiles.UpdateOption(OPT_PROJECT, tt::FindFilePortion(cszProject));
-				}
-
-				if (!m_cSrcFiles.WriteNew(m_cszDirOutput, cszHdr)) {
-					tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
-					CancelEnd();
-				}
-			}
-			else {
-				CancelEnd();
-			}
+		if (!doConversion()) {
+			CancelEnd();
 			return;
 		}
 	}
@@ -543,4 +509,49 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 	tt::ConvertToRelative(m_cszScriptRoot, pszFile, cszTmp);
 	tt::ConvertToRelative(m_cszOutRoot, cszTmp, m_cszRelative);
 	return m_cszRelative;
+}
+
+bool CConvertDlg::doConversion(const char* pszFile)
+{
+	if (pszFile)
+		m_cszConvertScript = pszFile;
+	const char* pszExt = tt::FindLastChar(m_cszConvertScript, '.');
+	if (pszExt) {
+		HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
+		if (hr != S_OK) {
+			tt::MsgBoxFmt(IDS_PARSE_ERROR, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+			return false;
+		}
+		m_cszDirOutput.AppendFileName(".srcfiles");
+
+		bool bResult = false;
+		if (tt::IsSameStrI(pszExt, ".project"))
+			bResult = ConvertCodeLite();
+		else if (tt::IsSameStrI(pszExt, ".cdb"))
+			bResult = ConvertCodeBlocks();
+		else if (tt::IsSameStrI(pszExt, ".filters"))
+			bResult = ConvertVcxProj();
+		else if (tt::IsSameStrI(pszExt, ".vcproj"))
+			bResult = ConvertVcProj();
+
+		if (bResult) {
+			ttCStr cszHdr;
+			cszHdr.printf("# Converted from %s", (char*) m_cszConvertScript);
+
+			if (tt::IsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT))) {
+				ttCStr cszProject(m_cszDirOutput);
+				char* pszFilePortion = tt::FindFilePortion(cszProject);
+				if (pszFilePortion)
+					*pszFilePortion = 0;
+				m_cSrcFiles.UpdateOption(OPT_PROJECT, tt::FindFilePortion(cszProject));
+			}
+
+			if (!m_cSrcFiles.WriteNew(m_cszDirOutput, cszHdr)) {
+				tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
+				return false;
+			}
+			return true;
+		}
+	}
+	return false;
 }

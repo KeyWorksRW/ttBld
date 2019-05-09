@@ -8,6 +8,7 @@
 
 STRINGTABLE
 BEGIN
+	IDS_CONVERSION_FAILED	"Conversion of %s failed!"
 	IDS_TAB_CLANG			"CLang"
 	IDS_TAB_RC_MIDL			"Rc/Midl"
 	IDS_64BIT_DIR			"Select 64-bit target directory"

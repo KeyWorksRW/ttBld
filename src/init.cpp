@@ -15,6 +15,8 @@
 	#pragma warning(disable: 6031)	// Return value ignored: '_chdir'.
 #endif // _MSC_VER
 
+#include "strtable.h"	// String resource IDs
+
 #include "convertdlg.h" 	// CConvertDlg
 #include "ninja.h"			// CNinja
 #include "vcxproj.h"		// CVcxProj
@@ -51,7 +53,16 @@ int main(int argc, char* argv[])
 			bDryRun = true;
 		else if (tt::IsSameStrI(argv[argpos] + 1, "new")) {
 			CConvertDlg dlg;
-			if (!dlg.CreateSrcFiles())
+
+			if (argpos + 1 < argc) {
+				++argpos;
+				if (!dlg.doConversion(argv[argpos])) {
+					tt::MsgBoxFmt(tt::GetResString(IDS_CONVERSION_FAILED), MB_OK | MB_ICONWARNING, dlg.GetConvertScript());
+					if (!dlg.CreateSrcFiles())
+						return 0;	// means .srcfiles wasn't created, so nothing further that we can do
+				}
+			}
+			else if (!dlg.CreateSrcFiles())
 				return 0;	// means .srcfiles wasn't created, so nothing further that we can do
 
 			ttCStr csz(dlg.GetDirOutput());
