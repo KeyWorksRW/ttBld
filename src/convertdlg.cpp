@@ -54,6 +54,7 @@ static const char* atxtProjects[] = {
 CConvertDlg::CConvertDlg() : ttCDlg(IDDDLG_CONVERT)
 {
 	m_cszDirOutput.GetCWD();
+	m_cszCWD = m_cszDirOutput;
 }
 
 bool CConvertDlg::CreateSrcFiles()
@@ -492,22 +493,30 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 
 	if (m_cszScriptRoot.IsEmpty()) {
 		m_cszScriptRoot = (char*) m_cszConvertScript;
+		m_cszScriptRoot.GetFullPathName();
 		char* pszFilePortion = tt::FindFilePortion(m_cszScriptRoot);
 		ttASSERT_MSG(pszFilePortion, "No filename in m_cszScriptRoot--things will go badly without it.");
 		if (pszFilePortion)
 			*pszFilePortion = 0;
+
+		// For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory as the
+		// script file
+
+		_chdir(m_cszScriptRoot);
 	}
 
 	if (m_cszOutRoot.IsEmpty()) {
 		m_cszOutRoot = (char*) m_cszDirOutput;
+		m_cszOutRoot.GetFullPathName();
 		char* pszFilePortion = m_cszOutRoot.FindStrI(".srcfiles");
 		if (pszFilePortion)
 			*pszFilePortion = 0;
 	}
 
-	ttCStr cszTmp;
-	tt::ConvertToRelative(m_cszScriptRoot, pszFile, cszTmp);
-	tt::ConvertToRelative(m_cszOutRoot, cszTmp, m_cszRelative);
+	ttCStr cszFile(pszFile);
+	cszFile.GetFullPathName();
+
+	tt::ConvertToRelative(m_cszOutRoot, cszFile, m_cszRelative);
 	return m_cszRelative;
 }
 
@@ -533,6 +542,8 @@ bool CConvertDlg::doConversion(const char* pszFile)
 			bResult = ConvertVcxProj();
 		else if (tt::IsSameStrI(pszExt, ".vcproj"))
 			bResult = ConvertVcProj();
+
+		_chdir(m_cszCWD);	// we may have changed directories during the conversion
 
 		if (bResult) {
 			ttCStr cszHdr;

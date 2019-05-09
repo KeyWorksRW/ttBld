@@ -73,4 +73,6 @@ protected:
 	ttCStr m_cszScriptRoot;
 	ttCStr m_cszOutRoot;
 	ttCStr m_cszRelative;		// used to create a relative location for a source file
+
+	ttCStr m_cszCWD;
 };
