@@ -1,13 +1,15 @@
 Options:
-	Project: MakeNinja
-	exe_type:	console		# [window | console | lib | dll]
-	PCH: pch.h				# "none" or name of header file to use for precompilation
-	64Bit:		true		# create 64-bit project in addition to 32-bit project
-	bit_suffix: true		# add "64" to the end of the project name (e.g., MakeNinja64.exe)
+	Project:	 MakeNinja	  # project name
+	exe_type:	 console	  # [window | console | lib | dll]
+	PCH:		 pch.h		  # "none" or name of header file to use for precompilation
 
-	IncDirs: ../ttLib/include;../src		# ../src so that files in ../common can locate pch.h
-	TargetDirs:	 ../bin; ../bin64
-	BuildLibs: ../ttLib/lib/ttLib
+	64Bit:		 true		  # generate scripts for 64-bit build
+	TargetDir64: ../bin64	  # 64-bit target directory
+	32Bit:		 true		  # generate scripts for 32-bit build
+	TargetDir32: ../bin32	  # 32-bit target directory
+
+	IncDirs:	 ../ttLib/include
+	BuildLibs:	 ../ttLib/lib/ttLib	  # libraries that need to be built (added to makefile generation)
 
 Files:
 	pch.cpp

@@ -12,7 +12,7 @@ msvc_deps_prefix = Note: including file:
 # -MDd	// Multithreaded debug dll (MSVCRTD)
 # -Z7	// produces object files with full symbolic debugging information
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MDd -Od -Z7 -GS- -I"../ttLib/include" -I"../src" /Fp$outdir/MakeNinja.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MDd -Od -Z7 -GS- -I"../ttLib/include" /Fp$outdir/MakeNinja.pch
 
 rule compilePCH
   deps = msvc
@@ -25,7 +25,7 @@ rule compile
   description = compiling $in
 
 rule rc
-  command = rc.exe -nologo -r /l 0x409 -fo$out $in
+  command = rc.exe -nologo -d_DEBUG /l 0x409 -fo$out $in
   description = resource compiler... $in
 
 rule link
@@ -74,7 +74,7 @@ build $outdir/tabrcmidl.obj: compile tabrcmidl.cpp | $outdir/pch.obj
 
 build $outdir/tabscripts.obj: compile tabscripts.cpp | $outdir/pch.obj
 
-build $resout/makeninja.res: rc makeninja.rc | $
+build $resout/makeninjaD.res: rc makeninja.rc | $
   resource.h $
   strtable.h $
   res/cdlprojectpre.txt $
@@ -88,7 +88,7 @@ build $resout/makeninja.res: rc makeninja.rc | $
   ../ttlib/icons/ok.ico $
   strtable.rc2
 
-build ../bin64/MakeNinjaD.exe : link $resout/makeninja.res ../ttLib/lib/ttLib64D.lib $
+build ../bin64/MakeNinjaD.exe : link $resout/makeninjaD.res ../ttLib/lib/ttLib64D.lib $
   $outdir/pch.obj $
   $outdir/addfiles.obj $
   $outdir/bldmaster.obj $
