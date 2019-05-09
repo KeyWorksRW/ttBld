@@ -1,15 +1,17 @@
 Options:
-	Project:	 MakeNinja	  # project name
-	exe_type:	 console	  # [window | console | lib | dll]
-	PCH:		 pch.h		  # "none" or name of header file to use for precompilation
+    Project:     MakeNinja    # project name
+    exe_type:    console      # [window | console | lib | dll]
+    PCH:         pch.h        # "none" or name of header file to use for precompilation
+    Natvis:      makeninja.natvis                  # Specifies a .natvis file to link into the pdb file
 
-	64Bit:		 true		  # generate scripts for 64-bit build
-	TargetDir64: ../bin64	  # 64-bit target directory
-	32Bit:		 true		  # generate scripts for 32-bit build
-	TargetDir32: ../bin32	  # 32-bit target directory
 
-	IncDirs:	 ../ttLib/include
-	BuildLibs:	 ../ttLib/lib/ttLib	  # libraries that need to be built (added to makefile generation)
+    64Bit:       true         # generate scripts for 64-bit build
+    TargetDir64: ../bin64     # 64-bit target directory
+    32Bit:       true         # generate scripts for 32-bit build
+    TargetDir32: ../bin32     # 32-bit target directory
+
+    IncDirs:     ../ttLib/include                  # additional directories for header files
+    BuildLibs:   ../ttLib/lib/ttLib                # libraries that need to be built (added to makefile generation)
 
 Files:
 	pch.cpp

@@ -29,7 +29,7 @@ rule rc
   description = resource compiler... $in
 
 rule link
-  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO /MACHINE:x64 /DEBUG /PDB:$outdir/MakeNinja.pdb /SUBSYSTEM:CONSOLE $in
+  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO /MACHINE:x64 /NATVIS:makeninja.natvis /DEBUG /PDB:$outdir/MakeNinja.pdb /SUBSYSTEM:CONSOLE $in
   description = linking $out
 
 build $outdir/pch.obj: compilePCH pch.cpp
@@ -109,5 +109,6 @@ build ../bin64/MakeNinjaD.exe : link $resout/makeninjaD.res ../ttLib/lib/ttLib64
   $outdir/tabclang.obj $
   $outdir/tablinker.obj $
   $outdir/tabrcmidl.obj $
-  $outdir/tabscripts.obj
+  $outdir/tabscripts.obj $
+  | makeninja.natvis
 
