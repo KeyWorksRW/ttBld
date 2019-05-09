@@ -43,7 +43,7 @@ static const char* atxtSrcTypes[] = {
 };
 
 static const char* atxtProjects[] = {
-	"*.filters",
+	"*.vcxproj",
 	"*.vcproj",
 	"*.project",	// CodeLite
 	"*.cbp",		// CodeBlocks
@@ -158,7 +158,7 @@ void CConvertDlg::OnBegin(void)
 void CConvertDlg::OnBtnLocateScript()
 {
 	ttCFileDlg dlg(*this);
-	dlg.SetFilter("Project Files|*.filters;*.vcproj;*.project;*.cbp");
+	dlg.SetFilter("Visual Studio|*.vcxproj;*.vcproj|CodeLite|*.project|CodeBlocks|*.cbp||");
 	dlg.UseCurrentDirectory();
 	if (dlg.GetOpenFileName()) {
 		auto item = m_comboScripts.Add(dlg.GetFileName());
@@ -538,7 +538,7 @@ bool CConvertDlg::doConversion(const char* pszFile)
 			bResult = ConvertCodeLite();
 		else if (tt::IsSameStrI(pszExt, ".cdb"))
 			bResult = ConvertCodeBlocks();
-		else if (tt::IsSameStrI(pszExt, ".filters"))
+		else if (tt::IsSameStrI(pszExt, ".vcxproj"))
 			bResult = ConvertVcxProj();
 		else if (tt::IsSameStrI(pszExt, ".vcproj"))
 			bResult = ConvertVcProj();
