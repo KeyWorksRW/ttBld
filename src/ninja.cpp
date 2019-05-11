@@ -54,14 +54,14 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 			break;
 
 		case GEN_RELEASE32:
-			cszOutDir	  = m_bPrivateBuild ? "outdir = .private/build/debug32" : "outdir = build/debug32";
+			cszOutDir	  = m_bPrivateBuild ? "outdir = .private/build/release32" : "outdir = build/release32";
 			cszScriptFile = m_bPrivateBuild ? ".private/build" : "build";
 			cszScriptFile.AppendFileName(m_bClang ? "clangBuild32.ninja" : "msvcBuild32.ninja");
 			break;
 
 		case GEN_RELEASE64:
 		default:
-			cszOutDir	  = m_bPrivateBuild ? "outdir = .private/build/debug64" : "outdir = build/debug64";
+			cszOutDir	  = m_bPrivateBuild ? "outdir = .private/build/release64" : "outdir = build/release64";
 			cszScriptFile = m_bPrivateBuild ? ".private/build" : "build";
 			cszScriptFile.AppendFileName(m_bClang ? "clangBuild64.ninja" : "msvcBuild64.ninja");
 			break;

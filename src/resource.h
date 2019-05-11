@@ -17,6 +17,7 @@
 #define IDRADIO_NORMAL                  1025
 #define IDR_MAKEFILE                    1026
 #define IDRADIO_CONSOLE                 1026
+#define IDR_PRIVATE_MAKEFILE            1027
 #define IDRADIO_LIB                     1027
 #define IDRADIO_DLL                     1028
 #define IDCHECK_CODEBLOCKS              1029
@@ -87,7 +88,7 @@
 #define IDBTN_CHANGE                    1087
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103

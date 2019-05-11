@@ -31,7 +31,7 @@ bool CBldMaster::CreateMakeFile()
 	// We get here if MAKEMAKE_ALWAYS is set, or MAKEMAKE_MISSING is set and the makefile doesn't exist
 
 	ttCFile kf;
-	if (!kf.ReadResource(IDR_MAKEFILE)) {
+	if (!kf.ReadResource(m_bPrivateBuild ? IDR_PRIVATE_MAKEFILE : IDR_MAKEFILE)) {
 		m_lstErrors += "MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile!";
 		return false;
 	}

@@ -80,6 +80,7 @@ build $resout/makeninja.res: rc makeninja.rc | $
   res/cdlprojectpre.txt $
   res/cdlprojectpost.txt $
   res/makefile.txt $
+  res/pmakefile.txt $
   res/vcxproj.xml $
   res/vcxproj.filters.xml $
   ttlibicons.rc2 $
