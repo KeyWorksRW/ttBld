@@ -83,6 +83,7 @@ public:
 	ttCStr m_cszLibName;		// name and location of any additional library to build (used by Lib: section)
 	ttCStr m_cszRcName;			// resource file to build (if any)
 	ttCStr m_cszHHPName;		// HTML Help project file
+	ttCStr m_cszOrgProjName;	// original name in case .private/.srcfiles overrides it
 
 	ttCHeap m_ttHeap;			// all the ttCList files will be attatched to this heap
 	ttCList m_lstSrcFiles;

@@ -35,7 +35,13 @@ bool CBldMaster::CreateMakeFile()
 		m_lstErrors += "MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile!";
 		return false;
 	}
-	while (kf.ReplaceStr("%project%", GetProjectName()));
+
+	// .private/.srcfiles might specify a new project name to be used for the executable name, but we don't need that new name in the makefile
+
+	if (m_cszOrgProjName.IsNonEmpty())
+		while (kf.ReplaceStr("%project%", m_cszOrgProjName));
+	else
+		while (kf.ReplaceStr("%project%", GetProjectName()));
 
 	// Now we parse the file as if we had read it, changing or adding as needed
 

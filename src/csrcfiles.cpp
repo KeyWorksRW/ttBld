@@ -338,6 +338,8 @@ bool CSrcFiles::ReadTwoFiles(const char* pszMaster, const char* pszPrivate)
 {
 	if (!ReadFile(pszMaster))
 		return false;
+	m_cszOrgProjName = GetProjectName();
+
 	m_bReadingPrivate = true;	// just in case some processing method needs to know
 
 	if (pszPrivate && tt::FileExists(pszPrivate))
