@@ -11,6 +11,7 @@
 #define IDTAB_SCRIPTS                   106
 #define IDTAB_RCMIDL                    107
 #define IDTAB_CLANG                     108
+#define IDTAB_PRIVATE                   109
 #define IDR_PRE_PROJECT                 1024
 #define IDEDIT_PROJ_NAME                1024
 #define IDR_POST_PROJECT                1025
@@ -78,6 +79,7 @@
 #define IDEDIT_COMMON                   1079
 #define IDEDIT_DIR64                    1080
 #define IDEDIT_RELEASE                  1080
+#define IDEDIT_COMMON_RC                1080
 #define IDBTN_DIR64                     1081
 #define IDEDIT_DEBUG                    1081
 #define IDCHECK_NO_MSVC                 1082

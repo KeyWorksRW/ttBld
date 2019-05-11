@@ -1,5 +1,9 @@
 // Purpose:		String resource IDs
 
+#ifdef PRIVATE
+	#include ".private/strtable.h"
+#endif
+
 #define IDS_PARSE_ERROR			2048
 #define IDS_INVALID_PROJECT		2049
 #define IDS_SRCFILES_CREATED	2050

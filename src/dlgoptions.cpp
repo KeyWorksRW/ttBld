@@ -6,6 +6,10 @@
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
+// As a way to ensure that .private/.srcfiles projects works correctly, we conditionalize a private tab to add to the end
+// of the tab list. However, the files to support the tab are not part of this project (which is the whole point of a
+// .private version). See https://github.com/KeyWorksRW/MakeNinja/issues/60 for more information.
+
 #include "pch.h"
 
 #include "ttlibicons.h"
@@ -21,7 +25,7 @@ bool ChangeOptions(bool bDryRun)
 
 	HWND hwndDlg = dlg.DoModeless(NULL);
 
-	// We aren't a window app, so we'll need to run a message loop here to handle the modeless dialog box
+	// We aren't a window app, so we need to run a message loop here to handle the modeless dialog box
 
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0)) {
@@ -49,6 +53,9 @@ CTabOptions::CTabOptions() : ttCDlg(IDDLG_OPTIONS)
 	m_tabLinker.SetParentClass(this);
 	m_tabRcMidl.SetParentClass(this);
 	m_tabScripts.SetParentClass(this);
+#ifdef PRIVATE
+	m_tabPrivate.SetParentClass(this);
+#endif
 
 	ReadFile();	// read in any existing .srcfiles
 
@@ -103,6 +110,13 @@ void CTabOptions::OnBegin(void)
 	ti.pszText = (char*) tt::GetResString(IDS_TAB_SCRIPTS);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_SCRIPTS, (LPARAM) &ti);
 
+#ifdef PRIVATE
+	if (tt::FileExists(".private/.srcfiles")) {
+		ti.pszText = (char*) tt::GetResString(IDS_TAB_PRIVATE);
+		SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_PRIVATE, (LPARAM) &ti);
+	}
+#endif
+
 	SendItemMsg(IDTAB, TCM_SETCURSEL, TAB_GENERAL);
 	m_hwndTabSub = m_tabGeneral.DoModeless(*this);
 	::ShowWindow(m_hwndTabSub, SW_SHOW);
@@ -110,6 +124,10 @@ void CTabOptions::OnBegin(void)
 
 void CTabOptions::OnOK(void)
 {
+#ifdef PRIVATE
+	m_tabPrivate.SaveChanges();
+#endif
+
 	::SendMessage(m_hwndTabSub, WM_COMMAND, IDOK, 0);
 	::SendMessage(m_hwndTabSub, WM_CLOSE, 0, 0);
 	DestroyWindow(*this);
@@ -169,6 +187,11 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
 					case TAB_SCRIPTS:
 						m_hwndTabSub = m_tabScripts.DoModeless(*this);
 						break;
+#ifdef PRIVATE
+					case TAB_PRIVATE:
+						m_hwndTabSub = m_tabPrivate.DoModeless(*this);
+						break;
+#endif
 
 					default:
 						return 0;

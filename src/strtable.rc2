@@ -6,6 +6,10 @@
 
 #include "strtable.h"
 
+#ifdef PRIVATE
+	#include ".private/strtable.rc2"
+#endif
+
 STRINGTABLE
 BEGIN
 	IDS_CONVERSION_FAILED	"Conversion of %s failed!"

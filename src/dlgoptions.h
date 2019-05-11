@@ -23,6 +23,10 @@
 #include "tabscripts.h"	// CTabScripts
 #include "tabrcmidl.h"	// CTabRcMidl
 
+#ifdef PRIVATE
+	#include ".private/tabprivate.h"	// CTabPrivate
+#endif
+
 class CTabOptions : public ttCDlg, public CWriteSrcFiles
 {
 public:
@@ -54,6 +58,7 @@ protected:
 		TAB_LINKER,
 		TAB_RC_MIDL,
 		TAB_SCRIPTS,
+		TAB_PRIVATE,
 	} TAB_ID;
 
 	CTabGeneral	 m_tabGeneral;
@@ -62,6 +67,9 @@ protected:
 	CTabLinker	 m_tabLinker;
 	CTabRcMidl	 m_tabRcMidl;
 	CTabScripts	 m_tabScripts;
+#ifdef PRIVATE
+	CTabPrivate	 m_tabPrivate;
+#endif
 
 	HWND m_hwndTabSub;
 };
