@@ -15,7 +15,15 @@
 
 CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 {
-	ReadTwoFiles(".srcfiles", bReadPrivate ? ".private/.srcfiles" : nullptr);
+	if (bReadPrivate && tt::FileExists(".private/.srcfiles"))
+		m_bPrivateBuild = true;	// changes where ninja scripts will be written
+	else
+		bReadPrivate = false;
+
+	if (bReadPrivate)
+		ReadTwoFiles(txtSrcFilesFileName, bReadPrivate ? ".private/.srcfiles" : nullptr);
+	else
+		ReadFile();
 
 	// If no platform was specified, default to 64-bit
 

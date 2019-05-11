@@ -13,7 +13,7 @@
 class CNinja : public CBldMaster
 {
 public:
-	CNinja() : CBldMaster(true) { m_bForceOutput = false; }
+	CNinja(bool bPrivateBuild = true) : CBldMaster(bPrivateBuild) { m_bForceOutput = false; }
 
 	typedef enum {
 		GEN_NONE,

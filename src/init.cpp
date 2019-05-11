@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 			if (!ChangeOptions(bDryRun))
 				return 1;
 		}
-		else if (tt::IsSameSubStrI(argv[argpos] + 1, "nop")) {
+		else if (tt::IsSameSubStrI(argv[argpos] + 1, "nop")) {	// noprivate
 			bReadPrivate = false;
 		}
 		else if (tt::IsSameSubStrI(argv[argpos] + 1, "force")) {
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 	}
 
 	{
-		CNinja cNinja;
+		CNinja cNinja(bReadPrivate);
 		if (bForce)
 			cNinja.ForceOutput();
 		if (bDryRun)

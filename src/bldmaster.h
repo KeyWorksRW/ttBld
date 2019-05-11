@@ -71,4 +71,5 @@ protected:
 
 	bool m_bBin64Exists;	// if true, the directory ../bin64 exists
 	bool m_bAddPlatformSuffix;	// true if 32-bit and 64-bit target directories are identical
+	bool m_bPrivateBuild;
 };
