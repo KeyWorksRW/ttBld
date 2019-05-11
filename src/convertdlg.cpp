@@ -389,7 +389,7 @@ bool CConvertDlg::ConvertVcxProj()
 									++pszFirstSemi;
 								ttCStr cszFlags(tt::IsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi :  pChild->GetData());
 								cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
-								m_cSrcFiles.UpdateOption(OPT_INC_DIRS, cszFlags);
+								m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszFlags);
 							}
 						}
 						pFlags = pCmd->FindFirstElement("PrecompiledHeaderFile");
