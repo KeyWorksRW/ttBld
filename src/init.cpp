@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 			Usage();
 			return 1;
 		}
-		else if (tt::IsSameSubStrI(argv[argpos] + 1, "dry"))
+		else if (tt::IsSameSubStrI(argv[argpos] + 1, "dry"))	// -dryryn
 			bDryRun = true;
 		else if (tt::IsSameStrI(argv[argpos] + 1, "new")) {
 			CConvertDlg dlg;
@@ -81,11 +81,11 @@ int main(int argc, char* argv[])
 			AddFiles(lstFiles, bDryRun);
 			return 1;
 		}
-		else if (tt::IsSameSubStrI(argv[argpos] + 1, "opt")) {
+		else if (tt::IsSameSubStrI(argv[argpos] + 1, "opt")) {	// -options
 			if (!ChangeOptions(bDryRun))
 				return 1;
 		}
-		else if (tt::IsSameSubStrI(argv[argpos] + 1, "nop")) {	// noprivate
+		else if (tt::IsSameSubStrI(argv[argpos] + 1, "nop")) {	// -noprivate
 			bReadPrivate = false;
 		}
 		else if (tt::IsSameSubStrI(argv[argpos] + 1, "force")) {
