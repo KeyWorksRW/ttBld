@@ -22,6 +22,11 @@
 # \
 !ifndef 0 # \
 # Following section is for nmake \
+!ifdef private # \
+bdir=.private/build # \
+!else # \
+bdir=build # \
+!endif # \
 !ifdef b64 # \
 bits=64 # \
 !ifdef LIB64 # \
@@ -40,6 +45,12 @@ cmplr=msvc # \
 # \
 !else
 # Following section is for GNU make and variants
+
+ifdef private
+	bdir=.private/build
+else
+	bdir=build
+endif
 
 ifdef b64
 	bits=64
@@ -62,40 +73,40 @@ endif
 
 ########## release section ##########
 
-release: ttLib build/$(cmplr)Build$(bits).ninja MakeNinja
+release: ttLib $(bdir)/$(cmplr)Build$(bits).ninja MakeNinja
 
 ttLib:
 	cd ../ttLib/src & ninja -f build/$(cmplr)Build$(bits).ninja
 
-build/$(cmplr)Build$(bits).ninja: .srcfiles
+$(bdir)/$(cmplr)Build$(bits).ninja: .srcfiles
 	MakeNinja -force
 
 MakeNinja:
-	ninja -f build/$(cmplr)Build$(bits).ninja
+	ninja -f $(bdir)/$(cmplr)Build$(bits).ninja
 
 ########## debug section ##########
 
-debug: ttLibD build/$(cmplr)Build$(bits)D.ninja MakeNinjaD
+debug: ttLibD $(bdir)/$(cmplr)Build$(bits)D.ninja MakeNinjaD
 
 ttLibD:
 	cd ../../ttLib/src & ninja -f build/$(cmplr)Build$(bits)D.ninja
 
-build/$(cmplr)Build$(bits)D.ninja: .srcfiles
+$(bdir)/$(cmplr)Build$(bits)D.ninja: .srcfiles
 	MakeNinja -force
 
 MakeNinjaD:
-	ninja -f build/$(cmplr)Build$(bits)D.ninja
+	ninja -f $(bdir)/$(cmplr)Build$(bits)D.ninja
 
 ########## clean release section ##########
 
 clean: MakeNinjaClean
 
 MakeNinjaClean:
-	ninja -f build/$(cmplr)Build$(bits).ninja -t clean
+	ninja -f $(bdir)/$(cmplr)Build$(bits).ninja -t clean
 
 ########## clean debug section ##########
 
 cleanD: MakeNinjaCleanD
 
 MakeNinjaCleanD:
-	ninja -f build/$(cmplr)Build$(bits)D.ninja -t clean
+	ninja -f $(bdir)/$(cmplr)Build$(bits)D.ninja -t clean
