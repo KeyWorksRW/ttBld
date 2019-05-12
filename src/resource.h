@@ -88,14 +88,18 @@
 #define IDEDIT_NATVIS                   1086
 #define IDEDIT_DEBUG_MIDL               1087
 #define IDBTN_CHANGE                    1087
+#define IDBTN_BASE_INCDIRS              1088
+#define IDBTN_BASE_CFLAGS               1089
+#define IDBTN_BASE_RCFLAGS              1090
+#define IDBTN_BASE_LIBS                 1091
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1088
+#define _APS_NEXT_CONTROL_VALUE         1089
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
