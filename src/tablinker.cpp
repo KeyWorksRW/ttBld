@@ -52,7 +52,7 @@ void CTabLinker::OnOK(void)
 	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
 	m_pOpts->UpdateOption(OPT_LIB_DIRS, (char*) csz);
 
-	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS)));
 	m_pOpts->UpdateOption(OPT_LIBS, (char*) csz);
 
 	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
