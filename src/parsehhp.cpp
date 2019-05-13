@@ -290,11 +290,16 @@ bool CNinja::CreateHelpFile()
 	file.WriteEol("  command = hhc.exe $in ");
 	file.WriteEol("  description = compiling $out\n");
 
-	file.printf("build %s : compile %s | $\n", (char*) m_cszChmFile, GetHHPName());
-	for (size_t pos = 0; pos < chhp.m_lstDependencies.GetCount() - 1; ++pos) {
-		file.printf("  %s $\n", chhp.m_lstDependencies[pos]);
+	if (chhp.m_lstDependencies.GetCount() > 0) {
+		file.printf("build %s : compile %s | $\n", (char*) m_cszChmFile, GetHHPName());
+		for (size_t pos = 0; chhp.m_lstDependencies.GetCount() - 1; ++pos) {
+			file.printf("  %s $\n", chhp.m_lstDependencies[pos]);
+		}
+		file.printf("  %s\n", chhp.m_lstDependencies[chhp.m_lstDependencies.GetCount() - 1]);	// last one doesn't have trailing '$' character
 	}
-	file.printf("  %s\n", chhp.m_lstDependencies[chhp.m_lstDependencies.GetCount() - 1]);	// last one doesn't have trailing '$' character
+	else {
+		file.printf("build %s : compile %s\n", (char*) m_cszChmFile, GetHHPName());
+	}
 
 	// We don't want to touch the build script if it hasn't changed, since that would change the timestamp causing git
 	// and other tools that check timestamp to think something is different.

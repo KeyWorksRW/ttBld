@@ -61,6 +61,7 @@ bool CBldMaster::CreateMakeFile()
 				if (!GetBuildLibs()) {
 					kfOut.WriteEol(cszNewLine);
 					kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
+					continue;
 				}
 			}
 
