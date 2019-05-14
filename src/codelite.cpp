@@ -55,7 +55,7 @@ size_t CreateCodeLiteProject()
 
 	ttCStr cszProjFile(cSrcFiles.GetProjectName());
 	cszProjFile.ChangeExtension(".project");
-	if (tt::FileExists(cszProjFile)) {
+	if (ttFileExists(cszProjFile)) {
 		// TODO: [randalphwa - 10/8/2018] We could call a function here to update the .project file, adding any src files that
 		// are in .srcfiles, but missing in .project
 		return CLP_EXISTS;
@@ -97,7 +97,7 @@ size_t CreateCodeLiteProject()
 	cszExe += (char*) cSrcFiles.GetProjectName();
 	cszExe += "D.exe";
 	cszExe.GetFullPathName();
-	tt::BackslashToForwardslash(cszExe);
+	ttBackslashToForwardslash(cszExe);
 	while (kfPost.ReplaceStr("%exepath%", cszExe));
 
 	while (kfPost.ReadLine())

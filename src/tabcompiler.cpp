@@ -18,7 +18,7 @@ void CTabCompiler::OnBegin(void)
 	SetCheck(DLG_ID(m_pOpts->IsOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
 	SetCheck(DLG_ID(m_pOpts->GetBoolOption(OPT_STDCALL) ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
 
-	ptrdiff_t warnLevel = m_pOpts->GetOption(OPT_WARN_LEVEL) ? tt::Atoi(m_pOpts->GetOption(OPT_WARN_LEVEL)) : 4;
+	ptrdiff_t warnLevel = m_pOpts->GetOption(OPT_WARN_LEVEL) ? ttAtoi(m_pOpts->GetOption(OPT_WARN_LEVEL)) : 4;
 
 	switch (warnLevel) {
 		case 1:
@@ -102,22 +102,22 @@ void CTabCompiler::OnBtnChangePch()
 		}
 		ttCStr cszFile(pszFileName);
 		cszFile.ChangeExtension(".cpp");
-		if (tt::FileExists(cszFile)) {
+		if (ttFileExists(cszFile)) {
 			SetControlText(DLG_ID(IDEDIT_PCH), pszFileName);
 			return;
 		}
 		cszFile.ChangeExtension(".cxx");
-		if (tt::FileExists(cszFile)) {
+		if (ttFileExists(cszFile)) {
 			SetControlText(DLG_ID(IDEDIT_PCH), pszFileName);
 			return;
 		}
 		cszFile.ChangeExtension(".ccc");
-		if (tt::FileExists(cszFile)) {
+		if (ttFileExists(cszFile)) {
 			SetControlText(DLG_ID(IDEDIT_PCH), pszFileName);
 			return;
 		}
 		cszFile.Delete();
 		cszFile.printf("%s does not have a matching C++ source file -- precompiled header will fail without it!", (char*) pszFileName);
-		tt::MsgBox(cszFile);
+		ttMsgBox(cszFile);
 	}
 }

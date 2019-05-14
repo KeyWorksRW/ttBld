@@ -36,24 +36,24 @@ public:
 
 	bool IsProcessed() { return m_bRead; }
 
-	bool IsCodeBlockIDE()	 { return (tt::FindStrI(GetOption(OPT_IDE), "CodeBlocks")); }
-	bool IsCodeLiteIDE()	 { return (tt::FindStrI(GetOption(OPT_IDE), "CodeLite")); }
-	bool IsVisualStudioIDE() { return (tt::FindStrI(GetOption(OPT_IDE), "VisualStudio")); }
+	bool IsCodeBlockIDE()	 { return (ttStrStrI(GetOption(OPT_IDE), "CodeBlocks")); }
+	bool IsCodeLiteIDE()	 { return (ttStrStrI(GetOption(OPT_IDE), "CodeLite")); }
+	bool IsVisualStudioIDE() { return (ttStrStrI(GetOption(OPT_IDE), "VisualStudio")); }
 
-	bool IsExeTypeConsole()	 { return (tt::FindStrI(GetOption(OPT_EXE_TYPE), "console")); }	// this is the default
-	bool IsExeTypeDll()		 { return (tt::FindStrI(GetOption(OPT_EXE_TYPE), "dll")); }
-	bool IsExeTypeLib()		 { return (tt::FindStrI(GetOption(OPT_EXE_TYPE), "lib")); }
-	bool IsExeTypeWindow()	 { return (tt::FindStrI(GetOption(OPT_EXE_TYPE), "window")); }
+	bool IsExeTypeConsole()	 { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "console")); }	// this is the default
+	bool IsExeTypeDll()		 { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "dll")); }
+	bool IsExeTypeLib()		 { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "lib")); }
+	bool IsExeTypeWindow()	 { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "window")); }
 
-	bool IsMakeMissing()	 { return (tt::FindStrI(GetOption(OPT_MAKEFILE), "missing")); }	// this is the default
-	bool IsMakeNever()		 { return (tt::FindStrI(GetOption(OPT_MAKEFILE), "never")); }
-	bool IsMakeAlways()		 { return (tt::FindStrI(GetOption(OPT_MAKEFILE), "always")); }
+	bool IsMakeMissing()	 { return (ttStrStrI(GetOption(OPT_MAKEFILE), "missing")); }	// this is the default
+	bool IsMakeNever()		 { return (ttStrStrI(GetOption(OPT_MAKEFILE), "never")); }
+	bool IsMakeAlways()		 { return (ttStrStrI(GetOption(OPT_MAKEFILE), "always")); }
 
-	bool IsOptimizeSpeed()	 { return (tt::FindStrI(GetOption(OPT_OPTIMIZE), "speed")); }
+	bool IsOptimizeSpeed()	 { return (ttStrStrI(GetOption(OPT_OPTIMIZE), "speed")); }
 
 	// if not specified, both compilers are used
-	bool IsCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || tt::FindStrI(GetOption(OPT_COMPILERS), "MSVC")); }
-	bool IsCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || tt::FindStrI(GetOption(OPT_COMPILERS), "CLANG")); }
+	bool IsCompilerMSVC()	{ return (!GetOption(OPT_COMPILERS) || ttStrStrI(GetOption(OPT_COMPILERS), "MSVC")); }
+	bool IsCompilerClang()	{ return (!GetOption(OPT_COMPILERS) || ttStrStrI(GetOption(OPT_COMPILERS), "CLANG")); }
 
 	const char* GetDir32()	{ return GetOption(OPT_TARGET_DIR32); }	// 32-bit target directory
 	const char* GetDir64()	{ return GetOption(OPT_TARGET_DIR64); }	// 64-bit target directory

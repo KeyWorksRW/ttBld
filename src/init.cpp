@@ -39,7 +39,7 @@ void Usage()
 
 int main(int argc, char* argv[])
 {
-	tt::InitCaller(txtVersion);
+	ttInitCaller(txtVersion);
 	bool bDryRun = false;
 	bool bForce = false;
 	bool bReadPrivate = true;	// read .private/.srcfiles in addition to .srcfiles
@@ -49,15 +49,15 @@ int main(int argc, char* argv[])
 			Usage();
 			return 1;
 		}
-		else if (tt::IsSameSubStrI(argv[argpos] + 1, "dry"))	// -dryryn
+		else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))	// -dryryn
 			bDryRun = true;
-		else if (tt::IsSameStrI(argv[argpos] + 1, "new")) {
+		else if (ttIsSameStrI(argv[argpos] + 1, "new")) {
 			CConvertDlg dlg;
 
 			if (argpos + 1 < argc) {
 				++argpos;
 				if (!dlg.doConversion(argv[argpos])) {
-					tt::MsgBoxFmt(tt::GetResString(IDS_CONVERSION_FAILED), MB_OK | MB_ICONWARNING, dlg.GetConvertScript());
+					ttMsgBoxFmt(ttGetResString(IDS_CONVERSION_FAILED), MB_OK | MB_ICONWARNING, dlg.GetConvertScript());
 					if (!dlg.CreateSrcFiles())
 						return 0;	// means .srcfiles wasn't created, so nothing further that we can do
 				}
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 			if (!ChangeOptions(bDryRun))
 				return 1;
 		}
-		else if (tt::IsSameStrI(argv[argpos] + 1, "add")) {
+		else if (ttIsSameStrI(argv[argpos] + 1, "add")) {
 			ttCList lstFiles;
 			for (++argpos; argpos < argc; ++argpos) {
 				lstFiles += argv[argpos];
@@ -81,19 +81,19 @@ int main(int argc, char* argv[])
 			AddFiles(lstFiles, bDryRun);
 			return 1;
 		}
-		else if (tt::IsSameSubStrI(argv[argpos] + 1, "opt")) {	// -options
+		else if (ttIsSameSubStrI(argv[argpos] + 1, "opt")) {	// -options
 			if (!ChangeOptions(bDryRun))
 				return 1;
 		}
-		else if (tt::IsSameSubStrI(argv[argpos] + 1, "nop")) {	// -noprivate
+		else if (ttIsSameSubStrI(argv[argpos] + 1, "nop")) {	// -noprivate
 			bReadPrivate = false;
 		}
-		else if (tt::IsSameSubStrI(argv[argpos] + 1, "force")) {
+		else if (ttIsSameSubStrI(argv[argpos] + 1, "force")) {
 			bForce = false;
 		}
 	}
 
-	if (!tt::FileExists(".srcfiles")) {
+	if (!ttFileExists(".srcfiles")) {
 		CConvertDlg dlg;
 		if (!dlg.CreateSrcFiles())
 			return 0;	// means .srcfiles wasn't created, so nothing further that we can do
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		if (tt::IsNonEmpty(cNinja.GetHHPName()))
+		if (ttIsNonEmpty(cNinja.GetHHPName()))
 			cNinja.CreateHelpFile();
 
 		// Display any errors that occurred during processing

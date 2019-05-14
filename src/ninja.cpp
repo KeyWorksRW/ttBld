@@ -71,7 +71,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	ttCStr cszExtraLib;		// used to specify the exact name/path of the "extra" library (if any)
 	if (GetOption(OPT_LIB_DIRS)) {		// start with the extra lib if there is one
 		cszExtraLib = "$libout/";
-		cszExtraLib += tt::FindFilePortion(GetOption(OPT_LIB_DIRS));
+		cszExtraLib += ttFindFilePortion(GetOption(OPT_LIB_DIRS));
 		cszExtraLib.ChangeExtension(".lib");
 	}
 #endif
@@ -139,7 +139,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 		size_t pos;
 		for (pos = 0; aCppExt[pos]; pos++) {		// find out what type of C++ extension is being used
 			m_cszCPP_PCH.ChangeExtension(aCppExt[pos]);
-			if (tt::FileExists(m_cszCPP_PCH))
+			if (ttFileExists(m_cszCPP_PCH))
 				break;
 		}
 		ttASSERT_MSG(aCppExt[pos], "No C++ source file found to generate precompiled header.");	// Probably means GetPchHeader() is pointing to an invalid header file
@@ -149,7 +149,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 			puts(cszErrorMsg);
 
 			for (pos = 0; pos < GetSrcFileList()->GetCount(); pos++) {
-				const char* pszExt = tt::FindStrI(GetSrcFileList()->GetAt(pos), ".c");
+				const char* pszExt = ttStrStrI(GetSrcFileList()->GetAt(pos), ".c");
 				if (pszExt) {
 					m_cszCPP_PCH.ChangeExtension(pszExt);	// match extension used by other source files
 					break;
@@ -182,8 +182,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	// Write the build rules for all source files
 
 	for (size_t iPos = 0; iPos < GetSrcFileList()->GetCount(); iPos++) {
-		ttCStr cszFile(tt::FindFilePortion(GetSrcFileList()->GetAt(iPos)));
-		if (!tt::FindStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() &&  tt::IsSameStrI(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
+		ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
+		if (!ttStrStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() &&  ttIsSameStrI(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
 			continue;	// we already handled this
 		cszFile.ChangeExtension(".obj");
 
@@ -198,15 +198,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	// Write the build rules for all lib files
 
 	for (size_t iPos = 0; iPos < GetLibFileList()->GetCount(); iPos++) {
-		ttCStr cszFile(tt::FindFilePortion(GetLibFileList()->GetAt(iPos)));
-		if (!tt::FindStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() && tt::IsSameStrI(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
+		ttCStr cszFile(ttFindFilePortion(GetLibFileList()->GetAt(iPos)));
+		if (!ttStrStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() && ttIsSameStrI(cszFile, m_cszCPP_PCH)))	// we already handled resources and pre-compiled headers
 			continue;	// we already handled this
 		cszFile.ChangeExtension(".obj");
 
 		if (m_cszPCH.IsNonEmpty())
 			file.printf("build $libout/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetLibFileList()->GetAt(iPos), (char*) m_cszPCHObj);
 		else
-			file.printf("build $libout/%s: compile %s\n\n", (char*) cszFile, tt::FindFilePortion(GetLibFileList()->GetAt(iPos)));
+			file.printf("build $libout/%s: compile %s\n\n", (char*) cszFile, ttFindFilePortion(GetLibFileList()->GetAt(iPos)));
 	}
 
 #endif
@@ -214,7 +214,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	// Write the build rule for the resource compiler if an .rc file was specified as a source
 
 	ttCStr cszRes;
-	if (tt::FileExists(GetRcFile())) {
+	if (ttFileExists(GetRcFile())) {
 		cszRes = GetRcFile();
 		cszRes.RemoveExtension();
 		cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ?	 "D.res" : ".res");
@@ -237,8 +237,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	if (!IsExeTypeLib() && GetOption(OPT_LIB_DIRS)) {	// If an extra library was specified, add it's build rule first
 		file.printf("build %s : lib", (char*) cszExtraLib);
 		for (size_t posLib = 0; posLib < GetLibFileList()->GetCount(); posLib++) {
-			ttCStr cszFile(tt::FindFilePortion(GetLibFileList()->GetAt(posLib)));
-			if (!tt::FindStrI(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file
+			ttCStr cszFile(ttFindFilePortion(GetLibFileList()->GetAt(posLib)));
+			if (!ttStrStrI(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file
 				continue;
 			cszFile.ChangeExtension(".obj");
 			file.printf(" $\n  $libout/%s", (char*) cszFile);
@@ -251,8 +251,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	WriteMidlTargets();
 	WriteLinkTargets(gentype);
 
-	if (!tt::DirExists(m_bPrivateBuild ? ".private/build" : "build")) {
-		if (!tt::CreateDir(m_bPrivateBuild ? ".private/build" : "build")) {
+	if (!ttDirExists(m_bPrivateBuild ? ".private/build" : "build")) {
+		if (!ttCreateDir(m_bPrivateBuild ? ".private/build" : "build")) {
 			AddError("Unable to create the build directory -- so no place to put the .ninja files!\n");
 			return false;
 		}
@@ -587,7 +587,7 @@ void CNinja::WriteLibDirective()
 
 void CNinja::WriteRcDirective()
 {
-	if (tt::FileExists(GetRcFile())) {
+	if (ttFileExists(GetRcFile())) {
 		if (m_bClang && !GetBoolOption(OPT_MS_RC))
 			m_pkfOut->WriteStr("rule rc\n  command = llvm-rc.exe -nologo");
 		else
@@ -616,9 +616,9 @@ void CNinja::WriteMidlDirective(GEN_TYPE gentype)
 {
 	if (m_lstIdlFiles.GetCount()) {
 		if (gentype == GEN_DEBUG64 || gentype == GEN_RELEASE64)
-			m_pkfOut->WriteEol("rule midl\n  command = midl.exe /nologo /x64");
+			m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /x64");
 		else
-			m_pkfOut->WriteEol("rule midl\n  command = midl.exe /nologo /win32");
+			m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /win32");
 
 		if (GetOption(OPT_MDL_CMN)) {
 			m_pkfOut->WriteChar(CH_SPACE);
@@ -635,7 +635,7 @@ void CNinja::WriteMidlDirective(GEN_TYPE gentype)
 			m_pkfOut->WriteChar(CH_SPACE);
 			m_pkfOut->WriteStr(GetOption(OPT_MDL_REL));
 		}
-		m_pkfOut->WriteEol(" /tlb $out $in\n  description = midl compiler... $in\n");
+		m_pkfOut->WriteEol("/tlb\n  description = midl compiler... $in\n");
 	}
 }
 
@@ -645,20 +645,17 @@ void CNinja::WriteMidlTargets()
 		ttCStr cszTypeLib(m_lstIdlFiles[pos]);
 		cszTypeLib.RemoveExtension();
 		cszTypeLib += (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ? "D.tlb" : ".tlb";
-		ttCStr cszIdlC(m_lstIdlFiles[pos]);
+		ttCStr cszIdl(m_lstIdlFiles[pos]);
 
 		// By default, midl will generate a file_i.c file which gets #included in one of the source files. The C++
 		// compilers should generate a dependency for it, so we use that file as the target rather then the .tlb file so
 		// that ninja will know to recompile the file that included the file_i.c file.
 
-		cszIdlC.RemoveExtension();
-		cszIdlC += "_i.c";
-		if (GetOption(OPT_MDL_CMN))
-			m_pkfOut->printf("build %s : midl %s /tlb %s %s\n\n",
-				(char*) cszIdlC, GetOption(OPT_MDL_CMN), (char*) cszTypeLib, m_lstIdlFiles[pos]);
-		else
-			m_pkfOut->printf("build %s : midl /tlb %s %s\n\n",
-				(char*) cszIdlC, (char*) cszTypeLib, m_lstIdlFiles[pos]);
+		// That seems to cause a problem for ninja, so changing dependency to the .tlb instead
+
+		cszIdl.RemoveExtension();
+		cszIdl += ".idl";
+		m_pkfOut->printf("build %s : midl %s %s\n\n", (char*) cszTypeLib,  (char*) cszTypeLib, (char*) cszIdl);
 	}
 }
 
@@ -692,7 +689,7 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 		m_pkfOut->printf("build %s : link", pszTarget);
 	}
 
-	if (tt::FileExists(GetRcFile())) {
+	if (ttFileExists(GetRcFile())) {
 		ttCStr cszRes(GetRcFile());
 		cszRes.RemoveExtension();
 		cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ?	 "D.res" : ".res");
@@ -701,7 +698,7 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 
 	if (!IsExeTypeLib() && GetOption(OPT_LIB_DIRS)) {
 		ttCStr cszExtraLib("$libout/");
-		cszExtraLib += tt::FindFilePortion(GetOption(OPT_LIB_DIRS));
+		cszExtraLib += ttFindFilePortion(GetOption(OPT_LIB_DIRS));
 		cszExtraLib.ChangeExtension(".lib");
 
 		m_pkfOut->WriteChar(CH_SPACE);
@@ -709,14 +706,14 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 	}
 
 	if (GetBuildLibs()) {
-		ttCEnumStr enumLib(tt::FindNonSpace(GetBuildLibs()), ';');
+		ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
 		while (enumLib.Enum())
 			AddDependentLibrary(enumLib, gentype);
 	}
 
 	for (size_t iPos = 0; iPos < getSrcCount(); iPos++) {
-		ttCStr cszFile(tt::FindFilePortion(GetSrcFileList()->GetAt(iPos)));
-		if (!tt::FindStrI(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file
+		ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
+		if (!ttStrStrI(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file
 			continue;
 		cszFile.ChangeExtension(".obj");
 		m_pkfOut->printf(" $\n  $outdir/%s", (char*) cszFile);
@@ -731,7 +728,7 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 {
 	ttCStr cszLib(pszLib);
-	char* pszTmp = tt::FindStrI(pszLib, ".lib");
+	char* pszTmp = ttStrStrI(pszLib, ".lib");
 	if (pszTmp)
 		*pszTmp = 0;
 
@@ -740,17 +737,17 @@ void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 
 	switch (gentype) {
 		case GEN_DEBUG32:
-			cszLib += !tt::FindStr(cszLib, "32") ? "32D.lib" : "D.lib";
+			cszLib += !ttStrStr(cszLib, "32") ? "32D.lib" : "D.lib";
 			break;
 		case GEN_DEBUG64:
-			cszLib += !tt::FindStr(cszLib, "64") ? "64D.lib" : "D.lib";
+			cszLib += !ttStrStr(cszLib, "64") ? "64D.lib" : "D.lib";
 			break;
 		case GEN_RELEASE32:
-			cszLib += !tt::FindStr(cszLib, "32") ? "32.lib" : ".lib";
+			cszLib += !ttStrStr(cszLib, "32") ? "32.lib" : ".lib";
 			break;
 		case GEN_RELEASE64:
 		default:
-			cszLib += !tt::FindStr(cszLib, "64") ? "64.lib" : ".lib";
+			cszLib += !ttStrStr(cszLib, "64") ? "64.lib" : ".lib";
 			break;
 	}
 

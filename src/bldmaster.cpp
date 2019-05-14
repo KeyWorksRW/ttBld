@@ -15,7 +15,7 @@
 
 CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 {
-	if (bReadPrivate && tt::FileExists(".private/.srcfiles"))
+	if (bReadPrivate && ttFileExists(".private/.srcfiles"))
 		m_bPrivateBuild = true;	// changes where ninja scripts will be written
 	else
 		bReadPrivate = false;
@@ -37,17 +37,17 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 	if (GetBoolOption(OPT_64BIT) && !GetDir64()) {
 		ttCStr cszCWD, cszDir64;
 		cszCWD.GetCWD();
-		bool bSrcDir = ttstristr(tt::FindFilePortion(cszCWD), "src") ? true : false;
+		bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
 		if (!bSrcDir) {
 			cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
-			if (tt::DirExists(cszCWD))
+			if (ttDirExists(cszCWD))
 				bSrcDir = true;
 		}
 		if (bSrcDir) {
 			ttCStr cszDir64(IsExeTypeLib() ? "../lib" : "../bin");
 			ttCStr cszTmp(cszDir64);
 			cszTmp += "64";
-			if (tt::DirExists(cszTmp))		// if there is a ../lib64 or ../bin64, then use that
+			if (ttDirExists(cszTmp))		// if there is a ../lib64 or ../bin64, then use that
 				cszDir64 = cszTmp;
 			UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
 		}
@@ -55,7 +55,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 			ttCStr cszDir64(IsExeTypeLib() ? "lib" : "bin");
 			ttCStr cszTmp(cszDir64);
 			cszTmp += "64";
-			if (tt::DirExists(cszTmp))		// if there is a ../lib64 or ../bin64, then use that
+			if (ttDirExists(cszTmp))		// if there is a ../lib64 or ../bin64, then use that
 				cszDir64 = cszTmp;
 			UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
 		}
@@ -64,17 +64,17 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 	if (GetBoolOption(OPT_32BIT) && !GetDir32()) {
 		ttCStr cszCWD, cszDir32;
 		cszCWD.GetCWD();
-		bool bSrcDir = ttstristr(tt::FindFilePortion(cszCWD), "src") ? true : false;
+		bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
 		if (!bSrcDir) {
 			cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
-			if (tt::DirExists(cszCWD))
+			if (ttDirExists(cszCWD))
 				bSrcDir = true;
 		}
 		if (bSrcDir) {
 			ttCStr cszDir32(IsExeTypeLib() ? "../lib" : "../bin");
 			ttCStr cszTmp(cszDir32);
 			cszTmp += "32";
-			if (tt::DirExists(cszTmp))		// if there is a ../lib32 or ../bin32, then use that
+			if (ttDirExists(cszTmp))		// if there is a ../lib32 or ../bin32, then use that
 				cszDir32 = cszTmp;
 			UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
 		}
@@ -82,13 +82,13 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 			ttCStr cszDir32(IsExeTypeLib() ? "lib" : "bin");
 			ttCStr cszTmp(cszDir32);
 			cszTmp += "32";
-			if (tt::DirExists(cszTmp))		// if there is a ../lib32 or ../bin32, then use that
+			if (ttDirExists(cszTmp))		// if there is a ../lib32 or ../bin32, then use that
 				cszDir32 = cszTmp;
 			UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
 		}
 	}
 
-	m_bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && tt::IsSameStr(GetDir64(), GetDir32())) ? true : false;
+	m_bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
 
 	if (!GetProjectName()) {
 		ttCStr cszCwd;
@@ -97,12 +97,12 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 		if (!pszTmp[1])		// if path ends with a slash, remove it -- we need that last directory name
 			*pszTmp = 0;
 
-		char* pszProj = tt::FindFilePortion(cszCwd);
-		if (tt::IsSameStrI(pszProj, "src")) {	// Use the parent folder for the root if the current directory is "src"
+		char* pszProj = ttFindFilePortion(cszCwd);
+		if (ttIsSameStrI(pszProj, "src")) {	// Use the parent folder for the root if the current directory is "src"
 			pszTmp = (char*) cszCwd.FindLastSlash();
 			if (pszTmp)	{
 				*pszTmp = 0;	// remove the last slash and filename, forcing the directory name above to be the "filename"
-				pszProj = tt::FindFilePortion(cszCwd);
+				pszProj = ttFindFilePortion(cszCwd);
 			}
 		}
 		UpdateOption(OPT_PROJECT, pszProj);
@@ -113,7 +113,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 	if (m_cszRcName.IsNonEmpty())
 		FindRcDependencies(m_cszRcName);
 
-	m_bBin64Exists = tt::FindStr(GetDir64(), "64");
+	m_bBin64Exists = ttStrStr(GetDir64(), "64");
 }
 
 const char* lstRcKeywords[] = {		// list of keywords that load a file
@@ -137,7 +137,7 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 	if (!kf.ReadFile(pszHdr ? pszHdr : pszRcFile)) {
 		if (!pszHdr) {	// we should have already reported a problem with a missing header file
 			ttCStr cszErrMsg;
-			cszErrMsg.printf(tt::GetResString(IDS_CS_CANNOT_OPEN), pszRcFile);
+			cszErrMsg.printf(ttGetResString(IDS_CS_CANNOT_OPEN), pszRcFile);
 			m_lstErrors += cszErrMsg;
 		}
 		return false;
@@ -151,18 +151,18 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 		cszRelPath = pszRelPath;
 	else {
 		if (pszHdr)	{
-			char* pszFilePortion = tt::FindFilePortion(pszHdr);
+			char* pszFilePortion = ttFindFilePortion(pszHdr);
 			if (pszFilePortion != pszHdr) {
 				cszRelPath = pszHdr;
-				pszFilePortion = tt::FindFilePortion(cszRelPath);
+				pszFilePortion = ttFindFilePortion(cszRelPath);
 				*pszFilePortion = 0;
 			}
 		}
 		else {
-			char* pszFilePortion = tt::FindFilePortion(pszRcFile);
+			char* pszFilePortion = ttFindFilePortion(pszRcFile);
 			if (pszFilePortion != pszRcFile) {
 				cszRelPath = pszRcFile;
-				pszFilePortion = tt::FindFilePortion(cszRelPath);
+				pszFilePortion = ttFindFilePortion(cszRelPath);
 				*pszFilePortion = 0;
 			}
 		}
@@ -171,8 +171,8 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 	size_t curLine = 0;
 	while (kf.ReadLine()) {
 		++curLine;
-		if (tt::IsSameSubStrI(tt::FindNonSpace(kf), "#include")) {
-			char* psz = tt::FindNonSpace(tt::FindNonSpace(kf) + sizeof("#include"));
+		if (ttIsSameSubStrI(ttFindNonSpace(kf), "#include")) {
+			char* psz = ttFindNonSpace(ttFindNonSpace(kf) + sizeof("#include"));
 
 			// We only care about header files in quotes -- we're not generating dependeices on system files (#include <foo.h>)
 
@@ -183,14 +183,14 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 				// Older versions of Visual Studio do not allow <> to be placed around header files. Since system header files
 				// rarely change, and when they do they are not likely to require rebuilding our .rc file, we simply ignore them.
 
-				if (tt::IsSameSubStrI(cszHeader, "afx") || tt::IsSameSubStrI(cszHeader, "atl") || tt::IsSameSubStrI(cszHeader, "winres"))
+				if (ttIsSameSubStrI(cszHeader, "afx") || ttIsSameSubStrI(cszHeader, "atl") || ttIsSameSubStrI(cszHeader, "winres"))
 					continue;
 
 				NormalizeHeader(pszHdr ? pszHdr : pszRcFile, cszHeader);
 
-				if (!tt::FileExists(cszHeader)) {
+				if (!ttFileExists(cszHeader)) {
 					ttCStr cszErrMsg;
-					cszErrMsg.printf(tt::GetResString(IDS_CS_MISSING_INCLUDE),
+					cszErrMsg.printf(ttGetResString(IDS_CS_MISSING_INCLUDE),
 						pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
 					m_lstErrors += cszErrMsg;
 					continue;
@@ -209,41 +209,41 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 		// Not a header file, but might still be something we are dependent on
 
 		else {
-			char* pszKeyWord = tt::FindNonSpace(kf);
+			char* pszKeyWord = ttFindNonSpace(kf);
 			if (!pszKeyWord || pszKeyWord[0] == '/' || pszKeyWord[0] == CH_QUOTE)	// TEXTINCLUDE typically puts things in quotes
 				continue;	// blank line or comment line
-			pszKeyWord = tt::FindSpace(pszKeyWord);
+			pszKeyWord = ttFindSpace(pszKeyWord);
 			if (!pszKeyWord)
 				continue;	// means it's not a line that will include anything
-			pszKeyWord = tt::FindNonSpace(pszKeyWord);
+			pszKeyWord = ttFindNonSpace(pszKeyWord);
 			if (!pszKeyWord)
 				continue;	// means it's not a line that will include anything
 
 			for (size_t pos = 0; lstRcKeywords[pos] ; ++pos) {
-				if (tt::IsSameSubStr(pszKeyWord, lstRcKeywords[pos])) {
-					const char* pszFileName = ttstrchr(pszKeyWord, CH_QUOTE);
+				if (ttIsSameSubStr(pszKeyWord, lstRcKeywords[pos])) {
+					const char* pszFileName = ttStrChr(pszKeyWord, CH_QUOTE);
 
 					// Some keywords use quotes which aren't actually filenames -- e.g., RCDATA { "string" }
 
-					if (pszFileName && ttstrchr(pszFileName + 1, CH_QUOTE) && !ttstrchr(pszFileName, '{')) {
+					if (pszFileName && ttStrChr(pszFileName + 1, CH_QUOTE) && !ttStrChr(pszFileName, '{')) {
 						ttCStr cszFile;
 						cszFile.GetQuotedString(pszFileName);
 
 						// Backslashes are doubled -- so convert them into forward slashes
 
-						char* pszSlash = tt::FindStr(cszFile, "\\\\");
+						char* pszSlash = ttStrStr(cszFile, "\\\\");
 						if (pszSlash) {
 							do {
 								*pszSlash++ = '/';
-								ttstrcpy(pszSlash, pszSlash + 1);
-								pszSlash = ttstrstr(pszSlash, "\\\\");
+								ttStrCpy(pszSlash, pszSlash + 1);
+								pszSlash = ttStrStr(pszSlash, "\\\\");
 							} while(pszSlash);
 						}
 
 						if (pszHdr) {
 							ttCStr cszHdr(pszHdr);
-							if (tt::FileExists(cszHdr)) {	// we only want the directory
-								char* pszFilePortion = tt::FindFilePortion(cszHdr);
+							if (ttFileExists(cszHdr)) {	// we only want the directory
+								char* pszFilePortion = ttFindFilePortion(cszHdr);
 								*pszFilePortion = 0;
 							}
 							// First we normalize it to the header
@@ -256,9 +256,9 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 						else
 							NormalizeHeader(pszRcFile, cszFile);
 
-						if (!tt::FileExists(cszFile)) {
+						if (!ttFileExists(cszFile)) {
 							ttCStr cszErrMsg;
-							cszErrMsg.printf(tt::GetResString(IDS_CS_MISSING_INCLUDE),
+							cszErrMsg.printf(ttGetResString(IDS_CS_MISSING_INCLUDE),
 								pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (pszFileName - kf.GetLnPtr()),  (char*) cszFile);
 							m_lstErrors += cszErrMsg;
 							break;
@@ -283,7 +283,7 @@ const char* CBldMaster::NormalizeHeader(const char* pszRoot, ttCStr& cszHeader)
 	ttASSERT(cszHeader.IsNonEmpty());
 
 	if (pszRoot && *pszRoot)
-		tt::ConvertToRelative(pszRoot, cszHeader, cszHeader);
+		ttConvertToRelative(pszRoot, cszHeader, cszHeader);
 
 	cszHeader.MakeLower();
 	return cszHeader;

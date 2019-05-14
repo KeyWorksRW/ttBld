@@ -40,13 +40,13 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 	}
 	kfIn.MakeCopy();
 
-	while (kfIn.ReadLine() && !tt::IsSameSubStrI(kfIn, "Files:"))
+	while (kfIn.ReadLine() && !ttIsSameSubStrI(kfIn, "Files:"))
 		kfOut.WriteEol(kfIn);
 
 	if (kfOut.IsEndOfFile()) {	// means there was no Files: section
 		kfOut.WriteEol("Files:");
 		for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos) {
-			if (!tt::FileExists(lstFiles[pos]))	{
+			if (!ttFileExists(lstFiles[pos]))	{
 				printf("%s doesn't exist -- not added\n", lstFiles[pos]);
 				continue;
 			}
@@ -69,9 +69,9 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 
 	kfOut.WriteEol(kfIn);	// This will be the Files: line
 	while (kfIn.ReadLine()) {
-		if (tt::IsAlpha(*(const char*)kfIn))	// Alphabetical character in first column is a new section
+		if (ttIsAlpha(*(const char*)kfIn))	// Alphabetical character in first column is a new section
 			break;
-		else if (!tt::FindNonSpace(kfIn)) {		// blank line, insert after it
+		else if (!ttFindNonSpace(kfIn)) {		// blank line, insert after it
 			kfOut.WriteEol(kfIn);
 			break;
 		}
@@ -82,7 +82,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 	// We are now after a blank line, at the beginning of a section, or at the end of the file
 
 	for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos) {
-		if (!tt::FileExists(lstFiles[pos]))	{
+		if (!ttFileExists(lstFiles[pos]))	{
 			printf("%s doesn't exist -- not added\n", lstFiles[pos]);
 			continue;
 		}

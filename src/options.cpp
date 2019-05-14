@@ -92,8 +92,8 @@ CSrcOptions::CSrcOptions()
 
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		size_t posOpt = m_aUpdateOpts.Add();
-		m_aUpdateOpts[posOpt].pszVal = s_aOptions[pos].pszVal ? ttstrdup(s_aOptions[pos].pszVal) : nullptr;
-		m_aUpdateOpts[posOpt].pszComment = tt::IsNonEmpty(s_aOptions[pos].pszComment) ? ttstrdup(s_aOptions[pos].pszComment) : nullptr;
+		m_aUpdateOpts[posOpt].pszVal = s_aOptions[pos].pszVal ? ttStrDup(s_aOptions[pos].pszVal) : nullptr;
+		m_aUpdateOpts[posOpt].pszComment = ttIsNonEmpty(s_aOptions[pos].pszComment) ? ttStrDup(s_aOptions[pos].pszComment) : nullptr;
 		m_aUpdateOpts[posOpt].bRequired = s_aOptions[pos].bRequired;
 	}
 }
@@ -101,8 +101,8 @@ CSrcOptions::CSrcOptions()
 CSrcOptions::~CSrcOptions()
 {
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		ttfree(m_aUpdateOpts[pos].pszVal);
-		ttfree(m_aUpdateOpts[pos].pszComment);
+		ttFree(m_aUpdateOpts[pos].pszVal);
+		ttFree(m_aUpdateOpts[pos].pszComment);
 	}
 }
 
@@ -120,16 +120,16 @@ bool CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* pszVal)	// fi
 	ttASSERT(s_aOptions[pos].opt != OPT_OVERFLOW);
 	if (s_aOptions[pos].opt == OPT_OVERFLOW)
 		return false;	// invalid option
-	ttfree(m_aUpdateOpts[pos].pszVal);
+	ttFree(m_aUpdateOpts[pos].pszVal);
 
 	// We want boolean values to be consistent, so if "yes" or "no" is specified, convert to "true" or "false"
 
-	if (tt::IsSameStrI(pszVal, "yes"))
+	if (ttIsSameStrI(pszVal, "yes"))
 		pszVal = "true";
-	else if (tt::IsSameStrI(pszVal, "no"))
+	else if (ttIsSameStrI(pszVal, "no"))
 		pszVal = "false";
 
-	m_aUpdateOpts[pos].pszVal = ttstrdup(pszVal);
+	m_aUpdateOpts[pos].pszVal = ttStrDup(pszVal);
 	return true;
 }
 
@@ -144,8 +144,8 @@ bool CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, bool bVal)
 	if (s_aOptions[pos].opt == OPT_OVERFLOW)
 		return false;	// invalid option
 
-	ttfree(m_aUpdateOpts[pos].pszVal);
-	m_aUpdateOpts[pos].pszVal = ttstrdup(bVal ? "true" : "false");
+	ttFree(m_aUpdateOpts[pos].pszVal);
+	m_aUpdateOpts[pos].pszVal = ttStrDup(bVal ? "true" : "false");
 	return true;
 }
 
@@ -171,7 +171,7 @@ bool CSrcOptions::GetBoolOption(sfopt::OPT_INDEX index)
 {
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		if (s_aOptions[pos].opt == index)
-			return tt::IsSameStrI(m_aUpdateOpts[pos].pszVal, "true");
+			return ttIsSameStrI(m_aUpdateOpts[pos].pszVal, "true");
 	}
 	return false;
 }
@@ -181,9 +181,9 @@ bool CSrcOptions::GetChanged(sfopt::OPT_INDEX index)
 	for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
 		if (s_aOptions[pos].opt == index) {
 			if (!s_aOptions[pos].pszVal)
-				return tt::IsNonEmpty(m_aUpdateOpts[pos].pszVal);
+				return ttIsNonEmpty(m_aUpdateOpts[pos].pszVal);
 			else
-				return !tt::IsSameStrI(m_aUpdateOpts[pos].pszVal, s_aOptions[pos].pszVal);
+				return !ttIsSameStrI(m_aUpdateOpts[pos].pszVal, s_aOptions[pos].pszVal);
 		}
 	}
 	return false;
@@ -215,7 +215,7 @@ bool CSrcOptions::UpdateReadOption(const char* pszName, const char* pszVal, cons
 
 	size_t pos;
 	for (pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos) {
-		if (tt::IsSameStrI(s_aOptions[pos].pszName, pszName))
+		if (ttIsSameStrI(s_aOptions[pos].pszName, pszName))
 			break;
 	}
 	if (s_aOptions[pos].opt == OPT_OVERFLOW)
@@ -224,8 +224,8 @@ bool CSrcOptions::UpdateReadOption(const char* pszName, const char* pszVal, cons
 	UpdateOption(s_aOptions[pos].opt, pszVal);	// we call this so that "yes" or "no" options get converted to "true" or "false"
 
 	if (pszComment)	{
-		ttfree(m_aUpdateOpts[pos].pszComment);
-		m_aUpdateOpts[pos].pszComment = ttstrdup(pszComment);
+		ttFree(m_aUpdateOpts[pos].pszComment);
+		m_aUpdateOpts[pos].pszComment = ttStrDup(pszComment);
 	}
 	return true;
 }

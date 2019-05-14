@@ -31,11 +31,11 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 
 	while (kfIn.ReadLine()) {
 		// Don't add any old options that have been replaced
-		if (tt::FindStr(kfIn, "TargetDirs:"))
+		if (ttStrStr(kfIn, "TargetDirs:"))
 			continue;
-		else if (tt::FindStr(kfIn, "LinkFlags:"))
+		else if (ttStrStr(kfIn, "LinkFlags:"))
 			continue;
-		else if (tt::FindStr(kfIn, "bit_suffix:"))
+		else if (ttStrStr(kfIn, "bit_suffix:"))
 			continue;
 
 		m_lstOriginal += (const char*) kfIn;
@@ -56,7 +56,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 	size_t cBlankLines = 0;
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos)	{
 		char* pszLine = (char*) m_lstOriginal[pos];	// since we're reducing the size, and about to delete it, okay to modify
-		tt::TrimRight(pszLine);
+		ttTrimRight(pszLine);
 		if (*pszLine)
 		   cBlankLines = 0;
 		else if (cBlankLines > 0)	// ignore if last line was also blank
@@ -66,7 +66,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 
 		// Add a blank line before 64Bit so that platform settings are a bit easier to spot
 
-		if (!cBlankLines && tt::IsSameSubStr(tt::FindNonSpace(m_lstOriginal[pos]), "64Bit")) {
+		if (!cBlankLines && ttIsSameSubStr(ttFindNonSpace(m_lstOriginal[pos]), "64Bit")) {
 			++cBlankLines;
 			kfOut.WriteEol();
 		}
@@ -125,7 +125,7 @@ bool CWriteSrcFiles::WriteNew(const char* pszFile, const char* pszCommentHdr)
 ptrdiff_t CWriteSrcFiles::FindOption(const char* pszOption, ttCStr& cszDst)
 {
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos) {
-		if (tt::IsSameSubStrI(tt::FindNonSpace(m_lstOriginal[pos]), pszOption)) {
+		if (ttIsSameSubStrI(ttFindNonSpace(m_lstOriginal[pos]), pszOption)) {
 			cszDst = m_lstOriginal[pos];
 			return (ptrdiff_t) pos;
 		}
@@ -136,7 +136,7 @@ ptrdiff_t CWriteSrcFiles::FindOption(const char* pszOption, ttCStr& cszDst)
 ptrdiff_t CWriteSrcFiles::FindSection(const char* pszSection)
 {
 	for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos) {
-		if (tt::IsSameSubStrI(m_lstOriginal[pos], pszSection)) {
+		if (ttIsSameSubStrI(m_lstOriginal[pos], pszSection)) {
 			return (ptrdiff_t) pos;
 		}
 	}
@@ -161,9 +161,9 @@ void CWriteSrcFiles::UpdateOptionsSection()
 		// Set the insertion point at the first blank line, or before the next Section
 
 		for (m_posInsert = m_posOptions + 1; m_posInsert < (ptrdiff_t) m_lstOriginal.GetCount(); ++m_posInsert) {
-			if (ttstrlen(m_lstOriginal[m_posInsert]) < 1)
+			if (ttStrLen(m_lstOriginal[m_posInsert]) < 1)
 				break;
-			else if (tt::IsAlpha(m_lstOriginal[m_posInsert][0])) {
+			else if (ttIsAlpha(m_lstOriginal[m_posInsert][0])) {
 				m_lstOriginal.InsertAt(m_posInsert, "");	// insert a blank line
 				break;
 			}
@@ -196,7 +196,7 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 			// REVIEW: [randalphwa - 3/13/2019] we don't allow changing the comment after it has been read in
 			m_cszOptComment = aOptions[pos].pszComment;
 
-		if (m_cszOptComment.IsNonEmpty() && ttstrlen(m_aUpdateOpts[pos].pszVal) > 12)
+		if (m_cszOptComment.IsNonEmpty() && ttStrLen(m_aUpdateOpts[pos].pszVal) > 12)
 			// we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
 			sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt,
 				(char*) cszName, m_aUpdateOpts[pos].pszVal, (char*) m_cszOptComment);
@@ -208,7 +208,7 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 		m_lstOriginal.Replace(posOption, szLine);	// replace the original line
 	}
 	else if (GetChanged(aOptions[pos].opt) || GetRequired(aOptions[pos].opt)) {
-		sprintf_s(szLine, sizeof(szLine), ttstrlen(m_aUpdateOpts[pos].pszVal) > 12 ? pszLongOptionFmt : pszOptionFmt,
+		sprintf_s(szLine, sizeof(szLine), ttStrLen(m_aUpdateOpts[pos].pszVal) > 12 ? pszLongOptionFmt : pszOptionFmt,
 			(char*) cszName,
 				m_aUpdateOpts[pos].pszVal ? m_aUpdateOpts[pos].pszVal : "",
 				aOptions[pos].pszComment ? aOptions[pos].pszComment : "");
@@ -222,20 +222,20 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
 {
 	m_cszOptComment.Delete();
 	for (ptrdiff_t pos = m_posOptions + 1; pos < (ptrdiff_t) m_lstOriginal.GetCount(); ++pos) {
-		if (tt::IsAlpha(*m_lstOriginal[pos]))
+		if (ttIsAlpha(*m_lstOriginal[pos]))
 			break;	// New sections start with an alphabetical character in the first column
 
-		const char* pszLine = tt::FindNonSpace(m_lstOriginal[pos]);
-		if (tt::IsSameSubStrI(pszLine, pszOption)) {
-			const char* pszComment = tt::FindChar(pszLine, '#');
+		const char* pszLine = ttFindNonSpace(m_lstOriginal[pos]);
+		if (ttIsSameSubStrI(pszLine, pszOption)) {
+			const char* pszComment = ttStrChr(pszLine, '#');
 			if (pszComment)
-				m_cszOptComment = tt::FindNonSpace(pszComment + 1);
+				m_cszOptComment = ttFindNonSpace(pszComment + 1);
 			else
 				m_cszOptComment.Delete();
 			return pos;
 		}
 		// Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a new section
-		else if (tt::IsAlpha(*m_lstOriginal[pos]))
+		else if (ttIsAlpha(*m_lstOriginal[pos]))
 			break;
 	}
 	return -1;

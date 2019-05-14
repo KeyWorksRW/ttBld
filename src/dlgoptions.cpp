@@ -59,19 +59,19 @@ CTabOptions::CTabOptions() : ttCDlg(IDDLG_OPTIONS)
 
 	ReadFile();	// read in any existing .srcfiles
 
-	if (tt::IsEmpty(GetPchHeader())) {
-		if (tt::FileExists("stdafx.h"))
+	if (ttIsEmpty(GetPchHeader())) {
+		if (ttFileExists("stdafx.h"))
 			UpdateOption(OPT_PCH, "stdafx.h");
-		else if (tt::FileExists("pch.h"))
+		else if (ttFileExists("pch.h"))
 			UpdateOption(OPT_PCH, "pch.h");
-		else if (tt::FileExists("precomp.h"))
+		else if (ttFileExists("precomp.h"))
 			UpdateOption(OPT_PCH, "precomp.h");
 
-		else if (tt::FileExists("pch.hh"))
+		else if (ttFileExists("pch.hh"))
 			UpdateOption(OPT_PCH, "pch.hh");
-		else if (tt::FileExists("pch.hpp"))
+		else if (ttFileExists("pch.hpp"))
 			UpdateOption(OPT_PCH, "pch.hpp");
-		else if (tt::FileExists("pch.hxx"))
+		else if (ttFileExists("pch.hxx"))
 			UpdateOption(OPT_PCH, "pch.hxx");
 	}
 }
@@ -87,7 +87,7 @@ void CTabOptions::OnBegin(void)
 	ti.iImage = -1;
 
 	ti.mask = TCIF_TEXT;
-	ti.pszText = (char*) tt::GetResString(IDS_GENERAL);
+	ti.pszText = (char*) ttGetResString(IDS_GENERAL);
 
 #ifdef _DEBUG
 	auto result =
@@ -95,24 +95,24 @@ void CTabOptions::OnBegin(void)
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_GENERAL, (LPARAM) &ti);
 	ttASSERT(result == 0);
 
-	ti.pszText = (char*) tt::GetResString(IDS_TAB_COMPILER);
+	ti.pszText = (char*) ttGetResString(IDS_TAB_COMPILER);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_COMPILER, (LPARAM) &ti);
 
-	ti.pszText = (char*) tt::GetResString(IDS_TAB_CLANG);
+	ti.pszText = (char*) ttGetResString(IDS_TAB_CLANG);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_CLANG, (LPARAM) &ti);
 
-	ti.pszText = (char*) tt::GetResString(IDS_TAB_LINKER);
+	ti.pszText = (char*) ttGetResString(IDS_TAB_LINKER);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_LINKER, (LPARAM) &ti);
 
-	ti.pszText = (char*) tt::GetResString(IDS_TAB_RC_MIDL);
+	ti.pszText = (char*) ttGetResString(IDS_TAB_RC_MIDL);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_RC_MIDL, (LPARAM) &ti);
 
-	ti.pszText = (char*) tt::GetResString(IDS_TAB_SCRIPTS);
+	ti.pszText = (char*) ttGetResString(IDS_TAB_SCRIPTS);
 	SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_SCRIPTS, (LPARAM) &ti);
 
 #ifdef PRIVATE
-	if (tt::FileExists(".private/.srcfiles")) {
-		ti.pszText = (char*) tt::GetResString(IDS_TAB_PRIVATE);
+	if (ttFileExists(".private/.srcfiles")) {
+		ti.pszText = (char*) ttGetResString(IDS_TAB_PRIVATE);
 		SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_PRIVATE, (LPARAM) &ti);
 	}
 #endif
@@ -144,7 +144,7 @@ void CTabOptions::OnCancel(void)
 
 void CTabOptions::SaveChanges()
 {
-	if (tt::FileExists(txtSrcFilesFileName)) {
+	if (ttFileExists(txtSrcFilesFileName)) {
 		if (WriteUpdates())
 			puts(".srcfiles Options: section updated");
 	}

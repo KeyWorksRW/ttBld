@@ -20,14 +20,14 @@ void CTabGeneral::OnBegin(void)
 	else {
 		char szCwd[MAX_PATH];
 		GetCurrentDirectory(sizeof(szCwd), szCwd);
-		char* pszProject = tt::FindFilePortion(szCwd);
+		char* pszProject = ttFindFilePortion(szCwd);
 
 		// If cwd is "src", then use the parent directory as the project name
 
-		if (tt::IsSameStrI(pszProject, "src")) {
+		if (ttIsSameStrI(pszProject, "src")) {
 			pszProject--;
 			*pszProject = 0;
-			pszProject = tt::FindFilePortion(szCwd);
+			pszProject = ttFindFilePortion(szCwd);
 		}
 		SetControlText(DLG_ID(IDEDIT_PROJ_NAME), pszProject);
 	}
@@ -85,19 +85,19 @@ void CTabGeneral::OnOK(void)
 void CTabGeneral::OnBtnDir32()
 {
 	ttCDirDlg dlg;
-	dlg.SetTitle(tt::GetResString(IDS_32BIT_DIR));
+	dlg.SetTitle(ttGetResString(IDS_32BIT_DIR));
 
 	ttCStr cszDir;
 	cszDir.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
 	cszDir.GetFullPathName();
-	if (!tt::DirExists(cszDir))	// SHCreateItemFromParsingName will fail if the folder doesn't already exist
+	if (!ttDirExists(cszDir))	// SHCreateItemFromParsingName will fail if the folder doesn't already exist
 		cszDir.GetCWD();
 
 	dlg.SetStartingDir(cszDir);
 	if (dlg.GetFolderName(*this)) {
 		ttCStr cszCWD;
 		cszCWD.GetCWD();
-		tt::ConvertToRelative(cszCWD, dlg, cszDir);
+		ttConvertToRelative(cszCWD, dlg, cszDir);
 		SetControlText(DLG_ID(IDEDIT_DIR32), cszDir);
 	}
 }
@@ -105,19 +105,19 @@ void CTabGeneral::OnBtnDir32()
 void CTabGeneral::OnBtnDir64()
 {
 	ttCDirDlg dlg;
-	dlg.SetTitle(tt::GetResString(IDS_64BIT_DIR));
+	dlg.SetTitle(ttGetResString(IDS_64BIT_DIR));
 
 	ttCStr cszDir;
 	cszDir.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
 	cszDir.GetFullPathName();
-	if (!tt::DirExists(cszDir))	// SHCreateItemFromParsingName will fail if the folder doesn't already exist
+	if (!ttDirExists(cszDir))	// SHCreateItemFromParsingName will fail if the folder doesn't already exist
 		cszDir.GetCWD();
 
 	dlg.SetStartingDir(cszDir);
 	if (dlg.GetFolderName(*this)) {
 		ttCStr cszCWD;
 		cszCWD.GetCWD();
-		tt::ConvertToRelative(cszCWD, dlg, cszDir);
+		ttConvertToRelative(cszCWD, dlg, cszDir);
 		SetControlText(DLG_ID(IDEDIT_DIR64), cszDir);
 	}
 }
@@ -149,10 +149,10 @@ void CTabGeneral::SetTargetDirs()
 
 	ttCStr cszCWD;
 	cszCWD.GetCWD();
-	bool bSrcDir = ttstristr(tt::FindFilePortion(cszCWD), "src") ? true : false;
+	bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
 	if (!bSrcDir) {
 		cszCWD.AppendFileName(m_pOpts->IsExeTypeLib() ? "../lib" : "../bin");
-		if (tt::DirExists(cszCWD))
+		if (ttDirExists(cszCWD))
 			bSrcDir = true;
 	}
 
@@ -160,12 +160,12 @@ void CTabGeneral::SetTargetDirs()
 		cszDir64 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
 		ttCStr cszTmp(cszDir64);
 		cszTmp += "64";
-		if (tt::DirExists(cszTmp)) {		// if there is a ../lib64 or ../bin64, then use that
+		if (ttDirExists(cszTmp)) {		// if there is a ../lib64 or ../bin64, then use that
 			cszDir64 = cszTmp;
 			cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
 			cszTmp = cszDir32;
 			cszTmp += "32";
-			if (tt::DirExists(cszTmp))
+			if (ttDirExists(cszTmp))
 				cszDir32 = cszTmp;
 		}
 		else
@@ -175,12 +175,12 @@ void CTabGeneral::SetTargetDirs()
 		cszDir64 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
 		ttCStr cszTmp(cszDir64);
 		cszTmp += "64";
-		if (tt::DirExists(cszTmp)) {		// if there is a lib64 or bin64, then use that
+		if (ttDirExists(cszTmp)) {		// if there is a lib64 or bin64, then use that
 			cszDir64 = cszTmp;
 			cszDir32 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
 			cszTmp = cszDir32;
 			cszTmp += "32";
-			if (tt::DirExists(cszTmp))
+			if (ttDirExists(cszTmp))
 				cszDir32 = cszTmp;
 		}
 		else

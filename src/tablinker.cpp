@@ -72,7 +72,7 @@ void CTabLinker::OnBtnChange()
 	if (fdlg.GetOpenFileName()) {
 		ttCStr cszCWD, cszFile;
 		cszCWD.GetCWD();
-		tt::ConvertToRelative(cszCWD, fdlg, cszFile);
+		ttConvertToRelative(cszCWD, fdlg, cszFile);
 		SetControlText(DLG_ID(IDEDIT_NATVIS), cszFile);
 	}
 }

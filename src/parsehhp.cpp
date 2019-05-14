@@ -22,7 +22,7 @@ CParseHHP::CParseHHP(const char* pszHHPName)
 	m_cszChmFile.ChangeExtension(".chm");
 	m_cszRoot = pszHHPName;
 	m_cszRoot.GetFullPathName();
-	char* pszFile = tt::FindFilePortion(m_cszRoot);
+	char* pszFile = ttFindFilePortion(m_cszRoot);
 	if (pszFile)
 		*pszFile = 0;
 	m_cszCWD.GetCWD();
@@ -72,8 +72,8 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 	while (kf.ReadLine()) {
 		if (!kf[0])
 			continue;	// blank line
-		if (tt::IsSameSubStrI(kf, "#include")) {
-			char* pszFile = tt::FindNonSpace(tt::FindSpace(kf));
+		if (ttIsSameSubStrI(kf, "#include")) {
+			char* pszFile = ttFindNonSpace(ttFindSpace(kf));
 			if (!*pszFile)
 				continue;	// invalid #include -- doesn't specify a filename
 			ttCStr cszFile;
@@ -86,25 +86,25 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 			// [KeyWorksRW - 11-29-2018] It's not clear from HH docs when comments are allowed on a line -- we remove it
 			// here just in case.
 
-			char* pszComment = tt::FindChar(cszFile, ';');
+			char* pszComment = ttStrChr(cszFile, ';');
 			if (pszComment)
 				*pszComment = 0;
-			tt::TrimRight(cszFile);
+			ttTrimRight(cszFile);
 
 			// A couple of sections sometimes include .h files -- but we only care about an #included .hhp file
 
-			if (tt::FindStrI(cszFile, ".hhp"))
+			if (ttStrStrI(cszFile, ".hhp"))
 				ParseHhpFile(cszFile);
 			continue;
 		}
 
 		if (kf[0] == '[') {	// sections are placed in brackets
 			m_section = SECTION_UNKNOWN;
-			if (tt::IsSameSubStrI(kf, "[ALIAS"))
+			if (ttIsSameSubStrI(kf, "[ALIAS"))
 				m_section = SECTION_ALIAS;
-			else if (tt::IsSameSubStrI(kf, "[FILE"))
+			else if (ttIsSameSubStrI(kf, "[FILE"))
 				m_section = SECTION_FILES;
-			else if (tt::IsSameSubStrI(kf, "[OPTION"))
+			else if (ttIsSameSubStrI(kf, "[OPTION"))
 				m_section = SECTION_OPTIONS;
 			continue;
 		}
@@ -118,34 +118,34 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 				{
 					size_t pos;
 					for (pos = 0; aOptions[pos]; ++pos) {
-						if (tt::IsSameSubStrI(kf, aOptions[pos]))
+						if (ttIsSameSubStrI(kf, aOptions[pos]))
 							break;
 					}
 					if (aOptions[pos]) {
-						char* pszFile = tt::FindChar(kf, '=');
+						char* pszFile = ttStrChr(kf, '=');
 						if (pszFile) {
-							pszFile = tt::FindNonSpace(pszFile + 1);
+							pszFile = ttFindNonSpace(pszFile + 1);
 							if (*pszFile) {
 								// [KeyWorksRW - 11-29-2018] I don't believe the HH compiler from MS supports comments after filenames, but
 								// we can't be certain other compilers and/or authoring systems don't use them -- so remove any comment just
 								// to be sure.
 
-								char* pszComment = tt::FindChar(pszFile, ';');
+								char* pszComment = ttStrChr(pszFile, ';');
 								if (pszComment)
 									*pszComment = 0;
-								tt::TrimRight(pszFile);
+								ttTrimRight(pszFile);
 								AddDependency(pszHHP, pszFile);
 							}
 						}
 					}
-					else if (tt::IsSameSubStrI(kf, "Compiled file")) {
-						char* pszFile = tt::FindChar(kf, '=');
+					else if (ttIsSameSubStrI(kf, "Compiled file")) {
+						char* pszFile = ttStrChr(kf, '=');
 						if (pszFile) {
-							char* pszComment = tt::FindChar(pszFile, ';');
+							char* pszComment = ttStrChr(pszFile, ';');
 							if (pszComment)
 								*pszComment = 0;
-							tt::TrimRight(pszFile);
-							m_cszChmFile = tt::FindNonSpace(pszFile + 1);
+							ttTrimRight(pszFile);
+							m_cszChmFile = ttFindNonSpace(pszFile + 1);
 						}
 					}
 				}
@@ -153,14 +153,14 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 
 			case SECTION_ALIAS:
 				{
-					char* pszFile = tt::FindChar(kf, ';');	// remove any comment
+					char* pszFile = ttStrChr(kf, ';');	// remove any comment
 					if (pszFile) {
 						*pszFile = 0;
-						tt::TrimRight(kf);
+						ttTrimRight(kf);
 					}
-					pszFile = tt::FindChar(kf, '=');
+					pszFile = ttStrChr(kf, '=');
 					if (pszFile) {
-						pszFile = tt::FindSpace(pszFile + 1);
+						pszFile = ttFindSpace(pszFile + 1);
 						if (*pszFile) {
 							AddDependency(pszHHP, pszFile);
 						}
@@ -170,10 +170,10 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 
 			case SECTION_TEXT_POPUPS:
 				{
-					char* pszFile = tt::FindChar(kf, ';');	// remove any comment
+					char* pszFile = ttStrChr(kf, ';');	// remove any comment
 					if (pszFile) {
 						*pszFile = 0;
-						tt::TrimRight(kf);
+						ttTrimRight(kf);
 					}
 
 					// This section may include .h files that are parsed, but not compiled, but we need them for dependency checking.
@@ -188,10 +188,10 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 					// though it should. I'm supporting comments here just to be sure we can support other file formats
 					// like YAML which do allow for comments
 
-					char* pszFile = tt::FindChar(kf, ';');	// remove any comment
+					char* pszFile = ttStrChr(kf, ';');	// remove any comment
 					if (pszFile) {
 						*pszFile = 0;
-						tt::TrimRight(kf);
+						ttTrimRight(kf);
 					}
 
 					// This section may include .h files that are parsed, but not compiled, but we need them for dependency checking.
@@ -222,28 +222,28 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
 	ttCStr cszRelative;
 	ttCStr cszHHP;
 
-	if (!tt::IsSameStrI(pszHHP, m_cszHHPName)) {
+	if (!ttIsSameStrI(pszHHP, m_cszHHPName)) {
 		// If we're in a nested .HHP file, then we need to first get the location of the nested .HHP, use that to get the location
 		// of the pszFile;
 
-		tt::ConvertToRelative(m_cszRoot, pszHHP, cszHHP);
+		ttConvertToRelative(m_cszRoot, pszHHP, cszHHP);
 		cszHHP.GetFullPathName();	// now that we have the location relative to our original .hhp file, convert it to a full path
-		char* pszFilePortion = tt::FindFilePortion(cszHHP);
+		char* pszFilePortion = ttFindFilePortion(cszHHP);
 		*pszFilePortion = 0;
-		tt::ConvertToRelative(cszHHP, pszFile, cszRelative);
+		ttConvertToRelative(cszHHP, pszFile, cszRelative);
 		cszHHP.AppendFileName(cszRelative);
 		cszHHP.GetFullPathName();
-		tt::ConvertToRelative(m_cszCWD, cszHHP, cszRelative);
+		ttConvertToRelative(m_cszCWD, cszHHP, cszRelative);
 	}
 	else {
 		cszHHP = (char*) m_cszRoot;
 		cszHHP.AppendFileName(pszFile);
-		tt::ConvertToRelative(m_cszCWD, cszHHP, cszRelative);
+		ttConvertToRelative(m_cszCWD, cszHHP, cszRelative);
 	}
 
-	if (tt::FindChar(cszRelative, '*') || tt::FindChar(cszRelative, '?')) {
+	if (ttStrChr(cszRelative, '*') || ttStrChr(cszRelative, '?')) {
 		ttCFindFile ff(cszRelative);
-		char* pszFilePortion = tt::FindFilePortion(cszRelative);
+		char* pszFilePortion = ttFindFilePortion(cszRelative);
 		ptrdiff_t cFilePortion = (pszFilePortion - cszRelative.GetPtr());
 		if (ff.IsValid()) {
 			do {
@@ -266,11 +266,11 @@ const char* txtHelpNinja = "build/ChmHelp.ninja";
 
 bool CNinja::CreateHelpFile()
 {
-	if (tt::IsEmpty(GetHHPName()))
+	if (ttIsEmpty(GetHHPName()))
 		return false;
 
-	if (!tt::DirExists("build")) {
-		if (!tt::CreateDir("build")) {
+	if (!ttDirExists("build")) {
+		if (!ttCreateDir("build")) {
 			AddError("Unable to create the build directory -- so no place to put the .ninja files!\n");
 			return false;
 		}

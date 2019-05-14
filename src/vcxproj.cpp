@@ -52,7 +52,7 @@ bool CVcxProj::CreateBuildFile()
 
 	ttCStr cszProjVC(GetProjectName());
 	cszProjVC.ChangeExtension(".vcxproj");
-	if (!tt::FileExists(cszProjVC))	{
+	if (!ttFileExists(cszProjVC))	{
 		ttCFile kf;
 		kf.ReadResource(IDR_VCXPROJ_MASTER);
 		while (kf.ReplaceStr("%guid%", cszGuid));
@@ -63,7 +63,7 @@ bool CVcxProj::CreateBuildFile()
 
 		ttCStr cszSrcFile;
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			if (tt::FindStrI(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
+			if (ttStrStrI(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
 				cszSrcFile.printf(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>", m_lstSrcFiles[pos]);
 				kf.WriteEol(cszSrcFile);
 			}
@@ -107,7 +107,7 @@ bool CVcxProj::CreateBuildFile()
 		kf.WriteEol("  <ItemGroup>");
 
 		for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos) {
-			if (tt::FindStrI(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
+			if (ttStrStrI(m_lstSrcFiles[pos], ".c")) {	// only add C/C++ files
 				cszSrcFile.printf("    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>", m_lstSrcFiles[pos]);
 				kf.WriteEol(cszSrcFile);
 			}

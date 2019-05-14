@@ -59,8 +59,8 @@ CConvertDlg::CConvertDlg() : ttCDlg(IDDDLG_CONVERT)
 
 bool CConvertDlg::CreateSrcFiles()
 {
-	if (tt::FileExists(".srcfiles")) {
-		if (tt::MsgBox(IDS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
+	if (ttFileExists(".srcfiles")) {
+		if (ttMsgBox(IDS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
 			return false;
 
 		// If we converted this before, grab the name of the project we converted from
@@ -68,8 +68,8 @@ bool CConvertDlg::CreateSrcFiles()
 		ttCFile file;
 		if (file.ReadFile(".srcfiles")) {
 			if (file.ReadLine()) {
-				if (tt::IsSameSubStrI(file, "# Converted from")) {
-					char* psz = tt::FindNonSpace((char*) file + sizeof("# Converted from"));
+				if (ttIsSameSubStrI(file, "# Converted from")) {
+					char* psz = ttFindNonSpace((char*) file + sizeof("# Converted from"));
 					m_cszConvertScript = psz;
 				}
 			}
@@ -78,7 +78,7 @@ bool CConvertDlg::CreateSrcFiles()
 
 	if (DoModal(NULL) == IDOK) {
 		if (m_cszConvertScript.IsNonEmpty())
-			tt::MsgBoxFmt(IDS_SRCFILES_CREATED, MB_OK, (char*) tt::FindFilePortion(m_cszConvertScript));
+			ttMsgBoxFmt(IDS_SRCFILES_CREATED, MB_OK, (char*) ttFindFilePortion(m_cszConvertScript));
 		return true;
 	}
 	else
@@ -114,7 +114,7 @@ void CConvertDlg::OnBegin(void)
 			ff.NewPattern("*.*");
 			do {
 				if (ff.IsDir()) {
-					if (!tt::IsValidFileChar(ff, 0))	// this will skip over . and ..
+					if (!ttIsValidFileChar(ff, 0))	// this will skip over . and ..
 						continue;
 					ttCStr cszDir((char*) ff);
 					cszDir.AppendFileName(atxtProjects[0]);
@@ -178,8 +178,8 @@ void CConvertDlg::OnBtnChangeOut()	// change the directory to write .srcfiles to
 	if (dlg.GetFolderName(*this)) {
 		ttCStr cszSrcFiles(dlg);
 		cszSrcFiles.AppendFileName(".srcfiles");
-		if (tt::FileExists(cszSrcFiles)) {
-			if (tt::MsgBox(IDS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
+		if (ttFileExists(cszSrcFiles)) {
+			if (ttMsgBox(IDS_SRCFILES_EXISTS, MB_YESNO) != IDYES)
 				return;
 		}
 		SetControlText(DLG_ID(IDEDIT_OUT_DIR), dlg);
@@ -223,8 +223,8 @@ void CConvertDlg::OnOK(void)
 		m_cszConvertScript.Delete();
 
 	if (m_cszConvertScript.IsNonEmpty()) {
-		if (!tt::FileExists(m_cszConvertScript)) {
-			tt::MsgBoxFmt(IDS_CS_CANNOT_OPEN, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		if (!ttFileExists(m_cszConvertScript)) {
+			ttMsgBoxFmt(IDS_CS_CANNOT_OPEN, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 			CancelEnd();
 			return;
 		}
@@ -238,7 +238,7 @@ void CConvertDlg::OnOK(void)
 		ttCStr cszFile(m_cszDirOutput);
 		cszFile.AppendFileName(".srcfiles");
 		if (!m_cSrcFiles.WriteNew(cszFile)) {
-			tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) cszFile);
+			ttMsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) cszFile);
 			CancelEnd();
 		}
 	}
@@ -248,7 +248,7 @@ bool CConvertDlg::ConvertCodeLite()
 {
 	ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
 	if (!pProject) {
-		tt::MsgBoxFmt(IDS_INVALID_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		ttMsgBoxFmt(IDS_INVALID_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
@@ -258,13 +258,13 @@ bool CConvertDlg::ConvertCodeLite()
 
 	for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pProject->GetChildAt(item);
-		if (tt::IsSameStrI(pItem->GetName(), "VirtualDirectory"))
+		if (ttIsSameStrI(pItem->GetName(), "VirtualDirectory"))
 			AddCodeLiteFiles(pItem);
-		else if (tt::IsSameStrI(pItem->GetName(), "Settings")) {
+		else if (ttIsSameStrI(pItem->GetName(), "Settings")) {
 			const char* pszType = pItem->GetAttribute("Type");
-			if (tt::IsSameStrI(pszType, "Dynamic Library"))
+			if (ttIsSameStrI(pszType, "Dynamic Library"))
 				m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
-			else if (tt::IsSameStrI(pszType, "Static Library"))
+			else if (ttIsSameStrI(pszType, "Static Library"))
 				m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
 		}
 	}
@@ -273,24 +273,24 @@ bool CConvertDlg::ConvertCodeLite()
 
 bool CConvertDlg::ConvertCodeBlocks()
 {
-	if (!tt::FileExists(m_cszConvertScript)) {
-		tt::MsgBoxFmt(IDS_CS_CANNOT_OPEN, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+	if (!ttFileExists(m_cszConvertScript)) {
+		ttMsgBoxFmt(IDS_CS_CANNOT_OPEN, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
 	ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
 	if (!pProject)	{
-		tt::MsgBoxFmt(IDS_MISSING_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		ttMsgBoxFmt(IDS_MISSING_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
 	for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pProject->GetChildAt(item);
-		if (tt::IsSameStrI(pItem->GetName(), "Option")) {
+		if (ttIsSameStrI(pItem->GetName(), "Option")) {
 			if (pItem->GetAttribute("title"))
 				m_cSrcFiles.UpdateOption(OPT_PROJECT, pItem->GetAttribute("title"));
 		}
-		else if (tt::IsSameStrI(pItem->GetName(), "Unit")) {
+		else if (ttIsSameStrI(pItem->GetName(), "Unit")) {
 			if (isValidSrcFile(pItem->GetAttribute("filename")))
 				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("filename"));
 		}
@@ -303,7 +303,7 @@ bool CConvertDlg::ConvertVcxProj()
 {
 	ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
 	if (!pProject)	{
-		tt::MsgBoxFmt(IDS_MISSING_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		ttMsgBoxFmt(IDS_MISSING_PROJECT, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
@@ -313,17 +313,17 @@ bool CConvertDlg::ConvertVcxProj()
 
 	for (size_t item = 0; item < pProject->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pProject->GetChildAt(item);
-		if (tt::IsSameStrI(pItem->GetName(), "ItemGroup")) {
+		if (ttIsSameStrI(pItem->GetName(), "ItemGroup")) {
 			for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++) {
 				ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
-				if (tt::IsSameStrI(pCmd->GetName(), "ClCompile") || tt::IsSameStrI(pCmd->GetName(), "ResourceCompile")) {
+				if (ttIsSameStrI(pCmd->GetName(), "ClCompile") || ttIsSameStrI(pCmd->GetName(), "ResourceCompile")) {
 					const char* pszFile = pCmd->GetAttribute("Include");
 					if (pszFile && *pszFile)
 						m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pszFile);
 				}
 			}
 		}
-		else if (tt::IsSameStrI(pItem->GetName(), "PropertyGroup")) {
+		else if (ttIsSameStrI(pItem->GetName(), "PropertyGroup")) {
 			if (bTypeSeen)
 				continue;
 			ttCXMLBranch* pFlags = pItem->FindFirstElement("ConfigurationType");
@@ -331,21 +331,21 @@ bool CConvertDlg::ConvertVcxProj()
 				ttCXMLBranch* pChild = pFlags->GetChildAt(0);
 				if (pChild->GetData()) {
 					bTypeSeen = true;
-					if (tt::IsSameStrI(pChild->GetData(), "DynamicLibrary"))
+					if (ttIsSameStrI(pChild->GetData(), "DynamicLibrary"))
 						m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
-					else if (tt::IsSameStrI(pChild->GetData(), "StaticLibrary"))
+					else if (ttIsSameStrI(pChild->GetData(), "StaticLibrary"))
 						m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
 					// TODO: [randalphwa - 5/9/2019] What are the options for console and gui?
 				}
 			}
 		}
-		else if (tt::IsSameStrI(pItem->GetName(), "ItemDefinitionGroup")) {
+		else if (ttIsSameStrI(pItem->GetName(), "ItemDefinitionGroup")) {
 			const char* pszCondition = pItem->GetAttribute("Condition");
-			if (!bDebugFlagsSeen && pszCondition && (ttstristr(pszCondition, "Debug|Win32") || ttstristr(pszCondition, "Debug|x64"))) {
+			if (!bDebugFlagsSeen && pszCondition && (ttStrStrI(pszCondition, "Debug|Win32") || ttStrStrI(pszCondition, "Debug|x64"))) {
 				bDebugFlagsSeen = true;
 				for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++) {
 					ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
-					if (tt::IsSameStrI(pCmd->GetName(), "Midl")) {
+					if (ttIsSameStrI(pCmd->GetName(), "Midl")) {
 						ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
@@ -359,7 +359,7 @@ bool CConvertDlg::ConvertVcxProj()
 							}
 						}
 					}
-					else if (tt::IsSameStrI(pCmd->GetName(), "ResourceCompile")) {
+					else if (ttIsSameStrI(pCmd->GetName(), "ResourceCompile")) {
 						ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
@@ -373,21 +373,21 @@ bool CConvertDlg::ConvertVcxProj()
 							}
 						}
 					}
-					else if (tt::IsSameStrI(pCmd->GetName(), "ClCompile")) {
+					else if (ttIsSameStrI(pCmd->GetName(), "ClCompile")) {
 						ttCXMLBranch* pFlags = pCmd->FindFirstElement("FavorSizeOrSpeed");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
 							if (pChild->GetData())
-								m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, tt::IsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
+								m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
 						}
 						pFlags = pCmd->FindFirstElement("AdditionalIncludeDirectories");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
 							if (pChild->GetData()) {
-								const char* pszFirstSemi = ttstrchr(pChild->GetData(), ';');
+								const char* pszFirstSemi = ttStrChr(pChild->GetData(), ';');
 								if (pszFirstSemi)
 									++pszFirstSemi;
-								ttCStr cszFlags(tt::IsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi :  pChild->GetData());
+								ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi :  pChild->GetData());
 								cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
 								m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszFlags);
 							}
@@ -403,7 +403,7 @@ bool CConvertDlg::ConvertVcxProj()
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
 							if (pChild->GetData()) {
 								const char* pszTmp = pChild->GetData();
-								while (*pszTmp && !tt::IsDigit(*pszTmp))
+								while (*pszTmp && !ttIsDigit(*pszTmp))
 									++pszTmp;
 								m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszTmp);
 							}
@@ -411,7 +411,7 @@ bool CConvertDlg::ConvertVcxProj()
 						pFlags = pCmd->FindFirstElement("CallingConvention");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-							if (pChild->GetData() && ttstristr(pChild->GetData(), "stdcall")) {
+							if (pChild->GetData() && ttStrStrI(pChild->GetData(), "stdcall")) {
 								m_cSrcFiles.UpdateOption(OPT_STDCALL, true);
 							}
 						}
@@ -430,11 +430,11 @@ bool CConvertDlg::ConvertVcxProj()
 					}
 				}
 			}
-			else if (!bRelFlagsSeen && pszCondition && (ttstristr(pszCondition, "Release|Win32") || ttstristr(pszCondition, "Release|x64"))) {
+			else if (!bRelFlagsSeen && pszCondition && (ttStrStrI(pszCondition, "Release|Win32") || ttStrStrI(pszCondition, "Release|x64"))) {
 				bRelFlagsSeen = true;
 				for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++) {
 					ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
-					if (tt::IsSameStrI(pCmd->GetName(), "Midl")) {
+					if (ttIsSameStrI(pCmd->GetName(), "Midl")) {
 						ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
@@ -448,7 +448,7 @@ bool CConvertDlg::ConvertVcxProj()
 							}
 						}
 					}
-					else if (tt::IsSameStrI(pCmd->GetName(), "ResourceCompile")) {
+					else if (ttIsSameStrI(pCmd->GetName(), "ResourceCompile")) {
 						ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
@@ -462,12 +462,12 @@ bool CConvertDlg::ConvertVcxProj()
 							}
 						}
 					}
-					else if (tt::IsSameStrI(pCmd->GetName(), "ClCompile")) {
+					else if (ttIsSameStrI(pCmd->GetName(), "ClCompile")) {
 						ttCXMLBranch* pFlags = pCmd->FindFirstElement("FavorSizeOrSpeed");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
 							if (pChild->GetData())
-								m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, tt::IsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
+								m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
 						}
 						pFlags = pCmd->FindFirstElement("PrecompiledHeaderFile");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
@@ -480,7 +480,7 @@ bool CConvertDlg::ConvertVcxProj()
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
 							if (pChild->GetData()) {
 								const char* pszTmp = pChild->GetData();
-								while (*pszTmp && !tt::IsDigit(*pszTmp))
+								while (*pszTmp && !ttIsDigit(*pszTmp))
 									++pszTmp;
 								m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszTmp);
 							}
@@ -488,7 +488,7 @@ bool CConvertDlg::ConvertVcxProj()
 						pFlags = pCmd->FindFirstElement("CallingConvention");
 						if (pFlags && pFlags->GetChildrenCount() > 0) {
 							ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-							if (pChild->GetData() && ttstristr(pChild->GetData(), "stdcall")) {
+							if (pChild->GetData() && ttStrStrI(pChild->GetData(), "stdcall")) {
 								m_cSrcFiles.UpdateOption(OPT_STDCALL, true);
 							}
 						}
@@ -513,19 +513,19 @@ bool CConvertDlg::ConvertVcxProj()
 	// If Debug and Release flags are the same, then remove them and just use the common flag setting
 
 	if (m_cSrcFiles.GetOption(OPT_CFLAGS_REL) && m_cSrcFiles.GetOption(OPT_CFLAGS_DBG) &&
-				tt::IsSameStrI(m_cSrcFiles.GetOption(OPT_CFLAGS_REL), m_cSrcFiles.GetOption(OPT_CFLAGS_DBG)))	{
+				ttIsSameStrI(m_cSrcFiles.GetOption(OPT_CFLAGS_REL), m_cSrcFiles.GetOption(OPT_CFLAGS_DBG)))	{
 		m_cSrcFiles.UpdateOption(OPT_CFLAGS_CMN, m_cSrcFiles.GetOption(OPT_CFLAGS_REL));
 		m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, "");
 		m_cSrcFiles.UpdateOption(OPT_CFLAGS_DBG, "");
 	}
 	if (m_cSrcFiles.GetOption(OPT_MDL_REL) && m_cSrcFiles.GetOption(OPT_MDL_DBG) &&
-				tt::IsSameStrI(m_cSrcFiles.GetOption(OPT_MDL_REL), m_cSrcFiles.GetOption(OPT_MDL_DBG)))	{
+				ttIsSameStrI(m_cSrcFiles.GetOption(OPT_MDL_REL), m_cSrcFiles.GetOption(OPT_MDL_DBG)))	{
 		m_cSrcFiles.UpdateOption(OPT_MDL_CMN, m_cSrcFiles.GetOption(OPT_MDL_REL));
 		m_cSrcFiles.UpdateOption(OPT_MDL_REL, "");
 		m_cSrcFiles.UpdateOption(OPT_MDL_DBG, "");
 	}
 	if (m_cSrcFiles.GetOption(OPT_RC_REL) && m_cSrcFiles.GetOption(OPT_RC_DBG) &&
-				tt::IsSameStrI(m_cSrcFiles.GetOption(OPT_RC_REL), m_cSrcFiles.GetOption(OPT_RC_DBG)))	{
+				ttIsSameStrI(m_cSrcFiles.GetOption(OPT_RC_REL), m_cSrcFiles.GetOption(OPT_RC_DBG)))	{
 		m_cSrcFiles.UpdateOption(OPT_RC_CMN, m_cSrcFiles.GetOption(OPT_RC_REL));
 		m_cSrcFiles.UpdateOption(OPT_RC_REL, "");
 		m_cSrcFiles.UpdateOption(OPT_RC_DBG, "");
@@ -538,7 +538,7 @@ bool CConvertDlg::ConvertVcProj()
 {
 	ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
 	if (!pProject)	{
-		tt::MsgBoxFmt(IDS_MISSING_VSP, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		ttMsgBoxFmt(IDS_MISSING_VSP, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 
@@ -547,17 +547,17 @@ bool CConvertDlg::ConvertVcProj()
 
 	ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
 	if (!pFiles)	{
-		tt::MsgBoxFmt(IDS_MISSING_FILES, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		ttMsgBoxFmt(IDS_MISSING_FILES, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 	ttCXMLBranch* pFilter = pFiles->FindFirstElement("Filter");
 	if (!pFilter) {
-		tt::MsgBoxFmt(IDS_MISSING_FILTER, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+		ttMsgBoxFmt(IDS_MISSING_FILTER, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 		return false;
 	}
 	for (size_t item = 0; item < pFilter->GetChildrenCount(); item++) {
 		ttCXMLBranch* pItem = pFilter->GetChildAt(item);
-		if (tt::IsSameStrI(pItem->GetName(), "File")) {
+		if (ttIsSameStrI(pItem->GetName(), "File")) {
 			if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
 				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("RelativePath"));
 		}
@@ -566,7 +566,7 @@ bool CConvertDlg::ConvertVcProj()
 	if (pFilter) {
 		for (size_t item = 0; item < pFilter->GetChildrenCount(); item++) {
 			ttCXMLBranch* pItem = pFilter->GetChildAt(item);
-			if (tt::IsSameStrI(pItem->GetName(), "File")) {
+			if (ttIsSameStrI(pItem->GetName(), "File")) {
 				if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
 					m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("RelativePath"));
 			}
@@ -582,13 +582,13 @@ bool CConvertDlg::ConvertVcProj()
 		ttCXMLBranch* pOption = pConfiguration->FindFirstAttribute("OutputFile");
 		if (pOption) {
 			ttCStr cszOutDir(pOption->GetAttribute("OutputFile"));	// will typically be something like: "../bin/$(ProjectName).exe"
-			char* pszFile = tt::FindFilePortion(cszOutDir);
+			char* pszFile = ttFindFilePortion(cszOutDir);
 			if (pszFile)
 				*pszFile = 0;
 			m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszOutDir);
 		}
 		do {
-			if (tt::FindStrI(pConfiguration->GetAttribute("Name"), "Release"))
+			if (ttStrStrI(pConfiguration->GetAttribute("Name"), "Release"))
 				break;
 			pConfiguration = pConfigurations->FindNextElement("Configuration");
 		} while(pConfiguration);
@@ -597,11 +597,11 @@ bool CConvertDlg::ConvertVcProj()
 
 		if (pRelease) {
 			const char* pszOption = pRelease->GetAttribute("FavorSizeOrSpeed");
-			if (pszOption && tt::IsSameSubStrI(pszOption, "1"))
+			if (pszOption && ttIsSameSubStrI(pszOption, "1"))
 				m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, "speed");
 
 			pszOption = pRelease->GetAttribute("WarningLevel");
-			if (pszOption && !tt::IsSameSubStrI(pszOption, "4"))
+			if (pszOption && !ttIsSameSubStrI(pszOption, "4"))
 				m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszOption);
 
 			pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
@@ -616,17 +616,17 @@ bool CConvertDlg::ConvertVcProj()
 				ttCEnumStr enumFlags(pszOption);
 				ttCStr cszCFlags;
 				while (enumFlags.Enum()) {
-					if (tt::IsSameStrI(enumFlags, "NDEBUG"))
+					if (ttIsSameStrI(enumFlags, "NDEBUG"))
 						continue;	// we already added this
-					if (tt::IsSameStrI(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
+					if (ttIsSameStrI(enumFlags, "_CONSOLE")) {	// the define is already in use, but make certain exeType matches
 						m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
 						continue;
 					}
-					if (tt::IsSameStrI(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
+					if (ttIsSameStrI(enumFlags, "_USRDLL")) {	// the define is already in use, but make certain exeType matches
 						m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
 						continue;	// do we need to add this?
 					}
-					if (tt::IsSameSubStrI(enumFlags, "$("))	// Visual Studio specific, ignore it
+					if (ttIsSameSubStrI(enumFlags, "$("))	// Visual Studio specific, ignore it
 						continue;
 
 
@@ -646,12 +646,12 @@ void CConvertDlg::AddCodeLiteFiles(ttCXMLBranch* pParent)
 {
 	for (size_t child = 0; child < pParent->GetChildrenCount(); child++) {
 		ttCXMLBranch* pFile = pParent->GetChildAt(child);
-		if (tt::IsSameStrI(pFile->GetName(), "File")) {
+		if (ttIsSameStrI(pFile->GetName(), "File")) {
 			if (isValidSrcFile(pFile->GetAttribute("Name")))
 				m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pFile->GetAttribute("Name"));
 		}
 		// CodeLite nests resources in a sub <VirtualDirectory> tag
-		else if (tt::IsSameStrI(pFile->GetName(), "VirtualDirectory")) {
+		else if (ttIsSameStrI(pFile->GetName(), "VirtualDirectory")) {
 			AddCodeLiteFiles(pFile);
 		}
 	}
@@ -662,13 +662,13 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 	if (!pszFile)
 		return false;
 
-	char* psz = tt::FindLastChar(pszFile, '.');
+	char* psz = ttStrChrR(pszFile, '.');
 	if (psz) {
-		if (	tt::IsSameStrI(psz, ".cpp") ||
-				tt::IsSameStrI(psz, ".cc") ||
-				tt::IsSameStrI(psz, ".cxx") ||
-				tt::IsSameStrI(psz, ".c") ||
-				tt::IsSameSubStrI(psz, ".rc"))
+		if (	ttIsSameStrI(psz, ".cpp") ||
+				ttIsSameStrI(psz, ".cc") ||
+				ttIsSameStrI(psz, ".cxx") ||
+				ttIsSameStrI(psz, ".c") ||
+				ttIsSameSubStrI(psz, ".rc"))
 			return true;
 	}
 	return false;
@@ -677,19 +677,19 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 void CConvertDlg::CreateNewSrcFiles()
 {
 	char szPath[MAX_PATH];
-	ttstrcpy(szPath, m_cszDirSrcFiles);
-	tt::AddTrailingSlash(szPath);
-	size_t cbRoot = ttstrlen(szPath);
+	ttStrCpy(szPath, m_cszDirSrcFiles);
+	ttAddTrailingSlash(szPath);
+	size_t cbRoot = ttStrLen(szPath);
 
 	ttCStr cszRelPath;
 
 	for (size_t pos = 0; atxtSrcTypes[pos]; ++pos) {
-		ttstrcpy(szPath + cbRoot, atxtSrcTypes[pos]);
+		ttStrCpy(szPath + cbRoot, atxtSrcTypes[pos]);
 		ttCFindFile ff(szPath);
 		if (ff.IsValid()) {
 			do {
-				ttstrcpy(szPath + cbRoot, sizeof(szPath) - cbRoot, ff);
-				tt::ConvertToRelative(m_cszDirOutput, szPath, cszRelPath);
+				ttStrCpy(szPath + cbRoot, sizeof(szPath) - cbRoot, ff);
+				ttConvertToRelative(m_cszDirOutput, szPath, cszRelPath);
 				m_cSrcFiles.m_lstSrcFiles += cszRelPath;
 			} while(ff.NextFile());
 		}
@@ -705,7 +705,7 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 	if (m_cszScriptRoot.IsEmpty()) {
 		m_cszScriptRoot = (char*) m_cszConvertScript;
 		m_cszScriptRoot.GetFullPathName();
-		char* pszFilePortion = tt::FindFilePortion(m_cszScriptRoot);
+		char* pszFilePortion = ttFindFilePortion(m_cszScriptRoot);
 		ttASSERT_MSG(pszFilePortion, "No filename in m_cszScriptRoot--things will go badly without it.");
 		if (pszFilePortion)
 			*pszFilePortion = 0;
@@ -727,7 +727,7 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 	ttCStr cszFile(pszFile);
 	cszFile.GetFullPathName();
 
-	tt::ConvertToRelative(m_cszOutRoot, cszFile, m_cszRelative);
+	ttConvertToRelative(m_cszOutRoot, cszFile, m_cszRelative);
 	return m_cszRelative;
 }
 
@@ -735,23 +735,23 @@ bool CConvertDlg::doConversion(const char* pszFile)
 {
 	if (pszFile)
 		m_cszConvertScript = pszFile;
-	const char* pszExt = tt::FindLastChar(m_cszConvertScript, '.');
+	const char* pszExt = ttStrChrR(m_cszConvertScript, '.');
 	if (pszExt) {
 		HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
 		if (hr != S_OK) {
-			tt::MsgBoxFmt(IDS_PARSE_ERROR, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+			ttMsgBoxFmt(IDS_PARSE_ERROR, MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
 			return false;
 		}
 		m_cszDirOutput.AppendFileName(".srcfiles");
 
 		bool bResult = false;
-		if (tt::IsSameStrI(pszExt, ".project"))
+		if (ttIsSameStrI(pszExt, ".project"))
 			bResult = ConvertCodeLite();
-		else if (tt::IsSameStrI(pszExt, ".cdb"))
+		else if (ttIsSameStrI(pszExt, ".cdb"))
 			bResult = ConvertCodeBlocks();
-		else if (tt::IsSameStrI(pszExt, ".vcxproj"))
+		else if (ttIsSameStrI(pszExt, ".vcxproj"))
 			bResult = ConvertVcxProj();
-		else if (tt::IsSameStrI(pszExt, ".vcproj"))
+		else if (ttIsSameStrI(pszExt, ".vcproj"))
 			bResult = ConvertVcProj();
 
 		_chdir(m_cszCWD);	// we may have changed directories during the conversion
@@ -760,16 +760,16 @@ bool CConvertDlg::doConversion(const char* pszFile)
 			ttCStr cszHdr;
 			cszHdr.printf("# Converted from %s", (char*) m_cszConvertScript);
 
-			if (tt::IsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT))) {
+			if (ttIsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT))) {
 				ttCStr cszProject(m_cszDirOutput);
-				char* pszFilePortion = tt::FindFilePortion(cszProject);
+				char* pszFilePortion = ttFindFilePortion(cszProject);
 				if (pszFilePortion)
 					*pszFilePortion = 0;
-				m_cSrcFiles.UpdateOption(OPT_PROJECT, tt::FindFilePortion(cszProject));
+				m_cSrcFiles.UpdateOption(OPT_PROJECT, ttFindFilePortion(cszProject));
 			}
 
 			if (!m_cSrcFiles.WriteNew(m_cszDirOutput, cszHdr)) {
-				tt::MsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
+				ttMsgBoxFmt(IDS_CS_CANT_WRITE, MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
 				return false;
 			}
 			return true;

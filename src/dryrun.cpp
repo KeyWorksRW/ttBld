@@ -27,7 +27,7 @@ void CDryRun::DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew)
 	fileNew.PrepForReadLine();
 	while (fileNew.ReadLine()) {
 		fileOrg.ReadLine();
-		if (!tt::IsSameStr(fileOrg, fileNew))	{
+		if (!ttIsSameStr(fileOrg, fileNew))	{
 			printf("    old: %s\n", (char*) fileOrg);
 			printf("    new: %s\n", (char*) fileNew);
 		}
