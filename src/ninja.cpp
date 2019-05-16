@@ -511,6 +511,15 @@ void CNinja::WriteLinkDirective()
 			cszRule += " /LTCG /OPT:REF /OPT:ICF";
 
 		cszRule += IsExeTypeConsole() ? " /SUBSYSTEM:CONSOLE" : " /SUBSYSTEM:WINDOWS";
+
+		if (GetOption(OPT_LIBS)) {
+			ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
+			while (enumLib.Enum()) {
+				cszRule += " ";
+				cszRule += enumLib;
+			}
+		}
+
 		cszRule += " $in";
 		m_pkfOut->WriteEol(cszRule);
 		m_pkfOut->WriteEol("  description = linking $out\n");
@@ -541,6 +550,15 @@ void CNinja::WriteLinkDirective()
 			cszRule += " /opt:ref /opt:icf";
 		}
 		cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
+
+		if (GetOption(OPT_LIBS)) {
+			ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
+			while (enumLib.Enum()) {
+				cszRule += " ";
+				cszRule += enumLib;
+			}
+		}
+
 		cszRule += " $in";
 		m_pkfOut->WriteEol(cszRule);
 		m_pkfOut->WriteEol("  description = linking $out\n");
@@ -690,14 +708,6 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 		ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
 		while (enumLib.Enum())
 			AddDependentLibrary(enumLib, gentype);
-	}
-
-	if (GetOption(OPT_LIBS)) {
-		ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
-		while (enumLib.Enum()) {
-			m_pkfOut->WriteChar(CH_SPACE);
-			m_pkfOut->WriteStr(enumLib);
-		}
 	}
 
 	for (size_t iPos = 0; iPos < getSrcCount(); iPos++) {
