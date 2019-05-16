@@ -692,6 +692,14 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 			AddDependentLibrary(enumLib, gentype);
 	}
 
+	if (GetOption(OPT_LIBS)) {
+		ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
+		while (enumLib.Enum()) {
+			m_pkfOut->WriteChar(CH_SPACE);
+			m_pkfOut->WriteStr(enumLib);
+		}
+	}
+
 	for (size_t iPos = 0; iPos < getSrcCount(); iPos++) {
 		ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
 		if (!ttStrStrI(cszFile, ".c"))	// we don't care about any type of file that wasn't compiled into an .obj file

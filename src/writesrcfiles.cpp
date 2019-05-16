@@ -68,7 +68,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 
 		if (!cBlankLines && ttIsSameSubStr(ttFindNonSpace(m_lstOriginal[pos]), "64Bit")) {
 			++cBlankLines;
-			kfOut.WriteEol();
+//			kfOut.WriteEol();
 		}
 		kfOut.WriteEol(m_lstOriginal[pos]);
 	}

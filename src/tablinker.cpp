@@ -19,7 +19,7 @@ void CTabLinker::OnBegin(void)
 	SetCheck(DLG_ID(IDCHECK_STATIC_CRT), m_pOpts->GetBoolOption(OPT_STATIC_CRT));
 
 	if (m_pOpts->GetOption(OPT_LIBS))
-		SetControlText(DLG_ID(IDEDIT_LIBS), m_pOpts->GetOption(OPT_LIBS));
+		SetControlText(DLG_ID(IDEDIT_LIBS_LINK), m_pOpts->GetOption(OPT_LIBS));
 	if (m_pOpts->GetOption(OPT_BUILD_LIBS))
 		SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), m_pOpts->GetOption(OPT_BUILD_LIBS));
 	if (m_pOpts->GetOption(OPT_LIB_DIRS))
@@ -52,7 +52,7 @@ void CTabLinker::OnOK(void)
 	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
 	m_pOpts->UpdateOption(OPT_LIB_DIRS, (char*) csz);
 
-	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS)));
+	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
 	m_pOpts->UpdateOption(OPT_LIBS, (char*) csz);
 
 	csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
