@@ -112,6 +112,8 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 		}
 	}
 
+
+
 	// If no Files: were specified, then we still won't have any files to build. Default to every type of C++ source file
 	// in the current directory.
 
@@ -405,4 +407,34 @@ const char* CSrcFiles::GetPchHeader()
 	if (pszPch && ttIsSameStrI(pszPch, "none"))
 		return nullptr;
 	return pszPch;
+}
+
+const char* CSrcFiles::GetPchCpp()
+{
+	const char* pszPch = GetOption(OPT_PCH_CPP);
+	if (pszPch && !ttIsSameStrI(pszPch, "none")) {
+		m_cszPchCpp = GetOption(OPT_PCH_CPP);
+		return m_cszPchCpp;
+	}
+
+	if (!GetPchHeader())
+		return nullptr;
+
+	m_cszPchCpp = GetPchHeader();
+	m_cszPchCpp.ChangeExtension(".cpp");
+	if (ttFileExists(m_cszPchCpp))
+		return m_cszPchCpp;
+
+	// Check for other possible extensions
+
+	m_cszPchCpp.ChangeExtension(".cc");
+	if (ttFileExists(m_cszPchCpp))
+		return m_cszPchCpp;
+
+	m_cszPchCpp.ChangeExtension(".cxx");
+	if (ttFileExists(m_cszPchCpp))
+		return m_cszPchCpp;
+
+	m_cszPchCpp.ChangeExtension(".cpp");	// file doesn't exist, we'll generate a warning about it later
+	return m_cszPchCpp;
 }

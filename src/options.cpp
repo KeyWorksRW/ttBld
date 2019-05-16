@@ -25,6 +25,7 @@ static const OPT_SETTING s_aOptions[] = {
 
 	{ OPT_PROJECT,		"Project",		nullptr,	false, true,  "project name" },
 	{ OPT_PCH,			"PCH",			"none",		false, true,  "name of precompiled header file, or \042none\042 if not using precompiled headers" },
+	{ OPT_PCH_CPP,		"PCH_CPP",		"none",		false, false, "source file used to build precompiled header (default uses same name as PCH option)" },
 	{ OPT_EXE_TYPE,		"exe_type",		"console",	false, true,  "[window | console | lib | dll]" },
 
 	{ OPT_PERMISSIVE,	"permissive",	"false",	true,  false,  "true means add -permissive- compiler flag" },

@@ -134,31 +134,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 	if (GetPchHeader()) {
 		m_cszPCH = GetProjectName();
 		m_cszPCH.ChangeExtension(".pch");
-		m_cszCPP_PCH = GetPchHeader();
 
-		size_t pos;
-		for (pos = 0; aCppExt[pos]; pos++) {		// find out what type of C++ extension is being used
-			m_cszCPP_PCH.ChangeExtension(aCppExt[pos]);
-			if (ttFileExists(m_cszCPP_PCH))
-				break;
-		}
-		ttASSERT_MSG(aCppExt[pos], "No C++ source file found to generate precompiled header.");	// Probably means GetPchHeader() is pointing to an invalid header file
-		if (!aCppExt[pos]) {
+		m_cszCPP_PCH = GetPchCpp();
+		m_cszPCHObj = m_cszCPP_PCH;
+		m_cszPCHObj.ChangeExtension(".obj");
+
+		if (!ttFileExists(m_cszCPP_PCH)) {
 			ttCStr cszErrorMsg;
 			cszErrorMsg.printf("No C++ source file found that matches %s -- precompiled header will not build correctly.\n", GetPchHeader());
 			puts(cszErrorMsg);
-
-			for (pos = 0; pos < GetSrcFileList()->GetCount(); pos++) {
-				const char* pszExt = ttStrStrI(GetSrcFileList()->GetAt(pos), ".c");
-				if (pszExt) {
-					m_cszCPP_PCH.ChangeExtension(pszExt);	// match extension used by other source files
-					break;
-				}
-			}
-		}
-		if (m_cszCPP_PCH.IsNonEmpty()) {
-			m_cszPCHObj = m_cszCPP_PCH;
-			m_cszPCHObj.ChangeExtension(".obj");
 		}
 	}
 

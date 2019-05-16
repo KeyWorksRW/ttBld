@@ -16,6 +16,7 @@ namespace sfopt {			// .srcfiles otpions
 
 		OPT_PROJECT,		// name of the project--will be used as the base target name (i.e., project: foo, target: foo.exe, fooD.exe, etc.)
 		OPT_PCH,			// name of precompiled header file, or "none" if not using precompiled headers
+		OPT_PCH_CPP,		// source file used to build precompiled header (default uses same name as PCH option)
 		OPT_EXE_TYPE,		// [window | console | lib | dll]
 
 		// The following are boolean options (true or false)

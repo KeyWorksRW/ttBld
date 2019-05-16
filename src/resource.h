@@ -40,7 +40,9 @@
 #define IDRADIO_WARN2                   1042
 #define IDRADIO_WARN1                   1043
 #define IDEDIT_CFLAGS                   1044
+#define IDEDIT_PCH_CPP                  1044
 #define IDEDIT_LINK_FLAGS               1045
+#define IDBTN_PCH_CPP                   1045
 #define IDLIST_FILES                    1046
 #define IDBTN_ADD                       1047
 #define IDBTN_REMOVE                    1048

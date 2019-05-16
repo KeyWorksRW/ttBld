@@ -251,4 +251,13 @@ void CWriteSrcFiles::PreProcessOptions()
 		SetRequired(OPT_32BIT, true);
 		SetRequired(OPT_TARGET_DIR32, true);
 	}
+
+	if (GetPchHeader()) {
+		ttCStr cszHdr(GetPchHeader());
+		ttCStr cszSrc(GetPchCpp());		// GetPchCpp() will always return a string if GetPchHeader returns a string
+		cszHdr.RemoveExtension();
+		cszSrc.RemoveExtension();
+		if (ttIsSameStrI(cszHdr, cszSrc))
+			UpdateOption(OPT_PCH_CPP, "none");	// set it back to it's default value so it won't be written
+	}
 }
