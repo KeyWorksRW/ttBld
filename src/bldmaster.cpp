@@ -18,9 +18,9 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
 	if (bReadPrivate && ttFileExists(".private/.srcfiles"))
 		m_bPrivateBuild = true;	// changes where ninja scripts will be written
 	else
-		bReadPrivate = false;
+		m_bPrivateBuild = false;
 
-	if (bReadPrivate)
+	if (m_bPrivateBuild)
 		ReadTwoFiles(txtSrcFilesFileName, bReadPrivate ? ".private/.srcfiles" : nullptr);
 	else
 		ReadFile();
@@ -189,10 +189,16 @@ bool CBldMaster::FindRcDependencies(const char* pszRcFile, const char* pszHdr, c
 				NormalizeHeader(pszHdr ? pszHdr : pszRcFile, cszHeader);
 
 				if (!ttFileExists(cszHeader)) {
+#if 0
+					// REVIEW: [randalphwa - 5/16/2019]  We can't really report this as an error unless we first check
+					// the INCLUDE environment variable as well as the IncDIRs option. The resource compiler is going to
+					// report the error, so there's not a huge advantage to reporting here.
+
 					ttCStr cszErrMsg;
 					cszErrMsg.printf(ttGetResString(IDS_CS_MISSING_INCLUDE),
 						pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
 					m_lstErrors += cszErrMsg;
+#endif
 					continue;
 				}
 

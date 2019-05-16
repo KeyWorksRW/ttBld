@@ -136,7 +136,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 		m_cszPCH.ChangeExtension(".pch");
 
 		m_cszCPP_PCH = GetPchCpp();
-		m_cszPCHObj = m_cszCPP_PCH;
+		m_cszPCHObj = ttFindFilePortion(m_cszCPP_PCH);
 		m_cszPCHObj.ChangeExtension(".obj");
 
 		if (!ttFileExists(m_cszCPP_PCH)) {
@@ -155,11 +155,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 
 	// Write the build rule for the precompiled header
 
-	if (GetPchHeader()) {
-		ttCStr cszPchObj = m_cszCPP_PCH;
-		cszPchObj.ChangeExtension(".obj");
+	if (GetPchHeader())
 		file.printf("build $outdir/%s: compilePCH %s\n\n", (char*) m_cszPCHObj, (char*) m_cszCPP_PCH);
-	}
 
 	// TODO: [randalphwa - 09-02-2018] Need to add build rule for any .idl files (uses midl compiler to make a .tlb file)
 
@@ -171,7 +168,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 			continue;	// we already handled this
 		cszFile.ChangeExtension(".obj");
 
-		if (m_cszPCH.IsNonEmpty())
+		if (m_cszPCHObj.IsNonEmpty())	// we add m_cszPCHObj so it appears as a dependency and gets compiled, but not linked to
 			file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
 		else
 			file.printf("build $outdir/%s: compile %s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos));

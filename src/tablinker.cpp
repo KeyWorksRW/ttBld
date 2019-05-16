@@ -69,6 +69,7 @@ void CTabLinker::OnBtnChange()
 	ttCFileDlg fdlg(*this);
 	fdlg.SetFilter("Natvis Files|*.natvis");
 	fdlg.UseCurrentDirectory();
+	fdlg.RestoreDirectory();
 	if (fdlg.GetOpenFileName()) {
 		ttCStr cszCWD, cszFile;
 		cszCWD.GetCWD();

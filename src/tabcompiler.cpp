@@ -156,11 +156,13 @@ void CTabCompiler::OnBtnPchCpp()
 {
 	ttCFileDlg fdlg(*this);
 	fdlg.SetFilter("C++ Files|*.cpp;*.cc;*.cxx||");
-	ttCStr cszCWD;
-	cszCWD.GetCWD();
-	cszCWD.AddTrailingSlash();
-	fdlg.SetInitialDir(cszCWD);
-	if (fdlg.GetOpenFileName())
-		SetControlText(DLG_ID(IDEDIT_PCH_CPP), fdlg.GetFileName());
-
+	fdlg.UseCurrentDirectory();
+	fdlg.RestoreDirectory();
+	if (fdlg.GetOpenFileName()) {
+		ttCStr cszCWD;
+		cszCWD.GetCWD();
+		ttCStr cszRelPath;
+		ttConvertToRelative(cszCWD, fdlg.GetFileName(), cszRelPath);
+		SetControlText(DLG_ID(IDEDIT_PCH_CPP), cszRelPath);
+	}
 }

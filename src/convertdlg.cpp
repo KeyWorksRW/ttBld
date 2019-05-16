@@ -160,6 +160,7 @@ void CConvertDlg::OnBtnLocateScript()
 	ttCFileDlg dlg(*this);
 	dlg.SetFilter("Visual Studio|*.vcxproj;*.vcproj|CodeLite|*.project|CodeBlocks|*.cbp||");
 	dlg.UseCurrentDirectory();
+	dlg.RestoreDirectory();
 	if (dlg.GetOpenFileName()) {
 		auto item = m_comboScripts.Add(dlg.GetFileName());
 		m_comboScripts.SetCurSel(item);
