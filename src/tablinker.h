@@ -28,11 +28,15 @@ public:
 protected:
 	BEGIN_TTCMD_MAP()
 		TTCASE_CMD(IDBTN_CHANGE, OnBtnChange)
+		TTCASE_CMD(IDBTN_ADD_LIBDIR, OnBtnLibDir)
+		TTCASE_CMD(IDBTN_ADD_LIB, OnBtnAddLib)
 	END_TTMSG_MAP()
 
 	// Message handlers
 
 	void OnBtnChange();
+	void OnBtnLibDir();
+	void OnBtnAddLib();
 
 	void OnBegin(void);
 	void OnOK(void);

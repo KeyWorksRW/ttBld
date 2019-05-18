@@ -12,6 +12,8 @@
 
 STRINGTABLE
 BEGIN
+	IDS_ALREADY_ADDED_DIR	"You've already added the directory %s"
+	IDS_LIBDIR				"Library directory"
 	IDS_CONVERSION_FAILED	"Conversion of %s failed!"
 	IDS_TAB_CLANG			"CLang"
 	IDS_TAB_RC_MIDL			"Rc/Midl"

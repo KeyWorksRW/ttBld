@@ -9,8 +9,11 @@
 #include "pch.h"
 
 #include <ttfiledlg.h>	// ttCFileDlg
+#include <ttenumstr.h>	// ttCEnumStr
+#include <ttdirdlg.h>	// ttCDirDlg
 
 #include "dlgoptions.h"
+#include "strtable.h"
 
 void CTabLinker::OnBegin(void)
 {
@@ -75,5 +78,57 @@ void CTabLinker::OnBtnChange()
 		cszCWD.GetCWD();
 		ttConvertToRelative(cszCWD, fdlg, cszFile);
 		SetControlText(DLG_ID(IDEDIT_NATVIS), cszFile);
+	}
+}
+
+void CTabLinker::OnBtnLibDir()
+{
+	ttCDirDlg dlg;
+	dlg.SetTitle(ttGetResString(IDS_LIBDIR));
+	if (dlg.GetFolderName(*this)) {
+		ttCStr cszTmp, cszLibDir, cszCurLibDirs;
+		cszTmp.GetCWD();
+		ttConvertToRelative(cszTmp, dlg, cszLibDir);
+		cszCurLibDirs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
+
+		if (cszCurLibDirs.IsNonEmpty()) {
+			ttCEnumStr eLib(cszCurLibDirs);
+			while (eLib.Enum()) {
+				if (ttIsSamePath(eLib, cszLibDir)) {
+					ttMsgBoxFmt(ttGetResString(IDS_ALREADY_ADDED_DIR), MB_OK | MB_ICONWARNING, (char*) cszLibDir);
+					return;
+				}
+			}
+			cszCurLibDirs += ";";
+			cszCurLibDirs += cszLibDir;
+			SetControlText(DLG_ID(IDEDIT_LIBDIRS), cszCurLibDirs);
+		}
+		cszCurLibDirs += cszLibDir;
+		SetControlText(DLG_ID(IDEDIT_LIBDIRS), cszCurLibDirs);
+	}
+}
+
+void CTabLinker::OnBtnAddLib()
+{
+	ttCFileDlg fdlg(*this);
+	fdlg.SetFilter("Library Files|*.lib");
+
+	ttCStr cszCurLibDirs;
+	cszCurLibDirs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
+
+	if (cszCurLibDirs.IsNonEmpty() && !ttStrChr(cszCurLibDirs, ';'))	// set initial directory if one and only one path
+		fdlg.SetInitialDir(cszCurLibDirs);
+
+	fdlg.RestoreDirectory();
+	if (fdlg.GetOpenFileName()) {
+		ttCStr cszCWD, cszFile, cszCurLibs;
+		cszCWD.GetCWD();
+		ttConvertToRelative(cszCWD, fdlg, cszFile);
+		cszCurLibDirs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
+		if (cszCurLibDirs.IsNonEmpty())
+			cszCurLibDirs += ";";
+		cszCurLibDirs += ttFindFilePortion(cszFile);
+
+		SetControlText(DLG_ID(IDEDIT_LIBS_LINK), cszCurLibDirs);
 	}
 }
