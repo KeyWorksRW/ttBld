@@ -512,6 +512,14 @@ void CNinja::WriteLinkDirective()
 
 		cszRule += IsExeTypeConsole() ? " /SUBSYSTEM:CONSOLE" : " /SUBSYSTEM:WINDOWS";
 
+		if (GetOption(OPT_LIB_DIRS)) {
+			ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
+			while (enumLib.Enum()) {
+				cszRule += " /LIBPATH:";
+				cszRule += enumLib;
+			}
+		}
+
 		if (GetOption(OPT_LIBS)) {
 			ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
 			while (enumLib.Enum()) {
@@ -550,6 +558,14 @@ void CNinja::WriteLinkDirective()
 			cszRule += " /opt:ref /opt:icf";
 		}
 		cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
+
+		if (GetOption(OPT_LIB_DIRS)) {
+			ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
+			while (enumLib.Enum()) {
+				cszRule += " /LIBPATH:";
+				cszRule += enumLib;
+			}
+		}
 
 		if (GetOption(OPT_LIBS)) {
 			ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
@@ -693,15 +709,6 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 		cszRes.RemoveExtension();
 		cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ?	 "D.res" : ".res");
 		m_pkfOut->printf(" $resout/%s", (char*) cszRes);
-	}
-
-	if (!IsExeTypeLib() && GetOption(OPT_LIB_DIRS)) {
-		ttCStr cszExtraLib("$libout/");
-		cszExtraLib += ttFindFilePortion(GetOption(OPT_LIB_DIRS));
-		cszExtraLib.ChangeExtension(".lib");
-
-		m_pkfOut->WriteChar(CH_SPACE);
-		m_pkfOut->WriteStr(cszExtraLib);
 	}
 
 	if (GetBuildLibs()) {
