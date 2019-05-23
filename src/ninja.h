@@ -2,7 +2,7 @@
 // Name:		CNinja
 // Purpose:		Class for creating/maintaining build.ninja file for use by ninja.exe build tool
 // Author:		Ralph Walden
-// Copyright:	Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)
+// Copyright:	Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
 // License:		Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -30,6 +30,7 @@ public:
 protected:
 	// Class functions
 
+	   void GetLibName(const char* pszBaseName, ttCStr& cszLibName);
 	void AddDependentLibrary(const char* pszLib, GEN_TYPE gentype);
 
 	void WriteCompilerComments();
