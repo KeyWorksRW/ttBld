@@ -309,51 +309,42 @@ STYLE DS_CONTROL | WS_CHILD | WS_CAPTION
 CAPTION "Only used in .private builds"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "Optimize for:",IDC_STATIC,8,7,40,8
-    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,53,7,35,10
-    LTEXT           "&Warning:",IDC_STATIC,8,19,30,8
-    CONTROL         "4",IDRADIO_WARN4,"Button",BS_AUTORADIOBUTTON,53,19,20,
-                    10
-    CONTROL         "3",IDRADIO_WARN3,"Button",BS_AUTORADIOBUTTON,75,19,20,
-                    10
-    CONTROL         "2",IDRADIO_WARN2,"Button",BS_AUTORADIOBUTTON,97,19,20,
-                    10
-    CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,97,7,
-                    35,10
-    CONTROL         "Permissive",IDC_CHECK_PERMISSIVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,155,19,49,10
-    LTEXT           "IncDirs:",IDC_STATIC,7,35,25,8
-    EDITTEXT        IDEDIT_INCDIRS,38,33,135,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Base",IDBTN_BASE_INCDIRS,179,33,27,14
-    LTEXT           "CFlags",IDC_STATIC,7,54,22,8
-    EDITTEXT        IDEDIT_COMMON,38,52,135,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Base",IDBTN_BASE_CFLAGS,179,53,27,14
-    LTEXT           "RCFlags",IDC_STATIC,7,73,28,8
-    EDITTEXT        IDEDIT_COMMON_RC,38,71,135,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Base",IDBTN_BASE_RCFLAGS,179,71,27,14
-    LTEXT           "Libs:",IDC_STATIC,7,91,16,8
-    EDITTEXT        IDEDIT_LIBS,38,88,135,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Base",IDBTN_BASE_LIBS,179,89,27,14
+    LTEXT           "IncDirs:",IDC_STATIC,7,6,25,8
+    EDITTEXT        IDEDIT_INCDIRS,38,4,135,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Base",IDBTN_BASE_INCDIRS,179,4,27,14
+    LTEXT           "CFlags",IDC_STATIC,7,25,22,8
+    EDITTEXT        IDEDIT_COMMON,38,23,135,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Base",IDBTN_BASE_CFLAGS,179,24,27,14
+    LTEXT           "RCFlags",IDC_STATIC,7,44,28,8
+    EDITTEXT        IDEDIT_COMMON_RC,38,42,135,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Base",IDBTN_BASE_RCFLAGS,179,42,27,14
+    LTEXT           "Libs:",IDC_STATIC,7,62,16,8
+    EDITTEXT        IDEDIT_LIBS,38,59,135,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Base",IDBTN_BASE_LIBS,179,60,27,14
     CONTROL         "Link to static CRT",IDCHECK_STATIC_CRT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,107,73,10
-    GROUPBOX        "Create Makefile",IDC_STATIC,7,124,147,30
+                    BS_AUTOCHECKBOX | WS_TABSTOP,10,78,73,10
+    GROUPBOX        "Create Makefile",IDC_STATIC,7,95,147,30
     CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,18,136,37,10
+                    WS_GROUP | WS_TABSTOP,18,107,37,10
     CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,59,136,37,10
+                    WS_TABSTOP,59,107,37,10
     CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,100,136,37,10
-    GROUPBOX        "Create IDE projects (if missing)",IDC_STATIC,6,157,191,
+                    WS_TABSTOP,100,107,37,10
+    GROUPBOX        "Create IDE projects (if missing)",IDC_STATIC,6,128,191,
                     30
     CONTROL         "CodeBlocks",IDCHECK_CODEBLOCKS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,171,54,10
+                    WS_TABSTOP,18,142,54,10
     CONTROL         "CodeLite",IDCHECK_CODELITE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,76,171,44,10
+                    WS_TABSTOP,76,142,44,10
     CONTROL         "Visual Studio",IDCHECK_MSVC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,125,172,57,10
-    CONTROL         "1",IDRADIO_WARN1,"Button",BS_AUTORADIOBUTTON,120,19,20,
-                    10
+                    WS_TABSTOP,125,143,57,10
+    GROUPBOX        "Disable Security (/GS-)",IDC_STATIC,7,165,191,48
+    CONTROL         "In Debug builds",IDCHECK_NO_GS_DBG,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,179,65,10
+    CONTROL         "In Release builds",IDCHECK_NO_GS_rel,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,100,179,70,10
+    CONTROL         "Change root .srcfiles",IDCHECK_GS_ROOT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,196,80,10
 END
 
 

@@ -96,6 +96,9 @@
 #define IDBTN_ADD_LIB                   1089
 #define IDBTN_BASE_RCFLAGS              1090
 #define IDBTN_BASE_LIBS                 1091
+#define IDCHECK_NO_GS_DBG               1092
+#define IDCHECK_NO_GS_rel               1093
+#define IDCHECK_GS_ROOT                 1094
 
 // Next default values for new objects
 // 
@@ -103,7 +106,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1090
+#define _APS_NEXT_CONTROL_VALUE         1095
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

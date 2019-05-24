@@ -1,9 +1,9 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        CNinja
-// Purpose:     Class for creating/maintaining build.ninja file for use by ninja.exe build tool
-// Author:      Ralph Walden
-// Copyright:   Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
-// License:     Apache License (see ../LICENSE)
+// Name:      CNinja
+// Purpose:   Class for creating/maintaining build.ninja file for use by ninja.exe build tool
+// Author:    Ralph Walden
+// Copyright: Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
+// License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 // This will create one build?.ninja for each build target (debug32, debug64, release32, release64). Each build file will

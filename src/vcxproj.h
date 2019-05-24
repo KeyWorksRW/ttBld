@@ -1,25 +1,25 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:		CVcxProj
-// Purpose:		Class creating a Visual Studio build script
-// Author:		Ralph Walden
-// Copyright:	Copyright (c) 2002-2018 KeyWorks Software (Ralph Walden)
-// License:     Apache License (see ../LICENSE)
+// Name:      CVcxProj
+// Purpose:   Class creating a Visual Studio build script
+// Author:    Ralph Walden
+// Copyright: Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
+// License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include "bldmaster.h"	// CBldMaster
+#include "bldmaster.h"  // CBldMaster
 
 class CVcxProj : public CBldMaster
 {
 public:
-	CVcxProj() : CBldMaster(true) { }
+    CVcxProj() : CBldMaster(true) { }
 
-	// Class functions
+    // Class functions
 
-	bool CreateBuildFile();
+    bool CreateBuildFile();
 
 protected:
-	// Class members
+    // Class members
 
 };

@@ -1,44 +1,44 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:		CParseHHP
-// Purpose:		Parse an HHP file to collect dependencies
-// Author:		Ralph Walden
-// Copyright:	Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
-// License:		Apache License (see ../LICENSE)
+// Name:      CParseHHP
+// Purpose:   Parse an HHP file to collect dependencies
+// Author:    Ralph Walden
+// Copyright: Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
+// License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include <ttlist.h> 	// ttCList, ttCDblList, ttCStrIntList
-#include <ttstr.h>		// ttCStr
+#include <ttlist.h>     // ttCList, ttCDblList, ttCStrIntList
+#include <ttstr.h>      // ttCStr
 
 class CParseHHP
 {
 public:
-	CParseHHP(const char* pszHHPName);
+    CParseHHP(const char* pszHHPName);
 
-	enum {
-		SECTION_UNKNOWN,
-		SECTION_ALIAS,
-		SECTION_FILES,
-		SECTION_OPTIONS,
-		SECTION_TEXT_POPUPS,
-	};
+    enum {
+        SECTION_UNKNOWN,
+        SECTION_ALIAS,
+        SECTION_FILES,
+        SECTION_OPTIONS,
+        SECTION_TEXT_POPUPS,
+    };
 
-	// Class functions
+    // Class functions
 
-	void ParseHhpFile(const char* pszHHP = nullptr);
+    void ParseHhpFile(const char* pszHHP = nullptr);
 
-	ttCList		m_lstDependencies;
-	ttCStr		m_cszChmFile;
+    ttCList     m_lstDependencies;
+    ttCStr      m_cszChmFile;
 
 protected:
-	void AddDependency(const char* pszHHP, const char* pszFile);
+    void AddDependency(const char* pszHHP, const char* pszFile);
 
-	// Class members
+    // Class members
 
-	ttCStr	m_cszCWD;
-	ttCStr	m_cszRoot;		// root directory to base all filenames and includes to
-	ttCStr	m_cszHHPName;	// root level HHP filename
+    ttCStr  m_cszCWD;
+    ttCStr  m_cszRoot;      // root directory to base all filenames and includes to
+    ttCStr  m_cszHHPName;   // root level HHP filename
 
-	size_t		m_section;
+    size_t      m_section;
 };

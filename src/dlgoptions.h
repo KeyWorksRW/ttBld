@@ -1,75 +1,75 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:		CTabOptions
-// Purpose:		IDDLG_OPTIONS dialog handler
-// Author:		Ralph Walden
-// Copyright:	Copyright (c) 2019 KeyWorks Software (Ralph Walden)
-// License:		Apache License (see ../LICENSE)
+// Name:      CTabOptions
+// Purpose:   IDDLG_OPTIONS dialog handler
+// Author:    Ralph Walden
+// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #ifndef IDDLG_OPTIONS
-	#include "resource.h"
+    #include "resource.h"
 #endif
 
-#include <ttdlg.h>		// ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
-#include "writesrcfiles.h"	// CWriteSrcFiles
+#include "writesrcfiles.h"  // CWriteSrcFiles
 
-#include "tabgeneral.h"	// CTabGeneral
+#include "tabgeneral.h" // CTabGeneral
 #include "tabcompiler.h"// CTabCompiler
-#include "tabclang.h"	// CTabCLang
-#include "tablinker.h"	// CTabLinker
-#include "tabscripts.h"	// CTabScripts
-#include "tabrcmidl.h"	// CTabRcMidl
+#include "tabclang.h"   // CTabCLang
+#include "tablinker.h"  // CTabLinker
+#include "tabscripts.h" // CTabScripts
+#include "tabrcmidl.h"  // CTabRcMidl
 
 #ifdef PRIVATE
-	#include ".private/tabprivate.h"	// CTabPrivate
+    #include ".private/tabprivate.h"    // CTabPrivate
 #endif
 
 class CTabOptions : public ttCDlg, public CWriteSrcFiles
 {
 public:
-	CTabOptions();
+    CTabOptions();
 
-	// Class functions
+    // Class functions
 
-	void SaveChanges();
+    void SaveChanges();
 
 protected:
-	BEGIN_TTMSG_MAP()
-		TTMSG_WM_NOTIFY(OnNotify)
-	END_TTMSG_MAP()
+    BEGIN_TTMSG_MAP()
+        TTMSG_WM_NOTIFY(OnNotify)
+    END_TTMSG_MAP()
 
-	// Message handlers
+    // Message handlers
 
-	LRESULT OnNotify(int id, NMHDR* pNmHdr);
+    LRESULT OnNotify(int id, NMHDR* pNmHdr);
 
-	void OnBegin();
-	void OnOK();
-	void OnCancel();
+    void OnBegin();
+    void OnOK();
+    void OnCancel();
 
-	// Class members
+    // Class members
 
-	typedef enum {
-		TAB_GENERAL = 0,
-		TAB_COMPILER,
-		TAB_CLANG,
-		TAB_LINKER,
-		TAB_RC_MIDL,
-		TAB_SCRIPTS,
-		TAB_PRIVATE,
-	} TAB_ID;
+    typedef enum {
+        TAB_GENERAL = 0,
+        TAB_COMPILER,
+        TAB_CLANG,
+        TAB_LINKER,
+        TAB_RC_MIDL,
+        TAB_SCRIPTS,
+        TAB_PRIVATE,
+    } TAB_ID;
 
-	CTabGeneral	 m_tabGeneral;
-	CTabCompiler m_tabCompiler;
-	CTabCLang	 m_tabCLang;
-	CTabLinker	 m_tabLinker;
-	CTabRcMidl	 m_tabRcMidl;
-	CTabScripts	 m_tabScripts;
+    CTabGeneral  m_tabGeneral;
+    CTabCompiler m_tabCompiler;
+    CTabCLang    m_tabCLang;
+    CTabLinker   m_tabLinker;
+    CTabRcMidl   m_tabRcMidl;
+    CTabScripts  m_tabScripts;
 #ifdef PRIVATE
-	CTabPrivate	 m_tabPrivate;
+    CTabPrivate  m_tabPrivate;
 #endif
 
-	HWND m_hwndTabSub;
+    HWND m_hwndTabSub;
 };

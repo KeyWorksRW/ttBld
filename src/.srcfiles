@@ -14,29 +14,29 @@ Options:
     BuildLibs:   ../ttLib/lib/ttLib                # libraries that need to be built (added to makefile generation)
 
 Files:
-	pch.cpp
-	makeninja.rc
+    pch.cpp
+    makeninja.rc
 
-	addfiles.cpp
-	bldmaster.cpp
-	codelite.cpp
-	convertdlg.cpp
-	createmakefile.cpp
-	csrcfiles.cpp
-	dryrun.cpp
-	init.cpp
-	ninja.cpp
-	options.cpp
-	parsehhp.cpp
-	vcxproj.cpp
-	writesrcfiles.cpp
+    addfiles.cpp
+    bldmaster.cpp
+    codelite.cpp
+    convertdlg.cpp
+    createmakefile.cpp
+    csrcfiles.cpp
+    dryrun.cpp
+    init.cpp
+    ninja.cpp
+    options.cpp
+    parsehhp.cpp
+    vcxproj.cpp
+    writesrcfiles.cpp
 
 # Modules for creating the Options UI
 
-	dlgoptions.cpp
-	tabgeneral.cpp
-	tabcompiler.cpp
-	tabclang.cpp
-	tablinker.cpp
-	tabrcmidl.cpp
-	tabscripts.cpp
+    dlgoptions.cpp
+    tabgeneral.cpp
+    tabcompiler.cpp
+    tabclang.cpp
+    tablinker.cpp
+    tabrcmidl.cpp
+    tabscripts.cpp

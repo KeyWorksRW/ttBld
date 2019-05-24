@@ -1,78 +1,78 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:		CConvertDlg
-// Purpose:		IDDDLG_CONVERT dialog handler
-// Author:		Ralph Walden
-// Copyright:	Copyright (c) 2019 KeyWorks Software (Ralph Walden)
-// License:		Apache License (see ../LICENSE)
+// Name:      CConvertDlg
+// Purpose:   IDDDLG_CONVERT dialog handler
+// Author:    Ralph Walden
+// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #ifndef IDDDLG_CONVERT
-	#include "resource.h"
+    #include "resource.h"
 #endif
 
-#include <ttdlg.h>		// ttCDlg, ttCComboBox, ttCListBox, ttCListView
-#include <ttxml.h>		// ttCXMLBranch, ttCParseXML
+#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttxml.h>      // ttCXMLBranch, ttCParseXML
 
-#include "writesrcfiles.h"	// CWriteSrcFiles
+#include "writesrcfiles.h"  // CWriteSrcFiles
 
 class CConvertDlg : public ttCDlg
 {
 public:
-	CConvertDlg();
+    CConvertDlg();
 
-	// Public functions
+    // Public functions
 
-	bool  CreateSrcFiles();
-	bool  doConversion(const char* pszFile = nullptr);
+    bool  CreateSrcFiles();
+    bool  doConversion(const char* pszFile = nullptr);
 
-	char* GetDirOutput() { return m_cszDirOutput; }
-	char* GetDirSrcFiles() { return m_cszDirSrcFiles; }
-	char* GetConvertScript() { return m_cszConvertScript; }
-	void  SetConvertScritpt(const char* pszFile) { m_cszConvertScript = pszFile; }
+    char* GetDirOutput() { return m_cszDirOutput; }
+    char* GetDirSrcFiles() { return m_cszDirSrcFiles; }
+    char* GetConvertScript() { return m_cszConvertScript; }
+    void  SetConvertScritpt(const char* pszFile) { m_cszConvertScript = pszFile; }
 
-	bool ConvertCodeLite();
-	bool ConvertCodeBlocks();
-	bool ConvertVcxProj();
-	bool ConvertVcProj();
+    bool ConvertCodeLite();
+    bool ConvertCodeBlocks();
+    bool ConvertVcxProj();
+    bool ConvertVcProj();
 
 protected:
-	BEGIN_TTCMD_MAP()
-		TTCASE_CMD(IDBTN_CHANGE_IN, OnBtnChangeIn)
-		TTCASE_CMD(IDBTN_CHANGE_OUT, OnBtnChangeOut)
-		TTCASE_CMD(IDBTN_LOCATE_SCRIPT, OnBtnLocateScript)
-	END_TTMSG_MAP()
+    BEGIN_TTCMD_MAP()
+        TTCASE_CMD(IDBTN_CHANGE_IN, OnBtnChangeIn)
+        TTCASE_CMD(IDBTN_CHANGE_OUT, OnBtnChangeOut)
+        TTCASE_CMD(IDBTN_LOCATE_SCRIPT, OnBtnLocateScript)
+    END_TTMSG_MAP()
 
-	// Message handlers
+    // Message handlers
 
-	void OnBtnChangeIn();
-	void OnBtnChangeOut();
-	void OnBtnLocateScript();
-	void OnBegin(void);
-	void OnOK(void);
+    void OnBtnChangeIn();
+    void OnBtnChangeOut();
+    void OnBtnLocateScript();
+    void OnBegin(void);
+    void OnOK(void);
 
-	// Protected functions
+    // Protected functions
 
-	void CreateNewSrcFiles();
+    void CreateNewSrcFiles();
 
-	char* MakeSrcRelative(const char* pszFile);
-	void  AddCodeLiteFiles(ttCXMLBranch* pParent);
-	bool  isValidSrcFile(const char* pszFile) const;
+    char* MakeSrcRelative(const char* pszFile);
+    void  AddCodeLiteFiles(ttCXMLBranch* pParent);
+    bool  isValidSrcFile(const char* pszFile) const;
 
-	// Class members
+    // Class members
 
-	ttCComboBox m_comboScripts;
-	ttCParseXML m_xml;
-	CWriteSrcFiles m_cSrcFiles;
+    ttCComboBox m_comboScripts;
+    ttCParseXML m_xml;
+    CWriteSrcFiles m_cSrcFiles;
 
-	ttCStr m_cszDirOutput;		// where .srcfiles should be created
-	ttCStr m_cszDirSrcFiles;
-	ttCStr m_cszConvertScript;
+    ttCStr m_cszDirOutput;      // where .srcfiles should be created
+    ttCStr m_cszDirSrcFiles;
+    ttCStr m_cszConvertScript;
 
-	ttCStr m_cszScriptRoot;
-	ttCStr m_cszOutRoot;
-	ttCStr m_cszRelative;		// used to create a relative location for a source file
+    ttCStr m_cszScriptRoot;
+    ttCStr m_cszOutRoot;
+    ttCStr m_cszRelative;       // used to create a relative location for a source file
 
-	ttCStr m_cszCWD;
+    ttCStr m_cszCWD;
 };

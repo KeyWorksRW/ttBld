@@ -1,35 +1,35 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:		CTabCLang
-// Purpose:		IDTAB_CLANG dialog handler
-// Author:		Ralph Walden
-// Copyright:	Copyright (c) 2019 KeyWorks Software (Ralph Walden)
-// License:		Apache License (see ../LICENSE)
+// Name:      CTabCLang
+// Purpose:   IDTAB_CLANG dialog handler
+// Author:    Ralph Walden
+// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #ifndef IDTAB_CLANG
-	#include "resource.h"
+    #include "resource.h"
 #endif
 
-#include <ttdlg.h>		// ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 class CTabCLang : public ttCDlg
 {
 public:
-	CTabCLang() : ttCDlg(IDTAB_CLANG) { }
+    CTabCLang() : ttCDlg(IDTAB_CLANG) { }
 
-	// Class functions
+    // Class functions
 
-	void SetParentClass(CTabOptions* pclsOptions) { m_pOpts = pclsOptions; }
+    void SetParentClass(CTabOptions* pclsOptions) { m_pOpts = pclsOptions; }
 
 protected:
-	// Message handlers
+    // Message handlers
 
-	void OnBegin(void);
-	void OnOK(void);
+    void OnBegin(void);
+    void OnOK(void);
 
-	// Class members
+    // Class members
 
-	CTabOptions* m_pOpts;
+    CTabOptions* m_pOpts;
 };
