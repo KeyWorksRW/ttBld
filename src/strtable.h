@@ -29,3 +29,4 @@
 #define IDS_CONVERSION_FAILED       28013
 #define IDS_LIBDIR      28014
 #define IDS_ALREADY_ADDED_DIR       28015
+#define IDS_CANNOT_LOCATE        28016

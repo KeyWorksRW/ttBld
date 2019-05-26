@@ -69,7 +69,7 @@ size_t CreateCodeLiteProject()
 
     while (kf.ReplaceStr("%projname%", cSrcFiles.GetProjectName()));
 
-    kf.WriteEol("\t\t<File Name=\042.srcfiles\042/>");
+    kf.printf("\t\t<File Name=\042%s\042/>\n", cSrcFiles.GetSrcFiles());
     if (cSrcFiles.GetPchHeader())
         kf.printf("\t\t<File Name=\042%s\042/>\n", (char*) cSrcFiles.GetPchHeader());
 

@@ -67,6 +67,8 @@ public:
     const char* GetProjectName() { return GetOption(OPT_PROJECT); }
     const char* GetPchHeader();
     const char* GetPchCpp();    // source file to compile the precompiled header
+    const char* GetSrcFiles() { return m_cszSrcFilePath; };  // get location of .srcfiles (typically in bldMAC/, bldMSW/, or bldUNX/)
+    const char* GetBldDir() { return m_cszBldDir;  }
 
 protected:
     void ProcessFile(char* pszFile);
@@ -99,10 +101,12 @@ public:
     ttCStrIntList m_lstLibAddSrcFiles;  // additional .srcfiles to read into Lib: section
     ttCList       m_lstSrcIncluded;     // the names of all files included by all ".include path/.srcfiles" directives
 
-protected:
     ttCStr  m_cszPchHdr;
     ttCStr  m_cszPchCpp;
+    ttCStr  m_cszBldDir;    // bldMAC, bldMSW, or bldUNX
+    ttCStr  m_cszSrcFilePath;   //
 
+protected:
     bool GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment);
 
     bool m_bRead;               // file has been read and processed

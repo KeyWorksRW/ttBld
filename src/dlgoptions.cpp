@@ -17,7 +17,7 @@
 
 #include "dlgoptions.h"
 
-bool ChangeOptions(bool bDryRun)
+bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun)
 {
     CTabOptions dlg;
     if (bDryRun)
@@ -42,6 +42,7 @@ bool ChangeOptions(bool bDryRun)
     if (result == IDOK)
     {
         dlg.SaveChanges();
+        *pcszSrcFiles = dlg.m_cszSrcFilePath;
         return true;
     }
     else
@@ -148,14 +149,14 @@ void CTabOptions::OnCancel(void)
 
 void CTabOptions::SaveChanges()
 {
-    if (ttFileExists(txtSrcFilesFileName))
+    if (ttFileExists(m_cszSrcFilePath))
     {
-        if (WriteUpdates())
-            puts(".srcfiles Options: section updated");
+        if (WriteUpdates(m_cszSrcFilePath))
+            printf("%s Options: section updated.\n", GetSrcFiles());
     }
     else {
         if (WriteUpdates())
-            puts(".srcfiles created");
+            printf("%s created.\n", GetSrcFiles());
     }
 }
 
