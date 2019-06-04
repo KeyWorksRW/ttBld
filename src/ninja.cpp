@@ -275,7 +275,7 @@ void CNinja::WriteCompilerComments()
             m_pkfOut->WriteEol("# -GS-\t// Turn off buffer security checks");
             if (GetBoolOption(OPT_STDCALL))
                 m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-            if (GetBoolOption(OPT_STATIC_CRT))
+            if (GetBoolOption(OPT_STATIC_CRT_REL))
                 m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
             else
                 m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -287,7 +287,10 @@ void CNinja::WriteCompilerComments()
                 m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
         }
         else {  // Presumably GEN_DEBUG32 or GEN_DEBUG64
-            m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
+            if (GetBoolOption(OPT_STATIC_CRT_DBG))
+                m_pkfOut->WriteEol("# -MTd\t// Multithreaded debug dll (MSVCRTD)");
+            else
+                m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
             m_pkfOut->WriteEol("# -Z7\t// produces object files with full symbolic debugging information");
         }
     }
@@ -300,7 +303,7 @@ void CNinja::WriteCompilerComments()
         if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)   {
             if (GetBoolOption(OPT_STDCALL))
                 m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-            if (GetBoolOption(OPT_STATIC_CRT))
+            if (GetBoolOption(OPT_STATIC_CRT_REL))
                 m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
             else
                 m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -312,7 +315,10 @@ void CNinja::WriteCompilerComments()
                 m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
         }
         else {  // Presumably GEN_DEBUG32 or GEN_DEBUG64
-            m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
+            if (GetBoolOption(OPT_STATIC_CRT_DBG))
+                m_pkfOut->WriteEol("# -MTd\t// Multithreaded debug dll (MSVCRTD)");
+            else
+                m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
             m_pkfOut->WriteEol("# -Z7\t// produces object files with full symbolic debugging information");
         }
     }
@@ -335,7 +341,7 @@ void CNinja::WriteCompilerFlags()
 
                 GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
                 GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-                IsExeTypeLib() ? " -Zl" : " -MDd"   // Note use of -MDd -- assumption is to always use this for debug builds. Release builds track GetOptionName(OPT_STATIC_CRT)
+                IsExeTypeLib() ? " -Zl" : (GetBoolOption(OPT_STATIC_CRT_DBG) ? " -MTd" : " -MDd")
             );
     else    // Presumably GEN_RELEASE32 or GEN_RELEASE64
         m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s",
@@ -343,7 +349,7 @@ void CNinja::WriteCompilerFlags()
 
                 GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
                 GetBoolOption(OPT_STDCALL) ?    " -Gz" : "",
-                IsExeTypeLib() ? " -Zl" :  (GetBoolOption(OPT_STATIC_CRT) ? " -MT" : " -MD"),
+                IsExeTypeLib() ? " -Zl" :  (GetBoolOption(OPT_STATIC_CRT_REL) ? " -MT" : " -MD"),
                 IsOptimizeSpeed() ? " -O2" : " -O1"
             );
 

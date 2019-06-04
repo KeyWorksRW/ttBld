@@ -205,6 +205,11 @@ void CSrcFiles::ProcessOption(char* pszLine)
         UpdateOption(OPT_LINK_CMN, (char*) cszVal);
     else if (ttIsSameStrI(cszName, "bit_suffix"))       // could convert this to b64_suffix, but with new logic, probably don't need it
         return;
+    else if (ttIsSameStrI(cszName, "static_crt"))
+    {
+        UpdateOption(OPT_STATIC_CRT_REL, true);
+        return;
+    }
 
     ttCStr csz;
     csz.printf(ttGetResString(IDS_CS_UNKNOWN_OPTION), (char*) cszName);

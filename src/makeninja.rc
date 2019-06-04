@@ -28,19 +28,19 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""winres.h""\r\n"
     "#include ""strtable.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "#include ""ttlibicons.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""strtable.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -127,7 +127,7 @@ BEGIN
     PUSHBUTTON      "C&hange...",IDBTN_CHANGE_IN,177,76,50,14
     CONTROL         "Create using &project file:",IDRADIO_CONVERT,"Button",
                     BS_AUTORADIOBUTTON,6,121,91,10
-    COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT |
+    COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "&Locate...",IDBTN_LOCATE_SCRIPT,177,135,50,14
     DEFPUSHBUTTON   "Create",IDOK,115,174,50,14
@@ -136,7 +136,7 @@ BEGIN
 END
 
 IDDLG_OPTIONS DIALOG  0, 0, 232, 281
-STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_VISIBLE |
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
 CAPTION ".srcfiles Options"
 FONT 8, "MS Shell Dlg"
@@ -153,21 +153,21 @@ BEGIN
     LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
     EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
     GROUPBOX        "Project Type",IDC_STATIC,7,25,147,45
-    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,19,40,42,10
-    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,73,40,41,10
-    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,19,54,37,10
-    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,73,54,29,10
     GROUPBOX        "Platform",IDC_STATIC,7,83,196,59
-    CONTROL         "64-bit",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "64-bit",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,99,33,10
     LTEXT           "Dir:",IDC_STATIC,60,101,12,8
     EDITTEXT        IDEDIT_DIR64,76,96,83,14,ES_AUTOHSCROLL
     PUSHBUTTON      "Dir...",IDBTN_DIR64,166,96,29,16
-    CONTROL         "32-bit",IDCHECK_32BIT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "32-bit",IDCHECK_32BIT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,123,33,10
     LTEXT           "Dir:",IDC_STATIC,60,124,12,8
     EDITTEXT        IDEDIT_DIR32,76,120,83,14,ES_AUTOHSCROLL
@@ -179,12 +179,12 @@ STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT           "Optimize for:",IDC_STATIC,8,7,40,8
-    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,53,7,35,10
     CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,97,7,
                     35,10
     LTEXT           "Convention:",IDC_STATIC,8,19,39,8
-    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,53,19,33,10
     CONTROL         "stdcall",IDC_RADIO_STDCALL,"Button",BS_AUTORADIOBUTTON,
                     97,19,36,10
@@ -235,8 +235,11 @@ BEGIN
     PUSHBUTTON      "A&dd...",IDBTN_ADD_LIB,163,135,41,16
     LTEXT           "&Build and link to these:",IDC_STATIC,6,156,72,8
     EDITTEXT        IDEDIT_LIBS_BUILD,6,168,198,14,ES_AUTOHSCROLL
-    CONTROL         "Link to &static CRT",IDCHECK_STATIC_CRT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,6,193,73,10
+    LTEXT           "Use Static CRT:",IDC_STATIC,6,188,52,8
+    CONTROL         "Release",IDCHECK_STATIC_CRT_REL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,64,187,42,10
+    CONTROL         "Debug",IDCHECK_STATIC_CRT_DBG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,115,187,37,10
     LTEXT           "&NATVIS file:",IDC_STATIC,6,210,40,8
     EDITTEXT        IDEDIT_NATVIS,47,207,108,14,ES_AUTOHSCROLL
     PUSHBUTTON      "&Find...",IDBTN_CHANGE,163,206,41,16
@@ -247,19 +250,19 @@ STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Create Makefile",IDC_STATIC,7,7,147,30
-    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,18,22,37,10
-    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,59,22,37,10
-    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,100,22,37,10
     GROUPBOX        "Create IDE projects (if missing)",IDC_STATIC,6,47,147,
                     71
-    CONTROL         "CodeBlocks",IDCHECK_CODEBLOCKS,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "CodeBlocks",IDCHECK_CODEBLOCKS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,19,64,54,10
-    CONTROL         "CodeLite",IDCHECK_CODELITE,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "CodeLite",IDCHECK_CODELITE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,19,79,44,10
-    CONTROL         "Visual Studio",IDCHECK_MSVC,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "Visual Studio",IDCHECK_MSVC,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,19,95,57,10
 END
 
@@ -311,7 +314,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     IDDDLG_CONVERT, DIALOG
     BEGIN
@@ -388,4 +391,5 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
 

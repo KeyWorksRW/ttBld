@@ -19,7 +19,8 @@ void CTabLinker::OnBegin(void)
 {
     EnableShadeBtns();
 
-    SetCheck(DLG_ID(IDCHECK_STATIC_CRT), m_pOpts->GetBoolOption(OPT_STATIC_CRT));
+    SetCheck(DLG_ID(IDCHECK_STATIC_CRT_REL), m_pOpts->GetBoolOption(OPT_STATIC_CRT_REL));
+    SetCheck(DLG_ID(IDCHECK_STATIC_CRT_DBG), m_pOpts->GetBoolOption(OPT_STATIC_CRT_DBG));
 
     if (m_pOpts->GetOption(OPT_LIBS))
         SetControlText(DLG_ID(IDEDIT_LIBS_LINK), m_pOpts->GetOption(OPT_LIBS));
@@ -43,25 +44,26 @@ void CTabLinker::OnOK(void)
 {
     ttCStr csz;
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
+    csz.GetWindowText(GetDlgItem(IDEDIT_COMMON));
     m_pOpts->UpdateOption(OPT_LINK_CMN, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
+    csz.GetWindowText(GetDlgItem(IDEDIT_RELEASE));
     m_pOpts->UpdateOption(OPT_LINK_REL, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
+    csz.GetWindowText(GetDlgItem(IDEDIT_DEBUG));
     m_pOpts->UpdateOption(OPT_LINK_DBG, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
+    csz.GetWindowText(GetDlgItem(IDEDIT_LIBDIRS));
     m_pOpts->UpdateOption(OPT_LIB_DIRS, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
+    csz.GetWindowText(GetDlgItem(IDEDIT_LIBS_LINK));
     m_pOpts->UpdateOption(OPT_LIBS, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_BUILD)));
+    csz.GetWindowText(GetDlgItem(IDEDIT_LIBS_BUILD));
     m_pOpts->UpdateOption(OPT_BUILD_LIBS, (char*) csz);
 
-    m_pOpts->UpdateOption(OPT_STATIC_CRT, GetCheck(DLG_ID(IDCHECK_STATIC_CRT)));
+    m_pOpts->UpdateOption(OPT_STATIC_CRT_REL, GetCheck(IDCHECK_STATIC_CRT_REL));
+    m_pOpts->UpdateOption(OPT_STATIC_CRT_DBG, GetCheck(IDCHECK_STATIC_CRT_DBG));
 
     csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_NATVIS)));
     m_pOpts->UpdateOption(OPT_NATVIS, (char*) csz);

@@ -21,66 +21,68 @@ using namespace sfopt;
 // Add these in the order you want them written in a new .srcfiles files.
 
 static const OPT_SETTING s_aOptions[] = {
-    // { OPT_xxx,           "name",         "value", boolean type, required, "comment" }
+    // { OPT_xxx,       "name",         "value",   boolean, required, "comment" }
 
-    { OPT_PROJECT,      "Project",      nullptr,    false, true,  "project name" },
-    { OPT_PCH,          "PCH",          "none",     false, true,  "name of precompiled header file, or \042none\042 if not using precompiled headers" },
-    { OPT_PCH_CPP,      "PCH_CPP",      "none",     false, false, "source file used to build precompiled header (default uses same name as PCH option)" },
-    { OPT_EXE_TYPE,     "exe_type",     "console",  false, true,  "[window | console | lib | dll]" },
+    { OPT_PROJECT,      "Project",      nullptr,   false,   true,     "project name" },
+    { OPT_PCH,          "PCH",          "none",    false,   true,     "name of precompiled header file, or \042none\042 if not using precompiled headers" },
+    { OPT_PCH_CPP,      "PCH_CPP",      "none",    false,   false,    "source file used to build precompiled header (default uses same name as PCH option)" },
+    { OPT_EXE_TYPE,     "exe_type",     "console", false,   true,     "[window | console | lib | dll]" },
 
-    { OPT_PERMISSIVE,   "permissive",   "false",    true,  false,  "true means add -permissive- compiler flag" },
-    { OPT_STDCALL,      "stdcall",      "false",    true,  false,  "true to use stdcall calling convention, false for cdecl (default)" },
-    { OPT_OPTIMIZE,     "optimize",     "space",    false, false,  "[space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues)" },
-    { OPT_WARN_LEVEL,   "WarnLevel",    "4",        false, false,  "[1-4] default is 4" },
+    { OPT_PERMISSIVE,   "permissive",   "false",   true,    false,     "true means add -permissive- compiler flag" },
+    { OPT_STDCALL,      "stdcall",      "false",   true,    false,     "true to use stdcall calling convention, false for cdecl (default)" },
+    { OPT_OPTIMIZE,     "optimize",     "space",   false,   false,     "[space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues)" },
+    { OPT_WARN_LEVEL,   "WarnLevel",    "4",       false,   false,     "[1-4] default is 4" },
 
-    { OPT_MAKEFILE,     "Makefile",     "missing",  false, false, "[never | missing | always]" },
-    { OPT_COMPILERS,    "Compilers",    nullptr,    false, false,  "[MSVC or CLANG] default is both, set this option to limit it to one" },
+    { OPT_MAKEFILE,     "Makefile",     "missing", false,   false,    "[never | missing | always]" },
+    { OPT_COMPILERS,    "Compilers",    nullptr,   false,   false,     "[MSVC or CLANG] default is both, set this option to limit it to one" },
 
-    { OPT_CFLAGS_CMN,   "CFlags",       nullptr,    false, false,  "flags to pass to the compiler in all build targets" },
-    { OPT_CFLAGS_REL,   "CFlagsR",      nullptr,    false, false,  "flags to pass to the compiler in release builds" },
-    { OPT_CFLAGS_DBG,   "CFlagsD",      nullptr,    false, false,  "flags to pass to the compiler in debug builds" },
+    { OPT_CFLAGS_CMN,   "CFlags",       nullptr,   false,   false,     "flags to pass to the compiler in all build targets" },
+    { OPT_CFLAGS_REL,   "CFlagsR",      nullptr,   false,   false,     "flags to pass to the compiler in release builds" },
+    { OPT_CFLAGS_DBG,   "CFlagsD",      nullptr,   false,   false,     "flags to pass to the compiler in debug builds" },
 
-    { OPT_LINK_CMN,     "LFlags",       nullptr,    false, false,  "flags to pass to the linker in all build targets" },
-    { OPT_LINK_REL,     "LFlagsR",      nullptr,    false, false,  "flags to pass to the linker in release builds" },
-    { OPT_LINK_DBG,     "LFlagsD",      nullptr,    false, false,  "flags to pass to the linker in debug builds" },
+    { OPT_LINK_CMN,     "LFlags",       nullptr,   false,   false,     "flags to pass to the linker in all build targets" },
+    { OPT_LINK_REL,     "LFlagsR",      nullptr,   false,   false,     "flags to pass to the linker in release builds" },
+    { OPT_LINK_DBG,     "LFlagsD",      nullptr,   false,   false,     "flags to pass to the linker in debug builds" },
 
-    { OPT_NATVIS,       "Natvis",       nullptr,    false, false,  "Specifies a .natvis file to link into the pdb file" },
+    { OPT_NATVIS,       "Natvis",       nullptr,   false,   false,     "Specifies a .natvis file to link into the pdb file" },
 
-    { OPT_RC_CMN,       "RC_CMN",       nullptr,    false, false,  "flags to pass to the resource compiler in all build targets" },
-    { OPT_RC_REL,       "RC_REL",       nullptr,    false, false,  "flags to pass to the resource compiler in release builds" },
-    { OPT_RC_DBG,       "RC_DBG",       nullptr,    false, false,  "flags to pass to the resource compiler in debug builds" },
+    { OPT_RC_CMN,       "RC_CMN",       nullptr,   false,   false,     "flags to pass to the resource compiler in all build targets" },
+    { OPT_RC_REL,       "RC_REL",       nullptr,   false,   false,     "flags to pass to the resource compiler in release builds" },
+    { OPT_RC_DBG,       "RC_DBG",       nullptr,   false,   false,     "flags to pass to the resource compiler in debug builds" },
 
-    { OPT_MDL_CMN,      "MIDL_CMD",     nullptr,    false, false,  "flags to pass to the midl compiler in all build targets" },
-    { OPT_MDL_REL,      "MIDL_REL",     nullptr,    false, false,  "flags to pass to the midl compiler in release builds" },
-    { OPT_MDL_DBG,      "MIDL_DBG",     nullptr,    false, false,  "flags to pass to the midl compiler in debug builds" },
+    { OPT_MDL_CMN,      "MIDL_CMD",     nullptr,   false,   false,     "flags to pass to the midl compiler in all build targets" },
+    { OPT_MDL_REL,      "MIDL_REL",     nullptr,   false,   false,     "flags to pass to the midl compiler in release builds" },
+    { OPT_MDL_DBG,      "MIDL_DBG",     nullptr,   false,   false,     "flags to pass to the midl compiler in debug builds" },
 
-    { OPT_CLANG_CMN,    "CLANG_CMD",    nullptr,    false, false,  "flags to pass to the CLANG compiler in all build targets" },
-    { OPT_CLANG_REL,    "CLANG_REL",    nullptr,    false, false,  "flags to pass to the CLANG compiler in release builds" },
-    { OPT_CLANG_DBG,    "CLANG_DBG",    nullptr,    false, false,  "flags to pass to the CLANG compiler in debug builds" },
+    { OPT_CLANG_CMN,    "CLANG_CMD",    nullptr,   false,   false,     "flags to pass to the CLANG compiler in all build targets" },
+    { OPT_CLANG_REL,    "CLANG_REL",    nullptr,   false,   false,     "flags to pass to the CLANG compiler in release builds" },
+    { OPT_CLANG_DBG,    "CLANG_DBG",    nullptr,   false,   false,     "flags to pass to the CLANG compiler in debug builds" },
 
-    { OPT_DEBUG_RC,     "DebugRC",      "false",    true,  false,  "true means build a -D_DEBUG version of the project's rc file" },
+    { OPT_DEBUG_RC,     "DebugRC",      "false",   true,    false,     "true means build a -D_DEBUG version of the project's rc file" },
 
-    { OPT_STATIC_CRT,   "static_crt",   "false",    true,  false,  "true means link to static CRT" },
-    { OPT_MS_LINKER,    "ms_linker",    "false",    true,  false,  "true means use link.exe even when compiling with CLANG" },
-    { OPT_MS_RC,        "ms_rc",        "true",     true,  false,  "use rc.exe even when compiling with CLANG" },
-    { OPT_IDE,          "IDE",          nullptr,    false, false,  "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
+    { OPT_STATIC_CRT_REL, "CrtStaticRel", "true",  true,    false,     "true means link to static CRT in release builds (default)" },
+    { OPT_STATIC_CRT_DBG, "CrtStaticDbg", "false", false,   false,     "true means link to static CRT in debug builds" },
 
-    { OPT_64BIT,        "64Bit",        "false",    true,  false,  "generate scripts for 64-bit build" },
-    { OPT_TARGET_DIR64, "TargetDir64",  nullptr,    false, false,  "64-bit target directory" },
+    { OPT_MS_LINKER,    "ms_linker",    "false",   true,    false,     "true means use link.exe even when compiling with CLANG" },
+    { OPT_MS_RC,        "ms_rc",        "true",    true,    false,     "use rc.exe even when compiling with CLANG" },
+    { OPT_IDE,          "IDE",          nullptr,   false,   false,     "[CodeBlocks CodeLite VisualStudio] -- specifies one or more IDEs to generate project files for" },
 
-    { OPT_32BIT,        "32Bit",        "false",    true,  false,  "generate scripts for 32-bit build" },
-    { OPT_TARGET_DIR32, "TargetDir32",  nullptr,    false, false,  "32-bit target directory" },
+    { OPT_64BIT,        "64Bit",        "false",   true,    false,     "generate scripts for 64-bit build" },
+    { OPT_TARGET_DIR64, "TargetDir64",  nullptr,   false,   false,     "64-bit target directory" },
 
-    { OPT_64BIT_SUFFIX, "b64_suffix",   "false",    true,  false,  "true means append '64' to target's directory or .exe name" },
-    { OPT_32BIT_SUFFIX, "b32_suffix",   "false",    true,  false,  "true means append '32' to target's directory or .exe name" },
+    { OPT_32BIT,        "32Bit",        "false",   true,    false,     "generate scripts for 32-bit build" },
+    { OPT_TARGET_DIR32, "TargetDir32",  nullptr,   false,   false,     "32-bit target directory" },
 
-    { OPT_INC_DIRS,     "IncDirs",      nullptr,    false, false,  "additional directories for header files" },
-    { OPT_BUILD_LIBS,   "BuildLibs",    nullptr,    false, false,  "libraries that need to be built (added to makefile generation)" },
-    { OPT_LIB_DIRS,     "LibDirs",      nullptr,    false, false,  "additional directores for lib files" },
+    { OPT_64BIT_SUFFIX, "b64_suffix",   "false",   true,    false,     "true means append '64' to target's directory or .exe name" },
+    { OPT_32BIT_SUFFIX, "b32_suffix",   "false",   true,    false,     "true means append '32' to target's directory or .exe name" },
 
-    { OPT_LIBS,         "Libs",         nullptr,    false, false,  "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
-    { OPT_LIBS_REL,     "LibsR",        nullptr,    false, false,  "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
-    { OPT_LIBS_DBG,     "LibsD",        nullptr,    false, false,  "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
+    { OPT_INC_DIRS,     "IncDirs",      nullptr,   false,   false,     "additional directories for header files" },
+    { OPT_BUILD_LIBS,   "BuildLibs",    nullptr,   false,   false,     "libraries that need to be built (added to makefile generation)" },
+    { OPT_LIB_DIRS,     "LibDirs",      nullptr,   false,   false,     "additional directores for lib files" },
+
+    { OPT_LIBS,         "Libs",         nullptr,   false,   false,     "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
+    { OPT_LIBS_REL,     "LibsR",        nullptr,   false,   false,     "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
+    { OPT_LIBS_DBG,     "LibsD",        nullptr,   false,   false,     "additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)" },
 
     { OPT_OVERFLOW, "", "", false, false, "" },
 };

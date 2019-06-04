@@ -37,6 +37,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
             continue;
         else if (ttStrStr(kfIn, "bit_suffix:"))
             continue;
+        else if (ttStrStr(kfIn, "static_crt:"))
+            continue;
 
         m_lstOriginal += (const char*) kfIn;
     }
