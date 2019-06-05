@@ -61,7 +61,7 @@ static const OPT_SETTING s_aOptions[] = {
     { OPT_DEBUG_RC,     "DebugRC",      "false",   true,    false,     "true means build a -D_DEBUG version of the project's rc file" },
 
     { OPT_STATIC_CRT_REL, "CrtStaticRel", "true",  true,    false,     "true means link to static CRT in release builds (default)" },
-    { OPT_STATIC_CRT_DBG, "CrtStaticDbg", "false", false,   false,     "true means link to static CRT in debug builds" },
+    { OPT_STATIC_CRT_DBG, "CrtStaticDbg", "true",  true,    false,     "true means link to static CRT in debug builds" },
 
     { OPT_MS_LINKER,    "ms_linker",    "false",   true,    false,     "true means use link.exe even when compiling with CLANG" },
     { OPT_MS_RC,        "ms_rc",        "true",    true,    false,     "use rc.exe even when compiling with CLANG" },
