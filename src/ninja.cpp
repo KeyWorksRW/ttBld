@@ -765,13 +765,22 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
             AddDependentLibrary(enumLib, gentype);
     }
 
+    bool bPchSeen = false;
     for (size_t iPos = 0; iPos < getSrcCount(); iPos++) {
         ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
         if (!ttStrStrI(cszFile, ".c"))  // we don't care about any type of file that wasn't compiled into an .obj file
             continue;
         cszFile.ChangeExtension(".obj");
+        if (!bPchSeen && ttIsSameStrI(cszFile, m_cszPCHObj))
+            bPchSeen = true;
         m_pkfOut->printf(" $\n  $outdir/%s", (char*) cszFile);
     }
+
+    // The precompiled object file must be linked. It may or may not show up in the list of source files. We check here
+    // to make certain it does indeed get written.
+
+    if (!bPchSeen && m_cszPCHObj.IsNonEmpty())
+        m_pkfOut->printf(" $\n  $outdir/%s", (char*) m_cszPCHObj);
 
     if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) && GetOption(OPT_NATVIS))
         m_pkfOut->printf(" $\n  | %s", GetOption(OPT_NATVIS));
