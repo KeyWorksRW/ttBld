@@ -8,24 +8,34 @@
 
 #include "pch.h"
 
-#include <ttlist.h>                     // ttCList, ttCDblList, ttCStrIntList
-#include <ttfile.h>                     // ttCFile
+#include <ttlist.h>     // ttCList, ttCDblList, ttCStrIntList
+#include <ttfile.h>     // ttCFile
 
-#include "csrcfiles.h"      // CSrcFiles
-#include "dryrun.h"         // CDryRun
+#include "csrcfiles.h"  // CSrcFiles
+#include "dryrun.h"     // CDryRun
+#include "strtable.h"   // String resource IDs
 
 void AddFiles(ttCList& lstFiles, bool bDryRun)
 {
-    if (lstFiles.GetCount() < 1) {
+    if (lstFiles.GetCount() < 1)
+    {
         puts("You didn't specify any files to add!");
         return;
     }
 
     CSrcFiles cSrcFiles;
-    cSrcFiles.ReadFile(".srcfiles");
+    if (!cSrcFiles.ReadFile())
+    {
+        ttCStr cszMsg;
+        cszMsg.printf(IDS_CANNOT_LOCATE, (char*) cSrcFiles.m_cszSrcFilePath);
+        puts(cszMsg);
+        return;
+    }
 
-    for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos) {
-        if (cSrcFiles.m_lstSrcFiles.Find(lstFiles[pos])) {
+    for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos)
+    {
+        if (cSrcFiles.m_lstSrcFiles.Find(lstFiles[pos]))
+        {
             printf("%s already in .srcfiles\n", lstFiles[pos]);
             cSrcFiles.m_lstSrcFiles.Remove(pos);
         }
@@ -34,8 +44,11 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     size_t cFilesAdded = 0;
 
     ttCFile kfIn, kfOut;
-    if (!kfIn.ReadFile(".srcfiles")) {
-        puts("Cannot read .srcfiles!");
+    if (!kfIn.ReadFile(cSrcFiles.m_cszSrcFilePath))
+    {
+        ttCStr cszMsg;
+        cszMsg.printf(IDS_CS_CANNOT_OPEN, (char*) cSrcFiles.m_cszSrcFilePath);
+        puts(cszMsg);
         return;
     }
     kfIn.MakeCopy();
@@ -43,17 +56,21 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     while (kfIn.ReadLine() && !ttIsSameSubStrI(kfIn, "Files:"))
         kfOut.WriteEol(kfIn);
 
-    if (kfOut.IsEndOfFile()) {  // means there was no Files: section
+    if (kfOut.IsEndOfFile())  // means there was no Files: section
+    {
         kfOut.WriteEol("Files:");
-        for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos) {
-            if (!ttFileExists(lstFiles[pos]))   {
+        for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos)
+        {
+            if (!ttFileExists(lstFiles[pos]))
+            {
                 printf("%s doesn't exist -- not added\n", lstFiles[pos]);
                 continue;
             }
             kfOut.printf("  %s\n", lstFiles[pos]);
             ++cFilesAdded;
         }
-        if (!kfOut.WriteFile(".srcfiles")) {
+        if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
+        {
             puts("Cannot write to .srcfiles!");
             return;
         }
@@ -68,10 +85,12 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     }
 
     kfOut.WriteEol(kfIn);   // This will be the Files: line
-    while (kfIn.ReadLine()) {
+    while (kfIn.ReadLine())
+    {
         if (ttIsAlpha(*(const char*)kfIn))  // Alphabetical character in first column is a new section
             break;
-        else if (!ttFindNonSpace(kfIn)) {       // blank line, insert after it
+        else if (!ttFindNonSpace(kfIn))   // blank line, insert after it
+        {
             kfOut.WriteEol(kfIn);
             break;
         }
@@ -81,8 +100,10 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 
     // We are now after a blank line, at the beginning of a section, or at the end of the file
 
-    for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos) {
-        if (!ttFileExists(lstFiles[pos]))   {
+    for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos)
+    {
+        if (!ttFileExists(lstFiles[pos]))
+        {
             printf("%s doesn't exist -- not added\n", lstFiles[pos]);
             continue;
         }
@@ -95,15 +116,18 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     while (kfIn.ReadLine())
         kfOut.WriteEol(kfIn);
 
-    if (bDryRun) {
+    if (bDryRun)
+    {
         CDryRun dryrun;
         dryrun.Enable();
-        dryrun.NewFile(".srcfiles");
+        dryrun.NewFile(cSrcFiles.GetSrcFiles());
         dryrun.DisplayFileDiff(kfIn, kfOut);
         return;
     }
 
-    if (!kfOut.WriteFile(".srcfiles")) {
+    if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
+    {
+        printf(ttGetResString(IDS_CS_CANT_WRITE), cSrcFiles.GetSrcFiles());
         puts("Cannot write to .srcfiles!");
         return;
     }

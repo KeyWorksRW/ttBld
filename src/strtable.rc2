@@ -1,43 +1,44 @@
 // STRTABLE.RC2 - resources Microsoft Visual C++ does not edit directly
 
 #ifdef APSTUDIO_INVOKED
-	#error this file is not editable by Microsoft Visual C++
+    #error this file is not editable by Microsoft Visual C++
 #endif //APSTUDIO_INVOKED
 
 #include "strtable.h"
 
 #ifdef PRIVATE
-	#include ".private/strtable.rc2"
+    #include ".private/strtable.rc2"
 #endif
 
 STRINGTABLE
 BEGIN
-	IDS_ALREADY_ADDED_DIR	"You've already added the directory %s"
-	IDS_LIBDIR				"Library directory"
-	IDS_CONVERSION_FAILED	"Conversion of %s failed!"
-	IDS_TAB_CLANG			"CLang"
-	IDS_TAB_RC_MIDL			"Rc/Midl"
-	IDS_64BIT_DIR			"Select 64-bit target directory"
-	IDS_32BIT_DIR			"Select 32-bit Target directory"
-	IDS_TAB_SCRIPTS			"Scripts"
-	IDS_TAB_LINKER			"Linker"
-	IDS_TAB_COMPILER		"Compiler"
-	IDS_GENERAL				"General"
-	IDS_SRCFILES_CREATED	".srcfiles created using %s as the template"
-	IDS_PARSE_ERROR			"An internal error occurred attempting to parse the file %s"
-	IDS_INVALID_PROJECT		"Cannot locate <CodeLite_Project> in %s"
-	IDS_MISSING_PROJECT		"Cannot locate <Project> in %s"
-	IDS_MISSING_VSP			"Cannot locate <VisualStudioProject> in %s"
-	IDS_MISSING_FILES		"Cannot locate <Files> in %s"
-	IDS_MISSING_FILTER		"Cannot locate <Filter> in %s"
-	IDS_SRCFILES_EXISTS		".srcfiles already exists in this directory. Are you sure you want to replace it?"
+    IDS_CANNOT_LOCATE       "Cannot locate the file %s!"
+    IDS_ALREADY_ADDED_DIR   "You've already added the directory %s"
+    IDS_LIBDIR              "Library directory"
+    IDS_CONVERSION_FAILED   "Conversion of %s failed!"
+    IDS_TAB_CLANG           "CLang"
+    IDS_TAB_RC_MIDL         "Rc/Midl"
+    IDS_64BIT_DIR           "Select 64-bit target directory"
+    IDS_32BIT_DIR           "Select 32-bit Target directory"
+    IDS_TAB_SCRIPTS         "Scripts"
+    IDS_TAB_LINKER          "Linker"
+    IDS_TAB_COMPILER        "Compiler"
+    IDS_GENERAL             "General"
+    IDS_SRCFILES_CREATED    ".srcfiles created using %s as the template"
+    IDS_PARSE_ERROR         "An internal error occurred attempting to parse the file %s"
+    IDS_INVALID_PROJECT     "Cannot locate <CodeLite_Project> in %s"
+    IDS_MISSING_PROJECT     "Cannot locate <Project> in %s"
+    IDS_MISSING_VSP         "Cannot locate <VisualStudioProject> in %s"
+    IDS_MISSING_FILES       "Cannot locate <Files> in %s"
+    IDS_MISSING_FILTER      "Cannot locate <Filter> in %s"
+    IDS_SRCFILES_EXISTS     ".srcfiles already exists in this directory. Are you sure you want to replace it?"
 END
 
 STRINGTABLE
 BEGIN
-	IDS_CS_MISSING_INCLUDE		"%s(%kt,%kt):  warning: cannot locate include file %s"
-	IDS_CS_CANNOT_OPEN			"Cannot open \042%s\042."
-	IDS_CS_UNKNOWN_OPTION		"%s is an unknown option"
-	IDS_CS_OPT_MISSING_COLON	"Option name is missing a ':' (%s)"
-	IDS_CS_CANT_WRITE			"Unable to create or write to %s"
+    IDS_CS_MISSING_INCLUDE      "%s(%kt,%kt):  warning: cannot locate include file %s"
+    IDS_CS_CANNOT_OPEN          "Cannot open \042%s\042."
+    IDS_CS_UNKNOWN_OPTION       "%s is an unknown option"
+    IDS_CS_OPT_MISSING_COLON    "Option name is missing a ':' (%s)"
+    IDS_CS_CANT_WRITE           "Unable to create or write to %s"
 END

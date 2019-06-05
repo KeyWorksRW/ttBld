@@ -25,9 +25,12 @@ namespace sfopt {           // .srcfiles otpions
         OPT_DEBUG_RC,       // true means build a -D_DEBUG version of the project's rc file
         OPT_PERMISSIVE,     // true means add -permissive- compiler flag
         OPT_STDCALL,        // use stdcall calling convention
-        OPT_STATIC_CRT,     // true means link to static CRT
         OPT_MS_LINKER,      // use link.exe even when compiling with CLANG
         OPT_MS_RC,          // use rc.exe even when compiling with CLANG
+
+//        OPT_STATIC_CRT,     // true means link to static CRT in all builds
+        OPT_STATIC_CRT_REL, // true means link to static CRT in release builds
+        OPT_STATIC_CRT_DBG, // true means link to static CRT in debug builgs
 
         OPT_CFLAGS_CMN,     // flags to pass to the compiler in all build targets
         OPT_CFLAGS_REL,     // flags to pass to the compiler in release builds

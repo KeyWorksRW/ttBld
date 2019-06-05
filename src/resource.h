@@ -2,7 +2,6 @@
 // Microsoft Developer Studio generated include file.
 // Used by makeninja.rc
 //
-
 #define IDDDLG_CONVERT                  101
 #define IDDLG_OPTIONS                   102
 #define IDTAB_GENERAL                   103
@@ -31,7 +30,9 @@
 #define IDCHECK_64BIT                   1035
 #define IDBTN_ADD_LIBDIR                1036
 #define IDCHECK_STATIC_CRT              1037
+#define IDCHECK_STATIC_CRT_REL          1037
 #define IDEDIT_PCH                      1038
+#define IDCHECK_STATIC_CRT_DBG          1038
 #define IDBTN_PCH                       1039
 #define IDRADIO_WARN4                   1040
 #define IDRADIO_WARN3                   1041
@@ -45,7 +46,6 @@
 #define IDRADIO_MF_NEVER                1049
 #define IDRADIO_MF_MISSING              1050
 #define IDRADIO_MF_ALWAYS               1051
-
 #define IDC_RADIO_SPACE                 1055
 #define IDC_RADIO_SPEED                 1056
 #define IDC_CHECK_PERMISSIVE            1057
@@ -56,12 +56,10 @@
 #define IDEDIT_LIBDIRS                  1062
 #define IDCHECK_MSRC                    1062
 #define IDEDIT_LIBS_LINK                1063
-
 #define IDEDIT_OUT_DIR                  1065
 #define IDBTN_CHANGE_OUT                1066
 #define IDEDIT_IN_DIR                   1067
 #define IDBTN_CHANGE_IN                 1068
-
 #define IDCOMBO_SCRIPTS                 1070
 #define IDBTN_LOCATE_SCRIPT             1071
 #define IDTXT_FILES_FOUND               1072

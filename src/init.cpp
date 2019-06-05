@@ -44,6 +44,8 @@ int main(int argc, char* argv[])
     bool bForce = false;
     bool bReadPrivate = true;   // read .private/.srcfiles in addition to .srcfiles
 
+    ttCStr cszSrcFilePath(".srcfiles");   // ChangeOptions will set this to the .srcfiles that got modified
+
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos) {
         if (argv[argpos][1] == '?') {
             Usage();
@@ -70,7 +72,7 @@ int main(int argc, char* argv[])
             if (pszTmp)
                 *pszTmp = 0;
             _chdir(csz);
-            if (!ChangeOptions(bDryRun))
+            if (!ChangeOptions(&cszSrcFilePath, bDryRun))
                 return 1;
         }
         else if (ttIsSameStrI(argv[argpos] + 1, "add")) {
@@ -82,7 +84,7 @@ int main(int argc, char* argv[])
             return 1;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "opt")) {    // -options
-            if (!ChangeOptions(bDryRun))
+            if (!ChangeOptions(&cszSrcFilePath, bDryRun))
                 return 1;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "nop")) {    // -noprivate
@@ -93,7 +95,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (!ttFileExists(".srcfiles")) {
+    if (!ttFileExists(cszSrcFilePath)) {
         CConvertDlg dlg;
         if (!dlg.CreateSrcFiles())
             return 0;   // means .srcfiles wasn't created, so nothing further that we can do
@@ -102,7 +104,7 @@ int main(int argc, char* argv[])
         if (pszTmp)
             *pszTmp = 0;
         _chdir(csz);
-        if (!ChangeOptions(bDryRun))
+        if (!ChangeOptions(&cszSrcFilePath, bDryRun))
             return 1;
     }
 

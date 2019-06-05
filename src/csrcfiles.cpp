@@ -37,13 +37,64 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
     m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
     m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
     m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
+
+    ttCStr cszCWD;
+    cszCWD.GetCWD();
+    const char* pszLastDir = ttFindFilePortion(cszCWD);
+    if (ttIsSameStrI(pszLastDir, "bldMAC"))
+        m_cszBldDir = "bldMAC";
+    else if (ttIsSameStrI(pszLastDir, "bldMSW"))
+        m_cszBldDir = "bldMSW";
+    else if (ttIsSameStrI(pszLastDir, "bldUNX"))
+        m_cszBldDir = "bldUNX";
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
 {
+    ttASSERT_NONEMPTY(pszFile);
+
     ttCFile kfSrcFiles;
-    if (!kfSrcFiles.ReadFile(pszFile))
-        return false;
+    m_cszSrcFilePath = pszFile;
+    if (!kfSrcFiles.ReadFile(m_cszSrcFilePath))
+    {
+        for (;;)
+        {
+            if (m_cszBldDir.IsNonEmpty())
+            {
+                m_cszSrcFilePath = m_cszBldDir;
+                m_cszSrcFilePath.AppendFileName(pszFile);
+                if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
+                    break;
+            }
+
+            m_cszSrcFilePath = "bldMSW";
+            m_cszSrcFilePath.AppendFileName(pszFile);
+            if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
+            {
+                m_cszBldDir = "bldMSW";
+                break;
+            }
+
+            m_cszSrcFilePath = "bldMAC";
+            m_cszSrcFilePath.AppendFileName(pszFile);
+            if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
+            {
+                m_cszBldDir = "bldMAC";
+                break;
+            }
+
+            m_cszSrcFilePath = "bldUNX";
+            m_cszSrcFilePath.AppendFileName(pszFile);
+            if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
+            {
+                m_cszBldDir = "bldUNX";
+                break;
+            }
+
+            return false;
+        }
+    }
+
     m_bRead = true;
 
     char* pszLine;
@@ -154,6 +205,11 @@ void CSrcFiles::ProcessOption(char* pszLine)
         UpdateOption(OPT_LINK_CMN, (char*) cszVal);
     else if (ttIsSameStrI(cszName, "bit_suffix"))       // could convert this to b64_suffix, but with new logic, probably don't need it
         return;
+    else if (ttIsSameStrI(cszName, "static_crt"))
+    {
+        UpdateOption(OPT_STATIC_CRT_REL, true);
+        return;
+    }
 
     ttCStr csz;
     csz.printf(ttGetResString(IDS_CS_UNKNOWN_OPTION), (char*) cszName);
