@@ -555,6 +555,41 @@ void CNinja::WriteLinkDirective()
             }
         }
 
+        if (GetBuildLibs()) {
+            ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
+            ttCStr cszSaveCwd;
+            cszSaveCwd.GetCWD();
+
+            while (enumLib.Enum())
+            {
+                ttChDir(enumLib);
+                CSrcFiles cSrcFiles;
+                if (cSrcFiles.ReadFile())
+                {
+                    ttCStr cszLib(cSrcFiles.GetProjectName());
+                    switch (m_gentype)
+                    {
+                        case GEN_DEBUG32:
+                            cszLib += !ttStrStr(cszLib, "32") ? "32D.lib" : "D.lib";
+                            break;
+                        case GEN_DEBUG64:
+                            cszLib += !ttStrStr(cszLib, "64") ? "64D.lib" : "D.lib";
+                            break;
+                        case GEN_RELEASE32:
+                            cszLib += !ttStrStr(cszLib, "32") ? "32.lib" : ".lib";
+                            break;
+                        case GEN_RELEASE64:
+                        default:
+                            cszLib += !ttStrStr(cszLib, "64") ? "64.lib" : ".lib";
+                            break;
+                    }
+                    cszRule += " ";
+                    cszRule += cszLib;
+                }
+            }
+            ttChDir(cszSaveCwd);
+        }
+
         cszRule += " $in";
         m_pkfOut->WriteEol(cszRule);
         m_pkfOut->WriteEol("  description = linking $out\n");
@@ -621,6 +656,41 @@ void CNinja::WriteLinkDirective()
                 cszRule += " ";
                 cszRule += enumLib;
             }
+        }
+
+        if (GetBuildLibs()) {
+            ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
+            ttCStr cszSaveCwd;
+            cszSaveCwd.GetCWD();
+
+            while (enumLib.Enum())
+            {
+                ttChDir(enumLib);
+                CSrcFiles cSrcFiles;
+                if (cSrcFiles.ReadFile())
+                {
+                    ttCStr cszLib(cSrcFiles.GetProjectName());
+                    switch (m_gentype)
+                    {
+                        case GEN_DEBUG32:
+                            cszLib += !ttStrStr(cszLib, "32") ? "32D.lib" : "D.lib";
+                            break;
+                        case GEN_DEBUG64:
+                            cszLib += !ttStrStr(cszLib, "64") ? "64D.lib" : "D.lib";
+                            break;
+                        case GEN_RELEASE32:
+                            cszLib += !ttStrStr(cszLib, "32") ? "32.lib" : ".lib";
+                            break;
+                        case GEN_RELEASE64:
+                        default:
+                            cszLib += !ttStrStr(cszLib, "64") ? "64.lib" : ".lib";
+                            break;
+                    }
+                    cszRule += " ";
+                    cszRule += cszLib;
+                }
+            }
+            ttChDir(cszSaveCwd);
         }
 
         cszRule += " $in";
@@ -757,12 +827,6 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
         cszRes.RemoveExtension();
         cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ?  "D.res" : ".res");
         m_pkfOut->printf(" $resout/%s", (char*) cszRes);
-    }
-
-    if (GetBuildLibs()) {
-        ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
-        while (enumLib.Enum())
-            AddDependentLibrary(enumLib, gentype);
     }
 
     bool bPchSeen = false;

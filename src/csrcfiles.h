@@ -30,6 +30,7 @@ public:
 
     // Class functions
 
+    const char* GetBuildScriptDir();
     void AddFile(const char* pszFile) { m_lstSrcFiles += pszFile; }
     bool ReadFile(const char* pszFile = txtSrcFilesFileName);
     bool ReadTwoFiles(const char* pszMaster, const char* pszPrivate);
@@ -103,8 +104,8 @@ public:
 
     ttCStr  m_cszPchHdr;
     ttCStr  m_cszPchCpp;
-    ttCStr  m_cszBldDir;    // bldMAC, bldMSW, or bldUNX
-    ttCStr  m_cszSrcFilePath;   //
+    ttCStr  m_cszBldDir;           // bldMAC, bldMSW, or bldUNX
+    ttCStr  m_cszSrcFilePath;
 
 protected:
     bool GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment);
