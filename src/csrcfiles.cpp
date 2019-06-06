@@ -47,51 +47,71 @@ CSrcFiles::CSrcFiles() : m_ttHeap(true),
         m_cszBldDir = "bldMSW";
     else if (ttIsSameStrI(pszLastDir, "bldUNX"))
         m_cszBldDir = "bldUNX";
+    else if (ttIsSameStrI(pszLastDir, "build"))
+        m_cszBldDir = "build";
 }
+
+static const char* aSrcFilesDirs[] =    // locations to look for .srcfiles
+{
+    "src",
+    ".private",
+
+    // any directory name start with a 'b' will also be considered as the build directory
+
+    "build",
+    "bld",
+    "bldMSW",
+    "bldMAC",
+    "bldUNX",
+
+    nullptr,
+};
 
 bool CSrcFiles::ReadFile(const char* pszFile)
 {
     ttASSERT_NONEMPTY(pszFile);
 
-    ttCFile kfSrcFiles;
     m_cszSrcFilePath = pszFile;
+
+    ttCFile kfSrcFiles;
     if (!kfSrcFiles.ReadFile(m_cszSrcFilePath))
     {
-        for (;;)
+        size_t pos;
+        for (pos = 0; aSrcFilesDirs[pos]; ++pos)
         {
-            if (m_cszBldDir.IsNonEmpty())
-            {
-                m_cszSrcFilePath = m_cszBldDir;
-                m_cszSrcFilePath.AppendFileName(pszFile);
-                if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
-                    break;
-            }
-
-            m_cszSrcFilePath = "bldMSW";
+            m_cszSrcFilePath = aSrcFilesDirs[pos];
             m_cszSrcFilePath.AppendFileName(pszFile);
             if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
             {
-                m_cszBldDir = "bldMSW";
+                if (tolower(aSrcFilesDirs[pos][0]) == 'b')
+                    m_cszBldDir = aSrcFilesDirs[pos];
                 break;
             }
+        }
 
-            m_cszSrcFilePath = "bldMAC";
-            m_cszSrcFilePath.AppendFileName(pszFile);
-            if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
-            {
-                m_cszBldDir = "bldMAC";
-                break;
-            }
-
-            m_cszSrcFilePath = "bldUNX";
-            m_cszSrcFilePath.AppendFileName(pszFile);
-            if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
-            {
-                m_cszBldDir = "bldUNX";
-                break;
-            }
-
+        if (!aSrcFilesDirs[pos])
             return false;
+    }
+
+    if (m_cszBldDir.IsEmpty())  // if we aren't in a build directory, then see if we can find one
+    {
+        ttCStr cszTmp(m_cszSrcFilePath);
+        char* pszFile = ttFindFilePortion(cszTmp);
+        if (pszFile)
+        {
+            for (size_t pos = 0; aSrcFilesDirs[pos]; ++pos)
+            {
+                if (tolower(aSrcFilesDirs[pos][0]) == 'b')
+                {
+                    *pszFile = 0;
+                    cszTmp.AppendFileName(aSrcFilesDirs[pos]);
+                    if (ttDirExists(cszTmp))
+                    {
+                        m_cszBldDir = aSrcFilesDirs[pos];
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -100,7 +120,6 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     char* pszLine;
     SRC_SECTION section = SECTION_UNKNOWN;
 
-    // kfSrcFiles.PrepForReadLine();
     while (kfSrcFiles.ReadLine(&pszLine)) {
         char* pszBegin = ttFindNonSpace(pszLine);   // ignore any leading spaces
         if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-')) {    // ignore empty, comment or divider lines
@@ -493,4 +512,23 @@ const char* CSrcFiles::GetPchCpp()
 
     m_cszPchCpp.ChangeExtension(".cpp");    // file doesn't exist, we'll generate a warning about it later
     return m_cszPchCpp;
+}
+
+const char* CSrcFiles::GetBuildScriptDir()
+{
+    if (m_cszBldDir.IsNonEmpty())
+        return m_cszBldDir;
+
+    if (m_cszSrcFilePath.IsEmpty())
+    {
+        m_cszBldDir = "build";
+        return m_cszBldDir;
+    }
+
+#if defined(_WINDOWS_)
+    m_cszBldDir = "bldMSW";
+#else
+    m_cszBldDir = "bldUNX";
+#endif
+    return m_cszBldDir;
 }

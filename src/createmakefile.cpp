@@ -67,14 +67,31 @@ bool CBldMaster::CreateMakeFile()
 
             if (GetBuildLibs()) {
                 ttCEnumStr cEnumStr(GetBuildLibs(), ';');
-                const char* pszBuildLib;
-                while (cEnumStr.Enum(&pszBuildLib)) {
-                    ttCStr cszTarget;
-                    cszTarget.printf(" %s%s ", ttFindFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
+                ttCStr cszSaveCwd;
+                cszSaveCwd.GetCWD();
 
-                    // Line is "release: project" so we simply replace the first space with our additional target (which begins and ends with a space
+                while (cEnumStr.Enum()) {
+                    ttChDir(cszSaveCwd);    // cEnumStr may be relative to this directory
+                    ttChDir(cEnumStr);
+                    CSrcFiles cSrcFiles;
+                    if (cSrcFiles.ReadFile())
+                    {
+                        ttCStr cszTarget;
+                        cszTarget.printf(" %s%s ", cSrcFiles.GetProjectName(), bDebugTarget ? "D" : "");
 
-                    cszNewLine.ReplaceStr(" ", cszTarget);
+                        // Line is "release: project" so we simply replace the first space with our additional target (which begins and ends with a space
+
+                        cszNewLine.ReplaceStr(" ", cszTarget);
+                    }
+                    else
+                    {
+                        ttCStr cszTarget;
+                        cszTarget.printf(" %s%s ", ttFindFilePortion(cEnumStr), bDebugTarget ? "D" : "");
+
+                        // Line is "release: project" so we simply replace the first space with our additional target (which begins and ends with a space
+
+                        cszNewLine.ReplaceStr(" ", cszTarget);
+                    }
                 }
                 kfOut.WriteEol(cszNewLine);
                 if (!ttIsEmpty(GetHHPName())) {
@@ -84,21 +101,47 @@ bool CBldMaster::CreateMakeFile()
                 // Now that we've added the targets to the release: or debug: line, we need to add the rule
 
                 cEnumStr.SetNewStr(GetBuildLibs(), ';');
-                while (cEnumStr.Enum(&pszBuildLib)) {
-                    kfOut.printf("\n%s%s:\n", ttFindFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
-                    ttCStr cszCWD;
-                    if (!FindBuildSrc(pszBuildLib, cszCWD)) {
-                        ttCStr cszMsg;
-                        cszMsg.printf("Unable to find build/ directory for %s library", ttFindFilePortion(pszBuildLib));
-                        m_lstErrors += cszMsg;
-                        cszCWD = pszBuildLib;
-                        char* pszLibName = ttFindFilePortion(cszCWD);
-                        if (pszLibName)
-                            *pszLibName = 0;
+                while (cEnumStr.Enum()) {
+                    CSrcFiles cSrcFiles;
+                    ttChDir(cszSaveCwd);    // cEnumStr may be relative to this directory
+                    ttChDir(cEnumStr);
+                    if (cSrcFiles.ReadFile())
+                    {
+                        // .srcfiles can either be in the same directory as the .ninja scripts, or up one directory
+
+                        kfOut.printf("\n%s%s:\n", cSrcFiles.GetProjectName(), bDebugTarget ? "D" : "");
+                        ttCStr cszBuild, cszCD;
+                        ttCStr cszDir(cSrcFiles.m_cszSrcFilePath);
+                        cszDir.GetFullPathName();
+                        char* pszFile = ttFindFilePortion(cszDir);
+                        *pszFile = 0;
+                        ttCStr cszRoot(cszDir);  // this is now the root directory where .srcfiles was found
+                        cszDir += cSrcFiles.GetBuildScriptDir();    // this is now where the ninja scripts are located
+                        ttConvertToRelative(cszRoot, cszDir, cszBuild);
+                        cszDir = cSrcFiles.m_cszSrcFilePath;
+                        cszDir.GetFullPathName();
+                        ttConvertToRelative(cszSaveCwd, cszDir, cszCD);     // figure out how to get to the directory to build in
+                        pszFile = ttFindFilePortion(cszCD);
+                        *pszFile = 0;
+                        kfOut.printf("\tcd %s & ninja -f %s/$(cmplr)Build$(bits)%s.ninja\n", (char*) cszCD, (char*) cszBuild, bDebugTarget ? "D" : "");
                     }
-                    kfOut.printf("\tcd %s & ninja -f build/$(cmplr)Build$(bits)%s.ninja\n", (const char*) cszCWD,
-                                                                                bDebugTarget ? "D" : "");
+                    else
+                    {
+                        kfOut.printf("\n%s%s:\n", ttFindFilePortion(cEnumStr), bDebugTarget ? "D" : "");
+                        ttCStr cszCWD;
+                        if (!FindBuildSrc(cEnumStr, cszCWD)) {
+                            ttCStr cszMsg;
+                            cszMsg.printf("Unable to find build/ directory for %s library", ttFindFilePortion(cEnumStr));
+                            m_lstErrors += cszMsg;
+                            cszCWD = cEnumStr;
+                            char* pszLibName = ttFindFilePortion(cszCWD);
+                            if (pszLibName)
+                                *pszLibName = 0;
+                        }
+                        kfOut.printf("\tcd %s & ninja -f build/$(cmplr)Build$(bits)%s.ninja\n", (const char*) cszCWD, bDebugTarget ? "D" : "");
+                    }
                 }
+                ttChDir(cszSaveCwd);
             }
             else
                 kfOut.WriteEol(kf);
