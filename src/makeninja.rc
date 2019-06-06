@@ -249,21 +249,13 @@ IDTAB_SCRIPTS DIALOG  8, 20, 210, 222
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Create Makefile",IDC_STATIC,7,7,147,30
-    CONTROL         "never",IDRADIO_MF_NEVER,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,18,22,37,10
-    CONTROL         "missing",IDRADIO_MF_MISSING,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,59,22,37,10
-    CONTROL         "always",IDRADIO_MF_ALWAYS,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,100,22,37,10
-    GROUPBOX        "Create IDE projects (if missing)",IDC_STATIC,6,47,147,
-                    71
+    GROUPBOX        "Create IDE projects (if missing)",IDC_STATIC,6,8,147,71
     CONTROL         "CodeBlocks",IDCHECK_CODEBLOCKS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,19,64,54,10
+                    WS_TABSTOP,19,25,54,10
     CONTROL         "CodeLite",IDCHECK_CODELITE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,19,79,44,10
+                    WS_TABSTOP,19,40,44,10
     CONTROL         "Visual Studio",IDCHECK_MSVC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,19,95,57,10
+                    WS_TABSTOP,19,56,57,10
 END
 
 IDTAB_RCMIDL DIALOG  8, 20, 210, 222
@@ -391,5 +383,4 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-
 

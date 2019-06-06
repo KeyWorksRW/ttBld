@@ -1,10 +1,10 @@
 # Call with nmake.exe (MSVC) or a GNU make variation (mingw32-make.exe, gmake.exe, or make.exe)
 
-# mingw32-make release 		 <-- this will build release target(s)
+# mingw32-make release       <-- this will build release target(s)
 # mingw32-make clean release <-- this will clean and rebuild release target(s)
 # mingw32-make cleanD debug  <-- this will clean and rebuild debug target(s)
 
-# nmake release 	  <-- this will build release target(s)
+# nmake release       <-- this will build release target(s)
 # nmake clean release <-- this will clean and rebuild release target(s)
 # nmake cleanD debug  <-- this will clean and rebuild debug target(s)
 
@@ -75,18 +75,12 @@ endif
 
 release: $(bdir)/$(cmplr)Build$(bits).ninja %project%
 
-$(bdir)/$(cmplr)Build$(bits).ninja: .srcfiles
-	MakeNinja -force
-
 %project%:
 	ninja -f $(bdir)/$(cmplr)Build$(bits).ninja
 
 ########## debug section ##########
 
 debug: $(bdir)/$(cmplr)Build$(bits)D.ninja %project%D
-
-$(bdir)/$(cmplr)Build$(bits)D.ninja: .srcfiles
-	MakeNinja -force
 
 %project%D:
 	ninja -f $(bdir)/$(cmplr)Build$(bits)D.ninja
