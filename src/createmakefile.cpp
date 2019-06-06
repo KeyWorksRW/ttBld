@@ -67,12 +67,12 @@ bool CBldMaster::CreateMakeFile()
 
             if (GetBuildLibs()) {
                 ttCEnumStr cEnumStr(GetBuildLibs(), ';');
-                const char* pszBuildLib;
                 ttCStr cszSaveCwd;
                 cszSaveCwd.GetCWD();
 
-                while (cEnumStr.Enum(&pszBuildLib)) {
-                    ttChDir(pszBuildLib);
+                while (cEnumStr.Enum()) {
+                    ttChDir(cszSaveCwd);    // cEnumStr may be relative to this directory
+                    ttChDir(cEnumStr);
                     CSrcFiles cSrcFiles;
                     if (cSrcFiles.ReadFile())
                     {
@@ -86,7 +86,7 @@ bool CBldMaster::CreateMakeFile()
                     else
                     {
                         ttCStr cszTarget;
-                        cszTarget.printf(" %s%s ", ttFindFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
+                        cszTarget.printf(" %s%s ", ttFindFilePortion(cEnumStr), bDebugTarget ? "D" : "");
 
                         // Line is "release: project" so we simply replace the first space with our additional target (which begins and ends with a space
 
@@ -101,9 +101,10 @@ bool CBldMaster::CreateMakeFile()
                 // Now that we've added the targets to the release: or debug: line, we need to add the rule
 
                 cEnumStr.SetNewStr(GetBuildLibs(), ';');
-                while (cEnumStr.Enum(&pszBuildLib)) {
+                while (cEnumStr.Enum()) {
                     CSrcFiles cSrcFiles;
-                    ttChDir(pszBuildLib);
+                    ttChDir(cszSaveCwd);    // cEnumStr may be relative to this directory
+                    ttChDir(cEnumStr);
                     if (cSrcFiles.ReadFile())
                     {
                         // .srcfiles can either be in the same directory as the .ninja scripts, or up one directory
@@ -122,25 +123,22 @@ bool CBldMaster::CreateMakeFile()
                         ttConvertToRelative(cszSaveCwd, cszDir, cszCD);     // figure out how to get to the directory to build in
                         pszFile = ttFindFilePortion(cszCD);
                         *pszFile = 0;
-                        kfOut.printf("\tcd %s & ninja -f %s/$(cmplr)Build$(bits)%s.ninja\n", (char*) cszCD, (char*) cszBuild,
-                                                                                bDebugTarget ? "D" : "");
+                        kfOut.printf("\tcd %s & ninja -f %s/$(cmplr)Build$(bits)%s.ninja\n", (char*) cszCD, (char*) cszBuild, bDebugTarget ? "D" : "");
                     }
                     else
                     {
-                        kfOut.printf("\n%s%s:\n", ttFindFilePortion(pszBuildLib), bDebugTarget ? "D" : "");
+                        kfOut.printf("\n%s%s:\n", ttFindFilePortion(cEnumStr), bDebugTarget ? "D" : "");
                         ttCStr cszCWD;
-                        if (!FindBuildSrc(pszBuildLib, cszCWD)) {
+                        if (!FindBuildSrc(cEnumStr, cszCWD)) {
                             ttCStr cszMsg;
-                            cszMsg.printf("Unable to find build/ directory for %s library", ttFindFilePortion(pszBuildLib));
+                            cszMsg.printf("Unable to find build/ directory for %s library", ttFindFilePortion(cEnumStr));
                             m_lstErrors += cszMsg;
-                            cszCWD = pszBuildLib;
+                            cszCWD = cEnumStr;
                             char* pszLibName = ttFindFilePortion(cszCWD);
                             if (pszLibName)
                                 *pszLibName = 0;
                         }
-                        kfOut.printf("\tcd %s & ninja -f build/$(cmplr)Build$(bits)%s.ninja\n", (const char*) cszCWD,
-                                                                                    bDebugTarget ? "D" : "");
-
+                        kfOut.printf("\tcd %s & ninja -f build/$(cmplr)Build$(bits)%s.ninja\n", (const char*) cszCWD, bDebugTarget ? "D" : "");
                     }
                 }
                 ttChDir(cszSaveCwd);

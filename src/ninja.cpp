@@ -562,6 +562,7 @@ void CNinja::WriteLinkDirective()
 
             while (enumLib.Enum())
             {
+                ttChDir(cszSaveCwd);    // cEnumStr may be relative to this directory
                 ttChDir(enumLib);
                 CSrcFiles cSrcFiles;
                 if (cSrcFiles.ReadFile())
@@ -665,6 +666,7 @@ void CNinja::WriteLinkDirective()
 
             while (enumLib.Enum())
             {
+                ttChDir(cszSaveCwd);    // cEnumStr may be relative to this directory
                 ttChDir(enumLib);
                 CSrcFiles cSrcFiles;
                 if (cSrcFiles.ReadFile())
