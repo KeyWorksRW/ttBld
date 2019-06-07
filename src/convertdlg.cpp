@@ -766,8 +766,10 @@ bool CConvertDlg::doConversion(const char* pszFile)
         _chdir(m_cszCWD);   // we may have changed directories during the conversion
 
         if (bResult) {
-            ttCStr cszHdr;
-            cszHdr.printf("# Converted from %s", (char*) m_cszConvertScript);
+            ttCStr cszHdr, cszRelative;
+            ttConvertToRelative(m_cszDirOutput, m_cszConvertScript, cszRelative);
+
+            cszHdr.printf("# Converted from %s", (char*) cszRelative);
 
             if (ttIsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT))) {
                 ttCStr cszProject(m_cszDirOutput);
