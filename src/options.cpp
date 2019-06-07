@@ -50,11 +50,11 @@ static const OPT_SETTING s_aOptions[] = {
     { OPT_RC_REL,       "RC_REL",       nullptr,   false,   false,     "flags to pass to the resource compiler in release builds" },
     { OPT_RC_DBG,       "RC_DBG",       nullptr,   false,   false,     "flags to pass to the resource compiler in debug builds" },
 
-    { OPT_MDL_CMN,      "MIDL_CMD",     nullptr,   false,   false,     "flags to pass to the midl compiler in all build targets" },
+    { OPT_MDL_CMN,      "MIDL_CMN",     nullptr,   false,   false,     "flags to pass to the midl compiler in all build targets" },
     { OPT_MDL_REL,      "MIDL_REL",     nullptr,   false,   false,     "flags to pass to the midl compiler in release builds" },
     { OPT_MDL_DBG,      "MIDL_DBG",     nullptr,   false,   false,     "flags to pass to the midl compiler in debug builds" },
 
-    { OPT_CLANG_CMN,    "CLANG_CMD",    nullptr,   false,   false,     "flags to pass to the CLANG compiler in all build targets" },
+    { OPT_CLANG_CMN,    "CLANG_CMN",    nullptr,   false,   false,     "flags to pass to the CLANG compiler in all build targets" },
     { OPT_CLANG_REL,    "CLANG_REL",    nullptr,   false,   false,     "flags to pass to the CLANG compiler in release builds" },
     { OPT_CLANG_DBG,    "CLANG_DBG",    nullptr,   false,   false,     "flags to pass to the CLANG compiler in debug builds" },
 
