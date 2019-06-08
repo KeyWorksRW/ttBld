@@ -153,12 +153,37 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
     WriteLibDirective();
     WriteLinkDirective();
 
-    // Write the build rule for the precompiled header
+    // Issue #80
+
+    // If the project has a .idl file, then the midl compiler will create a matching header file that will be included in
+    // one or more source files. If the .idl file changes, or the header file doesn't exist yet, then we need to run the
+    // midl compiler before compiling any source files. If we knew ahead of time which source files included the header
+    // file, then we could create a dependency. However, that would essentially require an accurate C/C++ preprocessor to
+    // run on every source file which is far beyond the scope of this project. Instead, we add the dependency to the
+    // precompiled header if there is one, and if not, we add the dependency to every source file. Unfortunately that
+    // does mean that every time the .idl file changes, then every source file will get rebuilt whether or not a
+    // particular source file actually uses the generated header file.
 
     if (GetPchHeader())
-        file.printf("build $outdir/%s: compilePCH %s\n\n", (char*) m_cszPCHObj, (char*) m_cszCPP_PCH);
-
-    // TODO: [randalphwa - 09-02-2018] Need to add build rule for any .idl files (uses midl compiler to make a .tlb file)
+    {
+        file.printf("build $outdir/%s: compilePCH %s", (char*) m_cszPCHObj, (char*) m_cszCPP_PCH);
+        if (m_lstIdlFiles.GetCount())
+        {
+            file.WriteEol(" | $");
+            size_t pos;
+            ttCStr cszHdr;
+            for (pos = 0; pos < m_lstIdlFiles.GetCount() - 1; ++pos)
+            {
+                cszHdr = m_lstIdlFiles[pos];
+                cszHdr.ChangeExtension(".h");
+                file.printf("  %s $\n", (char*) cszHdr);
+            }
+            cszHdr = m_lstIdlFiles[pos];
+            cszHdr.ChangeExtension(".h");
+            file.printf("  %s", (char*) cszHdr);    // write the last one without the trailing pipe
+        }
+        file.WriteEol("\n");
+    }
 
     // Write the build rules for all source files
 
@@ -171,7 +196,28 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
         if (m_cszPCHObj.IsNonEmpty())   // we add m_cszPCHObj so it appears as a dependency and gets compiled, but not linked to
             file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
         else
-            file.printf("build $outdir/%s: compile %s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos));
+        {
+            // We get here if we don't have a precompiled header. We might have .idl files, which means we're going to
+            // need to add all the midl-generated header files as dependencies to each source file. See issue #80 for details.
+
+            file.printf("build $outdir/%s: compile %s", (char*) cszFile, GetSrcFileList()->GetAt(iPos));
+            if (m_lstIdlFiles.GetCount())
+            {
+                file.WriteEol(" | $");
+                size_t pos;
+                ttCStr cszHdr;
+                for (pos = 0; pos < m_lstIdlFiles.GetCount() - 1; ++pos)
+                {
+                    cszHdr = m_lstIdlFiles[pos];
+                    cszHdr.ChangeExtension(".h");
+                    file.printf("  %s $\n", (char*) cszHdr);
+                }
+                cszHdr = m_lstIdlFiles[pos];
+                cszHdr.ChangeExtension(".h");
+                file.printf("  %s", (char*) cszHdr);    // write the last one without the trailing pipe
+            }
+            file.WriteEol("\n");
+        }
     }
 
 #if LIB_SUPPORT
@@ -760,7 +806,7 @@ void CNinja::WriteMidlDirective(GEN_TYPE gentype)
             m_pkfOut->WriteStr(GetOption(OPT_MDL_CMN));
         }
         if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) {
-            m_pkfOut->WriteStr(" -D_DEBUG");
+            // m_pkfOut->WriteStr(" -D_DEBUG");
             if (GetOption(OPT_MDL_DBG)) {
                 m_pkfOut->WriteChar(CH_SPACE);
                 m_pkfOut->WriteStr(GetOption(OPT_MDL_DBG));
@@ -770,27 +816,24 @@ void CNinja::WriteMidlDirective(GEN_TYPE gentype)
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_MDL_REL));
         }
-        m_pkfOut->WriteEol("/tlb\n  description = midl compiler... $in\n");
+        m_pkfOut->WriteEol(" $in\n  description = midl compiler... $in\n");
     }
 }
 
 void CNinja::WriteMidlTargets()
 {
+    // .idl files have one input file, and two output files: a header file (.h) and a type library file (.tlb). Typically
+    // the header file will be needed by one or more source files and the typelib file will be needed by the resource
+    // compiler. We create the header file as a target, and a phony rule for the typelib pointing to the header file
+    // target.
+
     for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos) {
         ttCStr cszTypeLib(m_lstIdlFiles[pos]);
-        cszTypeLib.RemoveExtension();
-        cszTypeLib += (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ? "D.tlb" : ".tlb";
-        ttCStr cszIdl(m_lstIdlFiles[pos]);
-
-        // By default, midl will generate a file_i.c file which gets #included in one of the source files. The C++
-        // compilers should generate a dependency for it, so we use that file as the target rather then the .tlb file so
-        // that ninja will know to recompile the file that included the file_i.c file.
-
-        // That seems to cause a problem for ninja, so changing dependency to the .tlb instead
-
-        cszIdl.RemoveExtension();
-        cszIdl += ".idl";
-        m_pkfOut->printf("build %s : midl %s %s\n\n", (char*) cszTypeLib,  (char*) cszTypeLib, (char*) cszIdl);
+        cszTypeLib.ChangeExtension(".tlb");
+        ttCStr cszHeader(m_lstIdlFiles[pos]);
+        cszHeader.ChangeExtension(".h");
+        m_pkfOut->printf("build %s : midl %s\n\n", (char*) cszHeader, m_lstIdlFiles[pos]);
+        m_pkfOut->printf("build %s : phony %s\n\n", (char*) cszTypeLib, (char*) cszHeader);
     }
 }
 

@@ -8,7 +8,7 @@ Options:
     32Bit:       true         # generate scripts for 32-bit build
     TargetDir32: ../bin32     # 32-bit target directory
 
-    IncDirs:     ../ttLib/include   # additional directories for header files
+    IncDirs:     ../ttLib/include;./   # clang needs the "./" to be able to find the pch.h file in modules in the .private/ directory
     BuildLibs:   ../ttLib           # libraries that need to be built (added to makefile generation)
     Natvis:      makeninja.natvis   # Specifies a .natvis file to link into the pdb file
 
