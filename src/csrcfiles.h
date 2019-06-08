@@ -42,7 +42,7 @@ public:
     bool IsVisualStudioIDE() { return (ttStrStrI(GetOption(OPT_IDE), "VisualStudio")); }
 
     bool IsExeTypeConsole()  { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "console")); }    // this is the default
-    bool IsExeTypeDll()      { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "dll")); }
+    bool IsExeTypeDll()      { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "dll") || ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx")); }
     bool IsExeTypeLib()      { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "lib")); }
     bool IsExeTypeWindow()   { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "window")); }
 

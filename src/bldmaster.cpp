@@ -315,6 +315,8 @@ const char* CBldMaster::GetTargetDebug32()
     else if (IsExeTypeDll()) {
         m_cszTargetDebug32.AppendFileName(GetProjectName());
         m_cszTargetDebug32 += (m_bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.dll" : ".dll";
+        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
+            m_cszTargetDebug32.ReplaceStr(".dll", ".ocx");
     }
     else {
         m_cszTargetDebug32.AppendFileName(GetProjectName());
@@ -338,6 +340,8 @@ const char* CBldMaster::GetTargetRelease32()
     else if (IsExeTypeDll()) {
         m_cszTargetRelease32.AppendFileName(GetProjectName());
         m_cszTargetRelease32 += (m_bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.dll" : ".dll";
+        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
+            m_cszTargetRelease32.ReplaceStr(".dll", ".ocx");
     }
     else {
         m_cszTargetRelease32.AppendFileName(GetProjectName());
@@ -361,6 +365,8 @@ const char* CBldMaster::GetTargetDebug64()
     else if (IsExeTypeDll()) {
         m_cszTargetDebug64.AppendFileName(GetProjectName());
         m_cszTargetDebug64 += (m_bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.dll" : ".dll";
+        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
+            m_cszTargetDebug64.ReplaceStr(".dll", ".ocx");
     }
     else {
         m_cszTargetDebug64.AppendFileName(GetProjectName());
@@ -384,6 +390,8 @@ const char* CBldMaster::GetTargetRelease64()
     else if (IsExeTypeDll()) {
         m_cszTargetRelease64.AppendFileName(GetProjectName());
         m_cszTargetRelease64 += (m_bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.dll" : ".dll";
+        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
+            m_cszTargetRelease64.ReplaceStr(".dll", ".ocx");
     }
     else {
         m_cszTargetRelease64.AppendFileName(GetProjectName());
