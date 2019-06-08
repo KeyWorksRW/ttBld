@@ -196,7 +196,28 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
         if (m_cszPCHObj.IsNonEmpty())   // we add m_cszPCHObj so it appears as a dependency and gets compiled, but not linked to
             file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
         else
-            file.printf("build $outdir/%s: compile %s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos));
+        {
+            // We get here if we don't have a precompiled header. We might have .idl files, which means we're going to
+            // need to add all the midl-generated header files as dependencies to each source file. See issue #80 for details.
+
+            file.printf("build $outdir/%s: compile %s", (char*) cszFile, GetSrcFileList()->GetAt(iPos));
+            if (m_lstIdlFiles.GetCount())
+            {
+                file.WriteEol(" | $");
+                size_t pos;
+                ttCStr cszHdr;
+                for (pos = 0; pos < m_lstIdlFiles.GetCount() - 1; ++pos)
+                {
+                    cszHdr = m_lstIdlFiles[pos];
+                    cszHdr.ChangeExtension(".h");
+                    file.printf("  %s $\n", (char*) cszHdr);
+                }
+                cszHdr = m_lstIdlFiles[pos];
+                cszHdr.ChangeExtension(".h");
+                file.printf("  %s", (char*) cszHdr);    // write the last one without the trailing pipe
+            }
+            file.WriteEol("\n");
+        }
     }
 
 #if LIB_SUPPORT
