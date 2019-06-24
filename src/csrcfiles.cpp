@@ -97,16 +97,16 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     if (m_cszBldDir.IsEmpty())  // if we aren't in a build directory, then see if we can find one
     {
         ttCStr cszTmp(m_cszSrcFilePath);
-        char* pszFile = ttFindFilePortion(cszTmp);
-        if (pszFile)
+        char* pszFilePortion = ttFindFilePortion(cszTmp);
+        if (pszFilePortion)
         {
             for (size_t pos = 0; aSrcFilesDirs[pos]; ++pos)
             {
                 if (tolower(aSrcFilesDirs[pos][0]) == 'b')
                 {
-                    pszFile = ttFindFilePortion(cszTmp);
-                    if (pszFile)
-                        *pszFile = 0;
+                    pszFilePortion = ttFindFilePortion(cszTmp);
+                    if (pszFilePortion)
+                        *pszFilePortion = 0;
                     cszTmp.AppendFileName(aSrcFilesDirs[pos]);
                     if (ttDirExists(cszTmp))
                     {
