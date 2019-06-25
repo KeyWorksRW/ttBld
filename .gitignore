@@ -12,6 +12,7 @@ tests/
 
 # remove ttLib/ when it switches to a submodule
 ttLib/
+wxLibs/
 
 # File extensions to ignore
 *.backup
