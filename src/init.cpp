@@ -11,6 +11,12 @@
 #include <iostream>
 #include <direct.h>     // Functions for directory handling and creation
 
+// wxLibs is not tracked by git. If you are building wxWidgets using the build scripts in ../ttLib/wxMSW then copy
+// ../ttLib/wxMSW/wxLibs.h to this directory. If you are already build wxWidgets, then simply create an empty wxLibs.h or
+// use ../ttLib/wxMSW/wxLibs.h as a template to specify which libraries you want to link to.
+
+#include "wxLibs.h"     // adds pragmas telling the linker which libraries to link to
+
 #ifdef _MSC_VER
     #pragma warning(disable: 6031)  // Return value ignored: '_chdir'.
 #endif // _MSC_VER

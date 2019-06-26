@@ -2,44 +2,51 @@
 
 #pragma once
 
-// Uncomment the following section to use wxWidgets (https://github.com/wxWidgets/wxWidgets)
-/*
-#pragma warning(push, 1)
-    #include <wx/wxprec.h>
-    #include <wx/debug.h>
-#pragma warning(pop)
-*/
+#define NOATOM
+#define NOCOMM
+#define NODRIVERS
+#define NOEXTDEVMODEPROPSHEET
+#define NOIME
+#define NOKANJI
+#define NOLOGERROR
+#define NOMCX
+#define NOPROFILER
+#define NOSCALABLEFONT
+#define NOSERVICE
+#define NOSOUND
+#define NOWINDOWSX
+#define NOENHMETAFILE
 
-#ifndef _WX_WX_H_
-    #define STRICT
+#define OEMRESOURCE
+#define WIN32_LEAN_AND_MEAN
+#define _CRT_SECURE_NO_WARNINGS
 
-#ifndef _WIN32_WINNT_VISTA
-    #define _WIN32_WINNT_NT4    0x0400
-    #define _WIN32_WINNT_WINXP  0x0501
-    #define _WIN32_WINNT_VISTA  0x0600
-    #define _WIN32_WINNT_WIN7   0x0601
-    #define _WIN32_WINNT_WIN8   0x0602
-    #define _WIN32_WINNT_WIN10  0x0A00
+#define WINVER       0x0601     // Windows 7
+#define _WIN32_WINNT 0x0600
+#define _WIN32_IE    0x0700
+
+#define wxUSE_UNICODE     0
+#define wxGUI             0
+#define wxUSE_NO_MANIFEST 1
+
+#include "wx/defs.h"    // compiler detection; includes setup.h
+
+// include "wx/chartype.h" first to ensure that UNICODE macro is correctly set
+// _before_ including <windows.h>
+#include "wx/chartype.h"
+
+// include standard Windows headers
+#if defined(__WINDOWS__)
+    #include <urlmon.h>
+    #include "wx/msw/wrapwin.h"
+    #include "wx/msw/private.h"
 #endif
 
-    #define WINVER       _WIN32_WINNT_VISTA     // minimum OS required
-    #define _WIN32_WINNT _WIN32_WINNT_VISTA
-
-    #include <windows.h>
-#endif  // _WX_WX_H_
-
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#ifdef _WINDOWS_
-    #pragma comment(lib, "advapi32.lib")
-    #pragma comment(lib, "comdlg32.lib")
-    #pragma comment(lib, "gdi32.lib")
-    #pragma comment(lib, "kernel32.lib")
-    #pragma comment(lib, "shell32.lib")
-    #pragma comment(lib, "user32.lib")
-#endif  // _WINDOWS_
+#if defined(__WXMSW__)
+    #include "wx/msw/wrapcctl.h"
+    #include "wx/msw/wrapcdlg.h"
+    #include "wx/msw/missing.h"
+#endif
 
 extern const char* txtVersion;
 extern const char* txtCopyRight;
