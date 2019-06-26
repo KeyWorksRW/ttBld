@@ -35,7 +35,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
     // Set default target directories if they are missing
 
     if (GetBoolOption(OPT_64BIT) && !GetDir64()) {
-        ttCStr cszCWD, cszDir64;
+        ttCStr cszCWD;
         cszCWD.GetCWD();
         bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
         if (!bSrcDir) {
@@ -62,7 +62,7 @@ CBldMaster::CBldMaster(bool bReadPrivate) : CSrcFiles()
     }
 
     if (GetBoolOption(OPT_32BIT) && !GetDir32()) {
-        ttCStr cszCWD, cszDir32;
+        ttCStr cszCWD;
         cszCWD.GetCWD();
         bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
         if (!bSrcDir) {
