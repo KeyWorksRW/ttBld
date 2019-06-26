@@ -89,7 +89,7 @@ MakeNinja:
 debug: ttLibD $(bdir)/$(cmplr)Build$(bits)D.ninja MakeNinjaD
 
 ttLibD:
-	cd ../../ttLib/src & ninja -f build/$(cmplr)Build$(bits)D.ninja
+	cd ../ttLib/src & ninja -f build/$(cmplr)Build$(bits)D.ninja
 
 $(bdir)/$(cmplr)Build$(bits)D.ninja: .srcfiles
 	MakeNinja -force
