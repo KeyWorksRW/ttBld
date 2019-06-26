@@ -1,14 +1,18 @@
 # Directories to ignore
 bin/
+bin32/
 bin64/
 build/
 lib/
+lib32/
 lib64/
 
 .private/
 backup/
 bonepile/
 tests/
+
+wxLibs.h
 
 # remove ttLib/ when it switches to a submodule
 ttLib/
