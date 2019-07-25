@@ -26,20 +26,15 @@ extern const char* txtSrcFilesFileName;
 class CSrcFiles : public CSrcOptions
 {
 public:
-    CSrcFiles();
+    CSrcFiles(bool bVsCodeDir = false);
 
-    // Class functions
+    // Public functions
 
     const char* GetBuildScriptDir();
     void AddFile(const char* pszFile) { m_lstSrcFiles += pszFile; }
-    bool ReadFile(const char* pszFile = txtSrcFilesFileName);
-    bool ReadTwoFiles(const char* pszMaster, const char* pszPrivate);
+    bool ReadFile(const char* pszFile = nullptr);
 
     bool IsProcessed() { return m_bRead; }
-
-    bool IsCodeBlockIDE()    { return (ttStrStrI(GetOption(OPT_IDE), "CodeBlocks")); }
-    bool IsCodeLiteIDE()     { return (ttStrStrI(GetOption(OPT_IDE), "CodeLite")); }
-    bool IsVisualStudioIDE() { return (ttStrStrI(GetOption(OPT_IDE), "VisualStudio")); }
 
     bool IsExeTypeConsole()  { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "console")); }    // this is the default
     bool IsExeTypeDll()      { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "dll") || ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx")); }
@@ -59,7 +54,13 @@ public:
     const char* GetDir32()  { return GetOption(OPT_TARGET_DIR32); } // 32-bit target directory
     const char* GetDir64()  { return GetOption(OPT_TARGET_DIR64); } // 64-bit target directory
 
+    const char* GetTargetDebug32();
+    const char* GetTargetDebug64();
+    const char* GetTargetRelease32();
+    const char* GetTargetRelease64();
+
     const char* GetBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
+    const char* GetXgetFlags() { return GetOption(OPT_XGET_FLAGS); }
 
     void AddSourcePattern(const char* pszFilePattern);
 
@@ -69,14 +70,27 @@ public:
     const char* GetPchHeader();
     const char* GetPchCpp();    // source file to compile the precompiled header
     const char* GetSrcFiles() { return m_cszSrcFilePath; };  // get location of .srcfiles (typically in bldMAC/, bldMSW/, or bldUNX/)
-    const char* GetBldDir() { return m_cszBldDir;  }
+
+    const char* GetBldDir() { return m_cszBldDir;  }        // ninja's builddir should be set to this directory
+
+    bool IsVsCodeDir() { return m_bVsCodeDir; }                    // true means we are reading/writing files to .vscode
+
+    int GetMajorRequired() { return m_RequiredMajor; }
+    int GetMinorRequired() { return m_RequiredMinor; }
+    int GetSubRequired() { return m_RequiredSub; }
+
+    ttCList* GetSrcFilesList() { return &m_lstSrcFiles; }
 
 protected:
+    // Protected functions
+
     void ProcessFile(char* pszFile);
     void ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFiles, bool bFileSection);
     void ProcessLibSection(char* pszLibFile);
     void ProcessOption(char* pszLine);
     void ProcessTarget(char* pszLine);
+
+    bool GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment);
 
     void AddCompilerFlag(const char* pszFlag);
     void AddLibrary(const char* pszName);
@@ -84,17 +98,18 @@ protected:
     // Class members (note that these are NOT marked protected or private -- too many callers need to access individual members)
 
 public:
+    // REVIEW: [randalphwa - 7/6/2019] Having these public: is a bad design. We should replace them with Get/Set functions
+
     ttCStr m_cszLibName;        // name and location of any additional library to build (used by Lib: section)
     ttCStr m_cszRcName;         // resource file to build (if any)
     ttCStr m_cszHHPName;        // HTML Help project file
     ttCStr m_cszOrgProjName;    // original name in case .private/.srcfiles overrides it
 
     ttCHeap m_ttHeap;           // all the ttCList files will be attatched to this heap
-    ttCList m_lstSrcFiles;
+
+    ttCList m_lstSrcFiles;      // list of all source files
     ttCList m_lstLibFiles;      // list of any files used to build additional library
     ttCList m_lstIdlFiles;      // list of any idl files to compile with midl compiler
-
-    ttCDblList m_lstDepLibs;    // key is library, val is src (if any)
 
     ttCList m_lstErrors;        // list of any errors that occurred during processing
 
@@ -104,14 +119,24 @@ public:
 
     ttCStr  m_cszPchHdr;
     ttCStr  m_cszPchCpp;
-    ttCStr  m_cszBldDir;           // bldMAC, bldMSW, or bldUNX
     ttCStr  m_cszSrcFilePath;
 
-protected:
-    bool GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment);
+private:
+    // Class members
 
-    bool m_bRead;               // file has been read and processed
-    bool m_bReadingPrivate;     // true if we are reading a private file
+    ttCStr m_cszTargetDebug32;
+    ttCStr m_cszTargetDebug64;
+    ttCStr m_cszTargetRelease32;
+    ttCStr m_cszTargetRelease64;
+
+    ttCStr  m_cszBldDir;    // this is where we write the .ninja files, and is ninja's builddir
+
+    int m_RequiredMajor;    // these three get filled in to the minimum MakeNinja version required to process
+    int m_RequiredMinor;
+    int m_RequiredSub;
+
+    bool m_bRead;           // file has been read and processed
+    bool m_bVsCodeDir;      // means we reading/writing to files in the .vscode directory
 };
 
 #endif  // __CSRCFILES_H__

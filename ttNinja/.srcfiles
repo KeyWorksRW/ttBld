@@ -1,0 +1,24 @@
+# Requires MakeNinja version 1.0.0 or higher to process
+
+Options:
+    Project:     ttNinja      # project name
+    exe_type:    lib          # [window | console | lib | dll]
+    PCH:         pch.h        # name of precompiled header file, or "none" if not using precompiled headers
+    PCH_CPP:     ../src/pch.cpp     # source file used to build precompiled header
+
+    64Bit:       true         # generate scripts for 64-bit build
+    TargetDir64: ../lib64     # 64-bit target directory
+    32Bit:       true         # generate scripts for 32-bit build
+    TargetDir32: ../lib32     # 32-bit target directory
+
+    IncDirs:    ../src;../ttLib/include
+
+Files:
+    ../src/csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
+    ../src/options.cpp         # contains all Options strings and CSrcOptions class for working with them
+    ../src/verninja.cpp        # CVerMakeNinja class
+    ../src/writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
+    ../src/dryrun.cpp          # CDryRun class for testing
+    ../src/NinjaStringIds.cpp  # Maps IDS_NINJA_ strings into string to translate
+    ../src/vscode.cpp          # Creates/updates .vscode files
+

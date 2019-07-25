@@ -41,6 +41,7 @@ protected:
     void OnBegin(void);
     void OnOK(void);
 
+private:
     // Class members
 
     CTabOptions* m_pOpts;

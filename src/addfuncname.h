@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CTabRcMidl
-// Purpose:   IDTAB_RCMIDL dialog handler
+// Name:      CAddFuncName
+// Purpose:   IDDLG_FUNC_NAME dialog handler
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -8,29 +8,35 @@
 
 #pragma once
 
-#ifndef IDTAB_RCMIDL
+#if (defined(_WIN64) || defined(_WIN32)) && !defined(IDDLG_FUNC_NAME)
     #include "resource.h"
 #endif
 
 #include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
-class CTabRcMidl : public ttCDlg
+class CAddFuncName : public ttCDlg
 {
 public:
-    CTabRcMidl() : ttCDlg(IDTAB_RCMIDL) { }
+    CAddFuncName() : ttCDlg(IDDLG_FUNC_NAME) { }
 
-    // Class functions
+    // Public functions
 
-    void SetParentClass(CTabOptions* pclsOptions) { m_pOpts = pclsOptions; }
+    const char* GetFuncName() { return m_cszFunctionName; }
 
 protected:
+    BEGIN_TTCMD_MAP()
+        TTCASE_CTRL(IDEDIT_FUNCTION_NAME, OnEditFunctionName)
+    END_TTMSG_MAP()
+
     // Message handlers
 
+    void OnEditFunctionName(int NotifyCode);
     void OnBegin(void);
     void OnOK(void);
 
 private:
     // Class members
 
-    CTabOptions* m_pOpts;
+    ttCStr m_cszFunctionName;
+
 };

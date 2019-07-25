@@ -8,14 +8,11 @@
 
 #include "pch.h"
 
-#include <stdio.h>  // for sprintf
-
 #include <ttfindfile.h>     // ttCFindFile
 #include <ttenumstr.h>      // ttCEnumStr
 #include <ttmem.h>          // ttCMem, ttCTMem
 
 #include "csrcfiles.h"      // CSrcFiles
-#include "strtable.h"       // String resource IDs
 
 const char* txtSrcFilesFileName = ".srcfiles";
 
@@ -27,95 +24,79 @@ typedef enum
     SECTION_LIB,
 } SRC_SECTION;
 
-CSrcFiles::CSrcFiles() : m_ttHeap(true),
+CSrcFiles::CSrcFiles(bool bVsCodeDir) : m_ttHeap(true),
     // make all ttCList classes use the same sub-heap
-    m_lstSrcFiles(m_ttHeap), m_lstLibFiles(m_ttHeap), m_lstIdlFiles(m_ttHeap), m_lstDepLibs(m_ttHeap),
+    m_lstSrcFiles(m_ttHeap), m_lstLibFiles(m_ttHeap), m_lstIdlFiles(m_ttHeap),
     m_lstErrors(m_ttHeap), m_lstLibAddSrcFiles(m_ttHeap), m_lstSrcIncluded(m_ttHeap)
 {
     m_bRead = false;
-    m_bReadingPrivate = false;
 
     m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
     m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
     m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
 
-    ttCStr cszCWD;
-    cszCWD.GetCWD();
-    const char* pszLastDir = ttFindFilePortion(cszCWD);
-    if (ttIsSameStrI(pszLastDir, "bldMAC"))
-        m_cszBldDir = "bldMAC";
-    else if (ttIsSameStrI(pszLastDir, "bldMSW"))
-        m_cszBldDir = "bldMSW";
-    else if (ttIsSameStrI(pszLastDir, "bldUNX"))
-        m_cszBldDir = "bldUNX";
-    else if (ttIsSameStrI(pszLastDir, "build"))
-        m_cszBldDir = "build";
+    m_RequiredMajor = 1;
+    m_RequiredMinor = 0;
+    m_RequiredSub   = 0;
+
+    m_bVsCodeDir = bVsCodeDir;
 }
 
-static const char* aSrcFilesDirs[] =    // locations to look for .srcfiles
+static const char* aSrcFileLocation[] =
 {
-    "src",
-    ".private",
-
-    // any directory name start with a 'b' will also be considered as the build directory
-
-    "build",
-    "bld",
-    "bldMSW",
-    "bldMAC",
-    "bldUNX",
+    ".vscode/srcfiles.yaml",
+    ".codelite/srcfiles.yaml",
 
     nullptr,
 };
 
 bool CSrcFiles::ReadFile(const char* pszFile)
 {
-    ttASSERT_NONEMPTY(pszFile);
+    if (!pszFile)
+    {
+        if (m_bVsCodeDir)
+        {
+            if (ttFileExists(".vscode/srcfiles.yaml"))
+                pszFile = ".vscode/srcfiles.yaml";
+            else if (ttFileExists("../.vscode/srcfiles.yaml"))
+                pszFile = "../.vscode/srcfiles.yaml";
+            else
+            {
+                ttCStr csz;
+                csz.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), ".vscode/srcfiles.yaml");
+                m_lstErrors += csz;
+                return false;
+            }
+        }
+        else
+        {
+            pszFile = ".srcfiles";
+            if (!ttFileExists(pszFile))
+            {
+                ttCStr csz;
+                csz.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), ".srcfiles");
+                m_lstErrors += csz;
+                return false;   // if we still can't find it, bail
+            }
+        }
+    }
 
     m_cszSrcFilePath = pszFile;
+    if (m_cszBldDir.IsEmpty())
+    {
+        m_cszBldDir = pszFile;
+        *(ttFindFilePortion(m_cszBldDir)) = 0;  // remove the file portion
+        m_cszBldDir.AppendFileName("build");
+    }
 
     ttCFile kfSrcFiles;
     if (!kfSrcFiles.ReadFile(m_cszSrcFilePath))
     {
-        size_t pos;
-        for (pos = 0; aSrcFilesDirs[pos]; ++pos)
-        {
-            m_cszSrcFilePath = aSrcFilesDirs[pos];
-            m_cszSrcFilePath.AppendFileName(pszFile);
-            if (kfSrcFiles.ReadFile(m_cszSrcFilePath))
-            {
-                if (tolower(aSrcFilesDirs[pos][0]) == 'b')
-                    m_cszBldDir = aSrcFilesDirs[pos];
-                break;
-            }
-        }
+        ttCStr csz;
+        csz.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), (char*) m_cszSrcFilePath);
+        m_lstErrors += csz;
 
-        if (!aSrcFilesDirs[pos])
-            return false;
-    }
-
-    if (m_cszBldDir.IsEmpty())  // if we aren't in a build directory, then see if we can find one
-    {
-        ttCStr cszTmp(m_cszSrcFilePath);
-        char* pszFilePortion = ttFindFilePortion(cszTmp);
-        if (pszFilePortion)
-        {
-            for (size_t pos = 0; aSrcFilesDirs[pos]; ++pos)
-            {
-                if (tolower(aSrcFilesDirs[pos][0]) == 'b')
-                {
-                    pszFilePortion = ttFindFilePortion(cszTmp);
-                    if (pszFilePortion)
-                        *pszFilePortion = 0;
-                    cszTmp.AppendFileName(aSrcFilesDirs[pos]);
-                    if (ttDirExists(cszTmp))
-                    {
-                        m_cszBldDir = aSrcFilesDirs[pos];
-                        break;
-                    }
-                }
-            }
-        }
+        return false;
     }
 
     m_bRead = true;
@@ -126,11 +107,13 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     while (kfSrcFiles.ReadLine(&pszLine))
     {
         char* pszBegin = ttFindNonSpace(pszLine);   // ignore any leading spaces
-        if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-')) {    // ignore empty, comment or divider lines
+        if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-'))    // ignore empty, comment or divider lines
+        {
             continue;
         }
 
-        if (ttIsSameSubStrI(pszBegin, "%YAML")) {   // not required, but possible a YAML editor could add this
+        if (ttIsSameSubStrI(pszBegin, "%YAML")) // not required, but possible a YAML editor could add this
+        {
             continue;
         }
 
@@ -206,10 +189,45 @@ void CSrcFiles::ProcessOption(char* pszLine)
         return;
 
     if (ttIsSameStrI(cszName, "BuildLibs"))
+    {
         while (cszVal.ReplaceStr(".lib", ""));  // we want the target name, not the library filename
 
-    if (UpdateReadOption(cszName, cszVal, cszComment))
+        ttCStr cszCleaned;
+        ttCEnumStr cEnumStr(cszVal, ';');
+        while (cEnumStr.Enum())
+        {
+            ttCStr cszLib(cEnumStr);
+            cszLib.TrimRight();
+            char* pszLast = cszLib.FindLastSlash();
+            if (pszLast && !pszLast[1])
+                *pszLast = 0;
+            if (cszLib.StrLen() > 0)    // don't add an empty string
+            {
+                if (cszCleaned.IsNonEmpty())
+                    cszCleaned += ";";
+                cszCleaned += cszLib;
+            }
+        }
+        if (cszCleaned.IsEmpty())
+            return; // ignore it if it's just a blank line
+        cszVal = cszCleaned;
+    }
+
+    OPT_INDEX opt = UpdateReadOption(cszName, cszVal, cszComment);
+    if (opt < OPT_OVERFLOW)
+    {
+        const OPT_VERSION* pVer = GetOptionMinVersion(opt);
+        if (pVer)
+        {
+            if (pVer->major > m_RequiredMajor)
+                m_RequiredMajor = pVer->major;
+            if (pVer->minor > m_RequiredMinor)
+                m_RequiredMinor = pVer->minor;
+            if (pVer->sub > m_RequiredSub)
+                m_RequiredSub = pVer->sub;
+        }
         return;
+    }
 
     // If you need to support reading old options, add the code here to convert them into the new options. You will also
     // need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
@@ -234,7 +252,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
     }
 
     ttCStr csz;
-    csz.printf(ttGetResString(IDS_CS_UNKNOWN_OPTION), (char*) cszName);
+    csz.printf(GETSTRING(IDS_NINJA_UNKNOWN_OPTION), (char*) cszName);
     m_lstErrors += csz;
 }
 
@@ -297,7 +315,17 @@ void CSrcFiles::ProcessFile(char* pszFile)
     if (ttIsSameSubStrI(pszFile, ".include"))
     {
         const char* pszIncFile = ttFindNonSpace(ttFindSpace(pszFile));
-        ProcessInclude(pszIncFile, m_lstAddSrcFiles, true);
+        if (pszIncFile)
+        {
+            ttCStr cszFile(pszIncFile);
+            char* pszTmp = ttStrChr(cszFile, '#');
+            if (pszTmp)
+            {
+                *pszTmp = 0;
+                cszFile.TrimRight();
+            }
+            ProcessInclude(cszFile, m_lstLibAddSrcFiles, false);
+        }
         return;
     }
 
@@ -312,7 +340,7 @@ void CSrcFiles::ProcessFile(char* pszFile)
     if (!ttFileExists(pszFile))
     {
         ttCStr cszErrMsg;
-        cszErrMsg.printf("Cannot locate %s", (char*) pszFile);
+        cszErrMsg.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), (char*) pszFile);
         m_lstErrors += cszErrMsg;
     }
 
@@ -343,7 +371,17 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     if (ttIsSameSubStrI(pszFile, ".include"))
     {
         const char* pszIncFile = ttFindNonSpace(ttFindSpace(pszFile));
-        ProcessInclude(pszIncFile, m_lstLibAddSrcFiles, false);
+        if (pszIncFile)
+        {
+            ttCStr cszFile(pszIncFile);
+            char* pszTmp = ttStrChr(cszFile, '#');
+            if (pszTmp)
+            {
+                *pszTmp = 0;
+                cszFile.TrimRight();
+            }
+            ProcessInclude(cszFile, m_lstLibAddSrcFiles, false);
+        }
         return;
     }
 
@@ -351,7 +389,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     if (!cIncSrcFiles.ReadFile(pszFile))
     {
         ttCStr cszMsg;
-        cszMsg.printf("Cannot open %s!", pszFile);
+        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), pszFile);
         m_lstErrors += cszMsg;
         return;
     }
@@ -360,7 +398,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     cszCWD.GetCWD();
 
     ttCStr cszFullPath(pszFile);
-    cszFullPath.GetFullPathName();
+    cszFullPath.FullPathName();
 
     ttCTMem<char*> szPath(1024);
     ttStrCpy(szPath, 1024, cszFullPath);
@@ -433,26 +471,6 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
     }
 }
 
-// It's fine if pszPrivate is NULL or the file doesn't exists -- only failure condition is if pszMaster can't be read
-
-bool CSrcFiles::ReadTwoFiles(const char* pszMaster, const char* pszPrivate)
-{
-    if (!ReadFile(pszMaster))
-        return false;
-    m_cszOrgProjName = GetProjectName();
-
-    m_bReadingPrivate = true;   // just in case some processing method needs to know
-
-    if (pszPrivate && ttFileExists(pszPrivate))
-        ReadFile(pszPrivate);
-
-    // The private file is only used to overwrite options in the master file, so if reading it fails either because it
-    // doesn't exist, or some other reason, we can still return true since we onlyt got here if the master file was
-    // successfully read.
-
-    return true;
-}
-
 // .srcfiles is a YAML file, so the value of the option may be within a single or double quote. That means we can't just
 // search for '#' to find the comment, we must first step over any opening/closing quote.
 
@@ -463,7 +481,7 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
     if (!pszVal)
     {
         ttCStr cszTmp;
-        cszTmp.printf(ttGetResString(IDS_CS_OPT_MISSING_COLON), pszLine);
+        cszTmp.printf(GETSTRING(IDS_NINJA_MISSING_COLON), pszLine);
         m_lstErrors += cszTmp;
         return false;
     }
@@ -557,10 +575,147 @@ const char* CSrcFiles::GetBuildScriptDir()
         return m_cszBldDir;
     }
 
-#if defined(_WINDOWS_)
+#if defined(_WIN32)
     m_cszBldDir = "bldMSW";
 #else
     m_cszBldDir = "bldUNX";
 #endif
     return m_cszBldDir;
+}
+
+// Don't add the 'D' to the end of DLL's -- it is perfectly viable for a release app to use a debug dll and that won't
+// work if the filename has changed. Under MSVC Linker, it will also generate a LNK4070 error if the dll name is
+// specified in the matching .def file. The downside, of course, is that without the 'D' only the size of the dll
+// indicates if it is a debug or release version.
+
+const char* CSrcFiles::GetTargetDebug32()
+{
+    if (m_cszTargetDebug32.IsNonEmpty())
+        return m_cszTargetDebug32;
+
+    ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles");
+    m_cszTargetDebug32 = GetDir32();
+
+    // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
+    // suffix to the target filename to differentiate between the two builds.
+
+    bool bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+
+    if (IsExeTypeLib())
+    {
+        m_cszTargetDebug32.AppendFileName(GetProjectName());
+        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32D.lib" : "D.lib";
+    }
+    else if (IsExeTypeDll())
+    {
+        m_cszTargetDebug32.AppendFileName(GetProjectName());
+        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.dll" : ".dll";
+        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
+            m_cszTargetDebug32.ReplaceStr(".dll", ".ocx");
+    }
+    else
+    {
+        m_cszTargetDebug32.AppendFileName(GetProjectName());
+        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32D.exe" : "D.exe";
+    }
+    return m_cszTargetDebug32;
+}
+
+const char* CSrcFiles::GetTargetRelease32()
+{
+    if (m_cszTargetRelease32.IsNonEmpty())
+        return m_cszTargetRelease32;
+
+    ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles");
+    m_cszTargetRelease32 = GetDir32();
+
+    // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
+    // suffix to the target filename to differentiate between the two builds.
+
+    bool bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+
+    if (IsExeTypeLib())
+    {
+        m_cszTargetRelease32.AppendFileName(GetProjectName());
+        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.lib" : ".lib";
+    }
+    else if (IsExeTypeDll())
+    {
+        m_cszTargetRelease32.AppendFileName(GetProjectName());
+        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.dll" : ".dll";
+        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
+            m_cszTargetRelease32.ReplaceStr(".dll", ".ocx");
+    }
+    else
+    {
+        m_cszTargetRelease32.AppendFileName(GetProjectName());
+        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.exe" : ".exe";
+    }
+    return m_cszTargetRelease32;
+}
+
+const char* CSrcFiles::GetTargetDebug64()
+{
+    if (m_cszTargetDebug64.IsNonEmpty())
+        return m_cszTargetDebug64;
+
+    ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles");
+    m_cszTargetDebug64 = GetDir64();
+
+    // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
+    // suffix to the target filename to differentiate between the two builds.
+
+    bool bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+
+    if (IsExeTypeLib())
+    {
+        m_cszTargetDebug64.AppendFileName(GetProjectName());
+        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64D.lib" : "D.lib";
+    }
+    else if (IsExeTypeDll())
+    {
+        m_cszTargetDebug64.AppendFileName(GetProjectName());
+        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.dll" : ".dll";
+        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
+            m_cszTargetDebug64.ReplaceStr(".dll", ".ocx");
+    }
+    else
+    {
+        m_cszTargetDebug64.AppendFileName(GetProjectName());
+        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64D.exe" : "D.exe";
+    }
+    return m_cszTargetDebug64;
+}
+
+const char* CSrcFiles::GetTargetRelease64()
+{
+    if (m_cszTargetRelease64.IsNonEmpty())
+        return m_cszTargetRelease64;
+
+    ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles");
+    m_cszTargetRelease64 = GetDir64();
+
+    // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
+    // suffix to the target filename to differentiate between the two builds.
+
+    bool bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+
+    if (IsExeTypeLib())
+    {
+        m_cszTargetRelease64.AppendFileName(GetProjectName());
+        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.lib" : ".lib";
+    }
+    else if (IsExeTypeDll())
+    {
+        m_cszTargetRelease64.AppendFileName(GetProjectName());
+        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.dll" : ".dll";
+        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
+            m_cszTargetRelease64.ReplaceStr(".dll", ".ocx");
+    }
+    else
+    {
+        m_cszTargetRelease64.AppendFileName(GetProjectName());
+        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.exe" : ".exe";
+    }
+    return m_cszTargetRelease64;
 }

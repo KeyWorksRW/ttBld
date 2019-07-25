@@ -32,22 +32,22 @@ void CTabRcMidl::OnOK(void)
 {
     ttCStr csz;
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
     m_pOpts->UpdateOption(OPT_RC_CMN, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
     m_pOpts->UpdateOption(OPT_RC_REL, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
     m_pOpts->UpdateOption(OPT_RC_DBG, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_COMMON_MIDL)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON_MIDL)));
     m_pOpts->UpdateOption(OPT_MDL_CMN, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_RELEASE_MIDL)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE_MIDL)));
     m_pOpts->UpdateOption(OPT_MDL_REL, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DEBUG_MIDL)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG_MIDL)));
     m_pOpts->UpdateOption(OPT_MDL_DBG, (char*) csz);
 }
 

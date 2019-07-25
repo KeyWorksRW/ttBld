@@ -10,11 +10,12 @@
 #define IDTAB_SCRIPTS                   106
 #define IDTAB_RCMIDL                    107
 #define IDTAB_CLANG                     108
+#define IDDLG_XGETTEXT                  109
+#define IDDLG_FUNC_NAME                 110
 #define IDR_PRE_PROJECT                 1024
 #define IDEDIT_PROJ_NAME                1024
 #define IDR_POST_PROJECT                1025
 #define IDRADIO_NORMAL                  1025
-#define IDR_MAKEFILE                    1026
 #define IDRADIO_CONSOLE                 1026
 #define IDR_PRIVATE_MAKEFILE            1027
 #define IDRADIO_LIB                     1027
@@ -43,6 +44,7 @@
 #define IDBTN_ADD_LIB                   1046
 #define IDBTN_ADD                       1047
 #define IDEDIT_CFLAGS                   1048
+#define IDBTN_REMOVE                    1048
 #define IDRADIO_MF_NEVER                1049
 #define IDRADIO_MF_MISSING              1050
 #define IDRADIO_MF_ALWAYS               1051
@@ -70,6 +72,7 @@
 #define IDEDIT_DIR32                    1077
 #define IDBTN_DIR32                     1078
 #define IDEDIT_COMMON                   1079
+#define IDBTN_MORE                      1079
 #define IDEDIT_DIR64                    1080
 #define IDEDIT_RELEASE                  1080
 #define IDBTN_DIR64                     1081
@@ -80,14 +83,22 @@
 #define IDEDIT_NATVIS                   1086
 #define IDEDIT_DEBUG_MIDL               1087
 #define IDBTN_CHANGE                    1087
+#define IDCHECK_LOCALE                  1088
+#define IDEDIT_XGETTEXT                 1089
+#define IDLIST_FUNC_NAMES               1090
+#define IDEDIT_INPUT_FILE               1092
+#define IDBTN_FIND                      1093
+#define IDCHECK_INDENTED                1094
+#define IDCHECK_NO_HEADER               1095
+#define IDEDIT_FUNCTION_NAME            1095
 
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        109
+#define _APS_NEXT_RESOURCE_VALUE        111
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1088
+#define _APS_NEXT_CONTROL_VALUE         1096
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

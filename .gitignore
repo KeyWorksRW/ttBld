@@ -1,22 +1,22 @@
 # Directories to ignore
-bin/
 bin32/
 bin64/
-build/
-lib/
 lib32/
-lib64/
+lib64
+build/
+bldMSW/
+bldMAC/
+bldUNIX/
 
 .private/
+archive/
 backup/
-bonepile/
 tests/
 
 wxLibs.h
 
 # remove ttLib/ when it switches to a submodule
 ttLib/
-wxLibs/
 
 # File extensions to ignore
 *.backup

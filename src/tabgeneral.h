@@ -28,6 +28,7 @@ public:
 
 protected:
     BEGIN_TTCMD_MAP()
+        TTCASE_CMD(IDBTN_MORE, OnMore)
         TTCASE_CMD(IDRADIO_CONSOLE, OnCheckExe)
         TTCASE_CMD(IDRADIO_DLL, OnCheckExe)
         TTCASE_CMD(IDRADIO_NORMAL, OnCheckExe)
@@ -38,13 +39,16 @@ protected:
 
     // Message handlers
 
+    void OnMore();
     void OnCheckExe();
     void OnCheckLib();
     void OnBtnDir64();
     void OnBtnDir32();
+
     void OnBegin(void);
     void OnOK(void);
 
+private:
     // Class members
 
     CTabOptions* m_pOpts;

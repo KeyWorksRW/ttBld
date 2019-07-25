@@ -11,15 +11,15 @@
 #include <ttdirdlg.h>   // ttCDirDlg
 
 #include "dlgoptions.h"
-#include "strtable.h"
 
 void CTabGeneral::OnBegin(void)
 {
     if (m_pOpts->GetProjectName())
         SetControlText(DLG_ID(IDEDIT_PROJ_NAME), m_pOpts->GetProjectName());
-    else {
+    else
+    {
         char szCwd[MAX_PATH];
-        GetCurrentDirectory(sizeof(szCwd), szCwd);
+        GetCurrentDirectoryA(sizeof(szCwd), szCwd);
         char* pszProject = ttFindFilePortion(szCwd);
 
         // If cwd is "src", then use the parent directory as the project name
@@ -46,18 +46,26 @@ void CTabGeneral::OnBegin(void)
 
     if (!m_pOpts->GetBoolOption(OPT_32BIT))
         SetCheck(DLG_ID(IDCHECK_64BIT));    // default to 64-bit builds
-    else {
+    else
+    {
         SetCheck(DLG_ID(IDCHECK_32BIT));
         SetCheck(DLG_ID(IDCHECK_64BIT), m_pOpts->GetBoolOption(OPT_64BIT));
     }
+
+    if (ttIsNonEmpty(m_pOpts->GetXgetFlags()))
+        SetControlText(DLG_ID(IDEDIT_XGETTEXT), m_pOpts->GetXgetFlags());
 }
 
 void CTabGeneral::OnOK(void)
 {
     ttCStr csz;
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
     m_pOpts->UpdateOption(OPT_PROJECT, (char*) csz);
+
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_XGETTEXT)));
+    if (csz.IsNonEmpty() || m_pOpts->GetXgetFlags())
+        m_pOpts->UpdateOption(OPT_XGET_FLAGS, (char*) csz);
 
     if (GetCheck(DLG_ID(IDRADIO_CONSOLE)))
         m_pOpts->UpdateOption(OPT_EXE_TYPE, "console");
@@ -71,7 +79,7 @@ void CTabGeneral::OnOK(void)
     m_pOpts->UpdateOption(OPT_32BIT, GetCheck(DLG_ID(IDCHECK_32BIT)));
     if (GetCheck(DLG_ID(IDCHECK_32BIT)))
     {
-        csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
+        csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
         if (csz.IsNonEmpty())
             m_pOpts->UpdateOption(OPT_TARGET_DIR32, (char*) csz);
     }
@@ -79,7 +87,7 @@ void CTabGeneral::OnOK(void)
     m_pOpts->UpdateOption(OPT_64BIT, GetCheck(DLG_ID(IDCHECK_64BIT)));
     if (GetCheck(DLG_ID(IDCHECK_64BIT)))
     {
-        csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
+        csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
         if (csz.IsNonEmpty())
             m_pOpts->UpdateOption(OPT_TARGET_DIR64, (char*) csz);
     }
@@ -88,11 +96,11 @@ void CTabGeneral::OnOK(void)
 void CTabGeneral::OnBtnDir32()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(ttGetResString(IDS_32BIT_DIR));
+    dlg.SetTitle(GETSTRING(IDS_NINJA_32BIT_DIR));
 
     ttCStr cszDir;
-    cszDir.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
-    cszDir.GetFullPathName();
+    cszDir.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
+    cszDir.FullPathName();
     if (!ttDirExists(cszDir))   // SHCreateItemFromParsingName will fail if the folder doesn't already exist
         cszDir.GetCWD();
 
@@ -109,11 +117,11 @@ void CTabGeneral::OnBtnDir32()
 void CTabGeneral::OnBtnDir64()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(ttGetResString(IDS_64BIT_DIR));
+    dlg.SetTitle(GETSTRING(IDS_NINJA_64BIT_DIR));
 
     ttCStr cszDir;
-    cszDir.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
-    cszDir.GetFullPathName();
+    cszDir.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
+    cszDir.FullPathName();
     if (!ttDirExists(cszDir))   // SHCreateItemFromParsingName will fail if the folder doesn't already exist
         cszDir.GetCWD();
 
@@ -180,7 +188,8 @@ void CTabGeneral::SetTargetDirs()
         else
             cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib32" : "../bin32";
     }
-    else {
+    else
+    {
         cszDir64 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
         ttCStr cszTmp(cszDir64);
         cszTmp += "64";
@@ -206,4 +215,12 @@ void CTabGeneral::SetTargetDirs()
         SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
     else
         SetControlText(DLG_ID(IDEDIT_DIR64), cszDir64);
+}
+
+#include "dlggettext.h"    // CDlgGetText
+
+void CTabGeneral::OnMore()
+{
+    CDlgGetText dlg;
+
 }

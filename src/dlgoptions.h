@@ -20,7 +20,6 @@
 #include "tabcompiler.h"// CTabCompiler
 #include "tabclang.h"   // CTabCLang
 #include "tablinker.h"  // CTabLinker
-#include "tabscripts.h" // CTabScripts
 #include "tabrcmidl.h"  // CTabRcMidl
 
 #ifdef PRIVATE
@@ -30,7 +29,7 @@
 class CTabOptions : public ttCDlg, public CWriteSrcFiles
 {
 public:
-    CTabOptions();
+    CTabOptions(bool bVsCodeDir = false);
 
     // Class functions
 
@@ -49,6 +48,7 @@ protected:
     void OnOK();
     void OnCancel();
 
+private:
     // Class members
 
     typedef enum {
@@ -57,7 +57,6 @@ protected:
         TAB_CLANG,
         TAB_LINKER,
         TAB_RC_MIDL,
-        TAB_SCRIPTS,
         TAB_PRIVATE,
     } TAB_ID;
 
@@ -66,7 +65,6 @@ protected:
     CTabCLang    m_tabCLang;
     CTabLinker   m_tabLinker;
     CTabRcMidl   m_tabRcMidl;
-    CTabScripts  m_tabScripts;
 #ifdef PRIVATE
     CTabPrivate  m_tabPrivate;
 #endif

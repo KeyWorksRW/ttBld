@@ -60,6 +60,7 @@ protected:
     void  AddCodeLiteFiles(ttCXMLBranch* pParent);
     bool  isValidSrcFile(const char* pszFile) const;
 
+private:
     // Class members
 
     ttCComboBox m_comboScripts;

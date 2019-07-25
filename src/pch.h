@@ -2,51 +2,55 @@
 
 #pragma once
 
-#define NOATOM
-#define NOCOMM
-#define NODRIVERS
-#define NOEXTDEVMODEPROPSHEET
-#define NOIME
-#define NOKANJI
-#define NOLOGERROR
-#define NOMCX
-#define NOPROFILER
-#define NOSCALABLEFONT
-#define NOSERVICE
-#define NOSOUND
-#define NOWINDOWSX
-#define NOENHMETAFILE
+#if defined(_WIN32) & !defined(_WX_DEFS_H_)
+    #define NOATOM
+    #define NOCOMM
+    #define NODRIVERS
+    #define NOEXTDEVMODEPROPSHEET
+    #define NOIME
+    #define NOKANJI
+    #define NOLOGERROR
+    #define NOMCX
+    #define NOPROFILER
+    #define NOSCALABLEFONT
+    #define NOSERVICE
+    #define NOSOUND
+    #define NOWINDOWSX
+    #define NOENHMETAFILE
 
-#define OEMRESOURCE
-#define WIN32_LEAN_AND_MEAN
-#define _CRT_SECURE_NO_WARNINGS
+    #define OEMRESOURCE
+    #define WIN32_LEAN_AND_MEAN
+    #define _CRT_SECURE_NO_WARNINGS
 
-#define WINVER       0x0601     // Windows 7
-#define _WIN32_WINNT 0x0600
-#define _WIN32_IE    0x0700
+    #define WINVER       0x0601     // Windows 7
+    #define _WIN32_WINNT 0x0600
+    #define _WIN32_IE    0x0700
 
-#define wxUSE_UNICODE     0
-#define wxGUI             0
-#define wxUSE_NO_MANIFEST 1
+    #include <windows.h>
+    #include <stdlib.h>
+    #include <stdio.h>
+#endif    // defined(_WIN32) & !defined(_WX_DEFS_H_)
 
-#include "wx/defs.h"    // compiler detection; includes setup.h
+#if defined(_WX_DEFS_H_)
+    #define wxUSE_UNICODE     1
+    #define wxUSE_GUI         1
+    #define wxUSE_NO_MANIFEST 1
 
-// include "wx/chartype.h" first to ensure that UNICODE macro is correctly set
-// _before_ including <windows.h>
-#include "wx/chartype.h"
+    #include "wx/defs.h"    // compiler detection; includes setup.h
 
-// include standard Windows headers
-#if defined(__WINDOWS__)
-    #include <urlmon.h>
-    #include "wx/msw/wrapwin.h"
-    #include "wx/msw/private.h"
-#endif
+    #include "wx/chartype.h"
 
-#if defined(__WXMSW__)
-    #include "wx/msw/wrapcctl.h"
-    #include "wx/msw/wrapcdlg.h"
-    #include "wx/msw/missing.h"
-#endif
+    #if defined(__WINDOWS__)
+        #include "wx/msw/wrapwin.h"
+        #include "wx/msw/private.h"
+    #endif
+
+    #if defined(__WXMSW__)
+        #include "wx/msw/wrapcctl.h"
+        #include "wx/msw/wrapcdlg.h"
+        #include "wx/msw/missing.h"
+    #endif
+#endif    // !defined(NOWX)
 
 extern const char* txtVersion;
 extern const char* txtCopyRight;
@@ -56,4 +60,7 @@ extern const char* txtCopyRight;
 
 using namespace ttch;   // For the CH_ constants
 
+extern const char* txtOptVersion; // The minimum version of MakeNinja required by a .srcfiles
+
+#include "NinjaStringIds.h"   // Maps IDS_NINJA_ strings into string to translate
 #include "funcs.h"      // List of function declarations

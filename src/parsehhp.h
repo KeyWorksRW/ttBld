@@ -34,6 +34,7 @@ public:
 protected:
     void AddDependency(const char* pszHHP, const char* pszFile);
 
+private:
     // Class members
 
     ttCStr  m_cszCWD;

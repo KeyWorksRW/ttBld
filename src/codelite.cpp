@@ -43,26 +43,30 @@ enum {
 size_t CreateCodeLiteProject()
 {
     CSrcFiles cSrcFiles;
-    if (!cSrcFiles.ReadFile()) {
+    if (!cSrcFiles.ReadFile())
+    {
         puts("Cannot create a CodeLite project file if there is no .srcfiles file!");
         return CLP_NO_SRCFILES;
     }
 
-    if (!cSrcFiles.GetProjectName()) {
+    if (!cSrcFiles.GetProjectName())
+    {
         puts("Cannot create a CodeLite project file if .srcfiles doesn't specifiy the name of the project!");
         return CLP_NO_PROJECT;
     }
 
     ttCStr cszProjFile(cSrcFiles.GetProjectName());
     cszProjFile.ChangeExtension(".project");
-    if (ttFileExists(cszProjFile)) {
+    if (ttFileExists(cszProjFile))
+    {
         // TODO: [randalphwa - 10/8/2018] We could call a function here to update the .project file, adding any src files that
         // are in .srcfiles, but missing in .project
         return CLP_EXISTS;
     }
 
     ttCFile kf;
-    if (!kf.ReadResource(IDR_PRE_PROJECT)) {
+    if (!kf.ReadResource(IDR_PRE_PROJECT))
+    {
         puts("MakeNinja.exe is corrupted -- cannot read the necessary resource");
         return CLP_MISSING_RES;
     }
@@ -83,7 +87,8 @@ size_t CreateCodeLiteProject()
     kf.WriteEol("\t</VirtualDirectory>");
 
     ttCFile kfPost;
-    if (!kfPost.ReadResource(IDR_POST_PROJECT)) {
+    if (!kfPost.ReadResource(IDR_POST_PROJECT))
+    {
         puts("MakeNinja.exe is corrupted -- cannot read the necessary resource");
         return CLP_MISSING_RES;
     }
@@ -96,18 +101,20 @@ size_t CreateCodeLiteProject()
     cszExe.AppendFileName("../bin/");
     cszExe += (char*) cSrcFiles.GetProjectName();
     cszExe += "D.exe";
-    cszExe.GetFullPathName();
+    cszExe.FullPathName();
     ttBackslashToForwardslash(cszExe);
     while (kfPost.ReplaceStr("%exepath%", cszExe));
 
     while (kfPost.ReadLine())
         kf.WriteEol(kfPost);
 
-    if (!kf.WriteFile(cszProjFile)) {
+    if (!kf.WriteFile(cszProjFile))
+    {
         printf("Unable to write to %s!\n", (char*) cszProjFile);
         return CLP_CANT_WRITE;
     }
-    else {
+    else
+    {
         printf("created %s\n", (char*) cszProjFile);
     }
 

@@ -13,8 +13,6 @@
 #include <ttdirdlg.h>   // ttCDirDlg
 
 #include "dlgoptions.h"
-#include "strtable.h"
-
 void CTabLinker::OnBegin(void)
 {
     EnableShadeBtns();
@@ -44,28 +42,28 @@ void CTabLinker::OnOK(void)
 {
     ttCStr csz;
 
-    csz.GetWindowText(GetDlgItem(IDEDIT_COMMON));
+    csz.GetWndText(GetDlgItem(IDEDIT_COMMON));
     m_pOpts->UpdateOption(OPT_LINK_CMN, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(IDEDIT_RELEASE));
+    csz.GetWndText(GetDlgItem(IDEDIT_RELEASE));
     m_pOpts->UpdateOption(OPT_LINK_REL, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(IDEDIT_DEBUG));
+    csz.GetWndText(GetDlgItem(IDEDIT_DEBUG));
     m_pOpts->UpdateOption(OPT_LINK_DBG, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(IDEDIT_LIBDIRS));
+    csz.GetWndText(GetDlgItem(IDEDIT_LIBDIRS));
     m_pOpts->UpdateOption(OPT_LIB_DIRS, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(IDEDIT_LIBS_LINK));
+    csz.GetWndText(GetDlgItem(IDEDIT_LIBS_LINK));
     m_pOpts->UpdateOption(OPT_LIBS, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(IDEDIT_LIBS_BUILD));
+    csz.GetWndText(GetDlgItem(IDEDIT_LIBS_BUILD));
     m_pOpts->UpdateOption(OPT_BUILD_LIBS, (char*) csz);
 
     m_pOpts->UpdateOption(OPT_STATIC_CRT_REL, GetCheck(IDCHECK_STATIC_CRT_REL));
     m_pOpts->UpdateOption(OPT_STATIC_CRT_DBG, GetCheck(IDCHECK_STATIC_CRT_DBG));
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_NATVIS)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_NATVIS)));
     m_pOpts->UpdateOption(OPT_NATVIS, (char*) csz);
 }
 
@@ -75,7 +73,7 @@ void CTabLinker::OnBtnChange()
     fdlg.SetFilter("Natvis Files|*.natvis");
     fdlg.UseCurrentDirectory();
     fdlg.RestoreDirectory();
-    if (fdlg.GetOpenFileName())
+    if (fdlg.GetOpenName())
     {
         ttCStr cszCWD, cszFile;
         cszCWD.GetCWD();
@@ -87,13 +85,13 @@ void CTabLinker::OnBtnChange()
 void CTabLinker::OnBtnLibDir()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(ttGetResString(IDS_LIBDIR));
+    dlg.SetTitle(GETSTRING(IDS_NINJA_TITLE_LIB_DIR));   // we're repurposing an existing dialog, so change the title
     if (dlg.GetFolderName(*this))
     {
         ttCStr cszTmp, cszLibDir, cszCurLibDirs;
         cszTmp.GetCWD();
         ttConvertToRelative(cszTmp, dlg, cszLibDir);
-        cszCurLibDirs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
+        cszCurLibDirs.GetWndText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
 
         if (cszCurLibDirs.IsNonEmpty())
         {
@@ -102,7 +100,7 @@ void CTabLinker::OnBtnLibDir()
             {
                 if (ttIsSamePath(eLib, cszLibDir))
                 {
-                    ttMsgBoxFmt(ttGetResString(IDS_ALREADY_ADDED_DIR), MB_OK | MB_ICONWARNING, (char*) cszLibDir);
+                    ttMsgBoxFmt(GETSTRING(IDS_NINJA_ALREADY_ADDED_DIR), MB_OK | MB_ICONWARNING, (char*) cszLibDir);
                     return;
                 }
             }
@@ -121,18 +119,18 @@ void CTabLinker::OnBtnAddLib()
     fdlg.SetFilter("Library Files|*.lib");
 
     ttCStr cszCurLibDirs;
-    cszCurLibDirs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
+    cszCurLibDirs.GetWndText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
 
     if (cszCurLibDirs.IsNonEmpty() && !ttStrChr(cszCurLibDirs, ';'))    // set initial directory if one and only one path
         fdlg.SetInitialDir(cszCurLibDirs);
 
     fdlg.RestoreDirectory();
-    if (fdlg.GetOpenFileName())
+    if (fdlg.GetOpenName())
     {
         ttCStr cszCWD, cszFile, cszCurLibs;
         cszCWD.GetCWD();
         ttConvertToRelative(cszCWD, fdlg, cszFile);
-        cszCurLibDirs.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
+        cszCurLibDirs.GetWndText(GetDlgItem(DLG_ID(IDEDIT_LIBS_LINK)));
         if (cszCurLibDirs.IsNonEmpty())
             cszCurLibDirs += ";";
         cszCurLibDirs += ttFindFilePortion(cszFile);

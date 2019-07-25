@@ -23,13 +23,14 @@
 class CBldMaster : public CSrcFiles
 {
 public:
-    CBldMaster(bool bReadPrivate = true);
+    CBldMaster(bool bVsCodeDir = false);
 
-    // Class functions
+    // Public functions
 
-    size_t GetErrorCount() { return m_lstErrors.GetCount(); }
+
+    size_t      GetErrorCount() { return m_lstErrors.GetCount(); }
     const char* GetError(size_t pos) { return m_lstErrors[pos]; }
-    void AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
+    void        AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
 
     size_t getSrcCount() { return m_lstSrcFiles.GetCount(); }
 
@@ -41,35 +42,31 @@ public:
     ttCList* GetLibFileList()  { return &m_lstLibFiles; }
     ttCList* GetRcDepList()     { return &m_lstRcDependencies; }
 
-    bool IsBin64()          { return m_bBin64Exists; }
+    bool IsValidVersion() { return m_bInvalidVersion != true; }  // returns false if .srcfiles requires a newer version
+    bool IsBin64()        { return m_bBin64Exists; }
 
-    const char* GetLibName()    { return m_cszLibName; }        // name and location of any additional library to build
+    const char* GetLibName() { return m_cszLibName; }        // name and location of any additional library to build
 
-    const char* GetHHPName()    { return m_cszHHPName; }
+    const char* GetHHPName() { return m_cszHHPName; }
 
-    const char* GetTargetDebug32();
-    const char* GetTargetDebug64();
-    const char* GetTargetRelease32();
-    const char* GetTargetRelease64();
-
-    void EnableDryRun() { dryrun.Enable(); }
+    void EnableDryRun() { m_dryrun.Enable(); }
 
     ttCList m_lstRcDependencies;
 
 protected:
+    // Protected functions
+
     bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
     const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);
 
+    CDryRun m_dryrun;
+
+private:
     // Class members
 
-    ttCStr m_cszTargetDebug32;
-    ttCStr m_cszTargetDebug64;
-    ttCStr m_cszTargetRelease32;
-    ttCStr m_cszTargetRelease64;
+    bool m_bBin64Exists;        // if true, the directory ../bin64 exists
+    bool m_bPrivateSrcfiles;
 
-    CDryRun dryrun;
-
-    bool m_bBin64Exists;    // if true, the directory ../bin64 exists
-    bool m_bAddPlatformSuffix;  // true if 32-bit and 64-bit target directories are identical
-    bool m_bPrivateBuild;
+    bool m_bWritePrivate;    // if true, write to .private\build
+    bool m_bInvalidVersion;  // true if a newer version is needed to parse the .srcfiles
 };

@@ -88,24 +88,24 @@ endif
 
 ########## release section ##########
 
-release: $(BldScript) %project%
+release: $(BldScript) ttNinja
 
 # This command will only be run if private=1 is set on the command line
 $(BldScript): .srcfiles
 	$(bldninja)
 
-%project%:
+ttNinja:
 	ninja -f $(BldScript)
 
 ########## debug section ##########
 
-debug: $(BldScriptD) %project%D
+debug: $(BldScriptD) ttNinjaD
 
 # This command will only be run if private=1 is set on the command line
 $(BldScriptD): .srcfiles
 	$(bldninja)
 
-%project%D:
+ttNinjaD:
 	ninja -f $(BldScriptD)
 
 ########## localization ##########

@@ -19,7 +19,7 @@ public:
 
     bool CreateBuildFile();
 
-protected:
+private:
     // Class members
 
 };
