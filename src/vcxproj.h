@@ -8,12 +8,12 @@
 
 #pragma once
 
-#include "bldmaster.h"  // CBldMaster
+#include "ninja.h"    // CNinja
 
-class CVcxProj : public CBldMaster
+class CVcxProj : public CNinja
 {
 public:
-    CVcxProj() : CBldMaster(true) { }
+    CVcxProj() : CNinja(true) { }
 
     // Class functions
 

@@ -17,6 +17,7 @@
 
 #include "ninja.h"      // CNinja
 #include "parsehhp.h"   // CParseHHP
+#include "verninja.h"   // CVerMakeNinja
 
 const char* aCppExt[] = {
     ".cpp",
@@ -26,11 +27,121 @@ const char* aCppExt[] = {
     nullptr
 };
 
-CNinja::CNinja(bool bVsCodeDir) : CBldMaster(bVsCodeDir),
+CNinja::CNinja(bool bVsCodeDir) : CSrcFiles(bVsCodeDir),
     // make all ttCList classes use the same sub-heap
     m_lstBuildLibs32D(m_ttHeap), m_lstBuildLibs64D(m_ttHeap),
     m_lstBuildLibs32R(m_ttHeap), m_lstBuildLibs64R(m_ttHeap)
 {
+    #if defined(_DEBUG)
+    ttASSERT(ReadFile());
+#else
+    if (!ReadFile())
+        return;
+#endif
+
+    CVerMakeNinja verSrcFiles;
+    m_bInvalidVersion = verSrcFiles.IsSrcFilesNewer(GetMajorRequired(), GetMinorRequired(), GetSubRequired());
+
+    // If no platform was specified, default to 64-bit
+
+    if (!GetBoolOption(OPT_64BIT) && !GetBoolOption(OPT_32BIT))
+    {
+        UpdateOption(OPT_64BIT, true);          // default to 64-bit build
+        UpdateOption(OPT_64BIT_SUFFIX, false);  // no suffix
+    }
+
+    // Set default target directories if they are missing
+
+    if (GetBoolOption(OPT_64BIT) && !GetDir64())
+    {
+        ttCStr cszCWD;
+        cszCWD.GetCWD();
+        bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
+        if (!bSrcDir)
+        {
+            cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
+            if (ttDirExists(cszCWD))
+                bSrcDir = true;
+        }
+        if (bSrcDir)
+        {
+            ttCStr cszDir64(IsExeTypeLib() ? "../lib" : "../bin");
+            ttCStr cszTmp(cszDir64);
+            cszTmp += "64";
+            if (ttDirExists(cszTmp))        // if there is a ../lib64 or ../bin64, then use that
+                cszDir64 = cszTmp;
+            UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
+        }
+        else
+        {
+            ttCStr cszDir64(IsExeTypeLib() ? "lib" : "bin");
+            ttCStr cszTmp(cszDir64);
+            cszTmp += "64";
+            if (ttDirExists(cszTmp))        // if there is a ../lib64 or ../bin64, then use that
+                cszDir64 = cszTmp;
+            UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
+        }
+    }
+
+    if (GetBoolOption(OPT_32BIT) && !GetDir32())
+    {
+        ttCStr cszCWD;
+        cszCWD.GetCWD();
+        bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
+        if (!bSrcDir)
+        {
+            cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
+            if (ttDirExists(cszCWD))
+                bSrcDir = true;
+        }
+        if (bSrcDir)
+        {
+            ttCStr cszDir32(IsExeTypeLib() ? "../lib" : "../bin");
+            ttCStr cszTmp(cszDir32);
+            cszTmp += "32";
+            if (ttDirExists(cszTmp))        // if there is a ../lib32 or ../bin32, then use that
+                cszDir32 = cszTmp;
+            UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
+        }
+        else
+        {
+            ttCStr cszDir32(IsExeTypeLib() ? "lib" : "bin");
+            ttCStr cszTmp(cszDir32);
+            cszTmp += "32";
+            if (ttDirExists(cszTmp))        // if there is a ../lib32 or ../bin32, then use that
+                cszDir32 = cszTmp;
+            UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
+        }
+    }
+
+    if (!GetProjectName())
+    {
+        ttCStr cszCwd;
+        cszCwd.GetCWD();
+        char* pszTmp = (char*) cszCwd.FindLastSlash();
+        if (!pszTmp[1])     // if path ends with a slash, remove it -- we need that last directory name
+            *pszTmp = 0;
+
+        char* pszProj = ttFindFilePortion(cszCwd);
+        if (ttIsSameStrI(pszProj, "src")) // Use the parent folder for the root if the current directory is "src"
+        {
+            pszTmp = (char*) cszCwd.FindLastSlash();
+            if (pszTmp)
+            {
+                *pszTmp = 0;    // remove the last slash and filename, forcing the directory name above to be the "filename"
+                pszProj = ttFindFilePortion(cszCwd);
+            }
+        }
+        UpdateOption(OPT_PROJECT, pszProj);
+    }
+
+    m_lstRcDependencies.SetFlags(ttCList::FLG_URL_STRINGS);
+
+    if (m_cszRcName.IsNonEmpty())
+        FindRcDependencies(m_cszRcName);
+
+    m_bBin64Exists = ttStrStr(GetDir64(), "64");
+
     ProcessBuildLibs();
 }
 
@@ -932,6 +1043,66 @@ void CNinja::ProcessBuildLibs()
                 cszMsg += "\n";
                 AddError(cszMsg);
                 continue;
+            }
+
+            // The current directory may just be the name of the library, but not necessarily where srcfiles is located.
+
+            if (!ttFileExists(".srcfiles") && !ttFileExists(".vscode/srcfiles.yaml"))
+            {
+                for (;;)    // empty for loop that we break out of as soon as we find a srcfiles file to use
+                {
+                    // CSrcFiles will automatically read .vscode/srcfiles.yaml if there is no .srcfiles in the current
+                    // directory
+
+                    if (ttFileExists(".vscode/srcfiles.yaml"))
+                        break;
+
+                    // See if there is a src/.srcfiles or src/.vscode/srcfiles.yaml file
+
+                    if (ttDirExists("src"))
+                    {
+                        ttChDir("src");
+                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                            break;
+                        else
+                            ttChDir("..");
+                    }
+
+                    if (ttDirExists("source"))
+                    {
+                        ttChDir("source");
+                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                            break;
+                        else
+                            ttChDir("..");
+                    }
+
+                    /*
+                        It's unusual, but possible for there to be a sub-directory with the same name as the root
+                        directory:
+
+                        foo
+                            foo -- src for foo.lib
+                            bar -- src for bar.lib
+                            app -- src for some related app
+
+                    */
+
+                    if (ttDirExists(ttFindFilePortion(enumLib)))
+                    {
+                        ttChDir(ttFindFilePortion(enumLib));
+                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                            break;
+                        else
+                            ttChDir("..");
+                    }
+
+                    // Any further directory searches should go above this -- once we get here, we can't find a .srcfiles. We go ahead an break
+                    // out of the loop. cSrcFiles.ReadFile() will fail -- we'll use whatever error reporting (if any) it uses for a file that
+                    // cannot be found or read.
+
+                    break;
+                }
             }
 
             CSrcFiles cSrcFiles;

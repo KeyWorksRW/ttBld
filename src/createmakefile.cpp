@@ -12,12 +12,12 @@
 #include <ttenumstr.h>  // ttCEnumStr
 #include <ttfindfile.h> // ttCFindFile
 
-#include "bldmaster.h"  // CBldMaster
+#include "ninja.h"      // CNinja
 #include "resource.h"   // IDR_MAKEFILE
 
 extern const char* txtHelpNinja;
 
-bool CBldMaster::CreateMakeFile()
+bool CNinja::CreateMakeFile()
 {
     if (IsMakeNever())
         return true;        // user doesn't want makefile created at all
