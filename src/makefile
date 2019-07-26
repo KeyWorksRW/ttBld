@@ -62,29 +62,38 @@ ifndef cmplr
     cmplr=clang
 endif
 
-bdir=build
-BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
-BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
+ifdef private
+    bdir=.private/build
+    BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
+    BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
+    bldninja=MakeNinja -privBuild
+else
+    bdir=build
+    BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
+    BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
+    bldninja=
+endif
 
 # \
 !endif
 
 ########## release section ##########
 
-release: ttLibMD MakeNinja
+release: ttLib $(BldScript) MakeNinja
 
-ttLibMD:
-	cd ../ttLib/ttLibMD & ninja -f $(BldScript)
+ttLib:
+	cd ../ttLib & ninja -f $(BldScript)
+
+# This command will only be run if private=1 is set on the command line
+$(BldScript): .srcfiles
+	$(bldninja)
 
 MakeNinja:
 	ninja -f $(BldScript)
 
 ########## debug section ##########
 
-debug: ttLibMDD MakeNinjaD
-
-ttLibMDD:
-	cd ../ttLib/ttLibMD & ninja -f $(BldScriptD)
+debug: MakeNinjaD
 
 MakeNinjaD:
 	ninja -f $(BldScriptD)
