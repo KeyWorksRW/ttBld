@@ -39,18 +39,9 @@ bits=64 # \
 cmplr=msvc # \
 !endif #\
 #\
-!ifdef private # \
-bdir=.private/build # \
-BldScript=$(bdir)/$(cmplr)Build$(bits).ninja # \
-BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja # \
-bldninja=MakeNinja -privBuild #\
-!else # \
 bdir=build # \
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja # \
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja # \
-bldninja= #\
-!endif # \
-
 # \
 !else
 ######### Following section is for GNU make and variants #########
@@ -71,39 +62,23 @@ ifndef cmplr
     cmplr=clang
 endif
 
-ifdef private
-    bdir=.private/build
-    BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
-    BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
-    bldninja=MakeNinja -privBuild
-else
-    bdir=build
-    BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
-    BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
-    bldninja=
-endif
+bdir=build
+BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
+BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
 
 # \
 !endif
 
 ########## release section ##########
 
-release: $(BldScript) %project%
-
-# This command will only be run if private=1 is set on the command line
-$(BldScript): .srcfiles
-	$(bldninja)
+release: %project%
 
 %project%:
 	ninja -f $(BldScript)
 
 ########## debug section ##########
 
-debug: $(BldScriptD) %project%D
-
-# This command will only be run if private=1 is set on the command line
-$(BldScriptD): .srcfiles
-	$(bldninja)
+debug: %project%D
 
 %project%D:
 	ninja -f $(BldScriptD)
