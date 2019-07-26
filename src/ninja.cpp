@@ -934,6 +934,66 @@ void CNinja::ProcessBuildLibs()
                 continue;
             }
 
+            // The current directory may just be the name of the library, but not necessarily where srcfiles is located.
+
+            if (!ttFileExists(".srcfiles") && !ttFileExists(".vscode/srcfiles.yaml"))
+            {
+                for (;;)    // empty for loop that we break out of as soon as we find a srcfiles file to use
+                {
+                    // CSrcFiles will automatically read .vscode/srcfiles.yaml if there is no .srcfiles in the current
+                    // directory
+
+                    if (ttFileExists(".vscode/srcfiles.yaml"))
+                        break;
+
+                    // See if there is a src/.srcfiles or src/.vscode/srcfiles.yaml file
+
+                    if (ttDirExists("src"))
+                    {
+                        ttChDir("src");
+                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                            break;
+                        else
+                            ttChDir("..");
+                    }
+
+                    if (ttDirExists("source"))
+                    {
+                        ttChDir("source");
+                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                            break;
+                        else
+                            ttChDir("..");
+                    }
+
+                    /*
+                        It's unusual, but possible for there to be a sub-directory with the same name as the root
+                        directory:
+
+                        foo
+                            foo -- src for foo.lib
+                            bar -- src for bar.lib
+                            app -- src for some related app
+
+                    */
+
+                    if (ttDirExists(ttFindFilePortion(enumLib)))
+                    {
+                        ttChDir(ttFindFilePortion(enumLib));
+                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                            break;
+                        else
+                            ttChDir("..");
+                    }
+
+                    // Any further directory searches should go above this -- once we get here, we can't find a .srcfiles. We go ahead an break
+                    // out of the loop. cSrcFiles.ReadFile() will fail -- we'll use whatever error reporting (if any) it uses for a file that
+                    // cannot be found or read.
+
+                    break;
+                }
+            }
+
             CSrcFiles cSrcFiles;
             if (cSrcFiles.ReadFile())
             {
