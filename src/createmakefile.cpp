@@ -73,14 +73,12 @@ bool CNinja::CreateMakeFile()
                 }
             }
 
-            if (GetBuildLibs())
+            if (m_dlstTargetDir.GetCount())
             {
-                ttCEnumStr cEnumStr(GetBuildLibs(), ';');
-
-                while (cEnumStr.Enum())
+                for (size_t pos = 0; m_dlstTargetDir.InRange(pos); ++pos)
                 {
                     ttCStr cszTarget;
-                    cszTarget.printf(" %s%s ", ttFindFilePortion(cEnumStr), bDebugTarget ? "D" : "");
+                    cszTarget.printf(" %s%s ", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");
 
                     // Line is "release: project" so we simply replace the first space with our additional target (which
                     // begins and ends with a space)
@@ -94,13 +92,12 @@ bool CNinja::CreateMakeFile()
 
                 // Now that we've added the targets to the release: or debug: line, we need to add the rule
 
-                cEnumStr.SetNewStr(GetBuildLibs(), ';');
-                while (cEnumStr.Enum())
+                for (size_t pos = 0; m_dlstTargetDir.InRange(pos); ++pos)
                 {
-                    kfOut.printf("\n%s%s:\n", ttFindFilePortion(cEnumStr), bDebugTarget ? "D" : "");    // the rule
+                    kfOut.printf("\n%s%s:\n", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");    // the rule
 
                     // The leading \t before the command is required or make will fail
-                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", (const char*) cEnumStr, bDebugTarget ? "D" : "");
+                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", m_dlstTargetDir.GetValAt(pos), bDebugTarget ? "D" : "");
                 }
             }
             else

@@ -1108,6 +1108,12 @@ void CNinja::ProcessBuildLibs()
             CSrcFiles cSrcFiles;
             if (cSrcFiles.ReadFile())
             {
+                ttCStr cszCurDir;
+                cszCurDir.GetCWD();
+                ttCStr cszRelDir;
+                ttConvertToRelative(cszSaveCwd, cszCurDir, cszRelDir);
+                m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), cszRelDir);
+
                 const char* pszLib;
 
                 pszLib = cSrcFiles.GetTargetDebug32();
