@@ -1,6 +1,8 @@
 # Directories to ignore
+bin/
 bin32/
 bin64/
+lib/
 lib32/
 lib64
 build/
