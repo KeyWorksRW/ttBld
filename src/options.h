@@ -8,17 +8,24 @@
 
 #pragma once
 
+#ifndef __TTNINJA_OPTIONS_H__
+#define __TTNINJA_OPTIONS_H__
+
 #include <ttarray.h>    // ttCArray
 
-namespace sfopt {           // .srcfiles otpions
+namespace sfopt
+{           // .srcfiles otpions
+
+    extern const char* txtNinjaVerFormat; // "# Requires MakeNinja version %d.%d.%d or higher to process";
+
     typedef enum
     {
         OPT_ERROR = 0,
 
         OPT_PROJECT,        // name of the project--will be used as the base target name (i.e., project: foo, target: foo.exe, fooD.exe, etc.)
+        OPT_EXE_TYPE,       // [window | console | lib | dll]
         OPT_PCH,            // name of precompiled header file, or "none" if not using precompiled headers
         OPT_PCH_CPP,        // source file used to build precompiled header (default uses same name as PCH option)
-        OPT_EXE_TYPE,       // [window | console | lib | dll]
 
         // The following are boolean options (true or false)
 
@@ -28,7 +35,6 @@ namespace sfopt {           // .srcfiles otpions
         OPT_MS_LINKER,      // use link.exe even when compiling with CLANG
         OPT_MS_RC,          // use rc.exe even when compiling with CLANG
 
-//        OPT_STATIC_CRT,     // true means link to static CRT in all builds
         OPT_STATIC_CRT_REL, // true means link to static CRT in release builds
         OPT_STATIC_CRT_DBG, // true means link to static CRT in debug builgs
 
@@ -69,11 +75,12 @@ namespace sfopt {           // .srcfiles otpions
         OPT_LIBS,           // additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
         OPT_LIBS_REL,       // additional libraries to link to in release builds
         OPT_LIBS_DBG,       // additional libraries to link to in debug builds
-        OPT_IDE,            // [CodeBlocks CodeLite VisualStudio] -- specifies one or more IDE go generate project files for
         OPT_MAKEFILE,       // [never | missing | always] -- default, if not specified, is missing
         OPT_OPTIMIZE,       // [space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues) -- default, if not specified, is space
         OPT_WARN_LEVEL,     // [1-4] default, if not specified, is 4
         OPT_BUILD_LIBS,     // libraries that need to be built (added to makefile generation)
+
+        OPT_XGET_FLAGS,
 
         OPT_OVERFLOW
     } OPT_INDEX;
@@ -97,6 +104,14 @@ namespace sfopt {           // .srcfiles otpions
         bool    bRequired;
     } OPT_UPDATE;
 
+    typedef struct
+    {
+        OPT_INDEX opt;
+        int major;
+        int minor;
+        int sub;
+    } OPT_VERSION;
+
 } // end of sfopt namespace
 
 class CSrcOptions
@@ -105,7 +120,7 @@ public:
     CSrcOptions();
     ~CSrcOptions();
 
-    // Class functions
+    // Public functions
 
     const char* GetOption(sfopt::OPT_INDEX index);
     bool        GetBoolOption(sfopt::OPT_INDEX index);
@@ -115,16 +130,22 @@ public:
     bool        GetRequired(sfopt::OPT_INDEX index);    // returns true if the option is required
     void        SetRequired(sfopt::OPT_INDEX index, bool bVal = true);
 
-    bool UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);  // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
-    bool UpdateOption(sfopt::OPT_INDEX index, bool bVal);
-    bool UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment);
+    sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);  // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
+    sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, bool bVal);
+    sfopt::OPT_INDEX UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment);
+
+    const sfopt::OPT_VERSION* GetOptionMinVersion(sfopt::OPT_INDEX index);
 
     const sfopt::OPT_SETTING* GetOrgOptions();
 
-protected:
+    const char* GetOptVal(size_t pos) const { return m_aUpdateOpts[pos].pszVal; }
+
+private:
     // Class members
 
     // This structure is similar to OPT_SETTINGS, but is used to store changes to an option
 
     ttCArray<sfopt::OPT_UPDATE> m_aUpdateOpts;
 };
+
+#endif    // __TTNINJA_OPTIONS_H__

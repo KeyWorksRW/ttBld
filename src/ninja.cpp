@@ -26,6 +26,14 @@ const char* aCppExt[] = {
     nullptr
 };
 
+CNinja::CNinja(bool bVsCodeDir) : CBldMaster(bVsCodeDir),
+    // make all ttCList classes use the same sub-heap
+    m_lstBuildLibs32D(m_ttHeap), m_lstBuildLibs64D(m_ttHeap),
+    m_lstBuildLibs32R(m_ttHeap), m_lstBuildLibs64R(m_ttHeap)
+{
+    ProcessBuildLibs();
+}
+
 bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 {
     ttCFile file;
@@ -33,48 +41,47 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
     m_gentype = gentype;
     m_bClang = bClang;
 
-    // Note the resout goes to the same directory in all builds. The actual filename will have a 'D' appended for debug
+    // Note that resout goes to the same directory in all builds. The actual filename will have a 'D' appended for debug
     // builds. Currently, 32 and 64 bit builds of the resource file are identical.
 
-    ttCStr cszBuildDir, cszOutDir, cszResOut, cszScriptFile;
-    cszResOut   = m_bPrivateBuild ? "resout = .private/build/res" : "resout = build/res";
-    cszBuildDir = m_bPrivateBuild ? "builddir = .private/build" : "builddir = build";
+    ttCStr cszResOut("resout = ");
+    cszResOut += GetBldDir();
+    cszResOut.AddTrailingSlash();
+    cszResOut.AppendFileName("res");
 
-    switch (gentype) {
+    ttCStr cszBuildDir("builddir = ");
+    cszBuildDir += GetBldDir();
+
+    ttCStr cszOutDir("outdir = ");
+    cszOutDir += GetBldDir();
+    cszOutDir.AddTrailingSlash();
+
+    ttCStr cszScriptFile(GetBldDir());
+    cszScriptFile.AddTrailingSlash();
+
+    switch (gentype)
+    {
         case GEN_DEBUG32:
-            cszOutDir     = m_bPrivateBuild ? "outdir = .private/build/debug32" : "outdir = build/debug32";
-            cszScriptFile = m_bPrivateBuild ? ".private/build" : "build";
-            cszScriptFile.AppendFileName(m_bClang ? "clangBuild32D.ninja" : "msvcBuild32D.ninja");
+            cszOutDir     += m_bClang ? "clangDebug32"        : "msvcDebug32";
+            cszScriptFile += m_bClang ? "clangBuild32D.ninja" : "msvcBuild32D.ninja";
             break;
 
         case GEN_DEBUG64:
-            cszOutDir     = m_bPrivateBuild ? "outdir = .private/build/debug64" : "outdir = build/debug64";
-            cszScriptFile = m_bPrivateBuild ? ".private/build" : "build";
-            cszScriptFile.AppendFileName(m_bClang ? "clangBuild64D.ninja" : "msvcBuild64D.ninja");
+            cszOutDir     += m_bClang ? "clangDebug64"        : "msvcDebug64";
+            cszScriptFile += m_bClang ? "clangBuild64D.ninja" : "msvcBuild64D.ninja";
             break;
 
         case GEN_RELEASE32:
-            cszOutDir     = m_bPrivateBuild ? "outdir = .private/build/release32" : "outdir = build/release32";
-            cszScriptFile = m_bPrivateBuild ? ".private/build" : "build";
-            cszScriptFile.AppendFileName(m_bClang ? "clangBuild32.ninja" : "msvcBuild32.ninja");
+            cszOutDir     += m_bClang ? "clangRelease32"     : "msvcRelease32";
+            cszScriptFile += m_bClang ? "clangBuild32.ninja" : "msvcBuild32.ninja";
             break;
 
         case GEN_RELEASE64:
         default:
-            cszOutDir     = m_bPrivateBuild ? "outdir = .private/build/release64" : "outdir = build/release64";
-            cszScriptFile = m_bPrivateBuild ? ".private/build" : "build";
-            cszScriptFile.AppendFileName(m_bClang ? "clangBuild64.ninja" : "msvcBuild64.ninja");
+            cszOutDir     += m_bClang ? "clangRelease64"     : "msvcRelease64";
+            cszScriptFile += m_bClang ? "clangBuild64.ninja" : "msvcBuild64.ninja";
             break;
     }
-
-#ifdef LIB_SUPPORT
-    ttCStr cszExtraLib;     // used to specify the exact name/path of the "extra" library (if any)
-    if (GetOption(OPT_LIB_DIRS)) {      // start with the extra lib if there is one
-        cszExtraLib = "$libout/";
-        cszExtraLib += ttFindFilePortion(GetOption(OPT_LIB_DIRS));
-        cszExtraLib.ChangeExtension(".lib");
-    }
-#endif
 
     ttCStr cszProj(GetProjectName());   // If needed, add a suffix to the project name
 
@@ -83,13 +90,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
     // is specified in the matching .def file. The downside, of course, is that without the 'D' only the size of the dll
     // indicates if it is a debug or release version.
 
-    if (IsExeTypeDll()) {
+    if (IsExeTypeDll())
+    {
         if (GetBoolOption(OPT_64BIT_SUFFIX))
             cszProj += "64";
         else if (GetBoolOption(OPT_32BIT_SUFFIX))
             cszProj += "32";
     }
-    else {
+    else
+    {
         if (gentype == GEN_DEBUG64 && GetBoolOption(OPT_64BIT_SUFFIX))
             cszProj += "64D";
         else if (gentype == GEN_RELEASE64 && GetBoolOption(OPT_64BIT_SUFFIX))
@@ -108,30 +117,14 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
     file.WriteEol(cszOutDir);
     file.WriteEol(cszResOut);
 
-#ifdef LIB_SUPPORT
-
-    if (GetOption(OPT_LIB_DIRS)) {
-        cszTmp.Delete();
-        if (gentype == GEN_DEBUG32)
-            cszTmp.printf("libout = build/debugLib32");
-        else if (gentype == GEN_DEBUG64)
-            cszTmp.printf("libout = build/debugLib64");
-        else if (gentype == GEN_RELEASE32)
-            cszTmp.printf("libout = build/releaseLib32");
-        else if (gentype == GEN_RELEASE64)
-            cszTmp.printf("libout = build/releaseLib64");
-        file.WriteEol(cszTmp);
-        file.WriteEol("libres = build/resLib");
-    }
-#endif
-
     file.WriteEol();
 
     WriteCompilerComments();
 
     // Figure out the filenames to use for the source and output for a precompiled header
 
-    if (GetPchHeader()) {
+    if (GetPchHeader())
+    {
         m_cszPCH = GetProjectName();
         m_cszPCH.ChangeExtension(".pch");
 
@@ -139,7 +132,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
         m_cszPCHObj = ttFindFilePortion(m_cszCPP_PCH);
         m_cszPCHObj.ChangeExtension(".obj");
 
-        if (!ttFileExists(m_cszCPP_PCH)) {
+        if (!ttFileExists(m_cszCPP_PCH))
+        {
             ttCStr cszErrorMsg;
             cszErrorMsg.printf("No C++ source file found that matches %s -- precompiled header will not build correctly.\n", GetPchHeader());
             puts(cszErrorMsg);
@@ -187,7 +181,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 
     // Write the build rules for all source files
 
-    for (size_t iPos = 0; iPos < GetSrcFileList()->GetCount(); iPos++) {
+    for (size_t iPos = 0; iPos < GetSrcFileList()->GetCount(); iPos++)
+    {
         ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
         if (!ttStrStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() &&  ttIsSameStrI(cszFile, m_cszCPP_PCH)))   // we already handled resources and pre-compiled headers
             continue;   // we already handled this
@@ -220,28 +215,11 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
         }
     }
 
-#if LIB_SUPPORT
-
-    // Write the build rules for all lib files
-
-    for (size_t iPos = 0; iPos < GetLibFileList()->GetCount(); iPos++) {
-        ttCStr cszFile(ttFindFilePortion(GetLibFileList()->GetAt(iPos)));
-        if (!ttStrStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() && ttIsSameStrI(cszFile, m_cszCPP_PCH)))    // we already handled resources and pre-compiled headers
-            continue;   // we already handled this
-        cszFile.ChangeExtension(".obj");
-
-        if (m_cszPCH.IsNonEmpty())
-            file.printf("build $libout/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetLibFileList()->GetAt(iPos), (char*) m_cszPCHObj);
-        else
-            file.printf("build $libout/%s: compile %s\n\n", (char*) cszFile, ttFindFilePortion(GetLibFileList()->GetAt(iPos)));
-    }
-
-#endif
-
     // Write the build rule for the resource compiler if an .rc file was specified as a source
 
     ttCStr cszRes;
-    if (ttFileExists(GetRcFile())) {
+    if (ttFileExists(GetRcFile()))
+    {
         cszRes = GetRcFile();
         cszRes.RemoveExtension();
         cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ?  "D.res" : ".res");
@@ -250,7 +228,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 
         if (GetRcDepList()->GetCount())
             file.WriteStr(" |");
-        for (size_t nPos = 0; nPos < GetRcDepList()->GetCount(); nPos++) {
+        for (size_t nPos = 0; nPos < GetRcDepList()->GetCount(); nPos++)
+        {
             file.WriteStr(" $\n  ");
             file.WriteStr(GetRcDepList()->Get(nPos));
         }
@@ -259,49 +238,38 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 
     // Write the final build rules to complete the project
 
-#if LIB_SUPPORT
-
-    if (!IsExeTypeLib() && GetOption(OPT_LIB_DIRS)) {   // If an extra library was specified, add it's build rule first
-        file.printf("build %s : lib", (char*) cszExtraLib);
-        for (size_t posLib = 0; posLib < GetLibFileList()->GetCount(); posLib++) {
-            ttCStr cszFile(ttFindFilePortion(GetLibFileList()->GetAt(posLib)));
-            if (!ttStrStrI(cszFile, ".c"))  // we don't care about any type of file that wasn't compiled into an .obj file
-                continue;
-            cszFile.ChangeExtension(".obj");
-            file.printf(" $\n  $libout/%s", (char*) cszFile);
-        }
-        file.WriteEol("\n");
-    }
-
-#endif
-
     WriteMidlTargets();
     WriteLinkTargets(gentype);
 
-    if (!ttDirExists(m_bPrivateBuild ? ".private/build" : "build")) {
-        if (!ttCreateDir(m_bPrivateBuild ? ".private/build" : "build")) {
-            AddError("Unable to create the build directory -- so no place to put the .ninja files!\n");
+    if (!ttDirExists(GetBldDir()))
+    {
+        if (!ttCreateDir(GetBldDir()))
+        {
+            ttCStr cszMsg;
+            cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), GetBldDir());
+            AddError(cszMsg);
             return false;
         }
     }
-
-    // We don't want to touch the build script if it hasn't changed, since that would change the timestamp causing git
-    // and other tools that check timestamp to think something is different.
 
     ttCFile fileOrg;
-    if (fileOrg.ReadFile(cszScriptFile)) {
-        if (!m_bForceOutput && strcmp(fileOrg, file) == 0)
+    if (fileOrg.ReadFile(cszScriptFile))
+    {
+        if (strcmp(fileOrg, file) == 0)    // Only write the build script if something changed
             return false;
-        else if (dryrun.IsEnabled()) {
-            dryrun.NewFile(cszScriptFile);
-            dryrun.DisplayFileDiff(fileOrg, file);
-            return false;   // we didn't actually write anything
+        else if (m_dryrun.IsEnabled())
+        {
+            m_dryrun.NewFile(cszScriptFile);
+            m_dryrun.DisplayFileDiff(fileOrg, file);
+            return false;   // because we didn't write anything
         }
     }
 
-    if (!file.WriteFile(cszScriptFile)) {
+    if (!file.WriteFile(cszScriptFile))
+    {
         ttCStr cszMsg;
-        cszMsg.printf("Cannot write to %s\n", (char*) cszScriptFile);
+        cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), (char*) cszScriptFile);
+        cszMsg += "\n";
         AddError(cszMsg);
         return false;
     }
@@ -310,13 +278,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
 
 void CNinja::WriteCompilerComments()
 {
-    if (!m_bClang) {
+    if (!m_bClang)
+    {
         m_pkfOut->WriteEol("msvc_deps_prefix = Note: including file:\n");
 
         // Write comment section explaining the compiler flags in use
 
         m_pkfOut->WriteEol("# -EHsc\t// Structured exception handling");
-        if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)   {
+        if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
+        {
             m_pkfOut->WriteEol("# -GL\t// Whole program optimization");
             m_pkfOut->WriteEol("# -GS-\t// Turn off buffer security checks");
             if (GetBoolOption(OPT_STDCALL))
@@ -332,7 +302,8 @@ void CNinja::WriteCompilerComments()
             else
                 m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
         }
-        else {  // Presumably GEN_DEBUG32 or GEN_DEBUG64
+        else  // Presumably GEN_DEBUG32 or GEN_DEBUG64
+        {
             if (GetBoolOption(OPT_STATIC_CRT_DBG))
                 m_pkfOut->WriteEol("# -MTd\t// Multithreaded debug dll (MSVCRTD)");
             else
@@ -340,13 +311,15 @@ void CNinja::WriteCompilerComments()
             m_pkfOut->WriteEol("# -Z7\t// produces object files with full symbolic debugging information");
         }
     }
-    else if (m_bClang) {
+    else if (m_bClang)
+    {
         m_pkfOut->WriteEol("msvc_deps_prefix = Note: including file:\n");
 
         // Write comment section explaining the compiler flags in use
 
         m_pkfOut->WriteEol("# -EHsc\t// Structured exception handling");
-        if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)   {
+        if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
+        {
             if (GetBoolOption(OPT_STDCALL))
                 m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
             if (GetBoolOption(OPT_STATIC_CRT_REL))
@@ -360,7 +333,8 @@ void CNinja::WriteCompilerComments()
             else
                 m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
         }
-        else {  // Presumably GEN_DEBUG32 or GEN_DEBUG64
+        else              // Presumably GEN_DEBUG32 or GEN_DEBUG64
+        {
             if (GetBoolOption(OPT_STATIC_CRT_DBG))
                 m_pkfOut->WriteEol("# -MTd\t// Multithreaded debug dll (MSVCRTD)");
             else
@@ -399,51 +373,59 @@ void CNinja::WriteCompilerFlags()
                 IsOptimizeSpeed() ? " -O2" : " -O1"
             );
 
-    if (GetOption(OPT_INC_DIRS)) {
+    if (GetOption(OPT_INC_DIRS))
+    {
         ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
-        while (cEnumStr.Enum()) {
+        while (cEnumStr.Enum())
             m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
-        }
     }
 
-    if (GetOption(OPT_CFLAGS_CMN)) {
+    if (GetOption(OPT_CFLAGS_CMN))
+    {
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_CMN));
     }
-    if (GetOption(OPT_CFLAGS_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)) {
+    if (GetOption(OPT_CFLAGS_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+    {
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_REL));
     }
-    if (GetOption(OPT_CFLAGS_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)) {
+    if (GetOption(OPT_CFLAGS_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
+    {
         m_pkfOut->WriteChar(' ');
-        m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_REL));
+        m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_DBG));
     }
 
     // Now write out the compiler-specific flags
 
-    if (!m_bClang) {
+    if (!m_bClang)
+    {
         if (GetBoolOption(OPT_PERMISSIVE))
             m_pkfOut->WriteStr(" -permissive-");
         if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
             m_pkfOut->WriteStr(" -GL"); // whole program optimization
     }
 
-    else if (m_bClang) {
+    else if (m_bClang)
+    {
         m_pkfOut->WriteStr(" -D__clang__"); // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
         m_pkfOut->WriteStr(" -fms-compatibility-version=19");   // Version of MSVC to be compatible with
         m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" : " -m32"); // specify the platform
         if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
             m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");   // whole program optimization
 
-        if (GetOption(OPT_CLANG_CMN)) {
+        if (GetOption(OPT_CLANG_CMN))
+        {
             m_pkfOut->WriteChar(' ');
             m_pkfOut->WriteStr(GetOption(OPT_CLANG_CMN));
         }
-        if (GetOption(OPT_CLANG_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)) {
+        if (GetOption(OPT_CLANG_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+        {
             m_pkfOut->WriteChar(' ');
             m_pkfOut->WriteStr(GetOption(OPT_CLANG_REL));
         }
-        if (GetOption(OPT_CLANG_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)) {
+        if (GetOption(OPT_CLANG_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
+        {
             m_pkfOut->WriteChar(' ');
             m_pkfOut->WriteStr(GetOption(OPT_CLANG_DBG));
         }
@@ -457,8 +439,10 @@ void CNinja::WriteCompilerFlags()
 
 void CNinja::WriteCompilerDirectives()
 {
-    if (!m_bClang) {
-        if (GetPchHeader()) {
+    if (!m_bClang)
+    {
+        if (GetPchHeader())
+        {
             m_pkfOut->printf(
                     "rule compilePCH\n"
                     "  deps = msvc\n"
@@ -471,7 +455,8 @@ void CNinja::WriteCompilerDirectives()
 
         // Write compile directive
 
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)   {
+        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+        {
             m_pkfOut->printf(
                     "rule compile\n"
                     "  deps = msvc\n"
@@ -480,7 +465,8 @@ void CNinja::WriteCompilerDirectives()
                     GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : ""
                     );
         }
-        else {
+        else
+        {
             m_pkfOut->printf(
                     "rule compile\n"
                     "  deps = msvc\n"
@@ -491,8 +477,10 @@ void CNinja::WriteCompilerDirectives()
         }
         m_pkfOut->WriteEol("  description = compiling $in\n");
     }
-    else if (m_bClang) {
-        if (GetPchHeader()) {
+    else if (m_bClang)
+    {
+        if (GetPchHeader())
+        {
             m_pkfOut->printf(
                     "rule compilePCH\n"
                     "  deps = msvc\n"
@@ -505,7 +493,8 @@ void CNinja::WriteCompilerDirectives()
 
         // Write compile directive
 
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)   {
+        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+        {
             m_pkfOut->printf(
                     "rule compile\n"
                     "  deps = msvc\n"   // clang-cl supports -showIncludes, same as msvc
@@ -514,7 +503,8 @@ void CNinja::WriteCompilerDirectives()
                     GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : ""
                     );
         }
-        else {
+        else
+        {
             m_pkfOut->printf(
                     "rule compile\n"
                     "  deps = msvc\n"
@@ -532,232 +522,116 @@ void CNinja::WriteLinkDirective()
     if (IsExeTypeLib())
         return; // lib directive should be used if the project is a library
 
-    if (!m_bClang || GetBoolOption(OPT_MS_LINKER)) {
-        ttCStr cszRule("rule link\n  command = link.exe /OUT:$out /NOLOGO /MANIFEST:NO");
-        cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /MACHINE:x64" : " /MACHINE:x86");
+    ttCStr cszRule("rule link\n  command = ");
 
-        if (GetOption(OPT_LINK_CMN)) {
-            cszRule += " ";
-            cszRule += GetOption(OPT_LINK_CMN);
-        }
-        if (GetOption(OPT_LINK_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)) {
-            cszRule += " ";
-            cszRule += GetOption(OPT_LINK_REL);
-        }
+    if (GetBoolOption(OPT_MS_LINKER))
+        cszRule += "link.exe /nologo";
+    else
+        cszRule += m_bClang ? "lld-link.exe" : "link.exe /nologo";
 
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) {
-            if (GetOption(OPT_LINK_DBG)) {
-                cszRule += " ";
-                cszRule += GetOption(OPT_LINK_DBG);
-            }
+    cszRule += " /out:$out /manifest:no";
+    if (IsExeTypeDll())
+        cszRule += " /dll";
+    cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /machine:x64" : " /machine:x86");
 
-            if (GetOption(OPT_NATVIS)) {
-                cszRule += " /NATVIS:";
-                cszRule += GetOption(OPT_NATVIS);
-            }
-            cszRule +=" /DEBUG /PDB:$outdir/";
-            cszRule += GetProjectName();
-            cszRule += ".pdb";
-        }
-        else
-            cszRule += " /LTCG /OPT:REF /OPT:ICF";
-
-        cszRule += IsExeTypeConsole() ? " /SUBSYSTEM:CONSOLE" : " /SUBSYSTEM:WINDOWS";
-
-        if (GetOption(OPT_LIB_DIRS)) {
-            ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
-            while (enumLib.Enum()) {
-                cszRule += " /LIBPATH:";
-                cszRule += enumLib;
-            }
-        }
-
-        if (GetOption(OPT_LIBS))
-        {
-            ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
-            while (enumLib.Enum()) {
-                ttCStr cszLib;
-                GetLibName(enumLib, cszLib);
-                cszRule += " ";
-                cszRule += cszLib;
-            }
-        }
-
-        if (GetOption(OPT_LIBS_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
-        {
-            ttCEnumStr enumLib(GetOption(OPT_LIBS_DBG), ';');
-            while (enumLib.Enum()) {
-                cszRule += " ";
-                cszRule += enumLib;
-            }
-        }
-
-        if (GetOption(OPT_LIBS_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
-        {
-            ttCEnumStr enumLib(GetOption(OPT_LIBS_REL), ';');
-            while (enumLib.Enum()) {
-                cszRule += " ";
-                cszRule += enumLib;
-            }
-        }
-
-        if (GetBuildLibs()) {
-            ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
-            ttCStr cszSaveCwd;
-            cszSaveCwd.GetCWD();
-
-            while (enumLib.Enum())
-            {
-                ttChDir(cszSaveCwd);    // cEnumStr may be relative to this directory
-                ttChDir(enumLib);
-                CSrcFiles cSrcFiles;
-                if (cSrcFiles.ReadFile())
-                {
-                    ttCStr cszLib(cSrcFiles.GetProjectName());
-                    switch (m_gentype)
-                    {
-                        case GEN_DEBUG32:
-                            cszLib += !ttStrStr(cszLib, "32") ? "32D.lib" : "D.lib";
-                            break;
-                        case GEN_DEBUG64:
-                            cszLib += !ttStrStr(cszLib, "64") ? "64D.lib" : "D.lib";
-                            break;
-                        case GEN_RELEASE32:
-                            cszLib += !ttStrStr(cszLib, "32") ? "32.lib" : ".lib";
-                            break;
-                        case GEN_RELEASE64:
-                        default:
-                            cszLib += !ttStrStr(cszLib, "64") ? "64.lib" : ".lib";
-                            break;
-                    }
-                    cszRule += " ";
-                    cszRule += cszLib;
-                }
-            }
-            ttChDir(cszSaveCwd);
-        }
-
-        cszRule += " $in";
-        m_pkfOut->WriteEol(cszRule);
-        m_pkfOut->WriteEol("  description = linking $out\n");
+    if (GetOption(OPT_LINK_CMN))
+    {
+        cszRule += " ";
+        cszRule += GetOption(OPT_LINK_CMN);
     }
-    else if (m_bClang) {
-        ttCStr cszRule("rule link\n  command = lld-link.exe");
-        if (IsExeTypeDll())
-            cszRule += " /dll";
-        cszRule += " /out:$out /manifest:no";
-        cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /machine:x64" : " /machine:x86");
-
-        if (GetOption(OPT_LINK_CMN)) {
-            cszRule += " ";
-            cszRule += GetOption(OPT_LINK_CMN);
-        }
-
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)   {
-            if (GetOption(OPT_NATVIS)) {
-                cszRule += " /natvis:";
-                cszRule += GetOption(OPT_NATVIS);
-            }
-            cszRule +=" /debug /pdb:$outdir/";
-            cszRule += GetProjectName();
-            cszRule += ".pdb";
-        }
-        else {
-            // MSVC -LTCG option is not supported by lld
-            cszRule += " /opt:ref /opt:icf";
-        }
-        cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
-
-        if (GetOption(OPT_LIB_DIRS)) {
-            ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
-            while (enumLib.Enum()) {
-                cszRule += " /LIBPATH:";
-                cszRule += enumLib;
-            }
-        }
-
-        if (GetOption(OPT_LIBS))
-        {
-            ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
-            while (enumLib.Enum()) {
-                ttCStr cszLib;
-                GetLibName(enumLib, cszLib);
-                cszRule += " ";
-                cszRule += cszLib;
-            }
-        }
-
-        if (GetOption(OPT_LIBS_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
-        {
-            ttCEnumStr enumLib(GetOption(OPT_LIBS_DBG), ';');
-            while (enumLib.Enum()) {
-                cszRule += " ";
-                cszRule += enumLib;
-            }
-        }
-
-        if (GetOption(OPT_LIBS_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
-        {
-            ttCEnumStr enumLib(GetOption(OPT_LIBS_REL), ';');
-            while (enumLib.Enum()) {
-                cszRule += " ";
-                cszRule += enumLib;
-            }
-        }
-
-        if (GetBuildLibs()) {
-            ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
-            ttCStr cszSaveCwd;
-            cszSaveCwd.GetCWD();
-
-            while (enumLib.Enum())
-            {
-                ttChDir(cszSaveCwd);    // cEnumStr may be relative to this directory
-                ttChDir(enumLib);
-                CSrcFiles cSrcFiles;
-                if (cSrcFiles.ReadFile())
-                {
-                    ttCStr cszLib(cSrcFiles.GetProjectName());
-                    switch (m_gentype)
-                    {
-                        case GEN_DEBUG32:
-                            cszLib += !ttStrStr(cszLib, "32") ? "32D.lib" : "D.lib";
-                            break;
-                        case GEN_DEBUG64:
-                            cszLib += !ttStrStr(cszLib, "64") ? "64D.lib" : "D.lib";
-                            break;
-                        case GEN_RELEASE32:
-                            cszLib += !ttStrStr(cszLib, "32") ? "32.lib" : ".lib";
-                            break;
-                        case GEN_RELEASE64:
-                        default:
-                            cszLib += !ttStrStr(cszLib, "64") ? "64.lib" : ".lib";
-                            break;
-                    }
-                    cszRule += " ";
-                    cszRule += cszLib;
-                }
-            }
-            ttChDir(cszSaveCwd);
-        }
-
-        cszRule += " $in";
-        m_pkfOut->WriteEol(cszRule);
-        m_pkfOut->WriteEol("  description = linking $out\n");
+    if (GetOption(OPT_LINK_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+    {
+        cszRule += " ";
+        cszRule += GetOption(OPT_LINK_REL);
     }
+
+    if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+    {
+        if (GetOption(OPT_LINK_DBG))
+        {
+            cszRule += " ";
+            cszRule += GetOption(OPT_LINK_DBG);
+        }
+
+        if (GetOption(OPT_NATVIS))
+        {
+            cszRule += " /natvis:";
+            cszRule += GetOption(OPT_NATVIS);
+        }
+        cszRule +=" /debug /pdb:$outdir/";
+        cszRule += GetProjectName();
+        cszRule += ".pdb";
+    }
+    else
+    {
+        cszRule += " /opt:ref /opt:icf";
+        if (!m_bClang)
+            cszRule += " /ltcg";    // whole program optimization, MSVC only
+    }
+    cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
+
+    if (GetOption(OPT_LIB_DIRS))
+    {
+        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
+        while (enumLib.Enum())
+        {
+            cszRule += " /LIBPATH:";
+            cszRule += enumLib;
+        }
+    }
+
+    if (GetOption(OPT_LIBS))
+    {
+        ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
+        while (enumLib.Enum())
+        {
+            ttCStr cszLib;
+            GetLibName(enumLib, cszLib);
+            cszRule += " ";
+            cszRule += cszLib;
+        }
+    }
+
+    if (GetOption(OPT_LIBS_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
+    {
+        ttCEnumStr enumLib(GetOption(OPT_LIBS_DBG), ';');
+        while (enumLib.Enum())
+        {
+            cszRule += " ";
+            cszRule += enumLib;
+        }
+    }
+
+    if (GetOption(OPT_LIBS_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+    {
+        ttCEnumStr enumLib(GetOption(OPT_LIBS_REL), ';');
+        while (enumLib.Enum())
+        {
+            cszRule += " ";
+            cszRule += enumLib;
+        }
+    }
+
+    cszRule += " $in";
+    m_pkfOut->WriteEol(cszRule);
+    m_pkfOut->WriteEol("  description = linking $out\n");
 }
 
 void CNinja::WriteLibDirective()
 {
-    if (!m_bClang) {
-        if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))  {
+    if (!m_bClang)
+    {
+        if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))
+        {
             m_pkfOut->printf("rule lib\n  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in\n",
                 (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
             m_pkfOut->WriteEol("  description = creating library $out\n");
         }
     }
-    else if (m_bClang) {
-        if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))  {
+    else if (m_bClang)
+    {
+        if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))
+        {
             // MSVC -LTCG option is not supported by lld
             m_pkfOut->printf("rule lib\n  command = lld-link.exe /lib /machine:%s /out:$out $in\n",
                 (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
@@ -768,24 +642,29 @@ void CNinja::WriteLibDirective()
 
 void CNinja::WriteRcDirective()
 {
-    if (ttFileExists(GetRcFile())) {
+    if (ttFileExists(GetRcFile()))
+    {
         if (m_bClang && !GetBoolOption(OPT_MS_RC))
             m_pkfOut->WriteStr("rule rc\n  command = llvm-rc.exe -nologo");
         else
             m_pkfOut->WriteStr("rule rc\n  command = rc.exe -nologo");
 
-        if (GetOption(OPT_RC_CMN)) {
+        if (GetOption(OPT_RC_CMN))
+        {
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_RC_CMN));
         }
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)   {
+        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+        {
             m_pkfOut->WriteStr(" -d_DEBUG");
-            if (GetOption(OPT_RC_DBG)) {
+            if (GetOption(OPT_RC_DBG))
+            {
                 m_pkfOut->WriteChar(CH_SPACE);
                 m_pkfOut->WriteStr(GetOption(OPT_RC_DBG));
             }
         }
-        else if ((m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64) && GetOption(OPT_RC_REL)) {
+        else if ((m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64) && GetOption(OPT_RC_REL))
+        {
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_RC_REL));
         }
@@ -795,24 +674,29 @@ void CNinja::WriteRcDirective()
 
 void CNinja::WriteMidlDirective(GEN_TYPE gentype)
 {
-    if (m_lstIdlFiles.GetCount()) {
+    if (m_lstIdlFiles.GetCount())
+    {
         if (gentype == GEN_DEBUG64 || gentype == GEN_RELEASE64)
             m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /x64");
         else
             m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /win32");
 
-        if (GetOption(OPT_MDL_CMN)) {
+        if (GetOption(OPT_MDL_CMN))
+        {
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_MDL_CMN));
         }
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) {
+        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+        {
             // m_pkfOut->WriteStr(" -D_DEBUG");
-            if (GetOption(OPT_MDL_DBG)) {
+            if (GetOption(OPT_MDL_DBG))
+            {
                 m_pkfOut->WriteChar(CH_SPACE);
                 m_pkfOut->WriteStr(GetOption(OPT_MDL_DBG));
             }
         }
-        else if ((m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64) && GetOption(OPT_MDL_REL)) {
+        else if ((m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64) && GetOption(OPT_MDL_REL))
+        {
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_MDL_REL));
         }
@@ -827,7 +711,8 @@ void CNinja::WriteMidlTargets()
     // compiler. We create the header file as a target, and a phony rule for the typelib pointing to the header file
     // target.
 
-    for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos) {
+    for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos)
+    {
         ttCStr cszTypeLib(m_lstIdlFiles[pos]);
         cszTypeLib.ChangeExtension(".tlb");
         ttCStr cszHeader(m_lstIdlFiles[pos]);
@@ -844,7 +729,8 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
     // this would be to add support for an "OutPrefix: ../" option in .srcfiles.
 
     const char* pszTarget;
-    switch (gentype) {
+    switch (gentype)
+    {
         case GEN_DEBUG32:
             pszTarget = GetTargetDebug32();
             break;
@@ -860,14 +746,13 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
             break;
     }
 
-    if (IsExeTypeLib()) {
+    if (IsExeTypeLib())
         m_pkfOut->printf("build %s : lib", pszTarget);
-    }
-    else {
+    else
         m_pkfOut->printf("build %s : link", pszTarget);
-    }
 
-    if (ttFileExists(GetRcFile())) {
+    if (ttFileExists(GetRcFile()))
+    {
         ttCStr cszRes(GetRcFile());
         cszRes.RemoveExtension();
         cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ?  "D.res" : ".res");
@@ -875,7 +760,8 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
     }
 
     bool bPchSeen = false;
-    for (size_t iPos = 0; iPos < getSrcCount(); iPos++) {
+    for (size_t iPos = 0; iPos < getSrcCount(); iPos++)
+    {
         ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
         if (!ttStrStrI(cszFile, ".c"))  // we don't care about any type of file that wasn't compiled into an .obj file
             continue;
@@ -890,6 +776,30 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 
     if (!bPchSeen && m_cszPCHObj.IsNonEmpty())
         m_pkfOut->printf(" $\n  $outdir/%s", (char*) m_cszPCHObj);
+
+    switch (gentype)
+    {
+        case GEN_DEBUG32:
+            for (size_t pos = 0; m_lstBuildLibs32D.InRange(pos); ++pos)
+                m_pkfOut->printf(" $\n  %s", (char*) m_lstBuildLibs32D[pos]);
+            break;
+
+        case GEN_DEBUG64:
+            for (size_t pos = 0; m_lstBuildLibs64D.InRange(pos); ++pos)
+                m_pkfOut->printf(" $\n  %s", (char*) m_lstBuildLibs64D[pos]);
+            break;
+
+        case GEN_RELEASE32:
+            for (size_t pos = 0; m_lstBuildLibs32R.InRange(pos); ++pos)
+                m_pkfOut->printf(" $\n  %s", (char*) m_lstBuildLibs32R[pos]);
+            break;
+
+        case GEN_RELEASE64:
+        default:
+            for (size_t pos = 0; m_lstBuildLibs64R.InRange(pos); ++pos)
+                m_pkfOut->printf(" $\n  %s", (char*) m_lstBuildLibs64R[pos]);
+            break;
+    }
 
     if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) && GetOption(OPT_NATVIS))
         m_pkfOut->printf(" $\n  | %s", GetOption(OPT_NATVIS));
@@ -907,7 +817,8 @@ void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
     // Note that if the path to the library contains a "64" or "32" then the "64" suffix is not added. I.e., ../ttLib/lib64/ttLib will turn
     // into ttLibD.lib not ttLib64D.lib. Otherwise we always add a platform suffix (64 or 32).
 
-    switch (gentype) {
+    switch (gentype)
+    {
         case GEN_DEBUG32:
             cszLib += !ttStrStr(cszLib, "32") ? "32D.lib" : "D.lib";
             break;
@@ -923,25 +834,8 @@ void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
             break;
     }
 
-#if 1
     m_pkfOut->WriteChar(CH_SPACE);
     m_pkfOut->WriteStr(cszLib);
-#else
-    // [randalphwa - 12/5/2018] The problem with this code is that it can mess up a valid library name if the library
-    // doesn't exist when MakeNinja is being run. That can result in "foo64D.lib" being turned into "foo.lib" which is
-    // probably the wrong platform version.
-
-    if (FileExists(cszLib)) {
-        m_pkfOut->WriteChar(CH_SPACE);
-        m_pkfOut->WriteStr(cszLib);
-    }
-    else {
-        cszLib = pszLib;
-        cszLib.ChangeExtension(".lib");
-        m_pkfOut->WriteChar(CH_SPACE);
-        m_pkfOut->WriteStr(cszLib);
-    }
-#endif
 }
 
 // Some libraries will have suffixes appended to the base name to indicate platform and debug versions. If we can find such
@@ -985,7 +879,8 @@ void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
     if (GetOption(OPT_LIB_DIRS))
     {
         ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
-        while (enumLib.Enum()) {
+        while (enumLib.Enum())
+        {
             ttCStr cszPath(enumLib);
             cszPath.AppendFileName(cszLibName);
             if (ttFileExists(cszPath))
@@ -1016,4 +911,87 @@ void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
     cszLibName = pszBaseName;
     if (!ttStrChr(cszLibName, '.'))
         cszLibName += cszExt;
+}
+
+void CNinja::ProcessBuildLibs()
+{
+    if (GetBuildLibs())
+    {
+        ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
+        ttCStr cszSaveCwd;
+        cszSaveCwd.GetCWD();
+
+        while (enumLib.Enum())
+        {
+            // Change to the directory that should contain a .srcfiles and read it
+
+            if (!ttChDir(enumLib))
+            {
+                ttCStr cszMsg;
+                cszMsg.printf(GETSTRING(IDS_LIB_DIR_FAIL), (char*) enumLib);
+                cszMsg += "\n";
+                AddError(cszMsg);
+                continue;
+            }
+
+            CSrcFiles cSrcFiles;
+            if (cSrcFiles.ReadFile())
+            {
+                const char* pszLib;
+
+                pszLib = cSrcFiles.GetTargetDebug32();
+                if (pszLib)
+                {
+                    ttCStr cszLibDir;
+                    cszLibDir.GetCWD();
+                    cszLibDir.AppendFileName(pszLib);
+                    cszLibDir.FullPathName();
+                    ttCStr cszRelLib;
+                    ttConvertToRelative(cszSaveCwd, cszLibDir, cszRelLib);
+                    m_lstBuildLibs32D += cszRelLib;
+                }
+
+                pszLib = cSrcFiles.GetTargetDebug64();
+                if (pszLib)
+                {
+                    ttCStr cszLibDir;
+                    cszLibDir.GetCWD();
+                    cszLibDir.AppendFileName(pszLib);
+                    cszLibDir.FullPathName();
+                    ttCStr cszRelLib;
+                    ttConvertToRelative(cszSaveCwd, cszLibDir, cszRelLib);
+                    m_lstBuildLibs64D += cszRelLib;
+                }
+
+                pszLib = cSrcFiles.GetTargetRelease32();
+                if (pszLib)
+                {
+                    ttCStr cszLibDir;
+                    cszLibDir.GetCWD();
+                    cszLibDir.AppendFileName(pszLib);
+                    cszLibDir.FullPathName();
+                    ttCStr cszRelLib;
+                    ttConvertToRelative(cszSaveCwd, cszLibDir, cszRelLib);
+                    m_lstBuildLibs32R += cszRelLib;
+                }
+
+                pszLib = cSrcFiles.GetTargetRelease64();
+                if (pszLib)
+                {
+                    ttCStr cszLibDir;
+                    cszLibDir.GetCWD();
+                    cszLibDir.AppendFileName(pszLib);
+                    cszLibDir.FullPathName();
+                    ttCStr cszRelLib;
+                    ttConvertToRelative(cszSaveCwd, cszLibDir, cszRelLib);
+                    m_lstBuildLibs64R += cszRelLib;
+                }
+            }
+
+            // Change back to our original directory since library paths will be relative to our master directory, not to
+            // each other
+
+            ttChDir(cszSaveCwd);
+        }
+    }
 }

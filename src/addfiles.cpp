@@ -13,7 +13,6 @@
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
-#include "strtable.h"   // String resource IDs
 
 void AddFiles(ttCList& lstFiles, bool bDryRun)
 {
@@ -27,7 +26,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     if (!cSrcFiles.ReadFile())
     {
         ttCStr cszMsg;
-        cszMsg.printf(IDS_CANNOT_LOCATE, (char*) cSrcFiles.m_cszSrcFilePath);
+        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), (char*) cSrcFiles.m_cszSrcFilePath);
         puts(cszMsg);
         return;
     }
@@ -36,7 +35,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     {
         if (cSrcFiles.m_lstSrcFiles.Find(lstFiles[pos]))
         {
-            printf("%s already in .srcfiles\n", lstFiles[pos]);
+            printf(GETSTRING(IDS_NINJA_ALREAY_IN_FILES), lstFiles[pos]);
             cSrcFiles.m_lstSrcFiles.Remove(pos);
         }
     }
@@ -47,7 +46,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     if (!kfIn.ReadFile(cSrcFiles.m_cszSrcFilePath))
     {
         ttCStr cszMsg;
-        cszMsg.printf(IDS_CS_CANNOT_OPEN, (char*) cSrcFiles.m_cszSrcFilePath);
+        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), (char*) cSrcFiles.m_cszSrcFilePath);
         puts(cszMsg);
         return;
     }
@@ -63,7 +62,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         {
             if (!ttFileExists(lstFiles[pos]))
             {
-                printf("%s doesn't exist -- not added\n", lstFiles[pos]);
+                printf(GETSTRING(IDS_NINJA_FILE_NOT_ADDED), lstFiles[pos]);
                 continue;
             }
             kfOut.printf("  %s\n", lstFiles[pos]);
@@ -71,16 +70,11 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         }
         if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
         {
-            puts("Cannot write to .srcfiles!");
+            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, ".srcfiles");
             return;
         }
 
-        // Use ttCStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files -- 1
-        // file is singular
-
-        ttCStr cszResults;
-        cszResults.printf("%u file%ks added.", cFilesAdded, cFilesAdded);
-        puts(cszResults);
+        printf(GETSTRING(IDS_NINJA_FILES_ADDED), cFilesAdded);
         return;
     }
 
@@ -104,7 +98,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     {
         if (!ttFileExists(lstFiles[pos]))
         {
-            printf("%s doesn't exist -- not added\n", lstFiles[pos]);
+            printf(GETSTRING(IDS_NINJA_FILE_NOT_ADDED), lstFiles[pos]);
             continue;
         }
         kfOut.printf("  %s\n", lstFiles[pos]);
@@ -127,14 +121,9 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 
     if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
     {
-        printf(ttGetResString(IDS_CS_CANT_WRITE), cSrcFiles.GetSrcFiles());
-        puts("Cannot write to .srcfiles!");
+        printf(GETSTRING(IDS_NINJA_CANT_WRITE), cSrcFiles.GetSrcFiles());
         return;
     }
 
-    // Use ttCStr to print the count to properly add the "s" to "file" as needed. I.e., 0 files, 1 file, 2 files
-
-    ttCStr cszResults;
-    cszResults.printf("%u file%ks added.", cFilesAdded, cFilesAdded);
-    puts(cszResults);
+    printf(GETSTRING(IDS_NINJA_FILES_ADDED), cFilesAdded);
 }

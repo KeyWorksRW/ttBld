@@ -22,14 +22,16 @@ void CDryRun::NewFile(const char* pszFile)
 void CDryRun::DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew)
 {
     if (m_cszFilename.IsNonEmpty())
-        printf("%s dryrun changes:\n", (char*) m_cszFilename);
+        printf(GETSTRING(IDS_NINJA_DRURUN_CHANGES), (char*) m_cszFilename);
 
     fileNew.PrepForReadLine();
-    while (fileNew.ReadLine()) {
+    while (fileNew.ReadLine())
+    {
         fileOrg.ReadLine();
-        if (!ttIsSameStr(fileOrg, fileNew)) {
-            printf("    old: %s\n", (char*) fileOrg);
-            printf("    new: %s\n", (char*) fileNew);
+        if (!ttIsSameStr(fileOrg, fileNew))
+        {
+            printf(GETSTRING(IDS_NINJA_OLD_FILE), (char*) fileOrg);
+            printf(GETSTRING(IDS_NINJA_NEW_FILE), (char*) fileNew);
         }
     }
 }

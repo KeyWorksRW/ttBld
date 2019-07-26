@@ -24,7 +24,7 @@ public:
     void NewFile(const char* pszFile);  // will delete m_lstOut and replace m_cszFilename
     void DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew);
 
-protected:
+private:
     // Class members
 
     ttCStr  m_cszFilename;

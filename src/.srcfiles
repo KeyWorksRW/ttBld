@@ -1,42 +1,53 @@
+# Requires MakeNinja version 1.0.0 or higher to process
+
 Options:
     Project:     MakeNinja    # project name
     exe_type:    console      # [window | console | lib | dll]
     PCH:         pch.h        # "none" or name of header file to use for precompilation
+    LibDirs:     ../;../../ttLib/lib64../../ttLib/lib64    # additional directores for lib files
+    Libs:        ttLib        # additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
 
     64Bit:       true         # generate scripts for 64-bit build
     TargetDir64: ../bin64     # 64-bit target directory
-    32Bit:       true         # generate scripts for 32-bit build
-    TargetDir32: ../bin32     # 32-bit target directory
+#    32Bit:       true         # generate scripts for 64-bit build
+#    TargetDir32: ../bin32     # 64-bit target directory
 
-    IncDirs:    ../ttLib/include;./   # clang needs the "./" to be able to find the pch.h file in modules in the .private/ directory
-    LibDirs:    ../ttLib/lib
-    BuildLibs:  ../ttLib           # libraries that need to be built (added to makefile generation)
+    IncDirs:     ../ttLib/include                  # additional directories for header files
 
-    Natvis:     makeninja.natvis   # Specifies a .natvis file to link into the pdb file
+#    BuildLibs:  ../ttLib   # libraries that need to be built (added to makefile generation)
+
+    Natvis:      makeninja.natvis                  # MSVC Debug visualizer
 
 Files:
     makeninja.rc
+    mainapp.cpp         # entry point, global strings, library pragmas
 
-    addfiles.cpp
-    bldmaster.cpp
-    codelite.cpp
-    convertdlg.cpp
-    createmakefile.cpp
-    csrcfiles.cpp
-    dryrun.cpp
-    init.cpp
-    ninja.cpp
-    options.cpp
-    parsehhp.cpp
-    vcxproj.cpp
-    writesrcfiles.cpp
+    addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
+    bldmaster.cpp       # CBldMaster base class
+    codelite.cpp        # Creates a CodeLite project
+    convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
+    createmakefile.cpp  # CreateMakeFile method for creating a makefile
+    csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
+    dryrun.cpp          # CDryRun class for testing
+    ninja.cpp           # CNinja for creating .ninja scripts
+    options.cpp         # contains all Options strings and CSrcOptions class for working with them
+    parsehhp.cpp        # CParseHHP class for parsing a .hhp file
+    NinjaStringIds.cpp  # Maps IDS_ strings into string to translate
+    vcxproj.cpp         # Creates a Visual Studio project file
+    verninja.cpp        # CVerMakeNinja class
+    vscode.cpp          # Creates/updates .vscode files
+    writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
+    yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
 
 # Modules for creating the Options UI
 
-    dlgoptions.cpp
+    dlgoptions.cpp      # CTabOptions dialog
+
     tabgeneral.cpp
     tabcompiler.cpp
     tabclang.cpp
     tablinker.cpp
     tabrcmidl.cpp
-    tabscripts.cpp
+
+    addfuncname.cpp     # CAddFuncName dialog
+    dlggettext.cpp      # CDlgGetText dialog

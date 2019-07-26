@@ -6,14 +6,9 @@
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-// As a way to ensure that .private/.srcfiles projects works correctly, we conditionalize a private tab to add to the end
-// of the tab list. However, the files to support the tab are not part of this project (which is the whole point of a
-// .private version). See https://github.com/KeyWorksRW/MakeNinja/issues/60 for more information.
-
 #include "pch.h"
 
 #include "ttlibicons.h"
-#include "strtable.h"
 
 #include "dlgoptions.h"
 
@@ -49,21 +44,21 @@ bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun)
         return false;
 }
 
-CTabOptions::CTabOptions() : ttCDlg(IDDLG_OPTIONS)
+CTabOptions::CTabOptions(bool bVsCodeDir) : ttCDlg(IDDLG_OPTIONS), CWriteSrcFiles(bVsCodeDir)
 {
     m_tabGeneral.SetParentClass(this);
     m_tabCompiler.SetParentClass(this);
     m_tabCLang.SetParentClass(this);
     m_tabLinker.SetParentClass(this);
     m_tabRcMidl.SetParentClass(this);
-    m_tabScripts.SetParentClass(this);
-#ifdef PRIVATE
+#ifdef PRIVATE      // used for testing
     m_tabPrivate.SetParentClass(this);
 #endif
 
     ReadFile(); // read in any existing .srcfiles
 
-    if (ttIsEmpty(GetPchHeader())) {
+    if (ttIsEmpty(GetPchHeader()))
+    {
         if (ttFileExists("stdafx.h"))
             UpdateOption(OPT_PCH, "stdafx.h");
         else if (ttFileExists("pch.h"))
@@ -86,39 +81,36 @@ void CTabOptions::OnBegin(void)
     SetBtnIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
     SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
 
-    TC_ITEM ti;
-    ZeroMemory(&ti, sizeof(TC_ITEM));
+    TC_ITEMA ti;
+    ZeroMemory(&ti, sizeof(TC_ITEMA));
     ti.iImage = -1;
 
     ti.mask = TCIF_TEXT;
-    ti.pszText = (char*) ttGetResString(IDS_GENERAL);
+    ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_GENERAL);
 
 #ifdef _DEBUG
     auto result =
 #endif
-    SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_GENERAL, (LPARAM) &ti);
+    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_GENERAL, (LPARAM) &ti);
     ttASSERT(result == 0);
 
-    ti.pszText = (char*) ttGetResString(IDS_TAB_COMPILER);
-    SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_COMPILER, (LPARAM) &ti);
+    ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_COMPILER);
+    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_COMPILER, (LPARAM) &ti);
 
-    ti.pszText = (char*) ttGetResString(IDS_TAB_CLANG);
-    SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_CLANG, (LPARAM) &ti);
+    ti.pszText = (char*) "CLang";   // don't translate this
+    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_CLANG, (LPARAM) &ti);
 
-    ti.pszText = (char*) ttGetResString(IDS_TAB_LINKER);
-    SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_LINKER, (LPARAM) &ti);
+    ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_LINKER);
+    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LINKER, (LPARAM) &ti);
 
-    ti.pszText = (char*) ttGetResString(IDS_TAB_RC_MIDL);
-    SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_RC_MIDL, (LPARAM) &ti);
-
-    ti.pszText = (char*) ttGetResString(IDS_TAB_SCRIPTS);
-    SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_SCRIPTS, (LPARAM) &ti);
+    ti.pszText = (char*) "Rc/Midl";   // don't translate this
+    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_RC_MIDL, (LPARAM) &ti);
 
 #ifdef PRIVATE
     if (ttFileExists(".private/.srcfiles"))
     {
-        ti.pszText = (char*) ttGetResString(IDS_TAB_PRIVATE);
-        SendItemMsg(IDTAB, TCM_INSERTITEM, TAB_PRIVATE, (LPARAM) &ti);
+        ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_PRIVATE);
+        SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_PRIVATE, (LPARAM) &ti);
     }
 #endif
 
@@ -152,11 +144,12 @@ void CTabOptions::SaveChanges()
     if (ttFileExists(m_cszSrcFilePath))
     {
         if (WriteUpdates(m_cszSrcFilePath))
-            printf("%s Options: section updated.\n", GetSrcFiles());
+            printf(GETSTRING(IDS_NINJA_OPTIONS_UPDATED), GetSrcFiles());
     }
-    else {
+    else
+    {
         if (WriteUpdates())
-            printf("%s created.\n", GetSrcFiles());
+            printf(GETSTRING(IDS_NINJA_CREATED), GetSrcFiles());
     }
 }
 
@@ -171,7 +164,8 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
         case TCN_SELCHANGE:
             {
                 auto curTab = SendItemMsg(IDTAB, TCM_GETCURSEL);
-                switch (curTab) {
+                switch (curTab)
+                {
                     case TAB_GENERAL:
                         m_hwndTabSub = m_tabGeneral.DoModeless(*this);
                         break;
@@ -190,10 +184,6 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
 
                     case TAB_RC_MIDL:
                         m_hwndTabSub = m_tabRcMidl.DoModeless(*this);
-                        break;
-
-                    case TAB_SCRIPTS:
-                        m_hwndTabSub = m_tabScripts.DoModeless(*this);
                         break;
 #ifdef PRIVATE
                     case TAB_PRIVATE:

@@ -8,6 +8,9 @@
 
 #pragma once
 
+#ifndef __WRITE_SRCFILES_H__
+#define __WRITE_SRCFILES_H__
+
 #include <ttstr.h>                      // ttStr, ttCWD
 #include <ttlist.h>                     // ttCList, ttCDblList, ttCStrIntList
 
@@ -17,7 +20,7 @@
 class CWriteSrcFiles : public CSrcFiles
 {
 public:
-    CWriteSrcFiles() : CSrcFiles() { m_posOptions = -1; m_posInsert = 0; }
+    CWriteSrcFiles(bool bVsCodeDir = false) : CSrcFiles(bVsCodeDir) { m_posOptions = -1; m_posInsert = 0; }
 
     // Class methods
 
@@ -25,7 +28,8 @@ public:
     bool WriteNew(const char* pszFile, const char* pszCommentHdr = nullptr);    // write complete .srcfiles file (replacing any file that already exists)
 
     ttCList* GetOrgList() { return &m_lstOriginal; }
-    void UpdateOptionsSection();
+
+    void UpdateOptionsSection(bool bAddSpacing = false);
     void UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment = nullptr);
     void UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite = false);
     void UpdateWriteOption(size_t pos);
@@ -38,6 +42,7 @@ protected:
     ptrdiff_t FindOption(const char* pszOption, ttCStr& cszDst);
     ptrdiff_t FindSection(const char* pszSection);
 
+private:
     // Class members
 
     ttCStr      m_cszOptComment;
@@ -47,3 +52,5 @@ protected:
     ptrdiff_t   m_posOptions;
     ptrdiff_t   m_posInsert;
 };
+
+#endif  // __WRITE_SRCFILES_H__

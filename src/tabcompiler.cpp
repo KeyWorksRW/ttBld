@@ -58,19 +58,19 @@ void CTabCompiler::OnOK(void)
 {
     ttCStr csz;
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
     m_pOpts->UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
     m_pOpts->UpdateOption(OPT_CFLAGS_REL, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
     m_pOpts->UpdateOption(OPT_CFLAGS_DBG, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
     m_pOpts->UpdateOption(OPT_INC_DIRS, (char*) csz);
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
     if (csz.IsEmpty())
         m_pOpts->UpdateOption(OPT_PCH, "none");
     else
@@ -78,7 +78,7 @@ void CTabCompiler::OnOK(void)
 
     // We let WriteSrcFiles handle the case where the base names of PCH and PCH_CPP are identical
 
-    csz.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PCH_CPP)));
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH_CPP)));
     if (csz.IsEmpty())
         m_pOpts->UpdateOption(OPT_PCH_CPP, "none");
     else
@@ -110,11 +110,11 @@ void CTabCompiler::OnBtnChangePch()
     cszCWD.GetCWD();
     fdlg.UseCurrentDirectory();
     fdlg.RestoreDirectory();
-    if (fdlg.GetOpenFileName())
+    if (fdlg.GetOpenName())
     {
         ttCStr cszOrg, cszCpp;
-        cszOrg.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
-        cszCpp.GetWindowText(GetDlgItem(DLG_ID(IDEDIT_PCH_CPP)));
+        cszOrg.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
+        cszCpp.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH_CPP)));
 
         ttCStr cszRelPath;
         ttConvertToRelative(cszCWD, fdlg.GetFileName(), cszRelPath);
@@ -164,7 +164,7 @@ void CTabCompiler::OnBtnPchCpp()
     fdlg.SetFilter("C++ Files|*.cpp;*.cc;*.cxx||");
     fdlg.UseCurrentDirectory();
     fdlg.RestoreDirectory();
-    if (fdlg.GetOpenFileName())
+    if (fdlg.GetOpenName())
     {
         ttCStr cszCWD;
         cszCWD.GetCWD();
