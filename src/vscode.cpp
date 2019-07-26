@@ -703,7 +703,7 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
 
 // C:\vs2019\VC\Tools\MSVC\14.22.27905\bin\HostX64\x64
 
-bool ttCList::CreateMSVCEnvCmd()
+bool CreateMSVCEnvCmd()
 {
 #if !defined(_WIN32)
     return false;   // MSVC compiler and environment is only available on Windows
@@ -715,8 +715,8 @@ bool ttCList::CreateMSVCEnvCmd()
     ttCEnumStr enumstr(getenv("PATH"));
     ttCStr cszCompiler(enumstr);
     cszCompiler.AppendFileName("cl.exe");
-    if (ttFileExists(cszCompiler))
-    {
+//    if (ttFileExists(cszCompiler))
+//    {
 
 
 
@@ -724,5 +724,5 @@ bool ttCList::CreateMSVCEnvCmd()
 
 
 #endif    // end Windows-only code
-
+    return false;
 }
