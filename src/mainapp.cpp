@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
 
         cNinja.CreateMakeFile();    // this will create/update it if .srcfiles has a Makefile: section
 
-        ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT), "At least one platform build should have been set in CBldMaster (CNinja) constructor")
+        ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT), "At least one platform build should have been set in CNinja constructor")
 
         int countNinjas = 0;
         if (cNinja.GetBoolOption(OPT_64BIT))

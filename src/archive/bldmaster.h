@@ -56,8 +56,6 @@ public:
 protected:
     // Protected functions
 
-    bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
-    const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);
 
     CDryRun m_dryrun;
 

@@ -20,7 +20,6 @@ Files:
     mainapp.cpp         # entry point, global strings, library pragmas
 
     addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
-    bldmaster.cpp       # CBldMaster base class
     codelite.cpp        # Creates a CodeLite project
     convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
     createmakefile.cpp  # CreateMakeFile method for creating a makefile
@@ -30,6 +29,7 @@ Files:
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     parsehhp.cpp        # CParseHHP class for parsing a .hhp file
     NinjaStringIds.cpp  # Maps IDS_ strings into string to translate
+    rcdep.cpp           # Contains functions for parsing RC dependencies
     vcxproj.cpp         # Creates a Visual Studio project file
     verninja.cpp        # CVerMakeNinja class
     vscode.cpp          # Creates/updates .vscode files

@@ -8,9 +8,12 @@
 
 #pragma once
 
-#include "bldmaster.h"  // CBldMaster
+#include <ttlist.h>                     // ttCList, ttCDblList, ttCStrIntList
 
-class CNinja : public CBldMaster
+#include "csrcfiles.h"      // CSrcFiles
+#include "dryrun.h"         // CDryRun
+
+class CNinja : public CSrcFiles
 {
 public:
     CNinja(bool bVsCodeDir = false);
@@ -29,6 +32,28 @@ public:
     bool CreateBuildFile(GEN_TYPE gentype, bool bClang = true);
     bool CreateHelpFile();
 
+    size_t      GetErrorCount() { return m_lstErrors.GetCount(); }
+    const char* GetError(size_t pos) { return m_lstErrors[pos]; }
+    void        AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
+
+    size_t getSrcCount() { return m_lstSrcFiles.GetCount(); }
+
+    bool CreateMakeFile();
+
+    const char* GetRcFile()     { return m_cszRcName; }
+
+    ttCList* GetSrcFileList()  { return &m_lstSrcFiles; }
+    ttCList* GetLibFileList()  { return &m_lstLibFiles; }
+    ttCList* GetRcDepList()     { return &m_lstRcDependencies; }
+
+    bool IsValidVersion() { return m_bInvalidVersion != true; }  // returns false if .srcfiles requires a newer version
+    bool IsBin64()        { return m_bBin64Exists; }
+
+    const char* GetLibName() { return m_cszLibName; }        // name and location of any additional library to build
+    const char* GetHHPName() { return m_cszHHPName; }
+
+    void EnableDryRun() { m_dryrun.Enable(); }
+
 protected:
     // Protected functions
 
@@ -45,6 +70,12 @@ protected:
 
     void WriteLinkTargets(GEN_TYPE gentype);
     void WriteMidlTargets();
+
+    bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
+    const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);
+
+    CDryRun m_dryrun;
+    ttCList m_lstRcDependencies;
 
 private:
 
@@ -65,5 +96,10 @@ private:
     ttCList m_lstBuildLibs32R;
     ttCList m_lstBuildLibs64R;
 
-    bool    m_bClang;           // true if generating for CLANG compiler, false if generating for MSVC compiler
+    bool m_bClang;              // true if generating for CLANG compiler, false if generating for MSVC compiler
+    bool m_bBin64Exists;        // if true, the directory ../bin64 exists
+    bool m_bPrivateSrcfiles;
+
+    bool m_bWritePrivate;    // if true, write to .private\build
+    bool m_bInvalidVersion;  // true if a newer version is needed to parse the .srcfiles
 };
