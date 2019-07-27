@@ -19,6 +19,9 @@ extern const char* txtHelpNinja;
 
 bool CNinja::CreateMakeFile()
 {
+    if (IsVsCodeDir())
+        return VsCodeMakefile();
+
     if (IsMakeNever())
         return true;        // user doesn't want makefile created at all
     else if (IsMakeMissing())

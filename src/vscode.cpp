@@ -27,7 +27,7 @@ static const char* txtProperties =
     "             \"compilerPath\": \"%cl_path%\",\n"
     "             \"cStandard\": \"c11\",\n"
     "             \"cppStandard\": \"c++17\",\n"
-    "             \"intelliSenseMode\": \"msvc-x64\",\n"
+//    "             \"intelliSenseMode\": \"msvc-x64\",\n"
     "             \"includePath\": [\n"
     "             ]\n"
     "         }\n"
@@ -168,65 +168,63 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     kf.ReadStrFile(txtProperties);
 
-    ttCEnumStr enumstr(getenv("PATH"));
-
-    // REVIEW: [randalphwa - 5/31/2019] original code required a backslash on the end, which we don't here. Is that a problem?
-
     bool bCompilerFound = false;
+    ttCStr cszPath;
 
-    while (enumstr.Enum())
+    // clang.exe or gcc.exe are preferred since the PATH rarely changes and it works on all platforms
+
+    if (FindFileEnv("PATH", "clang.exe", cszPath))
     {
-        ttCStr cszCompiler(enumstr);
-        cszCompiler.AppendFileName("cl.exe");
-        if (ttFileExists(cszCompiler))
-        {
-            ttBackslashToForwardslash(cszCompiler);
-            kf.ReplaceStr("%cl_path%", cszCompiler);
-            bCompilerFound = true;
-            break;
-        }
+        kf.ReplaceStr("%cl_path%", cszPath);
+        bCompilerFound = true;
     }
-
-    if (!bCompilerFound)    // if we couldn't find cl.exe, look for clang-cl.exe
+    else if (FindFileEnv("PATH", "gcc.exe", cszPath))
     {
-        enumstr.SetNewStr(getenv("PATH"));
-        while (enumstr.Enum())
-        {
-            ttCStr cszCompiler(enumstr);
-            cszCompiler.AppendFileName("clang-cl.exe");
-            if (ttFileExists(cszCompiler))
-            {
-                ttBackslashToForwardslash(cszCompiler);
-                kf.ReplaceStr("%cl_path%", cszCompiler);
-                bCompilerFound = true;
-                break;
-            }
-        }
+        kf.ReplaceStr("%cl_path%", cszPath);
+        bCompilerFound = true;
     }
-
-    // TODO: [randalphwa - 7/19/2019] we should also look for the gcc compiler
-
     if (!bCompilerFound)
     {
-        // no compiler, take a wild guess (probably wrong) and tell the user to fix it
-        kf.ReplaceStr("%cl_path%", "C:/vs2019/VC/Tools/MSVC/14.20.27508/bin/Hostx64/x64/cl.exe");
-        puts(GETSTRING(IDS_CANT_FIND_COMPILER));
+#if defined(_WIN32)
+        ttCStr cszMSVC;
+        if (FindCurMsvcPath(cszMSVC))
+        {
+            bool bx64 = IsHost64();
+            cszMSVC.AppendFileName("bin/");
+            cszMSVC.AppendFileName(bx64 ? "Hostx64/" : "Hostx86/");
+            cszMSVC.AppendFileName(bx64 ? "x64/cl.exe" : "x86/cl.exe");
+            ttBackslashToForwardslash(cszMSVC);
+
+            // This gets us the correct version for now, but the next time the user updates Visual Studio, it will be
+            // wrong until the user updates the file by hand, or runs MakeNinja -vscode
+
+            kf.ReplaceStr("%cl_path%", cszMSVC);
+        }
+        else
+#endif
+        {
+            kf.ReplaceStr("%cl_path%", "cl.exe");
+            puts(GETSTRING(IDS_CANT_FIND_COMPILER));
+        }
     }
 
     // The original template specifies the installed SDK version. I'm not sure why that matters, but until we can confirm that it
     // doesn't matter, we'll need to grab the version from the registry: HKEY_CLASSES_ROOT\Installer\Dependencies\Microsoft.Windows.WindowsSDK.x86.10\Version
 
     bool bSdkFound = false;
-    ttCRegistry creg("HKEY_CLASSES_ROOT\\Installer\\Dependencies\\Microsoft.Windows.WindowsSDK.x86.10");
-    if (creg.IsOpen())
+
+#if defined(_WIN32)
+    ttCRegistry reg;
+    if (reg.Open(HKEY_CLASSES_ROOT, "Installer\\Dependencies\\Microsoft.Windows.WindowsSDK.x86.10", false))
     {
         char szVersion[MAX_PATH];
-        if (creg.ReadString("version", szVersion, sizeof(szVersion)))
+        if (reg.ReadString("version", szVersion, sizeof(szVersion)))
         {
             kf.ReplaceStr("%sdk_ver%", szVersion);
             bSdkFound = true;
         }
     }
+#endif    // defined(_WIN32)
     if (!bSdkFound)
         kf.ReplaceStr("%sdk_ver%", "10.0.17763.0");     // make a guess, probably wrong, but will also probably work fine
 
@@ -244,7 +242,11 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             for (size_t pos = 0; lstDefines.InRange(pos); ++pos)
                 kfOut.printf("                %kq,\n", lstDefines[pos]);
 
-            // we always define _DEBUG
+            // we always define _DEBUG. Under Windows, we always define _WIN32.
+
+#if defined(_WIN32)
+            kfOut.WriteEol("                \042_WIN32\042,");
+#endif
             kfOut.WriteEol("                \042_DEBUG\042");
             continue;
         }
@@ -598,6 +600,11 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     if (cSrcFiles.GetOption(OPT_CFLAGS_DBG))
         ParseDefines(lstDefines, cSrcFiles.GetOption(OPT_CFLAGS_DBG));
 
+    // BUGBUG: [KeyWorks - 7/27/2019] This is a short-term hack until we have hooked up proper routines for
+    // reading/writing .json files. While .json files are typically written out as line-oriented files, there's no
+    // requirement for each element to be on it's own line, which is what we require if we're reading line by line. So,
+    // if we're reading a file we generated that the user didn't touch, we're fine. But if the user decides to edit the
+    // file, we're likely to either lose their changes, or break entirely -- until we have a json class in place.
 
     while (kfIn.ReadLine())
     {
@@ -665,6 +672,38 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             kfOut.WriteEol  ("            ]");
             continue;
         }
+        else if (ttStrStrI(kfIn, "compilerPath") && ttStrStrI(kfIn, "cl.exe"))
+        {
+            // MSVC can change the path frequently (sometimes once a week).
+            ttCStr cszMSVC;
+            if (FindCurMsvcPath(cszMSVC))
+            {
+                bool bx64 = IsHost64();
+                cszMSVC.AppendFileName("bin/");
+                cszMSVC.AppendFileName(bx64 ? "Hostx64/" : "Hostx86/");
+                cszMSVC.AppendFileName(bx64 ? "x64/cl.exe" : "x86/cl.exe");
+                ttBackslashToForwardslash(cszMSVC);
+
+                char* pszSep = ttStrChr(kfIn, ':');
+                if (pszSep)
+                {
+                    pszSep = ttStrChr(pszSep, CH_QUOTE);
+                    if (pszSep)
+                    {
+                        ttCStr cszOld;
+                        cszOld.GetQuotedString(pszSep);
+                        ttBackslashToForwardslash(cszOld);
+                        if (!ttIsSameSubStrI(cszOld, cszMSVC))
+                        {
+                            ttCStr cszNewLine;
+                            cszNewLine.printf("             \"compilerPath\": \"%s\",", (char*) cszMSVC);
+                            kfOut.WriteEol(cszNewLine);
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
 
         kfOut.WriteEol(kfIn);
     }
@@ -699,30 +738,4 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
             pszStart += ttStrLen(cszTmp);
         }
     }
-}
-
-// C:\vs2019\VC\Tools\MSVC\14.22.27905\bin\HostX64\x64
-
-bool CreateMSVCEnvCmd()
-{
-#if !defined(_WIN32)
-    return false;   // MSVC compiler and environment is only available on Windows
-
-#else    // Windows-only code below
-
-    ttCStr cszPath(getenv("PATH"));
-
-    ttCEnumStr enumstr(getenv("PATH"));
-    ttCStr cszCompiler(enumstr);
-    cszCompiler.AppendFileName("cl.exe");
-//    if (ttFileExists(cszCompiler))
-//    {
-
-
-
-
-
-
-#endif    // end Windows-only code
-    return false;
 }

@@ -28,6 +28,7 @@ public:
 
     // Public functions
 
+    bool VsCodeMakefile();      // Used to create a makefile in .vscode
     void ProcessBuildLibs();
     bool CreateBuildFile(GEN_TYPE gentype, bool bClang = true);
     bool CreateHelpFile();

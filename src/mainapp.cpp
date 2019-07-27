@@ -54,6 +54,27 @@ int main(int argc, char* argv[])
     bool bDryRun = false;
     bool bVsCodeDir = false;
 
+// Change 0 to 1 to confirm that our locating functions are actually working as expected
+#if 0 && defined(_DEBUG) && defined(_WIN32)
+    {
+        ttCStr cszTest;
+        if (FindCurMsvcPath(cszTest))
+            puts((char*) cszTest);
+        else
+            puts("Cannot locate MSVC path");
+
+        if (FindVsCode(cszTest))
+            puts((char*) cszTest);
+        else
+            puts("Cannot locate VSCode.exe");
+
+        if (FindFileEnv("PATH", "mingw32-make.exe", cszTest))
+            puts((char*) cszTest);
+        else
+            puts("Cannot locate mingw32-make.exe");
+    }
+#endif
+
     const char* pszEnv = getenv("MAKENINJA");
     if (pszEnv)
     {

@@ -16,7 +16,7 @@ Options:
     Natvis:      makeninja.natvis                  # MSVC Debug visualizer
 
 Files:
-    makeninja.rc
+    makeninja.rc        # Windows resource files
     mainapp.cpp         # entry point, global strings, library pragmas
 
     addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
@@ -25,6 +25,8 @@ Files:
     createmakefile.cpp  # CreateMakeFile method for creating a makefile
     csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
     dryrun.cpp          # CDryRun class for testing
+    finder.cpp          # Routines for finding executables such as the MSVC compiler
+    gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
     ninja.cpp           # CNinja for creating .ninja scripts
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     parsehhp.cpp        # CParseHHP class for parsing a .hhp file
@@ -33,6 +35,7 @@ Files:
     vcxproj.cpp         # Creates a Visual Studio project file
     verninja.cpp        # CVerMakeNinja class
     vscode.cpp          # Creates/updates .vscode files
+    vscodemake.cpp      # Creates .vscode/makefile
     writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
 
