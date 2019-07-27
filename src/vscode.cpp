@@ -168,65 +168,77 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     kf.ReadStrFile(txtProperties);
 
-    ttCEnumStr enumstr(getenv("PATH"));
-
-    // REVIEW: [randalphwa - 5/31/2019] original code required a backslash on the end, which we don't here. Is that a problem?
-
     bool bCompilerFound = false;
+    ttCStr cszPath;
 
-    while (enumstr.Enum())
+#if defined(_WIN32)
+    if (FindFileEnv("PATH", "cl.exe", cszPath))
     {
-        ttCStr cszCompiler(enumstr);
-        cszCompiler.AppendFileName("cl.exe");
-        if (ttFileExists(cszCompiler))
-        {
-            ttBackslashToForwardslash(cszCompiler);
-            kf.ReplaceStr("%cl_path%", cszCompiler);
-            bCompilerFound = true;
-            break;
-        }
+        kf.ReplaceStr("%cl_path%", cszPath);
+        bCompilerFound = true;
     }
-
-    if (!bCompilerFound)    // if we couldn't find cl.exe, look for clang-cl.exe
+    else if (FindFileEnv("PATH", "clang-cl.exe", cszPath))
     {
-        enumstr.SetNewStr(getenv("PATH"));
-        while (enumstr.Enum())
-        {
-            ttCStr cszCompiler(enumstr);
-            cszCompiler.AppendFileName("clang-cl.exe");
-            if (ttFileExists(cszCompiler))
-            {
-                ttBackslashToForwardslash(cszCompiler);
-                kf.ReplaceStr("%cl_path%", cszCompiler);
-                bCompilerFound = true;
-                break;
-            }
-        }
+        kf.ReplaceStr("%cl_path%", cszPath);
+        bCompilerFound = true;
     }
-
-    // TODO: [randalphwa - 7/19/2019] we should also look for the gcc compiler
+#endif    // defined(_WIN32)
 
     if (!bCompilerFound)
     {
-        // no compiler, take a wild guess (probably wrong) and tell the user to fix it
-        kf.ReplaceStr("%cl_path%", "C:/vs2019/VC/Tools/MSVC/14.20.27508/bin/Hostx64/x64/cl.exe");
-        puts(GETSTRING(IDS_CANT_FIND_COMPILER));
+        if (FindFileEnv("PATH", "clang.exe", cszPath))
+        {
+            kf.ReplaceStr("%cl_path%", cszPath);
+            bCompilerFound = true;
+        }
+        if (FindFileEnv("PATH", "gcc.exe", cszPath))
+        {
+            kf.ReplaceStr("%cl_path%", cszPath);
+            bCompilerFound = true;
+        }
+    }
+
+    if (!bCompilerFound)
+    {
+#if defined(_WIN32)
+        ttCStr cszMSVC;
+        if (FindCurMsvcPath(cszMSVC))
+        {
+            bool bx64 = IsHost64();
+            cszMSVC.AppendFileName("bin/");
+            cszMSVC.AppendFileName(bx64 ? "Hostx64/" : "Hostx86/");
+            cszMSVC.AppendFileName(bx64 ? "x64/cl.exe" : "x86/cl.exe");
+
+            // This gets us the correct version for now, but the next time the user updates Visual Studio, it will be wrong. MSVC does not install
+            // to a persistent path, so unless the user ALWAYS runs VS Code from a shell that contains the current path, this will fail.
+
+            kf.ReplaceStr("%cl_path%", cszMSVC);
+        }
+        else
+        {
+            kf.ReplaceStr("%cl_path%", "cl.exe");
+            puts(GETSTRING(IDS_CANT_FIND_COMPILER));
+        }
+#endif
     }
 
     // The original template specifies the installed SDK version. I'm not sure why that matters, but until we can confirm that it
     // doesn't matter, we'll need to grab the version from the registry: HKEY_CLASSES_ROOT\Installer\Dependencies\Microsoft.Windows.WindowsSDK.x86.10\Version
 
     bool bSdkFound = false;
-    ttCRegistry creg("HKEY_CLASSES_ROOT\\Installer\\Dependencies\\Microsoft.Windows.WindowsSDK.x86.10");
-    if (creg.IsOpen())
+
+#if defined(_WIN32)
+    ttCRegistry reg;
+    if (reg.Open(HKEY_CLASSES_ROOT, "Installer\\Dependencies\\Microsoft.Windows.WindowsSDK.x86.10", false))
     {
         char szVersion[MAX_PATH];
-        if (creg.ReadString("version", szVersion, sizeof(szVersion)))
+        if (reg.ReadString("version", szVersion, sizeof(szVersion)))
         {
             kf.ReplaceStr("%sdk_ver%", szVersion);
             bSdkFound = true;
         }
     }
+#endif    // defined(_WIN32)
     if (!bSdkFound)
         kf.ReplaceStr("%sdk_ver%", "10.0.17763.0");     // make a guess, probably wrong, but will also probably work fine
 
@@ -244,7 +256,11 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             for (size_t pos = 0; lstDefines.InRange(pos); ++pos)
                 kfOut.printf("                %kq,\n", lstDefines[pos]);
 
-            // we always define _DEBUG
+            // we always define _DEBUG. Under Windows, we always define _WIN32.
+
+#if defined(_WIN32)
+            kfOut.WriteEol("                \042_WIN32\042,");
+#endif
             kfOut.WriteEol("                \042_DEBUG\042");
             continue;
         }
