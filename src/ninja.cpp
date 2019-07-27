@@ -999,23 +999,9 @@ void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
         }
     }
 
-    ttCStr cszEnv;
-    size_t cbEnv = 0;
-    if (getenv_s(&cbEnv, nullptr, 0, "LIB") == 0 && cbEnv > 0)
-    {
-        cszEnv.ReSize(cbEnv + 1);
-        if (getenv_s(&cbEnv, cszEnv.GetPtr(), cbEnv, "LIB") != 0)
-        {
-            ttCEnumStr enumLib(cszEnv, ';');
-            while (enumLib.Enum())
-            {
-                ttCStr cszPath(enumLib);
-                cszPath.AppendFileName(cszLibName);
-                if (ttFileExists(cszPath))
-                    return;     // we found the modified library, so return
-            }
-        }
-    }
+    ttCStr cszTmp;
+    if (FindFileEnv(cszLibName, "LIB", cszTmp))
+        return;     // we found the modified library, so return
 
     // If we get here, we couldn't find the modified version
 
