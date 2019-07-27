@@ -30,6 +30,7 @@ bool Yamalize();
 
 #if defined(_WIN32)
 
+bool CreateMSVCenvCmd();
 bool FindCurMsvcPath(ttCStr& cszPath);
 bool FindVsCode(ttCStr& cszPath);
 bool IsHost64();    // returns true if we are running on an x64 processor
