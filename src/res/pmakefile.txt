@@ -39,9 +39,12 @@ bits=64 # \
 cmplr=msvc # \
 !endif #\
 #\
-bdir=%vsbuild% # \
+bdir=%build% # \
+libbdir=%libbuild% # \
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja # \
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja # \
+LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja # \
+LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja # \
 # \
 !else
 ######### Following section is for GNU make and variants #########
@@ -62,9 +65,12 @@ ifndef cmplr
     cmplr=clang
 endif
 
-bdir=%vsbuild%
+bdir=%build%
+libbdir=%libbuild%
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
+LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja
+LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja
 
 # \
 !endif

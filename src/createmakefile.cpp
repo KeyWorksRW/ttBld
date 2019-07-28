@@ -31,15 +31,18 @@ bool CNinja::CreateMakeFile()
 
     // We get here if the makefile is missing or "Makefile: always" is set
 
+    bool bMinGW = FindFileEnv("PATH", "mingw32-make.exe");
+
     ttCFile kf;
-    if (!kf.ReadResource(IDR_PRIVATE_MAKEFILE))
+    if (!kf.ReadResource(bMinGW & IsVsCodeDir() ? IDR_VSCODE_MAKE :  IDR_PRIVATE_MAKEFILE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
         m_lstErrors += TRANSLATE("MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile,");
         return false;
     }
 
-    while (kf.ReplaceStr("%vsbuild%", IsVsCodeDir() ? ".vscode/build" : "build"));
+    while (kf.ReplaceStr("%build%", IsVsCodeDir() ? ".vscode/build" : "build"));
+    while (kf.ReplaceStr("%libbuild%", "build"));
 
     // .private/.srcfiles might specify a new project name to be used for the executable name, but we don't need that new
     // name in the makefile
@@ -99,9 +102,13 @@ bool CNinja::CreateMakeFile()
                 for (size_t pos = 0; m_dlstTargetDir.InRange(pos); ++pos)
                 {
                     kfOut.printf("\n%s%s:\n", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");    // the rule
-
+                    ttCStr cszBuild(m_dlstTargetDir.GetValAt(pos));
+                    cszBuild.AppendFileName(".vscode/makefile");
                     // The leading \t before the command is required or make will fail
-                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", m_dlstTargetDir.GetValAt(pos), bDebugTarget ? "D" : "");
+                    if (ttFileExists(cszBuild))
+                        kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", m_dlstTargetDir.GetValAt(pos), bDebugTarget ? "D" : "");
+                    else
+                        kfOut.printf("\tcd %s & ninja -f $(LibBldScript%s)\n", m_dlstTargetDir.GetValAt(pos), bDebugTarget ? "D" : "");
                 }
             }
             else
