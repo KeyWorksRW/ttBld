@@ -21,4 +21,6 @@ Files:
     ../src/dryrun.cpp          # CDryRun class for testing
     ../src/NinjaStringIds.cpp  # Maps IDS_NINJA_ strings into string to translate
     ../src/vscode.cpp          # Creates/updates .vscode files
+    ../src/finder.cpp          # Routines for finding executables such as the MSVC compiler
+    ../src/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
 
