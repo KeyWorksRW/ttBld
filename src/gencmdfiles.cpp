@@ -213,6 +213,15 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         file.WriteEol(cszPath);
     }
 
+    // Don't write the file unless something has actually changed
+
+    ttCFile fileOrg;
+    if (fileOrg.ReadFile(pszDstFile))
+    {
+        if (strcmp(fileOrg, file) == 0)
+            return true;    // nothing changed
+    }
+
     return file.WriteFile(pszDstFile);
 #endif    // end Windows-only code
 }
