@@ -86,12 +86,14 @@ bool IsHost64()
 
 #endif
 
-bool FindFileEnv(const char* pszEnv, const char* pszExe, ttCStr& cszPath)
+bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
 {
     ttASSERT_MSG(pszEnv, "NULL pointer!");
-    ttASSERT_MSG(pszExe, "NULL pointer!");
+    ttASSERT_MSG(pszFile, "NULL pointer!");
 
-    ttCStr cszEnv;
+    ttCStr cszEnv, cszPath;
+    if (!pcszPath)
+        pcszPath = &cszPath;
     size_t cbEnv = 0;
     if (getenv_s(&cbEnv, nullptr, 0, pszEnv) == 0 && cbEnv > 0)
     {
@@ -101,9 +103,9 @@ bool FindFileEnv(const char* pszEnv, const char* pszExe, ttCStr& cszPath)
             ttCEnumStr enumLib(cszEnv, ';');
             while (enumLib.Enum())
             {
-                cszPath = enumLib;
-                cszPath.AppendFileName(pszExe);
-                if (ttFileExists(cszPath))
+                *pcszPath = enumLib;
+                pcszPath->AppendFileName(pszFile);
+                if (ttFileExists(*pcszPath))
                     return true;
             }
         }

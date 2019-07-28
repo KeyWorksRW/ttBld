@@ -174,12 +174,12 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     // clang.exe or gcc.exe are preferred since the PATH rarely changes and it works on all platforms
 
 #if defined(_WIN32)
-    if (FindFileEnv("PATH", "clang-cl.exe", cszPath))
+    if (FindFileEnv("PATH", "clang-cl.exe", &cszPath))
     {
         kf.ReplaceStr("%cl_path%", cszPath);
         bCompilerFound = true;
     }
-    else if (FindFileEnv("PATH", "clang.exe", cszPath))
+    else if (FindFileEnv("PATH", "clang.exe", &cszPath))
 #else
     if (FindFileEnv("PATH", "clang.exe", cszPath))
 #endif
@@ -187,7 +187,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         kf.ReplaceStr("%cl_path%", cszPath);
         bCompilerFound = true;
     }
-    else if (FindFileEnv("PATH", "gcc.exe", cszPath))
+    else if (FindFileEnv("PATH", "gcc.exe", &cszPath))
     {
         kf.ReplaceStr("%cl_path%", cszPath);
         bCompilerFound = true;
@@ -363,9 +363,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     kfTask.ReadStrFile(txtTasks);
 
-    ttCStr cszTmp;
-    bool bMinGW = FindFileEnv("PATH", "mingw32-make.exe", cszTmp);
-
+    bool bMinGW = FindFileEnv("PATH", "mingw32-make.exe");
 
     while (kfTask.ReadLine())
     {
