@@ -395,6 +395,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 kfOut.WriteEol(kfSubTask);
 #endif    // defined(_WIN32)
 
+#if 0   // CLANG-CL disabled for now
             // Build CLANG debug
 
 #if defined(_WIN32)
@@ -404,7 +405,6 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             // On non-Windows, default to CLANG build
             kfSubTask.ReadStrFile(txtDefaultTask);
 #endif
-
             cszTarget.printf("Build %s (debug) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                     cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
 
@@ -418,6 +418,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             while (kfSubTask.ReadLine())
                 kfOut.WriteEol(kfSubTask);
+#endif
 
 #if defined(_WIN32)   // MSVC compiler is only available on Windows
 
@@ -441,6 +442,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 kfOut.WriteEol(kfSubTask);
 #endif
 
+#if 0   // CLANG-CL disabled for now
             // Build CLANG release
 
             kfSubTask.Delete();
@@ -479,6 +481,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             while (kfSubTask.ReadLine())
                 kfOut.WriteEol(kfSubTask);
+#endif
 
 #if defined(_WIN32)   // MSVC compiler is only available on Windows
 
@@ -500,6 +503,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
 #endif
 
+#if 0   // CLANG-CL disabled for now
             // Test: clean CLANG release targets
 
             kfSubTask.Delete();
@@ -515,6 +519,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             while (kfSubTask.ReadLine())
                 kfOut.WriteEol(kfSubTask);
+#endif
 
 #if defined(_WIN32)   // MSVC compiler is only available on Windows
 
@@ -535,6 +540,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 kfOut.WriteEol(kfSubTask);
 #endif
 
+#if 0   // CLANG-CL disabled for now
             // Test: View CLANG build commands
 
             kfSubTask.Delete();
@@ -550,6 +556,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             while (kfSubTask.ReadLine())
                 kfOut.WriteEol(kfSubTask);
+#endif
 
             // Test View debug targets
 
