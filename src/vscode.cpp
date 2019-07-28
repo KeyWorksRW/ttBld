@@ -174,12 +174,12 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     // clang.exe or gcc.exe are preferred since the PATH rarely changes and it works on all platforms
 
 #if defined(_WIN32)
-    if (FindFileEnv("PATH", "clang-cl.exe", cszPath))
+    if (FindFileEnv("PATH", "clang-cl.exe", &cszPath))
     {
         kf.ReplaceStr("%cl_path%", cszPath);
         bCompilerFound = true;
     }
-    else if (FindFileEnv("PATH", "clang.exe", cszPath))
+    else if (FindFileEnv("PATH", "clang.exe", &cszPath))
 #else
     if (FindFileEnv("PATH", "clang.exe", cszPath))
 #endif
@@ -187,7 +187,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         kf.ReplaceStr("%cl_path%", cszPath);
         bCompilerFound = true;
     }
-    else if (FindFileEnv("PATH", "gcc.exe", cszPath))
+    else if (FindFileEnv("PATH", "gcc.exe", &cszPath))
     {
         kf.ReplaceStr("%cl_path%", cszPath);
         bCompilerFound = true;
@@ -363,6 +363,8 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     kfTask.ReadStrFile(txtTasks);
 
+    bool bMinGW = FindFileEnv("PATH", "mingw32-make.exe");
+
     while (kfTask.ReadLine())
     {
         if (ttIsSameSubStrI(ttFindNonSpace(kfTask), "\042tasks"))
@@ -383,7 +385,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", cszTarget);
             kfSubTask.ReplaceStr("%group%", "build");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 cmplr=msvc debug");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc debug -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc debug -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
 
             while (kfSubTask.ReadLine())
@@ -405,7 +410,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", cszTarget);
             kfSubTask.ReplaceStr("%group%", "build");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 cmplr=clang debug");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=clang debug -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=clang debug -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
 
             while (kfSubTask.ReadLine())
@@ -423,7 +431,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", cszTarget);
             kfSubTask.ReplaceStr("%group%", "build");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 cmplr=msvc release");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc release -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc release -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
 
             while (kfSubTask.ReadLine())
@@ -440,7 +451,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", cszTarget);
             kfSubTask.ReplaceStr("%group%", "build");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 cmplr=clang release");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=clang release -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=clang release -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
 
             while (kfSubTask.ReadLine())
@@ -475,7 +489,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", "Clean MSVC release targets");
             kfSubTask.ReplaceStr("%group%", "test");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 cmplr=msvc cleanR");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc clean -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc clean -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "");
 
             while (kfSubTask.ReadLine())
@@ -490,7 +507,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", "Clean CLANG release targets");
             kfSubTask.ReplaceStr("%group%", "test");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 cmplr=clang cleanR");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=clang clean -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=clang clean -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "");
 
             while (kfSubTask.ReadLine())
@@ -505,7 +525,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", "View MSVC debug build commands");
             kfSubTask.ReplaceStr("%group%", "test");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 cmplr=msvc commandsD");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc commandsD -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc commandsD -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "");
 
             while (kfSubTask.ReadLine())
@@ -519,7 +542,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", "View CLANG debug build commands");
             kfSubTask.ReplaceStr("%group%", "test");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 cmplr=clang commandsD");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=clang commandsD -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=clang commandsD -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "");
 
             while (kfSubTask.ReadLine())
@@ -532,7 +558,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", "View debug targets");
             kfSubTask.ReplaceStr("%group%", "test");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 targetsD");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc targetsD -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc targetsD -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "");
 
             while (kfSubTask.ReadLine())
@@ -545,7 +574,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", "View debug dependencies");
             kfSubTask.ReplaceStr("%group%", "test");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 deps");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc deps -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc deps -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "");
 
             while (kfSubTask.ReadLine())
@@ -558,7 +590,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             kfSubTask.ReplaceStr("%label%", "Generate messages.pos");
             kfSubTask.ReplaceStr("%group%", "test");
-            kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo private=1 locale");
+            if (bMinGW)
+                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc locale -f .vscode/makefile");
+            else
+                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc locale -f .vscode/makefile");
             kfSubTask.ReplaceStr("%problem%", "");
 
             while (kfSubTask.ReadLine())

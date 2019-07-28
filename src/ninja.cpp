@@ -999,8 +999,7 @@ void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
         }
     }
 
-    ttCStr cszTmp;
-    if (FindFileEnv(cszLibName, "LIB", cszTmp))
+    if (FindFileEnv(cszLibName, "LIB"))
         return;     // we found the modified library, so return
 
     // If we get here, we couldn't find the modified version

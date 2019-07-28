@@ -15,7 +15,7 @@ class CSrcFiles;
 void AddFiles(ttCList& lstFiles, bool bDryRun);
 bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun);
 bool ConvertBuildScript(const char* pszBldFile);
-bool FindFileEnv(const char* pexEnv, const char* pszFile, ttCStr& cszPath);     // Search PATH, LIB, or INCLUDE (or variants)
+bool FindFileEnv(const char* pexEnv, const char* pszFile, ttCStr* pcszPath = nullptr);     // Search PATH, LIB, or INCLUDE (or variants)
 int  MakeNinja(int argc, char* argv[]);
 void ParseDefines(ttCList& lst, const char* pszDefines);
 bool isSystemHeaderFile(const char* pszHeaderFile);

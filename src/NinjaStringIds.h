@@ -20,6 +20,7 @@ void NinjaResetStringIDs();                 // call this before switching to a d
 
 enum
 {
+    IDS_FILE_UPDATED,                   // %s updated.\n
     IDS_CANT_FIND_COMPILER,             // Unable to find either the cl.exe or clang-cl.exe compilers in PATH.
     IDS_MAKENINJA_CORRUPTED,            // MakeNinja.exe is corrupted -- cannot read the necessary resource.
     IDS_CANT_WRITE_MAKEFILE,            // Unable to write to makefile.
@@ -32,7 +33,7 @@ enum
     IDS_NINJA_CANNOT_OPEN,              // "Cannot open \042%s\042."
     IDS_NINJA_CANT_WRITE,               // "Unable to create or write to %s"
     IDS_NINJA_CONVERSION_FAILED,        // "Conversion of %s failed!"
-    IDS_NINJA_CREATED,                  // "%s created.\n"
+    IDS_FILE_CREATED,                  // "%s created.\n"
     IDS_NINJA_DRURUN_CHANGES,           // "%s dryrun changes:\n"
     IDS_NINJA_FILES_ADDED,              // "%u files added."
     IDS_NINJA_FILE_NOT_ADDED,           // "The file %s doesn't exist -- not added\n"

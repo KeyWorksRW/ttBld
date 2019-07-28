@@ -28,13 +28,14 @@ bool CNinja::VsCodeMakefile()
     if (ttFileExists(".vsCode/makefile"))
         return true;    // TODO: [KeyWorks - 7/26/2019] If we end up storing the MSVC path in the makefile, then we need to be able to update it.
 
-    ttCStr cszTmp;
 #if defined(_WIN32)
-    if (!FindFileEnv("PATH", "mingw32-make.exe", cszTmp))
+    if (!FindFileEnv("PATH", "mingw32-make.exe"))
         return VsCodeNmake();
 #endif
 
     ttCFile file;
+
+
 
 
     if (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT))

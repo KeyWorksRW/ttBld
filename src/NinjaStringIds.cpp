@@ -85,8 +85,8 @@ static const ttIDS_LIST aNinjaStringIds[] =
     { IDS_NINJA_UNKNOWN_OPTION,      _XGET("%s is an unknown option") },
     { IDS_NINJA_OPTIONS_UPDATED,     _XGET("%s Options: section updated.\n") },
 
-    // TRANSLATORS: Indicates how many ninja scripts were created
-    { IDS_NINJA_CREATED,             _XGET("%s created.\n") },
+    { IDS_FILE_CREATED,    _XGET("%s created.\n") },
+    { IDS_FILE_UPDATED,    _XGET("%s updated.\n") },
 
     { IDS_NINJA_UP_TO_DATE,          _XGET("All ninja scripts are up to date.") },
 

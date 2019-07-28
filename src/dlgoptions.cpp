@@ -149,7 +149,7 @@ void CTabOptions::SaveChanges()
     else
     {
         if (WriteUpdates())
-            printf(GETSTRING(IDS_NINJA_CREATED), GetSrcFiles());
+            printf(GETSTRING(IDS_FILE_CREATED), GetSrcFiles());
     }
 }
 

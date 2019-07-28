@@ -59,7 +59,7 @@ void CreateCodeCmd(const char* pszFile)
     ttBackslashToForwardslash(cszPath);
 
     if (file.WriteFile(cszPath))
-        printf(GETSTRING(IDS_NINJA_CREATED), (char*) cszPath);
+        printf(GETSTRING(IDS_FILE_CREATED), (char*) cszPath);
 }
 
 #endif    // !defined(_WIN32)
