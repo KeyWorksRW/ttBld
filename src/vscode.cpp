@@ -173,7 +173,16 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // clang.exe or gcc.exe are preferred since the PATH rarely changes and it works on all platforms
 
+#if defined(_WIN32)
+    if (FindFileEnv("PATH", "clang-cl.exe", cszPath))
+    {
+        kf.ReplaceStr("%cl_path%", cszPath);
+        bCompilerFound = true;
+    }
+    else if (FindFileEnv("PATH", "clang.exe", cszPath))
+#else
     if (FindFileEnv("PATH", "clang.exe", cszPath))
+#endif
     {
         kf.ReplaceStr("%cl_path%", cszPath);
         bCompilerFound = true;
@@ -265,6 +274,16 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
             while (enumInc.Enum())
                 kfOut.printf("                %kq,\n", (const char*) enumInc);
+
+#if defined(_WIN32)
+            ttCStr cszMSVC;
+            if (FindCurMsvcPath(cszMSVC))
+            {
+                cszMSVC.AppendFileName("include");
+                ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+                kfOut.printf("                %kq,\n", (const char*) cszMSVC);
+            }
+#endif
 
             // we always add the default include path
             kfOut.WriteEol("                \042${default}\042");
@@ -592,6 +611,16 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     while (enumInc.Enum())
         lstIncludes += enumInc;
 
+#if defined(_WIN32)
+    ttCStr cszMSVC;
+    if (FindCurMsvcPath(cszMSVC))
+    {
+        cszMSVC.AppendFileName("include");
+        ttBackslashToForwardslash(cszMSVC); // so we don't have to escape all the backslashes
+        lstIncludes += cszMSVC;
+    }
+#endif
+
     // Gather all the commonad and debug defines specified in CFlags: and CFlagsD:
 
     ttCList lstDefines;
@@ -675,7 +704,6 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         else if (ttStrStrI(kfIn, "compilerPath") && ttStrStrI(kfIn, "cl.exe"))
         {
             // MSVC can change the path frequently (sometimes once a week).
-            ttCStr cszMSVC;
             if (FindCurMsvcPath(cszMSVC))
             {
                 bool bx64 = IsHost64();

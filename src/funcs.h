@@ -25,12 +25,12 @@ size_t CreateCodeLiteProject();    // returns 0 - no errors, 1 - file already ex
 // Following functions are for use in setting up a build system for VS Code
 
 bool CreateVsCodeProject(ttCList* plstResults = nullptr);      // returns true unless unable to write to a file
-bool CreateMSVCEnvCmd();
 bool Yamalize();
 
 #if defined(_WIN32)
 
-bool CreateMSVCenvCmd();
+void CreateCodeCmd(const char* pszFile);
+bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64 = false);
 bool FindCurMsvcPath(ttCStr& cszPath);
 bool FindVsCode(ttCStr& cszPath);
 bool IsHost64();    // returns true if we are running on an x64 processor

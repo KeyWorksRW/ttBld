@@ -47,7 +47,7 @@ bool FindCurMsvcPath(ttCStr& cszPath)
                         {
                             psz = ttStrChr(cszPath, '*');
                             *psz = 0;
-                            cszPath += ff;
+                            cszPath += (const char*) ff;
                             return true;
                         }
                     } while(ff.NextFile());
@@ -68,6 +68,9 @@ bool FindVsCode(ttCStr& cszPath)
         if (reg.ReadString("", szPath, sizeof(szPath)))
         {
             cszPath.GetQuotedString(szPath);
+            char* pszExe = ttFindFilePortion(cszPath);
+            if (pszExe)
+                *pszExe = 0;    // remove the filename
             return true;
         }
     }
@@ -78,7 +81,7 @@ bool IsHost64()
 {
     SYSTEM_INFO si;
     GetSystemInfo(&si);
-    return (si.dwProcessorType == PROCESSOR_ARCHITECTURE_AMD64);
+    return (si.dwProcessorType == PROCESSOR_AMD_X8664 || si.dwProcessorType == PROCESSOR_INTEL_IA64);
 }
 
 #endif

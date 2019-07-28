@@ -36,6 +36,9 @@ void Usage()
     puts(TRANSLATE("\nMakeNinja [options] -- parses .srcfiles and produces ninja build scripts\n"));
     puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in a .srcfiles file"));
     puts(TRANSLATE("    -dryrun    -- displays what would have happened, but doesn't change anything"));
+#if defined(_WIN32)
+    puts(TRANSLATE("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd"));
+#endif
     puts(TRANSLATE("    -new       -- displays a dialog allowing you to create a new .srcfiles file"));
     puts(TRANSLATE("    -vscode    -- creates or updates files needed to build project using VS Code"));
 
@@ -153,6 +156,30 @@ int main(int argc, char* argv[])
         {
             cszSrcFilePath = ".srcfiles";
             bVsCodeDir = false;
+        }
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
+        {
+            CreateCodeCmd("code32.cmd");
+            CreateCodeCmd("code64.cmd");
+            return 1;
+        }
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "msvcenv64"))  // used in case it was set in environment
+        {
+            if (argpos + 1 < argc)
+            {
+                CreateMSVCEnvCmd(argv[argpos + 1], true);
+                return 1;
+            }
+            return 0;
+        }
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "msvcenv32"))  // used in case it was set in environment
+        {
+            if (argpos + 1 < argc)
+            {
+                CreateMSVCEnvCmd(argv[argpos + 1], false);
+                return 1;
+            }
+            return 0;
         }
     }
 
