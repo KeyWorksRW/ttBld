@@ -43,6 +43,8 @@ bool CNinja::CreateMakeFile()
 
     while (kf.ReplaceStr("%build%", IsVsCodeDir() ? ".vscode/build" : "build"));
     while (kf.ReplaceStr("%libbuild%", "build"));
+    if (IsVsCodeDir() && !ttFileExists(".srcfiles"))
+        while (kf.ReplaceStr(".srcfiles", ""));
 
     // .private/.srcfiles might specify a new project name to be used for the executable name, but we don't need that new
     // name in the makefile
