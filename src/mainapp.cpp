@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
     ttInitCaller(txtVersion);
     bool bDryRun = false;
     bool bVsCodeDir = false;
+    bool bForceWrite = false;
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && defined(_DEBUG) && defined(_WIN32)
@@ -157,6 +158,10 @@ int main(int argc, char* argv[])
             cszSrcFilePath = ".srcfiles";
             bVsCodeDir = false;
         }
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
+        {
+            bForceWrite = true;
+        }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
         {
             CreateCodeCmd("code32.cmd");
@@ -213,7 +218,9 @@ int main(int argc, char* argv[])
                 return 1;
         }
 
-        if (bDryRun)
+        if (bForceWrite)    // force write ignores any request for dryrun
+            cNinja.ForceWrite();
+        else if (bDryRun)
             cNinja.EnableDryRun();
 
         cNinja.CreateMakeFile();    // this will create/update it if .srcfiles has a Makefile: section
