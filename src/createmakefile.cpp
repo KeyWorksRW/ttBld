@@ -19,14 +19,13 @@ extern const char* txtHelpNinja;
 
 bool CNinja::CreateMakeFile()
 {
-    if (IsVsCodeDir())
-        return VsCodeMakefile();
+    ttCStr cszMakeFile(IsVsCodeDir() ? ".vscode/makefile" : "makefile");
 
     if (IsMakeNever())
         return true;        // user doesn't want makefile created at all
     else if (IsMakeMissing())
     {
-        if (ttFileExists("makefile"))
+        if (ttFileExists(cszMakeFile))
             return true;    // file exists, user doesn't want us to update it
     }
 
@@ -39,6 +38,8 @@ bool CNinja::CreateMakeFile()
         m_lstErrors += TRANSLATE("MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile,");
         return false;
     }
+
+    while (kf.ReplaceStr("%vsbuild%", IsVsCodeDir() ? ".vscode/build" : "build"));
 
     // .private/.srcfiles might specify a new project name to be used for the executable name, but we don't need that new
     // name in the makefile
@@ -112,20 +113,19 @@ bool CNinja::CreateMakeFile()
 
     // If the makefile already exists, don't write to it unless something has actually changed
 
-    if (ttFileExists("makefile"))
+    if (ttFileExists(cszMakeFile))
     {
         ttCFile kfOrg;
-        if (!kfOrg.ReadFile("makefile") || strcmp(kfOrg, kfOut) != 0)
+        if (!kfOrg.ReadFile(cszMakeFile) || strcmp(kfOrg, kfOut) != 0)
         {
             if (m_dryrun.IsEnabled())
             {
-                m_dryrun.NewFile("makefile");
+                m_dryrun.NewFile(cszMakeFile);
                 m_dryrun.DisplayFileDiff(kfOrg, kfOut);
             }
-            else if (kfOut.WriteFile("makefile"))
+            else if (kfOut.WriteFile(cszMakeFile))
             {
-                // TRANSLATORS: Don't change the filename "makefile"
-                puts(TRANSLATE("makefile updated"));
+                printf(GETSTRING(IDS_FILE_UPDATED), (char*) cszMakeFile);
                 return true;
             }
             else
@@ -138,10 +138,10 @@ bool CNinja::CreateMakeFile()
     }
     else
     {
-        if (kfOut.WriteFile("makefile"))
+        if (kfOut.WriteFile(cszMakeFile))
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            puts(TRANSLATE("makefile created"));
+            printf(GETSTRING(IDS_FILE_CREATED), (char*) cszMakeFile);
             return true;
         }
         else

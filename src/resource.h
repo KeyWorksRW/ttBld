@@ -23,6 +23,7 @@
 #define IDCHECK_CODEBLOCKS              1029
 #define IDR_VCXPROJ_MASTER              1030
 #define IDR_VCXPROJ_FILTERS             1031
+#define IDR_VSCODE_MAKE                 1032
 #define IDCHECK_CODELITE                1031
 #define IDCHECK_CLANG                   1032
 #define IDCHECK_MSVC                    1033

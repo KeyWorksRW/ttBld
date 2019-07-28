@@ -37,6 +37,8 @@ bool CNinja::VsCodeMakefile()
     ttCFile file;
 
 
+
+
     if (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT))
     {
     }
