@@ -103,8 +103,6 @@ private:
 
     bool m_bClang;              // true if generating for CLANG compiler, false if generating for MSVC compiler
     bool m_bBin64Exists;        // if true, the directory ../bin64 exists
-    bool m_bPrivateSrcfiles;
 
-    bool m_bWritePrivate;    // if true, write to .private\build
     bool m_bInvalidVersion;  // true if a newer version is needed to parse the .srcfiles
 };
