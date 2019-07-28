@@ -324,7 +324,7 @@ void CSrcFiles::ProcessFile(char* pszFile)
                 *pszTmp = 0;
                 cszFile.TrimRight();
             }
-            ProcessInclude(cszFile, m_lstLibAddSrcFiles, false);
+            ProcessInclude(cszFile, m_lstAddSrcFiles, true);
         }
         return;
     }
