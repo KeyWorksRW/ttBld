@@ -32,12 +32,13 @@ CNinja::CNinja(bool bVsCodeDir) : CSrcFiles(bVsCodeDir),
     m_lstBuildLibs32D(m_ttHeap), m_lstBuildLibs64D(m_ttHeap),
     m_lstBuildLibs32R(m_ttHeap), m_lstBuildLibs64R(m_ttHeap)
 {
-    #if defined(_DEBUG)
+#if defined(_DEBUG)
     ttASSERT(ReadFile());
 #else
     if (!ReadFile())
         return;
 #endif
+    m_bForceWrite = false;
 
     CVerMakeNinja verSrcFiles;
     m_bInvalidVersion = verSrcFiles.IsSrcFilesNewer(GetMajorRequired(), GetMinorRequired(), GetSubRequired());
@@ -362,6 +363,9 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
             return false;
         }
     }
+
+    if (m_bForceWrite)
+        return file.WriteFile(cszScriptFile);
 
     ttCFile fileOrg;
     if (fileOrg.ReadFile(cszScriptFile))

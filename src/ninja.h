@@ -56,6 +56,7 @@ public:
     bool VsCodeNmake();
 
     void EnableDryRun() { m_dryrun.Enable(); }
+    void ForceWrite(bool bForceWrite = true) { m_bForceWrite = bForceWrite; }
 
 protected:
     // Protected functions
@@ -103,6 +104,6 @@ private:
 
     bool m_bClang;              // true if generating for CLANG compiler, false if generating for MSVC compiler
     bool m_bBin64Exists;        // if true, the directory ../bin64 exists
-
-    bool m_bInvalidVersion;  // true if a newer version is needed to parse the .srcfiles
+    bool m_bForceWrite;         // write the ninja file even if it hasn't changed
+    bool m_bInvalidVersion;     // true if a newer version is needed to parse the .srcfiles
 };

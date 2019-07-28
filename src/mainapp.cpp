@@ -51,11 +51,37 @@ void Usage()
     // puts("\t-add [file(s)] -- Adds file(s) to .srcfiles");
 }
 
+typedef enum
+{
+    UPDATE_NORMAL,
+
+    UPDATE_MSVC64D,
+    UPDATE_MSVC32D,
+    UPDATE_CLANG_CL64D,
+    UPDATE_CLANG_CL32D,
+    UPDATE_CLANG64D,
+    UPDATE_CLANG32D,
+    UPDATE_GCC64D,
+    UPDATE_GCC32D,
+
+    UPDATE_MSVC64,
+    UPDATE_MSVC32,
+    UPDATE_CLANG_CL64,
+    UPDATE_CLANG_CL32,
+    UPDATE_CLANG64,
+    UPDATE_CLANG32,
+    UPDATE_GCC64,
+    UPDATE_GCC32,
+
+} UPDATE_TYPE;
+
 int main(int argc, char* argv[])
 {
     ttInitCaller(txtVersion);
     bool bDryRun = false;
     bool bVsCodeDir = false;
+    bool bForceWrite = false;
+    UPDATE_TYPE upType = UPDATE_NORMAL;
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && defined(_DEBUG) && defined(_WIN32)
@@ -157,6 +183,10 @@ int main(int argc, char* argv[])
             cszSrcFilePath = ".srcfiles";
             bVsCodeDir = false;
         }
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
+        {
+            bForceWrite = true;
+        }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
         {
             CreateCodeCmd("code32.cmd");
@@ -181,6 +211,23 @@ int main(int argc, char* argv[])
             }
             return 0;
         }
+
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64"))  // used in case it was set in environment
+            upType = UPDATE_MSVC64;
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc32"))  // used in case it was set in environment
+            upType = UPDATE_MSVC32;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclangcl64"))  // used in case it was set in environment
+            upType = UPDATE_CLANG_CL64;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclangcl32"))  // used in case it was set in environment
+            upType = UPDATE_CLANG_CL32;
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64D"))  // used in case it was set in environment
+            upType = UPDATE_MSVC64D;
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc32D"))  // used in case it was set in environment
+            upType = UPDATE_MSVC32D;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclangcl64D"))  // used in case it was set in environment
+            upType = UPDATE_CLANG_CL64D;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclangcl32D"))  // used in case it was set in environment
+            upType = UPDATE_CLANG_CL32D;
     }
 
     if (bVsCodeDir)
@@ -205,6 +252,67 @@ int main(int argc, char* argv[])
             return 1;
     }
 
+    if (upType != UPDATE_NORMAL)
+    {
+        // If we get here, assume we are being launched from a makefile
+
+        CNinja cNinja(true);
+        cNinja.ForceWrite();
+
+        if (!cNinja.IsValidVersion())
+        {
+            puts(TRANSLATE("This version of MakeNinja is too old to properly create ninja scripts from your current srcfiles."));
+            return 0;   // We return as if an error did not occur so that compilation can proceed
+        }
+
+        switch (upType)
+        {
+            case UPDATE_MSVC64:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
+                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/msvcBuild64.ninja");
+                return 0;
+
+            case UPDATE_MSVC32:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
+                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/msvcBuild32.ninja");
+                return 0;
+
+            case UPDATE_CLANG_CL64:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
+                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/clangBuild64.ninja");
+                return 0;
+
+            case UPDATE_CLANG_CL32:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
+                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/clangBuild32.ninja");
+                return 0;
+
+            case UPDATE_MSVC64D:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
+                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/msvcBuild64D.ninja");
+                return 0;
+
+            case UPDATE_MSVC32D:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
+                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/msvcBuild32D.ninja");
+                return 0;
+
+            case UPDATE_CLANG_CL64D:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
+                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/clangBuild64D.ninja");
+                return 0;
+
+            case UPDATE_CLANG_CL32D:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
+                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/clangBuild32D.ninja");
+                return 0;
+
+            default:
+                return 0;
+        }
+
+    }
+    else
     {
         CNinja cNinja(bVsCodeDir);
         if (!cNinja.IsValidVersion())
@@ -213,7 +321,9 @@ int main(int argc, char* argv[])
                 return 1;
         }
 
-        if (bDryRun)
+        if (bForceWrite)    // force write ignores any request for dryrun
+            cNinja.ForceWrite();
+        else if (bDryRun)
             cNinja.EnableDryRun();
 
         cNinja.CreateMakeFile();    // this will create/update it if .srcfiles has a Makefile: section
