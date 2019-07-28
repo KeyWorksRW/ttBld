@@ -173,15 +173,21 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // clang.exe or gcc.exe are preferred since the PATH rarely changes and it works on all platforms
 
-#if defined(_WIN32)
-    if (FindFileEnv("PATH", "clang-cl.exe", &cszPath))
-    {
-        kf.ReplaceStr("%cl_path%", cszPath);
-        bCompilerFound = true;
-    }
-    else if (FindFileEnv("PATH", "clang.exe", &cszPath))
+#if 0
+    // [KeyWorks - 7/28/2019] I want to see how well clang does since it works on all platforms. If it has problems
+    // they should be documented here before trying to use clang-cl
+    #if defined(_WIN32)
+        if (FindFileEnv("PATH", "clang-cl.exe", &cszPath))
+        {
+            kf.ReplaceStr("%cl_path%", cszPath);
+            bCompilerFound = true;
+        }
+        else if (FindFileEnv("PATH", "clang.exe", &cszPath))
+    #else
+        if (FindFileEnv("PATH", "clang.exe", &cszPath))
+    #endif
 #else
-    if (FindFileEnv("PATH", "clang.exe", cszPath))
+    if (FindFileEnv("PATH", "clang.exe", &cszPath))
 #endif
     {
         kf.ReplaceStr("%cl_path%", cszPath);
@@ -229,6 +235,12 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         char szVersion[MAX_PATH];
         if (reg.ReadString("version", szVersion, sizeof(szVersion)))
         {
+            // VS Code doesn't think it's possible for there to be more then one final digit -- though there can actually be at least three
+
+            char* psz = ttStrChrR(szVersion, '.');
+            if (psz && ttIsDigit(psz[1]))
+                psz[2] = 0;
+
             kf.ReplaceStr("%sdk_ver%", szVersion);
             bSdkFound = true;
         }
@@ -280,7 +292,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             if (FindCurMsvcPath(cszMSVC))
             {
                 cszMSVC.AppendFileName("include");
-                ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+                ttBackslashToForwardslash(cszMSVC); // just to be certain that they are consistent
                 kfOut.printf("                %kq,\n", (const char*) cszMSVC);
             }
 #endif
