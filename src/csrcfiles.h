@@ -69,7 +69,7 @@ public:
     const char* GetProjectName() { return GetOption(OPT_PROJECT); }
     const char* GetPchHeader();
     const char* GetPchCpp();    // source file to compile the precompiled header
-    const char* GetSrcFiles() { return m_cszSrcFilePath; };  // get location of .srcfiles (typically in bldMAC/, bldMSW/, or bldUNX/)
+    const char* GetSrcFiles() { return m_cszSrcFilePath; };  // get location of .srcfiles.yaml
 
     const char* GetBldDir() { return m_cszBldDir;  }        // ninja's builddir should be set to this directory
 
@@ -103,7 +103,6 @@ public:
     ttCStr m_cszLibName;        // name and location of any additional library to build (used by Lib: section)
     ttCStr m_cszRcName;         // resource file to build (if any)
     ttCStr m_cszHHPName;        // HTML Help project file
-    ttCStr m_cszOrgProjName;    // original name in case .private/.srcfiles overrides it
 
     ttCHeap m_ttHeap;           // all the ttCList files will be attatched to this heap
 
@@ -113,9 +112,9 @@ public:
 
     ttCList m_lstErrors;        // list of any errors that occurred during processing
 
-    ttCStrIntList m_lstAddSrcFiles;     // additional .srcfiles to read into Files: section
-    ttCStrIntList m_lstLibAddSrcFiles;  // additional .srcfiles to read into Lib: section
-    ttCList       m_lstSrcIncluded;     // the names of all files included by all ".include path/.srcfiles" directives
+    ttCStrIntList m_lstAddSrcFiles;     // additional .srcfiles.yaml to read into Files: section
+    ttCStrIntList m_lstLibAddSrcFiles;  // additional .srcfiles.yaml to read into Lib: section
+    ttCList       m_lstSrcIncluded;     // the names of all files included by all ".include path/.srcfiles.yaml" directives
 
     ttCStr  m_cszPchHdr;
     ttCStr  m_cszPchCpp;

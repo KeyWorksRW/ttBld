@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CSrcOptions
-// Purpose:   Class for storing/retrieving options in a .srcfiles file
+// Purpose:   Class for storing/retrieving options in a .srcfiles.yaml file
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -28,7 +28,7 @@ sfopt::OPT_VERSION aoptVersions[] =
     { OPT_OVERFLOW, 1, 0, 0  }
 };
 
-// Add these in the order you want them written in a new .srcfiles files.
+// Add these in the order you want them written in a new .srcfiles.yaml files.
 
 static const OPT_SETTING s_aOptions[] =
 {

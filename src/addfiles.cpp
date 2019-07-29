@@ -70,7 +70,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         }
         if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
         {
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, ".srcfiles");
+            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, cSrcFiles.GetSrcFiles());
             return;
         }
 

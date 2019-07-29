@@ -53,7 +53,7 @@ CConvertDlg::CConvertDlg() : ttCDlg(IDDDLG_CONVERT)
 
 bool CConvertDlg::CreateSrcFiles()
 {
-    if (ttFileExists(".srcfiles"))
+    if (ttFileExists(".srcfiles.yaml"))
     {
         if (ttMsgBox(GETSTRING(IDS_NINJA_SRCFILES_EXISTS), MB_YESNO) != IDYES)
             return false;
@@ -61,7 +61,7 @@ bool CConvertDlg::CreateSrcFiles()
         // If we converted this before, grab the name of the project we converted from
 
         ttCFile file;
-        if (file.ReadFile(".srcfiles"))
+        if (file.ReadFile(".srcfiles.yaml"))
         {
             if (file.ReadLine())
             {
@@ -189,7 +189,7 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
     if (dlg.GetFolderName(*this))
     {
         ttCStr cszSrcFiles(dlg);
-        cszSrcFiles.AppendFileName(".srcfiles");
+        cszSrcFiles.AppendFileName(".srcfiles.yaml");
         if (ttFileExists(cszSrcFiles))
         {
             if (ttMsgBox(GETSTRING(IDS_NINJA_SRCFILES_EXISTS), MB_YESNO) != IDYES)
@@ -256,7 +256,7 @@ void CConvertDlg::OnOK(void)
     {
         CreateNewSrcFiles();
         ttCStr cszFile(m_cszDirOutput);
-        cszFile.AppendFileName(".srcfiles");
+        cszFile.AppendFileName(".srcfiles.yaml");
         if (!m_cSrcFiles.WriteNew(cszFile))
         {
             ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) cszFile);
@@ -822,7 +822,7 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
     {
         m_cszOutRoot = (char*) m_cszDirOutput;
         m_cszOutRoot.FullPathName();
-        char* pszFilePortion = m_cszOutRoot.FindStrI(".srcfiles");
+        char* pszFilePortion = m_cszOutRoot.FindStrI(".srcfiles.yaml");
         if (pszFilePortion)
             *pszFilePortion = 0;
     }
@@ -847,7 +847,7 @@ bool CConvertDlg::doConversion(const char* pszFile)
             ttMsgBoxFmt(GETSTRING(IDS_NINJA_PARSE_ERROR), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
             return false;
         }
-        m_cszDirOutput.AppendFileName(".srcfiles");
+        m_cszDirOutput.AppendFileName(".srcfiles.yaml");
 
         bool bResult = false;
         if (ttIsSameStrI(pszExt, ".project"))

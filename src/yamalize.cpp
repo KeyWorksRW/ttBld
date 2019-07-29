@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      yamalize.cpp
-// Purpose:   Used to convert .srcfiles to .vscode/srcfiles.yaml
+// Purpose:   Used to convert .srcfiles.yaml to .vscode/srcfiles.yaml
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -10,7 +10,7 @@
 
 #include "writesrcfiles.h"    // CWriteSrcFiles
 
-// This file will read a .srcfiles in the current directory and write a .vscode/srcfiles.yaml. If the .vscode directory does not exist, it will be created.
+// This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode directory does not exist, it will be created.
 // The srcfiles.yaml is not designed to be tracked, so it's fine to customize it based on the current system (what compilers are available, what platform we're on, etc.).
 // A lot of the default options which would not be normally displayed are listed to make them easy to modify in VS Code or any editor that understands YAML format
 
@@ -19,14 +19,14 @@ using namespace sfopt;
 bool Yamalize()
 {
     CSrcFiles cOrgSrcFiles(false);
-    cOrgSrcFiles.ReadFile(".srcfiles");
+    cOrgSrcFiles.ReadFile(".srcfiles.yaml");
 
     CWriteSrcFiles cNewSrcFiles(true);
     ttCList* plstFiles = cNewSrcFiles.GetSrcFilesList();
 
 
-    if (ttFileExists(".srcfiles"))
-        *plstFiles += ".include .srcfiles  # import all the filenames from ${workspaceRoot}/.srcfiles";
+    if (ttFileExists(".srcfiles.yaml"))
+        *plstFiles += ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml";
     else
         *plstFiles += "*.c*";      // TODO: this is a placeholder, need to be smarter about what wildcards to use
 

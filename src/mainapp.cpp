@@ -33,13 +33,13 @@ void Usage()
     puts(txtVersion);
     puts(txtCopyRight);
 
-    puts(TRANSLATE("\nMakeNinja [options] -- parses .srcfiles and produces ninja build scripts\n"));
-    puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in a .srcfiles file"));
+    puts(TRANSLATE("\nMakeNinja [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
+    puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
     puts(TRANSLATE("    -dryrun    -- displays what would have happened, but doesn't change anything"));
 #if defined(_WIN32)
     puts(TRANSLATE("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd"));
 #endif
-    puts(TRANSLATE("    -new       -- displays a dialog allowing you to create a new .srcfiles file"));
+    puts(TRANSLATE("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file"));
     puts(TRANSLATE("    -vscode    -- creates or updates files needed to build project using VS Code"));
 
     puts("\nIDE workspace options:");
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    ttCStr cszSrcFilePath(bVsCodeDir ? ".vscode/srcfiles.yaml" :  ".srcfiles");   // ChangeOptions will set this to the .srcfiles that got modified
+    ttCStr cszSrcFilePath(bVsCodeDir ? ".vscode/srcfiles.yaml" :  ".srcfiles.yaml");   // ChangeOptions will set this to the .srcfiles that got modified
 
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
                 return 0;   // means .srcfiles wasn't created, so nothing further that we can do
 
             ttCStr csz(dlg.GetDirOutput());
-            char* pszTmp = csz.FindStrI(".srcfiles");
+            char* pszTmp = csz.FindStrI(".srcfiles.yaml");
             if (pszTmp)
                 *pszTmp = 0;
             ttChDir(csz);
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "novscode"))  // used in case it was set in environment
         {
-            cszSrcFilePath = ".srcfiles";
+            cszSrcFilePath = ".srcfiles.yaml";
             bVsCodeDir = false;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
         if (!dlg.CreateSrcFiles())
             return 0;   // means .srcfiles wasn't created, so nothing further that we can do
         ttCStr csz(dlg.GetDirOutput());
-        char* pszTmp = csz.FindStrI(".srcfiles");
+        char* pszTmp = csz.FindStrI(".srcfiles.yaml");
         if (pszTmp)
             *pszTmp = 0;
         ttChDir(csz);

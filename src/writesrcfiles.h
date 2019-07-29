@@ -25,7 +25,7 @@ public:
     // Class methods
 
     bool WriteUpdates(const char* pszFile = txtSrcFilesFileName);               // write updates to the [OPTIONS] section
-    bool WriteNew(const char* pszFile, const char* pszCommentHdr = nullptr);    // write complete .srcfiles file (replacing any file that already exists)
+    bool WriteNew(const char* pszFile, const char* pszCommentHdr = nullptr);    // write complete .srcfiles.yaml file (replacing any file that already exists)
 
     ttCList* GetOrgList() { return &m_lstOriginal; }
 

@@ -841,7 +841,7 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 {
     // Note that bin and lib don't need to exist ahead of time as ninja will create them, however if the output is
     // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way around
-    // this would be to add support for an "OutPrefix: ../" option in .srcfiles.
+    // this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
     const char* pszTarget;
     switch (gentype)
@@ -1023,7 +1023,7 @@ void CNinja::ProcessBuildLibs()
 
         while (enumLib.Enum())
         {
-            // Change to the directory that should contain a .srcfiles and read it
+            // Change to the directory that should contain a .srcfiles.yaml and read it
 
             if (!ttChDir(enumLib))
             {
@@ -1036,11 +1036,11 @@ void CNinja::ProcessBuildLibs()
 
             // The current directory may just be the name of the library, but not necessarily where srcfiles is located.
 
-            if (!ttFileExists(".srcfiles") && !ttFileExists(".vscode/srcfiles.yaml"))
+            if (!ttFileExists(".srcfiles.yaml") && !ttFileExists(".vscode/srcfiles.yaml"))
             {
                 for (;;)    // empty for loop that we break out of as soon as we find a srcfiles file to use
                 {
-                    // CSrcFiles will automatically read .vscode/srcfiles.yaml if there is no .srcfiles in the current
+                    // CSrcFiles will automatically read .vscode/srcfiles.yaml if there is no .srcfiles.yaml in the current
                     // directory
 
                     if (ttFileExists(".vscode/srcfiles.yaml"))
@@ -1051,7 +1051,7 @@ void CNinja::ProcessBuildLibs()
                     if (ttDirExists("src"))
                     {
                         ttChDir("src");
-                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                        if (ttFileExists(".srcfiles.yaml") || ttFileExists(".vscode/srcfiles.yaml"))
                             break;
                         else
                             ttChDir("..");
@@ -1060,7 +1060,7 @@ void CNinja::ProcessBuildLibs()
                     if (ttDirExists("source"))
                     {
                         ttChDir("source");
-                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                        if (ttFileExists(".srcfiles.yaml") || ttFileExists(".vscode/srcfiles.yaml"))
                             break;
                         else
                             ttChDir("..");
@@ -1080,13 +1080,13 @@ void CNinja::ProcessBuildLibs()
                     if (ttDirExists(ttFindFilePortion(enumLib)))
                     {
                         ttChDir(ttFindFilePortion(enumLib));
-                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                        if (ttFileExists(".srcfiles.yaml") || ttFileExists(".vscode/srcfiles.yaml"))
                             break;
                         else
                             ttChDir("..");
                     }
 
-                    // Any further directory searches should go above this -- once we get here, we can't find a .srcfiles. We go ahead an break
+                    // Any further directory searches should go above this -- once we get here, we can't find a .srcfiles.yaml. We go ahead an break
                     // out of the loop. cSrcFiles.ReadFile() will fail -- we'll use whatever error reporting (if any) it uses for a file that
                     // cannot be found or read.
 
