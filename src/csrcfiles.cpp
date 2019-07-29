@@ -57,18 +57,26 @@ static const char* aSrcFilesLocations[] =
     nullptr
 };
 
+const char* LocateSrcFiles(bool bStartWithVsCode)
+{
+    for (size_t pos = bStartWithVsCode ? 1 : 0; aSrcFilesLocations[pos]; ++pos)
+    {
+        if (ttFileExists(aSrcFilesLocations[pos]))
+            return aSrcFilesLocations[pos];
+    }
+
+    // We may have been told to start looking in .vscode, but if we stil can't find it, then look in the root
+    if (bStartWithVsCode && ttFileExists(aSrcFilesLocations[0]))
+        return aSrcFilesLocations[0];
+
+    return nullptr;
+}
+
 bool CSrcFiles::ReadFile(const char* pszFile)
 {
     if (!pszFile)
     {
-        for (size_t pos = m_bVsCodeDir ? 1 : 0; aSrcFilesLocations[pos]; ++pos)
-        {
-            if (ttFileExists(aSrcFilesLocations[pos]))
-            {
-                pszFile = aSrcFilesLocations[pos];
-                break;
-            }
-        }
+        pszFile = LocateSrcFiles(m_bVsCodeDir);
 
         if (!pszFile)
         {

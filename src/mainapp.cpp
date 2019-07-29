@@ -40,7 +40,7 @@ void Usage()
     puts(TRANSLATE("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd"));
 #endif
     puts(TRANSLATE("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file"));
-    puts(TRANSLATE("    -vscode    -- creates or updates files needed to build project using VS Code"));
+    puts(TRANSLATE("    -vscode    -- creates or updates files needed to build a project using VS Code"));
 
     puts("\nIDE workspace options:");
     puts(TRANSLATE("    -codelite   -- creates or updates files needed to build project using CodeLite"));
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    ttCStr cszSrcFilePath(bVsCodeDir ? ".vscode/srcfiles.yaml" :  ".srcfiles.yaml");   // ChangeOptions will set this to the .srcfiles that got modified
+    ttCStr cszSrcFilePath;
 
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
@@ -175,13 +175,7 @@ int main(int argc, char* argv[])
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))
         {
-            cszSrcFilePath = ".vscode/srcfiles.yaml";
             bVsCodeDir = true;
-        }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "novscode"))  // used in case it was set in environment
-        {
-            cszSrcFilePath = ".srcfiles.yaml";
-            bVsCodeDir = false;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
         {
@@ -230,26 +224,32 @@ int main(int argc, char* argv[])
             upType = UPDATE_CLANG_CL32D;
     }
 
+    if (cszSrcFilePath.IsEmpty())
+    {
+        const char* pszFile = LocateSrcFiles(bVsCodeDir);
+        if (pszFile)
+            cszSrcFilePath = pszFile;
+        else
+        {
+            CConvertDlg dlg;
+            if (!dlg.CreateSrcFiles())
+                return 0;   // means .srcfiles wasn't created, so nothing further that we can do
+            ttCStr csz(dlg.GetDirOutput());
+            char* pszTmp = csz.FindStrI(".srcfiles.yaml");
+            if (pszTmp)
+                *pszTmp = 0;
+            ttChDir(csz);
+            if (!ChangeOptions(&cszSrcFilePath, bDryRun))
+                return 1;
+        }
+    }
+
     if (bVsCodeDir)
     {
         ttCList lstResults;
         CreateVsCodeProject(&lstResults);
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             puts(lstResults[pos]);
-    }
-
-    if (!ttFileExists(cszSrcFilePath))
-    {
-        CConvertDlg dlg;
-        if (!dlg.CreateSrcFiles())
-            return 0;   // means .srcfiles wasn't created, so nothing further that we can do
-        ttCStr csz(dlg.GetDirOutput());
-        char* pszTmp = csz.FindStrI(".srcfiles.yaml");
-        if (pszTmp)
-            *pszTmp = 0;
-        ttChDir(csz);
-        if (!ChangeOptions(&cszSrcFilePath, bDryRun))
-            return 1;
     }
 
     if (upType != UPDATE_NORMAL)

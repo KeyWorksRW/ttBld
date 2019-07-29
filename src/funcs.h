@@ -20,6 +20,8 @@ int  MakeNinja(int argc, char* argv[]);
 void ParseDefines(ttCList& lst, const char* pszDefines);
 bool isSystemHeaderFile(const char* pszHeaderFile);
 
+const char* LocateSrcFiles(bool bStartWithVsCode = false);   // looks in various standard places to find a .srcfiles.yaml file
+
 size_t CreateCodeLiteProject();    // returns 0 - no errors, 1 - file already exists, 2 - other error
 
 // Following functions are for use in setting up a build system for VS Code

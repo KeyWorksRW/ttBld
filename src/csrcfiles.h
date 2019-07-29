@@ -26,7 +26,7 @@ extern const char* txtSrcFilesFileName;
 class CSrcFiles : public CSrcOptions
 {
 public:
-    CSrcFiles(bool bVsCodeDir = false);
+    CSrcFiles(bool bVsCodeDir = false);     // bVsCodeDir should only be set to true to skip looking for .srcfiles.yaml in current directory
 
     // Public functions
 

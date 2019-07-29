@@ -112,17 +112,6 @@ bool CreateVsCodeProject(ttCList* plstResults)      // returns true unless unabl
         }
     }
 
-    if (!ttFileExists(".vscode/srcfiles.yaml"))
-    {
-        if (!Yamalize())
-        {
-            ttMsgBox(TRANSLATE("Unable to create the file .vscode/srcfiles.yaml"));
-            return 1;
-        }
-        else if (plstResults)
-            *plstResults += TRANSLATE("Created .vscode/srcfiles.yaml");
-    }
-
     CSrcFiles cSrcFiles(true);
     if (!cSrcFiles.ReadFile())
     {
