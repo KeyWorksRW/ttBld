@@ -45,43 +45,15 @@ static const char* atxtProjects[] =
     nullptr
 };
 
-CConvertDlg::CConvertDlg() : ttCDlg(IDDDLG_CONVERT)
+CConvertDlg::CConvertDlg(const char* pszDstSrcFiles) : ttCDlg(IDDDLG_CONVERT)
 {
-    m_cszDirOutput.GetCWD();
-    m_cszCWD = m_cszDirOutput;
-}
-
-bool CConvertDlg::CreateSrcFiles()
-{
-    if (ttFileExists(".srcfiles.yaml"))
-    {
-        if (ttMsgBox(GETSTRING(IDS_NINJA_SRCFILES_EXISTS), MB_YESNO) != IDYES)
-            return false;
-
-        // If we converted this before, grab the name of the project we converted from
-
-        ttCFile file;
-        if (file.ReadFile(".srcfiles.yaml"))
-        {
-            if (file.ReadLine())
-            {
-                if (ttIsSameSubStrI(file, "# Converted from"))
-                {
-                    char* psz = ttFindNonSpace((char*) file + sizeof("# Converted from"));
-                    m_cszConvertScript = psz;
-                }
-            }
-        }
-    }
-
-    if (DoModal(NULL) == IDOK)
-    {
-        if (m_cszConvertScript.IsNonEmpty())
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_SRCFILES_CREATED), MB_OK, (char*) ttFindFilePortion(m_cszConvertScript));
-        return true;
-    }
+    if (pszDstSrcFiles)
+        m_cszOutSrcFiles = pszDstSrcFiles;
     else
-        return false;
+        m_cszOutSrcFiles = ".srcfiles.yaml";
+
+    // Process of conversion may change directories, so save the directory we should change back to
+    m_cszCWD.GetCWD();
 }
 
 void CConvertDlg::OnBegin(void)
@@ -93,8 +65,13 @@ void CConvertDlg::OnBegin(void)
 
     ttCStr csz;
     csz.GetCWD();
-    SetControlText(DLG_ID(IDEDIT_OUT_DIR), csz);
     SetControlText(DLG_ID(IDEDIT_IN_DIR), csz);
+
+    csz = m_cszOutSrcFiles;
+    char* pszFilePortion = ttFindFilePortion(csz);
+    if (pszFilePortion)
+        *pszFilePortion = 0;
+    SetControlText(DLG_ID(IDEDIT_OUT_DIR), csz);
 
     m_comboScripts.Initialize(*this, DLG_ID(IDCOMBO_SCRIPTS));
     ttCFindFile ff(atxtProjects[0]);
@@ -231,7 +208,7 @@ void CConvertDlg::OnBtnChangeIn()
 
 void CConvertDlg::OnOK(void)
 {
-    m_cszDirOutput.GetWndText(GetDlgItem(DLG_ID(IDEDIT_OUT_DIR)));
+    m_cszOutSrcFiles.GetWndText(GetDlgItem(DLG_ID(IDEDIT_OUT_DIR)));
     m_cszDirSrcFiles.GetWndText(GetDlgItem(DLG_ID(IDEDIT_IN_DIR)));
     if (GetCheck(DLG_ID(IDRADIO_CONVERT)))
         m_cszConvertScript.GetWndText(GetDlgItem(DLG_ID(IDCOMBO_SCRIPTS)));
@@ -254,12 +231,9 @@ void CConvertDlg::OnOK(void)
     }
     else  // We get here if the user didn't specify anything to convert from.
     {
-        CreateNewSrcFiles();
-        ttCStr cszFile(m_cszDirOutput);
-        cszFile.AppendFileName(".srcfiles.yaml");
-        if (!m_cSrcFiles.WriteNew(cszFile))
+        if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles))
         {
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) cszFile);
+            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
             CancelEnd();
         }
     }
@@ -773,30 +747,6 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
     return false;
 }
 
-void CConvertDlg::CreateNewSrcFiles()
-{
-    char szPath[MAX_PATH];
-    ttStrCpy(szPath, m_cszDirSrcFiles);
-    ttAddTrailingSlash(szPath);
-    size_t cbRoot = ttStrLen(szPath);
-
-    ttCStr cszRelPath;
-
-    for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
-    {
-        ttStrCpy(szPath + cbRoot, atxtSrcTypes[pos]);
-        ttCFindFile ff(szPath);
-        if (ff.IsValid())
-        {
-            do {
-                ttStrCpy(szPath + cbRoot, sizeof(szPath) - cbRoot, ff);
-                ttConvertToRelative(m_cszDirOutput, szPath, cszRelPath);
-                m_cSrcFiles.m_lstSrcFiles += cszRelPath;
-            } while(ff.NextFile());
-        }
-    }
-}
-
 // This function first converts the file relative to the location of the build script, and then relative to the location of .srcfiles
 
 char* CConvertDlg::MakeSrcRelative(const char* pszFile)
@@ -820,7 +770,7 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 
     if (m_cszOutRoot.IsEmpty())
     {
-        m_cszOutRoot = (char*) m_cszDirOutput;
+        m_cszOutRoot = (char*) m_cszOutSrcFiles;
         m_cszOutRoot.FullPathName();
         char* pszFilePortion = m_cszOutRoot.FindStrI(".srcfiles.yaml");
         if (pszFilePortion)
@@ -834,10 +784,12 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
     return m_cszRelative;
 }
 
-bool CConvertDlg::doConversion(const char* pszFile)
+bool CConvertDlg::doConversion(const char* pszInFile)
 {
-    if (pszFile)
-        m_cszConvertScript = pszFile;
+    ttASSERT_MSG(m_cszOutSrcFiles.IsNonEmpty(), "Need to set path to .srcfiles.yaml before calling doConversion()");
+
+    if (pszInFile)
+        m_cszConvertScript = pszInFile;
     const char* pszExt = ttStrChrR(m_cszConvertScript, '.');
     if (pszExt)
     {
@@ -847,7 +799,6 @@ bool CConvertDlg::doConversion(const char* pszFile)
             ttMsgBoxFmt(GETSTRING(IDS_NINJA_PARSE_ERROR), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
             return false;
         }
-        m_cszDirOutput.AppendFileName(".srcfiles.yaml");
 
         bool bResult = false;
         if (ttIsSameStrI(pszExt, ".project"))
@@ -864,22 +815,22 @@ bool CConvertDlg::doConversion(const char* pszFile)
         if (bResult)
         {
             ttCStr cszHdr, cszRelative;
-            ttConvertToRelative(m_cszDirOutput, m_cszConvertScript, cszRelative);
+            ttConvertToRelative(m_cszOutSrcFiles, m_cszConvertScript, cszRelative);
 
             cszHdr.printf("# Converted from %s", (char*) cszRelative);
 
             if (ttIsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT)))
             {
-                ttCStr cszProject(m_cszDirOutput);
+                ttCStr cszProject(m_cszOutSrcFiles);
                 char* pszFilePortion = ttFindFilePortion(cszProject);
                 if (pszFilePortion)
                     *pszFilePortion = 0;
                 m_cSrcFiles.UpdateOption(OPT_PROJECT, ttFindFilePortion(cszProject));
             }
 
-            if (!m_cSrcFiles.WriteNew(m_cszDirOutput, cszHdr))
+            if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles, cszHdr))
             {
-                ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) m_cszDirOutput);
+                ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
                 return false;
             }
             return true;

@@ -20,14 +20,11 @@
 class CConvertDlg : public ttCDlg
 {
 public:
-    CConvertDlg();
+    CConvertDlg(const char* pszDstSrcFiles = nullptr);
 
     // Public functions
 
-    bool  CreateSrcFiles();
-    bool  doConversion(const char* pszFile = nullptr);
-
-    char* GetDirOutput() { return m_cszDirOutput; }
+    char* GetOutSrcFiles() { return m_cszOutSrcFiles; }
     char* GetDirSrcFiles() { return m_cszDirSrcFiles; }
     char* GetConvertScript() { return m_cszConvertScript; }
     void  SetConvertScritpt(const char* pszFile) { m_cszConvertScript = pszFile; }
@@ -54,7 +51,7 @@ protected:
 
     // Protected functions
 
-    void CreateNewSrcFiles();
+    bool doConversion(const char* pszInFile = nullptr);
 
     char* MakeSrcRelative(const char* pszFile);
     void  AddCodeLiteFiles(ttCXMLBranch* pParent);
@@ -67,7 +64,8 @@ private:
     ttCParseXML m_xml;
     CWriteSrcFiles m_cSrcFiles;
 
-    ttCStr m_cszDirOutput;      // where .srcfiles should be created
+    ttCStr m_cszOutSrcFiles;      // where .srcfiles should be created
+
     ttCStr m_cszDirSrcFiles;
     ttCStr m_cszConvertScript;
 
