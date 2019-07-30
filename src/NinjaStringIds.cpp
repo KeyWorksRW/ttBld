@@ -39,7 +39,7 @@ static const ttIDS_LIST aNinjaStringIds[] =
     { IDS_NINJA_CONVERSION_FAILED,   _XGET("Conversion of %s failed!") },
     { IDS_NINJA_LIBDIR,              _XGET("Library directory") },
     { IDS_NINJA_CANNOT_LOCATE,       _XGET("Cannot locate the file %s") },
-    { IDS_NINJA_ALREAY_IN_FILES,     _XGET("The file %s is alreay in .srcfiles\n") },
+    { IDS_NINJA_ALREAY_IN_FILES,     _XGET("The file %s is alreay in .srcfiles.yaml\n") },
     { IDS_NINJA_FILE_NOT_ADDED,      _XGET("The file %s doesn't exist -- not added\n") },
 
     { IDS_NINJA_FILES_ADDED,         _XGET("%u files added.") },
@@ -52,23 +52,23 @@ static const ttIDS_LIST aNinjaStringIds[] =
     // TRANSLATORS: Don't change the amount of leading spaces
     { IDS_NINJA_NEW_FILE,            _XGET("    new: %s\n") },
 
-    // TRANSLATORS: Error while converting an IDE script into .srcfiles
+    // TRANSLATORS: Error while converting an IDE script into .srcfiles.yaml
     { IDS_NINJA_INVALID_PROJECT,     _XGET("Cannot locate <CodeLite_Project> in %s") },
-    // TRANSLATORS: Error while converting an IDE script into .srcfiles
+    // TRANSLATORS: Error while converting an IDE script into .srcfiles.yaml
     { IDS_NINJA_MISSING_FILES,       _XGET("Cannot locate <Files> in %s") },
-    // TRANSLATORS: Error while converting an IDE script into .srcfiles
+    // TRANSLATORS: Error while converting an IDE script into .srcfiles.yaml
     { IDS_NINJA_MISSING_FILTER,      _XGET("Cannot locate <Filter> in %s") },
-    // TRANSLATORS: Error while converting an IDE script into .srcfiles
+    // TRANSLATORS: Error while converting an IDE script into .srcfiles.yaml
     { IDS_NINJA_MISSING_INCLUDE,     _XGET("%s(%kt,%kt):  warning: cannot locate include file %s") },
-    // TRANSLATORS: Error while converting an IDE script into .srcfiles
+    // TRANSLATORS: Error while converting an IDE script into .srcfiles.yaml
     { IDS_NINJA_MISSING_PROJECT,     _XGET("Cannot locate <Project> in %s") },
-    // TRANSLATORS: Error while converting an IDE script into .srcfiles
+    // TRANSLATORS: Error while converting an IDE script into .srcfiles.yaml
     { IDS_NINJA_MISSING_VSP,         _XGET("Cannot locate <VisualStudioProject> in %s") },
 
     { IDS_NINJA_OPT_MISSING_COLON,   _XGET("Option name is missing a ':' (%s)") },
     { IDS_NINJA_PARSE_ERROR,         _XGET("An internal error occurred attempting to parse the file %s") },
-    { IDS_NINJA_SRCFILES_CREATED,    _XGET(".srcfiles created using %s as the template") },
-    { IDS_NINJA_SRCFILES_EXISTS,     _XGET(".srcfiles already exists in this directory. Are you sure you want to replace it?") },
+    { IDS_NINJA_SRCFILES_CREATED,    _XGET(".srcfiles.yaml created using %s as the template") },
+    { IDS_NINJA_SRCFILES_EXISTS,     _XGET(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?") },
 
     // TRANSLATORS: Used for the Tab name of the tab that sets general options
     { IDS_NINJA_TAB_GENERAL,             _XGET("General") },
@@ -78,10 +78,8 @@ static const ttIDS_LIST aNinjaStringIds[] =
     { IDS_NINJA_TAB_LINKER,          _XGET("Linker") },
     // TRANSLATORS: Used for the Tab name of the tab that sets general scripting options (for IDE, makefile, etc.)
     { IDS_NINJA_TAB_SCRIPTS,         _XGET("Scripts") },
-    // TRANSLATORS: Used for the Tab name of the tab that sets options in .private/.srcfiles
-    { IDS_NINJA_TAB_PRIVATE,         _XGET("Private") },
 
-    // TRANSLATORS: Displayed when MakeNinja doesn't recognize an option in the Options section of a .srcfiles file
+    // TRANSLATORS: Displayed when MakeNinja doesn't recognize an option in the Options section of a .srcfiles.yaml file
     { IDS_NINJA_UNKNOWN_OPTION,      _XGET("%s is an unknown option") },
     { IDS_NINJA_OPTIONS_UPDATED,     _XGET("%s Options: section updated.\n") },
 

@@ -57,11 +57,11 @@ END
 
 IDR_PRE_PROJECT         RCDATA    "res/cdlprojectpre.txt"
 IDR_POST_PROJECT        RCDATA    "res/cdlprojectpost.txt"
-IDR_MAKEFILE            RCDATA    "res/makefile.txt"
-IDR_PRIVATE_MAKEFILE    RCDATA    "res/pmakefile.txt"
 IDR_VCXPROJ_MASTER      RCDATA    "res/vcxproj.xml"
 IDR_VCXPROJ_FILTERS     RCDATA    "res/vcxproj.filters.xml"
-IDR_VSCODE_MAKE         RCDATA    "res/vscodeMake.txt"
+
+IDR_MAKEFILE_ALL        RCDATA    "res/makefileAll.txt"
+IDR_MAKEFILE_SINGLE     RCDATA    "res/makefileSng.txt"
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -89,14 +89,14 @@ BEGIN
             VALUE "Comments", "Released under Apache License\0"
             VALUE "CompanyName", "KeyWorks Software\0"
             VALUE "FileDescription", "Ninja Build Script generator\0"
-            VALUE "FileVersion", "2.0.8295\0"
+            VALUE "FileVersion", "1.1.0.8295\0"
             VALUE "InternalName", "MakeNinja\0"
-            VALUE "LegalCopyright", "Copyright (c) 2002-2018 KeyWorks Software\0"
+            VALUE "LegalCopyright", "Copyright (c) 2002-2019 KeyWorks Software\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "MakeNinja.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "MakeNinja\0"
-            VALUE "ProductVersion", "2.0\0"
+            VALUE "ProductVersion", "1.1\0"
             VALUE "SpecialBuild", "\0"
         END
     END

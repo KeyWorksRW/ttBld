@@ -16,18 +16,17 @@
 #include "csrcfiles.h"          // CSrcFiles
 #include "resource.h"
 
+static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, char* pszProblem);
+
 static const char* txtProperties =
     "{\n"
     "    \"configurations\": [\n"
     "        {\n"
-    "            \"name\": \"Win32\",\n"
+    "            \"name\": \"Default\",\n"
     "             \"defines\": [\n"
     "             ],\n"
-    "             \"windowsSdkVersion\": \"%sdk_ver%\",\n"
-    "             \"compilerPath\": \"%cl_path%\",\n"
     "             \"cStandard\": \"c11\",\n"
     "             \"cppStandard\": \"c++17\",\n"
-//    "             \"intelliSenseMode\": \"msvc-x64\",\n"
     "             \"includePath\": [\n"
     "             ]\n"
     "         }\n"
@@ -95,13 +94,15 @@ static const char* txtDefaultTask =
     "        },\n"
     ;
 
+static const char* txtDefTaskName = _XGET("Build %s (debug) using %s");
+
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults);
 bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults);
 
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 
-bool CreateVsCodeProject(ttCList* plstResults)      // returns true unless unable to write to a file
+bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)      // returns true unless unable to write to a file
 {
     if (!ttDirExists(".vscode"))
     {
@@ -112,23 +113,11 @@ bool CreateVsCodeProject(ttCList* plstResults)      // returns true unless unabl
         }
     }
 
-    if (!ttFileExists(".vscode/srcfiles.yaml"))
+    CSrcFiles cSrcFiles;
+    if (!cSrcFiles.ReadFile(pszSrcFiles))
     {
-        if (!Yamalize())
-        {
-            ttMsgBox(TRANSLATE("Unable to create the file .vscode/srcfiles.yaml"));
-            return 1;
-        }
-        else if (plstResults)
-            *plstResults += TRANSLATE("Created .vscode/srcfiles.yaml");
-    }
-
-    CSrcFiles cSrcFiles(true);
-    if (!cSrcFiles.ReadFile())
-    {
-        ttCStr cszMsg;
-        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), (char*) cSrcFiles.m_cszSrcFilePath);
-        ttMsgBox(cszMsg);
+        if (plstResults)
+            *plstResults += TRANSLATE("Cannot locate a .srcfiles.yaml file need to configure .vscode/*.json files.");
         return false;
     }
 
@@ -162,94 +151,9 @@ bool CreateVsCodeProject(ttCList* plstResults)      // returns true unless unabl
 
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 {
-    ttCFile kf;
-
-    // Read the array of lines, write them into kf so it looks like it was read from a file
+    ttCFile kf, kfOut;
 
     kf.ReadStrFile(txtProperties);
-
-    bool bCompilerFound = false;
-    ttCStr cszPath;
-
-    // clang.exe or gcc.exe are preferred since the PATH rarely changes and it works on all platforms
-
-#if 0
-    // [KeyWorks - 7/28/2019] I want to see how well clang does since it works on all platforms. If it has problems
-    // they should be documented here before trying to use clang-cl
-    #if defined(_WIN32)
-        if (FindFileEnv("PATH", "clang-cl.exe", &cszPath))
-        {
-            kf.ReplaceStr("%cl_path%", cszPath);
-            bCompilerFound = true;
-        }
-        else if (FindFileEnv("PATH", "clang.exe", &cszPath))
-    #else
-        if (FindFileEnv("PATH", "clang.exe", &cszPath))
-    #endif
-#else
-    if (FindFileEnv("PATH", "clang.exe", &cszPath))
-#endif
-    {
-        kf.ReplaceStr("%cl_path%", cszPath);
-        bCompilerFound = true;
-    }
-    else if (FindFileEnv("PATH", "gcc.exe", &cszPath))
-    {
-        kf.ReplaceStr("%cl_path%", cszPath);
-        bCompilerFound = true;
-    }
-    if (!bCompilerFound)
-    {
-#if defined(_WIN32)
-        ttCStr cszMSVC;
-        if (FindCurMsvcPath(cszMSVC))
-        {
-            bool bx64 = IsHost64();
-            cszMSVC.AppendFileName("bin/");
-            cszMSVC.AppendFileName(bx64 ? "Hostx64/" : "Hostx86/");
-            cszMSVC.AppendFileName(bx64 ? "x64/cl.exe" : "x86/cl.exe");
-            ttBackslashToForwardslash(cszMSVC);
-
-            // This gets us the correct version for now, but the next time the user updates Visual Studio, it will be
-            // wrong until the user updates the file by hand, or runs MakeNinja -vscode
-
-            kf.ReplaceStr("%cl_path%", cszMSVC);
-        }
-        else
-#endif
-        {
-            kf.ReplaceStr("%cl_path%", "cl.exe");
-            puts(GETSTRING(IDS_CANT_FIND_COMPILER));
-        }
-    }
-
-    // The original template specifies the installed SDK version. I'm not sure why that matters, but until we can confirm that it
-    // doesn't matter, we'll need to grab the version from the registry: HKEY_CLASSES_ROOT\Installer\Dependencies\Microsoft.Windows.WindowsSDK.x86.10\Version
-
-    bool bSdkFound = false;
-
-#if defined(_WIN32)
-    ttCRegistry reg;
-    if (reg.Open(HKEY_CLASSES_ROOT, "Installer\\Dependencies\\Microsoft.Windows.WindowsSDK.x86.10", false))
-    {
-        char szVersion[MAX_PATH];
-        if (reg.ReadString("version", szVersion, sizeof(szVersion)))
-        {
-            // VS Code doesn't think it's possible for there to be more then one final digit -- though there can actually be at least three
-
-            char* psz = ttStrChrR(szVersion, '.');
-            if (psz && ttIsDigit(psz[1]))
-                psz[2] = 0;
-
-            kf.ReplaceStr("%sdk_ver%", szVersion);
-            bSdkFound = true;
-        }
-    }
-#endif    // defined(_WIN32)
-    if (!bSdkFound)
-        kf.ReplaceStr("%sdk_ver%", "10.0.17763.0");     // make a guess, probably wrong, but will also probably work fine
-
-    ttCFile kfOut;
     while (kf.ReadLine())
     {
         if (ttIsSameSubStrI(ttFindNonSpace(kf), "\042defines"))
@@ -287,16 +191,6 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             while (enumInc.Enum())
                 kfOut.printf("                %kq,\n", (const char*) enumInc);
 
-#if defined(_WIN32)
-            ttCStr cszMSVC;
-            if (FindCurMsvcPath(cszMSVC))
-            {
-                cszMSVC.AppendFileName("include");
-                ttBackslashToForwardslash(cszMSVC); // just to be certain that they are consistent
-                kfOut.printf("                %kq,\n", (const char*) cszMSVC);
-            }
-#endif
-
             // we always add the default include path
             kfOut.WriteEol("                \042${default}\042");
             kfOut.WriteEol(kf);
@@ -313,6 +207,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     }
     else
     {
+        // Note that we can't use IDS_FILE_CREATED since that string adds \n to the end.
         if (plstResults)
             *plstResults += TRANSLATE("Created .vscode/c_cpp_properties.json");
     }
@@ -334,13 +229,24 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     kf.ReplaceStr("%proj%", cSrcFiles.GetProjectName());
 
     ttCStr cszTarget;
+
+    // REVIEW: [KeyWorks - 7/30/2019] If we ever add the ability to set a default compiler for makefile, then should
+    // change this. For now we'll default to MSVC on Windows.
+
 #ifdef _WIN32
-    cszTarget.printf("Build %s (debug) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
+    cszTarget.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
+        ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()),
+        "MSVC");
     kf.ReplaceStr("%bld%", cszTarget);
 #else
-    cszTarget.printf("Build %s (debug) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
+    // [KeyWorks - 7/30/2019] This is a placeholder -- it needs to be set depending on whether clang.exe is actually
+    // available. Use GCC if not.
+
+    cszTarget.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
+        ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32())
+        "CLANG");
     kf.ReplaceStr("%bld%", cszTarget);
 #endif
 
@@ -367,15 +273,33 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     return true;
 }
 
+
+// https://vscode-docs.readthedocs.io/en/latest/editor/tasks/
+
+// For clang-cl.exe we definitely need to provide a problem matcher since the $mscompiler one doesn't work. We will
+// probably need to add it for our regular builds as well if the makefile is not in the same location as the current
+// directory. Reason is that $mscompile assumes an absolute path, but all of the compilers are outputing a relative path.
+
 bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 {
     ttCFile kfTask, kfSubTask, kfOut;
 
+    ttCStr cszMakeFileOption("");
+    {
+        char* pszFilePortion = ttFindFilePortion(cSrcFiles.GetSrcFiles());
+        if (pszFilePortion != cSrcFiles.GetSrcFiles())
+        {
+            cszMakeFileOption += "-f ";
+            cszMakeFileOption += cSrcFiles.GetSrcFiles();
+            pszFilePortion = ttFindFilePortion(cszMakeFileOption);
+            *pszFilePortion = 0;
+            cszMakeFileOption.AppendFileName("makefile");
+        }
+    }
+
     // Read the array of lines, write them into kf so it looks like it was read from a file
 
     kfTask.ReadStrFile(txtTasks);
-
-    bool bMinGW = FindFileEnv("PATH", "mingw32-make.exe");
 
     while (kfTask.ReadLine())
     {
@@ -383,254 +307,159 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
         {
             kfOut.WriteEol(kfTask);
 
-            // [KeyWorks - 7/21/2019] Currently the only group names that VS Code allows are "build" and "test"
+            // First set the default task. This is the only one where the property "isDefault" is set
 
-#if defined(_WIN32)   // MSVC compiler is only available on Windows
+            kfSubTask.ReadStrFile(txtDefaultTask);
+            ttCStr cszLabel, cszMakeCommand;
+
+#if defined(_WIN32)
 
             // Build MSVC debug
 
-            kfSubTask.ReadStrFile(txtDefaultTask);
+            cszLabel.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
+                ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()),
+                "MSVC");
 
-            ttCStr cszTarget;
-            cszTarget.printf("Build %s (debug) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                    cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
-
-            kfSubTask.ReplaceStr("%label%", cszTarget);
+            kfSubTask.ReplaceStr("%label%", cszLabel);
             kfSubTask.ReplaceStr("%group%", "build");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc debug -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc debug -f .vscode/makefile");
+
+            cszMakeCommand.printf("nmake.exe -nologo debug %s", (char*) cszMakeFileOption);
+            kfSubTask.ReplaceStr("%command%", cszMakeCommand);
             kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
 
             while (kfSubTask.ReadLine())
                 kfOut.WriteEol(kfSubTask);
-#endif    // defined(_WIN32)
-
-#if 0   // CLANG-CL disabled for now
-            // Build CLANG debug
-
-#if defined(_WIN32)
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
 #else
-            // On non-Windows, default to CLANG build
-            kfSubTask.ReadStrFile(txtDefaultTask);
-#endif
-            cszTarget.printf("Build %s (debug) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                    cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
+            bool bClangAvail = FindFileEnv("PATH", "clang.exe");
 
-            kfSubTask.ReplaceStr("%label%", cszTarget);
+            cszLabel.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
+                ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32())
+                bClangAvail ? "CLANG" : "GCC");
+
+            kfSubTask.ReplaceStr("%label%", cszLabel);
             kfSubTask.ReplaceStr("%group%", "build");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=clang debug -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=clang debug -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
+
+            cszMakeCommand.printf("make debug cmplr=clang %s", (char*) cszMakeFileOption);
+            kfSubTask.ReplaceStr("%command%", cszMakeCommand);
+            if (!bClangAvail)
+                kfSubTask.ReplaceStr("cmplr=clang", "cmplr=gcc");
+
+            kfSubTask.ReplaceStr("%problem%", "\042$gcc\042");
 
             while (kfSubTask.ReadLine())
                 kfOut.WriteEol(kfSubTask);
 #endif
 
-#if defined(_WIN32)   // MSVC compiler is only available on Windows
+            // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC compiler. If we're not on Windows, then
+            // before we write the file, we replace nmake.exe with make.exe, and MSVC with either CLANG or GCC.
 
             // Build MSVC release
 
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
+            cszLabel.printf("Build %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+            cszMakeCommand.printf("nmake.exe -nologo release %s", (char*) cszMakeFileOption);
+            AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$msCompile\042");
 
-            cszTarget.printf("Build %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                    cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+            // Rebuild MSVC release
 
-            kfSubTask.ReplaceStr("%label%", cszTarget);
-            kfSubTask.ReplaceStr("%group%", "build");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc release -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc release -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
-#endif
-
-#if 0   // CLANG-CL disabled for now
-            // Build CLANG release
-
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
-
-            cszTarget.printf("Build %s (release) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                    cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
-
-            kfSubTask.ReplaceStr("%label%", cszTarget);
-            kfSubTask.ReplaceStr("%group%", "build");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=clang release -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=clang release -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
-
-            // Test: Run target (debug)
-
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
-
-            if (cSrcFiles.IsExeTypeWindow())
-                kfSubTask.ReplaceStr("shell", "process");
-
-            cszTarget.printf("Run %s (debug)", cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                    cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32());
-
-            kfSubTask.ReplaceStr("%label%", cszTarget);
-            kfSubTask.ReplaceStr("%group%", "test");
-            kfSubTask.ReplaceStr("%command%", cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                                                cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32());
-            kfSubTask.ReplaceStr("%problem%", "");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
-#endif
-
-#if defined(_WIN32)   // MSVC compiler is only available on Windows
-
-            // Test: clean MSVC release targets
-
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
-
-            kfSubTask.ReplaceStr("%label%", "Clean MSVC release targets");
-            kfSubTask.ReplaceStr("%group%", "test");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc clean -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc clean -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
-
-#endif
-
-#if 0   // CLANG-CL disabled for now
-            // Test: clean CLANG release targets
-
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
-
-            kfSubTask.ReplaceStr("%label%", "Clean CLANG release targets");
-            kfSubTask.ReplaceStr("%group%", "test");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=clang clean -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=clang clean -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
-#endif
-
-#if defined(_WIN32)   // MSVC compiler is only available on Windows
+            cszLabel.printf("Rebuild %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+            cszMakeCommand.printf("nmake.exe -nologo clean release %s", (char*) cszMakeFileOption);
+            AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$msCompile\042");
 
             // Test: View MSVC build commands
 
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
-
-            kfSubTask.ReplaceStr("%label%", "View MSVC debug build commands");
-            kfSubTask.ReplaceStr("%group%", "test");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc commandsD -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc commandsD -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
-#endif
-
-#if 0   // CLANG-CL disabled for now
-            // Test: View CLANG build commands
-
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
-
-            kfSubTask.ReplaceStr("%label%", "View CLANG debug build commands");
-            kfSubTask.ReplaceStr("%group%", "test");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=clang commandsD -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=clang commandsD -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
-#endif
+            cszMakeCommand.printf("nmake.exe -nologo commandsD %s", (char*) cszMakeFileOption);
+            AddTask(kfOut, "View MSVC debug build commands", "test", cszMakeCommand, "");
 
             // Test View debug targets
 
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
-
-            kfSubTask.ReplaceStr("%label%", "View debug targets");
-            kfSubTask.ReplaceStr("%group%", "test");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc targetsD -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc targetsD -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
+            cszMakeCommand.printf("nmake.exe -nologo targetsD %s", (char*) cszMakeFileOption);
+            AddTask(kfOut, "View MSVC debug targets", "test", cszMakeCommand, "");
 
             // Test View dependencies
 
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
-
-            kfSubTask.ReplaceStr("%label%", "View debug dependencies");
-            kfSubTask.ReplaceStr("%group%", "test");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc deps -f .vscode/makefile");
-            else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc deps -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
+            cszMakeCommand.printf("nmake.exe -nologo deps %s", (char*) cszMakeFileOption);
+            AddTask(kfOut, "View debug dependencies", "test", cszMakeCommand, "");
 
             // Test Generate messages.po
 
-            kfSubTask.Delete();
-            kfSubTask.ReadStrFile(txtSubTasks);
+            cszMakeCommand.printf("nmake.exe -nologo locale %s", (char*) cszMakeFileOption);
+            AddTask(kfOut, "Generate messages.pos", "test", cszMakeCommand, "");
 
-            kfSubTask.ReplaceStr("%label%", "Generate messages.pos");
-            kfSubTask.ReplaceStr("%group%", "test");
-            if (bMinGW)
-                kfSubTask.ReplaceStr("%command%", "mingw32-make.exe cmplr=msvc locale -f .vscode/makefile");
+#if defined(_WIN32)
+            // If we're on Windows, then we also look to see if either the clang or gcc compiler is available. If so,
+            // we add build targets for them (we only choose one, with clang being the first choice)/
+
+            if (FindFileEnv("PATH", "mingw32-make.exe"))
+            {
+                if (FindFileEnv("PATH", "clang.exe"))
+                {
+                    cszLabel.printf("Build %s (debug) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                    cszMakeCommand.printf("mingw32-make.exe debug %s", (char*) cszMakeFileOption);
+                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+
+                    cszLabel.printf("Build %s (release) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                    cszMakeCommand.printf("mingw32-make.exe release %s", (char*) cszMakeFileOption);
+                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+
+                    cszLabel.printf("Rebuild %s (release) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                    cszMakeCommand.printf("mingw32-make.exe clean release %s", (char*) cszMakeFileOption);
+                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+                }
+                else if (FindFileEnv("PATH", "gcc.exe"))
+                {
+                    cszLabel.printf("Build %s (debug) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                    cszMakeCommand.printf("mingw32-make.exe cmplr=gcc debug %s", (char*) cszMakeFileOption);
+                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+
+                    cszLabel.printf("Build %s (release) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                    cszMakeCommand.printf("mingw32-make.exe cmplr=gcc release %s", (char*) cszMakeFileOption);
+                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+
+                    cszLabel.printf("Rebuild %s (release) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                    cszMakeCommand.printf("mingw32-make.exe cmplr=gcc clean release %s", (char*) cszMakeFileOption);
+                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+                }
+            }
+
+#endif
+
+#if !defined(_WIN32)
+            if (FindFileEnv("PATH", "clang.exe"))
+            {
+                while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=clang"));
+                while (kfOut.ReplaceStr("MSVC", "CLANG"));
+            }
             else
-                kfSubTask.ReplaceStr("%command%", "nmake.exe -nologo cmplr=msvc locale -f .vscode/makefile");
-            kfSubTask.ReplaceStr("%problem%", "");
+            {
+                while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=gcc"));
+                while (kfOut.ReplaceStr("MSVC", "GCC"));
+            }
+            while (kfOut.ReplaceStr("$msCompile", "$gcc"));
+#endif
 
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
         }
         else
             kfOut.WriteEol(kfTask);
     }
 
-#if !defined(_WIN32)
-    // nmake.exe is a Windows-only app -- make.exe should be available on Unix/Mac platforms
-
-    while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe"));
-#endif
-
     if (!kfOut.WriteFile(".vscode/tasks.json"))
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, ".vscode/tasks.json");
+        if (plstResults)
+        {
+            ttCStr cszMsg;
+            cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), ".vscode/tasks.json");
+            *plstResults += (char*) cszMsg;
+        }
         return false;
     }
     else
@@ -820,4 +649,19 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
             pszStart += ttStrLen(cszTmp);
         }
     }
+}
+
+static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, char* pszProblem)
+{
+    ttCFile fileTask;
+    fileTask.Delete();
+    fileTask.ReadStrFile(txtSubTasks);
+
+    fileTask.ReplaceStr("%label%", pszLabel);
+    fileTask.ReplaceStr("%group%", pszGroup);
+    fileTask.ReplaceStr("%command%", pszCommand);
+    fileTask.ReplaceStr("%problem%", pszProblem);
+
+    while (fileTask.ReadLine())
+        fileOut.WriteEol(fileTask);
 }

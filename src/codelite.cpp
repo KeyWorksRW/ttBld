@@ -45,13 +45,14 @@ size_t CreateCodeLiteProject()
     CSrcFiles cSrcFiles;
     if (!cSrcFiles.ReadFile())
     {
-        puts("Cannot create a CodeLite project file if there is no .srcfiles file!");
+        // BUGBUG: [KeyWorks - 7/29/2019] This should be wrong. There's no reason we can't open a .vcxproj file and write a CodeLite project file
+        puts(TRANSLATE("Cannot create a CodeLite project file if there is no .srcfiles.yaml file."));
         return CLP_NO_SRCFILES;
     }
 
     if (!cSrcFiles.GetProjectName())
     {
-        puts("Cannot create a CodeLite project file if .srcfiles doesn't specifiy the name of the project!");
+        printf("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n", cSrcFiles.GetSrcFiles());
         return CLP_NO_PROJECT;
     }
 

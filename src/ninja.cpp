@@ -168,30 +168,30 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
     cszOutDir += GetBldDir();
     cszOutDir.AddTrailingSlash();
 
-    ttCStr cszScriptFile(GetBldDir());
-    cszScriptFile.AddTrailingSlash();
+    m_cszScriptFile = GetBldDir();
+    m_cszScriptFile.AddTrailingSlash();
 
     switch (gentype)
     {
         case GEN_DEBUG32:
             cszOutDir     += m_bClang ? "clangDebug32"        : "msvcDebug32";
-            cszScriptFile += m_bClang ? "clangBuild32D.ninja" : "msvcBuild32D.ninja";
+            m_cszScriptFile += m_bClang ? "clangBuild32D.ninja" : "msvcBuild32D.ninja";
             break;
 
         case GEN_DEBUG64:
             cszOutDir     += m_bClang ? "clangDebug64"        : "msvcDebug64";
-            cszScriptFile += m_bClang ? "clangBuild64D.ninja" : "msvcBuild64D.ninja";
+            m_cszScriptFile += m_bClang ? "clangBuild64D.ninja" : "msvcBuild64D.ninja";
             break;
 
         case GEN_RELEASE32:
             cszOutDir     += m_bClang ? "clangRelease32"     : "msvcRelease32";
-            cszScriptFile += m_bClang ? "clangBuild32.ninja" : "msvcBuild32.ninja";
+            m_cszScriptFile += m_bClang ? "clangBuild32.ninja" : "msvcBuild32.ninja";
             break;
 
         case GEN_RELEASE64:
         default:
             cszOutDir     += m_bClang ? "clangRelease64"     : "msvcRelease64";
-            cszScriptFile += m_bClang ? "clangBuild64.ninja" : "msvcBuild64.ninja";
+            m_cszScriptFile += m_bClang ? "clangBuild64.ninja" : "msvcBuild64.ninja";
             break;
     }
 
@@ -365,29 +365,30 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
     }
 
     if (m_bForceWrite)
-        return file.WriteFile(cszScriptFile);
+        return file.WriteFile(m_cszScriptFile);
 
     ttCFile fileOrg;
-    if (fileOrg.ReadFile(cszScriptFile))
+    if (fileOrg.ReadFile(m_cszScriptFile))
     {
         if (strcmp(fileOrg, file) == 0)    // Only write the build script if something changed
             return false;
         else if (m_dryrun.IsEnabled())
         {
-            m_dryrun.NewFile(cszScriptFile);
+            m_dryrun.NewFile(m_cszScriptFile);
             m_dryrun.DisplayFileDiff(fileOrg, file);
             return false;   // because we didn't write anything
         }
     }
 
-    if (!file.WriteFile(cszScriptFile))
+    if (!file.WriteFile(m_cszScriptFile))
     {
         ttCStr cszMsg;
-        cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), (char*) cszScriptFile);
+        cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), (char*) m_cszScriptFile);
         cszMsg += "\n";
         AddError(cszMsg);
         return false;
     }
+
     return true;
 }
 
@@ -841,7 +842,7 @@ void CNinja::WriteLinkTargets(GEN_TYPE gentype)
 {
     // Note that bin and lib don't need to exist ahead of time as ninja will create them, however if the output is
     // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way around
-    // this would be to add support for an "OutPrefix: ../" option in .srcfiles.
+    // this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
     const char* pszTarget;
     switch (gentype)
@@ -1023,7 +1024,7 @@ void CNinja::ProcessBuildLibs()
 
         while (enumLib.Enum())
         {
-            // Change to the directory that should contain a .srcfiles and read it
+            // Change to the directory that should contain a .srcfiles.yaml and read it
 
             if (!ttChDir(enumLib))
             {
@@ -1036,22 +1037,14 @@ void CNinja::ProcessBuildLibs()
 
             // The current directory may just be the name of the library, but not necessarily where srcfiles is located.
 
-            if (!ttFileExists(".srcfiles") && !ttFileExists(".vscode/srcfiles.yaml"))
+            if (!LocateSrcFiles())
             {
                 for (;;)    // empty for loop that we break out of as soon as we find a srcfiles file to use
                 {
-                    // CSrcFiles will automatically read .vscode/srcfiles.yaml if there is no .srcfiles in the current
-                    // directory
-
-                    if (ttFileExists(".vscode/srcfiles.yaml"))
-                        break;
-
-                    // See if there is a src/.srcfiles or src/.vscode/srcfiles.yaml file
-
                     if (ttDirExists("src"))
                     {
                         ttChDir("src");
-                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                        if (LocateSrcFiles())
                             break;
                         else
                             ttChDir("..");
@@ -1060,7 +1053,7 @@ void CNinja::ProcessBuildLibs()
                     if (ttDirExists("source"))
                     {
                         ttChDir("source");
-                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                        if (LocateSrcFiles())
                             break;
                         else
                             ttChDir("..");
@@ -1080,13 +1073,13 @@ void CNinja::ProcessBuildLibs()
                     if (ttDirExists(ttFindFilePortion(enumLib)))
                     {
                         ttChDir(ttFindFilePortion(enumLib));
-                        if (ttFileExists(".srcfiles") || ttFileExists(".vscode/srcfiles.yaml"))
+                        if (LocateSrcFiles())
                             break;
                         else
                             ttChDir("..");
                     }
 
-                    // Any further directory searches should go above this -- once we get here, we can't find a .srcfiles. We go ahead an break
+                    // Any further directory searches should go above this -- once we get here, we can't find a .srcfiles.yaml. We go ahead an break
                     // out of the loop. cSrcFiles.ReadFile() will fail -- we'll use whatever error reporting (if any) it uses for a file that
                     // cannot be found or read.
 

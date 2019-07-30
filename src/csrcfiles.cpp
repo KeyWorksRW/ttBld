@@ -14,7 +14,7 @@
 
 #include "csrcfiles.h"      // CSrcFiles
 
-const char* txtSrcFilesFileName = ".srcfiles";
+const char* txtSrcFilesFileName = ".srcfiles.yaml";
 
 typedef enum
 {
@@ -42,42 +42,48 @@ CSrcFiles::CSrcFiles(bool bVsCodeDir) : m_ttHeap(true),
     m_bVsCodeDir = bVsCodeDir;
 }
 
-static const char* aSrcFileLocation[] =
+static const char* aSrcFilesLocations[] =
 {
-    ".vscode/srcfiles.yaml",
-    ".codelite/srcfiles.yaml",
+    ".srcfiles.yaml",           // this MUST be the first file
+    ".vscode/srcfiles.yaml",    // this MUST be the second file
 
-    nullptr,
+    ".private/.srcfiles.yaml",
+    "build/.srcfiles.yaml",
+    "bld/.srcfiles.yaml",
+
+    // the following is here for backwards compatability
+    ".srcfiles",
+
+    nullptr
 };
+
+const char* LocateSrcFiles(bool bStartWithVsCode)
+{
+    for (size_t pos = bStartWithVsCode ? 1 : 0; aSrcFilesLocations[pos]; ++pos)
+    {
+        if (ttFileExists(aSrcFilesLocations[pos]))
+            return aSrcFilesLocations[pos];
+    }
+
+    // We may have been told to start looking in .vscode, but if we stil can't find it, then look in the root
+    if (bStartWithVsCode && ttFileExists(aSrcFilesLocations[0]))
+        return aSrcFilesLocations[0];
+
+    return nullptr;
+}
 
 bool CSrcFiles::ReadFile(const char* pszFile)
 {
     if (!pszFile)
     {
-        if (m_bVsCodeDir)
+        pszFile = LocateSrcFiles(m_bVsCodeDir);
+
+        if (!pszFile)
         {
-            if (ttFileExists(".vscode/srcfiles.yaml"))
-                pszFile = ".vscode/srcfiles.yaml";
-            else if (ttFileExists("../.vscode/srcfiles.yaml"))
-                pszFile = "../.vscode/srcfiles.yaml";
-            else
-            {
-                ttCStr csz;
-                csz.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), ".vscode/srcfiles.yaml");
-                m_lstErrors += csz;
-                return false;
-            }
-        }
-        else
-        {
-            pszFile = ".srcfiles";
-            if (!ttFileExists(pszFile))
-            {
-                ttCStr csz;
-                csz.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), ".srcfiles");
-                m_lstErrors += csz;
-                return false;   // if we still can't find it, bail
-            }
+            ttCStr csz;
+            csz.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), ".srcfiles.yaml");
+            m_lstErrors += csz;
+            return false;   // if we still can't find it, bail
         }
     }
 
@@ -175,7 +181,11 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
     if (m_lstSrcFiles.GetCount() < 1)
     {
-        AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc");
+#if defined(_WIN32)
+        AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl;*.hhp");
+#else
+        AddSourcePattern("*.cpp;*.cc;*.cxx");
+#endif
     }
 
     return true;
@@ -593,7 +603,7 @@ const char* CSrcFiles::GetTargetDebug32()
     if (m_cszTargetDebug32.IsNonEmpty())
         return m_cszTargetDebug32;
 
-    ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles");
+    ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles.yaml");
     m_cszTargetDebug32 = GetDir32();
 
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
@@ -626,7 +636,7 @@ const char* CSrcFiles::GetTargetRelease32()
     if (m_cszTargetRelease32.IsNonEmpty())
         return m_cszTargetRelease32;
 
-    ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles");
+    ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles.yaml");
     m_cszTargetRelease32 = GetDir32();
 
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
@@ -659,7 +669,7 @@ const char* CSrcFiles::GetTargetDebug64()
     if (m_cszTargetDebug64.IsNonEmpty())
         return m_cszTargetDebug64;
 
-    ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles");
+    ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles.yaml");
     m_cszTargetDebug64 = GetDir64();
 
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
@@ -692,7 +702,7 @@ const char* CSrcFiles::GetTargetRelease64()
     if (m_cszTargetRelease64.IsNonEmpty())
         return m_cszTargetRelease64;
 
-    ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles");
+    ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles.yaml");
     m_cszTargetRelease64 = GetDir64();
 
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CWriteSrcFiles
-// Purpose:   Class for writing out a new or updated version of .srcfiles
+// Purpose:   Class for writing out a new or updated version of .srcfiles.yaml
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 1998-2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -32,7 +32,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 #if defined(_DEBUG)
     // We need to be certain that the current MakeNinja version is at least as high as any option in the OPT_VERSION
     // array. There isn't a way to check that during compile time, so we check it in DEBUG builds whenever we try to
-    // write the .srcfiles
+    // write the .srcfiles.yaml
 
     static bool bWarned = false;
     if (!bWarned)   // we can be called twice if a private Tab writes to a .private .srcfiles
@@ -58,7 +58,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
         CVerMakeNinja verinfo;
         ttASSERT_MSG(!verinfo.IsSrcFilesNewer(cszVersion),
                      "An OPT_ in aoptVersions has a higher version number then txtOptVersion."
-                     " If you write to .srcfiles without fixing the code first, this version of MakeNinja will no longer be able to use it.");
+                     " If you write to .srcfiles.yaml without fixing the code first, this version of MakeNinja will no longer be able to use it.");
     }
 #endif
 

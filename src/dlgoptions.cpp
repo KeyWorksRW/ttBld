@@ -106,14 +106,6 @@ void CTabOptions::OnBegin(void)
     ti.pszText = (char*) "Rc/Midl";   // don't translate this
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_RC_MIDL, (LPARAM) &ti);
 
-#ifdef PRIVATE
-    if (ttFileExists(".private/.srcfiles"))
-    {
-        ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_PRIVATE);
-        SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_PRIVATE, (LPARAM) &ti);
-    }
-#endif
-
     SendItemMsg(IDTAB, TCM_SETCURSEL, TAB_GENERAL);
     m_hwndTabSub = m_tabGeneral.DoModeless(*this);
     ::ShowWindow(m_hwndTabSub, SW_SHOW);

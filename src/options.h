@@ -14,7 +14,7 @@
 #include <ttarray.h>    // ttCArray
 
 namespace sfopt
-{           // .srcfiles otpions
+{           // .srcfiles.yaml otpions
 
     extern const char* txtNinjaVerFormat; // "# Requires MakeNinja version %d.%d.%d or higher to process";
 

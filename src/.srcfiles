@@ -35,7 +35,6 @@ Files:
     vcxproj.cpp         # Creates a Visual Studio project file
     verninja.cpp        # CVerMakeNinja class
     vscode.cpp          # Creates/updates .vscode files
-    vscodemake.cpp      # Creates .vscode/makefile
     writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
 
