@@ -52,7 +52,7 @@ size_t CreateCodeLiteProject()
 
     if (!cSrcFiles.GetProjectName())
     {
-        printf("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n", cSrcFiles.GetProjectName());
+        printf("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n", cSrcFiles.GetSrcFiles());
         return CLP_NO_PROJECT;
     }
 
