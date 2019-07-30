@@ -92,6 +92,8 @@ int main(int argc, char* argv[])
     ttInitCaller(txtVersion);
     UPDATE_TYPE upType = UPDATE_NORMAL;
     size_t Action = 0;
+    ttCStr cszRootDir;      // this will be set if (Action & ACT_DIR) is set
+    ttCStr cszSrcFilePath;  // location of srcfiles.yaml
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && defined(_DEBUG) && defined(_WIN32)
@@ -134,8 +136,6 @@ int main(int argc, char* argv[])
         }
     }
 
-    ttCStr cszSrcFilePath;
-
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
         if (argv[argpos][1] == '?' || ttIsSameSubStrI(argv[argpos] + 1, "help"))
@@ -143,32 +143,25 @@ int main(int argc, char* argv[])
             Usage();
             return 1;
         }
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "dir"))  // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
+        {
+            ++argpos;
+            if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
+            {
+                puts(TRANSLATE("-dir must be followed by the directory to use."));
+                return 1;
+            }
+            cszRootDir = argv[argpos];
+            Action |= ACT_DIR;
+            cszSrcFilePath = cszRootDir;
+            cszSrcFilePath.AppendFileName("srcfiles.yaml");
+            continue;
+        }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))  // -dryryn
             Action |= ACT_DRYRUN;
         else if (ttIsSameStrI(argv[argpos] + 1, "new"))
         {
-            CConvertDlg dlg;
-
-            if (argpos + 1 < argc)
-            {
-                ++argpos;
-                if (!dlg.doConversion(argv[argpos]))
-                {
-                    ttMsgBoxFmt(TRANSLATE("Conversion of %s failed!"), MB_OK | MB_ICONWARNING, dlg.GetConvertScript());
-                    if (!dlg.CreateSrcFiles())
-                        return 0;   // means .srcfiles wasn't created, so nothing further that we can do
-                }
-            }
-            else if (!dlg.CreateSrcFiles())
-                return 0;   // means .srcfiles wasn't created, so nothing further that we can do
-
-            ttCStr csz(dlg.GetDirOutput());
-            char* pszTmp = csz.FindStrI(".srcfiles.yaml");
-            if (pszTmp)
-                *pszTmp = 0;
-            ttChDir(csz);
-            if (!ChangeOptions(&cszSrcFilePath, Action & ACT_DRYRUN))
-                return 1;
+            Action |= ACT_NEW;
         }
         else if (ttIsSameStrI(argv[argpos] + 1, "add"))
         {
@@ -234,6 +227,23 @@ int main(int argc, char* argv[])
             upType = UPDATE_CLANG_CL32D;
     }
 
+    if (Action & ACT_NEW)
+    {
+        // -dir option will have set cszSrcFilePath, if option not specified, default to current directory
+        CConvertDlg dlg(cszSrcFilePath.IsNonEmpty() ? cszSrcFilePath : ".srcfiles.yaml");
+        if (dlg.DoModal(NULL) != IDOK)
+            return 1;
+        cszSrcFilePath = dlg.GetOutSrcFiles();
+
+        // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has been
+        // created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the user wants to
+        // cancel -- that just means they didn't want to change any options. It does NOT mean they want to cancel running
+        // any other commands, such as makefile creation (which doesn't need to know what options are set in
+        // .srcfiles.yaml).
+
+        ChangeOptions(&cszSrcFilePath);
+    }
+
     if (cszSrcFilePath.IsEmpty())
     {
         const char* pszFile = LocateSrcFiles(Action & ACT_VSCODE);
@@ -241,16 +251,7 @@ int main(int argc, char* argv[])
             cszSrcFilePath = pszFile;
         else
         {
-            CConvertDlg dlg;
-            if (!dlg.CreateSrcFiles())
-                return 0;   // means .srcfiles wasn't created, so nothing further that we can do
-            ttCStr csz(dlg.GetDirOutput());
-            char* pszTmp = csz.FindStrI(".srcfiles.yaml");
-            if (pszTmp)
-                *pszTmp = 0;
-            ttChDir(csz);
-            if (!ChangeOptions(&cszSrcFilePath, Action & ACT_DRYRUN))
-                return 1;
+
         }
     }
 
