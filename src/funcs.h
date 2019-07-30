@@ -26,7 +26,7 @@ size_t CreateCodeLiteProject();    // returns 0 - no errors, 1 - file already ex
 
 // Following functions are for use in setting up a build system for VS Code
 
-bool CreateVsCodeProject(ttCList* plstResults = nullptr);      // returns true unless unable to write to a file
+bool CreateVsCodeProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);      // returns true unless unable to write to a file
 bool Yamalize();
 
 #if defined(_WIN32)

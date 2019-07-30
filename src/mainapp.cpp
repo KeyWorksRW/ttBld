@@ -286,7 +286,7 @@ int main(int argc, char* argv[])
     {
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         ttCList lstResults;
-        CreateVsCodeProject(&lstResults);
+        CreateVsCodeProject(cszSrcFilePath, &lstResults);
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             puts(lstResults[pos]);
     }
@@ -365,7 +365,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
+void MakeFileCaller(UPDATE_TYPE upType, const char* /* pszRootDir */)
 {
     // TODO: [KeyWorks - 7/30/2019] Need to change CNinja to accept a root dir instead of bVsCodeDir, then we can pass in
     // pszRootDir.
