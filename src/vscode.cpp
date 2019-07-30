@@ -16,7 +16,7 @@
 #include "csrcfiles.h"          // CSrcFiles
 #include "resource.h"
 
-static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, char* pszProblem);
+static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, const char* pszProblem);
 
 static const char* txtProperties =
     "{\n"
@@ -651,7 +651,7 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
     }
 }
 
-static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, char* pszProblem)
+static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, const char* pszProblem)
 {
     ttCFile fileTask;
     fileTask.Delete();

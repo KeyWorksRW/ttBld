@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
     if (Action & ACT_NEW)
     {
         // -dir option will have set cszSrcFilePath, if option not specified, default to current directory
-        CConvertDlg dlg(cszSrcFilePath.IsNonEmpty() ? cszSrcFilePath : ".srcfiles.yaml");
+        CConvertDlg dlg(cszSrcFilePath.IsNonEmpty() ? (char*) cszSrcFilePath : ".srcfiles.yaml");
         if (dlg.DoModal(NULL) != IDOK)
             return 1;
         cszSrcFilePath = dlg.GetOutSrcFiles();
