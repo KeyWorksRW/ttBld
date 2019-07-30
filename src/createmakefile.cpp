@@ -17,9 +17,13 @@
 
 extern const char* txtHelpNinja;
 
-bool CNinja::CreateMakeFile()
+bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
 {
-    ttCStr cszMakeFile(IsVsCodeDir() ? ".vscode/makefile" : "makefile");
+    ttCStr cszBuildRoot;
+    cszBuildRoot = pszDir ? pszDir : "";
+
+    ttCStr cszMakeFile(cszBuildRoot);
+    cszMakeFile.AppendFileName("makefile");
 
     if (IsMakeNever())
         return true;        // user doesn't want makefile created at all
@@ -31,20 +35,32 @@ bool CNinja::CreateMakeFile()
 
     // We get here if the makefile is missing or "Makefile: always" is set
 
-    bool bMinGW = FindFileEnv("PATH", "mingw32-make.exe");
+    ttCStr cszBuildDir(cszBuildRoot);
+    // Some repositories use a bld directory which is added to .gitignore. If it exists, we'll use this directory
+    cszBuildDir.AppendFileName("bld");
+    if (!ttDirExists(cszBuildDir))
+    {
+        cszBuildDir = cszBuildRoot;
+        cszBuildDir.AppendFileName("build");
+    }
+
+    const char* pszSrcFiles = LocateSrcFiles(ttIsSameSubStrI(pszDir, ".vscode"));   // it's fine if pszDir is a nullptr
+    if (!pszSrcFiles)
+        bAllVersion = true;     // can't create a dependency on .srcfiles.yaml if we don't know where it is
 
     ttCFile kf;
-    if (!kf.ReadResource(bMinGW & IsVsCodeDir() ? IDR_VSCODE_MAKE :  IDR_PRIVATE_MAKEFILE))
+    if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL :  IDR_MAKEFILE_SINGLE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
         m_lstErrors += TRANSLATE("MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile,");
         return false;
     }
 
-    while (kf.ReplaceStr("%build%", IsVsCodeDir() ? ".vscode/build" : "build"));
+    while (kf.ReplaceStr("%build%", cszBuildDir));
     while (kf.ReplaceStr("%libbuild%", "build"));
-    if (IsVsCodeDir() && !ttFileExists(".srcfiles.yaml"))
-        while (kf.ReplaceStr(".srcfiles.yaml", ""));
+
+    if (!bAllVersion && pszSrcFiles)
+        while (kf.ReplaceStr("%srcfiles%", pszSrcFiles));
 
     while (kf.ReplaceStr("%project%", GetProjectName()));
 
