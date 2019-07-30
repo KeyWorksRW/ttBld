@@ -40,8 +40,11 @@ cmplr=msvc # \
 !endif #\
 #\
 bdir=build # \
+libbdir=build # \
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja # \
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja # \
+LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja # \
+LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja # \
 # \
 !else
 ######### Following section is for GNU make and variants #########
@@ -63,28 +66,31 @@ ifndef cmplr
 endif
 
 bdir=build
+libbdir=build
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
+LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja
+LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja
 
 # \
 !endif
 
 ########## release section ##########
 
-release: ttLib MakeNinja
+release: ttLib $(BldScript) MakeNinja
 
 ttLib:
-	cd ../ttLib/src & ninja -f $(BldScript)
+	cd ../ttLib/src & ninja -f $(LibBldScript)
 
 MakeNinja:
 	ninja -f $(BldScript)
 
 ########## debug section ##########
 
-debug: ttLibD MakeNinjaD
+debug: ttLibD $(BldScriptD) MakeNinjaD
 
 ttLibD:
-	cd ../ttLib/src & ninja -f $(BldScriptD)
+	cd ../ttLib/src & ninja -f $(LibBldScriptD)
 
 MakeNinjaD:
 	ninja -f $(BldScriptD)
@@ -96,27 +102,35 @@ locale:
 
 ########## clean release section ##########
 
-clean:
+clean: $(BldScript)
 	ninja -f $(BldScript) -t clean
 
 ########## clean debug section ##########
 
-cleanD:
+cleanD: $(BldScriptD)
 	ninja -f $(BldScriptD) -t clean
 
 ########## special ninja diagnostics ##########
 
-commandsD:
+commandsD: $(BldScriptD)
 	ninja -f $(BldScriptD) -t commands
 
-commandsR:
+commandsR: $(BldScript)
 	ninja -f $(BldScript) -t commands
 
-targetsD:
+targetsD: $(BldScriptD)
 	ninja -f $(BldScriptD) -t targets depth 2
 
-targetsR:
+targetsR: $(BldScript)
 	ninja -f $(BldScript) -t targets depth 2
 
-deps:
+deps: $(BldScript)
 	ninja -f $(BldScript) -t deps
+
+########## Creates or updates ninja file if needed ##########
+
+$(BldScript): .srcfiles
+	makeninja -u$(cmplr)$(bits)
+
+$(BldScriptD): .srcfiles
+	makeninja -u$(cmplr)$(bits)D
