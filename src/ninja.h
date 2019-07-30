@@ -53,9 +53,6 @@ public:
     const char* GetLibName() { return m_cszLibName; }        // name and location of any additional library to build
     const char* GetHHPName() { return m_cszHHPName; }
 
-    bool VsCodeMakefile();      // Used to create a makefile in .vscode
-    bool VsCodeNmake();
-
     void EnableDryRun() { m_dryrun.Enable(); }
     void ForceWrite(bool bForceWrite = true) { m_bForceWrite = bForceWrite; }
 
