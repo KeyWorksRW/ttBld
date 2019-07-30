@@ -75,13 +75,23 @@ typedef enum
 
 } UPDATE_TYPE;
 
+
+enum    // actions that can be run in addition to normal single command actions
+{
+    ACT_DRYRUN   = 1 << 0,
+    ACT_VSCODE   = 1 << 1,
+    ACT_DIR      = 1 << 2,
+    ACT_MAKEFILE = 1 << 3,
+    ACT_ALLNINJA = 1 << 4,
+    ACT_NEW      = 1 << 5,
+    ACT_FORCE    = 1 << 6,
+};
+
 int main(int argc, char* argv[])
 {
     ttInitCaller(txtVersion);
-    bool bDryRun = false;
-    bool bVsCodeDir = false;
-    bool bForceWrite = false;
     UPDATE_TYPE upType = UPDATE_NORMAL;
+    size_t Action = 0;
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && defined(_DEBUG) && defined(_WIN32)
@@ -117,7 +127,7 @@ int main(int argc, char* argv[])
                 // Only a few or our standard arguments will actually make sense as an environment variable
 
                 if (ttIsSameSubStrI(pszArg, "vscode"))
-                    bVsCodeDir = true;
+                    Action |= ACT_VSCODE;
 
             }
             pszArg = ttStepOver(pszArg);
@@ -134,7 +144,7 @@ int main(int argc, char* argv[])
             return 1;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))  // -dryryn
-            bDryRun = true;
+            Action |= ACT_DRYRUN;
         else if (ttIsSameStrI(argv[argpos] + 1, "new"))
         {
             CConvertDlg dlg;
@@ -157,7 +167,7 @@ int main(int argc, char* argv[])
             if (pszTmp)
                 *pszTmp = 0;
             ttChDir(csz);
-            if (!ChangeOptions(&cszSrcFilePath, bDryRun))
+            if (!ChangeOptions(&cszSrcFilePath, Action & ACT_DRYRUN))
                 return 1;
         }
         else if (ttIsSameStrI(argv[argpos] + 1, "add"))
@@ -165,21 +175,21 @@ int main(int argc, char* argv[])
             ttCList lstFiles;
             for (++argpos; argpos < argc; ++argpos)
                 lstFiles += argv[argpos];
-            AddFiles(lstFiles, bDryRun);
+            AddFiles(lstFiles, Action & ACT_DRYRUN);
             return 1;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "opt"))    // -options
         {
-            if (!ChangeOptions(&cszSrcFilePath, bDryRun))
+            if (!ChangeOptions(&cszSrcFilePath, Action & ACT_DRYRUN))
                 return 1;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))
         {
-            bVsCodeDir = true;
+            Action |= ACT_VSCODE;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
         {
-            bForceWrite = true;
+            Action |= ACT_FORCE;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
         {
@@ -226,7 +236,7 @@ int main(int argc, char* argv[])
 
     if (cszSrcFilePath.IsEmpty())
     {
-        const char* pszFile = LocateSrcFiles(bVsCodeDir);
+        const char* pszFile = LocateSrcFiles(Action & ACT_VSCODE);
         if (pszFile)
             cszSrcFilePath = pszFile;
         else
@@ -239,12 +249,12 @@ int main(int argc, char* argv[])
             if (pszTmp)
                 *pszTmp = 0;
             ttChDir(csz);
-            if (!ChangeOptions(&cszSrcFilePath, bDryRun))
+            if (!ChangeOptions(&cszSrcFilePath, Action & ACT_DRYRUN))
                 return 1;
         }
     }
 
-    if (bVsCodeDir)
+    if (Action & ACT_VSCODE)
     {
         ttCList lstResults;
         CreateVsCodeProject(&lstResults);
@@ -314,16 +324,16 @@ int main(int argc, char* argv[])
     }
     else
     {
-        CNinja cNinja(bVsCodeDir);
+        CNinja cNinja;
         if (!cNinja.IsValidVersion())
         {
             if (ttMsgBox(TRANSLATE("This version of MakeNinja is too old -- create ninja scripts anyway?"), MB_YESNO | MB_ICONWARNING) != IDYES)
                 return 1;
         }
 
-        if (bForceWrite)    // force write ignores any request for dryrun
+        if (Action & ACT_FORCE)    // force write ignores any request for dryrun
             cNinja.ForceWrite();
-        else if (bDryRun)
+        else if (Action & ACT_DRYRUN)
             cNinja.EnableDryRun();
 
         cNinja.CreateMakeFile();    // this will create/update it if .srcfiles has a Makefile: section
