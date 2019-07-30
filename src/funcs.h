@@ -13,7 +13,7 @@ class ttCStr;
 class CSrcFiles;
 
 void AddFiles(ttCList& lstFiles, bool bDryRun);
-bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun);
+bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun = false);
 bool ConvertBuildScript(const char* pszBldFile);
 bool FindFileEnv(const char* pexEnv, const char* pszFile, ttCStr* pcszPath = nullptr);     // Search PATH, LIB, or INCLUDE (or variants)
 int  MakeNinja(int argc, char* argv[]);
