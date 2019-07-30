@@ -181,7 +181,11 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
     if (m_lstSrcFiles.GetCount() < 1)
     {
-        AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc");
+#if defined(_WIN32)
+        AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl;*.hhp");
+#else
+        AddSourcePattern("*.cpp;*.cc;*.cxx");
+#endif
     }
 
     return true;
