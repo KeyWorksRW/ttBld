@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
     {
         // If we get here, assume we are being launched from a makefile
 
-        CNinja cNinja(true);
+        CNinja cNinja;
         cNinja.ForceWrite();
 
         if (!cNinja.IsValidVersion())
@@ -269,42 +269,42 @@ int main(int argc, char* argv[])
         {
             case UPDATE_MSVC64:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
-                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/msvcBuild64.ninja");
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 return 0;
 
             case UPDATE_MSVC32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
-                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/msvcBuild32.ninja");
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 return 0;
 
             case UPDATE_CLANG_CL64:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
-                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/clangBuild64.ninja");
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 return 0;
 
             case UPDATE_CLANG_CL32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
-                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/clangBuild32.ninja");
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 return 0;
 
             case UPDATE_MSVC64D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
-                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/msvcBuild64D.ninja");
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 return 0;
 
             case UPDATE_MSVC32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
-                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/msvcBuild32D.ninja");
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 return 0;
 
             case UPDATE_CLANG_CL64D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
-                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/clangBuild64D.ninja");
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 return 0;
 
             case UPDATE_CLANG_CL32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
-                    printf(GETSTRING(IDS_FILE_UPDATED), ".vscode/build/clangBuild32D.ninja");
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 return 0;
 
             default:

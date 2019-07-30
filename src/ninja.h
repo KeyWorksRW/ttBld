@@ -38,9 +38,10 @@ public:
 
     size_t getSrcCount() { return m_lstSrcFiles.GetCount(); }
 
-    bool CreateMakeFile();
+    bool CreateMakeFile(bool bAllVersion = false, const char* pszDir = nullptr);
 
     const char* GetRcFile()     { return m_cszRcName; }
+    const char* GetScriptFile() { return m_cszScriptFile; }
 
     ttCList* GetSrcFileList()  { return &m_lstSrcFiles; }
     ttCList* GetLibFileList()  { return &m_lstLibFiles; }
@@ -85,8 +86,6 @@ private:
 
     // Class members
 
-    // The members below are reset every time CreateBuildFile() is called
-
     ttCFile* m_pkfOut;
     GEN_TYPE m_gentype;
 
@@ -94,6 +93,7 @@ private:
     ttCStr m_cszCPP_PCH;        // the .cpp name that will be used to create the .pch file
     ttCStr m_cszPCHObj;         // the .obj file that is built to create the .pch file
     ttCStr m_cszChmFile;        // set if a .hhp file was specified in .srcfiles.yaml
+    ttCStr m_cszScriptFile;     // the .ninja file
 
     ttCList m_lstBuildLibs32D;
     ttCList m_lstBuildLibs64D;
