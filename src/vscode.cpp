@@ -20,14 +20,11 @@ static const char* txtProperties =
     "{\n"
     "    \"configurations\": [\n"
     "        {\n"
-    "            \"name\": \"Win32\",\n"
+    "            \"name\": \"Default\",\n"
     "             \"defines\": [\n"
     "             ],\n"
-    "             \"windowsSdkVersion\": \"%sdk_ver%\",\n"
-    "             \"compilerPath\": \"%cl_path%\",\n"
     "             \"cStandard\": \"c11\",\n"
     "             \"cppStandard\": \"c++17\",\n"
-//    "             \"intelliSenseMode\": \"msvc-x64\",\n"
     "             \"includePath\": [\n"
     "             ]\n"
     "         }\n"
@@ -151,94 +148,9 @@ bool CreateVsCodeProject(ttCList* plstResults)      // returns true unless unabl
 
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 {
-    ttCFile kf;
-
-    // Read the array of lines, write them into kf so it looks like it was read from a file
+    ttCFile kf, kfOut;
 
     kf.ReadStrFile(txtProperties);
-
-    bool bCompilerFound = false;
-    ttCStr cszPath;
-
-    // clang.exe or gcc.exe are preferred since the PATH rarely changes and it works on all platforms
-
-#if 0
-    // [KeyWorks - 7/28/2019] I want to see how well clang does since it works on all platforms. If it has problems
-    // they should be documented here before trying to use clang-cl
-    #if defined(_WIN32)
-        if (FindFileEnv("PATH", "clang-cl.exe", &cszPath))
-        {
-            kf.ReplaceStr("%cl_path%", cszPath);
-            bCompilerFound = true;
-        }
-        else if (FindFileEnv("PATH", "clang.exe", &cszPath))
-    #else
-        if (FindFileEnv("PATH", "clang.exe", &cszPath))
-    #endif
-#else
-    if (FindFileEnv("PATH", "clang.exe", &cszPath))
-#endif
-    {
-        kf.ReplaceStr("%cl_path%", cszPath);
-        bCompilerFound = true;
-    }
-    else if (FindFileEnv("PATH", "gcc.exe", &cszPath))
-    {
-        kf.ReplaceStr("%cl_path%", cszPath);
-        bCompilerFound = true;
-    }
-    if (!bCompilerFound)
-    {
-#if defined(_WIN32)
-        ttCStr cszMSVC;
-        if (FindCurMsvcPath(cszMSVC))
-        {
-            bool bx64 = IsHost64();
-            cszMSVC.AppendFileName("bin/");
-            cszMSVC.AppendFileName(bx64 ? "Hostx64/" : "Hostx86/");
-            cszMSVC.AppendFileName(bx64 ? "x64/cl.exe" : "x86/cl.exe");
-            ttBackslashToForwardslash(cszMSVC);
-
-            // This gets us the correct version for now, but the next time the user updates Visual Studio, it will be
-            // wrong until the user updates the file by hand, or runs MakeNinja -vscode
-
-            kf.ReplaceStr("%cl_path%", cszMSVC);
-        }
-        else
-#endif
-        {
-            kf.ReplaceStr("%cl_path%", "cl.exe");
-            puts(GETSTRING(IDS_CANT_FIND_COMPILER));
-        }
-    }
-
-    // The original template specifies the installed SDK version. I'm not sure why that matters, but until we can confirm that it
-    // doesn't matter, we'll need to grab the version from the registry: HKEY_CLASSES_ROOT\Installer\Dependencies\Microsoft.Windows.WindowsSDK.x86.10\Version
-
-    bool bSdkFound = false;
-
-#if defined(_WIN32)
-    ttCRegistry reg;
-    if (reg.Open(HKEY_CLASSES_ROOT, "Installer\\Dependencies\\Microsoft.Windows.WindowsSDK.x86.10", false))
-    {
-        char szVersion[MAX_PATH];
-        if (reg.ReadString("version", szVersion, sizeof(szVersion)))
-        {
-            // VS Code doesn't think it's possible for there to be more then one final digit -- though there can actually be at least three
-
-            char* psz = ttStrChrR(szVersion, '.');
-            if (psz && ttIsDigit(psz[1]))
-                psz[2] = 0;
-
-            kf.ReplaceStr("%sdk_ver%", szVersion);
-            bSdkFound = true;
-        }
-    }
-#endif    // defined(_WIN32)
-    if (!bSdkFound)
-        kf.ReplaceStr("%sdk_ver%", "10.0.17763.0");     // make a guess, probably wrong, but will also probably work fine
-
-    ttCFile kfOut;
     while (kf.ReadLine())
     {
         if (ttIsSameSubStrI(ttFindNonSpace(kf), "\042defines"))
@@ -276,16 +188,6 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             while (enumInc.Enum())
                 kfOut.printf("                %kq,\n", (const char*) enumInc);
 
-#if defined(_WIN32)
-            ttCStr cszMSVC;
-            if (FindCurMsvcPath(cszMSVC))
-            {
-                cszMSVC.AppendFileName("include");
-                ttBackslashToForwardslash(cszMSVC); // just to be certain that they are consistent
-                kfOut.printf("                %kq,\n", (const char*) cszMSVC);
-            }
-#endif
-
             // we always add the default include path
             kfOut.WriteEol("                \042${default}\042");
             kfOut.WriteEol(kf);
@@ -302,6 +204,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     }
     else
     {
+        // Note that we can't use IDS_FILE_CREATED since that string adds \n to the end.
         if (plstResults)
             *plstResults += TRANSLATE("Created .vscode/c_cpp_properties.json");
     }
