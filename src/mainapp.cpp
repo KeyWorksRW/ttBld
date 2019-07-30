@@ -74,7 +74,7 @@ typedef enum
     UPDATE_GCC32,
 
 } UPDATE_TYPE;
-
+void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 
 enum    // actions that can be run in addition to normal single command actions
 {
@@ -85,6 +85,7 @@ enum    // actions that can be run in addition to normal single command actions
     ACT_ALLNINJA = 1 << 4,
     ACT_NEW      = 1 << 5,
     ACT_FORCE    = 1 << 6,
+    ACT_OPTIONS  = 1 << 7,
 };
 
 int main(int argc, char* argv[])
@@ -173,8 +174,7 @@ int main(int argc, char* argv[])
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "opt"))    // -options
         {
-            if (!ChangeOptions(&cszSrcFilePath, Action & ACT_DRYRUN))
-                return 1;
+            Action |= ACT_OPTIONS;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))
         {
@@ -227,6 +227,18 @@ int main(int argc, char* argv[])
             upType = UPDATE_CLANG_CL32D;
     }
 
+    // If we are being called from a makefile then this is the only option we will now process. Note that we ignore
+    // -dryrun even though we are generating a .ninja script. We do process the -dir option.
+
+    if (upType != UPDATE_NORMAL)
+    {
+        MakeFileCaller(upType, cszRootDir);
+        return 0;
+    }
+
+    // The order that we process switches is important. -new comes first since we can only continue to run
+    // if we have a .srcfiles.yaml file to work with.
+
     if (Action & ACT_NEW)
     {
         // -dir option will have set cszSrcFilePath, if option not specified, default to current directory
@@ -244,6 +256,9 @@ int main(int argc, char* argv[])
         ChangeOptions(&cszSrcFilePath);
     }
 
+    // At this point we must have a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we need
+    // to locate it.
+
     if (cszSrcFilePath.IsEmpty())
     {
         const char* pszFile = LocateSrcFiles(Action & ACT_VSCODE);
@@ -251,79 +266,31 @@ int main(int argc, char* argv[])
             cszSrcFilePath = pszFile;
         else
         {
-
+            puts(TRANSLATE("MakeNinja was unable to locate a .srcfiles.yaml file -- either run it with -new, or set the location with -dir."));
+            return 1;
         }
     }
 
+    // We now have the location of the .srcfiles.yaml file to use. If -opt was specified, then we need to let the user
+    // change options before continuing.
+
+    if (Action & ACT_OPTIONS && !(Action & ACT_NEW))
+    {
+        if (!ChangeOptions(&cszSrcFilePath, Action & ACT_DRYRUN))
+            return 1;
+    }
+
+    // At this point we have the location of .srcfiles.yaml, and we're ready to use it.
+
     if (Action & ACT_VSCODE)
     {
+        // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         ttCList lstResults;
         CreateVsCodeProject(&lstResults);
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             puts(lstResults[pos]);
     }
 
-    if (upType != UPDATE_NORMAL)
-    {
-        // If we get here, assume we are being launched from a makefile
-
-        CNinja cNinja;
-        cNinja.ForceWrite();
-
-        if (!cNinja.IsValidVersion())
-        {
-            puts(TRANSLATE("This version of MakeNinja is too old to properly create ninja scripts from your current srcfiles."));
-            return 0;   // We return as if an error did not occur so that compilation can proceed
-        }
-
-        switch (upType)
-        {
-            case UPDATE_MSVC64:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
-                return 0;
-
-            case UPDATE_MSVC32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
-                return 0;
-
-            case UPDATE_CLANG_CL64:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
-                return 0;
-
-            case UPDATE_CLANG_CL32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
-                return 0;
-
-            case UPDATE_MSVC64D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
-                return 0;
-
-            case UPDATE_MSVC32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
-                return 0;
-
-            case UPDATE_CLANG_CL64D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
-                return 0;
-
-            case UPDATE_CLANG_CL32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
-                return 0;
-
-            default:
-                return 0;
-        }
-
-    }
-    else
     {
         CNinja cNinja;
         if (!cNinja.IsValidVersion())
@@ -396,4 +363,65 @@ int main(int argc, char* argv[])
     }
 
     return 0;
+}
+
+void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
+{
+    // TODO: [KeyWorks - 7/30/2019] Need to change CNinja to accept a root dir instead of bVsCodeDir, then we can pass in
+    // pszRootDir.
+
+    CNinja cNinja;
+    cNinja.ForceWrite();
+
+    if (cNinja.IsValidVersion())
+    {
+        switch (upType)
+        {
+            case UPDATE_MSVC64:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                break;
+
+            case UPDATE_MSVC32:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                break;
+
+            case UPDATE_CLANG_CL64:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                break;
+
+            case UPDATE_CLANG_CL32:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                break;
+
+            case UPDATE_MSVC64D:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                break;
+
+            case UPDATE_MSVC32D:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                break;
+
+            case UPDATE_CLANG_CL64D:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                break;
+
+            case UPDATE_CLANG_CL32D:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
+                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    else
+        puts(TRANSLATE("This version of MakeNinja is too old to properly create ninja scripts from your current srcfiles."));
 }
