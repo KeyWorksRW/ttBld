@@ -18,23 +18,6 @@ void CTabCLang::OnBegin(void)
         SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_CLANG_REL));
     if (m_pOpts->GetOption(OPT_CLANG_DBG))
         SetControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->GetOption(OPT_CLANG_DBG));
-
-    if (!m_pOpts->IsCompilerClang())
-    {
-        UnCheck(DLG_ID(IDCHECK_NO_MSVC));
-        UnCheck(DLG_ID(IDCHECK_MSRC));
-        DisableControl(DLG_ID(IDCHECK_MSLINKER));
-        DisableControl(DLG_ID(IDCHECK_MSRC));
-        DisableControl(DLG_ID(IDEDIT_CFLAGS));
-    }
-    else
-    {
-        SetCheck(DLG_ID(IDCHECK_CLANG));
-        if (!m_pOpts->IsCompilerMSVC())
-            SetCheck(DLG_ID(IDCHECK_NO_MSVC));
-        SetCheck(DLG_ID(IDCHECK_MSLINKER), m_pOpts->GetBoolOption(OPT_MS_LINKER));
-        SetCheck(DLG_ID(IDCHECK_MSRC), m_pOpts->GetBoolOption(OPT_MS_RC));
-    }
 }
 
 void CTabCLang::OnOK(void)
@@ -49,18 +32,5 @@ void CTabCLang::OnOK(void)
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
     m_pOpts->UpdateOption(OPT_CLANG_DBG, (char*) csz);
-
-    if (!GetCheck(DLG_ID(IDCHECK_CLANG)))
-    {
-        m_pOpts->UpdateOption(OPT_COMPILERS, "MSVC");
-        // We leave the rest of the CLANG options in case the user enables CLANG at a later time
-    }
-    else
-    {
-        if (GetCheck(DLG_ID(IDCHECK_NO_MSVC)))
-            m_pOpts->UpdateOption(OPT_COMPILERS, "CLANG");
-        m_pOpts->UpdateOption(OPT_MS_LINKER, GetCheck(DLG_ID(IDCHECK_MSLINKER)));
-        m_pOpts->UpdateOption(OPT_MS_RC, GetCheck(DLG_ID(IDCHECK_MSRC)));
-    }
 }
 

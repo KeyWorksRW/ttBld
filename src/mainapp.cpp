@@ -311,37 +311,29 @@ int main(int argc, char* argv[])
         int countNinjas = 0;
         if (cNinja.GetBoolOption(OPT_64BIT))
         {
-            if (cNinja.IsCompilerMSVC())
-            {
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
-                    countNinjas++;
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
-                    countNinjas++;
-            }
-            if (cNinja.IsCompilerClang())
-            {
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
-                    countNinjas++;
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
-                    countNinjas++;
-            }
+#if defined(_WIN32)
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
+                countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
+                countNinjas++;
+#endif
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
+                countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
+                countNinjas++;
         }
         if (cNinja.GetBoolOption(OPT_32BIT))
         {
-            if (cNinja.IsCompilerMSVC())
-            {
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
-                    countNinjas++;
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
-                    countNinjas++;
-            }
-            if (cNinja.IsCompilerClang())
-            {
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
-                    countNinjas++;
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
-                    countNinjas++;
-            }
+#if defined(_WIN32)
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
+                countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
+                countNinjas++;
+#endif
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
+                countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
+                countNinjas++;
         }
 
         if (ttIsNonEmpty(cNinja.GetHHPName()))

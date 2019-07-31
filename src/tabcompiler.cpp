@@ -16,7 +16,6 @@ void CTabCompiler::OnBegin(void)
 {
     EnableShadeBtns();
     SetCheck(DLG_ID(m_pOpts->IsOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
-    SetCheck(DLG_ID(m_pOpts->GetBoolOption(OPT_STDCALL) ? IDC_RADIO_STDCALL :IDC_RADIO_CDECL));
 
     ptrdiff_t warnLevel = m_pOpts->GetOption(OPT_WARN_LEVEL) ? ttAtoi(m_pOpts->GetOption(OPT_WARN_LEVEL)) : 4;
 
@@ -50,8 +49,6 @@ void CTabCompiler::OnBegin(void)
         SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_CFLAGS_REL));
     if (m_pOpts->GetOption(OPT_CFLAGS_DBG))
         SetControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->GetOption(OPT_CFLAGS_DBG));
-
-    SetCheck(DLG_ID(IDC_CHECK_PERMISSIVE), m_pOpts->GetBoolOption(OPT_PERMISSIVE));
 }
 
 void CTabCompiler::OnOK(void)
@@ -97,9 +94,6 @@ void CTabCompiler::OnOK(void)
         m_pOpts->UpdateOption(OPT_WARN_LEVEL, "3");
     else if (GetCheck(DLG_ID(IDRADIO_WARN4)))
         m_pOpts->UpdateOption(OPT_WARN_LEVEL, "4");
-
-    m_pOpts->UpdateOption(OPT_PERMISSIVE, GetCheck(DLG_ID(IDC_CHECK_PERMISSIVE)));
-    m_pOpts->UpdateOption(OPT_STDCALL, GetCheck(DLG_ID(IDC_RADIO_STDCALL)));
 }
 
 void CTabCompiler::OnBtnChangePch()
