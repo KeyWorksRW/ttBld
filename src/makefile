@@ -129,8 +129,8 @@ deps: $(BldScript)
 
 ########## Creates or updates ninja file if needed ##########
 
-$(BldScript): .srcfiles
+$(BldScript): .srcfiles.yaml
 	makeninja -u$(cmplr)$(bits)
 
-$(BldScriptD): .srcfiles
+$(BldScriptD): .srcfiles.yaml
 	makeninja -u$(cmplr)$(bits)D
