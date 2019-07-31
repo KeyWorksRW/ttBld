@@ -62,6 +62,26 @@ void CreateCodeCmd(const char* pszFile)
         printf(GETSTRING(IDS_FILE_CREATED), (char*) cszPath);
     else
     {
+        // It's possible to just move the entire VSCode directory and it will continue to work fine. In that case, the
+        // registry will still be pointing to the old location, but code.cmd may be located in the PATH, so we can look
+        // for that and use that directory if the registry location is wrong.
+
+        ttCStr cszNewPath;
+        if (FindFileEnv("PATH", "code.cmd", &cszNewPath))
+        {
+            char* pszFilePortion = ttFindFilePortion(cszNewPath);
+            if (pszFilePortion)
+            {
+                *pszFilePortion = 0;
+                cszNewPath.AppendFileName(pszFile);
+                if (file.WriteFile(cszPath))
+                {
+                    printf(GETSTRING(IDS_FILE_CREATED), (char*) cszPath);
+                    return;
+                }
+            }
+        }
+
         printf(GETSTRING(IDS_NINJA_CANT_WRITE), (char*) cszPath);
         puts("");
     }
