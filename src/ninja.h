@@ -71,16 +71,18 @@ protected:
     void GetLibName(const char* pszBaseName, ttCStr& cszLibName);
     void AddDependentLibrary(const char* pszLib, GEN_TYPE gentype);
 
-    void WriteCompilerComments();
-    void WriteCompilerDirectives();
-    void WriteCompilerFlags();
-    void WriteLibDirective();
-    void WriteLinkDirective();
-    void WriteMidlDirective(GEN_TYPE gentype);
-    void WriteRcDirective();
+#if defined(_WIN32)
+    void msvcWriteCompilerComments(CMPLR_TYPE cmplr);
+    void msvcWriteCompilerFlags(CMPLR_TYPE cmplr);
+    void msvcWriteCompilerDirectives(CMPLR_TYPE cmplr);
+    void msvcWriteRcDirective(CMPLR_TYPE cmplr);
+    void msvcWriteMidlDirective(CMPLR_TYPE cmplr);
+    void msvcWriteLibDirective(CMPLR_TYPE cmplr);
+    void msvcWriteLinkDirective(CMPLR_TYPE cmplr);
 
-    void WriteLinkTargets(GEN_TYPE gentype);
-    void WriteMidlTargets();
+    void msvcWriteLinkTargets(CMPLR_TYPE cmplr);
+    void msvcWriteMidlTargets(CMPLR_TYPE cmplr);
+#endif
 
     bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
     const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);
