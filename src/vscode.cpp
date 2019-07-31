@@ -398,7 +398,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 if (FindFileEnv("PATH", "clang.exe"))
                 {
                     cszLabel.printf("Build %s (debug) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
                     cszMakeCommand.printf("mingw32-make.exe debug %s", (char*) cszMakeFileOption);
                     AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
 
@@ -415,7 +415,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 else if (FindFileEnv("PATH", "gcc.exe"))
                 {
                     cszLabel.printf("Build %s (debug) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
                     cszMakeCommand.printf("mingw32-make.exe cmplr=gcc debug %s", (char*) cszMakeFileOption);
                     AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
 
