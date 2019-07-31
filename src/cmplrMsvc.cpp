@@ -93,15 +93,36 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_CMN));
     }
+
+    ttCStr cszEnv;
+    if (cszEnv.GetEnv("CFLAGS"))
+    {
+        m_pkfOut->WriteChar(' ');
+        m_pkfOut->WriteStr(cszEnv);
+    }
+
     if (GetOption(OPT_CFLAGS_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
     {
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_REL));
     }
+
+    if ((m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64) && cszEnv.GetEnv("CFLAGSR"))
+    {
+        m_pkfOut->WriteChar(' ');
+        m_pkfOut->WriteStr(cszEnv);
+    }
+
     if (GetOption(OPT_CFLAGS_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
     {
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_DBG));
+    }
+
+    if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) && cszEnv.GetEnv("CFLAGSD"))
+    {
+        m_pkfOut->WriteChar(' ');
+        m_pkfOut->WriteStr(cszEnv);
     }
 
     // Now write out the compiler-specific flags

@@ -534,6 +534,14 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     if (cSrcFiles.GetOption(OPT_CFLAGS_DBG))
         ParseDefines(lstDefines, cSrcFiles.GetOption(OPT_CFLAGS_DBG));
 
+    // Also add environment flags
+
+    ttCStr cszEnv;
+    if (cszEnv.GetEnv("CFLAGS"))
+        ParseDefines(lstDefines, cszEnv);
+    if (cszEnv.GetEnv("CFLAGSD"))
+        ParseDefines(lstDefines, cszEnv);
+
     // BUGBUG: [KeyWorks - 7/27/2019] This is a short-term hack until we have hooked up proper routines for
     // reading/writing .json files. While .json files are typically written out as line-oriented files, there's no
     // requirement for each element to be on it's own line, which is what we require if we're reading line by line. So,
