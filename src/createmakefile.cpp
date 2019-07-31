@@ -39,9 +39,25 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         cszBuildDir.AppendFileName("build");
     }
 
-    const char* pszSrcFiles = LocateSrcFiles(ttIsSameSubStrI(pszDir, ".vscode"));   // it's fine if pszDir is a nullptr
-    if (!pszSrcFiles)
-        bAllVersion = true;     // can't create a dependency on .srcfiles.yaml if we don't know where it is
+    ttCStr cszSrcFiles;
+    if (pszDir)
+    {
+        cszSrcFiles = pszDir;
+        if (!LocateSrcFiles(&cszSrcFiles))
+        {
+            cszSrcFiles.printf(TRANSLATE("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."), pszDir);
+            m_lstErrors += cszSrcFiles;
+            return false;
+        }
+    }
+    else
+    {
+        const char* pszSrcFiles = LocateSrcFiles();   // it's fine if pszDir is a nullptr
+        if (!pszSrcFiles)
+            bAllVersion = true;     // can't create a dependency on .srcfiles.yaml if we don't know where it is
+        else
+            cszSrcFiles = pszSrcFiles;
+    }
 
     ttCFile kf;
     if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL :  IDR_MAKEFILE_SINGLE))
@@ -54,8 +70,8 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     while (kf.ReplaceStr("%build%", cszBuildDir));
     while (kf.ReplaceStr("%libbuild%", "build"));
 
-    if (!bAllVersion && pszSrcFiles)
-        while (kf.ReplaceStr("%srcfiles%", pszSrcFiles));
+    if (!bAllVersion && cszSrcFiles.IsNonEmpty())
+        while (kf.ReplaceStr("%srcfiles%", cszSrcFiles));
 
     while (kf.ReplaceStr("%project%", GetProjectName()));
 

@@ -29,7 +29,7 @@
 class CTabOptions : public ttCDlg, public CWriteSrcFiles
 {
 public:
-    CTabOptions(bool bVsCodeDir = false);
+    CTabOptions(const char* pszNinjaDir = nullptr);
 
     // Class functions
 

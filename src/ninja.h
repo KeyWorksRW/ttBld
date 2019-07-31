@@ -16,7 +16,7 @@
 class CNinja : public CSrcFiles
 {
 public:
-    CNinja(bool bVsCodeDir = false);
+    CNinja(const char* pszNinjaDir = nullptr);
 
     typedef enum {
         GEN_NONE,

@@ -13,7 +13,7 @@
 class CVcxProj : public CNinja
 {
 public:
-    CVcxProj() : CNinja(true) { }
+    CVcxProj(const char* pszNinjaDir = nullptr) : CNinja(pszNinjaDir) { }
 
     // Class functions
 

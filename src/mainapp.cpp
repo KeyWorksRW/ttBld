@@ -256,18 +256,30 @@ int main(int argc, char* argv[])
         ChangeOptions(&cszSrcFilePath);
     }
 
-    // At this point we must have a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we need
+    // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we need
     // to locate it.
 
     if (cszSrcFilePath.IsEmpty())
     {
-        const char* pszFile = LocateSrcFiles(Action & ACT_VSCODE);
-        if (pszFile)
-            cszSrcFilePath = pszFile;
+        if (cszRootDir.IsNonEmpty())
+        {
+            cszSrcFilePath = cszRootDir;
+            if (!LocateSrcFiles(&cszSrcFilePath))
+            {
+                puts(TRANSLATE("MakeNinja was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
+                return 1;
+            }
+        }
         else
         {
-            puts(TRANSLATE("MakeNinja was unable to locate a .srcfiles.yaml file -- either run it with -new, or set the location with -dir."));
-            return 1;
+            const char* pszFile = LocateSrcFiles();
+            if (pszFile)
+                cszSrcFilePath = pszFile;
+            else
+            {
+                puts(TRANSLATE("MakeNinja was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
+                return 1;
+            }
         }
     }
 

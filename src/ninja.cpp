@@ -27,7 +27,7 @@ const char* aCppExt[] = {
     nullptr
 };
 
-CNinja::CNinja(bool bVsCodeDir) : CSrcFiles(bVsCodeDir),
+CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
     // make all ttCList classes use the same sub-heap
     m_lstBuildLibs32D(m_ttHeap), m_lstBuildLibs64D(m_ttHeap),
     m_lstBuildLibs32R(m_ttHeap), m_lstBuildLibs64R(m_ttHeap)

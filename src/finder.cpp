@@ -112,3 +112,45 @@ bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
     }
     return false;
 }
+
+static const char* aSrcFilesLocations[] =
+{
+    ".srcfiles.yaml",           // this MUST be the first file
+    ".vscode/srcfiles.yaml",
+    ".private/.srcfiles.yaml",
+    "build/.srcfiles.yaml",
+    "bld/.srcfiles.yaml",
+
+    // the following is here for backwards compatability
+    ".srcfiles",
+
+    nullptr
+};
+
+const char* LocateSrcFiles(ttCStr* pcszStartDir)
+{
+    if (pcszStartDir)
+    {
+        ttCStr cszPath;
+        for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
+        {
+            cszPath = *pcszStartDir;
+            cszPath.AppendFileName(aSrcFilesLocations[pos]);
+            if (ttFileExists(cszPath))
+            {
+                *pcszStartDir = (const char*) cszPath;
+                return *pcszStartDir;
+            }
+        }
+    }
+    else
+    {
+        for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
+        {
+            if (ttFileExists(aSrcFilesLocations[pos]))
+                return aSrcFilesLocations[pos];
+        }
+    }
+
+    return nullptr;
+}
