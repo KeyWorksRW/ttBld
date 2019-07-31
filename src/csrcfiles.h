@@ -41,15 +41,10 @@ public:
     bool IsExeTypeLib()      { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "lib")); }
     bool IsExeTypeWindow()   { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "window")); }
 
-    bool IsMakeMissing()     { return (ttStrStrI(GetOption(OPT_MAKEFILE), "missing")); }    // this is the default
-    bool IsMakeNever()       { return (ttStrStrI(GetOption(OPT_MAKEFILE), "never")); }
-    bool IsMakeAlways()      { return (ttStrStrI(GetOption(OPT_MAKEFILE), "always")); }
+    bool IsStaticCrtRel()   { return (ttStrStrI(GetOption(OPT_STATIC_CRT_REL), "static")); }
+    bool IsStaticCrtDbg()   { return (ttStrStrI(GetOption(OPT_STATIC_CRT_DBG), "static")); }
 
     bool IsOptimizeSpeed()   { return (ttStrStrI(GetOption(OPT_OPTIMIZE), "speed")); }
-
-    // if not specified, both compilers are used
-    bool IsCompilerMSVC()   { return (!GetOption(OPT_COMPILERS) || ttStrStrI(GetOption(OPT_COMPILERS), "MSVC")); }
-    bool IsCompilerClang()  { return (!GetOption(OPT_COMPILERS) || ttStrStrI(GetOption(OPT_COMPILERS), "CLANG")); }
 
     const char* GetDir32()  { return GetOption(OPT_TARGET_DIR32); } // 32-bit target directory
     const char* GetDir64()  { return GetOption(OPT_TARGET_DIR64); } // 64-bit target directory

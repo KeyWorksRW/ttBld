@@ -17,8 +17,8 @@ void CTabLinker::OnBegin(void)
 {
     EnableShadeBtns();
 
-    SetCheck(DLG_ID(IDCHECK_STATIC_CRT_REL), m_pOpts->GetBoolOption(OPT_STATIC_CRT_REL));
-    SetCheck(DLG_ID(IDCHECK_STATIC_CRT_DBG), m_pOpts->GetBoolOption(OPT_STATIC_CRT_DBG));
+    SetCheck(DLG_ID(IDCHECK_STATIC_CRT_REL), m_pOpts->IsStaticCrtRel());
+    SetCheck(DLG_ID(IDCHECK_STATIC_CRT_DBG), m_pOpts->IsStaticCrtDbg());
 
     if (m_pOpts->GetOption(OPT_LIBS))
         SetControlText(DLG_ID(IDEDIT_LIBS_LINK), m_pOpts->GetOption(OPT_LIBS));
@@ -60,8 +60,8 @@ void CTabLinker::OnOK(void)
     csz.GetWndText(GetDlgItem(IDEDIT_LIBS_BUILD));
     m_pOpts->UpdateOption(OPT_BUILD_LIBS, (char*) csz);
 
-    m_pOpts->UpdateOption(OPT_STATIC_CRT_REL, GetCheck(IDCHECK_STATIC_CRT_REL));
-    m_pOpts->UpdateOption(OPT_STATIC_CRT_DBG, GetCheck(IDCHECK_STATIC_CRT_DBG));
+    m_pOpts->UpdateOption(OPT_STATIC_CRT_REL, GetCheck(IDCHECK_STATIC_CRT_REL) ? "static" : "dll");
+    m_pOpts->UpdateOption(OPT_STATIC_CRT_DBG, GetCheck(IDCHECK_STATIC_CRT_DBG) ? "static" : "dll");
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_NATVIS)));
     m_pOpts->UpdateOption(OPT_NATVIS, (char*) csz);

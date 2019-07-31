@@ -100,6 +100,14 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
             continue;
         else if (ttStrStr(kfIn, "static_crt:"))
             continue;
+        else if (ttStrStr(kfIn, "CrtStaticRel:"))
+            continue;
+        else if (ttStrStr(kfIn, "CrtStaticDbg:"))
+            continue;
+        else if (ttStrStr(kfIn, "makefile:"))
+            continue;
+        else if (ttStrStr(kfIn, "compiler:"))
+            continue;
 
         if (!bSeenVersion && ttIsSameSubStrI(kfIn, "Options:"))
         {

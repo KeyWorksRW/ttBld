@@ -50,7 +50,10 @@ CTabOptions::CTabOptions(bool bVsCodeDir) : ttCDlg(IDDLG_OPTIONS), CWriteSrcFile
     m_tabCompiler.SetParentClass(this);
     m_tabCLang.SetParentClass(this);
     m_tabLinker.SetParentClass(this);
+#if defined(_WIN32)
     m_tabRcMidl.SetParentClass(this);
+#endif
+
 #ifdef PRIVATE      // used for testing
     m_tabPrivate.SetParentClass(this);
 #endif
@@ -103,8 +106,15 @@ void CTabOptions::OnBegin(void)
     ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_LINKER);
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LINKER, (LPARAM) &ti);
 
+#if defined(_WIN32)
     ti.pszText = (char*) "Rc/Midl";   // don't translate this
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_RC_MIDL, (LPARAM) &ti);
+#endif
+
+#if defined(PRIVATE)
+    ti.pszText = (char*) "Private";   // don't translate this
+    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_PRIVATE, (LPARAM) &ti);
+#endif
 
     SendItemMsg(IDTAB, TCM_SETCURSEL, TAB_GENERAL);
     m_hwndTabSub = m_tabGeneral.DoModeless(*this);
@@ -174,9 +184,11 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
                         m_hwndTabSub = m_tabLinker.DoModeless(*this);
                         break;
 
+#if defined(_WIN32)
                     case TAB_RC_MIDL:
                         m_hwndTabSub = m_tabRcMidl.DoModeless(*this);
                         break;
+#endif
 #ifdef PRIVATE
                     case TAB_PRIVATE:
                         m_hwndTabSub = m_tabPrivate.DoModeless(*this);

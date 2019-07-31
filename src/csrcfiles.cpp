@@ -253,13 +253,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
     }
     else if (ttIsSameStrI(cszName, "LinkFlags"))
         UpdateOption(OPT_LINK_CMN, (char*) cszVal);
-    else if (ttIsSameStrI(cszName, "bit_suffix"))       // could convert this to b64_suffix, but with new logic, probably don't need it
-        return;
-    else if (ttIsSameStrI(cszName, "static_crt"))
-    {
-        UpdateOption(OPT_STATIC_CRT_REL, true);
-        return;
-    }
 
     ttCStr csz;
     csz.printf(GETSTRING(IDS_NINJA_UNKNOWN_OPTION), (char*) cszName);

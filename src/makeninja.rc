@@ -28,19 +28,19 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""winres.h""\r\n"
     "#include ""strtable.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "#include ""ttlibicons.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""strtable.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
@@ -59,7 +59,6 @@ IDR_PRE_PROJECT         RCDATA    "res/cdlprojectpre.txt"
 IDR_POST_PROJECT        RCDATA    "res/cdlprojectpost.txt"
 IDR_VCXPROJ_MASTER      RCDATA    "res/vcxproj.xml"
 IDR_VCXPROJ_FILTERS     RCDATA    "res/vcxproj.filters.xml"
-
 IDR_MAKEFILE_ALL        RCDATA    "res/makefileAll.txt"
 IDR_MAKEFILE_SINGLE     RCDATA    "res/makefileSng.txt"
 
@@ -128,7 +127,7 @@ BEGIN
     PUSHBUTTON      "C&hange...",IDBTN_CHANGE_IN,177,76,50,14
     CONTROL         "Create using &project file:",IDRADIO_CONVERT,"Button",
                     BS_AUTORADIOBUTTON,6,121,91,10
-    COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT |
+    COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "&Locate...",IDBTN_LOCATE_SCRIPT,177,135,50,14
     DEFPUSHBUTTON   "Create",IDOK,115,174,50,14
@@ -137,7 +136,7 @@ BEGIN
 END
 
 IDDLG_OPTIONS DIALOG  0, 0, 232, 281
-STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_VISIBLE |
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
 CAPTION ".srcfiles Options"
 FONT 8, "MS Shell Dlg"
@@ -154,21 +153,21 @@ BEGIN
     LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
     EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
     GROUPBOX        "Project Type",IDC_STATIC,7,25,147,45
-    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,19,40,42,10
-    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,73,40,41,10
-    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,19,54,37,10
-    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,73,54,29,10
     GROUPBOX        "Platform",IDC_STATIC,7,83,196,59
-    CONTROL         "64-bit",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "64-bit",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,99,33,10
     LTEXT           "Dir:",IDC_STATIC,60,101,12,8
     EDITTEXT        IDEDIT_DIR64,76,96,83,14,ES_AUTOHSCROLL
     PUSHBUTTON      "Dir...",IDBTN_DIR64,166,96,29,16
-    CONTROL         "32-bit",IDCHECK_32BIT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "32-bit",IDCHECK_32BIT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,123,33,10
     LTEXT           "Dir:",IDC_STATIC,60,124,12,8
     EDITTEXT        IDEDIT_DIR32,76,120,83,14,ES_AUTOHSCROLL
@@ -180,41 +179,34 @@ STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT           "Optimize for:",IDC_STATIC,8,7,40,8
-    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,53,7,35,10
     CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,97,7,
                     35,10
-    LTEXT           "Convention:",IDC_STATIC,8,19,39,8
-    CONTROL         "cdecl",IDC_RADIO_CDECL,"Button",BS_AUTORADIOBUTTON |
-                    WS_GROUP | WS_TABSTOP,53,19,33,10
-    CONTROL         "stdcall",IDC_RADIO_STDCALL,"Button",BS_AUTORADIOBUTTON,
-                    97,19,36,10
-    LTEXT           "Warning:",IDC_STATIC,8,31,30,8
-    CONTROL         "&4",IDRADIO_WARN4,"Button",BS_AUTORADIOBUTTON,53,31,20,
+    LTEXT           "Warning:",IDC_STATIC,8,19,30,8
+    CONTROL         "&4",IDRADIO_WARN4,"Button",BS_AUTORADIOBUTTON,53,19,20,
                     10
-    CONTROL         "&3",IDRADIO_WARN3,"Button",BS_AUTORADIOBUTTON,75,31,20,
+    CONTROL         "&3",IDRADIO_WARN3,"Button",BS_AUTORADIOBUTTON,75,19,20,
                     10
-    CONTROL         "&2",IDRADIO_WARN2,"Button",BS_AUTORADIOBUTTON,97,31,20,
+    CONTROL         "&2",IDRADIO_WARN2,"Button",BS_AUTORADIOBUTTON,97,19,20,
                     10
-    CONTROL         "&1",IDRADIO_WARN1,"Button",BS_AUTORADIOBUTTON,120,31,20,
+    CONTROL         "&1",IDRADIO_WARN1,"Button",BS_AUTORADIOBUTTON,120,19,20,
                     10
-    CONTROL         "&Permissive",IDC_CHECK_PERMISSIVE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,155,31,49,10
-    LTEXT           "PCH &header:",IDC_STATIC,8,48,42,8
-    EDITTEXT        IDEDIT_PCH,54,46,77,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Ch&ange...",IDBTN_PCH,140,46,51,16
-    LTEXT           "PCH &source:",IDC_STATIC,8,66,41,8
-    EDITTEXT        IDEDIT_PCH_CPP,54,64,77,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Cha&nge...",IDBTN_PCH_CPP,140,64,51,16
-    LTEXT           "&IncDirs:",IDC_STATIC,8,88,25,8
-    EDITTEXT        IDEDIT_INCDIRS,38,86,166,14,ES_AUTOHSCROLL
-    GROUPBOX        "Compiler flags",IDC_STATIC,7,114,197,90
-    LTEXT           "&Common:",IDC_STATIC,19,132,30,8
-    EDITTEXT        IDEDIT_COMMON,59,131,133,14,ES_AUTOHSCROLL
-    LTEXT           "&Release:",IDC_STATIC,19,153,29,8
-    EDITTEXT        IDEDIT_RELEASE,59,151,133,14,ES_AUTOHSCROLL
-    LTEXT           "&Debug:",IDC_STATIC,19,175,24,8
-    EDITTEXT        IDEDIT_DEBUG,59,175,133,14,ES_AUTOHSCROLL
+    LTEXT           "PCH &header:",IDC_STATIC,8,36,42,8
+    EDITTEXT        IDEDIT_PCH,54,34,77,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Ch&ange...",IDBTN_PCH,140,34,51,16
+    LTEXT           "PCH &source:",IDC_STATIC,8,54,41,8
+    EDITTEXT        IDEDIT_PCH_CPP,54,52,77,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Cha&nge...",IDBTN_PCH_CPP,140,52,51,16
+    LTEXT           "&IncDirs:",IDC_STATIC,8,76,25,8
+    EDITTEXT        IDEDIT_INCDIRS,38,74,166,14,ES_AUTOHSCROLL
+    GROUPBOX        "Compiler flags",IDC_STATIC,7,102,197,90
+    LTEXT           "&Common:",IDC_STATIC,19,120,30,8
+    EDITTEXT        IDEDIT_COMMON,59,119,133,14,ES_AUTOHSCROLL
+    LTEXT           "&Release:",IDC_STATIC,19,141,29,8
+    EDITTEXT        IDEDIT_RELEASE,59,139,133,14,ES_AUTOHSCROLL
+    LTEXT           "&Debug:",IDC_STATIC,19,163,24,8
+    EDITTEXT        IDEDIT_DEBUG,59,163,133,14,ES_AUTOHSCROLL
 END
 
 IDTAB_LINKER DIALOG  8, 20, 210, 222
@@ -236,27 +228,14 @@ BEGIN
     PUSHBUTTON      "A&dd...",IDBTN_ADD_LIB,163,135,41,16
     LTEXT           "&Build and link to these:",IDC_STATIC,6,156,72,8
     EDITTEXT        IDEDIT_LIBS_BUILD,6,168,198,14,ES_AUTOHSCROLL
-    LTEXT           "Use Static CRT:",IDC_STATIC,6,188,52,8
+    LTEXT           "Link to static CRT:",IDC_STATIC,6,188,60,8
     CONTROL         "Release",IDCHECK_STATIC_CRT_REL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,64,187,42,10
-    CONTROL         "Debug",IDCHECK_STATIC_CRT_DBG,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,115,187,37,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,74,187,42,10
+    CONTROL         "Debug",IDCHECK_STATIC_CRT_DBG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,125,187,37,10
     LTEXT           "&NATVIS file:",IDC_STATIC,6,210,40,8
     EDITTEXT        IDEDIT_NATVIS,47,207,108,14,ES_AUTOHSCROLL
     PUSHBUTTON      "&Find...",IDBTN_CHANGE,163,206,41,16
-END
-
-IDTAB_SCRIPTS DIALOG  8, 20, 210, 222
-STYLE DS_CONTROL | WS_CHILD
-FONT 8, "MS Shell Dlg"
-BEGIN
-    GROUPBOX        "Create IDE projects (if missing)",IDC_STATIC,6,8,147,71
-    CONTROL         "CodeBlocks",IDCHECK_CODEBLOCKS,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,19,25,54,10
-    CONTROL         "CodeLite",IDCHECK_CODELITE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,19,40,44,10
-    CONTROL         "Visual Studio",IDCHECK_MSVC,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,19,56,57,10
 END
 
 IDTAB_RCMIDL DIALOG  8, 20, 210, 222
@@ -283,21 +262,13 @@ IDTAB_CLANG DIALOG  8, 20, 210, 222
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
-    CONTROL         "Generate CLANG ninja scripts",IDCHECK_CLANG,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,7,133,10
-    CONTROL         "Do NOT generate MSVC ninja scripts",IDCHECK_NO_MSVC,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,21,19,133,10
-    CONTROL         "Use MS Linker with CLANG compiler",IDCHECK_MSLINKER,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,38,131,10
-    GROUPBOX        "CLANG-only flags",IDC_STATIC,7,73,196,90
-    LTEXT           "Common:",IDC_STATIC,19,93,30,8
-    EDITTEXT        IDEDIT_COMMON,59,92,133,14,ES_AUTOHSCROLL
-    LTEXT           "Release:",IDC_STATIC,19,114,29,8
-    EDITTEXT        IDEDIT_RELEASE,59,113,133,14,ES_AUTOHSCROLL
-    LTEXT           "Debug:",IDC_STATIC,19,137,24,8
-    EDITTEXT        IDEDIT_DEBUG,59,136,133,14,ES_AUTOHSCROLL
-    CONTROL         "Use MS RC.exe with CLANG compiler",IDCHECK_MSRC,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,51,135,10
+    GROUPBOX        "CLANG-only flags",IDC_STATIC,7,7,196,90
+    LTEXT           "Common:",IDC_STATIC,19,27,30,8
+    EDITTEXT        IDEDIT_COMMON,59,26,133,14,ES_AUTOHSCROLL
+    LTEXT           "Release:",IDC_STATIC,19,48,29,8
+    EDITTEXT        IDEDIT_RELEASE,59,47,133,14,ES_AUTOHSCROLL
+    LTEXT           "Debug:",IDC_STATIC,19,71,24,8
+    EDITTEXT        IDEDIT_DEBUG,59,70,133,14,ES_AUTOHSCROLL
 END
 
 
@@ -307,7 +278,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     IDDDLG_CONVERT, DIALOG
     BEGIN
@@ -346,13 +317,6 @@ BEGIN
         TOPMARGIN, 6
     END
 
-    IDTAB_SCRIPTS, DIALOG
-    BEGIN
-        LEFTMARGIN, 6
-        RIGHTMARGIN, 204
-        TOPMARGIN, 6
-    END
-
     IDTAB_RCMIDL, DIALOG
     BEGIN
         LEFTMARGIN, 6
@@ -384,4 +348,5 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
 

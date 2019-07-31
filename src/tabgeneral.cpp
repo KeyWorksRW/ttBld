@@ -51,9 +51,6 @@ void CTabGeneral::OnBegin(void)
         SetCheck(DLG_ID(IDCHECK_32BIT));
         SetCheck(DLG_ID(IDCHECK_64BIT), m_pOpts->GetBoolOption(OPT_64BIT));
     }
-
-    if (ttIsNonEmpty(m_pOpts->GetXgetFlags()))
-        SetControlText(DLG_ID(IDEDIT_XGETTEXT), m_pOpts->GetXgetFlags());
 }
 
 void CTabGeneral::OnOK(void)
@@ -62,10 +59,6 @@ void CTabGeneral::OnOK(void)
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PROJ_NAME)));
     m_pOpts->UpdateOption(OPT_PROJECT, (char*) csz);
-
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_XGETTEXT)));
-    if (csz.IsNonEmpty() || m_pOpts->GetXgetFlags())
-        m_pOpts->UpdateOption(OPT_XGET_FLAGS, (char*) csz);
 
     if (GetCheck(DLG_ID(IDRADIO_CONSOLE)))
         m_pOpts->UpdateOption(OPT_EXE_TYPE, "console");
@@ -215,12 +208,4 @@ void CTabGeneral::SetTargetDirs()
         SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
     else
         SetControlText(DLG_ID(IDEDIT_DIR64), cszDir64);
-}
-
-#include "dlggettext.h"    // CDlgGetText
-
-void CTabGeneral::OnMore()
-{
-    CDlgGetText dlg;
-
 }

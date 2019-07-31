@@ -27,8 +27,6 @@ namespace sfopt
         OPT_PCH,            // name of precompiled header file, or "none" if not using precompiled headers
         OPT_PCH_CPP,        // source file used to build precompiled header (default uses same name as PCH option)
 
-        // The following are boolean options (true or false)
-
         OPT_DEBUG_RC,       // true means build a -D_DEBUG version of the project's rc file
         OPT_PERMISSIVE,     // true means add -permissive- compiler flag
         OPT_STDCALL,        // use stdcall calling convention
@@ -42,7 +40,6 @@ namespace sfopt
         OPT_CFLAGS_REL,     // flags to pass to the compiler in release builds
         OPT_CFLAGS_DBG,     // flags to pass to the compiler in debug builds
 
-        OPT_COMPILERS,      // [MSVC or CLANG] default is both, set this option to limit it to one
         OPT_NATVIS,         // Specifies a .natvis file to link into the pdb file
 
         OPT_LINK_CMN,       // flags to pass to the linker in all build targets
@@ -75,7 +72,6 @@ namespace sfopt
         OPT_LIBS,           // additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
         OPT_LIBS_REL,       // additional libraries to link to in release builds
         OPT_LIBS_DBG,       // additional libraries to link to in debug builds
-        OPT_MAKEFILE,       // [never | missing | always] -- default, if not specified, is missing
         OPT_OPTIMIZE,       // [space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues) -- default, if not specified, is space
         OPT_WARN_LEVEL,     // [1-4] default, if not specified, is 4
         OPT_BUILD_LIBS,     // libraries that need to be built (added to makefile generation)

@@ -407,7 +407,7 @@ void CNinja::WriteCompilerComments()
             m_pkfOut->WriteEol("# -GS-\t// Turn off buffer security checks");
             if (GetBoolOption(OPT_STDCALL))
                 m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-            if (GetBoolOption(OPT_STATIC_CRT_REL))
+            if (IsStaticCrtRel())
                 m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
             else
                 m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -420,7 +420,7 @@ void CNinja::WriteCompilerComments()
         }
         else  // Presumably GEN_DEBUG32 or GEN_DEBUG64
         {
-            if (GetBoolOption(OPT_STATIC_CRT_DBG))
+            if (IsStaticCrtDbg())
                 m_pkfOut->WriteEol("# -MTd\t// Multithreaded debug dll (MSVCRTD)");
             else
                 m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
@@ -438,7 +438,7 @@ void CNinja::WriteCompilerComments()
         {
             if (GetBoolOption(OPT_STDCALL))
                 m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
-            if (GetBoolOption(OPT_STATIC_CRT_REL))
+            if (IsStaticCrtRel())
                 m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
             else
                 m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
@@ -451,7 +451,7 @@ void CNinja::WriteCompilerComments()
         }
         else              // Presumably GEN_DEBUG32 or GEN_DEBUG64
         {
-            if (GetBoolOption(OPT_STATIC_CRT_DBG))
+            if (IsStaticCrtDbg())
                 m_pkfOut->WriteEol("# -MTd\t// Multithreaded debug dll (MSVCRTD)");
             else
                 m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
@@ -477,7 +477,7 @@ void CNinja::WriteCompilerFlags()
 
                 GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
                 GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-                IsExeTypeLib() ? " -Zl" : (GetBoolOption(OPT_STATIC_CRT_DBG) ? " -MTd" : " -MDd")
+                IsExeTypeLib() ? " -Zl" : (IsStaticCrtDbg() ? " -MTd" : " -MDd")
             );
     else    // Presumably GEN_RELEASE32 or GEN_RELEASE64
         m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s",
@@ -485,7 +485,7 @@ void CNinja::WriteCompilerFlags()
 
                 GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
                 GetBoolOption(OPT_STDCALL) ?    " -Gz" : "",
-                IsExeTypeLib() ? " -Zl" :  (GetBoolOption(OPT_STATIC_CRT_REL) ? " -MT" : " -MD"),
+                IsExeTypeLib() ? " -Zl" :  (IsStaticCrtRel() ? " -MT" : " -MD"),
                 IsOptimizeSpeed() ? " -O2" : " -O1"
             );
 

@@ -25,15 +25,10 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     ttCStr cszMakeFile(cszBuildRoot);
     cszMakeFile.AppendFileName("makefile");
 
-    if (IsMakeNever())
-        return true;        // user doesn't want makefile created at all
-    else if (IsMakeMissing())
-    {
-        if (ttFileExists(cszMakeFile))
-            return true;    // file exists, user doesn't want us to update it
-    }
+    if (ttFileExists(cszMakeFile))
+        return true;    // Don't overwrite an existing makefile
 
-    // We get here if the makefile is missing or "Makefile: always" is set
+    // We get here if the makefile is missing
 
     ttCStr cszBuildDir(cszBuildRoot);
     // Some repositories use a bld directory which is added to .gitignore. If it exists, we'll use this directory
