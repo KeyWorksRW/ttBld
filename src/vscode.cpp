@@ -17,16 +17,18 @@
 #include "resource.h"
 
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, const char* pszProblem);
+static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
+static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
 
 static const char* txtProperties =
     "{\n"
     "    \"configurations\": [\n"
     "        {\n"
     "            \"name\": \"Default\",\n"
-    "             \"defines\": [\n"
-    "             ],\n"
     "             \"cStandard\": \"c11\",\n"
     "             \"cppStandard\": \"c++17\",\n"
+    "             \"defines\": [\n"
+    "             ],\n"
     "             \"includePath\": [\n"
     "             ]\n"
     "         }\n"
@@ -80,6 +82,51 @@ static const char* txtSubTasks =
     "            \"problemMatcher\": [ %problem% ]\n"
     "        },\n"
     ;
+
+static const char* txtMsvcSubTasks =
+    "        {\n"
+    "            \"label\": \"%label%\",\n"
+    "            \"type\": \"shell\",\n"
+    "            \"command\": \"%command%\",\n"
+    "%group%"
+    "            \"problemMatcher\": {\n"
+    "                \"base\": \"$msCompile\",\n"
+    "                \"fileLocation\": [\"relative\", \"${workspaceFolder}\"]\n"
+    "            },\n"
+    "        },\n"
+    ;
+
+static const char* txtClangSubTasks =
+    "        {\n"
+    "            \"label\": \"%label%\",\n"
+    "            \"type\": \"shell\",\n"
+    "            \"command\": \"%command%\",\n"
+    "%group%"
+    "            \"problemMatcher\": {\n"
+    "                \"owner\": \"cpp\",\n"
+    "                \"fileLocation\": [\"relative\", \"${workspaceFolder}\"],\n"
+    "                \"pattern\": {\n"
+    "                    \"regexp\": \"^(.*):(\\\\d+):(\\\\d+):\\\\s+(note|warning|error):\\\\s+(.*)$\",\n"
+    "                    \"file\": 1,\n"
+    "                    \"line\": 2,\n"
+    "                    \"column\": 3,\n"
+    "                    \"severity\": 4,\n"
+    "                    \"message\": 5\n"
+    "                }\n"
+    "            }\n"
+    "        },\n"
+    ;
+
+static const char* txtNormalGroup =
+    "            \"group\": \"build\",\n"
+;
+
+static const char* txtDefaultGroup =
+    "            \"group\": {\n"
+    "                \"kind\": \"build\",\n"
+    "                \"isDefault\": true\n"
+    "            },\n"
+;
 
 static const char* txtDefaultTask =
     "        {\n"
@@ -273,13 +320,6 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     return true;
 }
 
-
-// https://vscode-docs.readthedocs.io/en/latest/editor/tasks/
-
-// For clang-cl.exe we definitely need to provide a problem matcher since the $mscompiler one doesn't work. We will
-// probably need to add it for our regular builds as well if the makefile is not in the same location as the current
-// directory. Reason is that $mscompile assumes an absolute path, but all of the compilers are outputing a relative path.
-
 bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 {
     ttCFile kfTask, kfSubTask, kfOut;
@@ -320,16 +360,9 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                 cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()),
                 "MSVC");
-
-            kfSubTask.ReplaceStr("%label%", cszLabel);
-            kfSubTask.ReplaceStr("%group%", "build");
-
             cszMakeCommand.printf("nmake.exe -nologo debug %s", (char*) cszMakeFileOption);
-            kfSubTask.ReplaceStr("%command%", cszMakeCommand);
-            kfSubTask.ReplaceStr("%problem%", "\042$msCompile\042");
+            AddMsvcTask(kfOut, cszLabel, txtDefaultGroup, cszMakeCommand);
 
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
 #else
             bool bClangAvail = FindFileEnv("PATH", "clang.exe");
 
@@ -337,19 +370,8 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                 cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32())
                 bClangAvail ? "CLANG" : "GCC");
-
-            kfSubTask.ReplaceStr("%label%", cszLabel);
-            kfSubTask.ReplaceStr("%group%", "build");
-
             cszMakeCommand.printf("make debug cmplr=clang %s", (char*) cszMakeFileOption);
-            kfSubTask.ReplaceStr("%command%", cszMakeCommand);
-            if (!bClangAvail)
-                kfSubTask.ReplaceStr("cmplr=clang", "cmplr=gcc");
-
-            kfSubTask.ReplaceStr("%problem%", "\042$gcc\042");
-
-            while (kfSubTask.ReadLine())
-                kfOut.WriteEol(kfSubTask);
+            AddClangTask(kfOut, cszLabel, txtDefaultGroup, cszMakeCommand);
 #endif
 
             // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC compiler. If we're not on Windows, then
@@ -360,14 +382,14 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             cszLabel.printf("Build %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                 cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
             cszMakeCommand.printf("nmake.exe -nologo release %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$msCompile\042");
+            AddMsvcTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
 
             // Rebuild MSVC release
 
             cszLabel.printf("Rebuild %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                 cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
             cszMakeCommand.printf("nmake.exe -nologo clean release %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$msCompile\042");
+            AddMsvcTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
 
             // Test: View MSVC build commands
 
@@ -400,34 +422,34 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     cszLabel.printf("Build %s (debug) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                         cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
                     cszMakeCommand.printf("mingw32-make.exe debug %s", (char*) cszMakeFileOption);
-                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
 
                     cszLabel.printf("Build %s (release) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                         cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
                     cszMakeCommand.printf("mingw32-make.exe release %s", (char*) cszMakeFileOption);
-                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
 
                     cszLabel.printf("Rebuild %s (release) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                         cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
                     cszMakeCommand.printf("mingw32-make.exe clean release %s", (char*) cszMakeFileOption);
-                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
                 }
                 else if (FindFileEnv("PATH", "gcc.exe"))
                 {
                     cszLabel.printf("Build %s (debug) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                         cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
                     cszMakeCommand.printf("mingw32-make.exe cmplr=gcc debug %s", (char*) cszMakeFileOption);
-                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
 
                     cszLabel.printf("Build %s (release) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                         cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
                     cszMakeCommand.printf("mingw32-make.exe cmplr=gcc release %s", (char*) cszMakeFileOption);
-                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
 
                     cszLabel.printf("Rebuild %s (release) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                         cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
                     cszMakeCommand.printf("mingw32-make.exe cmplr=gcc clean release %s", (char*) cszMakeFileOption);
-                    AddTask(kfOut, cszLabel, "build", cszMakeCommand, "\042$gcc\042");
+                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
                 }
             }
 
@@ -661,6 +683,38 @@ static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup
     fileTask.ReplaceStr("%group%", pszGroup);
     fileTask.ReplaceStr("%command%", pszCommand);
     fileTask.ReplaceStr("%problem%", pszProblem);
+
+    while (fileTask.ReadLine())
+        fileOut.WriteEol(fileTask);
+}
+
+// AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path instead of the default absolute path
+
+static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand)
+{
+    ttCFile fileTask;
+    fileTask.Delete();
+    fileTask.ReadStrFile(txtMsvcSubTasks);
+
+    fileTask.ReplaceStr("%label%", pszLabel);
+    fileTask.ReplaceStr("%group%", pszGroup);
+    fileTask.ReplaceStr("%command%", pszCommand);
+
+    while (fileTask.ReadLine())
+        fileOut.WriteEol(fileTask);
+}
+
+// AddClangTask provides it's own problemMatcher -- it should work with clang-cl, clang, and gcc
+
+static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand)
+{
+    ttCFile fileTask;
+    fileTask.Delete();
+    fileTask.ReadStrFile(txtClangSubTasks);
+
+    fileTask.ReplaceStr("%label%", pszLabel);
+    fileTask.ReplaceStr("%group%", pszGroup);
+    fileTask.ReplaceStr("%command%", pszCommand);
 
     while (fileTask.ReadLine())
         fileOut.WriteEol(fileTask);
