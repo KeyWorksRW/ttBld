@@ -13,6 +13,8 @@
 
 #include "ninja.h"      // CNinja
 
+#if defined(_WIN32)     // MSVC and CLANG-CL are only available on Windows
+
 void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
 {
     m_pkfOut->WriteEol("msvc_deps_prefix = Note: including file:\n");
@@ -536,3 +538,5 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
 
     m_pkfOut->WriteEol("\n");
 }
+
+#endif    // defined(_WIN32)
