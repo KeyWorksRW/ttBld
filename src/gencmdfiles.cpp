@@ -60,6 +60,11 @@ void CreateCodeCmd(const char* pszFile)
 
     if (file.WriteFile(cszPath))
         printf(GETSTRING(IDS_FILE_CREATED), (char*) cszPath);
+    else
+    {
+        printf(GETSTRING(IDS_NINJA_CANT_WRITE), (char*) cszPath);
+        puts("");
+    }
 }
 
 #endif    // !defined(_WIN32)
