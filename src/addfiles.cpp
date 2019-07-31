@@ -26,7 +26,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     if (!cSrcFiles.ReadFile())
     {
         ttCStr cszMsg;
-        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), (char*) cSrcFiles.m_cszSrcFilePath);
+        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), (char*) cSrcFiles.GetSrcFiles());
         puts(cszMsg);
         return;
     }
@@ -43,10 +43,10 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     size_t cFilesAdded = 0;
 
     ttCFile kfIn, kfOut;
-    if (!kfIn.ReadFile(cSrcFiles.m_cszSrcFilePath))
+    if (!kfIn.ReadFile(cSrcFiles.GetSrcFiles()))
     {
         ttCStr cszMsg;
-        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), (char*) cSrcFiles.m_cszSrcFilePath);
+        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), (char*) cSrcFiles.GetSrcFiles());
         puts(cszMsg);
         return;
     }

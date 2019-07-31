@@ -24,7 +24,7 @@ typedef enum
     SECTION_LIB,
 } SRC_SECTION;
 
-CSrcFiles::CSrcFiles(bool bVsCodeDir) : m_ttHeap(true),
+CSrcFiles::CSrcFiles(const char* pszNinjaDir) : m_ttHeap(true),
     // make all ttCList classes use the same sub-heap
     m_lstSrcFiles(m_ttHeap), m_lstLibFiles(m_ttHeap), m_lstIdlFiles(m_ttHeap),
     m_lstErrors(m_ttHeap), m_lstLibAddSrcFiles(m_ttHeap), m_lstSrcIncluded(m_ttHeap)
@@ -39,45 +39,15 @@ CSrcFiles::CSrcFiles(bool bVsCodeDir) : m_ttHeap(true),
     m_RequiredMinor = 0;
     m_RequiredSub   = 0;
 
-    m_bVsCodeDir = bVsCodeDir;
-}
-
-static const char* aSrcFilesLocations[] =
-{
-    ".srcfiles.yaml",           // this MUST be the first file
-    ".vscode/srcfiles.yaml",    // this MUST be the second file
-
-    ".private/.srcfiles.yaml",
-    "build/.srcfiles.yaml",
-    "bld/.srcfiles.yaml",
-
-    // the following is here for backwards compatability
-    ".srcfiles",
-
-    nullptr
-};
-
-const char* LocateSrcFiles(bool bStartWithVsCode)
-{
-    for (size_t pos = bStartWithVsCode ? 1 : 0; aSrcFilesLocations[pos]; ++pos)
-    {
-        if (ttFileExists(aSrcFilesLocations[pos]))
-            return aSrcFilesLocations[pos];
-    }
-
-    // We may have been told to start looking in .vscode, but if we stil can't find it, then look in the root
-    if (bStartWithVsCode && ttFileExists(aSrcFilesLocations[0]))
-        return aSrcFilesLocations[0];
-
-    return nullptr;
+    if (pszNinjaDir)
+        m_cszBldDir = pszNinjaDir;
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
 {
     if (!pszFile)
     {
-        pszFile = LocateSrcFiles(m_bVsCodeDir);
-
+        pszFile = LocateSrcFiles();
         if (!pszFile)
         {
             ttCStr csz;
@@ -88,8 +58,10 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     }
 
     m_cszSrcFilePath = pszFile;
+
     if (m_cszBldDir.IsEmpty())
     {
+        // pszFile might now point to a sub-directory, so we need to create the .ninja directory under that
         m_cszBldDir = pszFile;
         *(ttFindFilePortion(m_cszBldDir)) = 0;  // remove the file portion
         m_cszBldDir.AppendFileName("build");

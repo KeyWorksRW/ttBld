@@ -37,14 +37,14 @@ bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun)
     if (result == IDOK)
     {
         dlg.SaveChanges();
-        *pcszSrcFiles = dlg.m_cszSrcFilePath;
+        *pcszSrcFiles = dlg.GetSrcFiles();
         return true;
     }
     else
         return false;
 }
 
-CTabOptions::CTabOptions(bool bVsCodeDir) : ttCDlg(IDDLG_OPTIONS), CWriteSrcFiles(bVsCodeDir)
+CTabOptions::CTabOptions(const char* pszNinjaDir) : ttCDlg(IDDLG_OPTIONS), CWriteSrcFiles(pszNinjaDir)
 {
     m_tabGeneral.SetParentClass(this);
     m_tabCompiler.SetParentClass(this);
@@ -143,9 +143,9 @@ void CTabOptions::OnCancel(void)
 
 void CTabOptions::SaveChanges()
 {
-    if (ttFileExists(m_cszSrcFilePath))
+    if (ttFileExists(GetSrcFiles()))
     {
-        if (WriteUpdates(m_cszSrcFilePath))
+        if (WriteUpdates(GetSrcFiles()))
             printf(GETSTRING(IDS_NINJA_OPTIONS_UPDATED), GetSrcFiles());
     }
     else

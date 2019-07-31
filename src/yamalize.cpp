@@ -18,12 +18,11 @@ using namespace sfopt;
 
 bool Yamalize()
 {
-    CSrcFiles cOrgSrcFiles(false);
+    CSrcFiles cOrgSrcFiles;
     cOrgSrcFiles.ReadFile(".srcfiles.yaml");
 
-    CWriteSrcFiles cNewSrcFiles(true);
+    CWriteSrcFiles cNewSrcFiles;
     ttCList* plstFiles = cNewSrcFiles.GetSrcFilesList();
-
 
     if (ttFileExists(".srcfiles.yaml"))
         *plstFiles += ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml";

@@ -16,9 +16,10 @@
 class CNinja : public CSrcFiles
 {
 public:
-    CNinja(bool bVsCodeDir = false);
+    CNinja(const char* pszNinjaDir = nullptr);
 
-    typedef enum {
+    typedef enum
+    {
         GEN_NONE,
         GEN_DEBUG32,
         GEN_RELEASE32,
@@ -26,10 +27,18 @@ public:
         GEN_RELEASE64
     } GEN_TYPE;
 
+    typedef enum
+    {
+        CMPLR_MSVC     = 0,     // these MUST match the array of strings aszCompilerPrefix[] in ninja.cpp
+        CMPLR_CLANG_CL = 1,
+        CMPLR_CLANG    = 2,
+        CMPLR_GCC      = 3,
+    } CMPLR_TYPE;
+
     // Public functions
 
     void ProcessBuildLibs();
-    bool CreateBuildFile(GEN_TYPE gentype, bool bClang = true);
+    bool CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr);
     bool CreateHelpFile();
 
     size_t      GetErrorCount() { return m_lstErrors.GetCount(); }
@@ -62,16 +71,18 @@ protected:
     void GetLibName(const char* pszBaseName, ttCStr& cszLibName);
     void AddDependentLibrary(const char* pszLib, GEN_TYPE gentype);
 
-    void WriteCompilerComments();
-    void WriteCompilerDirectives();
-    void WriteCompilerFlags();
-    void WriteLibDirective();
-    void WriteLinkDirective();
-    void WriteMidlDirective(GEN_TYPE gentype);
-    void WriteRcDirective();
+#if defined(_WIN32)
+    void msvcWriteCompilerComments(CMPLR_TYPE cmplr);
+    void msvcWriteCompilerFlags(CMPLR_TYPE cmplr);
+    void msvcWriteCompilerDirectives(CMPLR_TYPE cmplr);
+    void msvcWriteRcDirective(CMPLR_TYPE cmplr);
+    void msvcWriteMidlDirective(CMPLR_TYPE cmplr);
+    void msvcWriteLibDirective(CMPLR_TYPE cmplr);
+    void msvcWriteLinkDirective(CMPLR_TYPE cmplr);
 
-    void WriteLinkTargets(GEN_TYPE gentype);
-    void WriteMidlTargets();
+    void msvcWriteLinkTargets(CMPLR_TYPE cmplr);
+    void msvcWriteMidlTargets(CMPLR_TYPE cmplr);
+#endif
 
     bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
     const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);

@@ -26,7 +26,7 @@ extern const char* txtSrcFilesFileName;
 class CSrcFiles : public CSrcOptions
 {
 public:
-    CSrcFiles(bool bVsCodeDir = false);     // bVsCodeDir should only be set to true to skip looking for .srcfiles.yaml in current directory
+    CSrcFiles(const char* pszNinjaDir = nullptr);
 
     // Public functions
 
@@ -64,11 +64,9 @@ public:
     const char* GetProjectName() { return GetOption(OPT_PROJECT); }
     const char* GetPchHeader();
     const char* GetPchCpp();    // source file to compile the precompiled header
-    const char* GetSrcFiles() { return m_cszSrcFilePath; };  // get location of .srcfiles.yaml
 
+    const char* GetSrcFiles() { return m_cszSrcFilePath; };  // get name/location of srcfiles (normally .srcfiles.yaml)
     const char* GetBldDir() { return m_cszBldDir;  }        // ninja's builddir should be set to this directory
-
-    bool IsVsCodeDir() { return m_bVsCodeDir; }                    // true means we are reading/writing files to .vscode
 
     int GetMajorRequired() { return m_RequiredMajor; }
     int GetMinorRequired() { return m_RequiredMinor; }
@@ -113,7 +111,6 @@ public:
 
     ttCStr  m_cszPchHdr;
     ttCStr  m_cszPchCpp;
-    ttCStr  m_cszSrcFilePath;
 
 private:
     // Class members
@@ -123,6 +120,7 @@ private:
     ttCStr m_cszTargetRelease32;
     ttCStr m_cszTargetRelease64;
 
+    ttCStr  m_cszSrcFilePath;
     ttCStr  m_cszBldDir;    // this is where we write the .ninja files, and is ninja's builddir
 
     int m_RequiredMajor;    // these three get filled in to the minimum MakeNinja version required to process
@@ -130,7 +128,6 @@ private:
     int m_RequiredSub;
 
     bool m_bRead;           // file has been read and processed
-    bool m_bVsCodeDir;      // means we reading/writing to files in the .vscode directory
 };
 
 #endif  // __CSRCFILES_H__

@@ -20,7 +20,7 @@
 class CWriteSrcFiles : public CSrcFiles
 {
 public:
-    CWriteSrcFiles(bool bVsCodeDir = false) : CSrcFiles(bVsCodeDir) { m_posOptions = -1; m_posInsert = 0; }
+    CWriteSrcFiles(const char* pszNinjaDir = nullptr) : CSrcFiles(pszNinjaDir) { m_posOptions = -1; m_posInsert = 0; }
 
     // Class methods
 
