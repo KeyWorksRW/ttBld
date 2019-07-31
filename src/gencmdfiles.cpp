@@ -123,7 +123,8 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
     bool bHost64 = IsHost64();     // figure out what processor we have to determine what compiler host to use
 
     ttCList lstLib;
-    ttCList lstLib32((HANDLE) lstLib), lstPath((HANDLE) lstLib), lstPath32((HANDLE) lstLib);    // share the sub-heap
+    // share the sub-heap so that only a single sub-heap will be created/destroyed
+    ttCList lstLib32((HANDLE) lstLib), lstPath((HANDLE) lstLib), lstPath32((HANDLE) lstLib), lstInc((HANDLE) lstLib);
 
     lstLib.SetFlags(ttCList::FLG_URL_STRINGS);  // ignore case, forward and backslash considered the same
     lstLib32.SetFlags(ttCList::FLG_URL_STRINGS);
@@ -157,6 +158,7 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
     AddToList("LIB32", lstLib32);
     AddToList("PATH", lstPath);
     AddToList("PATH32", lstPath32);
+    AddToList("INCLUDE", lstInc);
 
     if (bDef64 && lstLib32.IsEmpty())
     {
@@ -237,6 +239,17 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         file.WriteStr("set LIB32=");
         file.WriteEol(cszPath);
     }
+
+    // Now add the include environment the only one that doesn't have a 32-bit and 64-bit version
+
+    cszPath.Delete();
+    for (size_t pos = 0; lstInc.InRange(pos); ++pos)
+    {
+        cszPath += lstInc[pos];
+        cszPath += ";";
+    }
+    file.WriteStr("set INCLUDE=");
+    file.WriteEol(cszPath);
 
     // Don't write the file unless something has actually changed
 
