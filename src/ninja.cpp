@@ -146,12 +146,19 @@ CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
     ProcessBuildLibs();
 }
 
-bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
+static const char* aszCompilerPrefix[] =
+{
+    "msvc",
+    "clang-cl",
+    "clang",
+    "gcc",
+};
+
+bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 {
     ttCFile file;
     m_pkfOut = &file;
     m_gentype = gentype;
-    m_bClang = bClang;
 
     // Note that resout goes to the same directory in all builds. The actual filename will have a 'D' appended for debug
     // builds. Currently, 32 and 64 bit builds of the resource file are identical.
@@ -174,24 +181,32 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, bool bClang)
     switch (gentype)
     {
         case GEN_DEBUG32:
-            cszOutDir     += m_bClang ? "clangDebug32"        : "msvcDebug32";
-            m_cszScriptFile += m_bClang ? "clangBuild32D.ninja" : "msvcBuild32D.ninja";
+            cszOutDir = aszCompilerPrefix[cmplr];
+            cszOutDir += "Debug32";
+            m_cszScriptFile = aszCompilerPrefix[cmplr];
+            m_cszScriptFile += "Build32D.ninja";
             break;
 
         case GEN_DEBUG64:
-            cszOutDir     += m_bClang ? "clangDebug64"        : "msvcDebug64";
-            m_cszScriptFile += m_bClang ? "clangBuild64D.ninja" : "msvcBuild64D.ninja";
+            cszOutDir = aszCompilerPrefix[cmplr];
+            cszOutDir += "Debug64";
+            m_cszScriptFile = aszCompilerPrefix[cmplr];
+            m_cszScriptFile += "Build64D.ninja";
             break;
 
         case GEN_RELEASE32:
-            cszOutDir     += m_bClang ? "clangRelease32"     : "msvcRelease32";
-            m_cszScriptFile += m_bClang ? "clangBuild32.ninja" : "msvcBuild32.ninja";
+            cszOutDir = aszCompilerPrefix[cmplr];
+            cszOutDir += "Release32";
+            m_cszScriptFile = aszCompilerPrefix[cmplr];
+            m_cszScriptFile += "Build32.ninja";
             break;
 
         case GEN_RELEASE64:
         default:
-            cszOutDir     += m_bClang ? "clangRelease64"     : "msvcRelease64";
-            m_cszScriptFile += m_bClang ? "clangBuild64.ninja" : "msvcBuild64.ninja";
+            cszOutDir = aszCompilerPrefix[cmplr];
+            cszOutDir += "Release64";
+            m_cszScriptFile = aszCompilerPrefix[cmplr];
+            m_cszScriptFile += "Build64.ninja";
             break;
     }
 

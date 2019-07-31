@@ -324,27 +324,27 @@ int main(int argc, char* argv[])
         if (cNinja.GetBoolOption(OPT_64BIT))
         {
 #if defined(_WIN32)
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_MSVC))
                 countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_MSVC))
                 countNinjas++;
 #endif
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
                 countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
                 countNinjas++;
         }
         if (cNinja.GetBoolOption(OPT_32BIT))
         {
 #if defined(_WIN32)
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_MSVC))
                 countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
                 countNinjas++;
 #endif
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
                 countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
                 countNinjas++;
         }
 
@@ -369,12 +369,12 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void MakeFileCaller(UPDATE_TYPE upType, const char* /* pszRootDir */)
+void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
 {
     // TODO: [KeyWorks - 7/30/2019] Need to change CNinja to accept a root dir instead of bVsCodeDir, then we can pass in
     // pszRootDir.
 
-    CNinja cNinja;
+    CNinja cNinja(pszRootDir);
     cNinja.ForceWrite();
 
     if (cNinja.IsValidVersion())
@@ -382,42 +382,42 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* /* pszRootDir */)
         switch (upType)
         {
             case UPDATE_MSVC64:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, false))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_MSVC))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_MSVC32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, false))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL64:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, true))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, true))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_MSVC64D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, false))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_MSVC))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_MSVC32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, false))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_MSVC))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL64D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, true))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, true))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 

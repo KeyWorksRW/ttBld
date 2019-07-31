@@ -18,7 +18,8 @@ class CNinja : public CSrcFiles
 public:
     CNinja(const char* pszNinjaDir = nullptr);
 
-    typedef enum {
+    typedef enum
+    {
         GEN_NONE,
         GEN_DEBUG32,
         GEN_RELEASE32,
@@ -26,10 +27,18 @@ public:
         GEN_RELEASE64
     } GEN_TYPE;
 
+    typedef enum
+    {
+        CMPLR_MSVC     = 0,     // these MUST match the array of strings aszCompilerPrefix[] in ninja.cpp
+        CMPLR_CLANG_CL = 1,
+        CMPLR_CLANG    = 2,
+        CMPLR_GCC      = 3,
+    } CMPLR_TYPE;
+
     // Public functions
 
     void ProcessBuildLibs();
-    bool CreateBuildFile(GEN_TYPE gentype, bool bClang = true);
+    bool CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr);
     bool CreateHelpFile();
 
     size_t      GetErrorCount() { return m_lstErrors.GetCount(); }
