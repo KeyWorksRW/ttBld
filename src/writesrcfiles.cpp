@@ -138,25 +138,30 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
     {
         char* pszLine = (char*) m_lstOriginal[pos]; // since we're reducing the size, and about to delete it, okay to modify
         ttTrimRight(pszLine);
+
+        // Add a blank line before 64Bit and IncDirs so that They are a bit easier to spot
+
+        if (!cBlankLines && ttIsSameSubStr(ttFindNonSpace(m_lstOriginal[pos]), "64Bit"))
+        {
+            ++cBlankLines;
+            kfOut.WriteEol();
+            kfOut.WriteEol(m_lstOriginal[pos]);
+            continue;
+        }
+        else if (!cBlankLines && ttIsSameSubStr(ttFindNonSpace(m_lstOriginal[pos]), "IncDirs"))
+        {
+            ++cBlankLines;
+            kfOut.WriteEol();
+            kfOut.WriteEol(m_lstOriginal[pos]);
+            continue;
+        }
+
         if (*pszLine)
            cBlankLines = 0;
         else if (cBlankLines > 0)   // ignore if last line was also blank
             continue;
         else
             ++cBlankLines;
-
-        // Add a blank line before 64Bit so that platform settings are a bit easier to spot
-
-        if (!cBlankLines && ttIsSameSubStr(ttFindNonSpace(m_lstOriginal[pos]), "64Bit"))
-        {
-            ++cBlankLines;
-            kfOut.WriteEol();
-        }
-        else if (!cBlankLines && ttIsSameSubStr(ttFindNonSpace(m_lstOriginal[pos]), "IncDirs"))
-        {
-            ++cBlankLines;
-            kfOut.WriteEol();
-        }
         kfOut.WriteEol(m_lstOriginal[pos]);
     }
 
