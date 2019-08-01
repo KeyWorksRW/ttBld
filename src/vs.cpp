@@ -54,7 +54,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)      // returns
     {
         if (!ttCreateDir(".vs"))
         {
-            ttMsgBox(TRANSLATE("Unable to create the required .vscode directory."));
+            ttMsgBox(TRANSLATE("Unable to create the required .vs directory."));
             return false;
         }
     }
