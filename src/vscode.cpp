@@ -280,8 +280,9 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     // REVIEW: [KeyWorks - 7/30/2019] If we ever add the ability to set a default compiler for makefile, then should
     // change this. For now we'll default to MSVC on Windows.
 
-    kf.ReplaceStr("%bld%", "Ninja Debug Build");
 #if 0
+    kf.ReplaceStr("%bld%", "Ninja Debug Build");
+#else    // not 0
 #ifdef _WIN32
     cszTarget.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
         ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
@@ -298,7 +299,7 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
         "CLANG");
     kf.ReplaceStr("%bld%", cszTarget);
 #endif
-#endif
+#endif    // 0
 
     if (cSrcFiles.GetBoolOption(OPT_64BIT))
         kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug64());
