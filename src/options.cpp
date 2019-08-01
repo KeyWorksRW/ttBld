@@ -44,15 +44,21 @@ static const OPT_SETTING s_aOptions[] =
     { OPT_OPTIMIZE,     "Optimize",     "space",   false,   true,      _XGET("[space | speed] optimization") },
     { OPT_WARN_LEVEL,   "WarnLevel",    "4",       false,   true,      _XGET("[1-4]") },
 
+    { OPT_STATIC_CRT_REL, "CrtRel",     "static",  false,   true,      _XGET("[static | dll] type of CRT to link to in release builds") },
+    { OPT_STATIC_CRT_DBG, "CrtDbg",     "static",  false,   true,      _XGET("[static | dll] type of CRT to link to in debug builds") },
+
+    { OPT_64BIT,        "64Bit",        "false",   true,    true,      _XGET("[true | false] can project be built as a 64-bit target") },
+    { OPT_TARGET_DIR64, "TargetDir64",  nullptr,   false,   false,     _XGET("64-bit target directory") },
+
+    { OPT_32BIT,        "32Bit",        "true",    true,    true,      _XGET("[true | false] can project be built as a 32-bit target") },
+    { OPT_TARGET_DIR32, "TargetDir32",  nullptr,   false,   false,     _XGET("32-bit target directory") },
+
     { OPT_PERMISSIVE,   "Permissive",   "false",   true,    false,     _XGET("true means add -permissive- compiler flag") },
     { OPT_STDCALL,      "Stdcall",      "false",   true,    false,     _XGET("true to use stdcall calling convention, false for cdecl (default)") },
 
     { OPT_CFLAGS_CMN,   "CFlags",       nullptr,   false,   false,     _XGET("flags to pass to the compiler in all builds") },
     { OPT_CFLAGS_REL,   "CFlagsR",      nullptr,   false,   false,     _XGET("flags to pass to the compiler in release builds") },
     { OPT_CFLAGS_DBG,   "CFlagsD",      nullptr,   false,   false,     _XGET("flags to pass to the compiler in debug builds") },
-
-    { OPT_STATIC_CRT_REL, "CrtRel",     "static",  false,   true,      _XGET("[static | dll] type of CRT to link to in release builds") },
-    { OPT_STATIC_CRT_DBG, "CrtDbg",     "static",  false,   true,      _XGET("[static | dll] type of CRT to link to in debug builds") },
 
     { OPT_LINK_CMN,     "LFlags",       nullptr,   false,   false,     _XGET("flags to pass to the linker in all builds") },
     { OPT_LINK_REL,     "LFlagsR",      nullptr,   false,   false,     _XGET("flags to pass to the linker in release builds") },
@@ -74,12 +80,6 @@ static const OPT_SETTING s_aOptions[] =
 
     { OPT_MS_LINKER,    "MS_linker",    "false",   true,    false,     _XGET("true means use link.exe even when compiling with CLANG-CL") },
     { OPT_MS_RC,        "MS_rc",        "true",    true,    false,     _XGET("use rc.exe even when compiling with CLANG-CL") },
-
-    { OPT_64BIT,        "64Bit",        "false",   true,    false,     _XGET("generate scripts for 64-bit build") },
-    { OPT_TARGET_DIR64, "TargetDir64",  nullptr,   false,   false,      _XGET("64-bit target directory") },
-
-    { OPT_32BIT,        "32Bit",        "false",   true,    false,     _XGET("generate scripts for 32-bit build") },
-    { OPT_TARGET_DIR32, "TargetDir32",  nullptr,   false,   false,      _XGET("32-bit target directory") },
 
     { OPT_64BIT_SUFFIX, "b64_suffix",   "false",   true,    false,     _XGET("true means append '64' to target's directory or .exe name") },
     { OPT_32BIT_SUFFIX, "b32_suffix",   "false",   true,    false,     _XGET("true means append '32' to target's directory or .exe name") },
