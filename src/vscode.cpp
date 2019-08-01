@@ -8,10 +8,8 @@
 
 #include "pch.h"
 
-#include <ttmem.h>              // ttCTMem
 #include <ttenumstr.h>          // ttCEnumStr
 #include <ttlist.h>             // ttCList
-#include <ttreg.h>              // ttCRegistry
 
 #include "csrcfiles.h"          // CSrcFiles
 #include "resource.h"

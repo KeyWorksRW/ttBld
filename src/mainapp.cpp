@@ -40,7 +40,9 @@ void Usage()
     puts(TRANSLATE("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd"));
 #endif
     puts(TRANSLATE("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file"));
-    puts(TRANSLATE("    -vscode    -- creates or updates files needed to build a project using VS Code"));
+
+    puts(TRANSLATE("    -vs        -- creates files used to build and debug a project using Visual Studio"));
+    puts(TRANSLATE("    -vscode    -- creates or updates files used to build and debug a project using VS Code"));
 
     puts("\nIDE workspace options:");
     puts(TRANSLATE("    -codelite   -- creates or updates files needed to build project using CodeLite"));
@@ -79,13 +81,14 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 enum    // actions that can be run in addition to normal single command actions
 {
     ACT_DRYRUN   = 1 << 0,
-    ACT_VSCODE   = 1 << 1,
-    ACT_DIR      = 1 << 2,
-    ACT_MAKEFILE = 1 << 3,
-    ACT_ALLNINJA = 1 << 4,
-    ACT_NEW      = 1 << 5,
-    ACT_FORCE    = 1 << 6,
-    ACT_OPTIONS  = 1 << 7,
+    ACT_VS       = 1 << 1,
+    ACT_VSCODE   = 1 << 2,
+    ACT_DIR      = 1 << 3,
+    ACT_MAKEFILE = 1 << 4,
+    ACT_ALLNINJA = 1 << 5,
+    ACT_NEW      = 1 << 6,
+    ACT_FORCE    = 1 << 7,
+    ACT_OPTIONS  = 1 << 8,
 };
 
 int main(int argc, char* argv[])
@@ -176,9 +179,13 @@ int main(int argc, char* argv[])
         {
             Action |= ACT_OPTIONS;
         }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))   // check this before "vs"
         {
             Action |= ACT_VSCODE;
+        }
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "vs"))
+        {
+            Action |= ACT_VS;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
         {
@@ -299,6 +306,15 @@ int main(int argc, char* argv[])
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         ttCList lstResults;
         CreateVsCodeProject(cszSrcFilePath, &lstResults);
+        for (size_t pos = 0; lstResults.InRange(pos); ++pos)
+            puts(lstResults[pos]);
+    }
+
+    if (Action & ACT_VS)
+    {
+        // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
+        ttCList lstResults;
+        CreateVsJson(cszSrcFilePath, &lstResults);
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             puts(lstResults[pos]);
     }
