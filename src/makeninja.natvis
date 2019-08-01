@@ -1,4 +1,8 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="CSrcFiles">
+      <DisplayString>{m_cszSrcFilePath,s}</DisplayString>
+    </Type>
+
     <!-- ttLib visualizers -->
 
     <Type Name="ttCFile">

@@ -360,7 +360,7 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
             m_pkfOut->WriteEol("  description = creating library $out\n");
         }
     }
-    else if (m_bClang)
+    else
     {
         if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))
         {

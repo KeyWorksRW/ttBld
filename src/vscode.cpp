@@ -280,6 +280,9 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     // REVIEW: [KeyWorks - 7/30/2019] If we ever add the ability to set a default compiler for makefile, then should
     // change this. For now we'll default to MSVC on Windows.
 
+#if 0
+    kf.ReplaceStr("%bld%", "Ninja Debug Build");
+#else    // not 0
 #ifdef _WIN32
     cszTarget.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
         ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
@@ -296,6 +299,7 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
         "CLANG");
     kf.ReplaceStr("%bld%", cszTarget);
 #endif
+#endif    // 0
 
     if (cSrcFiles.GetBoolOption(OPT_64BIT))
         kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug64());
@@ -390,6 +394,13 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
             cszMakeCommand.printf("nmake.exe -nologo clean release %s", (char*) cszMakeFileOption);
             AddMsvcTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+
+            // Ninja Debug Build
+
+            cszLabel.printf("Ninja Debug Build", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+            AddMsvcTask(kfOut, cszLabel, txtNormalGroup, cSrcFiles.GetBoolOption(OPT_64BIT) ?
+                "ninja -f build/msvcBuild64D.ninja" : "ninja -f build/msvcBuild32D.ninja");
 
             // Test: View MSVC build commands
 
