@@ -116,7 +116,7 @@ bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
 static const char* aSrcFilesLocations[] =
 {
     ".srcfiles.yaml",           // this MUST be the first file
-    ".vscode/srcfiles.yaml",
+    ".vscode/.srcfiles.yaml",
     ".private/.srcfiles.yaml",
     "build/.srcfiles.yaml",
     "bld/.srcfiles.yaml",

@@ -181,31 +181,31 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     switch (gentype)
     {
         case GEN_DEBUG32:
-            cszOutDir = aszCompilerPrefix[cmplr];
+            cszOutDir += aszCompilerPrefix[cmplr];
             cszOutDir += "Debug32";
-            m_cszScriptFile = aszCompilerPrefix[cmplr];
+            m_cszScriptFile += aszCompilerPrefix[cmplr];
             m_cszScriptFile += "Build32D.ninja";
             break;
 
         case GEN_DEBUG64:
-            cszOutDir = aszCompilerPrefix[cmplr];
+            cszOutDir += aszCompilerPrefix[cmplr];
             cszOutDir += "Debug64";
-            m_cszScriptFile = aszCompilerPrefix[cmplr];
+            m_cszScriptFile += aszCompilerPrefix[cmplr];
             m_cszScriptFile += "Build64D.ninja";
             break;
 
         case GEN_RELEASE32:
-            cszOutDir = aszCompilerPrefix[cmplr];
+            cszOutDir += aszCompilerPrefix[cmplr];
             cszOutDir += "Release32";
-            m_cszScriptFile = aszCompilerPrefix[cmplr];
+            m_cszScriptFile += aszCompilerPrefix[cmplr];
             m_cszScriptFile += "Build32.ninja";
             break;
 
         case GEN_RELEASE64:
         default:
-            cszOutDir = aszCompilerPrefix[cmplr];
+            cszOutDir += aszCompilerPrefix[cmplr];
             cszOutDir += "Release64";
-            m_cszScriptFile = aszCompilerPrefix[cmplr];
+            m_cszScriptFile += aszCompilerPrefix[cmplr];
             m_cszScriptFile += "Build64.ninja";
             break;
     }

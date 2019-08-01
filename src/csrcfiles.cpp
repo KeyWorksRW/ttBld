@@ -41,6 +41,8 @@ CSrcFiles::CSrcFiles(const char* pszNinjaDir) : m_ttHeap(true),
 
     if (pszNinjaDir)
         m_cszBldDir = pszNinjaDir;
+    else
+        m_cszBldDir = "build";
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
