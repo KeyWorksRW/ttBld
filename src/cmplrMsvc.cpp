@@ -168,7 +168,6 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     m_pkfOut->WriteEol("\n");
 }
 
-
 void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 {
     if (cmplr == CMPLR_MSVC)
@@ -207,7 +206,6 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
                     GetPchHeader() ? GetPchHeader() : ""
                     );
         }
-        m_pkfOut->WriteEol("  description = compiling $in\n");
     }
     else
     {
@@ -245,8 +243,9 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
                     GetPchHeader() ? GetPchHeader() : ""
                     );
         }
-        m_pkfOut->WriteEol("  description = compiling $in\n");
     }
+
+    m_pkfOut->WriteEol("  description = compiling $in\n");
 }
 
 void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
