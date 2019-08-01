@@ -36,6 +36,7 @@ Files:
     rcdep.cpp           # Contains functions for parsing RC dependencies
     vcxproj.cpp         # Creates a Visual Studio project file
     verninja.cpp        # CVerMakeNinja class
+    vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
     vscode.cpp          # Creates/updates .vscode files
     writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml

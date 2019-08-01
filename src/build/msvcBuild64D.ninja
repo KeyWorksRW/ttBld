@@ -70,6 +70,8 @@ build $outdir/vcxproj.obj: compile vcxproj.cpp | $outdir/pch.obj
 
 build $outdir/verninja.obj: compile verninja.cpp | $outdir/pch.obj
 
+build $outdir/vs.obj: compile vs.cpp | $outdir/pch.obj
+
 build $outdir/vscode.obj: compile vscode.cpp | $outdir/pch.obj
 
 build $outdir/writesrcfiles.obj: compile writesrcfiles.cpp | $outdir/pch.obj
@@ -130,6 +132,7 @@ build ../bin64/MakeNinjaD.exe : link $resout/makeninjaD.res $
   $outdir/rcdep.obj $
   $outdir/vcxproj.obj $
   $outdir/verninja.obj $
+  $outdir/vs.obj $
   $outdir/vscode.obj $
   $outdir/writesrcfiles.obj $
   $outdir/yamalize.obj $
