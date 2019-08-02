@@ -4,7 +4,8 @@ bin32/
 bin64/
 lib/
 lib32/
-lib64
+lib64/
+bld/
 build/
 bldMSW/
 bldMAC/
@@ -17,6 +18,7 @@ tests/
 
 # For now, this file is a local copy
 wxLibs.h
+messages.po
 
 # remove ttLib/ when it switches to a submodule
 ttLib/
