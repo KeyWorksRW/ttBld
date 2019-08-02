@@ -34,8 +34,9 @@ void Usage()
     puts(txtCopyRight);
 
     puts(TRANSLATE("\nttMakeNinja [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
+    puts(TRANSLATE("    -dir [directory]    -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
+
     puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
-    puts(TRANSLATE("    -dryrun    -- displays what would have happened, but doesn't change anything"));
 #if defined(_WIN32)
     puts(TRANSLATE("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd"));
 #endif
@@ -49,8 +50,19 @@ void Usage()
     puts(TRANSLATE("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
     puts(TRANSLATE("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
 
-    // disabled until we decide if we really want to support it
+    // Currently hidden commands
+
     // puts("\t-add [file(s)] -- Adds file(s) to .srcfiles");
+    // puts(TRANSLATE("    -allninja   -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
+    // puts(TRANSLATE("    -dryrun     -- displays what would have happened, but doesn't change anything"));
+    // puts(TRANSLATE("    -force      -- create .ninja file even if it hasn't changed"));
+    // puts(TRANSLATE("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
+    // puts(TRANSLATE("    -msvcenv64  -- create .ninja file even if it hasn't changed"));
+
+
+
+    // puts(TRANSLATE("    -help       -- displays usage information"));
+    // puts(TRANSLATE("    -?          -- displays usage information"));
 }
 
 typedef enum
@@ -142,30 +154,11 @@ int main(int argc, char* argv[])
 
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
+        // Only one of these commands can be used -- after it is processes, ttMakeNinja will exit
         if (argv[argpos][1] == '?' || ttIsSameSubStrI(argv[argpos] + 1, "help"))
         {
             Usage();
             return 1;
-        }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "dir"))  // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
-        {
-            ++argpos;
-            if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
-            {
-                puts(TRANSLATE("-dir must be followed by the directory to use."));
-                return 1;
-            }
-            cszRootDir = argv[argpos];
-            Action |= ACT_DIR;
-            cszSrcFilePath = cszRootDir;
-            cszSrcFilePath.AppendFileName("srcfiles.yaml");
-            continue;
-        }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))  // -dryryn
-            Action |= ACT_DRYRUN;
-        else if (ttIsSameStrI(argv[argpos] + 1, "new"))
-        {
-            Action |= ACT_NEW;
         }
         else if (ttIsSameStrI(argv[argpos] + 1, "add"))
         {
@@ -174,22 +167,6 @@ int main(int argc, char* argv[])
                 lstFiles += argv[argpos];
             AddFiles(lstFiles, Action & ACT_DRYRUN);
             return 1;
-        }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "opt"))    // -options
-        {
-            Action |= ACT_OPTIONS;
-        }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))   // check this before "vs"
-        {
-            Action |= ACT_VSCODE;
-        }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "vs"))
-        {
-            Action |= ACT_VS;
-        }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
-        {
-            Action |= ACT_FORCE;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
         {
@@ -215,6 +192,40 @@ int main(int argc, char* argv[])
             }
             return 0;
         }
+
+        // The following commands can be combined
+
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "allninja"))  // -allninja
+            Action |= ACT_ALLNINJA;
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))  // -dryryn
+            Action |= ACT_DRYRUN;
+        else if (ttIsSameStrI(argv[argpos] + 1, "new"))
+            Action |= ACT_NEW;
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "opt"))    // -options
+            Action |= ACT_OPTIONS;
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))   // check this before "vs"
+            Action |= ACT_VSCODE;
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "vs"))
+            Action |= ACT_VS;
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
+            Action |= ACT_FORCE;
+
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "dir"))  // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
+        {
+            ++argpos;
+            if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
+            {
+                puts(TRANSLATE("-dir must be followed by the directory to use."));
+                return 1;
+            }
+            cszRootDir = argv[argpos];
+            Action |= ACT_DIR;
+            cszSrcFilePath = cszRootDir;
+            cszSrcFilePath.AppendFileName("srcfiles.yaml");
+            continue;
+        }
+
+        // The following commands are called from a makefile to update one .ninja script and immediately exit
 
         else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64"))  // used in case it was set in environment
             upType = UPDATE_MSVC64;
@@ -332,7 +343,7 @@ int main(int argc, char* argv[])
         else if (Action & ACT_DRYRUN)
             cNinja.EnableDryRun();
 
-        cNinja.CreateMakeFile();    // this will create/update it if .srcfiles has a Makefile: section
+        cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);    // this will create/update it if .srcfiles has a Makefile: section
 
         ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT), "At least one platform build should have been set in CNinja constructor")
 
