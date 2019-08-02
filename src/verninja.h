@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CVerMakeNinja
-// Purpose:   used to read, write, and compare MakeNinja version number
+// Purpose:   used to read, write, and compare ttMakeNinja version number
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)

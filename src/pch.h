@@ -60,7 +60,7 @@ extern const char* txtCopyRight;
 
 using namespace ttch;   // For the CH_ constants
 
-extern const char* txtOptVersion; // The minimum version of MakeNinja required by a .srcfiles.yaml
+extern const char* txtOptVersion; // The minimum version of ttMakeNinja required by a .srcfiles.yaml
 
 #include "NinjaStringIds.h"   // Maps IDS_NINJA_ strings into string to translate
 #include "funcs.h"      // List of function declarations

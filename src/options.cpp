@@ -9,7 +9,7 @@
 /*
     Ideally, s_aOptions would be in a namespace. However, the Visual Studio debugger (2017 version) is not able to
     display the array even if fully qualified with the namespace. That makes debugging rather difficult since a lot of
-    the functionality of MakeNinja relies on comparison between a modified option and the original.
+    the functionality of ttMakeNinja relies on comparison between a modified option and the original.
 */
 
 #include "pch.h"
@@ -25,7 +25,7 @@ sfopt::OPT_VERSION aoptVersions[] =
     { OPT_STATIC_CRT_REL, 1, 1, 0  },
     { OPT_STATIC_CRT_DBG, 1, 1, 0  },
 
-    // All options default to 1.0.0, so only add options above that require a newer version of MakeNinja
+    // All options default to 1.0.0, so only add options above that require a newer version of ttMakeNinja
 
     { OPT_OVERFLOW, 1, 0, 0  }
 };

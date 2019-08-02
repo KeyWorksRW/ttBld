@@ -25,7 +25,7 @@ typedef struct
 static const ttIDS_LIST aNinjaStringIds[] =
 {
     { IDS_CANT_FIND_COMPILER,        _XGET("Unable to find either the cl.exe or clang-cl.exe compilers in PATH.") },
-    { IDS_MAKENINJA_CORRUPTED,       _XGET("MakeNinja.exe is corrupted -- cannot read the necessary resource.") },
+    { IDS_MAKENINJA_CORRUPTED,       _XGET("ttMakeNinja.exe is corrupted -- cannot read the necessary resource.") },
 
     // TRANSLATORS: "makefile" is a filename
     { IDS_CANT_WRITE_MAKEFILE,       _XGET("Unable to write to makefile.") },
@@ -79,7 +79,7 @@ static const ttIDS_LIST aNinjaStringIds[] =
     // TRANSLATORS: Used for the Tab name of the tab that sets general scripting options (for IDE, makefile, etc.)
     { IDS_NINJA_TAB_SCRIPTS,         _XGET("Scripts") },
 
-    // TRANSLATORS: Displayed when MakeNinja doesn't recognize an option in the Options section of a .srcfiles.yaml file
+    // TRANSLATORS: Displayed when ttMakeNinja doesn't recognize an option in the Options section of a .srcfiles.yaml file
     { IDS_NINJA_UNKNOWN_OPTION,      _XGET("%s is an unknown option") },
     { IDS_NINJA_OPTIONS_UPDATED,     _XGET("%s Options: section updated.\n") },
 

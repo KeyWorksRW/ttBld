@@ -12,16 +12,16 @@ msvc_deps_prefix = Note: including file:
 # -MTd	// Multithreaded debug dll (MSVCRTD)
 # -Z7	// produces object files with full symbolic debugging information
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MTd -Od -Z7 -GS- -I"../ttLib/include" /Fp$outdir/MakeNinja.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MTd -Od -Z7 -GS- -I"../ttLib/include" /Fp$outdir/ttMakeNinja.pch
 
 rule compilePCH
   deps = msvc
-  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/MakeNinja.pdb -Ycpch.h
+  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/ttMakeNinja.pdb -Ycpch.h
   description = compiling $in
 
 rule compile
   deps = msvc
-  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/MakeNinja.pdb -Yupch.h
+  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/ttMakeNinja.pdb -Yupch.h
   description = compiling $in
 
 rule rc
@@ -29,7 +29,7 @@ rule rc
   description = resource compiler... $in
 
 rule link
-  command = link.exe -nologo /out:$out /manifest:no /machine:x64 /natvis:makeninja.natvis /debug /pdb:$outdir/MakeNinja.pdb /subsystem:console $in
+  command = link.exe -nologo /out:$out /manifest:no /machine:x64 /natvis:ttMakeNinja.natvis /debug /pdb:$outdir/ttMakeNinja.pdb /subsystem:console $in
   description = linking $out
 
 build $outdir/pch.obj: compilePCH pch.cpp
@@ -94,7 +94,7 @@ build $outdir/addfuncname.obj: compile addfuncname.cpp | $outdir/pch.obj
 
 build $outdir/dlggettext.obj: compile dlggettext.cpp | $outdir/pch.obj
 
-build $resout/makeninjaD.res: rc makeninja.rc | $
+build $resout/ttMakeNinjaD.res: rc ttMakeNinja.rc | $
   resource.h $
   strtable.h $
   .private/strtable.h $
@@ -113,7 +113,7 @@ build $resout/makeninjaD.res: rc makeninja.rc | $
   .private/private.rc $
   .private/resource.h
 
-build ../bin64/MakeNinjaD.exe : link $resout/makeninjaD.res $
+build ../bin64/ttMakeNinjaD.exe : link $resout/ttMakeNinjaD.res $
   $outdir/mainapp.obj $
   $outdir/addfiles.obj $
   $outdir/codelite.obj $
@@ -146,5 +146,5 @@ build ../bin64/MakeNinjaD.exe : link $resout/makeninjaD.res $
   $outdir/dlggettext.obj $
   $outdir/pch.obj $
   ../ttLib/lib64/ttLibD.lib $
-  | makeninja.natvis
+  | ttMakeNinja.natvis
 

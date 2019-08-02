@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CVerMakeNinja
-// Purpose:   used to read, write, and compare MakeNinja version number
+// Purpose:   used to read, write, and compare ttMakeNinja version number
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -35,13 +35,13 @@ bool CVerMakeNinja::IsSrcFilesNewer(const char* pszRequired)
     int major = (int) ttAtoi(pszRequired);
 
     pszRequired = ttStrChr(pszRequired, '.');
-    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid MakeNinja version line!");
+    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttMakeNinja version line!");
     if (!pszRequired || !ttIsDigit(pszRequired[1]))
         return false;   // we don't know what the version number is
     int minor = (int) ttAtoi(++pszRequired);
 
     pszRequired = ttStrChr(pszRequired, '.');
-    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid MakeNinja version line!");
+    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttMakeNinja version line!");
     if (!pszRequired || !ttIsDigit(pszRequired[1]))
         return false;   // we don't know what the version number is
     int sub = (int) ttAtoi(++pszRequired);

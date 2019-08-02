@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-const char* txtVersion   = "MakeNinja 1.1.0.8295";
+const char* txtVersion   = "ttMakeNinja 1.1.0.8295";
 const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 
 #include <iostream>
@@ -33,7 +33,7 @@ void Usage()
     puts(txtVersion);
     puts(txtCopyRight);
 
-    puts(TRANSLATE("\nMakeNinja [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
+    puts(TRANSLATE("\nttMakeNinja [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
     puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
     puts(TRANSLATE("    -dryrun    -- displays what would have happened, but doesn't change anything"));
 #if defined(_WIN32)
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    const char* pszEnv = getenv("MAKENINJA");
+    const char* pszEnv = getenv("ttMAKENINJA");
     if (pszEnv)
     {
         char* pszArg = ttFindNonSpace(pszEnv);
@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
             cszSrcFilePath = cszRootDir;
             if (!LocateSrcFiles(&cszSrcFilePath))
             {
-                puts(TRANSLATE("MakeNinja was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
+                puts(TRANSLATE("ttMakeNinja was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
                 return 1;
             }
         }
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
                 cszSrcFilePath = pszFile;
             else
             {
-                puts(TRANSLATE("MakeNinja was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
+                puts(TRANSLATE("ttMakeNinja was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
                 return 1;
             }
         }
@@ -323,7 +323,7 @@ int main(int argc, char* argv[])
         CNinja cNinja;
         if (!cNinja.IsValidVersion())
         {
-            if (ttMsgBox(TRANSLATE("This version of MakeNinja is too old -- create ninja scripts anyway?"), MB_YESNO | MB_ICONWARNING) != IDYES)
+            if (ttMsgBox(TRANSLATE("This version of ttMakeNinja is too old -- create ninja scripts anyway?"), MB_YESNO | MB_ICONWARNING) != IDYES)
                 return 1;
         }
 
@@ -443,5 +443,5 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     }
 
     else
-        puts(TRANSLATE("This version of MakeNinja is too old to properly create ninja scripts from your current srcfiles."));
+        puts(TRANSLATE("This version of ttMakeNinja is too old to properly create ninja scripts from your current srcfiles."));
 }

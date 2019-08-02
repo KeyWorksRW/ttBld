@@ -123,7 +123,7 @@ private:
     ttCStr  m_cszSrcFilePath;
     ttCStr  m_cszBldDir;    // this is where we write the .ninja files, and is ninja's builddir
 
-    int m_RequiredMajor;    // these three get filled in to the minimum MakeNinja version required to process
+    int m_RequiredMajor;    // these three get filled in to the minimum ttMakeNinja version required to process
     int m_RequiredMinor;
     int m_RequiredSub;
 

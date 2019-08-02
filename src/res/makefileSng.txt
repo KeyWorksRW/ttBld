@@ -124,7 +124,7 @@ deps: $(BldScript)
 ########## Creates or updates ninja file if needed ##########
 
 $(BldScript): %srcfiles%
-	makeninja -u$(cmplr)$(bits)
+	ttMakeNinja.exe -u$(cmplr)$(bits)
 
 $(BldScriptD): %srcfiles%
-	makeninja -u$(cmplr)$(bits)D
+	ttMakeNinja.exe -u$(cmplr)$(bits)D

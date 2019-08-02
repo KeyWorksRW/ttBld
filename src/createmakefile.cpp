@@ -63,7 +63,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL :  IDR_MAKEFILE_SINGLE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
-        m_lstErrors += TRANSLATE("MakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile,");
+        m_lstErrors += TRANSLATE("ttMakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile,");
         return false;
     }
 

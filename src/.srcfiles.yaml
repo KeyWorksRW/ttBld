@@ -1,7 +1,7 @@
 # Requires MakeNinja version 1.0.0 or higher to process
 
 Options:
-    Project:     MakeNinja    # project name
+    Project:     ttMakeNinja    # project name
     exe_type:    console      # [window | console | lib | dll]
     PCH:         pch.h        # "none" or name of header file to use for precompilation
 
@@ -13,10 +13,10 @@ Options:
     IncDirs:     ../ttLib/include                  # additional directories for header files
     BuildLibs:   ../ttLib   # libraries that need to be built (added to makefile generation)
 
-    Natvis:      makeninja.natvis                  # MSVC Debug visualizer
+    Natvis:      ttMakeNinja.natvis                  # MSVC Debug visualizer
 
 Files:
-    makeninja.rc        # Windows resource files
+    ttMakeNinja.rc        # Windows resource files
     mainapp.cpp         # entry point, global strings, library pragmas
 
     addfiles.cpp        # Used to add one or more filenames to a .srcfiles file

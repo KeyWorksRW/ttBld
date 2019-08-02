@@ -16,7 +16,7 @@
 namespace sfopt
 {           // .srcfiles.yaml otpions
 
-    extern const char* txtNinjaVerFormat; // "# Requires MakeNinja version %d.%d.%d or higher to process";
+    extern const char* txtNinjaVerFormat; // "# Requires ttMakeNinja version %d.%d.%d or higher to process";
 
     typedef enum
     {
