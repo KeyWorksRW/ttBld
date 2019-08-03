@@ -195,6 +195,11 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         lstLib32 += cszPath;
     }
 
+    cszPath = cszMSVC;
+    cszPath.AppendFileName("include");
+    ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+    lstInc += cszPath;
+
     ttCFile file;
     file.WriteEol("@echo off\n");
     file.WriteEol("@REM This file is automatically created by ttMakeNinja. Any changes you make will be lost if ttMakeNinja creates it again.\n");
