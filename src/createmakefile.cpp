@@ -14,6 +14,7 @@
 
 #include "ninja.h"      // CNinja
 #include "resource.h"   // IDR_MAKEFILE
+#include "funcs.h"      // List of function declarations
 
 extern const char* txtHelpNinja;
 

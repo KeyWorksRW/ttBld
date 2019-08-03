@@ -13,6 +13,7 @@
 
 #include "csrcfiles.h"          // CSrcFiles
 #include "resource.h"
+#include "funcs.h"      // List of function declarations
 
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, const char* pszProblem);
 static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);

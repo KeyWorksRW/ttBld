@@ -18,6 +18,7 @@
 #include "ninja.h"      // CNinja
 #include "parsehhp.h"   // CParseHHP
 #include "verninja.h"   // CVerMakeNinja
+#include "funcs.h"      // List of function declarations
 
 const char* aCppExt[] = {
     ".cpp",

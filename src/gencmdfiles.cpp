@@ -12,6 +12,7 @@
 #include <ttlist.h>    // ttCList
 #include <ttenumstr.h> // ttCEnumStr
 
+#include "funcs.h"      // List of function declarations
 
 #if defined(_WIN32)    // no reason to use the batch files on non-Windows platforms
 

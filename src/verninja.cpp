@@ -10,6 +10,8 @@
 
 #include "verninja.h"  // CVerMakeNinja
 
+extern const char* txtOptVersion; // The minimum version of ttMakeNinja required by a .srcfiles.yaml
+
 CVerMakeNinja::CVerMakeNinja()
 {
     m_minMajor = 1;     // minimum required version for all options

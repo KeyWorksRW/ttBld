@@ -13,6 +13,7 @@
 #include <ttmem.h>          // ttCMem, ttCTMem
 
 #include "csrcfiles.h"      // CSrcFiles
+#include "funcs.h"      // List of function declarations
 
 const char* txtSrcFilesFileName = ".srcfiles.yaml";
 

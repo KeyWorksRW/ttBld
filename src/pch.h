@@ -2,7 +2,7 @@
 
 #pragma once
 
-#if defined(_WIN32) & !defined(_WX_DEFS_H_)
+#if defined(_WIN32) && !defined(wxUSE_GUI)
     #define NOATOM
     #define NOCOMM
     #define NODRIVERS
@@ -27,14 +27,14 @@
     #define _WIN32_IE    0x0700
 
     #include <windows.h>
-    #include <stdlib.h>
+    #include <stdint.h>
     #include <stdio.h>
-#endif    // defined(_WIN32) & !defined(_WX_DEFS_H_)
+    #include <stdlib.h>
+#endif    // defined(_WIN32) && !defined(wxUSE_GUI)
 
-#if defined(_WX_DEFS_H_)
+#if defined(wxUSE_GUI)
     #define wxUSE_UNICODE     1
-    #define wxUSE_GUI         1
-    #define wxUSE_NO_MANIFEST 1
+    #define wxUSE_NO_MANIFEST 1     // This is the only way clang-cl will be able to compile
 
     #include "wx/defs.h"    // compiler detection; includes setup.h
 
@@ -50,7 +50,7 @@
         #include "wx/msw/wrapcdlg.h"
         #include "wx/msw/missing.h"
     #endif
-#endif    // !defined(NOWX)
+#endif    // defined(wxUSE_GUI)
 
 extern const char* txtVersion;
 extern const char* txtCopyRight;
@@ -60,7 +60,4 @@ extern const char* txtCopyRight;
 
 using namespace ttch;   // For the CH_ constants
 
-extern const char* txtOptVersion; // The minimum version of ttMakeNinja required by a .srcfiles.yaml
-
 #include "NinjaStringIds.h"   // Maps IDS_NINJA_ strings into string to translate
-#include "funcs.h"      // List of function declarations

@@ -9,10 +9,10 @@ resout = build/res
 msvc_deps_prefix = Note: including file:
 
 # -EHsc	// Structured exception handling
-# -MTd	// Multithreaded debug dll (MSVCRTD)
+# -MDd	// Multithreaded debug dll (MSVCRTD)
 # -Z7	// produces object files with full symbolic debugging information
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MTd -Od -Z7 -GS- -I"../ttLib/include" /Fp$outdir/ttMakeNinja.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MDd -Od -Z7 -GS- -I"../ttLib/include" /Fp$outdir/ttMakeNinja.pch
 
 rule compilePCH
   deps = msvc
@@ -28,8 +28,12 @@ rule rc
   command = rc.exe -nologo -d_DEBUG /l 0x409 -fo$out $in
   description = resource compiler... $in
 
+rule lib
+  command = lib.exe /MACHINE:x64 /LTCG /NOLOGO /OUT:$out $in
+  description = creating library $out
+
 rule link
-  command = link.exe -nologo /out:$out /manifest:no /machine:x64 /natvis:ttMakeNinja.natvis /debug /pdb:$outdir/ttMakeNinja.pdb /subsystem:console $in
+  command = link.exe -nologo /out:$out /manifest:no /machine:x64 /natvis:ttMakeNinja.natvis /debug /pdb:$outdir/ttMakeNinja.pdb /subsystem:console /LIBPATH:../ttLib/lib64 $in
   description = linking $out
 
 build $outdir/pch.obj: compilePCH pch.cpp
