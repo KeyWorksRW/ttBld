@@ -140,8 +140,6 @@ static const char* txtDefaultTask =
     "        },\n"
     ;
 
-static const char* txtDefTaskName = _XGET("Build %s (debug) using %s");
-
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults);
 bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults);
@@ -279,26 +277,14 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     // REVIEW: [KeyWorks - 7/30/2019] If we ever add the ability to set a default compiler for makefile, then should
     // change this. For now we'll default to MSVC on Windows.
 
-#if 0
-    kf.ReplaceStr("%bld%", "Ninja Debug Build");
-#else    // not 0
 #ifdef _WIN32
-    cszTarget.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
-        ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()),
-        "MSVC");
-    kf.ReplaceStr("%bld%", cszTarget);
+    kf.ReplaceStr("%bld%", "Build Debug MSVC");
 #else
-    // [KeyWorks - 7/30/2019] This is a placeholder -- it needs to be set depending on whether clang.exe is actually
-    // available. Use GCC if not.
-
-    cszTarget.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
-        ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32())
-        "CLANG");
-    kf.ReplaceStr("%bld%", cszTarget);
+    if (FindFileEnv("PATH", "clang.exe"))
+        kf.ReplaceStr("%bld%", "Build Debug CLANG");
+    else
+        kf.ReplaceStr("%bld%", "Build Debug GCC");
 #endif
-#endif    // 0
 
     if (cSrcFiles.GetBoolOption(OPT_64BIT))
         kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug64());
@@ -359,22 +345,22 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             // Build MSVC debug
 
-            cszLabel.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
-                ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()),
-                "MSVC");
             cszMakeCommand.printf("nmake.exe -nologo debug %s", (char*) cszMakeFileOption);
-            AddMsvcTask(kfOut, cszLabel, txtDefaultGroup, cszMakeCommand);
+            AddMsvcTask(kfOut, "Build Debug MSVC", txtDefaultGroup, cszMakeCommand);
 
 #else
             bool bClangAvail = FindFileEnv("PATH", "clang.exe");
 
-            cszLabel.printf(TRANSLATE(txtDefTaskName), // "Build %s (debug) using %s"
-                ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32())
-                bClangAvail ? "CLANG" : "GCC");
-            cszMakeCommand.printf("make debug cmplr=clang %s", (char*) cszMakeFileOption);
-            AddClangTask(kfOut, cszLabel, txtDefaultGroup, cszMakeCommand);
+            if (bClangAvail)
+            {
+                cszMakeCommand.printf("make debug cmplr=clang %s", (char*) cszMakeFileOption);
+                AddClangTask(kfOut, "Build Debug CLANG", txtDefaultGroup, cszMakeCommand);
+            }
+            else
+            {
+                cszMakeCommand.printf("make debug cmplr=gcc %s", (char*) cszMakeFileOption);
+                AddClangTask(kfOut, "Build Debug GCC", txtDefaultGroup, cszMakeCommand);
+            }
 #endif
 
             // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC compiler. If we're not on Windows, then
@@ -385,36 +371,32 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             cszLabel.printf("Build %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
                 cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
             cszMakeCommand.printf("nmake.exe -nologo release %s", (char*) cszMakeFileOption);
-            AddMsvcTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+            AddMsvcTask(kfOut, "Build Release MSVC", txtNormalGroup, cszMakeCommand);
 
             // Rebuild MSVC release
 
-            cszLabel.printf("Rebuild %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
             cszMakeCommand.printf("nmake.exe -nologo clean release %s", (char*) cszMakeFileOption);
-            AddMsvcTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+            AddMsvcTask(kfOut, "Rebuild Release MSVC", txtNormalGroup, cszMakeCommand);
 
             // Ninja Debug Build
 
-            cszLabel.printf("Ninja Debug Build", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
-            AddMsvcTask(kfOut, cszLabel, txtNormalGroup, cSrcFiles.GetBoolOption(OPT_64BIT) ?
+            AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup, cSrcFiles.GetBoolOption(OPT_64BIT) ?
                 "ninja -f build/msvcBuild64D.ninja" : "ninja -f build/msvcBuild32D.ninja");
 
             // Test: View MSVC build commands
 
             cszMakeCommand.printf("nmake.exe -nologo commandsD %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, "View MSVC debug build commands", "test", cszMakeCommand, "");
+            AddTask(kfOut, "View Build Commands", "test", cszMakeCommand, "");
 
             // Test View debug targets
 
             cszMakeCommand.printf("nmake.exe -nologo targetsD %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, "View MSVC debug targets", "test", cszMakeCommand, "");
+            AddTask(kfOut, "View Targets", "test", cszMakeCommand, "");
 
             // Test View dependencies
 
             cszMakeCommand.printf("nmake.exe -nologo deps %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, "View debug dependencies", "test", cszMakeCommand, "");
+            AddTask(kfOut, "View Dependencies", "test", cszMakeCommand, "");
 
             // Test Generate messages.po
 
@@ -429,37 +411,25 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             {
                 if (FindFileEnv("PATH", "clang.exe"))
                 {
-                    cszLabel.printf("Build %s (debug) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
                     cszMakeCommand.printf("mingw32-make.exe debug %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+                    AddClangTask(kfOut, "Build Debug CLANG", txtNormalGroup, cszMakeCommand);
 
-                    cszLabel.printf("Build %s (release) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
                     cszMakeCommand.printf("mingw32-make.exe release %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+                    AddClangTask(kfOut, "Build Release CLANG", txtNormalGroup, cszMakeCommand);
 
-                    cszLabel.printf("Rebuild %s (release) using CLANG", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
                     cszMakeCommand.printf("mingw32-make.exe clean release %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+                    AddClangTask(kfOut, "Rebuild Release CLANG", txtNormalGroup, cszMakeCommand);
                 }
                 else if (FindFileEnv("PATH", "gcc.exe"))
                 {
-                    cszLabel.printf("Build %s (debug) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                        cSrcFiles.GetTargetDebug64() : cSrcFiles.GetTargetDebug32()));
                     cszMakeCommand.printf("mingw32-make.exe cmplr=gcc debug %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+                    AddClangTask(kfOut, "Build Debug GCC", txtNormalGroup, cszMakeCommand);
 
-                    cszLabel.printf("Build %s (release) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
                     cszMakeCommand.printf("mingw32-make.exe cmplr=gcc release %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+                    AddClangTask(kfOut, "Build Release GCC", txtNormalGroup, cszMakeCommand);
 
-                    cszLabel.printf("Rebuild %s (release) using GCC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                        cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
                     cszMakeCommand.printf("mingw32-make.exe cmplr=gcc clean release %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, cszLabel, txtNormalGroup, cszMakeCommand);
+                    AddClangTask(kfOut, "Rebuild Release GCC", txtNormalGroup, cszMakeCommand);
                 }
             }
 
@@ -468,11 +438,13 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 #if !defined(_WIN32)
             if (FindFileEnv("PATH", "clang.exe"))
             {
+                while (kfOut.ReplaceStr("msvcBuild", "clangBuild"));
                 while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=clang"));
                 while (kfOut.ReplaceStr("MSVC", "CLANG"));
             }
             else
             {
+                while (kfOut.ReplaceStr("msvcBuild", "gccBuild"));
                 while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=gcc"));
                 while (kfOut.ReplaceStr("MSVC", "GCC"));
             }
