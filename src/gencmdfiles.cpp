@@ -151,6 +151,16 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         cszPath.AppendFileName("x86");
         ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
         lstPath32 += cszPath;
+
+        // The main reason for switching to Hostx64/x86 is to swap compilers. Not all parts of the toolchain are
+        // duplicated there, so we need to add a path to the rest of the toolchain.
+
+        if (bHost64)
+        {
+            cszPath = cszMSVC;
+            cszPath.AppendFileName("bin/Hostx64/x64");
+            lstPath32 += cszPath;
+        }
     }
 
     // Gather up all the current paths into lists for each environment variable
