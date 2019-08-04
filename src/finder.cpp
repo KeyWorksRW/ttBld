@@ -41,7 +41,8 @@ bool FindCurMsvcPath(ttCStr& cszPath)
                 cszPath += "VC\\Tools\\MSVC\\*.*";
 
                 ttCFindFile ff(cszPath);
-                if (ff.IsValid()) {
+                if (ff.IsValid())
+                {
                     do {
                         if (ff.IsDir() && ttIsValidFileChar(ff, 0))
                         {
