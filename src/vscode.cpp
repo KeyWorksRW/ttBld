@@ -378,6 +378,10 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             cszMakeCommand.printf("nmake.exe -nologo clean release %s", (char*) cszMakeFileOption);
             AddMsvcTask(kfOut, "Rebuild Release MSVC", txtNormalGroup, cszMakeCommand);
 
+#if 0
+            // REVIEW: [KeyWorks - 8/4/2019] We certainly can add these, but they would be used rarely, if ever. The Ninja command
+            // is risky because if you change compilers, you might also need to change problem matchers
+
             // Ninja Debug Build
 
             AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup, cSrcFiles.GetBoolOption(OPT_64BIT) ?
@@ -397,11 +401,15 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             cszMakeCommand.printf("nmake.exe -nologo deps %s", (char*) cszMakeFileOption);
             AddTask(kfOut, "View Dependencies", "test", cszMakeCommand, "");
+#endif
 
             // Test Generate messages.po
 
-            cszMakeCommand.printf("nmake.exe -nologo locale %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, "Generate messages.pos", "test", cszMakeCommand, "");
+            if (FindFileEnv("PATH", "xgettext.exe"))
+            {
+                cszMakeCommand.printf("nmake.exe -nologo locale %s", (char*) cszMakeFileOption);
+                AddTask(kfOut, "Build messages.pos", "test", cszMakeCommand, "");
+            }
 
 #if defined(_WIN32)
             // If we're on Windows, then we also look to see if either the clang or gcc compiler is available. If so,
