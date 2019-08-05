@@ -40,10 +40,10 @@ enum {
     CLP_CANT_WRITE,
 };
 
-size_t CreateCodeLiteProject()
+size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */)
 {
     CSrcFiles cSrcFiles;
-    if (!cSrcFiles.ReadFile())
+    if (!cSrcFiles.ReadFile(pszSrcFiles))
     {
         // BUGBUG: [KeyWorks - 7/29/2019] This should be wrong. There's no reason we can't open a .vcxproj file and write a CodeLite project file
         puts(TRANSLATE("Cannot create a CodeLite project file if there is no .srcfiles.yaml file."));
@@ -52,7 +52,7 @@ size_t CreateCodeLiteProject()
 
     if (!cSrcFiles.GetProjectName())
     {
-        printf("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n", cSrcFiles.GetSrcFiles());
+        printf(TRANSLATE("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n"), cSrcFiles.GetSrcFiles());
         return CLP_NO_PROJECT;
     }
 
@@ -111,12 +111,13 @@ size_t CreateCodeLiteProject()
 
     if (!kf.WriteFile(cszProjFile))
     {
-        printf("Unable to write to %s!\n", (char*) cszProjFile);
+        printf(GETSTRING(IDS_NINJA_CANT_WRITE), (const char*) cszProjFile);
+        puts("");   // add EOL
         return CLP_CANT_WRITE;
     }
     else
     {
-        printf("created %s\n", (char*) cszProjFile);
+        printf(GETSTRING(IDS_FILE_CREATED), (const char*) cszProjFile);
     }
 
     return CLP_CREATED;

@@ -22,7 +22,7 @@ bool isSystemHeaderFile(const char* pszHeaderFile);
 
 const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);   // If pcszStartDir is used, it will be set to the path to the file or dir/file where .srcfiles.yaml was found
 
-size_t CreateCodeLiteProject();    // returns 0 - no errors, 1 - file already exists, 2 - other error
+size_t CreateCodeLiteProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);    // returns 0 - no errors, 1 - file already exists, 2 - other error
 
 bool CreateVsJson(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);   // creates .json files for Visual Studio
 

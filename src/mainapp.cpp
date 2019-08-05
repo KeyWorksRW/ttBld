@@ -102,6 +102,7 @@ enum    // actions that can be run in addition to normal single command actions
     ACT_NEW      = 1 << 6,
     ACT_FORCE    = 1 << 7,
     ACT_OPTIONS  = 1 << 8,
+    ACT_CODELITE = 1 << 9,
 };
 
 int main(int argc, char* argv[])
@@ -198,6 +199,8 @@ int main(int argc, char* argv[])
 
         else if (ttIsSameSubStrI(argv[argpos] + 1, "allninja"))  // -allninja
             Action |= ACT_ALLNINJA;
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "codelite"))  // create codelite project files
+            Action |= ACT_CODELITE;
         else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))  // -dryryn
             Action |= ACT_DRYRUN;
         else if (ttIsSameStrI(argv[argpos] + 1, "new"))
@@ -327,6 +330,15 @@ int main(int argc, char* argv[])
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         ttCList lstResults;
         CreateVsJson(cszSrcFilePath, &lstResults);
+        for (size_t pos = 0; lstResults.InRange(pos); ++pos)
+            puts(lstResults[pos]);
+    }
+
+    if (Action & ACT_CODELITE)
+    {
+        // Create CodeLite project files
+        ttCList lstResults;
+        CreateCodeLiteProject(cszSrcFilePath, &lstResults);
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             puts(lstResults[pos]);
     }
