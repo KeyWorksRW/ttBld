@@ -33,6 +33,8 @@ bool Yamalize();
 
 #if defined(_WIN32)
 
+bool IsVsCodeAvail();   // Determines if Visual Studio Code is installed
+
 void CreateCodeCmd(const char* pszFile);
 bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64 = false);
 bool FindCurMsvcPath(ttCStr& cszPath);
