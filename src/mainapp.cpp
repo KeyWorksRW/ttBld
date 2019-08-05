@@ -368,11 +368,11 @@ int main(int argc, char* argv[])
                 countNinjas++;
             if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_MSVC))
                 countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG_CL))
+                countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG_CL))
+                countNinjas++;
 #endif
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
-                countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
-                countNinjas++;
         }
         if (cNinja.GetBoolOption(OPT_32BIT))
         {
@@ -381,11 +381,11 @@ int main(int argc, char* argv[])
                 countNinjas++;
             if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
                 countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG_CL))
+                countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG_CL))
+                countNinjas++;
 #endif
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
-                countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
-                countNinjas++;
         }
 
         if (ttIsNonEmpty(cNinja.GetHHPName()))
@@ -432,12 +432,12 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
                 break;
 
             case UPDATE_CLANG_CL64:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG_CL))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG_CL))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
@@ -452,12 +452,12 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
                 break;
 
             case UPDATE_CLANG_CL64D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG_CL))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG_CL))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
