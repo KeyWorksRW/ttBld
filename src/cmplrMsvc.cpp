@@ -13,6 +13,7 @@
 
 #include "ninja.h"      // CNinja
 
+
 #if defined(_WIN32)     // MSVC and CLANG-CL are only available on Windows
 
 void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
