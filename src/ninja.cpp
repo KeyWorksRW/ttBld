@@ -266,7 +266,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         }
     }
 
-    if (cmplr == CMPLR_MSVC || cmplr == CMPLR_CLANG_CL)
+    if (cmplr == CMPLR_MSVC || cmplr == CMPLR_CLANG)
     {
         msvcWriteCompilerComments(cmplr);
         msvcWriteCompilerFlags(cmplr);
@@ -368,7 +368,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Write the final build rules to complete the project
 
-    if (cmplr == CMPLR_MSVC || cmplr == CMPLR_CLANG_CL)
+    if (cmplr == CMPLR_MSVC || cmplr == CMPLR_CLANG)
     {
         msvcWriteMidlTargets(cmplr);
         msvcWriteLinkTargets(cmplr);

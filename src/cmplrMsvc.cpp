@@ -144,6 +144,22 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" : " -m32"); // specify the platform
         if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
             m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");   // whole program optimization
+
+        if (GetOption(OPT_CLANG_CMN))
+        {
+            m_pkfOut->WriteChar(' ');
+            m_pkfOut->WriteStr(GetOption(OPT_CLANG_CMN));
+        }
+        if (GetOption(OPT_CLANG_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+        {
+            m_pkfOut->WriteChar(' ');
+            m_pkfOut->WriteStr(GetOption(OPT_CLANG_REL));
+        }
+        if (GetOption(OPT_CLANG_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
+        {
+            m_pkfOut->WriteChar(' ');
+            m_pkfOut->WriteStr(GetOption(OPT_CLANG_DBG));
+        }
     }
 
     if (GetPchHeader())
@@ -191,7 +207,7 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
                     );
         }
     }
-    else    ////// clang-cl compiler //////////////
+    else
     {
         if (GetPchHeader())
         {
@@ -359,7 +375,7 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
 {
     if (ttFileExists(GetRcFile()))
     {
-        if (cmplr == CMPLR_CLANG_CL && !GetBoolOption(OPT_MS_RC))
+        if (cmplr == CMPLR_CLANG && !GetBoolOption(OPT_MS_RC))
             m_pkfOut->WriteStr("rule rc\n  command = llvm-rc.exe -nologo");
         else
             m_pkfOut->WriteStr("rule rc\n  command = rc.exe -nologo");

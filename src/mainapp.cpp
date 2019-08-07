@@ -103,7 +103,6 @@ enum    // actions that can be run in addition to normal single command actions
     ACT_NEW      = 1 << 6,
     ACT_FORCE    = 1 << 7,
     ACT_OPTIONS  = 1 << 8,
-    ACT_CODELITE = 1 << 9,
 };
 
 int main(int argc, char* argv[])
@@ -200,8 +199,6 @@ int main(int argc, char* argv[])
 
         else if (ttIsSameSubStrI(argv[argpos] + 1, "allninja"))  // -allninja
             Action |= ACT_ALLNINJA;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "codelite"))  // create codelite project files
-            Action |= ACT_CODELITE;
         else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))  // -dryryn
             Action |= ACT_DRYRUN;
         else if (ttIsSameStrI(argv[argpos] + 1, "new"))
@@ -335,15 +332,6 @@ int main(int argc, char* argv[])
             puts(lstResults[pos]);
     }
 
-    if (Action & ACT_CODELITE)
-    {
-        // Create CodeLite project files
-        ttCList lstResults;
-        CreateCodeLiteProject(cszSrcFilePath, &lstResults);
-        for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-            puts(lstResults[pos]);
-    }
-
     {
         CNinja cNinja;
         if (!cNinja.IsValidVersion())
@@ -369,11 +357,11 @@ int main(int argc, char* argv[])
                 countNinjas++;
             if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_MSVC))
                 countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG_CL))
-                countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG_CL))
-                countNinjas++;
 #endif
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
+                countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
+                countNinjas++;
         }
         if (cNinja.GetBoolOption(OPT_32BIT))
         {
@@ -382,11 +370,11 @@ int main(int argc, char* argv[])
                 countNinjas++;
             if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
                 countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG_CL))
-                countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG_CL))
-                countNinjas++;
 #endif
+            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
+                countNinjas++;
+            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
+                countNinjas++;
         }
 
         if (ttIsNonEmpty(cNinja.GetHHPName()))
@@ -433,12 +421,12 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
                 break;
 
             case UPDATE_CLANG_CL64:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG_CL))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG_CL))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
@@ -453,12 +441,12 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
                 break;
 
             case UPDATE_CLANG_CL64D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG_CL))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG_CL))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
                     printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
                 break;
 
