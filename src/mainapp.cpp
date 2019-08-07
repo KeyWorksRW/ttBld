@@ -8,6 +8,7 @@
 
 #include "pch.h"
 
+
 const char* txtVersion   = "ttBld 1.1.0.8295";
 const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 
