@@ -20,6 +20,7 @@
 #include "verninja.h"   // CVerMakeNinja
 #include "funcs.h"      // List of function declarations
 
+
 const char* aCppExt[] = {
     ".cpp",
     ".cxx",
