@@ -30,9 +30,8 @@ public:
     typedef enum
     {
         CMPLR_MSVC     = 0,     // these MUST match the array of strings aszCompilerPrefix[] in ninja.cpp
-        CMPLR_CLANG_CL = 1,
-        CMPLR_CLANG    = 2,
-        CMPLR_GCC      = 3,
+        CMPLR_CLANG    = 1,
+        CMPLR_GCC      = 2,
     } CMPLR_TYPE;
 
     // Public functions

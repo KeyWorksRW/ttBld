@@ -1,7 +1,7 @@
 # Requires MakeNinja version 1.0.0 or higher to process
 
 Options:
-    Project:     ttMakeNinja  # project name
+    Project:     ttBld        # project name
     exe_type:    console      # [window | console | lib | dll]
     PCH:         pch.h        # "none" or name of header file to use for precompilation
     Optimize:    space        # [space | speed] optimization
@@ -27,7 +27,6 @@ Files:
     addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
     codelite.cpp        # Creates a CodeLite project
     convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
-    cmplrClang.cpp      # Creates .ninja scripts for CLANG and GCC compilers
     cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
     createmakefile.cpp  # CreateMakeFile method for creating a makefile
     csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
