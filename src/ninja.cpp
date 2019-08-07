@@ -150,7 +150,6 @@ CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
 static const char* aszCompilerPrefix[] =
 {
     "msvc",
-    "clang-cl",
     "clang",
     "gcc",
 };

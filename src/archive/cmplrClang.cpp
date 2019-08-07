@@ -12,3 +12,5 @@
 #include <ttenumstr.h>  // ttCEnumStr
 
 #include "ninja.h"      // CNinja
+
+// Just a placeholder in case someday we decide to add support for gcc compiler
