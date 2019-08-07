@@ -19,6 +19,7 @@
 #include "tabgeneral.h" // CTabGeneral
 #include "tabcompiler.h"// CTabCompiler
 #include "tabclang.h"   // CTabCLang
+#include "tablibs.h"    // CTabLibs
 #include "tablinker.h"  // CTabLinker
 #include "tabrcmidl.h"  // CTabRcMidl
 
@@ -54,15 +55,17 @@ private:
     typedef enum {
         TAB_GENERAL = 0,
         TAB_COMPILER,
-        TAB_CLANG,
+        TAB_LIBS,
         TAB_LINKER,
         TAB_RC_MIDL,
+        TAB_CLANG,
         TAB_PRIVATE,
     } TAB_ID;
 
     CTabGeneral  m_tabGeneral;
     CTabCompiler m_tabCompiler;
     CTabCLang    m_tabCLang;
+    CTabLibs     m_tabLibs;
     CTabLinker   m_tabLinker;
 #if defined(_WIN32)
     CTabRcMidl   m_tabRcMidl;

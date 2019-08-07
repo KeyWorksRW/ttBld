@@ -18,7 +18,7 @@
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(65001) // UTF-8
+#pragma code_page(1252)
 #endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
@@ -27,18 +27,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""winres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "#include ""ttlibicons.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "\0"
@@ -66,8 +66,8 @@ IDR_MAKEFILE_SINGLE     RCDATA    "res/makefileSng.txt"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,8295,0
- PRODUCTVERSION 2,0,0,0
+ FILEVERSION 1,2,8295,0
+ PRODUCTVERSION 1,2,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -85,14 +85,14 @@ BEGIN
             VALUE "Comments", "Released under Apache License\0"
             VALUE "CompanyName", "KeyWorks Software\0"
             VALUE "FileDescription", "Ninja Build Script generator\0"
-            VALUE "FileVersion", "1.1.0.8295\0"
-            VALUE "InternalName", "MakeNinja\0"
+            VALUE "FileVersion", "1.2.0.8295\0"
+            VALUE "InternalName", "ttBld\0"
             VALUE "LegalCopyright", "Copyright (c) 2002-2019 KeyWorks Software\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "MakeNinja.exe\0"
+            VALUE "OriginalFilename", "ttBld.exe\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "MakeNinja\0"
-            VALUE "ProductVersion", "1.1\0"
+            VALUE "ProductName", "ttBld\0"
+            VALUE "ProductVersion", "1.2\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -112,10 +112,10 @@ END
 
 IDDDLG_CONVERT DIALOG  0, 0, 233, 194
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create new .srcfiles file"
+CAPTION "Create new .srcfiles.yaml file"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "C&reate .srcfiles in:",IDC_STATIC,6,6,56,8
+    LTEXT           "C&reate .srcfiles.yaml in:",IDC_STATIC,6,6,72,8
     EDITTEXT        IDEDIT_OUT_DIR,6,23,157,14,ES_AUTOHSCROLL
     PUSHBUTTON      "&Change...",IDBTN_CHANGE_OUT,177,23,50,14
     CONTROL         "Create using &file list:",IDRADIO_FILES,"Button",
@@ -124,7 +124,7 @@ BEGIN
     PUSHBUTTON      "C&hange...",IDBTN_CHANGE_IN,177,76,50,14
     CONTROL         "Create using &project file:",IDRADIO_CONVERT,"Button",
                     BS_AUTORADIOBUTTON,6,121,91,10
-    COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT |
+    COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "&Locate...",IDBTN_LOCATE_SCRIPT,177,135,50,14
     DEFPUSHBUTTON   "Create",IDOK,115,174,50,14
@@ -133,7 +133,7 @@ BEGIN
 END
 
 IDDLG_OPTIONS DIALOG  0, 0, 232, 281
-STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_VISIBLE |
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
 CAPTION ".srcfiles Options"
 FONT 8, "MS Shell Dlg"
@@ -150,21 +150,21 @@ BEGIN
     LTEXT           "&Project Name:",IDC_STATIC,7,9,46,8
     EDITTEXT        IDEDIT_PROJ_NAME,60,7,94,14,ES_AUTOHSCROLL
     GROUPBOX        "Project Type",IDC_STATIC,7,25,147,45
-    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "Window",IDRADIO_NORMAL,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,19,40,42,10
-    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Console",IDRADIO_CONSOLE,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,73,40,41,10
-    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&Library",IDRADIO_LIB,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,19,54,37,10
-    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON | 
                     WS_TABSTOP,73,54,29,10
     GROUPBOX        "Platform",IDC_STATIC,7,83,196,59
-    CONTROL         "64-bit",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "64-bit",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,99,33,10
     LTEXT           "Dir:",IDC_STATIC,60,101,12,8
     EDITTEXT        IDEDIT_DIR64,76,96,83,14,ES_AUTOHSCROLL
     PUSHBUTTON      "Dir...",IDBTN_DIR64,166,96,29,16
-    CONTROL         "32-bit",IDCHECK_32BIT,"Button",BS_AUTOCHECKBOX |
+    CONTROL         "32-bit",IDCHECK_32BIT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,123,33,10
     LTEXT           "Dir:",IDC_STATIC,60,124,12,8
     EDITTEXT        IDEDIT_DIR32,76,120,83,14,ES_AUTOHSCROLL
@@ -176,7 +176,7 @@ STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT           "Optimize for:",IDC_STATIC,8,7,40,8
-    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON |
+    CONTROL         "space",IDC_RADIO_SPACE,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,53,7,35,10
     CONTROL         "speed",IDC_RADIO_SPEED,"Button",BS_AUTORADIOBUTTON,97,7,
                     35,10
@@ -217,22 +217,14 @@ BEGIN
     EDITTEXT        IDEDIT_RELEASE,58,41,133,14,ES_AUTOHSCROLL
     LTEXT           "Debu&g:",IDC_STATIC,18,65,24,8
     EDITTEXT        IDEDIT_DEBUG,58,65,133,14,ES_AUTOHSCROLL
-    LTEXT           "&Lib Directories:",IDC_STATIC,6,97,48,8
-    EDITTEXT        IDEDIT_LIBDIRS,6,109,149,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Add...",IDBTN_ADD_LIBDIR,163,107,41,16
-    LTEXT           "Lin&k to these:",IDC_STATIC,6,125,44,8
-    EDITTEXT        IDEDIT_LIBS_LINK,6,136,149,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "A&dd...",IDBTN_ADD_LIB,163,135,41,16
-    LTEXT           "&Build and link to these:",IDC_STATIC,6,156,72,8
-    EDITTEXT        IDEDIT_LIBS_BUILD,6,168,198,14,ES_AUTOHSCROLL
-    LTEXT           "Link to static CRT:",IDC_STATIC,6,188,60,8
+    LTEXT           "Link to static CRT:",IDC_STATIC,6,102,60,8
     CONTROL         "Release",IDCHECK_STATIC_CRT_REL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,74,187,42,10
-    CONTROL         "Debug",IDCHECK_STATIC_CRT_DBG,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,125,187,37,10
-    LTEXT           "&NATVIS file:",IDC_STATIC,6,210,40,8
-    EDITTEXT        IDEDIT_NATVIS,47,207,108,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Find...",IDBTN_CHANGE,163,206,41,16
+                    BS_AUTOCHECKBOX | WS_TABSTOP,74,101,42,10
+    CONTROL         "Debug",IDCHECK_STATIC_CRT_DBG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,125,101,37,10
+    LTEXT           "&NATVIS file:",IDC_STATIC,6,124,40,8
+    EDITTEXT        IDEDIT_NATVIS,47,121,108,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Find...",IDBTN_CHANGE,163,120,41,16
 END
 
 IDTAB_RCMIDL DIALOG  8, 20, 210, 222
@@ -259,13 +251,43 @@ IDTAB_CLANG DIALOG  8, 20, 210, 222
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "CLANG-only flags",IDC_STATIC,7,7,196,90
-    LTEXT           "Common:",IDC_STATIC,19,27,30,8
-    EDITTEXT        IDEDIT_COMMON,59,26,133,14,ES_AUTOHSCROLL
-    LTEXT           "Release:",IDC_STATIC,19,48,29,8
-    EDITTEXT        IDEDIT_RELEASE,59,47,133,14,ES_AUTOHSCROLL
-    LTEXT           "Debug:",IDC_STATIC,19,71,24,8
-    EDITTEXT        IDEDIT_DEBUG,59,70,133,14,ES_AUTOHSCROLL
+    GROUPBOX        "Additional flags for clang-cl.exe",IDC_STATIC,7,6,196,
+                    90
+    LTEXT           "Common:",IDC_STATIC,19,26,30,8
+    EDITTEXT        IDEDIT_COMMON,59,25,133,14,ES_AUTOHSCROLL
+    LTEXT           "Release:",IDC_STATIC,19,47,29,8
+    EDITTEXT        IDEDIT_RELEASE,59,46,133,14,ES_AUTOHSCROLL
+    LTEXT           "Debug:",IDC_STATIC,19,70,24,8
+    EDITTEXT        IDEDIT_DEBUG,59,69,133,14,ES_AUTOHSCROLL
+    CONTROL         "Use MS Linker (link.exe)",IDCHECK_MSLINKER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,19,111,93,10
+    CONTROL         "Use MS RC compiler (rc.exe)",IDCHECK_MSRC,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,19,124,107,10
+END
+
+IDTAB_LIBS DIALOG  8, 20, 210, 222
+STYLE DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "Common libraries:",IDC_STATIC,5,1,56,8
+    EDITTEXT        IDEDIT_LIBS_CMN,5,12,149,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "A&dd...",IDBTN_ADD_LIB_CMN,163,11,41,16
+    LTEXT           "Release-only libraries:",IDC_STATIC,5,33,69,8
+    EDITTEXT        IDEDIT_LIBS_REL,5,44,149,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "A&dd...",IDBTN_ADD_LIB_REL,163,43,41,16
+    LTEXT           "Debug-only libraries:",IDC_STATIC,5,66,64,8
+    EDITTEXT        IDEDIT_LIBS_DBG,5,78,149,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "A&dd...",IDBTN_ADD_LIB_DBG,163,77,41,16
+    LTEXT           "64-Bit Directories:",IDC_STATIC,5,100,56,8
+    EDITTEXT        IDEDIT_LIBDIRS64,5,111,149,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Add...",IDBTN_ADD_LIBDIR64,163,111,41,16
+    LTEXT           "32-Bit Directories:",IDC_STATIC,5,131,56,8
+    EDITTEXT        IDEDIT_LIBDIRS32,5,143,149,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Add...",IDBTN_ADD_LIBDIR33,163,143,41,16
+    LTEXT           "&Build and link to these libraries:",IDC_STATIC,5,183,
+                    98,8
+    EDITTEXT        IDEDIT_LIBS_BUILD,5,195,149,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "A&dd...",IDBTN_ADD_LIB_BLDLIB,163,194,41,16
 END
 
 
@@ -275,7 +297,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     IDDDLG_CONVERT, DIALOG
     BEGIN

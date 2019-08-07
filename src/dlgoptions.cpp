@@ -49,6 +49,7 @@ CTabOptions::CTabOptions(const char* pszNinjaDir) : ttCDlg(IDDLG_OPTIONS), CWrit
     m_tabGeneral.SetParentClass(this);
     m_tabCompiler.SetParentClass(this);
     m_tabCLang.SetParentClass(this);
+    m_tabLibs.SetParentClass(this);
     m_tabLinker.SetParentClass(this);
 #if defined(_WIN32)
     m_tabRcMidl.SetParentClass(this);
@@ -100,8 +101,8 @@ void CTabOptions::OnBegin(void)
     ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_COMPILER);
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_COMPILER, (LPARAM) &ti);
 
-    ti.pszText = (char*) "CLang";   // don't translate this
-    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_CLANG, (LPARAM) &ti);
+    ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_LIBS);
+    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LIBS, (LPARAM) &ti);
 
     ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_LINKER);
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LINKER, (LPARAM) &ti);
@@ -109,6 +110,11 @@ void CTabOptions::OnBegin(void)
 #if defined(_WIN32)
     ti.pszText = (char*) "Rc/Midl";   // don't translate this
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_RC_MIDL, (LPARAM) &ti);
+
+    // The following tab is for clang-cl, which is why it is Windows-only
+
+    ti.pszText = (char*) "CLang";   // don't translate this
+    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_CLANG, (LPARAM) &ti);
 #endif
 
 #if defined(PRIVATE)
@@ -178,6 +184,10 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
 
                     case TAB_CLANG:
                         m_hwndTabSub = m_tabCLang.DoModeless(*this);
+                        break;
+
+                    case TAB_LIBS:
+                        m_hwndTabSub = m_tabLibs.DoModeless(*this);
                         break;
 
                     case TAB_LINKER:

@@ -56,6 +56,7 @@ enum
     IDS_NINJA_TAB_CLANG,                // "CLang"
     IDS_NINJA_TAB_COMPILER,             // "Compiler"
     IDS_NINJA_TAB_GENERAL,              // "General"
+    IDS_NINJA_TAB_LIBS,                 // "Libs"
     IDS_NINJA_TAB_LINKER,               // "Linker"
     IDS_NINJA_TAB_RC_MIDL,              // "Rc/Midl"
     IDS_NINJA_TAB_SCRIPTS,              // "Scripts"

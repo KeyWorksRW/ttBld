@@ -7,7 +7,7 @@
 #define IDTAB_GENERAL                   103
 #define IDTAB_COMPILER                  104
 #define IDTAB_LINKER                    105
-#define IDTAB_SCRIPTS                   106
+#define IDTAB_LIBS                      106
 #define IDTAB_RCMIDL                    107
 #define IDTAB_CLANG                     108
 #define IDDLG_XGETTEXT                  109
@@ -23,19 +23,21 @@
 #define IDCHECK_CODEBLOCKS              1029
 #define IDR_VCXPROJ_MASTER              1030
 #define IDR_VCXPROJ_FILTERS             1031
-#define IDR_MAKEFILE_SINGLE             1032
 #define IDCHECK_CODELITE                1031
+#define IDR_MAKEFILE_SINGLE             1032
 #define IDCHECK_CLANG                   1032
 #define IDCHECK_MSVC                    1033
 #define IDEDIT_LIBS                     1034
 #define IDEDIT_LIBS_BUILD               1034
 #define IDCHECK_64BIT                   1035
 #define IDBTN_ADD_LIBDIR                1036
+#define IDBTN_ADD_LIBDIR64              1036
 #define IDCHECK_STATIC_CRT              1037
 #define IDCHECK_STATIC_CRT_REL          1037
 #define IDEDIT_PCH                      1038
 #define IDCHECK_STATIC_CRT_DBG          1038
 #define IDBTN_PCH                       1039
+#define IDBTN_ADD_LIBDIR33              1039
 #define IDRADIO_WARN4                   1040
 #define IDRADIO_WARN3                   1041
 #define IDRADIO_WARN2                   1042
@@ -43,10 +45,14 @@
 #define IDEDIT_PCH_CPP                  1044
 #define IDBTN_PCH_CPP                   1045
 #define IDBTN_ADD_LIB                   1046
+#define IDBTN_ADD_LIB_CMN               1046
 #define IDBTN_ADD                       1047
+#define IDBTN_ADD_LIB_REL               1047
 #define IDEDIT_CFLAGS                   1048
 #define IDBTN_REMOVE                    1048
+#define IDBTN_ADD_LIB_DBG               1048
 #define IDRADIO_MF_NEVER                1049
+#define IDBTN_ADD_LIB_BLDLIB            1049
 #define IDRADIO_MF_MISSING              1050
 #define IDRADIO_MF_ALWAYS               1051
 #define IDC_RADIO_SPACE                 1055
@@ -58,9 +64,14 @@
 #define IDCHECK_MSLINKER                1061
 #define IDEDIT_LIBDIRS                  1062
 #define IDCHECK_MSRC                    1062
+#define IDEDIT_LIBDIRS64                1062
 #define IDEDIT_LIBS_LINK                1063
+#define IDEDIT_LIBDIRS32                1063
+#define IDEDIT_LIBS_CMN                 1064
 #define IDEDIT_OUT_DIR                  1065
+#define IDEDIT_LIBS_REL                 1065
 #define IDBTN_CHANGE_OUT                1066
+#define IDEDIT_LIBS_DBG                 1066
 #define IDEDIT_IN_DIR                   1067
 #define IDBTN_CHANGE_IN                 1068
 #define IDCOMBO_SCRIPTS                 1070
@@ -94,12 +105,12 @@
 #define IDEDIT_FUNCTION_NAME            1095
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        111
+#define _APS_NEXT_RESOURCE_VALUE        101
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1096
+#define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

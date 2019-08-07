@@ -74,6 +74,8 @@ static const ttIDS_LIST aNinjaStringIds[] =
     { IDS_NINJA_TAB_GENERAL,             _XGET("General") },
     // TRANSLATORS: Used for the Tab name of the tab that sets general C compiler options
     { IDS_NINJA_TAB_COMPILER,        _XGET("Compiler") },
+    // TRANSLATORS: Used for the Tab name of the tab that sets Library options
+    { IDS_NINJA_TAB_LIBS,          _XGET("Libs") },
     // TRANSLATORS: Used for the Tab name of the tab that sets Linker options
     { IDS_NINJA_TAB_LINKER,          _XGET("Linker") },
     // TRANSLATORS: Used for the Tab name of the tab that sets general scripting options (for IDE, makefile, etc.)

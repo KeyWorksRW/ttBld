@@ -52,6 +52,7 @@ Files:
     tabgeneral.cpp
     tabcompiler.cpp
     tabclang.cpp
+    tablibs.cpp
     tablinker.cpp
     tabrcmidl.cpp
 
