@@ -64,12 +64,12 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL :  IDR_MAKEFILE_SINGLE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
-        m_lstErrors += TRANSLATE("ttMakeNinja.exe is corrupted -- unable to read the required resource for creating a makefile,");
+        m_lstErrors += TRANSLATE("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,");
         return false;
     }
 
     while (kf.ReplaceStr("%build%", cszBuildDir));
-    while (kf.ReplaceStr("%libbuild%", "build"));
+//    while (kf.ReplaceStr("%libbuild%", cszBuildDir));
 
     if (!bAllVersion && cszSrcFiles.IsNonEmpty())
         while (kf.ReplaceStr("%srcfiles%", cszSrcFiles));
@@ -129,10 +129,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
                     ttCStr cszBuild(m_dlstTargetDir.GetValAt(pos));
                     cszBuild.AppendFileName(".vscode/makefile");
                     // The leading \t before the command is required or make will fail
-                    if (ttFileExists(cszBuild))
-                        kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", m_dlstTargetDir.GetValAt(pos), bDebugTarget ? "D" : "");
-                    else
-                        kfOut.printf("\tcd %s & ninja -f $(LibBldScript%s)\n", m_dlstTargetDir.GetValAt(pos), bDebugTarget ? "D" : "");
+                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", m_dlstTargetDir.GetValAt(pos), bDebugTarget ? "D" : "");
                 }
             }
             else

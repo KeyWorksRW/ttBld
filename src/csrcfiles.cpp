@@ -16,6 +16,7 @@
 #include "funcs.h"      // List of function declarations
 
 const char* txtSrcFilesFileName = ".srcfiles.yaml";
+const char* txtDefBuildDir = "bld";
 
 typedef enum
 {
@@ -43,7 +44,7 @@ CSrcFiles::CSrcFiles(const char* pszNinjaDir) : m_ttHeap(true),
     if (pszNinjaDir)
         m_cszBldDir = pszNinjaDir;
     else
-        m_cszBldDir = "build";
+        m_cszBldDir = txtDefBuildDir;
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
@@ -67,7 +68,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
         // pszFile might now point to a sub-directory, so we need to create the .ninja directory under that
         m_cszBldDir = pszFile;
         *(ttFindFilePortion(m_cszBldDir)) = 0;  // remove the file portion
-        m_cszBldDir.AppendFileName("build");
+        m_cszBldDir.AppendFileName(txtDefBuildDir);
     }
 
     ttCFile kfSrcFiles;
@@ -549,15 +550,10 @@ const char* CSrcFiles::GetBuildScriptDir()
 
     if (m_cszSrcFilePath.IsEmpty())
     {
-        m_cszBldDir = "build";
+        m_cszBldDir = txtDefBuildDir;
         return m_cszBldDir;
     }
 
-#if defined(_WIN32)
-    m_cszBldDir = "bldMSW";
-#else
-    m_cszBldDir = "bldUNX";
-#endif
     return m_cszBldDir;
 }
 

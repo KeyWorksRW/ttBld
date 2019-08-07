@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CVerMakeNinja
-// Purpose:   used to read, write, and compare ttMakeNinja version number
+// Purpose:   used to read, write, and compare ttBld version number
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -10,7 +10,7 @@
 
 #include "verninja.h"  // CVerMakeNinja
 
-extern const char* txtOptVersion; // The minimum version of ttMakeNinja required by a .srcfiles.yaml
+extern const char* txtOptVersion; // The minimum version of ttBld required by a .srcfiles.yaml
 
 CVerMakeNinja::CVerMakeNinja()
 {
@@ -37,13 +37,13 @@ bool CVerMakeNinja::IsSrcFilesNewer(const char* pszRequired)
     int major = (int) ttAtoi(pszRequired);
 
     pszRequired = ttStrChr(pszRequired, '.');
-    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttMakeNinja version line!");
+    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttBld version line!");
     if (!pszRequired || !ttIsDigit(pszRequired[1]))
         return false;   // we don't know what the version number is
     int minor = (int) ttAtoi(++pszRequired);
 
     pszRequired = ttStrChr(pszRequired, '.');
-    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttMakeNinja version line!");
+    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttBld version line!");
     if (!pszRequired || !ttIsDigit(pszRequired[1]))
         return false;   // we don't know what the version number is
     int sub = (int) ttAtoi(++pszRequired);

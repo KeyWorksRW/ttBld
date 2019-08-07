@@ -68,7 +68,7 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     ttCFile kf;
     if (!kf.ReadResource(IDR_PRE_PROJECT))
     {
-        puts(TRANSLATE("ttMakeNinja.exe is corrupted -- cannot read the necessary resource"));
+        puts(TRANSLATE("ttBld.exe is corrupted -- cannot read the necessary resource"));
         return CLP_MISSING_RES;
     }
 
@@ -90,7 +90,7 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     ttCFile kfPost;
     if (!kfPost.ReadResource(IDR_POST_PROJECT))
     {
-        puts(TRANSLATE("ttMakeNinja.exe is corrupted -- cannot read the necessary resource"));
+        puts(TRANSLATE("ttBld.exe is corrupted -- cannot read the necessary resource"));
         return CLP_MISSING_RES;
     }
 

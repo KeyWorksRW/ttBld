@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
-// Used by ttMakeNinja.rc
+// Used by ttBld.rc
 //
 #define IDDDLG_CONVERT                  101
 #define IDDLG_OPTIONS                   102

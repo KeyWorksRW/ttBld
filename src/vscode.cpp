@@ -280,10 +280,7 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 #ifdef _WIN32
     kf.ReplaceStr("%bld%", "Build Debug MSVC");
 #else
-    if (FindFileEnv("PATH", "clang.exe"))
-        kf.ReplaceStr("%bld%", "Build Debug CLANG");
-    else
-        kf.ReplaceStr("%bld%", "Build Debug GCC");
+    kf.ReplaceStr("%bld%", "Build Debug GCC");
 #endif
 
     if (cSrcFiles.GetBoolOption(OPT_64BIT))
@@ -349,18 +346,8 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             AddMsvcTask(kfOut, "Build Debug MSVC", txtDefaultGroup, cszMakeCommand);
 
 #else
-            bool bClangAvail = FindFileEnv("PATH", "clang.exe");
-
-            if (bClangAvail)
-            {
-                cszMakeCommand.printf("make debug cmplr=clang %s", (char*) cszMakeFileOption);
-                AddClangTask(kfOut, "Build Debug CLANG", txtDefaultGroup, cszMakeCommand);
-            }
-            else
-            {
-                cszMakeCommand.printf("make debug cmplr=gcc %s", (char*) cszMakeFileOption);
-                AddClangTask(kfOut, "Build Debug GCC", txtDefaultGroup, cszMakeCommand);
-            }
+            cszMakeCommand.printf("make debug cmplr=gcc %s", (char*) cszMakeFileOption);
+            AddClangTask(kfOut, "Build Debug GCC", txtDefaultGroup, cszMakeCommand);
 #endif
 
             // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC compiler. If we're not on Windows, then
@@ -412,12 +399,12 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             }
 
 #if defined(_WIN32)
-            // If we're on Windows, then we also look to see if either the clang or gcc compiler is available. If so,
-            // we add build targets for them (we only choose one, with clang being the first choice)/
+            // If we're on Windows, then we also look to see if either the clang-cl compiler is available. If so, we add
+            // build targets for it
 
             if (FindFileEnv("PATH", "mingw32-make.exe"))
             {
-                if (FindFileEnv("PATH", "clang.exe"))
+                if (FindFileEnv("PATH", "clang-cl.exe"))
                 {
                     cszMakeCommand.printf("mingw32-make.exe debug %s", (char*) cszMakeFileOption);
                     AddClangTask(kfOut, "Build Debug CLANG", txtNormalGroup, cszMakeCommand);
@@ -428,29 +415,11 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     cszMakeCommand.printf("mingw32-make.exe clean release %s", (char*) cszMakeFileOption);
                     AddClangTask(kfOut, "Rebuild Release CLANG", txtNormalGroup, cszMakeCommand);
                 }
-                else if (FindFileEnv("PATH", "gcc.exe"))
-                {
-                    cszMakeCommand.printf("mingw32-make.exe cmplr=gcc debug %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, "Build Debug GCC", txtNormalGroup, cszMakeCommand);
-
-                    cszMakeCommand.printf("mingw32-make.exe cmplr=gcc release %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, "Build Release GCC", txtNormalGroup, cszMakeCommand);
-
-                    cszMakeCommand.printf("mingw32-make.exe cmplr=gcc clean release %s", (char*) cszMakeFileOption);
-                    AddClangTask(kfOut, "Rebuild Release GCC", txtNormalGroup, cszMakeCommand);
-                }
             }
 
 #endif
 
 #if !defined(_WIN32)
-            if (FindFileEnv("PATH", "clang.exe"))
-            {
-                while (kfOut.ReplaceStr("msvcBuild", "clangBuild"));
-                while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=clang"));
-                while (kfOut.ReplaceStr("MSVC", "CLANG"));
-            }
-            else
             {
                 while (kfOut.ReplaceStr("msvcBuild", "gccBuild"));
                 while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=gcc"));
@@ -702,7 +671,7 @@ static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszG
         fileOut.WriteEol(fileTask);
 }
 
-// AddClangTask provides it's own problemMatcher -- it should work with clang-cl, clang, and gcc
+// AddClangTask provides it's own problemMatcher -- because $gcc didn't work
 
 static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand)
 {

@@ -39,12 +39,9 @@ bits=64 # \
 cmplr=msvc # \
 !endif #\
 #\
-bdir=build # \
-libbdir=build # \
+bdir=bld # \
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja # \
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja # \
-LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja # \
-LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja # \
 # \
 !else
 ######### Following section is for GNU make and variants #########
@@ -65,34 +62,31 @@ ifndef cmplr
     cmplr=clang
 endif
 
-bdir=build
-libbdir=build
+bdir=bld
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
-LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja
-LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja
 
 # \
 !endif
 
 ########## release section ##########
 
-release: ttLib $(BldScript) MakeNinja
+release: ttLib $(BldScript) ttBld
 
 ttLib:
-	cd ../ttLib/src & ninja -f $(LibBldScript)
+	cd ../ttLib/src & ninja -f $(BldScript)
 
-MakeNinja:
+ttBld:
 	ninja -f $(BldScript)
 
 ########## debug section ##########
 
-debug: ttLibD $(BldScriptD) MakeNinjaD
+debug: ttLibD $(BldScriptD) ttBldD
 
 ttLibD:
-	cd ../ttLib/src & ninja -f $(LibBldScriptD)
+	cd ../ttLib/src & ninja -f $(BldScriptD)
 
-MakeNinjaD:
+ttBldD:
 	ninja -f $(BldScriptD)
 
 ########## localization ##########
@@ -130,7 +124,7 @@ deps: $(BldScript)
 ########## Creates or updates ninja file if needed ##########
 
 $(BldScript): .srcfiles.yaml
-	makeninja -u$(cmplr)$(bits)
+	ttBld.exe -u$(cmplr)$(bits)
 
 $(BldScriptD): .srcfiles.yaml
-	makeninja -u$(cmplr)$(bits)D
+	ttBld.exe -u$(cmplr)$(bits)D

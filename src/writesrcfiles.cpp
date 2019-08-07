@@ -25,12 +25,12 @@ extern sfopt::OPT_VERSION aoptVersions[];
 
 // Put another way, we may change spacing and formating, but we will preserve any custom data like comments
 
-const char* sfopt::txtNinjaVerFormat = "# Requires ttMakeNinja.exe version %d.%d.%d or higher to process";
+const char* sfopt::txtNinjaVerFormat = "# Requires ttBld.exe version %d.%d.%d or higher to process";
 
 bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 {
 #if defined(_DEBUG)
-    // We need to be certain that the current ttMakeNinja version is at least as high as any option in the OPT_VERSION
+    // We need to be certain that the current ttBld version is at least as high as any option in the OPT_VERSION
     // array. There isn't a way to check that during compile time, so we check it in DEBUG builds whenever we try to
     // write the .srcfiles.yaml
 
@@ -38,7 +38,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
     if (!bWarned)   // we can be called twice if a private Tab writes to a .private .srcfiles
     {
         bWarned = true;
-        int major = 1;     // these three get filled in to the minum ttMakeNinja version required to process
+        int major = 1;     // these three get filled in to the minum ttBld version required to process
         int minor = 0;
         int sub   = 0;
 
@@ -58,7 +58,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
         CVerMakeNinja verinfo;
         ttASSERT_MSG(!verinfo.IsSrcFilesNewer(cszVersion),
                      "An OPT_ in aoptVersions has a higher version number then txtOptVersion."
-                     " If you write to .srcfiles.yaml without fixing the code first, this version of ttMakeNinja will no longer be able to use it.");
+                     " If you write to .srcfiles.yaml without fixing the code first, this version of ttBld will no longer be able to use it.");
     }
 #endif
 
@@ -73,7 +73,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
     bool bSeenVersion = false;
     while (kfIn.ReadLine())
     {
-        if (ttIsSameSubStrI(kfIn, "# Requires ttMakeNinja"))
+        if (ttIsSameSubStrI(kfIn, "# Requires ttBld"))
         {
             bSeenVersion = true;
             CVerMakeNinja verinfo;
