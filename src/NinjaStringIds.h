@@ -22,7 +22,7 @@ enum
 {
     IDS_FILE_UPDATED,                   // %s updated.\n
     IDS_CANT_FIND_COMPILER,             // Unable to find either the cl.exe or clang-cl.exe compilers in PATH.
-    IDS_MAKENINJA_CORRUPTED,            // ttMakeNinja.exe is corrupted -- cannot read the necessary resource.
+    IDS_MAKENINJA_CORRUPTED,            // ttBld.exe is corrupted -- cannot read the necessary resource.
     IDS_CANT_WRITE_MAKEFILE,            // Unable to write to makefile.
     IDS_LIB_DIR_FAIL,                   // The library source directory %s specified in BuildLibs: does not exist.
     IDS_NINJA_32BIT_DIR,                // "Select 32-bit Target directory"

@@ -36,7 +36,7 @@ void CreateCodeCmd(const char* pszFile)
     ttCFile file;
     file.WriteEol("@echo off\n");
     const char* pszType = ttStrStr(pszFile, "64") ? "64" : "32";
-    file.printf("ttMakeNinja.exe -msvcenv%s %kq\n", pszType, (char*) cszPath);
+    file.printf("ttBld.exe -msvcenv%s %kq\n", pszType, (char*) cszPath);
     file.printf("call %kq\n\n", (char*) cszPath);
 
     file.WriteEol(
@@ -212,7 +212,7 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
 
     ttCFile file;
     file.WriteEol("@echo off\n");
-    file.WriteEol("@REM This file is automatically created by ttMakeNinja. Any changes you make will be lost if ttMakeNinja creates it again.\n");
+    file.WriteEol("@REM This file is automatically created by ttBld. Any changes you make will be lost if ttBld creates it again.\n");
 
     cszPath.Delete();
     for (size_t pos = 0; lstPath.InRange(pos); ++pos)

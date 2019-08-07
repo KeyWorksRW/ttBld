@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-const char* txtVersion   = "ttMakeNinja 1.1.0.8295";
+const char* txtVersion   = "ttBld 1.1.0.8295";
 const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 
 #include <iostream>
@@ -34,7 +34,7 @@ void Usage()
     puts(txtVersion);
     puts(txtCopyRight);
 
-    puts(TRANSLATE("\nttMakeNinja [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
+    puts(TRANSLATE("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
     puts(TRANSLATE("    -dir [directory]    -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
 
     puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    const char* pszEnv = getenv("ttMAKENINJA");
+    const char* pszEnv = getenv("TTBLD");
     if (pszEnv)
     {
         char* pszArg = ttFindNonSpace(pszEnv);
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
-        // Only one of these commands can be used -- after it is processes, ttMakeNinja will exit
+        // Only one of these commands can be used -- after it is processes, ttBld will exit
         if (argv[argpos][1] == '?' || ttIsSameSubStrI(argv[argpos] + 1, "help"))
         {
             Usage();
@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
             cszSrcFilePath = cszRootDir;
             if (!LocateSrcFiles(&cszSrcFilePath))
             {
-                puts(TRANSLATE("ttMakeNinja was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
+                puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
                 return 1;
             }
         }
@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
                 cszSrcFilePath = pszFile;
             else
             {
-                puts(TRANSLATE("ttMakeNinja was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
+                puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
                 return 1;
             }
         }
@@ -335,7 +335,7 @@ int main(int argc, char* argv[])
         CNinja cNinja;
         if (!cNinja.IsValidVersion())
         {
-            if (ttMsgBox(TRANSLATE("This version of ttMakeNinja is too old -- create ninja scripts anyway?"), MB_YESNO | MB_ICONWARNING) != IDYES)
+            if (ttMsgBox(TRANSLATE("This version of ttBld is too old -- create ninja scripts anyway?"), MB_YESNO | MB_ICONWARNING) != IDYES)
                 return 1;
         }
 
@@ -455,5 +455,5 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     }
 
     else
-        puts(TRANSLATE("This version of ttMakeNinja is too old to properly create ninja scripts from your current srcfiles."));
+        puts(TRANSLATE("This version of ttBld is too old to properly create ninja scripts from your current srcfiles."));
 }

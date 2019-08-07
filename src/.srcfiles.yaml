@@ -1,4 +1,4 @@
-# Requires MakeNinja version 1.0.0 or higher to process
+# Requires ttBld version 1.0.0 or higher to process
 
 Options:
     Project:     ttBld        # project name
@@ -18,10 +18,10 @@ Options:
     LibDirs:     ../ttLib/lib64      # additional directores for lib files
     BuildLibs:   ../ttLib            # libraries that need to be built (added to makefile generation)
 
-    Natvis:      ttMakeNinja.natvis  # MSVC Debug visualizer
+    Natvis:      ttBld.natvis  # MSVC Debug visualizer
 
 Files:
-    ttMakeNinja.rc      # Windows resource files
+    ttBld.rc      # Windows resource files
     mainapp.cpp         # entry point, global strings, library pragmas
 
     addfiles.cpp        # Used to add one or more filenames to a .srcfiles file

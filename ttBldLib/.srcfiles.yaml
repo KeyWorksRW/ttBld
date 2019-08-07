@@ -1,7 +1,7 @@
-# Requires MakeNinja version 1.0.0 or higher to process
+# Requires ttBld version 1.0.0 or higher to process
 
 Options:
-    Project:     ttNinjaLib      # project name
+    Project:     ttBldLib     # project name
     exe_type:    lib          # [window | console | lib | dll]
     PCH:         pch.h        # name of precompiled header file, or "none" if not using precompiled headers
     PCH_CPP:     ../src/pch.cpp     # source file used to build precompiled header

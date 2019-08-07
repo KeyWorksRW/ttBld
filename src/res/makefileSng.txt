@@ -40,11 +40,8 @@ cmplr=msvc # \
 !endif #\
 #\
 bdir=%build% # \
-libbdir=%libbuild% # \
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja # \
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja # \
-LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja # \
-LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja # \
 # \
 !else
 ######### Following section is for GNU make and variants #########
@@ -66,11 +63,8 @@ ifndef cmplr
 endif
 
 bdir=%build%
-libbdir=%libbuild%
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
-LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja
-LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja
 
 # \
 !endif
@@ -124,7 +118,7 @@ deps: $(BldScript)
 ########## Creates or updates ninja file if needed ##########
 
 $(BldScript): %srcfiles%
-	ttMakeNinja.exe -u$(cmplr)$(bits)
+	ttBld.exe -u$(cmplr)$(bits)
 
 $(BldScriptD): %srcfiles%
-	ttMakeNinja.exe -u$(cmplr)$(bits)D
+	ttBld.exe -u$(cmplr)$(bits)D

@@ -7,16 +7,13 @@ lib32/
 lib64/
 bld/
 build/
-bldMSW/
-bldMAC/
-bldUNIX/
 
 .private/
 archive/
 backup/
 tests/
 
-# For now, this file is a local copy
+# Generated files to ignore
 wxLibs.h
 messages.po
 

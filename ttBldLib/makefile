@@ -39,8 +39,8 @@ bits=64 # \
 cmplr=msvc # \
 !endif #\
 #\
-bdir=build # \
-libbdir=build # \
+bdir=bld # \
+libbdir=bld # \
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja # \
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja # \
 LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja # \
@@ -65,8 +65,8 @@ ifndef cmplr
     cmplr=clang
 endif
 
-bdir=build
-libbdir=build
+bdir=bld
+libbdir=bld
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
 LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja
@@ -124,7 +124,7 @@ deps: $(BldScript)
 ########## Creates or updates ninja file if needed ##########
 
 $(BldScript): .srcfiles.yaml
-	ttMakeNinja.exe -u$(cmplr)$(bits)
+	ttBld.exe -u$(cmplr)$(bits)
 
 $(BldScriptD): .srcfiles.yaml
-	ttMakeNinja.exe -u$(cmplr)$(bits)D
+	ttBld.exe -u$(cmplr)$(bits)D
