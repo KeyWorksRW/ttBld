@@ -68,8 +68,9 @@ namespace sfopt
         OPT_32BIT_SUFFIX,   // true means append "32" to target's directory or .exe name
 
         OPT_INC_DIRS,       // additional directories for header files
-        OPT_LIB_DIRS,       // additional directores for lib files
-        OPT_LIBS,           // additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)
+        OPT_LIB_DIRS64,     // 64-bit library directories
+        OPT_LIB_DIRS32,     // 32-bit library directories
+        OPT_LIBS_CMN,       // additional libraries to link to in all builds
         OPT_LIBS_REL,       // additional libraries to link to in release builds
         OPT_LIBS_DBG,       // additional libraries to link to in debug builds
         OPT_OPTIMIZE,       // [space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues) -- default, if not specified, is space

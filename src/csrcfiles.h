@@ -86,7 +86,7 @@ protected:
     bool GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment);
 
     void AddCompilerFlag(const char* pszFlag);
-    void AddLibrary(const char* pszName);
+//    void AddLibrary(const char* pszName);     // REVIEW: [KeyWorks - 8/7/2019] doesn't appear to be used
 
     // Class members (note that these are NOT marked protected or private -- too many callers need to access individual members)
 

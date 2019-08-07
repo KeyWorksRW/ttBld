@@ -301,9 +301,18 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
     }
     cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
 
-    if (GetOption(OPT_LIB_DIRS))
+    if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_RELEASE32) && GetOption(OPT_LIB_DIRS32))
     {
-        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
+        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS32), ';');
+        while (enumLib.Enum())
+        {
+            cszRule += " /LIBPATH:";
+            cszRule += enumLib;
+        }
+    }
+    else if ((m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) && GetOption(OPT_LIB_DIRS64))
+    {
+        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS64), ';');
         while (enumLib.Enum())
         {
             cszRule += " /LIBPATH:";
@@ -311,9 +320,9 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
         }
     }
 
-    if (GetOption(OPT_LIBS))
+    if (GetOption(OPT_LIBS_CMN))
     {
-        ttCEnumStr enumLib(GetOption(OPT_LIBS), ';');
+        ttCEnumStr enumLib(GetOption(OPT_LIBS_CMN), ';');
         while (enumLib.Enum())
         {
             ttCStr cszLib;
@@ -352,7 +361,7 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
 {
     if (cmplr == CMPLR_MSVC)
     {
-        if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))
+        if (IsExeTypeLib())
         {
             m_pkfOut->printf("rule lib\n  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in\n",
                 (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
@@ -361,7 +370,7 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
     }
     else
     {
-        if (IsExeTypeLib() || GetOption(OPT_LIB_DIRS))
+        if (IsExeTypeLib())
         {
             // MSVC -LTCG option is not supported by lld
             m_pkfOut->printf("rule lib\n  command = lld-link.exe /lib /machine:%s /out:$out $in\n",

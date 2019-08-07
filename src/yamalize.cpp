@@ -80,9 +80,10 @@ bool Yamalize()
 
     cNewSrcFiles.UpdateOption(OPT_INC_DIRS, cOrgSrcFiles.GetOption(OPT_INC_DIRS));
     cNewSrcFiles.UpdateOption(OPT_BUILD_LIBS, cOrgSrcFiles.GetOption(OPT_BUILD_LIBS));
-    cNewSrcFiles.UpdateOption(OPT_LIB_DIRS, cOrgSrcFiles.GetOption(OPT_LIB_DIRS));
+    cNewSrcFiles.UpdateOption(OPT_LIB_DIRS32, cOrgSrcFiles.GetOption(OPT_LIB_DIRS32));
+    cNewSrcFiles.UpdateOption(OPT_LIB_DIRS64, cOrgSrcFiles.GetOption(OPT_LIB_DIRS64));
 
-    cNewSrcFiles.UpdateOption(OPT_LIBS, cOrgSrcFiles.GetOption(OPT_LIBS));
+    cNewSrcFiles.UpdateOption(OPT_LIBS_CMN, cOrgSrcFiles.GetOption(OPT_LIBS_CMN));
     cNewSrcFiles.UpdateOption(OPT_LIBS_REL, cOrgSrcFiles.GetOption(OPT_LIBS_REL));
     cNewSrcFiles.UpdateOption(OPT_LIBS_DBG, cOrgSrcFiles.GetOption(OPT_LIBS_DBG));
 

@@ -482,9 +482,20 @@ void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
 
     cszLibName += cszExt;
 
-    if (GetOption(OPT_LIB_DIRS))
+    if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_RELEASE32) && GetOption(OPT_LIB_DIRS32))
     {
-        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
+        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS32), ';');
+        while (enumLib.Enum())
+        {
+            ttCStr cszPath(enumLib);
+            cszPath.AppendFileName(cszLibName);
+            if (ttFileExists(cszPath))
+                return;     // we found the modified library, so return
+        }
+    }
+    else if ((m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) && GetOption(OPT_LIB_DIRS64))
+    {
+        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS64), ';');
         while (enumLib.Enum())
         {
             ttCStr cszPath(enumLib);

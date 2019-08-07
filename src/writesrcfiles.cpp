@@ -309,8 +309,9 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
 
                 case OPT_INC_DIRS:
                 case OPT_BUILD_LIBS:
-                case OPT_LIB_DIRS:
-                case OPT_LIBS:
+                case OPT_LIB_DIRS32:
+                case OPT_LIB_DIRS64:
+                case OPT_LIBS_CMN:
                 case OPT_LIBS_REL:
                 case OPT_LIBS_DBG:
                     if (!bSeenDirs)

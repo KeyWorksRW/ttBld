@@ -20,12 +20,12 @@ void CTabLinker::OnBegin(void)
     SetCheck(DLG_ID(IDCHECK_STATIC_CRT_REL), m_pOpts->IsStaticCrtRel());
     SetCheck(DLG_ID(IDCHECK_STATIC_CRT_DBG), m_pOpts->IsStaticCrtDbg());
 
-    if (m_pOpts->GetOption(OPT_LIBS))
-        SetControlText(DLG_ID(IDEDIT_LIBS_LINK), m_pOpts->GetOption(OPT_LIBS));
+//    if (m_pOpts->GetOption(OPT_LIBS))
+//        SetControlText(DLG_ID(IDEDIT_LIBS_LINK), m_pOpts->GetOption(OPT_LIBS));
     if (m_pOpts->GetOption(OPT_BUILD_LIBS))
         SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), m_pOpts->GetOption(OPT_BUILD_LIBS));
-    if (m_pOpts->GetOption(OPT_LIB_DIRS))
-        SetControlText(DLG_ID(IDEDIT_LIBDIRS), m_pOpts->GetOption(OPT_LIB_DIRS));
+//    if (m_pOpts->GetOption(OPT_LIB_DIRS))
+//        SetControlText(DLG_ID(IDEDIT_LIBDIRS), m_pOpts->GetOption(OPT_LIB_DIRS));
 
     if (m_pOpts->GetOption(OPT_LINK_CMN))
         SetControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->GetOption(OPT_LINK_CMN));
@@ -51,11 +51,11 @@ void CTabLinker::OnOK(void)
     csz.GetWndText(GetDlgItem(IDEDIT_DEBUG));
     m_pOpts->UpdateOption(OPT_LINK_DBG, (char*) csz);
 
-    csz.GetWndText(GetDlgItem(IDEDIT_LIBDIRS));
-    m_pOpts->UpdateOption(OPT_LIB_DIRS, (char*) csz);
+//    csz.GetWndText(GetDlgItem(IDEDIT_LIBDIRS));
+//    m_pOpts->UpdateOption(OPT_LIB_DIRS, (char*) csz);
 
-    csz.GetWndText(GetDlgItem(IDEDIT_LIBS_LINK));
-    m_pOpts->UpdateOption(OPT_LIBS, (char*) csz);
+//    csz.GetWndText(GetDlgItem(IDEDIT_LIBS_LINK));
+//    m_pOpts->UpdateOption(OPT_LIBS, (char*) csz);
 
     csz.GetWndText(GetDlgItem(IDEDIT_LIBS_BUILD));
     m_pOpts->UpdateOption(OPT_BUILD_LIBS, (char*) csz);

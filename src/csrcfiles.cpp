@@ -249,6 +249,8 @@ void CSrcFiles::AddCompilerFlag(const char* pszFlag)
     }
 }
 
+#if 0
+// REVIEW: [KeyWorks - 8/7/2019] doesn't appear to be used
 void CSrcFiles::AddLibrary(const char* pszName)
 {
     if (!ttStrStrI(GetOption(OPT_LIBS), pszName))
@@ -260,6 +262,7 @@ void CSrcFiles::AddLibrary(const char* pszName)
         UpdateOption(OPT_LIBS, (char*) csz);
     }
 }
+#endif
 
 void CSrcFiles::ProcessLibSection(char* pszLibFile)
 {
