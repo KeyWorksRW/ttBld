@@ -48,11 +48,11 @@ CTabOptions::CTabOptions(const char* pszNinjaDir) : ttCDlg(IDDLG_OPTIONS), CWrit
 {
     m_tabGeneral.SetParentClass(this);
     m_tabCompiler.SetParentClass(this);
-    m_tabCLang.SetParentClass(this);
     m_tabLibs.SetParentClass(this);
     m_tabLinker.SetParentClass(this);
 #if defined(_WIN32)
     m_tabRcMidl.SetParentClass(this);
+    m_tabCLang.SetParentClass(this);
 #endif
 
 #ifdef PRIVATE      // used for testing
@@ -182,10 +182,6 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
                         m_hwndTabSub = m_tabCompiler.DoModeless(*this);
                         break;
 
-                    case TAB_CLANG:
-                        m_hwndTabSub = m_tabCLang.DoModeless(*this);
-                        break;
-
                     case TAB_LIBS:
                         m_hwndTabSub = m_tabLibs.DoModeless(*this);
                         break;
@@ -197,6 +193,10 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
 #if defined(_WIN32)
                     case TAB_RC_MIDL:
                         m_hwndTabSub = m_tabRcMidl.DoModeless(*this);
+                        break;
+
+                    case TAB_CLANG:
+                        m_hwndTabSub = m_tabCLang.DoModeless(*this);
                         break;
 #endif
 #ifdef PRIVATE

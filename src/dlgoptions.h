@@ -64,12 +64,13 @@ private:
 
     CTabGeneral  m_tabGeneral;
     CTabCompiler m_tabCompiler;
-    CTabCLang    m_tabCLang;
     CTabLibs     m_tabLibs;
     CTabLinker   m_tabLinker;
 #if defined(_WIN32)
     CTabRcMidl   m_tabRcMidl;
+    CTabCLang    m_tabCLang;
 #endif
+
 #ifdef PRIVATE
     CTabPrivate  m_tabPrivate;
 #endif
