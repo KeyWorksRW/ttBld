@@ -9,22 +9,22 @@
 #pragma once
 
 #ifndef IDDLG_OPTIONS
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 #include "writesrcfiles.h"  // CWriteSrcFiles
 
-#include "tabgeneral.h" // CTabGeneral
-#include "tabcompiler.h"// CTabCompiler
-#include "tabclang.h"   // CTabCLang
-#include "tablibs.h"    // CTabLibs
-#include "tablinker.h"  // CTabLinker
-#include "tabrcmidl.h"  // CTabRcMidl
+#include "tabgeneral.h"   // CTabGeneral
+#include "tabcompiler.h"  // CTabCompiler
+#include "tabclang.h"     // CTabCLang
+#include "tablibs.h"      // CTabLibs
+#include "tablinker.h"    // CTabLinker
+#include "tabrcmidl.h"    // CTabRcMidl
 
 #ifdef PRIVATE
-    #include ".private/tabprivate.h"    // CTabPrivate
+#include ".private/tabprivate.h"  // CTabPrivate
 #endif
 
 class CTabOptions : public ttCDlg, public CWriteSrcFiles
@@ -52,7 +52,8 @@ protected:
 private:
     // Class members
 
-    typedef enum {
+    typedef enum
+    {
         TAB_GENERAL = 0,
         TAB_COMPILER,
         TAB_LIBS,
@@ -67,12 +68,12 @@ private:
     CTabLibs     m_tabLibs;
     CTabLinker   m_tabLinker;
 #if defined(_WIN32)
-    CTabRcMidl   m_tabRcMidl;
-    CTabCLang    m_tabCLang;
+    CTabRcMidl m_tabRcMidl;
+    CTabCLang  m_tabCLang;
 #endif
 
 #ifdef PRIVATE
-    CTabPrivate  m_tabPrivate;
+    CTabPrivate m_tabPrivate;
 #endif
 
     HWND m_hwndTabSub;

@@ -10,11 +10,11 @@
 
 #include <stdio.h>  // for sprintf
 
-#include <ttfile.h> // ttCFile
+#include <ttfile.h>  // ttCFile
 
 #include "writesrcfiles.h"
-#include "verninja.h"    // CVerMakeNinja
-#include "options.h"     // CSrcOptions
+#include "verninja.h"  // CVerMakeNinja
+#include "options.h"   // CSrcOptions
 
 extern sfopt::OPT_VERSION aoptVersions[];
 
@@ -35,12 +35,12 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
     // write the .srcfiles.yaml
 
     static bool bWarned = false;
-    if (!bWarned)   // we can be called twice if a private Tab writes to a .private .srcfiles
+    if (!bWarned)  // we can be called twice if a private Tab writes to a .private .srcfiles
     {
         bWarned = true;
-        int major = 1;     // these three get filled in to the minum ttBld version required to process
+        int major = 1;  // these three get filled in to the minum ttBld version required to process
         int minor = 0;
-        int sub   = 0;
+        int sub = 0;
 
         for (size_t pos = 0; aoptVersions[pos].opt != OPT_OVERFLOW; ++pos)
         {
@@ -77,7 +77,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
         {
             bSeenVersion = true;
             CVerMakeNinja verinfo;
-            if (verinfo.IsSrcFilesNewer(kfIn)) // if .srcfiles is newer then our version, then leave the required version alone
+            if (verinfo.IsSrcFilesNewer(kfIn))  // if .srcfiles is newer then our version, then leave the required version alone
             {
                 m_lstOriginal += (const char*) kfIn;
             }
@@ -85,10 +85,10 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
             {
                 ttCStr cszVersion;
                 cszVersion.printf(txtNinjaVerFormat, GetMajorRequired(), GetMinorRequired(), GetSubRequired());
-                m_lstOriginal += (char*) cszVersion;    // always start with the require minimum version
-                m_lstOriginal += "";    // blank line after the version
+                m_lstOriginal += (char*) cszVersion;  // always start with the require minimum version
+                m_lstOriginal += "";                  // blank line after the version
             }
-            continue;   // we've already added this
+            continue;  // we've already added this
         }
 
         // Don't add any old options that have been replaced
@@ -114,8 +114,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
             bSeenVersion = true;
             ttCStr cszVersion;
             cszVersion.printf(txtNinjaVerFormat, GetMajorRequired(), GetMinorRequired(), GetSubRequired());
-            m_lstOriginal += (char*) cszVersion;    // always start with the require minimum version
-            m_lstOriginal += "";    // blank line after the version
+            m_lstOriginal += (char*) cszVersion;  // always start with the require minimum version
+            m_lstOriginal += "";                  // blank line after the version
         }
 
         m_lstOriginal += (const char*) kfIn;
@@ -136,7 +136,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
     size_t cBlankLines = 0;
     for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos)
     {
-        char* pszLine = (char*) m_lstOriginal[pos]; // since we're reducing the size, and about to delete it, okay to modify
+        char* pszLine = (char*) m_lstOriginal[pos];  // since we're reducing the size, and about to delete it, okay to modify
         ttTrimRight(pszLine);
 
         // Add a blank line before 64Bit and IncDirs so that They are a bit easier to spot
@@ -157,8 +157,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
         }
 
         if (*pszLine)
-           cBlankLines = 0;
-        else if (cBlankLines > 0)   // ignore if last line was also blank
+            cBlankLines = 0;
+        else if (cBlankLines > 0)  // ignore if last line was also blank
             continue;
         else
             ++cBlankLines;
@@ -167,26 +167,26 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 
     kfIn.RestoreCopy();
     if (strcmp(kfIn, kfOut) == 0)
-        return false;   // nothing has changed
+        return false;  // nothing has changed
     if (m_dryrun.IsEnabled())
     {
         m_dryrun.NewFile(pszFile);
         m_dryrun.DisplayFileDiff(kfIn, kfOut);
-        return false;   // since we didn't actually change anything
+        return false;  // since we didn't actually change anything
     }
     return kfOut.WriteFile(pszFile);
 }
 
 bool CWriteSrcFiles::WriteNew(const char* pszFile, const char* pszCommentHdr)
 {
-    m_lstOriginal.SetFlags(ttCList::FLG_ADD_DUPLICATES);    // required to add blank lines
+    m_lstOriginal.SetFlags(ttCList::FLG_ADD_DUPLICATES);  // required to add blank lines
     if (pszCommentHdr)
     {
         m_lstOriginal += pszCommentHdr;
         m_lstOriginal += "";
     }
     m_lstOriginal += "Options:";
-    if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() ||  m_cszRcName.IsNonEmpty())
+    if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() || m_cszRcName.IsNonEmpty())
     {
         ttCStr cszFile;
         m_lstOriginal += "";
@@ -258,7 +258,7 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
         m_posOptions = 0;
         m_lstOriginal.InsertAt(m_posOptions, "Options:");
         m_posInsert = m_posOptions + 1;
-        m_lstOriginal.InsertAt(m_posInsert, "");    // insert a blank line
+        m_lstOriginal.InsertAt(m_posInsert, "");  // insert a blank line
     }
     else
     {
@@ -270,7 +270,7 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
                 break;
             else if (ttIsAlpha(m_lstOriginal[m_posInsert][0]))
             {
-                m_lstOriginal.InsertAt(m_posInsert, "");    // insert a blank line
+                m_lstOriginal.InsertAt(m_posInsert, "");  // insert a blank line
                 break;
             }
         }
@@ -294,7 +294,7 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
                     if (!bSeenFlags)
                     {
                         bSeenFlags = true;
-                        m_lstOriginal.InsertAt(m_posInsert++, "");    // insert a blank line
+                        m_lstOriginal.InsertAt(m_posInsert++, "");  // insert a blank line
                     }
                     break;
 
@@ -303,7 +303,7 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
                     if (!bSeenBits)
                     {
                         bSeenBits = true;
-                        m_lstOriginal.InsertAt(m_posInsert++, "");    // insert a blank line
+                        m_lstOriginal.InsertAt(m_posInsert++, "");  // insert a blank line
                     }
                     break;
 
@@ -317,12 +317,12 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
                     if (!bSeenDirs)
                     {
                         bSeenDirs = true;
-                        m_lstOriginal.InsertAt(m_posInsert++, "");    // insert a blank line
+                        m_lstOriginal.InsertAt(m_posInsert++, "");  // insert a blank line
                     }
                     break;
 
                 case OPT_OPTIMIZE:
-                    m_lstOriginal.InsertAt(m_posInsert++, "");    // insert a blank line
+                    m_lstOriginal.InsertAt(m_posInsert++, "");  // insert a blank line
                     break;
 
                 default:
@@ -340,43 +340,43 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
 
 // If the option already exists then update it. If it doesn't exist, only write it if bAlwaysWrite is true
 
-static const char* pszOptionFmt =      "    %-12s %-12s # %s";
-static const char* pszLongOptionFmt =  "    %-12s %-30s    # %s";
+static const char* pszOptionFmt = "    %-12s %-12s # %s";
+static const char* pszLongOptionFmt = "    %-12s %-30s    # %s";
 static const char* pszNoCmtOptionFmt = "    %-12s %s";  // used when there isn't a comment
 
 void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 {
     const sfopt::OPT_SETTING* aOptions = GetOrgOptions();
-    ttCStr cszName(aOptions[pos].pszName);
-    cszName += ":";    // add the colon that separates a YAML key/value pair
+    ttCStr                    cszName(aOptions[pos].pszName);
+    cszName += ":";  // add the colon that separates a YAML key/value pair
 
-    char szLine[4096];
-    ptrdiff_t posOption = GetOptionLine(aOptions[pos].pszName); // this will set m_cszOptComment
+    char      szLine[4096];
+    ptrdiff_t posOption = GetOptionLine(aOptions[pos].pszName);  // this will set m_cszOptComment
     if (posOption >= 0)
     {
         // The option already exists, so add any changes that might have been made
 
-        if (m_cszOptComment.IsEmpty())      // we keep any comment that was previously used
+        if (m_cszOptComment.IsEmpty())  // we keep any comment that was previously used
             // REVIEW: [randalphwa - 3/13/2019] we don't allow changing the comment after it has been read in
             m_cszOptComment = aOptions[pos].pszComment;
 
         if (m_cszOptComment.IsNonEmpty() && ttStrLen(GetOptVal(pos)) > 12)
             // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
             sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt,
-                (char*) cszName, GetOptVal(pos), (char*) m_cszOptComment);
+                      (char*) cszName, GetOptVal(pos), (char*) m_cszOptComment);
         else
             // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
             sprintf_s(szLine, sizeof(szLine), m_cszOptComment.IsNonEmpty() ? pszOptionFmt : pszNoCmtOptionFmt,
-                (char*) cszName, GetOptVal(pos), (char*) m_cszOptComment);
+                      (char*) cszName, GetOptVal(pos), (char*) m_cszOptComment);
 
-        m_lstOriginal.Replace(posOption, szLine);   // replace the original line
+        m_lstOriginal.Replace(posOption, szLine);  // replace the original line
     }
     else if (GetChanged(aOptions[pos].opt) || GetRequired(aOptions[pos].opt))
     {
         sprintf_s(szLine, sizeof(szLine), ttStrLen(GetOptVal(pos)) > 12 ? pszLongOptionFmt : pszOptionFmt,
-            (char*) cszName,
-                GetOptVal(pos) ? GetOptVal(pos) : "",
-                aOptions[pos].pszComment ? aOptions[pos].pszComment : "");
+                  (char*) cszName,
+                  GetOptVal(pos) ? GetOptVal(pos) : "",
+                  aOptions[pos].pszComment ? aOptions[pos].pszComment : "");
         m_lstOriginal.InsertAt(m_posInsert++, szLine);
     }
 }
@@ -424,7 +424,7 @@ void CWriteSrcFiles::PreProcessOptions()
     if (GetPchHeader())
     {
         ttCStr cszHdr(GetPchHeader());
-        ttCStr cszSrc(GetPchCpp());     // GetPchCpp() will always return a string if GetPchHeader returns a string
+        ttCStr cszSrc(GetPchCpp());  // GetPchCpp() will always return a string if GetPchHeader returns a string
         cszHdr.RemoveExtension();
         cszSrc.RemoveExtension();
         if (ttIsSameStrI(cszHdr, cszSrc))

@@ -8,13 +8,13 @@
 
 #include "pch.h"
 
-#include <ttfile.h>    // ttCFile
-#include <ttlist.h>    // ttCList
-#include <ttenumstr.h> // ttCEnumStr
+#include <ttfile.h>     // ttCFile
+#include <ttlist.h>     // ttCList
+#include <ttenumstr.h>  // ttCEnumStr
 
-#include "funcs.h"      // List of function declarations
+#include "funcs.h"  // List of function declarations
 
-#if defined(_WIN32)    // no reason to use the batch files on non-Windows platforms
+#if defined(_WIN32)  // no reason to use the batch files on non-Windows platforms
 
 void CreateCodeCmd(const char* pszFile)
 {
@@ -40,10 +40,9 @@ void CreateCodeCmd(const char* pszFile)
     file.printf("call %kq\n\n", (char*) cszPath);
 
     file.WriteEol(
-            "setlocal\n"
-            "set VSCODE_DEV=\n"
-            "set ELECTRON_RUN_AS_NODE=1"
-    );
+        "setlocal\n"
+        "set VSCODE_DEV=\n"
+        "set ELECTRON_RUN_AS_NODE=1");
 
     cszPath = cszRoot;
     cszPath.AppendFileName("code.exe");
@@ -88,7 +87,7 @@ void CreateCodeCmd(const char* pszFile)
     }
 }
 
-#endif    // !defined(_WIN32)
+#endif  // !defined(_WIN32)
 
 static void AddToList(const char* pszEnv, ttCList& lstPaths)
 {
@@ -103,7 +102,7 @@ static void AddToList(const char* pszEnv, ttCList& lstPaths)
             while (enumLib.Enum())
             {
                 cszPath = enumLib;
-                ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+                ttForwardslashToBackslash(cszPath);  // just to be certain that they are consistent
                 lstPaths += cszPath;
             }
         }
@@ -113,15 +112,15 @@ static void AddToList(const char* pszEnv, ttCList& lstPaths)
 bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
 {
 #if !defined(_WIN32)
-    return false;   // MSVC compiler and environment is only available on Windows
+    return false;  // MSVC compiler and environment is only available on Windows
 
-#else    // Windows-only code below
+#else   // Windows-only code below
 
     ttCStr cszMSVC;
     if (!FindCurMsvcPath(cszMSVC))
-        return false;           // probably means MSVC isn't installed
+        return false;  // probably means MSVC isn't installed
 
-    bool bHost64 = IsHost64();     // figure out what processor we have to determine what compiler host to use
+    bool bHost64 = IsHost64();  // figure out what processor we have to determine what compiler host to use
 
     ttCList lstLib;
     // share the sub-heap so that only a single sub-heap will be created/destroyed
@@ -140,7 +139,7 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
     cszPath.AppendFileName("bin/");
     cszPath.AppendFileName(bHost64 ? "Hostx64/" : "Hostx86/");
     cszPath.AppendFileName(bDef64 ? "x64" : "x86");
-    ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+    ttForwardslashToBackslash(cszPath);  // just to be certain that they are consistent
     lstPath += cszPath;
 
     if (bDef64)
@@ -149,7 +148,7 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         cszPath.AppendFileName("bin/");
         cszPath.AppendFileName(bHost64 ? "Hostx64/" : "Hostx86/");
         cszPath.AppendFileName("x86");
-        ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+        ttForwardslashToBackslash(cszPath);  // just to be certain that they are consistent
         lstPath32 += cszPath;
 
         // The main reason for switching to Hostx64/x86 is to swap compilers. Not all parts of the toolchain are
@@ -177,7 +176,8 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         for (size_t pos = 0; lstLib.InRange(pos); ++pos)
         {
             cszPath = lstLib[pos];
-            while (cszPath.ReplaceStr("x64", "x86"));
+            while (cszPath.ReplaceStr("x64", "x86"))
+                ;
             lstLib32 += cszPath;
         }
     }
@@ -187,27 +187,28 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         for (size_t pos = 0; lstPath.InRange(pos); ++pos)
         {
             cszPath = lstPath[pos];
-            while (cszPath.ReplaceStr("x64", "x86"));
+            while (cszPath.ReplaceStr("x64", "x86"))
+                ;
             lstPath32 += cszPath;
         }
     }
 
     cszPath = cszMSVC;
     cszPath.AppendFileName(bDef64 ? "lib/x64" : "lib/x86");
-    ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+    ttForwardslashToBackslash(cszPath);  // just to be certain that they are consistent
     lstLib += cszPath;
 
     if (bDef64)
     {
         cszPath = cszMSVC;
         cszPath.AppendFileName("lib/x86");
-        ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+        ttForwardslashToBackslash(cszPath);  // just to be certain that they are consistent
         lstLib32 += cszPath;
     }
 
     cszPath = cszMSVC;
     cszPath.AppendFileName("include");
-    ttForwardslashToBackslash(cszPath); // just to be certain that they are consistent
+    ttForwardslashToBackslash(cszPath);  // just to be certain that they are consistent
     lstInc += cszPath;
 
     ttCFile file;
@@ -273,9 +274,9 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
     if (fileOrg.ReadFile(pszDstFile))
     {
         if (strcmp(fileOrg, file) == 0)
-            return true;    // nothing changed
+            return true;  // nothing changed
     }
 
     return file.WriteFile(pszDstFile);
-#endif    // end Windows-only code
+#endif  // end Windows-only code
 }

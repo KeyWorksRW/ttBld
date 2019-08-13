@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <ttstr.h>      // ttCStr
-#include <ttfile.h>     // ttCFile
+#include <ttstr.h>   // ttCStr
+#include <ttfile.h>  // ttCFile
 
 class CDryRun
 {
@@ -18,8 +18,8 @@ public:
 
     // Class functions
 
-    void Enable() { m_bEnabled = true; }
-    bool IsEnabled() { return m_bEnabled; }
+    void        Enable() { m_bEnabled = true; }
+    bool        IsEnabled() { return m_bEnabled; }
     const char* GetFileName() { return m_cszFilename; }
 
     void NewFile(const char* pszFile);  // will delete m_lstOut and replace m_cszFilename
@@ -28,6 +28,6 @@ public:
 private:
     // Class members
 
-    ttCStr  m_cszFilename;
-    bool    m_bEnabled;
+    ttCStr m_cszFilename;
+    bool   m_bEnabled;
 };

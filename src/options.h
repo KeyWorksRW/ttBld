@@ -11,15 +11,16 @@
 #ifndef __TTNINJA_OPTIONS_H__
 #define __TTNINJA_OPTIONS_H__
 
-#include <ttarray.h>    // ttCArray
+#include <ttarray.h>  // ttCArray
 
 namespace sfopt
-{           // .srcfiles.yaml otpions
+{  // .srcfiles.yaml otpions
 
-    extern const char* txtNinjaVerFormat; // "# Requires ttMakeNinja version %d.%d.%d or higher to process";
+    extern const char* txtNinjaVerFormat;  // "# Requires ttMakeNinja version %d.%d.%d or higher to process";
 
     typedef enum
     {
+        // clang-format off
         OPT_ERROR = 0,
 
         OPT_PROJECT,        // name of the project--will be used as the base target name (i.e., project: foo, target: foo.exe, fooD.exe, etc.)
@@ -80,12 +81,13 @@ namespace sfopt
         OPT_XGET_FLAGS,
 
         OPT_OVERFLOW
+        // clang-format on
     } OPT_INDEX;
 
     // { OPT_xxx, "name", "def value", boolean, required, "def comment" }
 
     typedef struct
-    {    // the original default settings for an option
+    {  // the original default settings for an option
         OPT_INDEX   opt;
         const char* pszName;
         const char* pszVal;
@@ -95,21 +97,21 @@ namespace sfopt
     } OPT_SETTING;
 
     typedef struct
-    {    // the updated version of the option
-        char*   pszVal;
-        char*   pszComment;
-        bool    bRequired;
+    {  // the updated version of the option
+        char* pszVal;
+        char* pszComment;
+        bool  bRequired;
     } OPT_UPDATE;
 
     typedef struct
     {
         OPT_INDEX opt;
-        int major;
-        int minor;
-        int sub;
+        int       major;
+        int       minor;
+        int       sub;
     } OPT_VERSION;
 
-} // end of sfopt namespace
+}  // namespace sfopt
 
 class CSrcOptions
 {
@@ -122,10 +124,10 @@ public:
     const char* GetOption(sfopt::OPT_INDEX index);
     bool        GetBoolOption(sfopt::OPT_INDEX index);
     const char* GetOptComment(sfopt::OPT_INDEX index);
-    bool        GetChanged(sfopt::OPT_INDEX index);     // returns true if the option has changed
+    bool        GetChanged(sfopt::OPT_INDEX index);  // returns true if the option has changed
 
-    bool        GetRequired(sfopt::OPT_INDEX index);    // returns true if the option is required
-    void        SetRequired(sfopt::OPT_INDEX index, bool bVal = true);
+    bool GetRequired(sfopt::OPT_INDEX index);  // returns true if the option is required
+    void SetRequired(sfopt::OPT_INDEX index, bool bVal = true);
 
     sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);  // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
     sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, bool bVal);
@@ -145,4 +147,4 @@ private:
     ttCArray<sfopt::OPT_UPDATE> m_aUpdateOpts;
 };
 
-#endif    // __TTNINJA_OPTIONS_H__
+#endif  // __TTNINJA_OPTIONS_H__

@@ -9,11 +9,11 @@
 #pragma once
 
 #ifndef IDDDLG_CONVERT
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
-#include <ttxml.h>      // ttCXMLBranch, ttCParseXML
+#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttxml.h>  // ttCXMLBranch, ttCParseXML
 
 #include "writesrcfiles.h"  // CWriteSrcFiles
 
@@ -60,18 +60,18 @@ protected:
 private:
     // Class members
 
-    ttCComboBox m_comboScripts;
-    ttCParseXML m_xml;
+    ttCComboBox    m_comboScripts;
+    ttCParseXML    m_xml;
     CWriteSrcFiles m_cSrcFiles;
 
-    ttCStr m_cszOutSrcFiles;      // where .srcfiles should be created
+    ttCStr m_cszOutSrcFiles;  // where .srcfiles should be created
 
     ttCStr m_cszDirSrcFiles;
     ttCStr m_cszConvertScript;
 
     ttCStr m_cszScriptRoot;
     ttCStr m_cszOutRoot;
-    ttCStr m_cszRelative;       // used to create a relative location for a source file
+    ttCStr m_cszRelative;  // used to create a relative location for a source file
 
     ttCStr m_cszCWD;
 };

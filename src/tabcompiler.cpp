@@ -114,7 +114,7 @@ void CTabCompiler::OnBtnChangePch()
         ttConvertToRelative(cszCWD, fdlg.GetFileName(), cszRelPath);
         SetControlText(DLG_ID(IDEDIT_PCH), cszRelPath);
 
-        if (ttFileExists(cszCpp))   // if the current source file exists, assume that's what the user wants
+        if (ttFileExists(cszCpp))  // if the current source file exists, assume that's what the user wants
             return;
 
         // The default behaviour is to use the same base name for the C++ source file as the precompiled header file. So, if they are the same, then

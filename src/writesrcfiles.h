@@ -11,21 +11,26 @@
 #ifndef __WRITE_SRCFILES_H__
 #define __WRITE_SRCFILES_H__
 
-#include <ttstr.h>                      // ttStr, ttCWD
-#include <ttlist.h>                     // ttCList, ttCDblList, ttCStrIntList
+#include <ttstr.h>   // ttStr, ttCWD
+#include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
 
-#include "csrcfiles.h"                  // CSrcFiles
-#include "dryrun.h"                     // CDryRun
+#include "csrcfiles.h"  // CSrcFiles
+#include "dryrun.h"     // CDryRun
 
 class CWriteSrcFiles : public CSrcFiles
 {
 public:
-    CWriteSrcFiles(const char* pszNinjaDir = nullptr) : CSrcFiles(pszNinjaDir) { m_posOptions = -1; m_posInsert = 0; }
+    CWriteSrcFiles(const char* pszNinjaDir = nullptr)
+        : CSrcFiles(pszNinjaDir)
+    {
+        m_posOptions = -1;
+        m_posInsert = 0;
+    }
 
     // Class methods
 
-    bool WriteUpdates(const char* pszFile = txtSrcFilesFileName);               // write updates to the [OPTIONS] section
-    bool WriteNew(const char* pszFile, const char* pszCommentHdr = nullptr);    // write complete .srcfiles.yaml file (replacing any file that already exists)
+    bool WriteUpdates(const char* pszFile = txtSrcFilesFileName);             // write updates to the [OPTIONS] section
+    bool WriteNew(const char* pszFile, const char* pszCommentHdr = nullptr);  // write complete .srcfiles.yaml file (replacing any file that already exists)
 
     ttCList* GetOrgList() { return &m_lstOriginal; }
 
@@ -38,19 +43,19 @@ public:
 
 protected:
     void      PreProcessOptions();
-    ptrdiff_t GetOptionLine(const char* pszOption);     // on success m_cszOptComment will be filled in
+    ptrdiff_t GetOptionLine(const char* pszOption);  // on success m_cszOptComment will be filled in
     ptrdiff_t FindOption(const char* pszOption, ttCStr& cszDst);
     ptrdiff_t FindSection(const char* pszSection);
 
 private:
     // Class members
 
-    ttCStr      m_cszOptComment;
-    ttCList     m_lstOriginal;
-    CDryRun     m_dryrun;
+    ttCStr  m_cszOptComment;
+    ttCList m_lstOriginal;
+    CDryRun m_dryrun;
 
-    ptrdiff_t   m_posOptions;
-    ptrdiff_t   m_posInsert;
+    ptrdiff_t m_posOptions;
+    ptrdiff_t m_posInsert;
 };
 
 #endif  // __WRITE_SRCFILES_H__

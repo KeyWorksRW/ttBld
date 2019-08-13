@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include <ttlist.h>                     // ttCList, ttCDblList, ttCStrIntList
+#include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
 
-#include "csrcfiles.h"      // CSrcFiles
-#include "dryrun.h"         // CDryRun
+#include "csrcfiles.h"  // CSrcFiles
+#include "dryrun.h"     // CDryRun
 
 class CNinja : public CSrcFiles
 {
@@ -29,9 +29,11 @@ public:
 
     typedef enum
     {
+        // clang-format off
         CMPLR_MSVC     = 0,     // these MUST match the array of strings aszCompilerPrefix[] in ninja.cpp
         CMPLR_CLANG    = 1,
         CMPLR_GCC      = 2,
+        // clang-format on
     } CMPLR_TYPE;
 
     // Public functions
@@ -48,17 +50,17 @@ public:
 
     bool CreateMakeFile(bool bAllVersion = false, const char* pszDir = nullptr);
 
-    const char* GetRcFile()     { return m_cszRcName; }
+    const char* GetRcFile() { return m_cszRcName; }
     const char* GetScriptFile() { return m_cszScriptFile; }
 
-    ttCList* GetSrcFileList()  { return &m_lstSrcFiles; }
-    ttCList* GetLibFileList()  { return &m_lstLibFiles; }
-    ttCList* GetRcDepList()     { return &m_lstRcDependencies; }
+    ttCList* GetSrcFileList() { return &m_lstSrcFiles; }
+    ttCList* GetLibFileList() { return &m_lstLibFiles; }
+    ttCList* GetRcDepList() { return &m_lstRcDependencies; }
 
     bool IsValidVersion() { return m_bInvalidVersion != true; }  // returns false if .srcfiles.yaml requires a newer version
-    bool IsBin64()        { return m_bBin64Exists; }
+    bool IsBin64() { return m_bBin64Exists; }
 
-    const char* GetLibName() { return m_cszLibName; }        // name and location of any additional library to build
+    const char* GetLibName() { return m_cszLibName; }  // name and location of any additional library to build
     const char* GetHHPName() { return m_cszHHPName; }
 
     void EnableDryRun() { m_dryrun.Enable(); }
@@ -83,33 +85,32 @@ protected:
     void msvcWriteMidlTargets(CMPLR_TYPE cmplr);
 #endif
 
-    bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
+    bool        FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
     const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);
 
     CDryRun m_dryrun;
     ttCList m_lstRcDependencies;
 
 private:
-
     // Class members
 
     ttCFile* m_pkfOut;
     GEN_TYPE m_gentype;
 
-    ttCStr m_cszPCH;            // the .pch name that will be generated
-    ttCStr m_cszCPP_PCH;        // the .cpp name that will be used to create the .pch file
-    ttCStr m_cszPCHObj;         // the .obj file that is built to create the .pch file
-    ttCStr m_cszChmFile;        // set if a .hhp file was specified in .srcfiles.yaml
-    ttCStr m_cszScriptFile;     // the .ninja file
+    ttCStr m_cszPCH;         // the .pch name that will be generated
+    ttCStr m_cszCPP_PCH;     // the .cpp name that will be used to create the .pch file
+    ttCStr m_cszPCHObj;      // the .obj file that is built to create the .pch file
+    ttCStr m_cszChmFile;     // set if a .hhp file was specified in .srcfiles.yaml
+    ttCStr m_cszScriptFile;  // the .ninja file
 
     ttCList m_lstBuildLibs32D;
     ttCList m_lstBuildLibs64D;
     ttCList m_lstBuildLibs32R;
     ttCList m_lstBuildLibs64R;
 
-    ttCDblList m_dlstTargetDir; // target name, directory to use
+    ttCDblList m_dlstTargetDir;  // target name, directory to use
 
-    bool m_bBin64Exists;        // if true, the directory ../bin64 exists
-    bool m_bForceWrite;         // write the ninja file even if it hasn't changed
-    bool m_bInvalidVersion;     // true if a newer version is needed to parse the .srcfiles.yaml
+    bool m_bBin64Exists;     // if true, the directory ../bin64 exists
+    bool m_bForceWrite;      // write the ninja file even if it hasn't changed
+    bool m_bInvalidVersion;  // true if a newer version is needed to parse the .srcfiles.yaml
 };

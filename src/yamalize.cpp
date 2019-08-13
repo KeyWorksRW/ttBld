@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-#include "writesrcfiles.h"    // CWriteSrcFiles
+#include "writesrcfiles.h"  // CWriteSrcFiles
 
 // This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode directory does not exist, it will be created.
 // The srcfiles.yaml is not designed to be tracked, so it's fine to customize it based on the current system (what compilers are available, what platform we're on, etc.).
@@ -22,12 +22,12 @@ bool Yamalize()
     cOrgSrcFiles.ReadFile(".srcfiles.yaml");
 
     CWriteSrcFiles cNewSrcFiles;
-    ttCList* plstFiles = cNewSrcFiles.GetSrcFilesList();
+    ttCList*       plstFiles = cNewSrcFiles.GetSrcFilesList();
 
     if (ttFileExists(".srcfiles.yaml"))
         *plstFiles += ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml";
     else
-        *plstFiles += "*.c*";      // TODO: this is a placeholder, need to be smarter about what wildcards to use
+        *plstFiles += "*.c*";  // TODO: this is a placeholder, need to be smarter about what wildcards to use
 
     cNewSrcFiles.UpdateOption(OPT_PROJECT, cOrgSrcFiles.GetOption(OPT_PROJECT));
     cNewSrcFiles.UpdateOption(OPT_EXE_TYPE, cOrgSrcFiles.GetOption(OPT_EXE_TYPE));
@@ -35,9 +35,9 @@ bool Yamalize()
     cNewSrcFiles.UpdateOption(OPT_PCH_CPP, cOrgSrcFiles.GetPchCpp());
 
     cNewSrcFiles.UpdateOption(OPT_OPTIMIZE, cOrgSrcFiles.GetOption(OPT_OPTIMIZE));
-        cNewSrcFiles.SetRequired(OPT_OPTIMIZE);
+    cNewSrcFiles.SetRequired(OPT_OPTIMIZE);
     cNewSrcFiles.UpdateOption(OPT_WARN_LEVEL, cOrgSrcFiles.GetOption(OPT_WARN_LEVEL));
-        cNewSrcFiles.SetRequired(OPT_WARN_LEVEL);
+    cNewSrcFiles.SetRequired(OPT_WARN_LEVEL);
 
     cNewSrcFiles.UpdateOption(OPT_PERMISSIVE, cOrgSrcFiles.GetOption(OPT_PERMISSIVE));
     cNewSrcFiles.UpdateOption(OPT_STDCALL, cOrgSrcFiles.GetOption(OPT_STDCALL));

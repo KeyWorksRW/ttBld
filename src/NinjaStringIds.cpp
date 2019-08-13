@@ -24,6 +24,7 @@ typedef struct
 
 static const ttIDS_LIST aNinjaStringIds[] =
 {
+    // clang-format off
     { IDS_CANT_FIND_COMPILER,        _XGET("Unable to find either the cl.exe or clang-cl.exe compilers in PATH.") },
     { IDS_MAKENINJA_CORRUPTED,       _XGET("ttBld.exe is corrupted -- cannot read the necessary resource.") },
 
@@ -95,6 +96,7 @@ static const ttIDS_LIST aNinjaStringIds[] =
 
     // TRANSLATORS: this string should never be used unless there is a bug in the code
     { IDS_NINJA_END_LIST,            _XGET("missing string id") },
+    // clang-format on
 };
 
 static ttCIntStrList clsIntStrList;

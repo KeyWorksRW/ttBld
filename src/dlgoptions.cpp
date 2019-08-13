@@ -44,7 +44,9 @@ bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun)
         return false;
 }
 
-CTabOptions::CTabOptions(const char* pszNinjaDir) : ttCDlg(IDDLG_OPTIONS), CWriteSrcFiles(pszNinjaDir)
+CTabOptions::CTabOptions(const char* pszNinjaDir)
+    : ttCDlg(IDDLG_OPTIONS)
+    , CWriteSrcFiles(pszNinjaDir)
 {
     m_tabGeneral.SetParentClass(this);
     m_tabCompiler.SetParentClass(this);
@@ -55,11 +57,11 @@ CTabOptions::CTabOptions(const char* pszNinjaDir) : ttCDlg(IDDLG_OPTIONS), CWrit
     m_tabCLang.SetParentClass(this);
 #endif
 
-#ifdef PRIVATE      // used for testing
+#ifdef PRIVATE  // used for testing
     m_tabPrivate.SetParentClass(this);
 #endif
 
-    ReadFile(); // read in any existing .srcfiles
+    ReadFile();  // read in any existing .srcfiles
 
     if (ttIsEmpty(GetPchHeader()))
     {
@@ -95,7 +97,7 @@ void CTabOptions::OnBegin(void)
 #ifdef _DEBUG
     auto result =
 #endif
-    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_GENERAL, (LPARAM) &ti);
+        SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_GENERAL, (LPARAM) &ti);
     ttASSERT(result == 0);
 
     ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_COMPILER);
@@ -108,17 +110,17 @@ void CTabOptions::OnBegin(void)
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LINKER, (LPARAM) &ti);
 
 #if defined(_WIN32)
-    ti.pszText = (char*) "Rc/Midl";   // don't translate this
+    ti.pszText = (char*) "Rc/Midl";  // don't translate this
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_RC_MIDL, (LPARAM) &ti);
 
     // The following tab is for clang-cl, which is why it is Windows-only
 
-    ti.pszText = (char*) "CLang";   // don't translate this
+    ti.pszText = (char*) "CLang";  // don't translate this
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_CLANG, (LPARAM) &ti);
 #endif
 
 #if defined(PRIVATE)
-    ti.pszText = (char*) "Private";   // don't translate this
+    ti.pszText = (char*) "Private";  // don't translate this
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_PRIVATE, (LPARAM) &ti);
 #endif
 
@@ -170,47 +172,47 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
             break;
 
         case TCN_SELCHANGE:
+        {
+            auto curTab = SendItemMsg(IDTAB, TCM_GETCURSEL);
+            switch (curTab)
             {
-                auto curTab = SendItemMsg(IDTAB, TCM_GETCURSEL);
-                switch (curTab)
-                {
-                    case TAB_GENERAL:
-                        m_hwndTabSub = m_tabGeneral.DoModeless(*this);
-                        break;
+                case TAB_GENERAL:
+                    m_hwndTabSub = m_tabGeneral.DoModeless(*this);
+                    break;
 
-                    case TAB_COMPILER:
-                        m_hwndTabSub = m_tabCompiler.DoModeless(*this);
-                        break;
+                case TAB_COMPILER:
+                    m_hwndTabSub = m_tabCompiler.DoModeless(*this);
+                    break;
 
-                    case TAB_LIBS:
-                        m_hwndTabSub = m_tabLibs.DoModeless(*this);
-                        break;
+                case TAB_LIBS:
+                    m_hwndTabSub = m_tabLibs.DoModeless(*this);
+                    break;
 
-                    case TAB_LINKER:
-                        m_hwndTabSub = m_tabLinker.DoModeless(*this);
-                        break;
+                case TAB_LINKER:
+                    m_hwndTabSub = m_tabLinker.DoModeless(*this);
+                    break;
 
 #if defined(_WIN32)
-                    case TAB_RC_MIDL:
-                        m_hwndTabSub = m_tabRcMidl.DoModeless(*this);
-                        break;
+                case TAB_RC_MIDL:
+                    m_hwndTabSub = m_tabRcMidl.DoModeless(*this);
+                    break;
 
-                    case TAB_CLANG:
-                        m_hwndTabSub = m_tabCLang.DoModeless(*this);
-                        break;
+                case TAB_CLANG:
+                    m_hwndTabSub = m_tabCLang.DoModeless(*this);
+                    break;
 #endif
 #ifdef PRIVATE
-                    case TAB_PRIVATE:
-                        m_hwndTabSub = m_tabPrivate.DoModeless(*this);
-                        break;
+                case TAB_PRIVATE:
+                    m_hwndTabSub = m_tabPrivate.DoModeless(*this);
+                    break;
 #endif
 
-                    default:
-                        return 0;
-                }
-                ::ShowWindow(m_hwndTabSub, SW_SHOW);
+                default:
+                    return 0;
             }
-            break;
+            ::ShowWindow(m_hwndTabSub, SW_SHOW);
+        }
+        break;
 
         default:
             break;

@@ -9,15 +9,18 @@
 #pragma once
 
 #ifndef IDTAB_CLANG
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 class CTabCLang : public ttCDlg
 {
 public:
-    CTabCLang() : ttCDlg(IDTAB_CLANG) { }
+    CTabCLang()
+        : ttCDlg(IDTAB_CLANG)
+    {
+    }
 
     // Class functions
 

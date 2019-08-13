@@ -8,12 +8,12 @@
 
 #pragma once
 
-#include <ttstr.h>    // ttCStr
+#include <ttstr.h>  // ttCStr
 
 class CVerMakeNinja
 {
 public:
-    CVerMakeNinja();    // this will initial our current version of major, minor, and sub values
+    CVerMakeNinja();  // this will initial our current version of major, minor, and sub values
 
     // Public functions
 

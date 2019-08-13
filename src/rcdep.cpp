@@ -8,11 +8,11 @@
 
 #include "pch.h"
 
-#if defined(_WIN32) // only Windows builds use .rc files
+#if defined(_WIN32)  // only Windows builds use .rc files
 
 #include "ninja.h"  // CNinja
 
-static const char* lstRcKeywords[] = {     // list of keywords that load a file
+static const char* lstRcKeywords[] = {  // list of keywords that load a file
     "BITMP",
     "CURSOR",
     "FONT",
@@ -110,12 +110,12 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                 }
 
                 size_t posHdr = m_lstRcDependencies.GetPos(cszHeader);
-                bool bHdrSeenBefore = (posHdr != (size_t) -1);
+                bool   bHdrSeenBefore = (posHdr != (size_t) -1);
                 if (!bHdrSeenBefore)
                     posHdr = m_lstRcDependencies.Add(cszHeader);
 
                 if (!bHdrSeenBefore)
-                    FindRcDependencies(pszRcFile, cszHeader, cszRelPath);       // now search the header file for any #includes it might have
+                    FindRcDependencies(pszRcFile, cszHeader, cszRelPath);  // now search the header file for any #includes it might have
             }
         }
 
@@ -124,14 +124,14 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
         else
         {
             char* pszKeyWord = ttFindNonSpace(kf);
-            if (!pszKeyWord || pszKeyWord[0] == '/' || pszKeyWord[0] == CH_QUOTE)   // TEXTINCLUDE typically puts things in quotes
-                continue;   // blank line or comment line
+            if (!pszKeyWord || pszKeyWord[0] == '/' || pszKeyWord[0] == CH_QUOTE)  // TEXTINCLUDE typically puts things in quotes
+                continue;                                                          // blank line or comment line
             pszKeyWord = ttFindSpace(pszKeyWord);
             if (!pszKeyWord)
-                continue;   // means it's not a line that will include anything
+                continue;  // means it's not a line that will include anything
             pszKeyWord = ttFindNonSpace(pszKeyWord);
             if (!pszKeyWord)
-                continue;   // means it's not a line that will include anything
+                continue;  // means it's not a line that will include anything
 
             for (size_t pos = 0; lstRcKeywords[pos]; ++pos)
             {
@@ -151,18 +151,18 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                         char* pszSlash = ttStrStr(cszFile, "\\\\");
                         if (pszSlash)
                         {
-                            do {
-
+                            do
+                            {
                                 *pszSlash++ = '/';
                                 ttStrCpy(pszSlash, pszSlash + 1);
                                 pszSlash = ttStrStr(pszSlash, "\\\\");
-                            } while(pszSlash);
+                            } while (pszSlash);
                         }
 
                         if (pszHdr)
                         {
                             ttCStr cszHdr(pszHdr);
-                            if (ttFileExists(cszHdr)) // we only want the directory
+                            if (ttFileExists(cszHdr))  // we only want the directory
                             {
                                 char* pszFilePortion = ttFindFilePortion(cszHdr);
                                 *pszFilePortion = 0;
@@ -183,12 +183,12 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                             // BUGBUG: [KeyWorks - 7/11/2019] See Issue #46 (https://github.com/KeyWorksRW/keyBld/issues/46)
                             // Once we commit to wxWidgets, we need to use wxNumberFormatter to deal with the number.
                             cszErrMsg.printf(TRANSLATE("%s(%kt,%kt):  warning: cannot locate include file %s"),
-                                pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (pszFileName - kf.GetLnPtr()),  (char*) cszFile);
+                                             pszHdr ? pszHdr : pszRcFile, curLine, (size_t)(pszFileName - kf.GetLnPtr()), (char*) cszFile);
                             m_lstErrors += cszErrMsg;
                             break;
                         }
                         size_t posHdr = m_lstRcDependencies.GetPos(cszFile);
-                        bool bHdrSeenBefore = (posHdr != (size_t) -1);
+                        bool   bHdrSeenBefore = (posHdr != (size_t) -1);
                         if (!bHdrSeenBefore)
                             posHdr = m_lstRcDependencies.Add(cszFile);
                     }

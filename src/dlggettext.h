@@ -9,17 +9,19 @@
 #pragma once
 
 #if (defined(_WIN64) || defined(_WIN32)) && !defined(IDDLG_XGETTEXT)
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
-#include <ttlist.h>     // ttCList
-#include <ttstr.h>      // ttCStr
+#include <ttdlg.h>   // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttlist.h>  // ttCList
+#include <ttstr.h>   // ttCStr
 
 class CDlgGetText : public ttCDlg
 {
 public:
-    CDlgGetText() : ttCDlg(IDDLG_XGETTEXT) {
+    CDlgGetText()
+        : ttCDlg(IDDLG_XGETTEXT)
+    {
         m_bIndents = false;
         m_bNoHeaders = false;
     }
@@ -47,8 +49,8 @@ private:
     // Class members
 
     ttCListBox m_lbKeywords;
-    ttCStr m_cszInputFile;
-    ttCList m_lstKeywords;
+    ttCStr     m_cszInputFile;
+    ttCList    m_lstKeywords;
 
     bool m_bIndents;
     bool m_bNoHeaders;

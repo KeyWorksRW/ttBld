@@ -10,10 +10,10 @@
 
 #if defined(_WIN32)
 
-#include <ttreg.h>      // ttCRegistry
-#include <ttstr.h>      // ttCStr
-#include <ttfindfile.h> // ttCFindFile
-#include <ttenumstr.h>  // ttCEnumStr
+#include <ttreg.h>       // ttCRegistry
+#include <ttstr.h>       // ttCStr
+#include <ttfindfile.h>  // ttCFindFile
+#include <ttenumstr.h>   // ttCEnumStr
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that
@@ -43,7 +43,8 @@ bool FindCurMsvcPath(ttCStr& cszPath)
                 ttCFindFile ff(cszPath);
                 if (ff.IsValid())
                 {
-                    do {
+                    do
+                    {
                         if (ff.IsDir() && ttIsValidFileChar(ff, 0))
                         {
                             psz = ttStrChr(cszPath, '*');
@@ -51,7 +52,7 @@ bool FindCurMsvcPath(ttCStr& cszPath)
                             cszPath += (const char*) ff;
                             return true;
                         }
-                    } while(ff.NextFile());
+                    } while (ff.NextFile());
                 }
             }
         }
@@ -71,7 +72,7 @@ bool FindVsCode(ttCStr& cszPath)
             cszPath.GetQuotedString(szPath);
             char* pszExe = ttFindFilePortion(cszPath);
             if (pszExe)
-                *pszExe = 0;    // remove the filename
+                *pszExe = 0;  // remove the filename
             return true;
         }
     }
@@ -114,9 +115,8 @@ bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
     return false;
 }
 
-static const char* aSrcFilesLocations[] =
-{
-    ".srcfiles.yaml",           // this MUST be the first file
+static const char* aSrcFilesLocations[] = {
+    ".srcfiles.yaml",  // this MUST be the first file
     ".vscode/.srcfiles.yaml",
     ".private/.srcfiles.yaml",
     "build/.srcfiles.yaml",

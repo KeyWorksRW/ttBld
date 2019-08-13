@@ -28,8 +28,7 @@ static const char* txtTasks =
     "            }\n"
     "        }\n"
     "    ]\n"
-    "}\n"
-    ;
+    "}\n";
 
 static const char* txtLaunch =
     "{\n"
@@ -42,10 +41,9 @@ static const char* txtLaunch =
     "            \"name\": \"%projgect%\"\n"
     "        }\n"
     "    ]\n"
-    "}\n"
-    ;
+    "}\n";
 
-bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)      // returns true unless unable to write to a file
+bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns true unless unable to write to a file
 {
     CSrcFiles cSrcFiles;
     cSrcFiles.ReadFile(pszSrcFiles);

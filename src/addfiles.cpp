@@ -8,8 +8,8 @@
 
 #include "pch.h"
 
-#include <ttlist.h>     // ttCList, ttCDblList, ttCStrIntList
-#include <ttfile.h>     // ttCFile
+#include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
+#include <ttfile.h>  // ttCFile
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
@@ -78,12 +78,12 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         return;
     }
 
-    kfOut.WriteEol(kfIn);   // This will be the Files: line
+    kfOut.WriteEol(kfIn);  // This will be the Files: line
     while (kfIn.ReadLine())
     {
-        if (ttIsAlpha(*(const char*)kfIn))  // Alphabetical character in first column is a new section
+        if (ttIsAlpha(*(const char*) kfIn))  // Alphabetical character in first column is a new section
             break;
-        else if (!ttFindNonSpace(kfIn))   // blank line, insert after it
+        else if (!ttFindNonSpace(kfIn))  // blank line, insert after it
         {
             kfOut.WriteEol(kfIn);
             break;

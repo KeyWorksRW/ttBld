@@ -8,12 +8,12 @@
 
 #include "pch.h"
 
-#include <ttenumstr.h>          // ttCEnumStr
-#include <ttlist.h>             // ttCList
+#include <ttenumstr.h>  // ttCEnumStr
+#include <ttlist.h>     // ttCList
 
-#include "csrcfiles.h"          // CSrcFiles
+#include "csrcfiles.h"  // CSrcFiles
 #include "resource.h"
-#include "funcs.h"      // List of function declarations
+#include "funcs.h"  // List of function declarations
 
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, const char* pszProblem);
 static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
@@ -33,8 +33,7 @@ static const char* txtProperties =
     "         }\n"
     "     ],\n"
     "     \"version\": 4\n"
-    "}\n"
-    ;
+    "}\n";
 
 static const char* txtLaunch =
     "{\n"
@@ -59,8 +58,7 @@ static const char* txtLaunch =
     "         \"preLaunchTask\": \"%bld%\"\n"
     "      }\n"
     "   ]\n"
-    "}\n"
-    ;
+    "}\n";
 
 static const char* txtTasks =
     "{\n"
@@ -69,8 +67,7 @@ static const char* txtTasks =
     "    \"version\": \"2.0.0\",\n"
     "    \"tasks\": [\n"
     "    ]\n"
-    "}\n"
-    ;
+    "}\n";
 
 static const char* txtSubTasks =
     "        {\n"
@@ -79,8 +76,7 @@ static const char* txtSubTasks =
     "            \"command\": \"%command%\",\n"
     "            \"group\": \"%group%\",\n"
     "            \"problemMatcher\": [ %problem% ]\n"
-    "        },\n"
-    ;
+    "        },\n";
 
 static const char* txtMsvcSubTasks =
     "        {\n"
@@ -92,8 +88,7 @@ static const char* txtMsvcSubTasks =
     "                \"base\": \"$msCompile\",\n"
     "                \"fileLocation\": [\"relative\", \"${workspaceFolder}\"]\n"
     "            },\n"
-    "        },\n"
-    ;
+    "        },\n";
 
 static const char* txtClangSubTasks =
     "        {\n"
@@ -113,19 +108,16 @@ static const char* txtClangSubTasks =
     "                    \"message\": 5\n"
     "                }\n"
     "            }\n"
-    "        },\n"
-    ;
+    "        },\n";
 
 static const char* txtNormalGroup =
-    "            \"group\": \"build\",\n"
-;
+    "            \"group\": \"build\",\n";
 
 static const char* txtDefaultGroup =
     "            \"group\": {\n"
     "                \"kind\": \"build\",\n"
     "                \"isDefault\": true\n"
-    "            },\n"
-;
+    "            },\n";
 
 static const char* txtDefaultTask =
     "        {\n"
@@ -137,8 +129,7 @@ static const char* txtDefaultTask =
     "                \"isDefault\": true\n"
     "            },\n"
     "            \"problemMatcher\": [ %problem% ]\n"
-    "        },\n"
-    ;
+    "        },\n";
 
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults);
@@ -146,7 +137,7 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults);
 
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 
-bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)      // returns true unless unable to write to a file
+bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)  // returns true unless unable to write to a file
 {
     if (!ttDirExists(".vscode"))
     {
@@ -211,7 +202,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             for (size_t pos = 0; lstDefines.InRange(pos); ++pos)
                 kfOut.printf("                %kq,\n", lstDefines[pos]);
 
-            // we always define _DEBUG. Under Windows, we always define _WIN32.
+                // we always define _DEBUG. Under Windows, we always define _WIN32.
 
 #if defined(_WIN32)
             kfOut.WriteEol("                \042_WIN32\042,");
@@ -223,7 +214,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         else if (ttIsSameSubStrI(ttFindNonSpace(kf), "\042includePath") && cSrcFiles.GetOption(OPT_INC_DIRS))
         {
             kfOut.WriteEol(kf);
-            while (kf.ReadLine())   // find the end of the current list of includes
+            while (kf.ReadLine())  // find the end of the current list of includes
             {
                 if (!ttIsSameSubStr(ttFindNonSpace(kf), "]"))
                     kfOut.WriteEol(kf);
@@ -262,7 +253,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 {
     if (cSrcFiles.IsExeTypeLib() || cSrcFiles.IsExeTypeDll())
-        return true; // nothing that we know how to launch if this is a library or dynamic link library
+        return true;  // nothing that we know how to launch if this is a library or dynamic link library
 
     ttCFile kf;
 
@@ -356,7 +347,8 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             // Build MSVC release
 
             cszLabel.printf("Build %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                cSrcFiles.GetTargetRelease64() : cSrcFiles.GetTargetRelease32()));
+                                                                                   cSrcFiles.GetTargetRelease64() :
+                                                                                   cSrcFiles.GetTargetRelease32()));
             cszMakeCommand.printf("nmake.exe -nologo release %s", (char*) cszMakeFileOption);
             AddMsvcTask(kfOut, "Build Release MSVC", txtNormalGroup, cszMakeCommand);
 
@@ -421,13 +413,16 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
 #if !defined(_WIN32)
             {
-                while (kfOut.ReplaceStr("msvcBuild", "gccBuild"));
-                while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=gcc"));
-                while (kfOut.ReplaceStr("MSVC", "GCC"));
+                while (kfOut.ReplaceStr("msvcBuild", "gccBuild"))
+                    ;
+                while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=gcc"))
+                    ;
+                while (kfOut.ReplaceStr("MSVC", "GCC"))
+                    ;
             }
-            while (kfOut.ReplaceStr("$msCompile", "$gcc"));
+            while (kfOut.ReplaceStr("$msCompile", "$gcc"))
+                ;
 #endif
-
         }
         else
             kfOut.WriteEol(kfTask);
@@ -465,12 +460,12 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             return false;
         }
     }
-    kfIn.MakeCopy();    // make a copy for comparing with later
+    kfIn.MakeCopy();  // make a copy for comparing with later
 
     // Gather all of our include directories into a list
 
     ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
-    ttCList lstIncludes;
+    ttCList    lstIncludes;
     lstIncludes.SetFlags(ttCList::FLG_IGNORE_CASE);
     while (enumInc.Enum())
         lstIncludes += enumInc;
@@ -480,7 +475,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     if (FindCurMsvcPath(cszMSVC))
     {
         cszMSVC.AppendFileName("include");
-        ttBackslashToForwardslash(cszMSVC); // so we don't have to escape all the backslashes
+        ttBackslashToForwardslash(cszMSVC);  // so we don't have to escape all the backslashes
         lstIncludes += cszMSVC;
     }
 #endif
@@ -516,7 +511,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         {
             kfOut.WriteEol(kfIn);
             if (ttStrChr(kfIn, CH_RIGHT_BRACKET))
-                continue;   // all on one line, we don't process it
+                continue;  // all on one line, we don't process it
             while (kfIn.ReadLine())
             {
                 if (ttStrChr(kfIn, CH_RIGHT_BRACKET))
@@ -526,7 +521,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     continue;
                 ttCStr cszDef;
                 cszDef.GetQuotedString(pszDef);
-                lstDefines += cszDef;   // this will only get added if it isn't a duplicate
+                lstDefines += cszDef;  // this will only get added if it isn't a duplicate
             }
 
             if (lstDefines.GetCount() > 1)
@@ -539,7 +534,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             if (lstDefines.GetCount() > 0)
                 kfOut.printf("                %kq\n", lstDefines[lstDefines.GetCount() - 1]);
 
-            kfOut.WriteEol  ("            ],");
+            kfOut.WriteEol("            ],");
             continue;
         }
 
@@ -547,7 +542,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         {
             kfOut.WriteEol(kfIn);
             if (ttStrChr(kfIn, CH_RIGHT_BRACKET))
-                continue;   // all on one line, we don't process it
+                continue;  // all on one line, we don't process it
             while (kfIn.ReadLine())
             {
                 if (ttStrChr(kfIn, CH_RIGHT_BRACKET))
@@ -557,7 +552,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     continue;
                 ttCStr cszDef;
                 cszDef.GetQuotedString(pszDef);
-                lstIncludes += cszDef;   // this will only get added if it isn't a duplicate
+                lstIncludes += cszDef;  // this will only get added if it isn't a duplicate
             }
 
             if (lstIncludes.GetCount() > 1)
@@ -570,7 +565,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             if (lstIncludes.GetCount() > 0)
                 kfOut.printf("                %kq\n", lstIncludes[lstIncludes.GetCount() - 1]);
 
-            kfOut.WriteEol  ("            ]");
+            kfOut.WriteEol("            ]");
             continue;
         }
         else if (ttStrStrI(kfIn, "compilerPath") && ttStrStrI(kfIn, "cl.exe"))
@@ -608,8 +603,8 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         kfOut.WriteEol(kfIn);
     }
 
-    kfIn.RestoreCopy(); // Restore file from temporary copy
-    if (strcmp(kfIn, kfOut) != 0)    // Only write if something changed
+    kfIn.RestoreCopy();            // Restore file from temporary copy
+    if (strcmp(kfIn, kfOut) != 0)  // Only write if something changed
     {
         if (!kfOut.WriteFile(".vscode/c_cpp_properties.json"))
             return false;
@@ -630,8 +625,8 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
         if (*pszStart == '-' || *pszStart != CH_FORWARDSLASH)
         {
             ++pszStart;
-            if (*pszStart != 'D')   // note that this option is case sensitive
-                continue;   // it's not a define
+            if (*pszStart != 'D')  // note that this option is case sensitive
+                continue;          // it's not a define
             ttCStr cszTmp;
             cszTmp.GetString(pszStart, *pszStart, CH_SPACE);
             lst += cszTmp;

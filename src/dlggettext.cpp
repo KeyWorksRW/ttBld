@@ -9,7 +9,7 @@
 #include "pch.h"
 
 #include "dlggettext.h"
-#include "addfuncname.h"    // CAddFuncName
+#include "addfuncname.h"  // CAddFuncName
 
 #include "ttlibicons.h"
 
@@ -25,8 +25,6 @@ void CDlgGetText::OnBegin(void)
 
 void CDlgGetText::OnOK(void)
 {
-
-
 }
 
 void CDlgGetText::ProcessCurOptions(const char* pszOptions)
@@ -67,4 +65,3 @@ void CDlgGetText::DisplayFunctionList()
     for (size_t pos = 0; m_lstKeywords.InRange(pos); ++pos)
         m_lbKeywords.Add(m_lstKeywords[pos]);
 }
-

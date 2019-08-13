@@ -33,4 +33,3 @@ void CTabCLang::OnOK(void)
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
     m_pOpts->UpdateOption(OPT_CLANG_DBG, (char*) csz);
 }
-

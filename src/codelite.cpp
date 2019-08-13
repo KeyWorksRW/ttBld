@@ -8,9 +8,9 @@
 
 #include "pch.h"
 
-#include <ttfile.h>                     // ttCFile
+#include <ttfile.h>  // ttCFile
 
-#include "csrcfiles.h"      // CSrcFiles
+#include "csrcfiles.h"  // CSrcFiles
 
 #include "resource.h"
 
@@ -31,7 +31,8 @@
 
 */
 
-enum {
+enum
+{
     CLP_CREATED,
     CLP_EXISTS,
     CLP_NO_SRCFILES,
@@ -72,7 +73,8 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
         return CLP_MISSING_RES;
     }
 
-    while (kf.ReplaceStr("%projname%", cSrcFiles.GetProjectName()));
+    while (kf.ReplaceStr("%projname%", cSrcFiles.GetProjectName()))
+        ;
 
     kf.printf("\t\t<File Name=\042%s\042/>\n", cSrcFiles.GetSrcFiles());
     if (cSrcFiles.GetPchHeader())
@@ -97,14 +99,16 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     ttCStr cszCWD;
     cszCWD.GetCWD();
 
-    while (kfPost.ReplaceStr("%cwd%", cszCWD));
+    while (kfPost.ReplaceStr("%cwd%", cszCWD))
+        ;
     ttCStr cszExe(cszCWD);
     cszExe.AppendFileName("../bin/");
     cszExe += (char*) cSrcFiles.GetProjectName();
     cszExe += "D.exe";
     cszExe.FullPathName();
     ttBackslashToForwardslash(cszExe);
-    while (kfPost.ReplaceStr("%exepath%", cszExe));
+    while (kfPost.ReplaceStr("%exepath%", cszExe))
+        ;
 
     while (kfPost.ReadLine())
         kf.WriteEol(kfPost);
@@ -112,7 +116,7 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     if (!kf.WriteFile(cszProjFile))
     {
         printf(GETSTRING(IDS_NINJA_CANT_WRITE), (const char*) cszProjFile);
-        puts("");   // add EOL
+        puts("");  // add EOL
         return CLP_CANT_WRITE;
     }
     else

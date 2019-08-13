@@ -17,7 +17,7 @@ void CAddFuncName::OnBegin(void)
     CenterWindow();
     SetBtnIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
     SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
-    DisableControl(IDOK);   // don't enable until we have some text in it
+    DisableControl(IDOK);  // don't enable until we have some text in it
 }
 
 void CAddFuncName::OnOK(void)

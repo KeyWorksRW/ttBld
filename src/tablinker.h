@@ -9,17 +9,20 @@
 #pragma once
 
 #ifndef IDTAB_LINKER
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 class CTabOptions;
 
 class CTabLinker : public ttCDlg
 {
 public:
-    CTabLinker() : ttCDlg(IDTAB_LINKER) { }
+    CTabLinker()
+        : ttCDlg(IDTAB_LINKER)
+    {
+    }
 
     // Class functions
 

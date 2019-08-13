@@ -94,6 +94,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 
 enum    // actions that can be run in addition to normal single command actions
 {
+    // clang-format off
     ACT_DRYRUN   = 1 << 0,
     ACT_VS       = 1 << 1,
     ACT_VSCODE   = 1 << 2,
@@ -103,6 +104,7 @@ enum    // actions that can be run in addition to normal single command actions
     ACT_NEW      = 1 << 6,
     ACT_FORCE    = 1 << 7,
     ACT_OPTIONS  = 1 << 8,
+    // clang-format on
 };
 
 int main(int argc, char* argv[])

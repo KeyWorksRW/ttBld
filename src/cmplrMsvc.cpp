@@ -11,9 +11,9 @@
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
 
-#include "ninja.h"      // CNinja
+#include "ninja.h"  // CNinja
 
-#if defined(_WIN32)     // MSVC and CLANG-CL are only available on Windows
+#if defined(_WIN32)  // MSVC and CLANG-CL are only available on Windows
 
 void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
 {
@@ -43,7 +43,7 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
         else
             m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
     }
-    else              // Presumably GEN_DEBUG32 or GEN_DEBUG64
+    else  // Presumably GEN_DEBUG32 or GEN_DEBUG64
     {
         if (IsStaticCrtDbg())
             m_pkfOut->WriteEol("# -MTd\t// Multithreaded debug dll (MSVCRTD)");
@@ -52,7 +52,7 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
         m_pkfOut->WriteEol("# -Z7\t// produces object files with full symbolic debugging information");
     }
 
-    m_pkfOut->WriteEol();   // force a blank line after the options are listed
+    m_pkfOut->WriteEol();  // force a blank line after the options are listed
 }
 
 // The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for both CLANG and MSVC
@@ -67,21 +67,19 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         // writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not recognize -Zf.
 
         m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7 -GS-",
-                IsExeTypeConsole() ? " -D_CONSOLE" : "",
+                         IsExeTypeConsole() ? " -D_CONSOLE" : "",
 
-                GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
-                GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-                IsExeTypeLib() ? " -Zl" : (IsStaticCrtDbg() ? " -MTd" : " -MDd")
-            );
-    else    // Presumably GEN_RELEASE32 or GEN_RELEASE64
+                         GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
+                         GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
+                         IsExeTypeLib() ? " -Zl" : (IsStaticCrtDbg() ? " -MTd" : " -MDd"));
+    else  // Presumably GEN_RELEASE32 or GEN_RELEASE64
         m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s",
-                IsExeTypeConsole() ? " -D_CONSOLE" : "",
+                         IsExeTypeConsole() ? " -D_CONSOLE" : "",
 
-                GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
-                GetBoolOption(OPT_STDCALL) ?    " -Gz" : "",
-                IsExeTypeLib() ? " -Zl" :  (IsStaticCrtRel() ? " -MT" : " -MD"),
-                IsOptimizeSpeed() ? " -O2" : " -O1"
-            );
+                         GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
+                         GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
+                         IsExeTypeLib() ? " -Zl" : (IsStaticCrtRel() ? " -MT" : " -MD"),
+                         IsOptimizeSpeed() ? " -O2" : " -O1");
 
     if (GetOption(OPT_INC_DIRS))
     {
@@ -134,16 +132,16 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         if (GetBoolOption(OPT_PERMISSIVE))
             m_pkfOut->WriteStr(" -permissive-");
         if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
-            m_pkfOut->WriteStr(" -GL"); // whole program optimization
+            m_pkfOut->WriteStr(" -GL");  // whole program optimization
     }
 
     else
     {
-        m_pkfOut->WriteStr(" -D__clang__"); // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
-        m_pkfOut->WriteStr(" -fms-compatibility-version=19");   // Version of MSVC to be compatible with
-        m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" : " -m32"); // specify the platform
+        m_pkfOut->WriteStr(" -D__clang__");                                                              // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
+        m_pkfOut->WriteStr(" -fms-compatibility-version=19");                                            // Version of MSVC to be compatible with
+        m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" : " -m32");  // specify the platform
         if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
-            m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");   // whole program optimization
+            m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");  // whole program optimization
 
         if (GetOption(OPT_CLANG_CMN))
         {
@@ -175,12 +173,12 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
         if (GetPchHeader())
         {
             m_pkfOut->printf(
-                    "rule compilePCH\n"
-                    "  deps = msvc\n"
-                    "  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
-                    GetProjectName(),
-                    GetPchHeader()                  // typically stdafx.h or precomp.h
-                    );
+                "rule compilePCH\n"
+                "  deps = msvc\n"
+                "  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
+                GetProjectName(),
+                GetPchHeader()  // typically stdafx.h or precomp.h
+            );
             m_pkfOut->WriteEol("  description = compiling $in\n");
         }
 
@@ -189,22 +187,20 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
         if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
         {
             m_pkfOut->printf(
-                    "rule compile\n"
-                    "  deps = msvc\n"
-                    "  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
-                    GetProjectName(),
-                    GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : ""
-                    );
+                "rule compile\n"
+                "  deps = msvc\n"
+                "  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
+                GetProjectName(),
+                GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
         }
         else
         {
             m_pkfOut->printf(
-                    "rule compile\n"
-                    "  deps = msvc\n"
-                    "  command = cl.exe -c $cflags -Fo$out $in %s%s\n",
-                    GetPchHeader() ? "-Yu" : "",
-                    GetPchHeader() ? GetPchHeader() : ""
-                    );
+                "rule compile\n"
+                "  deps = msvc\n"
+                "  command = cl.exe -c $cflags -Fo$out $in %s%s\n",
+                GetPchHeader() ? "-Yu" : "",
+                GetPchHeader() ? GetPchHeader() : "");
         }
     }
     else
@@ -212,12 +208,12 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
         if (GetPchHeader())
         {
             m_pkfOut->printf(
-                    "rule compilePCH\n"
-                    "  deps = msvc\n"
-                    "  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
-                    GetProjectName(),
-                    GetPchHeader()                  // typically stdafx.h or precomp.h
-                    );
+                "rule compilePCH\n"
+                "  deps = msvc\n"
+                "  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
+                GetProjectName(),
+                GetPchHeader()  // typically stdafx.h or precomp.h
+            );
             m_pkfOut->WriteEol("  description = compiling $in\n");
         }
 
@@ -226,22 +222,20 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
         if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
         {
             m_pkfOut->printf(
-                    "rule compile\n"
-                    "  deps = msvc\n"   // clang-cl supports -showIncludes, same as msvc
-                    "  command = clang-cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
-                    GetProjectName(),
-                    GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : ""
-                    );
+                "rule compile\n"
+                "  deps = msvc\n"  // clang-cl supports -showIncludes, same as msvc
+                "  command = clang-cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
+                GetProjectName(),
+                GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
         }
         else
         {
             m_pkfOut->printf(
-                    "rule compile\n"
-                    "  deps = msvc\n"
-                    "  command = clang-cl.exe -c $cflags -Fo$out $in %s%s\n",
-                    GetPchHeader() ? "-Yu" : "",
-                    GetPchHeader() ? GetPchHeader() : ""
-                    );
+                "rule compile\n"
+                "  deps = msvc\n"
+                "  command = clang-cl.exe -c $cflags -Fo$out $in %s%s\n",
+                GetPchHeader() ? "-Yu" : "",
+                GetPchHeader() ? GetPchHeader() : "");
         }
     }
 
@@ -251,7 +245,7 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
 {
     if (IsExeTypeLib())
-        return; // lib directive should be used if the project is a library
+        return;  // lib directive should be used if the project is a library
 
     ttCStr cszRule("rule link\n  command = ");
 
@@ -289,7 +283,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
             cszRule += " /natvis:";
             cszRule += GetOption(OPT_NATVIS);
         }
-        cszRule +=" /debug /pdb:$outdir/";
+        cszRule += " /debug /pdb:$outdir/";
         cszRule += GetProjectName();
         cszRule += ".pdb";
     }
@@ -297,7 +291,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
     {
         cszRule += " /opt:ref /opt:icf";
         if (cmplr == CMPLR_MSVC)
-            cszRule += " /ltcg";    // whole program optimization, MSVC only
+            cszRule += " /ltcg";  // whole program optimization, MSVC only
     }
     cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
 
@@ -364,7 +358,7 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
         if (IsExeTypeLib())
         {
             m_pkfOut->printf("rule lib\n  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in\n",
-                (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
+                             (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
             m_pkfOut->WriteEol("  description = creating library $out\n");
         }
     }
@@ -374,7 +368,7 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
         {
             // MSVC -LTCG option is not supported by lld
             m_pkfOut->printf("rule lib\n  command = lld-link.exe /lib /machine:%s /out:$out $in\n",
-                (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
+                             (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
             m_pkfOut->WriteEol("  description = creating library $out\n");
         }
     }
@@ -495,7 +489,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     {
         ttCStr cszRes(GetRcFile());
         cszRes.RemoveExtension();
-        cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ?  "D.res" : ".res");
+        cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ? "D.res" : ".res");
         m_pkfOut->printf(" $resout/%s", (char*) cszRes);
     }
 
@@ -547,4 +541,4 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     m_pkfOut->WriteEol("\n");
 }
 
-#endif    // defined(_WIN32)
+#endif  // defined(_WIN32)

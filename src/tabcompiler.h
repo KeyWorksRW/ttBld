@@ -9,17 +9,20 @@
 #pragma once
 
 #ifndef IDTAB_COMPILER
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 class CTabOptions;
 
 class CTabCompiler : public ttCDlg
 {
 public:
-    CTabCompiler() : ttCDlg(IDTAB_COMPILER) { }
+    CTabCompiler()
+        : ttCDlg(IDTAB_COMPILER)
+    {
+    }
 
     // Public functions
 

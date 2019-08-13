@@ -8,11 +8,11 @@
 
 #include "pch.h"
 
-#include <ttfindfile.h>     // ttCFindFile
-#include <ttenumstr.h>      // ttCEnumStr
-#include <ttmem.h>          // ttCMem, ttCTMem
+#include <ttfindfile.h>  // ttCFindFile
+#include <ttenumstr.h>   // ttCEnumStr
+#include <ttmem.h>       // ttCMem, ttCTMem
 
-#include "csrcfiles.h"      // CSrcFiles
+#include "csrcfiles.h"  // CSrcFiles
 #include "funcs.h"      // List of function declarations
 
 const char* txtSrcFilesFileName = ".srcfiles.yaml";
@@ -26,10 +26,16 @@ typedef enum
     SECTION_LIB,
 } SRC_SECTION;
 
-CSrcFiles::CSrcFiles(const char* pszNinjaDir) : m_ttHeap(true),
+CSrcFiles::CSrcFiles(const char* pszNinjaDir)
+    : m_ttHeap(true)
+    ,
     // make all ttCList classes use the same sub-heap
-    m_lstSrcFiles(m_ttHeap), m_lstLibFiles(m_ttHeap), m_lstIdlFiles(m_ttHeap),
-    m_lstErrors(m_ttHeap), m_lstLibAddSrcFiles(m_ttHeap), m_lstSrcIncluded(m_ttHeap)
+    m_lstSrcFiles(m_ttHeap)
+    , m_lstLibFiles(m_ttHeap)
+    , m_lstIdlFiles(m_ttHeap)
+    , m_lstErrors(m_ttHeap)
+    , m_lstLibAddSrcFiles(m_ttHeap)
+    , m_lstSrcIncluded(m_ttHeap)
 {
     m_bRead = false;
 
@@ -39,7 +45,7 @@ CSrcFiles::CSrcFiles(const char* pszNinjaDir) : m_ttHeap(true),
 
     m_RequiredMajor = 1;
     m_RequiredMinor = 0;
-    m_RequiredSub   = 0;
+    m_RequiredSub = 0;
 
     if (pszNinjaDir)
         m_cszBldDir = pszNinjaDir;
@@ -57,7 +63,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
             ttCStr csz;
             csz.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), ".srcfiles.yaml");
             m_lstErrors += csz;
-            return false;   // if we still can't find it, bail
+            return false;  // if we still can't find it, bail
         }
     }
 
@@ -83,23 +89,23 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
     m_bRead = true;
 
-    char* pszLine;
+    char*       pszLine;
     SRC_SECTION section = SECTION_UNKNOWN;
 
     while (kfSrcFiles.ReadLine(&pszLine))
     {
-        char* pszBegin = ttFindNonSpace(pszLine);   // ignore any leading spaces
-        if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-'))    // ignore empty, comment or divider lines
+        char* pszBegin = ttFindNonSpace(pszLine);                                                                           // ignore any leading spaces
+        if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-'))  // ignore empty, comment or divider lines
         {
             continue;
         }
 
-        if (ttIsSameSubStrI(pszBegin, "%YAML")) // not required, but possible a YAML editor could add this
+        if (ttIsSameSubStrI(pszBegin, "%YAML"))  // not required, but possible a YAML editor could add this
         {
             continue;
         }
 
-        if (ttIsAlpha(*pszLine))                  // sections always begin with an alphabetical character
+        if (ttIsAlpha(*pszLine))  // sections always begin with an alphabetical character
         {
             if (ttIsSameSubStrI(pszBegin, "Files:") || ttIsSameSubStrI(pszBegin, "[FILES]"))
                 section = SECTION_FILES;
@@ -176,9 +182,10 @@ void CSrcFiles::ProcessOption(char* pszLine)
 
     if (ttIsSameStrI(cszName, "BuildLibs"))
     {
-        while (cszVal.ReplaceStr(".lib", ""));  // we want the target name, not the library filename
+        while (cszVal.ReplaceStr(".lib", ""))
+            ;  // we want the target name, not the library filename
 
-        ttCStr cszCleaned;
+        ttCStr     cszCleaned;
         ttCEnumStr cEnumStr(cszVal, ';');
         while (cEnumStr.Enum())
         {
@@ -187,7 +194,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
             char* pszLast = cszLib.FindLastSlash();
             if (pszLast && !pszLast[1])
                 *pszLast = 0;
-            if (cszLib.StrLen() > 0)    // don't add an empty string
+            if (cszLib.StrLen() > 0)  // don't add an empty string
             {
                 if (cszCleaned.IsNonEmpty())
                     cszCleaned += ";";
@@ -195,7 +202,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
             }
         }
         if (cszCleaned.IsEmpty())
-            return; // ignore it if it's just a blank line
+            return;  // ignore it if it's just a blank line
         cszVal = cszCleaned;
     }
 
@@ -300,7 +307,7 @@ void CSrcFiles::ProcessFile(char* pszFile)
         if (pszIncFile)
         {
             ttCStr cszFile(pszIncFile);
-            char* pszTmp = ttStrChr(cszFile, '#');
+            char*  pszTmp = ttStrChr(cszFile, '#');
             if (pszTmp)
             {
                 *pszTmp = 0;
@@ -334,14 +341,14 @@ void CSrcFiles::ProcessFile(char* pszFile)
     }
 
     pszExt = ttStrStrI(pszFile, ".rc");
-    if (pszExt && !pszExt[3]) // ignore .rc2, .resources, etc.
+    if (pszExt && !pszExt[3])  // ignore .rc2, .resources, etc.
     {
         m_cszRcName = pszFile;
         return;
     }
 
     pszExt = ttStrStrI(pszFile, ".hhp");
-    if (pszExt)             // ignore .rc2, .resources, etc.
+    if (pszExt)  // ignore .rc2, .resources, etc.
     {
         m_cszHHPName = pszFile;
         return;
@@ -356,7 +363,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         if (pszIncFile)
         {
             ttCStr cszFile(pszIncFile);
-            char* pszTmp = ttStrChr(cszFile, '#');
+            char*  pszTmp = ttStrChr(cszFile, '#');
             if (pszTmp)
             {
                 *pszTmp = 0;
@@ -407,8 +414,8 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
     if (!pszFilePattern || !*pszFilePattern)
         return;
 
-    ttCStr cszPattern(pszFilePattern);
-    ttCEnumStr enumstr(cszPattern, ';');
+    ttCStr      cszPattern(pszFilePattern);
+    ttCEnumStr  enumstr(cszPattern, ';');
     const char* pszPattern;
 
     while (enumstr.Enum(&pszPattern))
@@ -420,14 +427,12 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
             if (psz)
             {
                 if (
-                        ttIsSameStrI(psz, ".c") ||
-                        ttIsSameStrI(psz, ".cpp") ||
-                        ttIsSameStrI(psz, ".cc") ||
-                        ttIsSameStrI(psz, ".cxx")
-                        )
+                    ttIsSameStrI(psz, ".c") ||
+                    ttIsSameStrI(psz, ".cpp") ||
+                    ttIsSameStrI(psz, ".cc") ||
+                    ttIsSameStrI(psz, ".cxx"))
                 {
-                        m_lstSrcFiles += ff;
-
+                    m_lstSrcFiles += ff;
                 }
                 else if (ttIsSameStrI(psz, ".rc"))
                 {
@@ -479,7 +484,7 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
         if (pszComment)
         {
             pszComment = ttStepOver(pszComment);
-            ttTrimRight(pszComment);    // remove any trailing whitespace
+            ttTrimRight(pszComment);  // remove any trailing whitespace
             cszComment = pszComment;
         }
         else
@@ -487,21 +492,21 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
             cszComment.Delete();
         }
     }
-    else                              // non-quoted option
+    else  // non-quoted option
     {
         char* pszComment = ttStrChr(pszVal, '#');
         if (pszComment)
         {
             *pszComment = 0;
             pszComment = ttStepOver(pszComment);
-            ttTrimRight(pszComment);    // remove any trailing whitespace
+            ttTrimRight(pszComment);  // remove any trailing whitespace
             cszComment = pszComment;
         }
         else
         {
             cszComment.Delete();
         }
-        ttTrimRight(pszVal);    // remove any trailing whitespace
+        ttTrimRight(pszVal);  // remove any trailing whitespace
         cszVal = pszVal;
     }
     return true;
@@ -542,7 +547,7 @@ const char* CSrcFiles::GetPchCpp()
     if (ttFileExists(m_cszPchCpp))
         return m_cszPchCpp;
 
-    m_cszPchCpp.ChangeExtension(".cpp");    // file doesn't exist, we'll generate a warning about it later
+    m_cszPchCpp.ChangeExtension(".cpp");  // file doesn't exist, we'll generate a warning about it later
     return m_cszPchCpp;
 }
 

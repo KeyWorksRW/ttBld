@@ -10,15 +10,15 @@
 
 #include "verninja.h"  // CVerMakeNinja
 
-extern const char* txtOptVersion; // The minimum version of ttBld required by a .srcfiles.yaml
+extern const char* txtOptVersion;  // The minimum version of ttBld required by a .srcfiles.yaml
 
 CVerMakeNinja::CVerMakeNinja()
 {
-    m_minMajor = 1;     // minimum required version for all options
+    m_minMajor = 1;  // minimum required version for all options
     m_minMinor = 0;
-    m_minSub   = 0;
+    m_minSub = 0;
 
-    const char* psz = txtOptVersion;    // we assume this string to be "n.n.n" where n is an integer for major, minor, and sub version
+    const char* psz = txtOptVersion;  // we assume this string to be "n.n.n" where n is an integer for major, minor, and sub version
     m_major = (int) ttAtoi(psz);
     psz = ttStrChr(psz, '.') + 1;
     m_minor = (int) ttAtoi(psz);
@@ -39,13 +39,13 @@ bool CVerMakeNinja::IsSrcFilesNewer(const char* pszRequired)
     pszRequired = ttStrChr(pszRequired, '.');
     ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttBld version line!");
     if (!pszRequired || !ttIsDigit(pszRequired[1]))
-        return false;   // we don't know what the version number is
+        return false;  // we don't know what the version number is
     int minor = (int) ttAtoi(++pszRequired);
 
     pszRequired = ttStrChr(pszRequired, '.');
     ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttBld version line!");
     if (!pszRequired || !ttIsDigit(pszRequired[1]))
-        return false;   // we don't know what the version number is
+        return false;  // we don't know what the version number is
     int sub = (int) ttAtoi(++pszRequired);
 
     return IsSrcFilesNewer(major, minor, sub);

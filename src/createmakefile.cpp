@@ -8,13 +8,13 @@
 
 #include "pch.h"
 
-#include <ttfile.h>     // ttCFile
-#include <ttenumstr.h>  // ttCEnumStr
-#include <ttfindfile.h> // ttCFindFile
+#include <ttfile.h>      // ttCFile
+#include <ttenumstr.h>   // ttCEnumStr
+#include <ttfindfile.h>  // ttCFindFile
 
-#include "ninja.h"      // CNinja
-#include "resource.h"   // IDR_MAKEFILE
-#include "funcs.h"      // List of function declarations
+#include "ninja.h"     // CNinja
+#include "resource.h"  // IDR_MAKEFILE
+#include "funcs.h"     // List of function declarations
 
 extern const char* txtHelpNinja;
 
@@ -27,7 +27,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     cszMakeFile.AppendFileName("makefile");
 
     if (ttFileExists(cszMakeFile))
-        return true;    // Don't overwrite an existing makefile
+        return true;  // Don't overwrite an existing makefile
 
     // We get here if the makefile is missing
 
@@ -53,28 +53,31 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     }
     else
     {
-        const char* pszSrcFiles = LocateSrcFiles();   // it's fine if pszDir is a nullptr
+        const char* pszSrcFiles = LocateSrcFiles();  // it's fine if pszDir is a nullptr
         if (!pszSrcFiles)
-            bAllVersion = true;     // can't create a dependency on .srcfiles.yaml if we don't know where it is
+            bAllVersion = true;  // can't create a dependency on .srcfiles.yaml if we don't know where it is
         else
             cszSrcFiles = pszSrcFiles;
     }
 
     ttCFile kf;
-    if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL :  IDR_MAKEFILE_SINGLE))
+    if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL : IDR_MAKEFILE_SINGLE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
         m_lstErrors += TRANSLATE("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,");
         return false;
     }
 
-    while (kf.ReplaceStr("%build%", cszBuildDir));
-//    while (kf.ReplaceStr("%libbuild%", cszBuildDir));
+    while (kf.ReplaceStr("%build%", cszBuildDir))
+        ;
+    //    while (kf.ReplaceStr("%libbuild%", cszBuildDir));
 
     if (!bAllVersion && cszSrcFiles.IsNonEmpty())
-        while (kf.ReplaceStr("%srcfiles%", cszSrcFiles));
+        while (kf.ReplaceStr("%srcfiles%", cszSrcFiles))
+            ;
 
-    while (kf.ReplaceStr("%project%", GetProjectName()));
+    while (kf.ReplaceStr("%project%", GetProjectName()))
+        ;
 
     // Now we parse the file as if we had read it, changing or adding as needed
 
@@ -91,7 +94,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         }
         else if (ttIsSameSubStrI(kf, "release:") || ttIsSameSubStrI(kf, "debug:"))
         {
-            bool bDebugTarget = ttIsSameSubStrI(kf, "debug:");  // so we don't have to keep parsing the line
+            bool   bDebugTarget = ttIsSameSubStrI(kf, "debug:");  // so we don't have to keep parsing the line
             ttCStr cszNewLine(kf);
             if (!ttIsEmpty(GetHHPName()))
             {
@@ -125,7 +128,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
 
                 for (size_t pos = 0; m_dlstTargetDir.InRange(pos); ++pos)
                 {
-                    kfOut.printf("\n%s%s:\n", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");    // the rule
+                    kfOut.printf("\n%s%s:\n", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");  // the rule
                     ttCStr cszBuild(m_dlstTargetDir.GetValAt(pos));
                     cszBuild.AppendFileName(".vscode/makefile");
                     // The leading \t before the command is required or make will fail

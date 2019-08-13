@@ -8,12 +8,15 @@
 
 #pragma once
 
-#include "ninja.h"    // CNinja
+#include "ninja.h"  // CNinja
 
 class CVcxProj : public CNinja
 {
 public:
-    CVcxProj(const char* pszNinjaDir = nullptr) : CNinja(pszNinjaDir) { }
+    CVcxProj(const char* pszNinjaDir = nullptr)
+        : CNinja(pszNinjaDir)
+    {
+    }
 
     // Class functions
 
@@ -21,5 +24,4 @@ public:
 
 private:
     // Class members
-
 };

@@ -50,4 +50,3 @@ void CTabRcMidl::OnOK(void)
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG_MIDL)));
     m_pOpts->UpdateOption(OPT_MDL_DBG, (char*) csz);
 }
-

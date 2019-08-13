@@ -17,4 +17,3 @@ void CTabLibs::OnBegin(void)
 void CTabLibs::OnOK(void)
 {
 }
-

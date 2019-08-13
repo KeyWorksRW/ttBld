@@ -9,15 +9,18 @@
 #pragma once
 
 #ifndef IDTAB_RCMIDL
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 class CTabRcMidl : public ttCDlg
 {
 public:
-    CTabRcMidl() : ttCDlg(IDTAB_RCMIDL) { }
+    CTabRcMidl()
+        : ttCDlg(IDTAB_RCMIDL)
+    {
+    }
 
     // Class functions
 

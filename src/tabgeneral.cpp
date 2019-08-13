@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-#include <ttdirdlg.h>   // ttCDirDlg
+#include <ttdirdlg.h>  // ttCDirDlg
 
 #include "dlgoptions.h"
 
@@ -45,7 +45,7 @@ void CTabGeneral::OnBegin(void)
     SetTargetDirs();
 
     if (!m_pOpts->GetBoolOption(OPT_32BIT))
-        SetCheck(DLG_ID(IDCHECK_64BIT));    // default to 64-bit builds
+        SetCheck(DLG_ID(IDCHECK_64BIT));  // default to 64-bit builds
     else
     {
         SetCheck(DLG_ID(IDCHECK_32BIT));
@@ -94,7 +94,7 @@ void CTabGeneral::OnBtnDir32()
     ttCStr cszDir;
     cszDir.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
     cszDir.FullPathName();
-    if (!ttDirExists(cszDir))   // SHCreateItemFromParsingName will fail if the folder doesn't already exist
+    if (!ttDirExists(cszDir))  // SHCreateItemFromParsingName will fail if the folder doesn't already exist
         cszDir.GetCWD();
 
     dlg.SetStartingDir(cszDir);
@@ -115,7 +115,7 @@ void CTabGeneral::OnBtnDir64()
     ttCStr cszDir;
     cszDir.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));
     cszDir.FullPathName();
-    if (!ttDirExists(cszDir))   // SHCreateItemFromParsingName will fail if the folder doesn't already exist
+    if (!ttDirExists(cszDir))  // SHCreateItemFromParsingName will fail if the folder doesn't already exist
         cszDir.GetCWD();
 
     dlg.SetStartingDir(cszDir);
@@ -169,7 +169,7 @@ void CTabGeneral::SetTargetDirs()
         cszDir64 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
         ttCStr cszTmp(cszDir64);
         cszTmp += "64";
-        if (ttDirExists(cszTmp))      // if there is a ../lib64 or ../bin64, then use that
+        if (ttDirExists(cszTmp))  // if there is a ../lib64 or ../bin64, then use that
         {
             cszDir64 = cszTmp;
             cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
@@ -186,7 +186,7 @@ void CTabGeneral::SetTargetDirs()
         cszDir64 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
         ttCStr cszTmp(cszDir64);
         cszTmp += "64";
-        if (ttDirExists(cszTmp))      // if there is a lib64 or bin64, then use that
+        if (ttDirExists(cszTmp))  // if there is a lib64 or bin64, then use that
         {
             cszDir64 = cszTmp;
             cszDir32 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";

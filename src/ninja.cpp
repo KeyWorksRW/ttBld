@@ -15,11 +15,10 @@
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
 
-#include "ninja.h"      // CNinja
-#include "parsehhp.h"   // CParseHHP
-#include "verninja.h"   // CVerMakeNinja
-#include "funcs.h"      // List of function declarations
-
+#include "ninja.h"     // CNinja
+#include "parsehhp.h"  // CParseHHP
+#include "verninja.h"  // CVerMakeNinja
+#include "funcs.h"     // List of function declarations
 
 const char* aCppExt[] = {
     ".cpp",
@@ -29,10 +28,14 @@ const char* aCppExt[] = {
     nullptr
 };
 
-CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
+CNinja::CNinja(const char* pszNinjaDir)
+    : CSrcFiles(pszNinjaDir)
+    ,
     // make all ttCList classes use the same sub-heap
-    m_lstBuildLibs32D(m_ttHeap), m_lstBuildLibs64D(m_ttHeap),
-    m_lstBuildLibs32R(m_ttHeap), m_lstBuildLibs64R(m_ttHeap)
+    m_lstBuildLibs32D(m_ttHeap)
+    , m_lstBuildLibs64D(m_ttHeap)
+    , m_lstBuildLibs32R(m_ttHeap)
+    , m_lstBuildLibs64R(m_ttHeap)
 {
 #if defined(_DEBUG)
     ttASSERT(ReadFile());
@@ -71,7 +74,7 @@ CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
             ttCStr cszDir64(IsExeTypeLib() ? "../lib" : "../bin");
             ttCStr cszTmp(cszDir64);
             cszTmp += "64";
-            if (ttDirExists(cszTmp))        // if there is a ../lib64 or ../bin64, then use that
+            if (ttDirExists(cszTmp))  // if there is a ../lib64 or ../bin64, then use that
                 cszDir64 = cszTmp;
             UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
         }
@@ -80,7 +83,7 @@ CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
             ttCStr cszDir64(IsExeTypeLib() ? "lib" : "bin");
             ttCStr cszTmp(cszDir64);
             cszTmp += "64";
-            if (ttDirExists(cszTmp))        // if there is a ../lib64 or ../bin64, then use that
+            if (ttDirExists(cszTmp))  // if there is a ../lib64 or ../bin64, then use that
                 cszDir64 = cszTmp;
             UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
         }
@@ -102,7 +105,7 @@ CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
             ttCStr cszDir32(IsExeTypeLib() ? "../lib" : "../bin");
             ttCStr cszTmp(cszDir32);
             cszTmp += "32";
-            if (ttDirExists(cszTmp))        // if there is a ../lib32 or ../bin32, then use that
+            if (ttDirExists(cszTmp))  // if there is a ../lib32 or ../bin32, then use that
                 cszDir32 = cszTmp;
             UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
         }
@@ -111,7 +114,7 @@ CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
             ttCStr cszDir32(IsExeTypeLib() ? "lib" : "bin");
             ttCStr cszTmp(cszDir32);
             cszTmp += "32";
-            if (ttDirExists(cszTmp))        // if there is a ../lib32 or ../bin32, then use that
+            if (ttDirExists(cszTmp))  // if there is a ../lib32 or ../bin32, then use that
                 cszDir32 = cszTmp;
             UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
         }
@@ -122,16 +125,16 @@ CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
         ttCStr cszCwd;
         cszCwd.GetCWD();
         char* pszTmp = (char*) cszCwd.FindLastSlash();
-        if (!pszTmp[1])     // if path ends with a slash, remove it -- we need that last directory name
+        if (!pszTmp[1])  // if path ends with a slash, remove it -- we need that last directory name
             *pszTmp = 0;
 
         char* pszProj = ttFindFilePortion(cszCwd);
-        if (ttIsSameStrI(pszProj, "src")) // Use the parent folder for the root if the current directory is "src"
+        if (ttIsSameStrI(pszProj, "src"))  // Use the parent folder for the root if the current directory is "src"
         {
             pszTmp = (char*) cszCwd.FindLastSlash();
             if (pszTmp)
             {
-                *pszTmp = 0;    // remove the last slash and filename, forcing the directory name above to be the "filename"
+                *pszTmp = 0;  // remove the last slash and filename, forcing the directory name above to be the "filename"
                 pszProj = ttFindFilePortion(cszCwd);
             }
         }
@@ -148,8 +151,7 @@ CNinja::CNinja(const char* pszNinjaDir) : CSrcFiles(pszNinjaDir),
     ProcessBuildLibs();
 }
 
-static const char* aszCompilerPrefix[] =
-{
+static const char* aszCompilerPrefix[] = {
     "msvc",
     "clang",
     "gcc",
@@ -211,7 +213,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
             break;
     }
 
-    ttCStr cszProj(GetProjectName());   // If needed, add a suffix to the project name
+    ttCStr cszProj(GetProjectName());  // If needed, add a suffix to the project name
 
     // Don't add the 'D' to the end of DLL's -- it is perfectly viable for a release app to use a debug dll and that
     // won't work if the filename has changed. Under MSVC Linker, it will also generate a LNK4070 error if the dll name
@@ -237,7 +239,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
             cszProj += "32";
     }
 
-    file.SetUnixLF();   // WARNING!!! NINJA doesn't allow \r characters (or \t for that matter)
+    file.SetUnixLF();  // WARNING!!! NINJA doesn't allow \r characters (or \t for that matter)
     file.printf("# WARNING: THIS FILE IS AUTO-GENERATED by %s. CHANGES YOU MAKE WILL BE LOST IF IT IS AUTO-GENERATED AGAIN.\n\n", txtVersion);
     file.WriteEol("ninja_required_version = 1.8\n");
     file.WriteEol(cszBuildDir);
@@ -304,7 +306,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
             }
             cszHdr = m_lstIdlFiles[pos];
             cszHdr.ChangeExtension(".h");
-            file.printf("  %s", (char*) cszHdr);    // write the last one without the trailing pipe
+            file.printf("  %s", (char*) cszHdr);  // write the last one without the trailing pipe
         }
         file.WriteEol("\n");
     }
@@ -314,11 +316,11 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     for (size_t iPos = 0; iPos < GetSrcFileList()->GetCount(); iPos++)
     {
         ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
-        if (!ttStrStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() &&  ttIsSameStrI(cszFile, m_cszCPP_PCH)))   // we already handled resources and pre-compiled headers
-            continue;   // we already handled this
+        if (!ttStrStrI(cszFile, ".c") || (m_cszCPP_PCH.IsNonEmpty() && ttIsSameStrI(cszFile, m_cszCPP_PCH)))  // we already handled resources and pre-compiled headers
+            continue;                                                                                         // we already handled this
         cszFile.ChangeExtension(".obj");
 
-        if (m_cszPCHObj.IsNonEmpty())   // we add m_cszPCHObj so it appears as a dependency and gets compiled, but not linked to
+        if (m_cszPCHObj.IsNonEmpty())  // we add m_cszPCHObj so it appears as a dependency and gets compiled, but not linked to
             file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
         else
         {
@@ -339,7 +341,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
                 }
                 cszHdr = m_lstIdlFiles[pos];
                 cszHdr.ChangeExtension(".h");
-                file.printf("  %s", (char*) cszHdr);    // write the last one without the trailing pipe
+                file.printf("  %s", (char*) cszHdr);  // write the last one without the trailing pipe
             }
             file.WriteEol("\n");
         }
@@ -352,7 +354,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     {
         cszRes = GetRcFile();
         cszRes.RemoveExtension();
-        cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ?  "D.res" : ".res");
+        cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ? "D.res" : ".res");
         cszRes.ChangeExtension(".res");
         file.printf("build $resout/%s: rc %s", (char*) cszRes, GetRcFile());
 
@@ -391,13 +393,13 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     ttCFile fileOrg;
     if (fileOrg.ReadFile(m_cszScriptFile))
     {
-        if (strcmp(fileOrg, file) == 0)    // Only write the build script if something changed
+        if (strcmp(fileOrg, file) == 0)  // Only write the build script if something changed
             return false;
         else if (m_dryrun.IsEnabled())
         {
             m_dryrun.NewFile(m_cszScriptFile);
             m_dryrun.DisplayFileDiff(fileOrg, file);
-            return false;   // because we didn't write anything
+            return false;  // because we didn't write anything
         }
     }
 
@@ -416,7 +418,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 {
     ttCStr cszLib(pszLib);
-    char* pszTmp = ttStrStrI(pszLib, ".lib");
+    char*  pszTmp = ttStrStrI(pszLib, ".lib");
     if (pszTmp)
         *pszTmp = 0;
 
@@ -452,7 +454,7 @@ void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
     ttASSERT(ttIsNonEmpty(pszBaseName));
 
     cszLibName = pszBaseName;
-    char* pszExt = cszLibName.FindExt();
+    char*  pszExt = cszLibName.FindExt();
     ttCStr cszExt;
 
     if (pszExt && *pszExt == '.')
@@ -490,7 +492,7 @@ void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
             ttCStr cszPath(enumLib);
             cszPath.AppendFileName(cszLibName);
             if (ttFileExists(cszPath))
-                return;     // we found the modified library, so return
+                return;  // we found the modified library, so return
         }
     }
     else if ((m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) && GetOption(OPT_LIB_DIRS64))
@@ -501,12 +503,12 @@ void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
             ttCStr cszPath(enumLib);
             cszPath.AppendFileName(cszLibName);
             if (ttFileExists(cszPath))
-                return;     // we found the modified library, so return
+                return;  // we found the modified library, so return
         }
     }
 
     if (FindFileEnv(cszLibName, "LIB"))
-        return;     // we found the modified library, so return
+        return;  // we found the modified library, so return
 
     // If we get here, we couldn't find the modified version
 
@@ -520,7 +522,7 @@ void CNinja::ProcessBuildLibs()
     if (GetBuildLibs())
     {
         ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
-        ttCStr cszSaveCwd;
+        ttCStr     cszSaveCwd;
         cszSaveCwd.GetCWD();
 
         while (enumLib.Enum())
@@ -540,7 +542,7 @@ void CNinja::ProcessBuildLibs()
 
             if (!LocateSrcFiles())
             {
-                for (;;)    // empty for loop that we break out of as soon as we find a srcfiles file to use
+                for (;;)  // empty for loop that we break out of as soon as we find a srcfiles file to use
                 {
                     if (ttDirExists("src"))
                     {

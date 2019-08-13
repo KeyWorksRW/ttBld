@@ -18,21 +18,25 @@
 
 using namespace sfopt;
 
-const char* txtOptVersion = "1.2.0"; // any time you add an option below, you need to increment this version number and then add it to the OPT_VERSION list
+const char* txtOptVersion = "1.2.0";  // any time you add an option below, you need to increment this version number and then add it to the OPT_VERSION list
 
-sfopt::OPT_VERSION aoptVersions[] =
-{
-//    { OPT_STATIC_CRT_REL, 1, 1, 0  },     // This is just an example of adding a min version requirement for an option
+sfopt::OPT_VERSION aoptVersions[] = {
+    // clang-format off
+
+    /*
+    { OPT_STATIC_CRT_REL, 1, 1, 0  },     // This is just an example of adding a min version requirement for an option
+    */
 
     // All options default to 1.0.0, so only add options above that require a newer version of ttBld
 
     { OPT_OVERFLOW, 1, 0, 0  }
+    // clang-format on
 };
 
 // Add these in the order you want them written in a new .srcfiles.yaml files.
 
-static const OPT_SETTING s_aOptions[] =
-{
+static const OPT_SETTING s_aOptions[] = {
+    // clang-format off
     // { OPT_xxx,       "name",         "value",   boolean, required, "comment" }
 
     { OPT_PROJECT,      "Project",      nullptr,   false,   true,      _XGET("project name") },
@@ -105,6 +109,7 @@ static const OPT_SETTING s_aOptions[] =
 //    { OPT_LIBS_DBG,     "LibsD",        nullptr,   false,   false,     _XGET("additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)") },
 
     { OPT_OVERFLOW, "", "", false, false, "" },
+    // clang-format on
 };
 
 const OPT_SETTING* CSrcOptions::GetOrgOptions()
@@ -147,7 +152,7 @@ sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* p
     }
     ttASSERT(s_aOptions[pos].opt != OPT_OVERFLOW);
     if (s_aOptions[pos].opt == OPT_OVERFLOW)
-        return OPT_OVERFLOW;   // invalid option
+        return OPT_OVERFLOW;  // invalid option
     ttFree(m_aUpdateOpts[pos].pszVal);
 
     // We want boolean values to be consistent, so if "yes" or "no" is specified, convert to "true" or "false"
@@ -171,7 +176,7 @@ sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, bool bVal)
     }
     ttASSERT(s_aOptions[pos].opt != OPT_OVERFLOW);
     if (s_aOptions[pos].opt == OPT_OVERFLOW)
-        return OPT_OVERFLOW;   // invalid option
+        return OPT_OVERFLOW;  // invalid option
 
     ttFree(m_aUpdateOpts[pos].pszVal);
     m_aUpdateOpts[pos].pszVal = ttStrDup(bVal ? "true" : "false");
@@ -257,7 +262,7 @@ sfopt::OPT_INDEX CSrcOptions::UpdateReadOption(const char* pszName, const char* 
             break;
     }
     if (s_aOptions[pos].opt == OPT_OVERFLOW)
-        return OPT_OVERFLOW;   // unknown option
+        return OPT_OVERFLOW;  // unknown option
 
     UpdateOption(s_aOptions[pos].opt, pszVal);  // we call this so that "yes" or "no" options get converted to "true" or "false"
 

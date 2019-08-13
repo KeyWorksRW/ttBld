@@ -9,15 +9,18 @@
 #pragma once
 
 #if (defined(_WIN64) || defined(_WIN32)) && !defined(IDDLG_FUNC_NAME)
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 class CAddFuncName : public ttCDlg
 {
 public:
-    CAddFuncName() : ttCDlg(IDDLG_FUNC_NAME) { }
+    CAddFuncName()
+        : ttCDlg(IDDLG_FUNC_NAME)
+    {
+    }
 
     // Public functions
 
@@ -38,5 +41,4 @@ private:
     // Class members
 
     ttCStr m_cszFunctionName;
-
 };

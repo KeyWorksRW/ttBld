@@ -13,15 +13,15 @@
 #pragma comment(lib, "Rpcrt4.lib")
 #endif
 
-#include <ttfile.h>         // ttCFile
-#include <ttfindfile.h>     // ttCFindFile
+#include <ttfile.h>      // ttCFile
+#include <ttfindfile.h>  // ttCFindFile
 
 #include "resource.h"
-#include "vcxproj.h"        // CVcxProj
+#include "vcxproj.h"  // CVcxProj
 
 static bool CreateGuid(ttCStr& cszGuid)
 {
-    UUID uuid;
+    UUID       uuid;
     RPC_STATUS ret_val = ::UuidCreate(&uuid);
 
     if (ret_val == RPC_S_OK)
@@ -59,11 +59,16 @@ bool CVcxProj::CreateBuildFile()
     {
         ttCFile kf;
         kf.ReadResource(IDR_VCXPROJ_MASTER);
-        while (kf.ReplaceStr("%guid%", cszGuid));
-        while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug32()));
-        while (kf.ReplaceStr("%%ReleaseExe%", GetTargetRelease32()));
-        while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug64()));
-        while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease64()));
+        while (kf.ReplaceStr("%guid%", cszGuid))
+            ;
+        while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug32()))
+            ;
+        while (kf.ReplaceStr("%%ReleaseExe%", GetTargetRelease32()))
+            ;
+        while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug64()))
+            ;
+        while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease64()))
+            ;
 
         ttCStr cszSrcFile;
         for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos)
@@ -83,10 +88,11 @@ bool CVcxProj::CreateBuildFile()
         ttCFindFile ff("*.h");  // add all header files in current directory
         if (ff.IsValid())
         {
-            do {
+            do
+            {
                 cszSrcFile.printf(" <ItemGroup>\n    <ClInclude Include=%kq />\n  </ItemGroup>", (const char*) ff);
                 kf.WriteEol(cszSrcFile);
-            } while(ff.NextFile());
+            } while (ff.NextFile());
         }
 
         kf.WriteEol("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />");
@@ -102,16 +108,19 @@ bool CVcxProj::CreateBuildFile()
             return false;
         }
         else
-            printf("Created %s\n",  (char*) cszProjVC);
+            printf("Created %s\n", (char*) cszProjVC);
 
         kf.Delete();
         kf.ReadResource(IDR_VCXPROJ_FILTERS);
-        CreateGuid(cszGuid);    // it already succeeded once if we got here, so we don't check for error again
-        while (kf.ReplaceStr("%guidSrc%", cszGuid));
+        CreateGuid(cszGuid);  // it already succeeded once if we got here, so we don't check for error again
+        while (kf.ReplaceStr("%guidSrc%", cszGuid))
+            ;
         CreateGuid(cszGuid);
-        while (kf.ReplaceStr("%guidHdr%", cszGuid));
+        while (kf.ReplaceStr("%guidHdr%", cszGuid))
+            ;
         CreateGuid(cszGuid);
-        while (kf.ReplaceStr("%guidResource%", cszGuid));
+        while (kf.ReplaceStr("%guidResource%", cszGuid))
+            ;
 
         kf.WriteEol("  <ItemGroup>");
 
@@ -134,8 +143,7 @@ bool CVcxProj::CreateBuildFile()
             return false;
         }
         else
-            printf("Created %s\n",  (char*) cszProjVC);
-
+            printf("Created %s\n", (char*) cszProjVC);
     }
     return true;
 }

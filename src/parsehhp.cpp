@@ -8,13 +8,13 @@
 
 #include "pch.h"
 
-#include <ttfile.h>     // ttCFile
-#include <ttfindfile.h> // ttCFindFile
+#include <ttfile.h>      // ttCFile
+#include <ttfindfile.h>  // ttCFindFile
 
-#include "parsehhp.h"   // CParseHHP
-#include "ninja.h"      // CNinja
+#include "parsehhp.h"  // CParseHHP
+#include "ninja.h"     // CNinja
 
-extern const char* txtDefBuildDir; // "bld";
+extern const char* txtDefBuildDir;  // "bld";
 
 CParseHHP::CParseHHP(const char* pszHHPName)
 {
@@ -33,14 +33,14 @@ CParseHHP::CParseHHP(const char* pszHHPName)
 namespace
 {
     const char* aOptions[] =  // array of options that specify files that will be compiled
-    {
-        "Contents file",
-        "Index file",
-        "DAT FILE",
-        "Default topic",
+        {
+            "Contents file",
+            "Index file",
+            "DAT FILE",
+            "Default topic",
 
-        nullptr
-    };
+            nullptr
+        };
 }
 
 // This function can be called recursively if the .HHP file has a #include directive to #include another .hhp file
@@ -53,10 +53,10 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
     ttCFile kf;
     if (!kf.ReadFile(pszHHP))
     {
-// REVIEW: [randalphwa - 11/29/2018] Need a way to add error msgs to CNinja
-//      ttCStr cszMsg;
-//      cszMsg.printf("Cannot read the file %s\n", pszHHP);
-//      AddError(cszMsg);
+        // REVIEW: [randalphwa - 11/29/2018] Need a way to add error msgs to CNinja
+        //      ttCStr cszMsg;
+        //      cszMsg.printf("Cannot read the file %s\n", pszHHP);
+        //      AddError(cszMsg);
         return;
     }
 
@@ -77,12 +77,12 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
     while (kf.ReadLine())
     {
         if (!kf[0])
-            continue;   // blank line
+            continue;  // blank line
         if (ttIsSameSubStrI(kf, "#include"))
         {
             char* pszFile = ttFindNonSpace(ttFindSpace(kf));
             if (!*pszFile)
-                continue;   // invalid #include -- doesn't specify a filename
+                continue;  // invalid #include -- doesn't specify a filename
             ttCStr cszFile;
             if (*pszFile == CH_QUOTE)
                 cszFile.GetQuotedString(pszFile);
@@ -104,7 +104,7 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
             continue;
         }
 
-        if (kf[0] == '[') // sections are placed in brackets
+        if (kf[0] == '[')  // sections are placed in brackets
         {
             m_section = SECTION_UNKNOWN;
             if (ttIsSameSubStrI(kf, "[ALIAS"))
@@ -123,101 +123,101 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
                 break;
 
             case SECTION_OPTIONS:
+            {
+                size_t pos;
+                for (pos = 0; aOptions[pos]; ++pos)
                 {
-                    size_t pos;
-                    for (pos = 0; aOptions[pos]; ++pos)
+                    if (ttIsSameSubStrI(kf, aOptions[pos]))
+                        break;
+                }
+                if (aOptions[pos])
+                {
+                    char* pszFile = ttStrChr(kf, '=');
+                    if (pszFile)
                     {
-                        if (ttIsSameSubStrI(kf, aOptions[pos]))
-                            break;
-                    }
-                    if (aOptions[pos])
-                    {
-                        char* pszFile = ttStrChr(kf, '=');
-                        if (pszFile)
+                        pszFile = ttFindNonSpace(pszFile + 1);
+                        if (*pszFile)
                         {
-                            pszFile = ttFindNonSpace(pszFile + 1);
-                            if (*pszFile)
-                            {
-                                // [KeyWorksRW - 11-29-2018] I don't believe the HH compiler from MS supports comments after filenames, but
-                                // we can't be certain other compilers and/or authoring systems don't use them -- so remove any comment just
-                                // to be sure.
+                            // [KeyWorksRW - 11-29-2018] I don't believe the HH compiler from MS supports comments after filenames, but
+                            // we can't be certain other compilers and/or authoring systems don't use them -- so remove any comment just
+                            // to be sure.
 
-                                char* pszComment = ttStrChr(pszFile, ';');
-                                if (pszComment)
-                                    *pszComment = 0;
-                                ttTrimRight(pszFile);
-                                AddDependency(pszHHP, pszFile);
-                            }
-                        }
-                    }
-                    else if (ttIsSameSubStrI(kf, "Compiled file"))
-                    {
-                        char* pszFile = ttStrChr(kf, '=');
-                        if (pszFile)
-                        {
                             char* pszComment = ttStrChr(pszFile, ';');
                             if (pszComment)
                                 *pszComment = 0;
                             ttTrimRight(pszFile);
-                            m_cszChmFile = ttFindNonSpace(pszFile + 1);
-                        }
-                    }
-                }
-                break;
-
-            case SECTION_ALIAS:
-                {
-                    char* pszFile = ttStrChr(kf, ';');  // remove any comment
-                    if (pszFile)
-                    {
-                        *pszFile = 0;
-                        ttTrimRight(kf);
-                    }
-                    pszFile = ttStrChr(kf, '=');
-                    if (pszFile)
-                    {
-                        pszFile = ttFindSpace(pszFile + 1);
-                        if (*pszFile)
-                        {
                             AddDependency(pszHHP, pszFile);
                         }
                     }
                 }
-                break;
+                else if (ttIsSameSubStrI(kf, "Compiled file"))
+                {
+                    char* pszFile = ttStrChr(kf, '=');
+                    if (pszFile)
+                    {
+                        char* pszComment = ttStrChr(pszFile, ';');
+                        if (pszComment)
+                            *pszComment = 0;
+                        ttTrimRight(pszFile);
+                        m_cszChmFile = ttFindNonSpace(pszFile + 1);
+                    }
+                }
+            }
+            break;
+
+            case SECTION_ALIAS:
+            {
+                char* pszFile = ttStrChr(kf, ';');  // remove any comment
+                if (pszFile)
+                {
+                    *pszFile = 0;
+                    ttTrimRight(kf);
+                }
+                pszFile = ttStrChr(kf, '=');
+                if (pszFile)
+                {
+                    pszFile = ttFindSpace(pszFile + 1);
+                    if (*pszFile)
+                    {
+                        AddDependency(pszHHP, pszFile);
+                    }
+                }
+            }
+            break;
 
             case SECTION_TEXT_POPUPS:
+            {
+                char* pszFile = ttStrChr(kf, ';');  // remove any comment
+                if (pszFile)
                 {
-                    char* pszFile = ttStrChr(kf, ';');  // remove any comment
-                    if (pszFile)
-                    {
-                        *pszFile = 0;
-                        ttTrimRight(kf);
-                    }
-
-                    // This section may include .h files that are parsed, but not compiled, but we need them for dependency checking.
-
-                    AddDependency(pszHHP, kf);
+                    *pszFile = 0;
+                    ttTrimRight(kf);
                 }
-                break;
+
+                // This section may include .h files that are parsed, but not compiled, but we need them for dependency checking.
+
+                AddDependency(pszHHP, kf);
+            }
+            break;
 
             case SECTION_FILES:
+            {
+                // [KeyWorksRW - 11-29-2018] I don't think HHC actually allows comments in the [FILES] section,
+                // though it should. I'm supporting comments here just to be sure we can support other file formats
+                // like YAML which do allow for comments
+
+                char* pszFile = ttStrChr(kf, ';');  // remove any comment
+                if (pszFile)
                 {
-                    // [KeyWorksRW - 11-29-2018] I don't think HHC actually allows comments in the [FILES] section,
-                    // though it should. I'm supporting comments here just to be sure we can support other file formats
-                    // like YAML which do allow for comments
-
-                    char* pszFile = ttStrChr(kf, ';');  // remove any comment
-                    if (pszFile)
-                    {
-                        *pszFile = 0;
-                        ttTrimRight(kf);
-                    }
-
-                    // This section may include .h files that are parsed, but not compiled, but we need them for dependency checking.
-
-                    AddDependency(pszHHP, kf);
+                    *pszFile = 0;
+                    ttTrimRight(kf);
                 }
-                break;
+
+                // This section may include .h files that are parsed, but not compiled, but we need them for dependency checking.
+
+                AddDependency(pszHHP, kf);
+            }
+            break;
         }
     }
 }
@@ -247,7 +247,7 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
         // of the pszFile;
 
         ttConvertToRelative(m_cszRoot, pszHHP, cszHHP);
-        cszHHP.FullPathName();   // now that we have the location relative to our original .hhp file, convert it to a full path
+        cszHHP.FullPathName();  // now that we have the location relative to our original .hhp file, convert it to a full path
         char* pszFilePortion = ttFindFilePortion(cszHHP);
         *pszFilePortion = 0;
         ttConvertToRelative(cszHHP, pszFile, cszRelative);
@@ -265,18 +265,19 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
     if (ttStrChr(cszRelative, '*') || ttStrChr(cszRelative, '?'))
     {
         ttCFindFile ff(cszRelative);
-        char* pszFilePortion = ttFindFilePortion(cszRelative);
-        ptrdiff_t cFilePortion = (pszFilePortion - cszRelative.GetPtr());
+        char*       pszFilePortion = ttFindFilePortion(cszRelative);
+        ptrdiff_t   cFilePortion = (pszFilePortion - cszRelative.GetPtr());
         if (ff.IsValid())
         {
-            do {
+            do
+            {
                 if (!ff.IsDir())
                 {
                     cszRelative.GetPtr()[cFilePortion] = 0;
                     cszRelative.AppendFileName(ff);
                     m_lstDependencies += (const char*) cszRelative;
                 }
-            } while(ff.NextFile());
+            } while (ff.NextFile());
         }
         return;
     }
@@ -303,11 +304,11 @@ bool CNinja::CreateHelpFile()
     }
 
     CParseHHP chhp(GetHHPName());
-    chhp.ParseHhpFile();    // this will figure out all of the dependencies
+    chhp.ParseHhpFile();  // this will figure out all of the dependencies
     m_cszChmFile = (const char*) chhp.m_cszChmFile;
 
     ttCFile file;
-    file.SetUnixLF();   // WARNING!!! NINJA doesn't allow \r characters (or \t for that matter)
+    file.SetUnixLF();  // WARNING!!! NINJA doesn't allow \r characters (or \t for that matter)
     file.printf("# WARNING: THIS FILE IS AUTO-GENERATED by %s. CHANGES YOU MAKE WILL BE LOST IF IT IS AUTO-GENERATED AGAIN.\n\n", txtVersion);
     file.WriteEol("ninja_required_version = 1.8\n");
     file.WriteStr("builddir = ");
@@ -324,7 +325,7 @@ bool CNinja::CreateHelpFile()
         {
             file.printf("  %s $\n", chhp.m_lstDependencies[pos]);
         }
-        file.printf("  %s\n", chhp.m_lstDependencies[chhp.m_lstDependencies.GetCount() - 1]);   // last one doesn't have trailing '$' character
+        file.printf("  %s\n", chhp.m_lstDependencies[chhp.m_lstDependencies.GetCount() - 1]);  // last one doesn't have trailing '$' character
     }
     else
     {
@@ -343,7 +344,7 @@ bool CNinja::CreateHelpFile()
         {
             m_dryrun.NewFile(txtHelpNinja);
             m_dryrun.DisplayFileDiff(fileOrg, file);
-            return false;   // we didn't actually write anything
+            return false;  // we didn't actually write anything
         }
     }
 

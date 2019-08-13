@@ -9,17 +9,20 @@
 #pragma once
 
 #ifndef IDTAB_GENERAL
-    #include "resource.h"
+#include "resource.h"
 #endif
 
-#include <ttdlg.h>      // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
 class CTabOptions;
 
 class CTabGeneral : public ttCDlg
 {
 public:
-    CTabGeneral() : ttCDlg(IDTAB_GENERAL) { }
+    CTabGeneral()
+        : ttCDlg(IDTAB_GENERAL)
+    {
+    }
 
     // Class functions
 

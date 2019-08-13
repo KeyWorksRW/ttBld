@@ -14,19 +14,18 @@
 
 #include "pch.h"
 
-#include <direct.h>     // Functions for directory handling and creation
+#include <direct.h>  // Functions for directory handling and creation
 
-#include <ttfindfile.h> // ttCFindFile
-#include <ttfiledlg.h>  // ttCFileDlg
-#include <ttdirdlg.h>   // ttCDirDlg
-#include <ttenumstr.h>  // ttCEnumStr
+#include <ttfindfile.h>  // ttCFindFile
+#include <ttfiledlg.h>   // ttCFileDlg
+#include <ttdirdlg.h>    // ttCDirDlg
+#include <ttenumstr.h>   // ttCEnumStr
 
-#include "ttlibicons.h" // Icons for use on 3D shaded buttons (ttShadeBtn)
+#include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
 
-#include "convertdlg.h" // CConvertDlg
+#include "convertdlg.h"  // CConvertDlg
 
-static const char* atxtSrcTypes[] =
-{
+static const char* atxtSrcTypes[] = {
     "*.cpp",
     "*.cc",
     "*.cxx",
@@ -35,17 +34,17 @@ static const char* atxtSrcTypes[] =
     nullptr
 };
 
-static const char* atxtProjects[] =
-{
+static const char* atxtProjects[] = {
     "*.vcxproj",
     "*.vcproj",
-    "*.project",    // CodeLite
-    "*.cbp",        // CodeBlocks
+    "*.project",  // CodeLite
+    "*.cbp",      // CodeBlocks
 
     nullptr
 };
 
-CConvertDlg::CConvertDlg(const char* pszDstSrcFiles) : ttCDlg(IDDDLG_CONVERT)
+CConvertDlg::CConvertDlg(const char* pszDstSrcFiles)
+    : ttCDlg(IDDDLG_CONVERT)
 {
     if (pszDstSrcFiles)
         m_cszOutSrcFiles = pszDstSrcFiles;
@@ -87,11 +86,11 @@ void CConvertDlg::OnBegin(void)
         if (ff.IsValid())
             m_comboScripts.Add((char*) ff);
 
-        if (m_comboScripts.GetCount() < 1)        // no scripts found, let's check sub directories
+        if (m_comboScripts.GetCount() < 1)  // no scripts found, let's check sub directories
         {
             ff.NewPattern("*.*");
-            do {
-
+            do
+            {
                 if (ff.IsDir())
                 {
                     if (!ttIsValidFileChar(ff, 0))  // this will skip over . and ..
@@ -113,7 +112,7 @@ void CConvertDlg::OnBegin(void)
                         m_comboScripts.Add(cszDir);
                     }
                 }
-            } while(ff.NextFile());
+            } while (ff.NextFile());
         }
     }
     if (m_comboScripts.GetCount() > 0)
@@ -128,9 +127,10 @@ void CConvertDlg::OnBegin(void)
         {
             if (ff.NewPattern(atxtSrcTypes[pos]))
             {
-                do {
-                   ++cFilesFound;
-                } while(ff.NextFile());
+                do
+                {
+                    ++cFilesFound;
+                } while (ff.NextFile());
             }
         }
         csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
@@ -138,7 +138,6 @@ void CConvertDlg::OnBegin(void)
         if (cFilesFound)
             SetCheck(DLG_ID(IDRADIO_FILES));
     }
-
 }
 
 void CConvertDlg::OnBtnLocateScript()
@@ -160,7 +159,7 @@ void CConvertDlg::OnBtnLocateScript()
 void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles to
 {
     ttCDirDlg dlg;
-    ttCStr cszCWD;
+    ttCStr    cszCWD;
     cszCWD.GetCWD();
     dlg.SetStartingDir(cszCWD);
     if (dlg.GetFolderName(*this))
@@ -179,7 +178,7 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
 void CConvertDlg::OnBtnChangeIn()
 {
     ttCDirDlg dlg;
-    ttCStr cszCWD;
+    ttCStr    cszCWD;
     cszCWD.GetCWD();
     dlg.SetStartingDir(cszCWD);
     if (dlg.GetFolderName(*this))
@@ -187,17 +186,18 @@ void CConvertDlg::OnBtnChangeIn()
         SetControlText(DLG_ID(IDEDIT_IN_DIR), dlg);
         ttChDir(dlg);
         ttCFindFile ff("*.cpp");
-        size_t cFilesFound = 0;
+        size_t      cFilesFound = 0;
         for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
         {
             if (ff.NewPattern(atxtSrcTypes[pos]))
             {
-                do {
-                   ++cFilesFound;
-                } while(ff.NextFile());
+                do
+                {
+                    ++cFilesFound;
+                } while (ff.NextFile());
             }
         }
-        ttChDir(cszCWD);     // restore our directory
+        ttChDir(cszCWD);  // restore our directory
         ttCStr csz;
         csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
         SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);
@@ -371,7 +371,8 @@ bool CConvertDlg::ConvertVcxProj()
                                 cszFlags += pChild->GetData();
                                 cszFlags.ReplaceStr("_DEBUG;", "");
                                 cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"));
+                                while (cszFlags.ReplaceStr(";", " -D"))
+                                    ;
                                 m_cSrcFiles.UpdateOption(OPT_MDL_DBG, (char*) cszFlags);
                             }
                         }
@@ -388,7 +389,8 @@ bool CConvertDlg::ConvertVcxProj()
                                 cszFlags += pChild->GetData();
                                 cszFlags.ReplaceStr("_DEBUG;", "");
                                 cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"));
+                                while (cszFlags.ReplaceStr(";", " -D"))
+                                    ;
                                 m_cSrcFiles.UpdateOption(OPT_RC_DBG, (char*) cszFlags);
                             }
                         }
@@ -411,7 +413,7 @@ bool CConvertDlg::ConvertVcxProj()
                                 const char* pszFirstSemi = ttStrChr(pChild->GetData(), ';');
                                 if (pszFirstSemi)
                                     ++pszFirstSemi;
-                                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi :  pChild->GetData());
+                                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi : pChild->GetData());
                                 cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
                                 m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszFlags);
                             }
@@ -454,7 +456,8 @@ bool CConvertDlg::ConvertVcxProj()
                                 cszFlags += pChild->GetData();
                                 cszFlags.ReplaceStr("_DEBUG;", "");
                                 cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"));
+                                while (cszFlags.ReplaceStr(";", " -D"))
+                                    ;
                                 m_cSrcFiles.UpdateOption(OPT_CFLAGS_DBG, (char*) cszFlags);
                             }
                         }
@@ -479,7 +482,8 @@ bool CConvertDlg::ConvertVcxProj()
                                 cszFlags += pChild->GetData();
                                 cszFlags.ReplaceStr("NDEBUG;", "");
                                 cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"));
+                                while (cszFlags.ReplaceStr(";", " -D"))
+                                    ;
                                 m_cSrcFiles.UpdateOption(OPT_MDL_REL, (char*) cszFlags);
                             }
                         }
@@ -496,7 +500,8 @@ bool CConvertDlg::ConvertVcxProj()
                                 cszFlags += pChild->GetData();
                                 cszFlags.ReplaceStr("NDEBUG;", "");
                                 cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"));
+                                while (cszFlags.ReplaceStr(";", " -D"))
+                                    ;
                                 m_cSrcFiles.UpdateOption(OPT_RC_REL, (char*) cszFlags);
                             }
                         }
@@ -548,7 +553,8 @@ bool CConvertDlg::ConvertVcxProj()
                                 cszFlags += pChild->GetData();
                                 cszFlags.ReplaceStr("NDEBUG;", "");
                                 cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"));
+                                while (cszFlags.ReplaceStr(";", " -D"))
+                                    ;
                                 m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, (char*) cszFlags);
                             }
                         }
@@ -561,21 +567,21 @@ bool CConvertDlg::ConvertVcxProj()
     // If Debug and Release flags are the same, then remove them and just use the common flag setting
 
     if (m_cSrcFiles.GetOption(OPT_CFLAGS_REL) && m_cSrcFiles.GetOption(OPT_CFLAGS_DBG) &&
-                ttIsSameStrI(m_cSrcFiles.GetOption(OPT_CFLAGS_REL), m_cSrcFiles.GetOption(OPT_CFLAGS_DBG)))
+        ttIsSameStrI(m_cSrcFiles.GetOption(OPT_CFLAGS_REL), m_cSrcFiles.GetOption(OPT_CFLAGS_DBG)))
     {
         m_cSrcFiles.UpdateOption(OPT_CFLAGS_CMN, m_cSrcFiles.GetOption(OPT_CFLAGS_REL));
         m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, "");
         m_cSrcFiles.UpdateOption(OPT_CFLAGS_DBG, "");
     }
     if (m_cSrcFiles.GetOption(OPT_MDL_REL) && m_cSrcFiles.GetOption(OPT_MDL_DBG) &&
-                ttIsSameStrI(m_cSrcFiles.GetOption(OPT_MDL_REL), m_cSrcFiles.GetOption(OPT_MDL_DBG)))
+        ttIsSameStrI(m_cSrcFiles.GetOption(OPT_MDL_REL), m_cSrcFiles.GetOption(OPT_MDL_DBG)))
     {
         m_cSrcFiles.UpdateOption(OPT_MDL_CMN, m_cSrcFiles.GetOption(OPT_MDL_REL));
         m_cSrcFiles.UpdateOption(OPT_MDL_REL, "");
         m_cSrcFiles.UpdateOption(OPT_MDL_DBG, "");
     }
     if (m_cSrcFiles.GetOption(OPT_RC_REL) && m_cSrcFiles.GetOption(OPT_RC_DBG) &&
-                ttIsSameStrI(m_cSrcFiles.GetOption(OPT_RC_REL), m_cSrcFiles.GetOption(OPT_RC_DBG)))
+        ttIsSameStrI(m_cSrcFiles.GetOption(OPT_RC_REL), m_cSrcFiles.GetOption(OPT_RC_DBG)))
     {
         m_cSrcFiles.UpdateOption(OPT_RC_CMN, m_cSrcFiles.GetOption(OPT_RC_REL));
         m_cSrcFiles.UpdateOption(OPT_RC_REL, "");
@@ -645,16 +651,17 @@ bool CConvertDlg::ConvertVcProj()
         if (pOption)
         {
             ttCStr cszOutDir(pOption->GetAttribute("OutputFile"));  // will typically be something like: "../bin/$(ProjectName).exe"
-            char* pszFile = ttFindFilePortion(cszOutDir);
+            char*  pszFile = ttFindFilePortion(cszOutDir);
             if (pszFile)
                 *pszFile = 0;
             m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszOutDir);
         }
-        do {
+        do
+        {
             if (ttStrStrI(pConfiguration->GetAttribute("Name"), "Release"))
                 break;
             pConfiguration = pConfigurations->FindNextElement("Configuration");
-        } while(pConfiguration);
+        } while (pConfiguration);
 
         ttCXMLBranch* pRelease = pConfiguration ? pConfiguration->FindFirstAttribute("Name") : nullptr;
 
@@ -680,24 +687,23 @@ bool CConvertDlg::ConvertVcProj()
             if (pszOption)
             {
                 ttCEnumStr enumFlags(pszOption);
-                ttCStr cszCFlags;
+                ttCStr     cszCFlags;
                 while (enumFlags.Enum())
                 {
                     if (ttIsSameStrI(enumFlags, "NDEBUG"))
-                        continue;   // we already added this
+                        continue;                             // we already added this
                     if (ttIsSameStrI(enumFlags, "_CONSOLE"))  // the define is already in use, but make certain exeType matches
                     {
                         m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
                         continue;
                     }
-                    if (ttIsSameStrI(enumFlags, "_USRDLL"))   // the define is already in use, but make certain exeType matches
+                    if (ttIsSameStrI(enumFlags, "_USRDLL"))  // the define is already in use, but make certain exeType matches
                     {
                         m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
-                        continue;   // do we need to add this?
+                        continue;  // do we need to add this?
                     }
-                    if (ttIsSameSubStrI(enumFlags, "$("))   // Visual Studio specific, ignore it
+                    if (ttIsSameSubStrI(enumFlags, "$("))  // Visual Studio specific, ignore it
                         continue;
-
 
                     if (cszCFlags.IsNonEmpty())
                         cszCFlags += " ";
@@ -737,11 +743,11 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
     char* psz = ttStrChrR(pszFile, '.');
     if (psz)
     {
-        if (    ttIsSameStrI(psz, ".cpp") ||
-                ttIsSameStrI(psz, ".cc") ||
-                ttIsSameStrI(psz, ".cxx") ||
-                ttIsSameStrI(psz, ".c") ||
-                ttIsSameSubStrI(psz, ".rc"))
+        if (ttIsSameStrI(psz, ".cpp") ||
+            ttIsSameStrI(psz, ".cc") ||
+            ttIsSameStrI(psz, ".cxx") ||
+            ttIsSameStrI(psz, ".c") ||
+            ttIsSameSubStrI(psz, ".rc"))
             return true;
     }
     return false;
@@ -810,7 +816,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
         else if (ttIsSameStrI(pszExt, ".vcproj"))
             bResult = ConvertVcProj();
 
-        ttChDir(m_cszCWD);   // we may have changed directories during the conversion
+        ttChDir(m_cszCWD);  // we may have changed directories during the conversion
 
         if (bResult)
         {
@@ -822,7 +828,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
             if (ttIsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT)))
             {
                 ttCStr cszProject(m_cszOutSrcFiles);
-                char* pszFilePortion = ttFindFilePortion(cszProject);
+                char*  pszFilePortion = ttFindFilePortion(cszProject);
                 if (pszFilePortion)
                     *pszFilePortion = 0;
                 m_cSrcFiles.UpdateOption(OPT_PROJECT, ttFindFilePortion(cszProject));
