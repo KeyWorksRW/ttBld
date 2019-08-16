@@ -224,8 +224,12 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
             while (enumInc.Enum())
-                kfOut.printf("                %kq,\n", (const char*) enumInc);
-
+            {
+                ttCStr cszInclude(enumInc);
+                cszInclude.FullPathName();
+                ttBackslashToForwardslash(cszInclude);
+                kfOut.printf("                %kq,\n", (const char*) cszInclude);
+            }
             // we always add the default include path
             kfOut.WriteEol("                \042${default}\042");
             kfOut.WriteEol(kf);
@@ -538,6 +542,11 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             continue;
         }
 
+#if 0
+// REVIEW: [KeyWorks - 08-16-2019] Internally, this is causing is problems because we typically use symbolic links to ttLib.
+// The full path is to the symbolic link rather than the original directory. Once we add code to retrieve where the symbolic
+// link is actually pointing to, then we can re-enable this.
+
         else if (ttStrStrI(kfIn, "\"includePath\""))
         {
             kfOut.WriteEol(kfIn);
@@ -552,6 +561,12 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     continue;
                 ttCStr cszDef;
                 cszDef.GetQuotedString(pszDef);
+                if (!cszDef.IsSameStrI("${default}"))
+                {
+                    cszDef.FullPathName();
+                    ttBackslashToForwardslash(cszDef);
+                }
+
                 lstIncludes += cszDef;  // this will only get added if it isn't a duplicate
             }
 
@@ -568,6 +583,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             kfOut.WriteEol("            ]");
             continue;
         }
+#endif
         else if (ttStrStrI(kfIn, "compilerPath") && ttStrStrI(kfIn, "cl.exe"))
         {
             // MSVC can change the path frequently (sometimes once a week).
