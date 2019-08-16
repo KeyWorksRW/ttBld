@@ -12,18 +12,17 @@
 
 #include "pch.h"
 
-#include <ttlist.h>    // ttCList
+#include <ttlist.h>  // ttCList
 
 #include "NinjaStringIds.h"
 
 typedef struct
 {
-    size_t id;
+    size_t      id;
     const char* psz;
 } ttIDS_LIST;
 
-static const ttIDS_LIST aNinjaStringIds[] =
-{
+static const ttIDS_LIST aNinjaStringIds[] = {
     // clang-format off
     { IDS_CANT_FIND_COMPILER,        _XGET("Unable to find either the cl.exe or clang-cl.exe compilers in PATH.") },
     { IDS_MAKENINJA_CORRUPTED,       _XGET("ttBld.exe is corrupted -- cannot read the necessary resource.") },

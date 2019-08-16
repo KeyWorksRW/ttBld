@@ -8,12 +8,11 @@
 
 #include "pch.h"
 
-
-const char* txtVersion   = "ttBld 1.2.0.8295";
+const char* txtVersion = "ttBld 1.2.0.8295";
 const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 
 #include <iostream>
-#include <direct.h>     // Functions for directory handling and creation
+#include <direct.h>  // Functions for directory handling and creation
 
 // _LINK_ commands combined with wxLibs.h is used to specify what wxWidgets libraries you want to link to. It is not
 // tracked so that you can change these to whatever you want. If you copy the file from ../wxMSW/wxLibs.h you can then
@@ -22,12 +21,12 @@ const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 #define _LINK_WX_BASE 1
 #define _LINK_WX_CORE 1
 
-#include "wxLibs.h"     // adds pragmas telling the linker which libraries to link to
+#include "wxLibs.h"  // adds pragmas telling the linker which libraries to link to
 
-#include "convertdlg.h" // CConvertDlg
-#include "ninja.h"      // CNinja
-#include "vcxproj.h"    // CVcxProj
-#include "funcs.h"      // List of function declarations
+#include "convertdlg.h"  // CConvertDlg
+#include "ninja.h"       // CNinja
+#include "vcxproj.h"     // CVcxProj
+#include "funcs.h"       // List of function declarations
 
 void Usage()
 {
@@ -61,8 +60,6 @@ void Usage()
     // puts(TRANSLATE("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
     // puts(TRANSLATE("    -msvcenv64  -- create .ninja file even if it hasn't changed"));
 
-
-
     // puts(TRANSLATE("    -help       -- displays usage information"));
     // puts(TRANSLATE("    -?          -- displays usage information"));
 }
@@ -92,7 +89,7 @@ typedef enum
 } UPDATE_TYPE;
 void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 
-enum    // actions that can be run in addition to normal single command actions
+enum  // actions that can be run in addition to normal single command actions
 {
     // clang-format off
     ACT_DRYRUN   = 1 << 0,
@@ -111,9 +108,9 @@ int main(int argc, char* argv[])
 {
     ttInitCaller(txtVersion);
     UPDATE_TYPE upType = UPDATE_NORMAL;
-    size_t Action = 0;
-    ttCStr cszRootDir;      // this will be set if (Action & ACT_DIR) is set
-    ttCStr cszSrcFilePath;  // location of srcfiles.yaml
+    size_t      Action = 0;
+    ttCStr      cszRootDir;      // this will be set if (Action & ACT_DIR) is set
+    ttCStr      cszSrcFilePath;  // location of srcfiles.yaml
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && defined(_DEBUG) && defined(_WIN32)
@@ -150,7 +147,6 @@ int main(int argc, char* argv[])
 
                 if (ttIsSameSubStrI(pszArg, "vscode"))
                     Action |= ACT_VSCODE;
-
             }
             pszArg = ttStepOver(pszArg);
         }
@@ -205,9 +201,9 @@ int main(int argc, char* argv[])
             Action |= ACT_DRYRUN;
         else if (ttIsSameStrI(argv[argpos] + 1, "new"))
             Action |= ACT_NEW;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "opt"))    // -options
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "opt"))  // -options
             Action |= ACT_OPTIONS;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))   // check this before "vs"
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))  // check this before "vs"
             Action |= ACT_VSCODE;
         else if (ttIsSameSubStrI(argv[argpos] + 1, "vs"))
             Action |= ACT_VS;
@@ -342,16 +338,16 @@ int main(int argc, char* argv[])
                 return 1;
         }
 
-        if (Action & ACT_FORCE)    // force write ignores any request for dryrun
+        if (Action & ACT_FORCE)  // force write ignores any request for dryrun
             cNinja.ForceWrite();
         else if (Action & ACT_DRYRUN)
             cNinja.EnableDryRun();
 
-        cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);    // this will create/update it if .srcfiles has a Makefile: section
+        cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);  // this will create/update it if .srcfiles has a Makefile: section
 
         ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT), "At least one platform build should have been set in CNinja constructor")
 
-        int countNinjas = 0;
+            int countNinjas = 0;
         if (cNinja.GetBoolOption(OPT_64BIT))
         {
 #if defined(_WIN32)
