@@ -23,6 +23,8 @@ const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 
 #include "wxLibs.h"  // adds pragmas telling the linker which libraries to link to
 
+#include <ttconsole.h>  // ttConsoleColor
+
 #include "convertdlg.h"  // CConvertDlg
 #include "ninja.h"       // CNinja
 #include "vcxproj.h"     // CVcxProj
@@ -215,6 +217,7 @@ int main(int argc, char* argv[])
             ++argpos;
             if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
             {
+                ttConsoleColor clr(ttConsoleColor::LIGHTRED);
                 puts(TRANSLATE("-dir must be followed by the directory to use."));
                 return 1;
             }
@@ -284,6 +287,7 @@ int main(int argc, char* argv[])
             cszSrcFilePath = cszRootDir;
             if (!LocateSrcFiles(&cszSrcFilePath))
             {
+                ttConsoleColor clr(ttConsoleColor::LIGHTRED);
                 puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
                 return 1;
             }
@@ -295,6 +299,7 @@ int main(int argc, char* argv[])
                 cszSrcFilePath = pszFile;
             else
             {
+                ttConsoleColor clr(ttConsoleColor::LIGHTRED);
                 puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
                 return 1;
             }
@@ -382,6 +387,7 @@ int main(int argc, char* argv[])
 
         if (cNinja.GetErrorCount())
         {
+            ttConsoleColor clr(ttConsoleColor::LIGHTRED);
             for (size_t pos = 0; pos < cNinja.GetErrorCount(); pos++)
                 puts(cNinja.GetError(pos));
             puts("");
@@ -454,5 +460,8 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     }
 
     else
+    {
+        ttConsoleColor clr(ttConsoleColor::LIGHTRED);
         puts(TRANSLATE("This version of ttBld is too old to properly create ninja scripts from your current srcfiles."));
+    }
 }
