@@ -23,9 +23,9 @@ const char* txtOptVersion = "1.2.0";  // any time you add an option below, you n
 sfopt::OPT_VERSION aoptVersions[] = {
     // clang-format off
 
-    /*
-    { OPT_STATIC_CRT_REL, 1, 1, 0  },     // This is just an example of adding a min version requirement for an option
-    */
+    { OPT_STATIC_CRT_REL, 1, 2, 0 },
+    { OPT_WARN_LEVEL, 1, 2, 0 },
+    { OPT_OPTIMIZE, 1, 2, 0 },
 
     // All options default to 1.0.0, so only add options above that require a newer version of ttBld
 
