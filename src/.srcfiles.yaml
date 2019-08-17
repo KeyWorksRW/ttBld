@@ -17,7 +17,7 @@ Options:
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
     IncDirs:     ../ttLib/include                  # additional directories for header files
-    BuildLibs:   ../ttLib     # libraries that need to be built (added to makefile generation)
+    BuildLibs:   ../ttLib/src # libraries that need to be built (added to makefile generation)
 
 Files:
     ttBld.rc            # Windows resource files
