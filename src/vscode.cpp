@@ -285,7 +285,9 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // REVIEW: [randalphwa - 7/19/2019] Will it work to have a non-existant default.natvis file or will VS Code complain?
     // An alternative would be to insert/remove the entire line
-    kf.ReplaceStr("%natvis%", cSrcFiles.GetOption(OPT_NATVIS) ? cSrcFiles.GetOption(OPT_NATVIS) : "default.natvis");
+    ttCStr cszPath(cSrcFiles.GetOption(OPT_NATVIS) ? cSrcFiles.GetOption(OPT_NATVIS) : "default.natvis");
+    ttBackslashToForwardslash(cszPath);
+    kf.ReplaceStr("%natvis%", cszPath);
 
     if (!kf.WriteFile(".vscode/launch.json"))
     {
@@ -472,7 +474,11 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     ttCList    lstIncludes;
     lstIncludes.SetFlags(ttCList::FLG_IGNORE_CASE);
     while (enumInc.Enum())
-        lstIncludes += enumInc;
+    {
+        ttCStr cszPath(enumInc);
+        ttBackslashToForwardslash(cszPath);
+        lstIncludes += cszPath;
+    }
 
 #if defined(_WIN32)
     ttCStr cszMSVC;
