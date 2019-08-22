@@ -42,6 +42,8 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
             m_pkfOut->WriteEol("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
         else
             m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
+
+        m_pkfOut->WriteEol("# -FC\t// Full path to source code file in diagnostics");
     }
     else  // Presumably GEN_DEBUG32 or GEN_DEBUG64
     {
@@ -50,6 +52,7 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
         else
             m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
         m_pkfOut->WriteEol("# -Z7\t// produces object files with full symbolic debugging information");
+        m_pkfOut->WriteEol("# -FC\t// Full path to source code file in diagnostics");
     }
 
     m_pkfOut->WriteEol();  // force a blank line after the options are listed
@@ -80,6 +83,8 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
                          GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
                          IsExeTypeLib() ? " -Zl" : (IsStaticCrtRel() ? " -MT" : " -MD"),
                          IsOptimizeSpeed() ? " -O2" : " -O1");
+
+    m_pkfOut->WriteStr(" -FC");
 
     if (GetOption(OPT_INC_DIRS))
     {

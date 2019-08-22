@@ -86,7 +86,7 @@ static const char* txtMsvcSubTasks =
     "%group%"
     "            \"problemMatcher\": {\n"
     "                \"base\": \"$msCompile\",\n"
-    "                \"fileLocation\": [\"relative\", \"${workspaceFolder}\"]\n"
+    "                \"fileLocation\": [\"autoDetect\", \"${workspaceFolder}\"]\n"
     "            },\n"
     "        },\n";
 
@@ -98,7 +98,7 @@ static const char* txtClangSubTasks =
     "%group%"
     "            \"problemMatcher\": {\n"
     "                \"owner\": \"cpp\",\n"
-    "                \"fileLocation\": [\"relative\", \"${workspaceFolder}\"],\n"
+    "                \"fileLocation\": [\"autoDetect\", \"${workspaceFolder}\"],\n"
     "                \"pattern\": {\n"
     "                    \"regexp\": \"^(.*):(\\\\d+):(\\\\d+):\\\\s+(note|warning|error):\\\\s+(.*)$\",\n"
     "                    \"file\": 1,\n"
