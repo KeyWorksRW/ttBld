@@ -644,15 +644,22 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
     const char* pszStart = pszDefines;
     while (*pszStart)
     {
-        if (*pszStart == '-' || *pszStart != CH_FORWARDSLASH)
+        if (*pszStart == '-' || *pszStart == CH_FORWARDSLASH)
         {
             ++pszStart;
-            if (*pszStart != 'D')  // note that this option is case sensitive
-                continue;          // it's not a define
+            if (*pszStart != 'D')
+            {  // note that this option is case sensitive
+                pszStart = ttStepOver(pszStart);
+                continue;  // it's not a define
+            }
             ttCStr cszTmp;
             cszTmp.GetString(pszStart, *pszStart, CH_SPACE);
             lst += cszTmp;
             pszStart += ttStrLen(cszTmp);
+        }
+        else
+        {
+            pszStart = ttStepOver(pszStart);
         }
     }
 }
