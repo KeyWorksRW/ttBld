@@ -388,6 +388,13 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
         else
             m_pkfOut->WriteStr("rule rc\n  command = rc.exe -nologo");
 
+        if (GetOption(OPT_INC_DIRS))
+        {
+            ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
+            while (cEnumStr.Enum())
+                m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
+        }
+
         if (GetOption(OPT_RC_CMN))
         {
             m_pkfOut->WriteChar(CH_SPACE);
@@ -419,6 +426,13 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
             m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /x64");
         else
             m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /win32");
+
+        if (GetOption(OPT_INC_DIRS))
+        {
+            ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
+            while (cEnumStr.Enum())
+                m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
+        }
 
         if (GetOption(OPT_MDL_CMN))
         {
