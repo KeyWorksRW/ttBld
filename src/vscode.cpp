@@ -235,7 +235,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             continue;
         }
 
-        else if (ttIsSameSubStrI(ttFindNonSpace(kf), "\042includePath") && cSrcFiles.GetOption(OPT_INC_DIRS))
+        else if (ttIsSameSubStrI(ttFindNonSpace(kf), "\042includePath"))
         {
             kfOut.WriteEol(kf);
             while (kf.ReadLine())  // find the end of the current list of includes
@@ -246,20 +246,23 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     break;
             }
 
-            ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
-            while (enumInc.Enum())
+            if (cSrcFiles.GetOption(OPT_INC_DIRS))
             {
-                ttCStr cszInclude(enumInc);
-                cszInclude.FullPathName();
+                ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
+                while (enumInc.Enum())
+                {
+                    ttCStr cszInclude(enumInc);
+                    cszInclude.FullPathName();
 #if defined(_WIN32)
-                ttCStr cszIncDir;
-                JunctionToReal(cszInclude, cszIncDir);
-                ttBackslashToForwardslash(cszIncDir);
-                kfOut.printf("                %kq,\n", (const char*) cszIncDir);
+                    ttCStr cszIncDir;
+                    JunctionToReal(cszInclude, cszIncDir);
+                    ttBackslashToForwardslash(cszIncDir);
+                    kfOut.printf("                %kq,\n", (const char*) cszIncDir);
 #else
-                ttBackslashToForwardslash(cszInclude);
-                kfOut.printf("                %kq,\n", (const char*) cszInclude);
+                    ttBackslashToForwardslash(cszInclude);
+                    kfOut.printf("                %kq,\n", (const char*) cszInclude);
 #endif
+                }
             }
             // we always add the default include path
             kfOut.WriteEol("                \042${default}\042");
