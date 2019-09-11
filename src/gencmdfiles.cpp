@@ -39,10 +39,9 @@ void CreateCodeCmd(const char* pszFile)
     file.printf("ttBld.exe -msvcenv%s %kq\n", pszType, (char*) cszPath);
     file.printf("call %kq\n\n", (char*) cszPath);
 
-    file.WriteEol(
-        "setlocal\n"
-        "set VSCODE_DEV=\n"
-        "set ELECTRON_RUN_AS_NODE=1");
+    file.WriteEol("setlocal\n"
+                  "set VSCODE_DEV=\n"
+                  "set ELECTRON_RUN_AS_NODE=1");
 
     cszPath = cszRoot;
     cszPath.AppendFileName("code.exe");
@@ -213,7 +212,8 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
 
     ttCFile file;
     file.WriteEol("@echo off\n");
-    file.WriteEol("@REM This file is automatically created by ttBld. Any changes you make will be lost if ttBld creates it again.\n");
+    file.WriteEol("@REM This file is automatically created by ttBld. Any changes you make will be lost if ttBld "
+                  "creates it again.\n");
 
     cszPath.Delete();
     for (size_t pos = 0; lstPath.InRange(pos); ++pos)

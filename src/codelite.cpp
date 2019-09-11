@@ -46,14 +46,16 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     CSrcFiles cSrcFiles;
     if (!cSrcFiles.ReadFile(pszSrcFiles))
     {
-        // BUGBUG: [KeyWorks - 7/29/2019] This should be wrong. There's no reason we can't open a .vcxproj file and write a CodeLite project file
+        // BUGBUG: [KeyWorks - 7/29/2019] This should be wrong. There's no reason we can't open a .vcxproj file and
+        // write a CodeLite project file
         puts(TRANSLATE("Cannot create a CodeLite project file if there is no .srcfiles.yaml file."));
         return CLP_NO_SRCFILES;
     }
 
     if (!cSrcFiles.GetProjectName())
     {
-        printf(TRANSLATE("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n"), cSrcFiles.GetSrcFiles());
+        printf(TRANSLATE("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n"),
+               cSrcFiles.GetSrcFiles());
         return CLP_NO_PROJECT;
     }
 
@@ -61,8 +63,8 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     cszProjFile.ChangeExtension(".project");
     if (ttFileExists(cszProjFile))
     {
-        // TODO: [randalphwa - 10/8/2018] We could call a function here to update the .project file, adding any src files that
-        // are in .srcfiles, but missing in .project
+        // TODO: [randalphwa - 10/8/2018] We could call a function here to update the .project file, adding any src
+        // files that are in .srcfiles, but missing in .project
         return CLP_EXISTS;
     }
 

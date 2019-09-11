@@ -6,9 +6,10 @@
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-// The risk of putting strings directly into the code is that you can end up with strings that were supposed to be the same, but have a
-// a slight variation, such as an extra space that results in two or more strings that have to be translated. If all strings are placed
-// here and accessed with the GETSTRING(id) macro then you avoid any accidental variations.
+// The risk of putting strings directly into the code is that you can end up with strings that were supposed to be the
+// same, but have a a slight variation, such as an extra space that results in two or more strings that have to be
+// translated. If all strings are placed here and accessed with the GETSTRING(id) macro then you avoid any accidental
+// variations.
 
 #include "pch.h"
 

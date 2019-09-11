@@ -12,6 +12,7 @@
 
 #include "ninja.h"  // CNinja
 
+// clang-format off
 static const char* lstRcKeywords[] = {  // list of keywords that load a file
     "BITMP",
     "CURSOR",
@@ -24,6 +25,7 @@ static const char* lstRcKeywords[] = {  // list of keywords that load a file
 
     nullptr
 };
+// clang-format on
 
 // This is called to parse .rc files to find dependencies
 
@@ -79,17 +81,20 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
         {
             char* psz = ttFindNonSpace(ttFindNonSpace(kf) + sizeof("#include"));
 
-            // We only care about header files in quotes -- we're not generating dependeices on system files (#include <foo.h>)
+            // We only care about header files in quotes -- we're not generating dependeices on system files (#include
+            // <foo.h>)
 
             if (*psz == CH_QUOTE)
             {
                 ttCStr cszHeader;
                 cszHeader.GetQuotedString(psz);
 
-                // Older versions of Visual Studio do not allow <> to be placed around header files. Since system header files
-                // rarely change, and when they do they are not likely to require rebuilding our .rc file, we simply ignore them.
+                // Older versions of Visual Studio do not allow <> to be placed around header files. Since system header
+                // files rarely change, and when they do they are not likely to require rebuilding our .rc file, we
+                // simply ignore them.
 
-                if (ttIsSameSubStrI(cszHeader, "afx") || ttIsSameSubStrI(cszHeader, "atl") || ttIsSameSubStrI(cszHeader, "winres"))
+                if (ttIsSameSubStrI(cszHeader, "afx") || ttIsSameSubStrI(cszHeader, "atl") ||
+                    ttIsSameSubStrI(cszHeader, "winres"))
                     continue;
 
                 NormalizeHeader(pszHdr ? pszHdr : pszRcFile, cszHeader);
@@ -115,7 +120,8 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                     posHdr = m_lstRcDependencies.Add(cszHeader);
 
                 if (!bHdrSeenBefore)
-                    FindRcDependencies(pszRcFile, cszHeader, cszRelPath);  // now search the header file for any #includes it might have
+                    FindRcDependencies(pszRcFile, cszHeader,
+                                       cszRelPath);  // now search the header file for any #includes it might have
             }
         }
 
@@ -124,8 +130,9 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
         else
         {
             char* pszKeyWord = ttFindNonSpace(kf);
-            if (!pszKeyWord || pszKeyWord[0] == '/' || pszKeyWord[0] == CH_QUOTE)  // TEXTINCLUDE typically puts things in quotes
-                continue;                                                          // blank line or comment line
+            if (!pszKeyWord || pszKeyWord[0] == '/' ||
+                pszKeyWord[0] == CH_QUOTE)  // TEXTINCLUDE typically puts things in quotes
+                continue;                   // blank line or comment line
             pszKeyWord = ttFindSpace(pszKeyWord);
             if (!pszKeyWord)
                 continue;  // means it's not a line that will include anything
@@ -180,10 +187,12 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                         if (!ttFileExists(cszFile))
                         {
                             ttCStr cszErrMsg;
-                            // BUGBUG: [KeyWorks - 7/11/2019] See Issue #46 (https://github.com/KeyWorksRW/keyBld/issues/46)
-                            // Once we commit to wxWidgets, we need to use wxNumberFormatter to deal with the number.
+                            // BUGBUG: [KeyWorks - 7/11/2019] See Issue #46
+                            // (https://github.com/KeyWorksRW/keyBld/issues/46) Once we commit to wxWidgets, we need to
+                            // use wxNumberFormatter to deal with the number.
                             cszErrMsg.printf(TRANSLATE("%s(%kt,%kt):  warning: cannot locate include file %s"),
-                                             pszHdr ? pszHdr : pszRcFile, curLine, (size_t)(pszFileName - kf.GetLnPtr()), (char*) cszFile);
+                                             pszHdr ? pszHdr : pszRcFile, curLine,
+                                             (size_t)(pszFileName - kf.GetLnPtr()), (char*) cszFile);
                             m_lstErrors += cszErrMsg;
                             break;
                         }

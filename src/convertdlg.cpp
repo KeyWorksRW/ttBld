@@ -7,8 +7,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*
-    Source files specified in a build script are relative to the location of that build script. The .srcfiles file we are
-    creating may be in an entirely different directory. So before we add a file to .srcfiles, we must first make it
+    Source files specified in a build script are relative to the location of that build script. The .srcfiles file we
+    are creating may be in an entirely different directory. So before we add a file to .srcfiles, we must first make it
     relative to the location of the build script, and then make it relative to the location of .srcfiles.
 */
 
@@ -25,23 +25,15 @@
 
 #include "convertdlg.h"  // CConvertDlg
 
-static const char* atxtSrcTypes[] = {
-    "*.cpp",
-    "*.cc",
-    "*.cxx",
-    "*.c",
+static const char* atxtSrcTypes[] = { "*.cpp", "*.cc", "*.cxx", "*.c",
 
-    nullptr
-};
+                                      nullptr };
 
-static const char* atxtProjects[] = {
-    "*.vcxproj",
-    "*.vcproj",
-    "*.project",  // CodeLite
-    "*.cbp",      // CodeBlocks
+static const char* atxtProjects[] = { "*.vcxproj", "*.vcproj",
+                                      "*.project",  // CodeLite
+                                      "*.cbp",      // CodeBlocks
 
-    nullptr
-};
+                                      nullptr };
 
 CConvertDlg::CConvertDlg(const char* pszDstSrcFiles)
     : ttCDlg(IDDDLG_CONVERT)
@@ -353,7 +345,8 @@ bool CConvertDlg::ConvertVcxProj()
         else if (ttIsSameStrI(pItem->GetName(), "ItemDefinitionGroup"))
         {
             const char* pszCondition = pItem->GetAttribute("Condition");
-            if (!bDebugFlagsSeen && pszCondition && (ttStrStrI(pszCondition, "Debug|Win32") || ttStrStrI(pszCondition, "Debug|x64")))
+            if (!bDebugFlagsSeen && pszCondition &&
+                (ttStrStrI(pszCondition, "Debug|Win32") || ttStrStrI(pszCondition, "Debug|x64")))
             {
                 bDebugFlagsSeen = true;
                 for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++)
@@ -402,7 +395,8 @@ bool CConvertDlg::ConvertVcxProj()
                         {
                             ttCXMLBranch* pChild = pFlags->GetChildAt(0);
                             if (pChild->GetData())
-                                m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
+                                m_cSrcFiles.UpdateOption(
+                                    OPT_OPTIMIZE, ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
                         }
                         pFlags = pCmd->FindFirstElement("AdditionalIncludeDirectories");
                         if (pFlags && pFlags->GetChildrenCount() > 0)
@@ -413,7 +407,9 @@ bool CConvertDlg::ConvertVcxProj()
                                 const char* pszFirstSemi = ttStrChr(pChild->GetData(), ';');
                                 if (pszFirstSemi)
                                     ++pszFirstSemi;
-                                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi : pChild->GetData());
+                                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ?
+                                                    pszFirstSemi :
+                                                    pChild->GetData());
                                 cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
                                 m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszFlags);
                             }
@@ -464,7 +460,8 @@ bool CConvertDlg::ConvertVcxProj()
                     }
                 }
             }
-            else if (!bRelFlagsSeen && pszCondition && (ttStrStrI(pszCondition, "Release|Win32") || ttStrStrI(pszCondition, "Release|x64")))
+            else if (!bRelFlagsSeen && pszCondition &&
+                     (ttStrStrI(pszCondition, "Release|Win32") || ttStrStrI(pszCondition, "Release|x64")))
             {
                 bRelFlagsSeen = true;
                 for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++)
@@ -513,7 +510,8 @@ bool CConvertDlg::ConvertVcxProj()
                         {
                             ttCXMLBranch* pChild = pFlags->GetChildAt(0);
                             if (pChild->GetData())
-                                m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
+                                m_cSrcFiles.UpdateOption(
+                                    OPT_OPTIMIZE, ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
                         }
                         pFlags = pCmd->FindFirstElement("PrecompiledHeaderFile");
                         if (pFlags && pFlags->GetChildrenCount() > 0)
@@ -650,8 +648,9 @@ bool CConvertDlg::ConvertVcProj()
         ttCXMLBranch* pOption = pConfiguration->FindFirstAttribute("OutputFile");
         if (pOption)
         {
-            ttCStr cszOutDir(pOption->GetAttribute("OutputFile"));  // will typically be something like: "../bin/$(ProjectName).exe"
-            char*  pszFile = ttFindFilePortion(cszOutDir);
+            ttCStr cszOutDir(
+                pOption->GetAttribute("OutputFile"));  // will typically be something like: "../bin/$(ProjectName).exe"
+            char* pszFile = ttFindFilePortion(cszOutDir);
             if (pszFile)
                 *pszFile = 0;
             m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszOutDir);
@@ -691,13 +690,15 @@ bool CConvertDlg::ConvertVcProj()
                 while (enumFlags.Enum())
                 {
                     if (ttIsSameStrI(enumFlags, "NDEBUG"))
-                        continue;                             // we already added this
-                    if (ttIsSameStrI(enumFlags, "_CONSOLE"))  // the define is already in use, but make certain exeType matches
+                        continue;  // we already added this
+                    if (ttIsSameStrI(enumFlags,
+                                     "_CONSOLE"))  // the define is already in use, but make certain exeType matches
                     {
                         m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
                         continue;
                     }
-                    if (ttIsSameStrI(enumFlags, "_USRDLL"))  // the define is already in use, but make certain exeType matches
+                    if (ttIsSameStrI(enumFlags,
+                                     "_USRDLL"))  // the define is already in use, but make certain exeType matches
                     {
                         m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
                         continue;  // do we need to add this?
@@ -743,17 +744,15 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
     char* psz = ttStrChrR(pszFile, '.');
     if (psz)
     {
-        if (ttIsSameStrI(psz, ".cpp") ||
-            ttIsSameStrI(psz, ".cc") ||
-            ttIsSameStrI(psz, ".cxx") ||
-            ttIsSameStrI(psz, ".c") ||
-            ttIsSameSubStrI(psz, ".rc"))
+        if (ttIsSameStrI(psz, ".cpp") || ttIsSameStrI(psz, ".cc") || ttIsSameStrI(psz, ".cxx") ||
+            ttIsSameStrI(psz, ".c") || ttIsSameSubStrI(psz, ".rc"))
             return true;
     }
     return false;
 }
 
-// This function first converts the file relative to the location of the build script, and then relative to the location of .srcfiles
+// This function first converts the file relative to the location of the build script, and then relative to the location
+// of .srcfiles
 
 char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 {
@@ -768,8 +767,8 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
         if (pszFilePortion)
             *pszFilePortion = 0;
 
-        // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory as the
-        // script file
+        // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory as
+        // the script file
 
         ttChDir(m_cszScriptRoot);
     }

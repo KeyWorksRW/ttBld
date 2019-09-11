@@ -117,8 +117,8 @@ void CTabCompiler::OnBtnChangePch()
         if (ttFileExists(cszCpp))  // if the current source file exists, assume that's what the user wants
             return;
 
-        // The default behaviour is to use the same base name for the C++ source file as the precompiled header file. So, if they are the same, then
-        // change the source file name to match (provided the file actually exists).
+        // The default behaviour is to use the same base name for the C++ source file as the precompiled header file.
+        // So, if they are the same, then change the source file name to match (provided the file actually exists).
 
         cszOrg.RemoveExtension();
         cszCpp.RemoveExtension();
@@ -146,7 +146,8 @@ void CTabCompiler::OnBtnChangePch()
             }
 
             cszCpp.Delete();
-            cszCpp.printf("%s does not have a matching C++ source file -- precompiled header will fail without it!", (char*) cszRelPath);
+            cszCpp.printf("%s does not have a matching C++ source file -- precompiled header will fail without it!",
+                          (char*) cszRelPath);
             ttMsgBox(cszCpp);
         }
     }

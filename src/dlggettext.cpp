@@ -23,9 +23,7 @@ void CDlgGetText::OnBegin(void)
     DisplayFunctionList();
 }
 
-void CDlgGetText::OnOK(void)
-{
-}
+void CDlgGetText::OnOK(void) {}
 
 void CDlgGetText::ProcessCurOptions(const char* pszOptions)
 {

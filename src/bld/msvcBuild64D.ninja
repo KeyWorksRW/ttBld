@@ -26,7 +26,7 @@ rule compile
   description = compiling $in
 
 rule rc
-  command = rc.exe -nologo -d_DEBUG /l 0x409 -fo$out $in
+  command = rc.exe -nologo -I"../ttLib/include" -d_DEBUG /l 0x409 -fo$out $in
   description = resource compiler... $in
 
 rule link

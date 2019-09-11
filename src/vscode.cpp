@@ -15,11 +15,13 @@
 #include "resource.h"
 #include "funcs.h"  // List of function declarations
 
-static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, const char* pszProblem);
+static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
+                    const char* pszProblem);
 static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
 static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
 
 static const char* txtProperties =
+
     "{\n"
     "    \"configurations\": [\n"
     "        {\n"
@@ -36,6 +38,7 @@ static const char* txtProperties =
     "}\n";
 
 static const char* txtLaunch =
+
     "{\n"
     "   // Use IntelliSense to learn about possible attributes.\n"
     "   // Hover to view descriptions of existing attributes.\n"
@@ -61,6 +64,7 @@ static const char* txtLaunch =
     "}\n";
 
 static const char* txtTasks =
+
     "{\n"
     "    // See https://go.microsoft.com/fwlink/?LinkId=733558\n"
     "    // for the documentation about the tasks.json format\n"
@@ -70,6 +74,7 @@ static const char* txtTasks =
     "}\n";
 
 static const char* txtSubTasks =
+
     "        {\n"
     "            \"label\": \"%label%\",\n"
     "            \"type\": \"shell\",\n"
@@ -79,6 +84,7 @@ static const char* txtSubTasks =
     "        },\n";
 
 static const char* txtMsvcSubTasks =
+
     "        {\n"
     "            \"label\": \"%label%\",\n"
     "            \"type\": \"shell\",\n"
@@ -111,15 +117,18 @@ static const char* txtClangSubTasks =
     "        },\n";
 
 static const char* txtNormalGroup =
+
     "            \"group\": \"build\",\n";
 
 static const char* txtDefaultGroup =
+
     "            \"group\": {\n"
     "                \"kind\": \"build\",\n"
     "                \"isDefault\": true\n"
     "            },\n";
 
 static const char* txtDefaultTask =
+
     "        {\n"
     "            \"label\": \"%label%\",\n"
     "            \"type\": \"shell\",\n"
@@ -137,7 +146,8 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults);
 
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 
-bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)  // returns true unless unable to write to a file
+bool CreateVsCodeProject(const char* pszSrcFiles,
+                         ttCList*    plstResults)  // returns true unless unable to write to a file
 {
     if (!ttDirExists(".vscode"))
     {
@@ -283,8 +293,8 @@ bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     else
         kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug32());
 
-    // REVIEW: [randalphwa - 7/19/2019] Will it work to have a non-existant default.natvis file or will VS Code complain?
-    // An alternative would be to insert/remove the entire line
+    // REVIEW: [randalphwa - 7/19/2019] Will it work to have a non-existant default.natvis file or will VS Code
+    // complain? An alternative would be to insert/remove the entire line
     ttCStr cszPath(cSrcFiles.GetOption(OPT_NATVIS) ? cSrcFiles.GetOption(OPT_NATVIS) : "default.natvis");
     ttBackslashToForwardslash(cszPath);
     kf.ReplaceStr("%natvis%", cszPath);
@@ -347,13 +357,14 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             AddClangTask(kfOut, "Build Debug GCC", txtDefaultGroup, cszMakeCommand);
 #endif
 
-            // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC compiler. If we're not on Windows, then
-            // before we write the file, we replace nmake.exe with make.exe, and MSVC with either CLANG or GCC.
+            // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC compiler. If
+            // we're not on Windows, then before we write the file, we replace nmake.exe with make.exe, and MSVC with
+            // either CLANG or GCC.
 
             // Build MSVC release
 
-            cszLabel.printf("Build %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                                                                                   cSrcFiles.GetTargetRelease64() :
+            cszLabel.printf("Build %s (release) using MSVC",
+                            ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ? cSrcFiles.GetTargetRelease64() :
                                                                                    cSrcFiles.GetTargetRelease32()));
             cszMakeCommand.printf("nmake.exe -nologo release %s", (char*) cszMakeFileOption);
             AddMsvcTask(kfOut, "Build Release MSVC", txtNormalGroup, cszMakeCommand);
@@ -364,8 +375,8 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             AddMsvcTask(kfOut, "Rebuild Release MSVC", txtNormalGroup, cszMakeCommand);
 
 #if 0
-            // REVIEW: [KeyWorks - 8/4/2019] We certainly can add these, but they would be used rarely, if ever. The Ninja command
-            // is risky because if you change compilers, you might also need to change problem matchers
+            // REVIEW: [KeyWorks - 8/4/2019] We certainly can add these, but they would be used rarely, if ever. The
+            // Ninja command is risky because if you change compilers, you might also need to change problem matchers
 
             // Ninja Debug Build
 
@@ -514,8 +525,9 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     while (kfIn.ReadLine())
     {
-        // Normally defines and includePath place each argument on its own line, but it doesn't have to be done that way. They could all be on a single line,
-        // or they could be on multiple lines interspersed with comment lines, blank lines, etc. For now, we'll assume it wasn't hand-edited...
+        // Normally defines and includePath place each argument on its own line, but it doesn't have to be done that
+        // way. They could all be on a single line, or they could be on multiple lines interspersed with comment lines,
+        // blank lines, etc. For now, we'll assume it wasn't hand-edited...
 
         if (ttStrStrI(kfIn, "\"defines\""))
         {
@@ -549,9 +561,9 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         }
 
 #if 0
-// REVIEW: [KeyWorks - 08-16-2019] Internally, this is causing is problems because we typically use symbolic links to ttLib.
-// The full path is to the symbolic link rather than the original directory. Once we add code to retrieve where the symbolic
-// link is actually pointing to, then we can re-enable this.
+// REVIEW: [KeyWorks - 08-16-2019] Internally, this is causing is problems because we typically use symbolic links to
+// ttLib. The full path is to the symbolic link rather than the original directory. Once we add code to retrieve where
+// the symbolic link is actually pointing to, then we can re-enable this.
 
         else if (ttStrStrI(kfIn, "\"includePath\""))
         {
@@ -637,7 +649,8 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     return true;
 }
 
-// Given a string, finds any definitions and stores them in the provided list. Primarily used to parse a CFlags: option string
+// Given a string, finds any definitions and stores them in the provided list. Primarily used to parse a CFlags: option
+// string
 
 void ParseDefines(ttCList& lst, const char* pszDefines)
 {
@@ -664,7 +677,8 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
     }
 }
 
-static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand, const char* pszProblem)
+static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
+                    const char* pszProblem)
 {
     ttCFile fileTask;
     fileTask.Delete();
@@ -679,7 +693,8 @@ static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup
         fileOut.WriteEol(fileTask);
 }
 
-// AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path instead of the default absolute path
+// AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path instead of the default
+// absolute path
 
 static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand)
 {

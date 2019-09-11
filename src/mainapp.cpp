@@ -37,7 +37,8 @@ void Usage()
     puts(txtCopyRight);
 
     puts(TRANSLATE("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
-    puts(TRANSLATE("    -dir [directory]    -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
+    puts(TRANSLATE(
+        "    -dir [directory]    -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
 
     puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
 #if defined(_WIN32)
@@ -211,8 +212,8 @@ int main(int argc, char* argv[])
             Action |= ACT_VS;
         else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
             Action |= ACT_FORCE;
-
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "dir"))  // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
+        // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "dir"))
         {
             ++argpos;
             if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
@@ -270,15 +271,15 @@ int main(int argc, char* argv[])
 
         // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has been
         // created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the user wants to
-        // cancel -- that just means they didn't want to change any options. It does NOT mean they want to cancel running
-        // any other commands, such as makefile creation (which doesn't need to know what options are set in
+        // cancel -- that just means they didn't want to change any options. It does NOT mean they want to cancel
+        // running any other commands, such as makefile creation (which doesn't need to know what options are set in
         // .srcfiles.yaml).
 
         ChangeOptions(&cszSrcFilePath);
     }
 
-    // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we need
-    // to locate it.
+    // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we
+    // need to locate it.
 
     if (cszSrcFilePath.IsEmpty())
     {
@@ -288,7 +289,8 @@ int main(int argc, char* argv[])
             if (!LocateSrcFiles(&cszSrcFilePath))
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
+                puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
+                               "the location with -dir."));
                 return 1;
             }
         }
@@ -300,7 +302,8 @@ int main(int argc, char* argv[])
             else
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir."));
+                puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
+                               "the location with -dir."));
                 return 1;
             }
         }
@@ -339,7 +342,8 @@ int main(int argc, char* argv[])
         CNinja cNinja;
         if (!cNinja.IsValidVersion())
         {
-            if (ttMsgBox(TRANSLATE("This version of ttBld is too old -- create ninja scripts anyway?"), MB_YESNO | MB_ICONWARNING) != IDYES)
+            if (ttMsgBox(TRANSLATE("This version of ttBld is too old -- create ninja scripts anyway?"),
+                         MB_YESNO | MB_ICONWARNING) != IDYES)
                 return 1;
         }
 
@@ -348,9 +352,11 @@ int main(int argc, char* argv[])
         else if (Action & ACT_DRYRUN)
             cNinja.EnableDryRun();
 
-        cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);  // this will create/update it if .srcfiles has a Makefile: section
+        cNinja.CreateMakeFile(Action & ACT_ALLNINJA,
+                              cszRootDir);  // this will create/update it if .srcfiles has a Makefile: section
 
-        ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT), "At least one platform build should have been set in CNinja constructor")
+        ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT),
+                     "At least one platform build should have been set in CNinja constructor")
 
             int countNinjas = 0;
         if (cNinja.GetBoolOption(OPT_64BIT))
@@ -404,8 +410,8 @@ int main(int argc, char* argv[])
 
 void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
 {
-    // TODO: [KeyWorks - 7/30/2019] Need to change CNinja to accept a root dir instead of bVsCodeDir, then we can pass in
-    // pszRootDir.
+    // TODO: [KeyWorks - 7/30/2019] Need to change CNinja to accept a root dir instead of bVsCodeDir, then we can pass
+    // in pszRootDir.
 
     CNinja cNinja(pszRootDir);
     cNinja.ForceWrite();
@@ -462,6 +468,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     else
     {
         ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-        puts(TRANSLATE("This version of ttBld is too old to properly create ninja scripts from your current srcfiles."));
+        puts(
+            TRANSLATE("This version of ttBld is too old to properly create ninja scripts from your current srcfiles."));
     }
 }

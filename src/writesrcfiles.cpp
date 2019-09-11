@@ -58,7 +58,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
         CVerMakeNinja verinfo;
         ttASSERT_MSG(!verinfo.IsSrcFilesNewer(cszVersion),
                      "An OPT_ in aoptVersions has a higher version number then txtOptVersion."
-                     " If you write to .srcfiles.yaml without fixing the code first, this version of ttBld will no longer be able to use it.");
+                     " If you write to .srcfiles.yaml without fixing the code first, this version of ttBld will no "
+                     "longer be able to use it.");
     }
 #endif
 
@@ -77,7 +78,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
         {
             bSeenVersion = true;
             CVerMakeNinja verinfo;
-            if (verinfo.IsSrcFilesNewer(kfIn))  // if .srcfiles is newer then our version, then leave the required version alone
+            if (verinfo.IsSrcFilesNewer(
+                    kfIn))  // if .srcfiles is newer then our version, then leave the required version alone
             {
                 m_lstOriginal += (const char*) kfIn;
             }
@@ -136,7 +138,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
     size_t cBlankLines = 0;
     for (size_t pos = 0; pos < m_lstOriginal.GetCount(); ++pos)
     {
-        char* pszLine = (char*) m_lstOriginal[pos];  // since we're reducing the size, and about to delete it, okay to modify
+        char* pszLine =
+            (char*) m_lstOriginal[pos];  // since we're reducing the size, and about to delete it, okay to modify
         ttTrimRight(pszLine);
 
         // Add a blank line before 64Bit and IncDirs so that They are a bit easier to spot
@@ -361,11 +364,13 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
             m_cszOptComment = aOptions[pos].pszComment;
 
         if (m_cszOptComment.IsNonEmpty() && ttStrLen(GetOptVal(pos)) > 12)
-            // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
-            sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt,
-                      (char*) cszName, GetOptVal(pos), (char*) m_cszOptComment);
+            // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier
+            // that we need
+            sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt, (char*) cszName, GetOptVal(pos),
+                      (char*) m_cszOptComment);
         else
-            // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier that we need
+            // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier
+            // that we need
             sprintf_s(szLine, sizeof(szLine), m_cszOptComment.IsNonEmpty() ? pszOptionFmt : pszNoCmtOptionFmt,
                       (char*) cszName, GetOptVal(pos), (char*) m_cszOptComment);
 
@@ -374,8 +379,7 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
     else if (GetChanged(aOptions[pos].opt) || GetRequired(aOptions[pos].opt))
     {
         sprintf_s(szLine, sizeof(szLine), ttStrLen(GetOptVal(pos)) > 12 ? pszLongOptionFmt : pszOptionFmt,
-                  (char*) cszName,
-                  GetOptVal(pos) ? GetOptVal(pos) : "",
+                  (char*) cszName, GetOptVal(pos) ? GetOptVal(pos) : "",
                   aOptions[pos].pszComment ? aOptions[pos].pszComment : "");
         m_lstOriginal.InsertAt(m_posInsert++, szLine);
     }
@@ -401,7 +405,8 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
                 m_cszOptComment.Delete();
             return pos;
         }
-        // Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a new section
+        // Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a
+        // new section
         else if (ttIsAlpha(*m_lstOriginal[pos]))
             break;
     }

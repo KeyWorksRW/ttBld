@@ -58,7 +58,8 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
     m_pkfOut->WriteEol();  // force a blank line after the options are listed
 }
 
-// The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for both CLANG and MSVC
+// The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for both
+// CLANG and MSVC
 
 void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 {
@@ -76,13 +77,11 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
                          GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
                          IsExeTypeLib() ? " -Zl" : (IsStaticCrtDbg() ? " -MTd" : " -MDd"));
     else  // Presumably GEN_RELEASE32 or GEN_RELEASE64
-        m_pkfOut->printf("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s",
-                         IsExeTypeConsole() ? " -D_CONSOLE" : "",
+        m_pkfOut->printf(
+            "cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s", IsExeTypeConsole() ? " -D_CONSOLE" : "",
 
-                         GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
-                         GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-                         IsExeTypeLib() ? " -Zl" : (IsStaticCrtRel() ? " -MT" : " -MD"),
-                         IsOptimizeSpeed() ? " -O2" : " -O1");
+            GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4", GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
+            IsExeTypeLib() ? " -Zl" : (IsStaticCrtRel() ? " -MT" : " -MD"), IsOptimizeSpeed() ? " -O2" : " -O1");
 
     m_pkfOut->WriteStr(" -FC");
 
@@ -142,9 +141,11 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 
     else
     {
-        m_pkfOut->WriteStr(" -D__clang__");                                                              // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
-        m_pkfOut->WriteStr(" -fms-compatibility-version=19");                                            // Version of MSVC to be compatible with
-        m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" : " -m32");  // specify the platform
+        m_pkfOut->WriteStr(
+            " -D__clang__");  // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
+        m_pkfOut->WriteStr(" -fms-compatibility-version=19");  // Version of MSVC to be compatible with
+        m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" :
+                                                                                    " -m32");  // specify the platform
         if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
             m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");  // whole program optimization
 
@@ -177,12 +178,11 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
     {
         if (GetPchHeader())
         {
-            m_pkfOut->printf(
-                "rule compilePCH\n"
-                "  deps = msvc\n"
-                "  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
-                GetProjectName(),
-                GetPchHeader()  // typically stdafx.h or precomp.h
+            m_pkfOut->printf("rule compilePCH\n"
+                             "  deps = msvc\n"
+                             "  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
+                             GetProjectName(),
+                             GetPchHeader()  // typically stdafx.h or precomp.h
             );
             m_pkfOut->WriteEol("  description = compiling $in\n");
         }
@@ -191,33 +191,28 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 
         if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
         {
-            m_pkfOut->printf(
-                "rule compile\n"
-                "  deps = msvc\n"
-                "  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
-                GetProjectName(),
-                GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
+            m_pkfOut->printf("rule compile\n"
+                             "  deps = msvc\n"
+                             "  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
+                             GetProjectName(), GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
         }
         else
         {
-            m_pkfOut->printf(
-                "rule compile\n"
-                "  deps = msvc\n"
-                "  command = cl.exe -c $cflags -Fo$out $in %s%s\n",
-                GetPchHeader() ? "-Yu" : "",
-                GetPchHeader() ? GetPchHeader() : "");
+            m_pkfOut->printf("rule compile\n"
+                             "  deps = msvc\n"
+                             "  command = cl.exe -c $cflags -Fo$out $in %s%s\n",
+                             GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
         }
     }
     else
     {
         if (GetPchHeader())
         {
-            m_pkfOut->printf(
-                "rule compilePCH\n"
-                "  deps = msvc\n"
-                "  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
-                GetProjectName(),
-                GetPchHeader()  // typically stdafx.h or precomp.h
+            m_pkfOut->printf("rule compilePCH\n"
+                             "  deps = msvc\n"
+                             "  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
+                             GetProjectName(),
+                             GetPchHeader()  // typically stdafx.h or precomp.h
             );
             m_pkfOut->WriteEol("  description = compiling $in\n");
         }
@@ -226,21 +221,17 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 
         if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
         {
-            m_pkfOut->printf(
-                "rule compile\n"
-                "  deps = msvc\n"  // clang-cl supports -showIncludes, same as msvc
-                "  command = clang-cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
-                GetProjectName(),
-                GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
+            m_pkfOut->printf("rule compile\n"
+                             "  deps = msvc\n"  // clang-cl supports -showIncludes, same as msvc
+                             "  command = clang-cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
+                             GetProjectName(), GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
         }
         else
         {
-            m_pkfOut->printf(
-                "rule compile\n"
-                "  deps = msvc\n"
-                "  command = clang-cl.exe -c $cflags -Fo$out $in %s%s\n",
-                GetPchHeader() ? "-Yu" : "",
-                GetPchHeader() ? GetPchHeader() : "");
+            m_pkfOut->printf("rule compile\n"
+                             "  deps = msvc\n"
+                             "  command = clang-cl.exe -c $cflags -Fo$out $in %s%s\n",
+                             GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
         }
     }
 
@@ -459,10 +450,10 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
 
 void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
 {
-    // .idl files have one input file, and two output files: a header file (.h) and a type library file (.tlb). Typically
-    // the header file will be needed by one or more source files and the typelib file will be needed by the resource
-    // compiler. We create the header file as a target, and a phony rule for the typelib pointing to the header file
-    // target.
+    // .idl files have one input file, and two output files: a header file (.h) and a type library file (.tlb).
+    // Typically the header file will be needed by one or more source files and the typelib file will be needed by the
+    // resource compiler. We create the header file as a target, and a phony rule for the typelib pointing to the header
+    // file target.
 
     for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos)
     {

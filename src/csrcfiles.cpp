@@ -94,8 +94,9 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
     while (kfSrcFiles.ReadLine(&pszLine))
     {
-        char* pszBegin = ttFindNonSpace(pszLine);                                                                           // ignore any leading spaces
-        if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' || (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-'))  // ignore empty, comment or divider lines
+        char* pszBegin = ttFindNonSpace(pszLine);  // ignore any leading spaces
+        if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' ||
+            (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-'))  // ignore empty, comment or divider lines
         {
             continue;
         }
@@ -158,8 +159,8 @@ bool CSrcFiles::ReadFile(const char* pszFile)
         }
     }
 
-    // If no Files: were specified, then we still won't have any files to build. Default to every type of C++ source file
-    // in the current directory.
+    // If no Files: were specified, then we still won't have any files to build. Default to every type of C++ source
+    // file in the current directory.
 
     if (m_lstSrcFiles.GetCount() < 1)
     {
@@ -273,9 +274,9 @@ void CSrcFiles::AddLibrary(const char* pszName)
 
 void CSrcFiles::ProcessLibSection(char* pszLibFile)
 {
-    // The library is built in the $libout directory, so we don't need to worry about a name conflict -- hence the default name of
-    // "tmplib". The name is also to indicate that this is a temporary library -- it's not designed to be linked to outside of the
-    // scope of the current project.
+    // The library is built in the $libout directory, so we don't need to worry about a name conflict -- hence the
+    // default name of "tmplib". The name is also to indicate that this is a temporary library -- it's not designed to
+    // be linked to outside of the scope of the current project.
 
     if (m_cszLibName.IsEmpty())
         m_cszLibName = "tmplib";
@@ -395,7 +396,8 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
 
     ttCStr cszRelative;
 
-    for (size_t pos = 0; pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.GetCount() : cIncSrcFiles.m_lstLibFiles.GetCount()); ++pos)
+    for (size_t pos = 0;
+         pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.GetCount() : cIncSrcFiles.m_lstLibFiles.GetCount()); ++pos)
     {
         ttStrCpy(pszFilePortion, bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos] : cIncSrcFiles.m_lstLibFiles[pos]);
         ttConvertToRelative(cszCWD, szPath, cszRelative);
@@ -426,10 +428,7 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
             char* psz = ttStrChrR(ff, '.');
             if (psz)
             {
-                if (
-                    ttIsSameStrI(psz, ".c") ||
-                    ttIsSameStrI(psz, ".cpp") ||
-                    ttIsSameStrI(psz, ".cc") ||
+                if (ttIsSameStrI(psz, ".c") || ttIsSameStrI(psz, ".cpp") || ttIsSameStrI(psz, ".cc") ||
                     ttIsSameStrI(psz, ".cxx"))
                 {
                     m_lstSrcFiles += ff;
@@ -581,7 +580,8 @@ const char* CSrcFiles::GetTargetDebug32()
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
     // suffix to the target filename to differentiate between the two builds.
 
-    bool bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+    bool bAddPlatformSuffix =
+        (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
 
     if (IsExeTypeLib())
     {
@@ -614,7 +614,8 @@ const char* CSrcFiles::GetTargetRelease32()
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
     // suffix to the target filename to differentiate between the two builds.
 
-    bool bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+    bool bAddPlatformSuffix =
+        (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
 
     if (IsExeTypeLib())
     {
@@ -647,7 +648,8 @@ const char* CSrcFiles::GetTargetDebug64()
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
     // suffix to the target filename to differentiate between the two builds.
 
-    bool bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+    bool bAddPlatformSuffix =
+        (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
 
     if (IsExeTypeLib())
     {
@@ -680,7 +682,8 @@ const char* CSrcFiles::GetTargetRelease64()
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
     // suffix to the target filename to differentiate between the two builds.
 
-    bool bAddPlatformSuffix = (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+    bool bAddPlatformSuffix =
+        (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
 
     if (IsExeTypeLib())
     {

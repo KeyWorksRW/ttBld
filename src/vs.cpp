@@ -12,6 +12,7 @@
 #include "csrcfiles.h"  // CSrcFiles
 
 static const char* txtTasks =
+
     "{\n"
     "    \"version\": \"0.2.1\",\n"
     "    \"outDir\": \"${workspaceRoot}%tgtDir%\",\n"
@@ -31,6 +32,7 @@ static const char* txtTasks =
     "}\n";
 
 static const char* txtLaunch =
+
     "{\n"
     "    \"version\": \"0.2.1\",\n"
     "    \"defaults\": {},\n"

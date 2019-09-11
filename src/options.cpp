@@ -18,7 +18,8 @@
 
 using namespace sfopt;
 
-const char* txtOptVersion = "1.2.0";  // any time you add an option below, you need to increment this version number and then add it to the OPT_VERSION list
+const char* txtOptVersion = "1.2.0";  // any time you add an option below, you need to increment this version number and
+                                      // then add it to the OPT_VERSION list
 
 sfopt::OPT_VERSION aoptVersions[] = {
     // clang-format off
@@ -119,13 +120,15 @@ const OPT_SETTING* CSrcOptions::GetOrgOptions()
 
 CSrcOptions::CSrcOptions()
 {
-    // By adding OPT_UPDATE structures in the same order as OPT_SETTING, a position in m_aUpdateOpts matches the same position in s_aOptions
+    // By adding OPT_UPDATE structures in the same order as OPT_SETTING, a position in m_aUpdateOpts matches the same
+    // position in s_aOptions
 
     for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos)
     {
         size_t posOpt = m_aUpdateOpts.Add();
         m_aUpdateOpts[posOpt].pszVal = s_aOptions[pos].pszVal ? ttStrDup(s_aOptions[pos].pszVal) : nullptr;
-        m_aUpdateOpts[posOpt].pszComment = ttIsNonEmpty(s_aOptions[pos].pszComment) ? ttStrDup(s_aOptions[pos].pszComment) : nullptr;
+        m_aUpdateOpts[posOpt].pszComment =
+            ttIsNonEmpty(s_aOptions[pos].pszComment) ? ttStrDup(s_aOptions[pos].pszComment) : nullptr;
         m_aUpdateOpts[posOpt].bRequired = s_aOptions[pos].bRequired;
     }
 }
@@ -139,7 +142,9 @@ CSrcOptions::~CSrcOptions()
     }
 }
 
-sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* pszVal)  // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
+sfopt::OPT_INDEX CSrcOptions::UpdateOption(
+    sfopt::OPT_INDEX index,
+    const char*      pszVal)  // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
 {
     if (!pszVal)
         return OPT_OVERFLOW;
@@ -264,7 +269,8 @@ sfopt::OPT_INDEX CSrcOptions::UpdateReadOption(const char* pszName, const char* 
     if (s_aOptions[pos].opt == OPT_OVERFLOW)
         return OPT_OVERFLOW;  // unknown option
 
-    UpdateOption(s_aOptions[pos].opt, pszVal);  // we call this so that "yes" or "no" options get converted to "true" or "false"
+    UpdateOption(s_aOptions[pos].opt,
+                 pszVal);  // we call this so that "yes" or "no" options get converted to "true" or "false"
 
     if (pszComment)
     {

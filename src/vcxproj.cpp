@@ -40,8 +40,8 @@ bool CVcxProj::CreateBuildFile()
 {
 #ifndef _WINDOWS_
     // Currently we only support creating VisualStudio projects on Windows. To get this to work on another platform, a
-    // replacement would be needed for creating a GUID, and the templates we store in the .rc file would need to be added
-    // in a different way (perhaps including them directly into the source code instead of the resource).
+    // replacement would be needed for creating a GUID, and the templates we store in the .rc file would need to be
+    // added in a different way (perhaps including them directly into the source code instead of the resource).
 
     return false;
 #endif  // _WINDOWS_
@@ -128,7 +128,8 @@ bool CVcxProj::CreateBuildFile()
         {
             if (ttStrStrI(m_lstSrcFiles[pos], ".c"))  // only add C/C++ files
             {
-                cszSrcFile.printf("    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>", m_lstSrcFiles[pos]);
+                cszSrcFile.printf("    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>",
+                                  m_lstSrcFiles[pos]);
                 kf.WriteEol(cszSrcFile);
             }
         }

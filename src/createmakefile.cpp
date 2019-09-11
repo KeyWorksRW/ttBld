@@ -46,7 +46,8 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         cszSrcFiles = pszDir;
         if (!LocateSrcFiles(&cszSrcFiles))
         {
-            cszSrcFiles.printf(TRANSLATE("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."), pszDir);
+            cszSrcFiles.printf(TRANSLATE("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
+                               pszDir);
             m_lstErrors += cszSrcFiles;
             return false;
         }
@@ -64,7 +65,8 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL : IDR_MAKEFILE_SINGLE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
-        m_lstErrors += TRANSLATE("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,");
+        m_lstErrors +=
+            TRANSLATE("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,");
         return false;
     }
 
@@ -132,7 +134,8 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
                     ttCStr cszBuild(m_dlstTargetDir.GetValAt(pos));
                     cszBuild.AppendFileName(".vscode/makefile");
                     // The leading \t before the command is required or make will fail
-                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", m_dlstTargetDir.GetValAt(pos), bDebugTarget ? "D" : "");
+                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", m_dlstTargetDir.GetValAt(pos),
+                                 bDebugTarget ? "D" : "");
                 }
             }
             else
