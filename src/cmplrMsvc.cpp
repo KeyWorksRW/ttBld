@@ -91,13 +91,6 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     }
     m_pkfOut->WriteStr(" -FC");
 
-    if (GetOption(OPT_INC_DIRS))
-    {
-        ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
-        while (cEnumStr.Enum())
-            m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
-    }
-
     if (GetOption(OPT_CFLAGS_CMN))
     {
         m_pkfOut->WriteChar(' ');
@@ -170,6 +163,13 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
             m_pkfOut->WriteChar(' ');
             m_pkfOut->WriteStr(GetOption(OPT_CLANG_DBG));
         }
+    }
+
+    if (GetOption(OPT_INC_DIRS))
+    {
+        ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
+        while (cEnumStr.Enum())
+            m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
     }
 
     if (GetPchHeader())
