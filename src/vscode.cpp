@@ -499,8 +499,16 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     while (enumInc.Enum())
     {
         ttCStr cszPath(enumInc);
+#if defined(_WIN32)
+        ttCStr cszIncDir;
+        JunctionToReal(cszPath, cszIncDir);
+        ttBackslashToForwardslash(cszIncDir);
+        lstIncludes += cszIncDir;
+#else
+
         ttBackslashToForwardslash(cszPath);
         lstIncludes += cszPath;
+#endif
     }
 
 #if defined(_WIN32)
@@ -600,8 +608,17 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     ttCStr csz;
                     csz.GetQuotedString(psz);
                     if (!ttIsSameStrI(csz, "${default}"))
+                    {
+#if defined(_WIN32)
+                        ttCStr cszIncDir;
+                        JunctionToReal(csz, cszIncDir);
+                        ttBackslashToForwardslash(cszIncDir);
+                        lstIncludes += cszIncDir;
+#else
                         lstIncludes += csz;  // this will only get added if it isn't a duplicate
-                    file.DeleteLine(line);   // we delete the line now, we'll add it back later
+#endif  // _WIN32
+                    }
+                    file.DeleteLine(line);  // we delete the line now, we'll add it back later
                 }
                 else
                 {
@@ -750,3 +767,31 @@ static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* psz
     while (fileTask.ReadLine())
         fileOut.WriteEol(fileTask);
 }
+
+#if defined(_WIN32)
+// This will get the full path to the directory, using the target path if it is a junction
+bool JunctionToReal(const char* pszDir, ttCStr& cszDir)
+{
+    ttASSERT_MSG(pszDir, "NULL pointer!");
+
+    auto hFile = CreateFileA(pszDir, 0, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
+        cszDir = pszDir;
+        return false;
+    }
+    char szPath[MAX_PATH];
+    auto dwRet = GetFinalPathNameByHandleA(hFile, szPath, sizeof(szPath), VOLUME_NAME_DOS);
+    if (dwRet < sizeof(szPath))
+    {
+        char* pszStart;
+        for (pszStart = szPath; *pszStart && !ttIsAlpha(*pszStart); ++pszStart)
+            ;
+
+        cszDir = pszStart;
+    }
+
+    CloseHandle(hFile);
+    return true;
+}
+#endif  // _WIN32

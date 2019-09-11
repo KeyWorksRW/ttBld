@@ -12,23 +12,33 @@ class ttCList;  // forward definition
 class ttCStr;
 class CSrcFiles;
 
+#if defined(_WIN32)
+bool JunctionToReal(const char* pszDir, ttCStr& cszDir);
+#endif  // _WIN32
+
 void AddFiles(ttCList& lstFiles, bool bDryRun);
 bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun = false);
 bool ConvertBuildScript(const char* pszBldFile);
-bool FindFileEnv(const char* pexEnv, const char* pszFile, ttCStr* pcszPath = nullptr);  // Search PATH, LIB, or INCLUDE (or variants)
+
+// Search PATH, LIB, or INCLUDE (or variants)
+bool FindFileEnv(const char* pexEnv, const char* pszFile, ttCStr* pcszPath = nullptr);
 int  MakeNinja(int argc, char* argv[]);
 void ParseDefines(ttCList& lst, const char* pszDefines);
 bool isSystemHeaderFile(const char* pszHeaderFile);
 
-const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);  // If pcszStartDir is used, it will be set to the path to the file or dir/file where .srcfiles.yaml was found
+// If pcszStartDir is used, it will be set to the path to the file or dir/file where .srcfiles.yaml was found
+const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);
 
-size_t CreateCodeLiteProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);  // returns 0 - no errors, 1 - file already exists, 2 - other error
+// returns 0 - no errors, 1 - file already exists, 2 - other error
+size_t CreateCodeLiteProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
 
-bool CreateVsJson(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);  // creates .json files for Visual Studio
+// creates .json files for Visual Studio
+bool CreateVsJson(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
 
 // Following functions are for use in setting up a build system for VS Code
 
-bool CreateVsCodeProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);  // returns true unless unable to write to a file
+bool CreateVsCodeProject(const char* pszSrcFiles = nullptr,
+                         ttCList*    plstResults = nullptr);  // returns true unless unable to write to a file
 bool Yamalize();
 
 #if defined(_WIN32)
