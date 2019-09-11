@@ -8,12 +8,13 @@
 
 #include "pch.h"
 
-#include <ttenumstr.h>  // ttCEnumStr
-#include <ttlist.h>     // ttCList
+#include <ttenumstr.h>   // ttCEnumStr
+#include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
+#include <ttlist.h>      // ttCList
 
 #include "csrcfiles.h"  // CSrcFiles
+#include "funcs.h"      // List of function declarations
 #include "resource.h"
-#include "funcs.h"  // List of function declarations
 
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
                     const char* pszProblem);
@@ -478,18 +479,17 @@ bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 {
-    ttCFile kfIn, kfOut;
-    if (!kfIn.ReadFile(".vscode/c_cpp_properties.json"))
+    ttCLineFile file;
+    if (!file.ReadFile(".vscode/c_cpp_properties.json"))
     {
         if (plstResults)
         {
             ttCStr cszErr;
-            cszErr.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), ".vscode/tasks.json");
+            cszErr.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), ".vscode/c_cpp_properties.json");
             *plstResults += cszErr;
             return false;
         }
     }
-    kfIn.MakeCopy();  // make a copy for comparing with later
 
     // Gather all of our include directories into a list
 
@@ -535,125 +535,138 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     // if we're reading a file we generated that the user didn't touch, we're fine. But if the user decides to edit the
     // file, we're likely to either lose their changes, or break entirely -- until we have a json class in place.
 
-    while (kfIn.ReadLine())
+    for (int line = 0; line < file.GetMaxLine(); ++line)
     {
         // Normally defines and includePath place each argument on its own line, but it doesn't have to be done that
         // way. They could all be on a single line, or they could be on multiple lines interspersed with comment lines,
         // blank lines, etc. For now, we'll assume it wasn't hand-edited...
 
-        if (ttStrStrI(kfIn, "\"defines\""))
+        if (ttStrStrI(file[line], "\"defines\""))
         {
-            kfOut.WriteEol(kfIn);
-            if (ttStrChr(kfIn, CH_RIGHT_BRACKET))
+            if (ttStrChr(file[line], CH_RIGHT_BRACKET))
                 continue;  // all on one line, we don't process it
-            while (kfIn.ReadLine())
+            for (++line; line < file.GetMaxLine();)
             {
-                if (ttStrChr(kfIn, CH_RIGHT_BRACKET))
+                if (ttStrChr(file[line], CH_RIGHT_BRACKET))
                     break;
-                const char* pszDef = ttStrChr(kfIn, CH_QUOTE);
-                if (!pszDef)
-                    continue;
-                ttCStr cszDef;
-                cszDef.GetQuotedString(pszDef);
-                lstDefines += cszDef;  // this will only get added if it isn't a duplicate
+                const char* pszDef = ttStrChr(file[line], CH_QUOTE);
+                if (pszDef)
+                {
+                    ttCStr cszDef;
+                    cszDef.GetQuotedString(pszDef);
+                    lstDefines += cszDef;   // this will only get added if it isn't a duplicate
+                    file.DeleteLine(line);  // we delete the line now, we'll add it back later
+                }
+                else
+                {
+                    if (!file[line][0])
+                        file.DeleteLine(line);  // we delete the line now, we'll add it back later
+                    else
+                        ++line;  // we don't know what it is, so we'll just leave it at the top
+                }
             }
 
             if (lstDefines.GetCount() > 1)
             {
+                lstDefines.Sort();
                 for (size_t pos = 0; pos < lstDefines.GetCount() - 1; ++pos)
-                    kfOut.printf("                %kq,\n", lstDefines[pos]);
+                {
+                    ttCStr csz;
+                    csz.printf("                %kq,", lstDefines[pos]);
+                    file.InsertLine(line++, csz);
+                }
             }
 
             // Write the last one without a comma
             if (lstDefines.GetCount() > 0)
-                kfOut.printf("                %kq\n", lstDefines[lstDefines.GetCount() - 1]);
-
-            kfOut.WriteEol("            ],");
+            {
+                ttCStr csz;
+                csz.printf("                %kq", lstDefines[lstDefines.GetCount() - 1]);
+                file.InsertLine(line++, csz);
+            }
             continue;
         }
-
-#if 0
-// REVIEW: [KeyWorks - 08-16-2019] Internally, this is causing is problems because we typically use symbolic links to
-// ttLib. The full path is to the symbolic link rather than the original directory. Once we add code to retrieve where
-// the symbolic link is actually pointing to, then we can re-enable this.
-
-        else if (ttStrStrI(kfIn, "\"includePath\""))
+        else if (ttStrStrI(file[line], "\"includePath\""))
         {
-            kfOut.WriteEol(kfIn);
-            if (ttStrChr(kfIn, CH_RIGHT_BRACKET))
+            if (ttStrChr(file[line], CH_RIGHT_BRACKET))
                 continue;  // all on one line, we don't process it
-            while (kfIn.ReadLine())
+            for (++line; line < file.GetMaxLine();)
             {
-                if (ttStrChr(kfIn, CH_RIGHT_BRACKET))
+                if (ttStrChr(file[line], CH_RIGHT_BRACKET))
                     break;
-                const char* pszDef = ttStrChr(kfIn, CH_QUOTE);
-                if (!pszDef)
-                    continue;
-                ttCStr cszDef;
-                cszDef.GetQuotedString(pszDef);
-                if (!cszDef.IsSameStrI("${default}"))
+                const char* psz = ttStrChr(file[line], CH_QUOTE);
+                if (psz)
                 {
-                    cszDef.FullPathName();
-                    ttBackslashToForwardslash(cszDef);
+                    ttCStr csz;
+                    csz.GetQuotedString(psz);
+                    if (!ttIsSameStrI(csz, "${default}"))
+                        lstIncludes += csz;  // this will only get added if it isn't a duplicate
+                    file.DeleteLine(line);   // we delete the line now, we'll add it back later
                 }
-
-                lstIncludes += cszDef;  // this will only get added if it isn't a duplicate
+                else
+                {
+                    if (!file[line][0])
+                        file.DeleteLine(line);  // we delete the line now, we'll add it back later
+                    else
+                        ++line;  // we don't know what it is, so we'll just leave it at the top
+                }
             }
 
             if (lstIncludes.GetCount() > 1)
             {
-                for (size_t pos = 0; pos < lstIncludes.GetCount() - 1; ++pos)
-                    kfOut.printf("                %kq,\n", lstIncludes[pos]);
-            }
-
-            // Write the last one without a comma
-            if (lstIncludes.GetCount() > 0)
-                kfOut.printf("                %kq\n", lstIncludes[lstIncludes.GetCount() - 1]);
-
-            kfOut.WriteEol("            ]");
-            continue;
-        }
-#endif
-        else if (ttStrStrI(kfIn, "compilerPath") && ttStrStrI(kfIn, "cl.exe"))
-        {
-            // MSVC can change the path frequently (sometimes once a week).
-            if (FindCurMsvcPath(cszMSVC))
-            {
-                bool bx64 = IsHost64();
-                cszMSVC.AppendFileName("bin/");
-                cszMSVC.AppendFileName(bx64 ? "Hostx64/" : "Hostx86/");
-                cszMSVC.AppendFileName(bx64 ? "x64/cl.exe" : "x86/cl.exe");
-                ttBackslashToForwardslash(cszMSVC);
-
-                char* pszSep = ttStrChr(kfIn, ':');
-                if (pszSep)
+                lstIncludes.Sort();
+                for (size_t pos = 0; pos < lstDefines.GetCount(); ++pos)
                 {
-                    pszSep = ttStrChr(pszSep, CH_QUOTE);
-                    if (pszSep)
-                    {
-                        ttCStr cszOld;
-                        cszOld.GetQuotedString(pszSep);
-                        ttBackslashToForwardslash(cszOld);
-                        if (!ttIsSameSubStrI(cszOld, cszMSVC))
-                        {
-                            ttCStr cszNewLine;
-                            cszNewLine.printf("             \"compilerPath\": \"%s\",", (char*) cszMSVC);
-                            kfOut.WriteEol(cszNewLine);
-                            continue;
-                        }
-                    }
+                    ttCStr csz;
+                    csz.printf("                %kq,", lstIncludes[pos]);
+                    file.InsertLine(line++, csz);
                 }
             }
-        }
 
-        kfOut.WriteEol(kfIn);
+            // Always write ${default}
+            if (lstDefines.GetCount() > 0)
+            {
+                ttCStr csz;
+                csz.printf("                %kq", "${default}");
+                file.InsertLine(line++, csz);
+            }
+            continue;
+        }
     }
 
-    kfIn.RestoreCopy();            // Restore file from temporary copy
-    if (strcmp(kfIn, kfOut) != 0)  // Only write if something changed
+    ttCFile fileOrg;
+    if (!fileOrg.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        if (!kfOut.WriteFile(".vscode/c_cpp_properties.json"))
+        if (plstResults)
+        {
+            ttCStr cszErr;
+            cszErr.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), ".vscode/c_cpp_properties.json");
+            *plstResults += cszErr;
             return false;
+        }
+    }
+
+    int line;
+    for (line = 0; line <= file.GetMaxLine(); ++line)
+    {
+        if (!fileOrg.ReadLine())
+            break;
+        if (!ttIsSameStr(fileOrg, file[line]))
+            break;
+    }
+
+    if (line <= file.GetMaxLine())
+    {
+        if (!file.WriteFile())
+        {
+            if (plstResults)
+            {
+                ttCStr cszErr;
+                cszErr.printf(GETSTRING(IDS_NINJA_CANT_WRITE), ".vscode/c_cpp_properties.json");
+                *plstResults += cszErr;
+            }
+            return false;
+        }
         else if (plstResults)
             *plstResults += TRANSLATE("Updated .vscode/c_cpp_properties.json");
     }
