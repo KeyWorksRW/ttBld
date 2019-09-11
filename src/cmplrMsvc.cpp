@@ -25,7 +25,6 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
     {
         // These are only supported by the MSVC compiler
         m_pkfOut->WriteEol("# -GL\t// Whole program optimization");
-        m_pkfOut->WriteEol("# -GS-\t// Turn off buffer security checks");
     }
 
     if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
@@ -66,23 +65,30 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     // First we write the flags common to both compilers
 
     if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+    {
         // For MSVC compiler you can either use -Z7 or -FS -Zf -Zi. My testing of the two approaches is that -Z7 yields
         // larger object files but reduces compile/link time by about 20% (compile speed is faster because no serialized
         // writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not recognize -Zf.
 
-        m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7 -GS-",
+        // clang-format off
+        m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7",
                          IsExeTypeConsole() ? " -D_CONSOLE" : "",
-
                          GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
                          GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
                          IsExeTypeLib() ? " -Zl" : (IsStaticCrtDbg() ? " -MTd" : " -MDd"));
+        // clang-format on
+    }
     else  // Presumably GEN_RELEASE32 or GEN_RELEASE64
+    {
+        // clang-format off
         m_pkfOut->printf(
             "cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s", IsExeTypeConsole() ? " -D_CONSOLE" : "",
-
-            GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4", GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-            IsExeTypeLib() ? " -Zl" : (IsStaticCrtRel() ? " -MT" : " -MD"), IsOptimizeSpeed() ? " -O2" : " -O1");
-
+            GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
+            GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
+            IsExeTypeLib() ? " -Zl" : (IsStaticCrtRel() ? " -MT" : " -MD"),
+            IsOptimizeSpeed() ? " -O2" : " -O1");
+        // clang-format on
+    }
     m_pkfOut->WriteStr(" -FC");
 
     if (GetOption(OPT_INC_DIRS))
