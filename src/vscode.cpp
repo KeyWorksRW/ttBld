@@ -222,6 +222,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 ParseDefines(lstDefines, cSrcFiles.GetOption(OPT_CFLAGS_CMN));
             if (cSrcFiles.GetOption(OPT_CFLAGS_DBG))
                 ParseDefines(lstDefines, cSrcFiles.GetOption(OPT_CFLAGS_DBG));
+            lstDefines.Sort();
             for (size_t pos = 0; lstDefines.InRange(pos); ++pos)
                 kfOut.printf("                %kq,\n", lstDefines[pos]);
 
@@ -250,8 +251,15 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             {
                 ttCStr cszInclude(enumInc);
                 cszInclude.FullPathName();
+#if defined(_WIN32)
+                ttCStr cszIncDir;
+                JunctionToReal(cszInclude, cszIncDir);
+                ttBackslashToForwardslash(cszIncDir);
+                kfOut.printf("                %kq,\n", (const char*) cszIncDir);
+#else
                 ttBackslashToForwardslash(cszInclude);
                 kfOut.printf("                %kq,\n", (const char*) cszInclude);
+#endif
             }
             // we always add the default include path
             kfOut.WriteEol("                \042${default}\042");
@@ -505,7 +513,6 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         ttBackslashToForwardslash(cszIncDir);
         lstIncludes += cszIncDir;
 #else
-
         ttBackslashToForwardslash(cszPath);
         lstIncludes += cszPath;
 #endif
