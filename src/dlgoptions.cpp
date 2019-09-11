@@ -153,12 +153,12 @@ void CTabOptions::SaveChanges()
 {
     if (ttFileExists(GetSrcFiles()))
     {
-        if (WriteUpdates(GetSrcFiles()))
+        if (WriteUpdates(GetSrcFiles()) == CWriteSrcFiles::RSLT_SUCCESS)
             printf(GETSTRING(IDS_NINJA_OPTIONS_UPDATED), GetSrcFiles());
     }
     else
     {
-        if (WriteUpdates())
+        if (WriteUpdates() == CWriteSrcFiles::RSLT_SUCCESS)
             printf(GETSTRING(IDS_FILE_CREATED), GetSrcFiles());
     }
 }

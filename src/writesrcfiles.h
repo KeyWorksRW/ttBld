@@ -11,7 +11,7 @@
 #ifndef __WRITE_SRCFILES_H__
 #define __WRITE_SRCFILES_H__
 
-#include <ttstr.h>   // ttStr, ttCWD
+#include <ttstr.h>   // ttCStr -- SBCS string class
 #include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
 
 #include "csrcfiles.h"  // CSrcFiles
@@ -27,21 +27,35 @@ public:
         m_posInsert = 0;
     }
 
-    // Class methods
+    typedef enum
+    {
+        RSLT_SUCCESS,
+        RSLT_NOCHANGES,
+        RSLT_DRYRUN,
+        RSLT_WRITE_FAILED,
+        RSLT_READ_FAILED,
+    } CWRT_RESULT;
 
-    bool WriteUpdates(const char* pszFile = txtSrcFilesFileName);             // write updates to the [OPTIONS] section
-    bool WriteNew(const char* pszFile, const char* pszCommentHdr = nullptr);  // write complete .srcfiles.yaml file (replacing any file that already exists)
+    // Public functions
+
+    CWRT_RESULT WriteUpdates(const char* pszFile = txtSrcFilesFileName);  // write updates to the [OPTIONS] section
+
+    // Writes complete .srcfiles.yaml file (replacing any file that already exists)
+    bool WriteNew(const char* pszFile, const char* pszCommentHdr = nullptr);
 
     ttCList* GetOrgList() { return &m_lstOriginal; }
 
     void UpdateOptionsSection(bool bAddSpacing = false);
     void UpdateLongOption(const char* pszOption, const char* pszVal, const char* pszComment = nullptr);
-    void UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment, bool bAlwaysWrite = false);
+    void UpdateShortOption(const char* pszOption, const char* pszVal, const char* pszComment,
+                           bool bAlwaysWrite = false);
     void UpdateWriteOption(size_t pos);
 
     void EnableDryRun() { m_dryrun.Enable(); }
 
 protected:
+    // Protected functions
+
     void      PreProcessOptions();
     ptrdiff_t GetOptionLine(const char* pszOption);  // on success m_cszOptComment will be filled in
     ptrdiff_t FindOption(const char* pszOption, ttCStr& cszDst);

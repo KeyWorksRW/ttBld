@@ -27,7 +27,7 @@ extern sfopt::OPT_VERSION aoptVersions[];
 
 const char* sfopt::txtNinjaVerFormat = "# Requires ttBld.exe version %d.%d.%d or higher to process";
 
-bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
+CWriteSrcFiles::CWRT_RESULT CWriteSrcFiles::WriteUpdates(const char* pszFile)
 {
 #if defined(_DEBUG)
     // We need to be certain that the current ttBld version is at least as high as any option in the OPT_VERSION
@@ -66,7 +66,7 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
     m_lstOriginal.SetFlags(ttCList::FLG_ADD_DUPLICATES);
     ttCFile kfIn;
     if (!kfIn.ReadFile(pszFile))
-        return false;
+        return RSLT_READ_FAILED;
     kfIn.MakeCopy();
 
     CVerMakeNinja verMakeNinja;
@@ -78,8 +78,8 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
         {
             bSeenVersion = true;
             CVerMakeNinja verinfo;
-            if (verinfo.IsSrcFilesNewer(
-                    kfIn))  // if .srcfiles is newer then our version, then leave the required version alone
+            // if .srcfiles is newer then our version, then leave the required version alone
+            if (verinfo.IsSrcFilesNewer(kfIn))
             {
                 m_lstOriginal += (const char*) kfIn;
             }
@@ -170,14 +170,14 @@ bool CWriteSrcFiles::WriteUpdates(const char* pszFile)
 
     kfIn.RestoreCopy();
     if (strcmp(kfIn, kfOut) == 0)
-        return false;  // nothing has changed
+        return RSLT_NOCHANGES;  // nothing has changed
     if (m_dryrun.IsEnabled())
     {
         m_dryrun.NewFile(pszFile);
         m_dryrun.DisplayFileDiff(kfIn, kfOut);
-        return false;  // since we didn't actually change anything
+        return RSLT_DRYRUN;  // since we didn't actually change anything
     }
-    return kfOut.WriteFile(pszFile);
+    return (kfOut.WriteFile(pszFile) ? RSLT_SUCCESS : RSLT_WRITE_FAILED);
 }
 
 bool CWriteSrcFiles::WriteNew(const char* pszFile, const char* pszCommentHdr)
