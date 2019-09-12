@@ -131,11 +131,16 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
                 for (size_t pos = 0; m_dlstTargetDir.InRange(pos); ++pos)
                 {
                     kfOut.printf("\n%s%s:\n", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");  // the rule
+
+                    // m_dlstTargetDir contains the root directory. We use that to locate .srcfiles.yaml which is the
+                    // directory we need to change to in order to build the library.
                     ttCStr cszBuild(m_dlstTargetDir.GetValAt(pos));
-                    cszBuild.AppendFileName(".vscode/makefile");
+                    LocateSrcFiles(&cszBuild);
+                    char* pszFile = ttFindFilePortion(cszBuild);
+                    if (pszFile && ttIsSameSubStrI(pszFile, ".srcfiles"))
+                        pszFile[-1] = 0;
                     // The leading \t before the command is required or make will fail
-                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", m_dlstTargetDir.GetValAt(pos),
-                                 bDebugTarget ? "D" : "");
+                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", (char*) cszBuild, bDebugTarget ? "D" : "");
                 }
             }
             else
