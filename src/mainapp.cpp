@@ -36,9 +36,10 @@ void Usage()
     puts(txtVersion);
     puts(txtCopyRight);
 
+    // clang-format off
+
     puts(TRANSLATE("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
-    puts(TRANSLATE(
-        "    -dir [directory]    -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
+    puts(TRANSLATE("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
 
     puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
 #if defined(_WIN32)
@@ -49,10 +50,7 @@ void Usage()
     puts(TRANSLATE("    -vs        -- creates files used to build and debug a project using Visual Studio"));
     puts(TRANSLATE("    -vscode    -- creates or updates files used to build and debug a project using VS Code"));
 
-    puts("\nIDE workspace options:");
-    puts(TRANSLATE("    -codelite   -- creates or updates files needed to build project using CodeLite"));
-    puts(TRANSLATE("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
-    puts(TRANSLATE("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
+    // clang-format on
 
     // Currently hidden commands
 
@@ -65,6 +63,13 @@ void Usage()
 
     // puts(TRANSLATE("    -help       -- displays usage information"));
     // puts(TRANSLATE("    -?          -- displays usage information"));
+
+    // Following commands are no longer supported:
+
+    // puts("\nIDE workspace options:");
+    // puts(TRANSLATE("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
+    // puts(TRANSLATE("    -codelite   -- creates or updates files needed to build project using CodeLite"));
+    // puts(TRANSLATE("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
 }
 
 typedef enum
