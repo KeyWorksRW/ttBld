@@ -37,13 +37,15 @@ bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile)
     }
 
     ttCFile file;
-    if (!file.ReadFile(cszGitIgnore))
-        return false;
-    while (file.ReadLine())
+    if (file.ReadFile(cszGitIgnore))
     {
-        if (ttIsSameStrI(file, pszFile))
-            return true;
+        while (file.ReadLine())
+        {
+            if (ttIsSameStrI(file, pszFile))
+                return true;
+        }
     }
+    cszGitIgnore.Delete();
     return false;
 }
 
@@ -69,21 +71,20 @@ bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile)
 
     if (!ttFileExists(cszGitExclude))
     {
-        if (!ttFileExists(cszGitExclude))
-        {
-            cszGitExclude.Delete();
-            return false;
-        }
+        cszGitExclude.Delete();
+        return false;
     }
 
     ttCFile file;
-    if (!file.ReadFile(cszGitExclude))
-        return false;
-    while (file.ReadLine())
+    if (file.ReadFile(cszGitExclude))
     {
-        if (ttIsSameStrI(file, pszFile))
-            return true;
+        while (file.ReadLine())
+        {
+            if (ttIsSameStrI(file, pszFile))
+                return true;
+        }
     }
+    cszGitExclude.Delete();
     return false;
 }
 
@@ -104,6 +105,6 @@ bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile)
         return file.WriteFile();
     }
 
-    file.InsertLine(line, pszFile);
+    file.AddLine(pszFile);
     return file.WriteFile();
 }

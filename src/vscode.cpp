@@ -169,6 +169,30 @@ bool CreateVsCodeProject(const char* pszSrcFiles,
             ttMsgBox(TRANSLATE("Unable to create the required .vscode directory."));
             return false;
         }
+        ttCStr cszIgnore;
+        if (!gitIsFileIgnored(cszIgnore, ".vscode/") && !gitIsExcluded(cszIgnore, ".vscode/"))
+        {
+            if (ttDirExists(".git"))
+                cszIgnore = ".git/info/exclude";
+            else if (ttDirExists("../.git"))
+                cszIgnore = "../.git/info/exclude";
+            else if (ttDirExists("../../.git"))
+                cszIgnore = "../../.git/info/exclude";
+
+            if (cszIgnore.IsNonEmpty() &&
+                ttMsgBoxFmt(
+                    TRANSLATE(
+                        "The directory .vscode is not being ignored by git. Would you like it to be added to %s?"),
+                    MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING, (char*) cszIgnore) == IDYES)
+            {
+                if (gitAddtoIgnore(cszIgnore, ".vscode/") && plstResults)
+                {
+                    ttCStr cszMsg;
+                    cszMsg.printf(".vscode/ added to %s\n", (char*) cszIgnore);
+                    *plstResults += cszMsg;
+                }
+            }
+        }
     }
 
     CSrcFiles cSrcFiles;
