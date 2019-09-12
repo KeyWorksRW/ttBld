@@ -12,9 +12,9 @@ class ttCList;  // forward definition
 class ttCStr;
 class CSrcFiles;
 
-#if defined(_WIN32)
-bool JunctionToReal(const char* pszDir, ttCStr& cszDir);
-#endif  // _WIN32
+bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile);
+bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile);
+bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile);
 
 void AddFiles(ttCList& lstFiles, bool bDryRun);
 bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun = false);
@@ -50,5 +50,6 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64 = false);
 bool FindCurMsvcPath(ttCStr& cszPath);
 bool FindVsCode(ttCStr& cszPath);
 bool IsHost64();  // returns true if we are running on an x64 processor
+bool JunctionToReal(const char* pszDir, ttCStr& cszDir);
 
 #endif

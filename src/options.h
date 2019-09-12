@@ -129,7 +129,8 @@ public:
     bool GetRequired(sfopt::OPT_INDEX index);  // returns true if the option is required
     void SetRequired(sfopt::OPT_INDEX index, bool bVal = true);
 
-    sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);  // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
+    // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
+    sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);
     sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, bool bVal);
     sfopt::OPT_INDEX UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment);
 

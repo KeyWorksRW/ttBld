@@ -18,6 +18,10 @@ void CTabCLang::OnBegin(void)
         SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_CLANG_REL));
     if (m_pOpts->GetOption(OPT_CLANG_DBG))
         SetControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->GetOption(OPT_CLANG_DBG));
+    if (m_pOpts->GetBoolOption(OPT_MS_LINKER))
+        SetCheck(DLG_ID(IDCHECK_MSLINKER));
+    if (m_pOpts->GetBoolOption(OPT_MS_RC))
+        SetCheck(DLG_ID(IDCHECK_MSRC));
 }
 
 void CTabCLang::OnOK(void)
@@ -32,4 +36,7 @@ void CTabCLang::OnOK(void)
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
     m_pOpts->UpdateOption(OPT_CLANG_DBG, (char*) csz);
+
+    m_pOpts->UpdateOption(OPT_MS_LINKER, GetCheck(IDCHECK_MSLINKER));
+    m_pOpts->UpdateOption(OPT_MS_RC, GetCheck(IDCHECK_MSRC));
 }

@@ -32,6 +32,7 @@ Files:
     dryrun.cpp          # CDryRun class for testing
     finder.cpp          # Routines for finding executables such as the MSVC compiler
     gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
+    gitfuncs.cpp        # Functions for working with .git
     ninja.cpp           # CNinja for creating .ninja scripts
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     parsehhp.cpp        # CParseHHP class for parsing a .hhp file
