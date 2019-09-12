@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CNinja
-// Purpose:   Class for creating/maintaining build.ninja file for use by ninja.exe build tool
+// Purpose:   Class for creating/maintaining *.ninja files for use by ninja.exe
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -20,9 +20,7 @@
 #include "verninja.h"  // CVerMakeNinja
 #include "funcs.h"     // List of function declarations
 
-const char* aCppExt[] = { ".cpp", ".cxx", ".cc",
-
-                          nullptr };
+const char* aCppExt[] = { ".cpp", ".cxx", ".cc", nullptr };
 
 CNinja::CNinja(const char* pszNinjaDir)
     : CSrcFiles(pszNinjaDir)
