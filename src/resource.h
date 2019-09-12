@@ -2,7 +2,6 @@
 // Microsoft Developer Studio generated include file.
 // Used by ttBld.rc
 //
-// clang-format off
 #define IDDDLG_CONVERT                  101
 #define IDDLG_OPTIONS                   102
 #define IDTAB_GENERAL                   103
@@ -13,6 +12,8 @@
 #define IDTAB_CLANG                     108
 #define IDDLG_XGETTEXT                  109
 #define IDDLG_FUNC_NAME                 110
+#define IDCHECK_VSCODE                  1000
+#define IDCHECK_IGNORE_ALL              1001
 #define IDR_PRE_PROJECT                 1024
 #define IDEDIT_PROJ_NAME                1024
 #define IDR_POST_PROJECT                1025
@@ -106,13 +107,12 @@
 #define IDEDIT_FUNCTION_NAME            1095
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        101
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_CONTROL_VALUE         1002
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
-// clang-format on

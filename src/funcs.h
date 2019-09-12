@@ -12,7 +12,9 @@ class ttCList;  // forward definition
 class ttCStr;
 class CSrcFiles;
 
+bool gitIgnoreAll(ttCStr& cszGitExclude);
 bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile);
+
 bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile);
 bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile);
 

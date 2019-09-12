@@ -281,6 +281,20 @@ int main(int argc, char* argv[])
         // .srcfiles.yaml).
 
         ChangeOptions(&cszSrcFilePath);
+        if (dlg.isCreateVsCode())
+        {
+            // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
+            ttCList lstResults;
+            CreateVsCodeProject(cszSrcFilePath, &lstResults);
+            for (size_t pos = 0; lstResults.InRange(pos); ++pos)
+                puts(lstResults[pos]);
+        }
+        if (dlg.isGitIgnoreAll())
+        {
+            ttCStr cszGitExclude;
+            if (gitIgnoreAll(cszGitExclude))
+                printf("Added directories and filenames to ignore to %s\n", (char*) cszGitExclude);
+        }
     }
 
     // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we

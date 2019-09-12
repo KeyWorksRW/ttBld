@@ -29,6 +29,9 @@ public:
     char* GetConvertScript() { return m_cszConvertScript; }
     void  SetConvertScritpt(const char* pszFile) { m_cszConvertScript = pszFile; }
 
+    bool isCreateVsCode() { return m_bCreateVsCode; }
+    bool isGitIgnoreAll() { return m_bGitIgnore; }
+
     bool ConvertCodeLite();
     bool ConvertCodeBlocks();
     bool ConvertVcxProj();
@@ -74,4 +77,7 @@ private:
     ttCStr m_cszRelative;  // used to create a relative location for a source file
 
     ttCStr m_cszCWD;
+
+    bool m_bCreateVsCode;
+    bool m_bGitIgnore;
 };

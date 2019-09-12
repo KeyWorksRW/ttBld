@@ -14,26 +14,30 @@
 
 #include "pch.h"
 
-#include <direct.h>  // Functions for directory handling and creation
-
-#include <ttfindfile.h>  // ttCFindFile
-#include <ttfiledlg.h>   // ttCFileDlg
-#include <ttdirdlg.h>    // ttCDirDlg
-#include <ttenumstr.h>   // ttCEnumStr
-
-#include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
-
 #include "convertdlg.h"  // CConvertDlg
 
-static const char* atxtSrcTypes[] = { "*.cpp", "*.cc", "*.cxx", "*.c",
+#include <direct.h>  // Functions for directory handling and creation
 
-                                      nullptr };
+#include <ttdirdlg.h>    // ttCDirDlg
+#include <ttenumstr.h>   // ttCEnumStr
+#include <ttfiledlg.h>   // ttCFileDlg
+#include <ttfindfile.h>  // ttCFindFile
 
-static const char* atxtProjects[] = { "*.vcxproj", "*.vcproj",
-                                      "*.project",  // CodeLite
-                                      "*.cbp",      // CodeBlocks
+#include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
+#include "funcs.h"       // List of function declarations
 
-                                      nullptr };
+static const char* atxtSrcTypes[] = { "*.cpp", "*.cc", "*.cxx", "*.c", nullptr };
+
+// clang-format off
+static const char* atxtProjects[] = {
+     "*.vcxproj",  // Visual Studio
+     "*.vcproj",   // Old Visual Studio
+     "*.project",  // CodeLite
+     "*.cbp",      // CodeBlocks
+
+     nullptr
+};
+// clang-format on
 
 CConvertDlg::CConvertDlg(const char* pszDstSrcFiles)
     : ttCDlg(IDDDLG_CONVERT)
@@ -42,6 +46,9 @@ CConvertDlg::CConvertDlg(const char* pszDstSrcFiles)
         m_cszOutSrcFiles = pszDstSrcFiles;
     else
         m_cszOutSrcFiles = ".srcfiles.yaml";
+
+    m_bCreateVsCode = false;
+    m_bGitIgnore = false;
 
     // Process of conversion may change directories, so save the directory we should change back to
     m_cszCWD.GetCWD();
@@ -55,13 +62,22 @@ void CConvertDlg::OnBegin(void)
     SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
 
     ttCStr csz;
+    if (!ttDirExists(".vscode") && FindVsCode(csz))
+        SetCheck(DLG_ID(IDCHECK_VSCODE));
+    if (ttDirExists(".git") || ttDirExists("../.git") || ttDirExists("../../.git"))
+        SetCheck(DLG_ID(IDCHECK_IGNORE_ALL));
+
     csz.GetCWD();
     SetControlText(DLG_ID(IDEDIT_IN_DIR), csz);
 
-    csz = m_cszOutSrcFiles;
-    char* pszFilePortion = ttFindFilePortion(csz);
-    if (pszFilePortion)
-        *pszFilePortion = 0;
+    if (m_cszOutSrcFiles.IsNonEmpty())
+    {
+        csz = m_cszOutSrcFiles;
+        csz.FullPathName();
+        char* pszFilePortion = ttFindFilePortion(csz);
+        if (pszFilePortion)
+            *pszFilePortion = 0;
+    }
     SetControlText(DLG_ID(IDEDIT_OUT_DIR), csz);
 
     m_comboScripts.Initialize(*this, DLG_ID(IDCOMBO_SCRIPTS));
@@ -107,28 +123,29 @@ void CConvertDlg::OnBegin(void)
             } while (ff.NextFile());
         }
     }
+
+    size_t cFilesFound = 0;
+    for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
+    {
+        if (ff.NewPattern(atxtSrcTypes[pos]))
+        {
+            do
+            {
+                ++cFilesFound;
+            } while (ff.NextFile());
+        }
+    }
+    csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
+    SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);
+
     if (m_comboScripts.GetCount() > 0)
     {
         m_comboScripts.SetCurSel();
         SetCheck(DLG_ID(IDRADIO_CONVERT));
     }
-    else
+    else if (cFilesFound)
     {
-        size_t cFilesFound = 0;
-        for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
-        {
-            if (ff.NewPattern(atxtSrcTypes[pos]))
-            {
-                do
-                {
-                    ++cFilesFound;
-                } while (ff.NextFile());
-            }
-        }
-        csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
-        SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);
-        if (cFilesFound)
-            SetCheck(DLG_ID(IDRADIO_FILES));
+        SetCheck(DLG_ID(IDRADIO_FILES));
     }
 }
 
@@ -201,11 +218,15 @@ void CConvertDlg::OnBtnChangeIn()
 void CConvertDlg::OnOK(void)
 {
     m_cszOutSrcFiles.GetWndText(GetDlgItem(DLG_ID(IDEDIT_OUT_DIR)));
+    m_cszOutSrcFiles.AppendFileName(".srcfiles.yaml");
     m_cszDirSrcFiles.GetWndText(GetDlgItem(DLG_ID(IDEDIT_IN_DIR)));
     if (GetCheck(DLG_ID(IDRADIO_CONVERT)))
         m_cszConvertScript.GetWndText(GetDlgItem(DLG_ID(IDCOMBO_SCRIPTS)));
     else
         m_cszConvertScript.Delete();
+
+    m_bCreateVsCode = GetCheck(DLG_ID(IDCHECK_VSCODE));
+    m_bGitIgnore = GetCheck(DLG_ID(IDCHECK_IGNORE_ALL));
 
     if (m_cszConvertScript.IsNonEmpty())
     {

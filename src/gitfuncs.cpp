@@ -108,3 +108,49 @@ bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile)
     file.AddLine(pszFile);
     return file.WriteFile();
 }
+
+// clang-format off
+static char* atxtIgnoreList[] =
+{
+    ".vscode/",
+    "bld/",
+    ".srcfiles.yaml",
+    "makefile",
+
+    nullptr
+};
+// clang-format on
+
+bool gitIgnoreAll(ttCStr& cszGitExclude)
+{
+    if (ttDirExists(".git"))
+        cszGitExclude = ".git/info/exclude";
+    else if (ttDirExists("../.git"))
+        cszGitExclude = "../.git/info/exclude";
+    else if (ttDirExists("../../.git"))
+        cszGitExclude = "../../.git/info/exclude";
+    else
+        return false;
+
+    ttCLineFile file;
+    if (!file.ReadFile(cszGitExclude))
+        return false;
+
+    for (size_t pos = 0; atxtIgnoreList[pos]; ++pos)
+    {
+        int  line;
+        bool bInserted = false;
+        for (line = 0; line < file.GetMaxLine(); ++line)
+        {
+            if (file[line][0] == '#')
+                continue;
+            file.InsertLine(line, atxtIgnoreList[pos]);
+            bInserted = true;
+            break;
+        }
+        if (!bInserted)
+            file.AddLine(atxtIgnoreList[pos]);
+    }
+
+    return file.WriteFile();
+}
