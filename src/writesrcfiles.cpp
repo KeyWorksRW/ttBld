@@ -359,6 +359,13 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
     {
         // The option already exists, so add any changes that might have been made
 
+        if (!GetOptVal(pos))
+        {
+            // If the option is now NULL, it means it was removed completely
+            m_lstOriginal.Remove(posOption);
+            return;
+        }
+
         if (m_cszOptComment.IsEmpty())  // we keep any comment that was previously used
             // REVIEW: [randalphwa - 3/13/2019] we don't allow changing the comment after it has been read in
             m_cszOptComment = aOptions[pos].pszComment;

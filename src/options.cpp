@@ -142,13 +142,9 @@ CSrcOptions::~CSrcOptions()
     }
 }
 
-sfopt::OPT_INDEX CSrcOptions::UpdateOption(
-    sfopt::OPT_INDEX index,
-    const char*      pszVal)  // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
+// fine to call this for boolean options if pszVal == "true/false" or "yes/no"
+sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* pszVal)
 {
-    if (!pszVal)
-        return OPT_OVERFLOW;
-
     size_t pos;
     for (pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos)
     {
@@ -158,7 +154,14 @@ sfopt::OPT_INDEX CSrcOptions::UpdateOption(
     ttASSERT(s_aOptions[pos].opt != OPT_OVERFLOW);
     if (s_aOptions[pos].opt == OPT_OVERFLOW)
         return OPT_OVERFLOW;  // invalid option
-    ttFree(m_aUpdateOpts[pos].pszVal);
+    if (m_aUpdateOpts[pos].pszVal)
+        ttFree(m_aUpdateOpts[pos].pszVal);
+
+    if (!pszVal)
+    {
+        m_aUpdateOpts[pos].pszVal = nullptr;
+        return s_aOptions[pos].opt;
+    }
 
     // We want boolean values to be consistent, so if "yes" or "no" is specified, convert to "true" or "false"
 

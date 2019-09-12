@@ -56,16 +56,16 @@ void CTabCompiler::OnOK(void)
     ttCStr csz;
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
-    m_pOpts->UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
+    m_pOpts->UpdateOption(OPT_CFLAGS_CMN, csz.IsEmpty() ? nullptr : (char*) csz);
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
-    m_pOpts->UpdateOption(OPT_CFLAGS_REL, (char*) csz);
+    m_pOpts->UpdateOption(OPT_CFLAGS_REL, csz.IsEmpty() ? nullptr : (char*) csz);
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
-    m_pOpts->UpdateOption(OPT_CFLAGS_DBG, (char*) csz);
+    m_pOpts->UpdateOption(OPT_CFLAGS_DBG, csz.IsEmpty() ? nullptr : (char*) csz);
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
-    m_pOpts->UpdateOption(OPT_INC_DIRS, (char*) csz);
+    m_pOpts->UpdateOption(OPT_INC_DIRS, csz.IsEmpty() ? nullptr : (char*) csz);
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
     if (csz.IsEmpty())
