@@ -110,12 +110,12 @@ bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile)
 }
 
 // clang-format off
-static char* atxtIgnoreList[] =
+static const char* atxtIgnoreList[] =
 {
-    ".vscode/",
-    "bld/",
-    ".srcfiles.yaml",
     "makefile",
+    ".srcfiles.yaml",
+    "bld/",
+    ".vscode/",
 
     nullptr
 };
@@ -139,16 +139,32 @@ bool gitIgnoreAll(ttCStr& cszGitExclude)
     for (size_t pos = 0; atxtIgnoreList[pos]; ++pos)
     {
         int  line;
-        bool bInserted = false;
-        for (line = 0; line < file.GetMaxLine(); ++line)
+        bool bInsert = true;
+
+        // If makefile or bld/ already exist, then assume they are already part of the project, so don't
+        // ignore them.
+
+        if (ttIsSameStr(atxtIgnoreList[pos], "makefile") && ttFileExists("makefile"))
+            continue;
+        if (ttIsSameStr(atxtIgnoreList[pos], "bld/") && ttDirExists("bld"))
+            continue;
+
+        for (line = 0; line <= file.GetMaxLine(); ++line)
         {
             if (file[line][0] == '#')
                 continue;
-            file.InsertLine(line, atxtIgnoreList[pos]);
-            bInserted = true;
+            do
+            {
+                if (ttIsSameStrI(file[line], atxtIgnoreList[pos]))
+                {
+                    bInsert = false;
+                    break;
+                }
+                ++line;
+            } while (line <= file.GetMaxLine());
             break;
         }
-        if (!bInserted)
+        if (bInsert)
             file.AddLine(atxtIgnoreList[pos]);
     }
 
