@@ -78,7 +78,11 @@ namespace sfopt
         OPT_WARN_LEVEL,     // [1-4] default, if not specified, is 4
         OPT_BUILD_LIBS,     // libraries that need to be built (added to makefile generation)
 
-        OPT_XGET_FLAGS,
+        OPT_XGET_OUT,       // output filename for xgettext
+        OPT_XGET_KEYWORDS,  // additional keywords (separated by semi-colon) to pass to xgettext
+        OPT_XGET_FLAGS,     // additional flags to pass to xgettext
+        OPT_MSGFMT_FLAGS,   // additional flags to pass to msgfmt
+        OPT_MSGFMT_XML,     // the name of the xml template file for msgfmt to use
 
         OPT_OVERFLOW
         // clang-format on

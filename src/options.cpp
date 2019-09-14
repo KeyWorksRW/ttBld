@@ -18,7 +18,7 @@
 
 using namespace sfopt;
 
-const char* txtOptVersion = "1.2.0";  // any time you add an option below, you need to increment this version number and
+const char* txtOptVersion = "1.3.0";  // any time you add an option below, you need to increment this version number and
                                       // then add it to the OPT_VERSION list
 
 sfopt::OPT_VERSION aoptVersions[] = {
@@ -27,6 +27,12 @@ sfopt::OPT_VERSION aoptVersions[] = {
     { OPT_STATIC_CRT_REL, 1, 2, 0 },
     { OPT_WARN_LEVEL, 1, 2, 0 },
     { OPT_OPTIMIZE, 1, 2, 0 },
+
+    { OPT_XGET_OUT, 1, 3, 0 },
+    { OPT_XGET_KEYWORDS, 1, 3, 0 },
+    { OPT_XGET_FLAGS, 1, 3, 0 },
+    { OPT_MSGFMT_FLAGS, 1, 3, 0 },
+    { OPT_MSGFMT_XML, 1, 3, 0 },
 
     // All options default to 1.0.0, so only add options above that require a newer version of ttBld
 
@@ -97,12 +103,18 @@ static const OPT_SETTING s_aOptions[] = {
     { OPT_LIBS_REL,     "Libs_rel",     nullptr,   false,   false,     _XGET("additional libraries to link to in release builds") },
     { OPT_LIBS_DBG,     "Libs_dbg",     nullptr,   false,   false,     _XGET("additional libraries to link to in debug builds") },
 
-    { OPT_XGET_FLAGS,   "XGet_flags",   nullptr,   false,   false,     _XGET("flags to pass to xgettext.exe") },
-
     // The following two should be obsolete, but we still check them elsewhere. Need to remove those checks, then remove these
 
     { OPT_64BIT_SUFFIX, "b64_suffix",   "false",   true,    false,     _XGET("true means append '64' to target's directory or .exe name") },
     { OPT_32BIT_SUFFIX, "b32_suffix",   "false",   true,    false,     _XGET("true means append '32' to target's directory or .exe name") },
+
+    // The following options are for xgettext/msgfmt support
+
+    { OPT_XGET_OUT,      "XGet_out",     nullptr, false, false, _XGET("output filename for xgettext") },
+    { OPT_XGET_KEYWORDS, "XGet_kwrds",   nullptr, false, false, _XGET("additional keywords (separated by semi-colon) to pass to xgettext") },
+    { OPT_XGET_FLAGS,    "XGet_flags",   nullptr, false, false, _XGET("additional flags to pass to xgettext") },
+    { OPT_MSGFMT_FLAGS,  "Msgfmt_flags", nullptr, false, false, _XGET("additional flags to pass to msgfmt") },
+    { OPT_MSGFMT_XML,    "Msgfmt_xml",   nullptr, false, false, _XGET("the name of the xml template file for msgfmt to use") },
 
 //    { OPT_LIB_DIRS,     "LibDirs",      nullptr,   false,   false,     _XGET("additional directores for lib files") },
 //    { OPT_LIBS,         "Libs",         nullptr,   false,   false,     _XGET("additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)") },
