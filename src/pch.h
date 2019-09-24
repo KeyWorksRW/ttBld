@@ -2,7 +2,6 @@
 
 #pragma once
 
-// clang-format off
 #if defined(_WIN32) && !defined(wxUSE_GUI)
     #define NOATOM
     #define NOCOMM
@@ -51,7 +50,6 @@
         #include "wx/msw/missing.h"
     #endif
 #endif    // defined(wxUSE_GUI)
-// clang-format on
 
 extern const char* txtVersion;
 extern const char* txtCopyRight;

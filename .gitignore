@@ -17,9 +17,6 @@ tests/
 wxLibs.h
 messages.po
 
-# remove ttLib/ when it switches to a submodule
-ttLib/
-
 # File extensions to ignore
 *.backup
 *.bak

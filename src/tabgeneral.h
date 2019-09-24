@@ -9,7 +9,7 @@
 #pragma once
 
 #ifndef IDTAB_GENERAL
-#include "resource.h"
+    #include "resource.h"
 #endif
 
 #include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView

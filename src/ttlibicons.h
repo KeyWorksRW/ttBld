@@ -8,9 +8,7 @@
 // These are the standard icons pulled in from ttlib/icons
 
 #ifndef IDICON_TTLIB_OK
-// clang-format off
-    #define IDICON_TTLIB_CANCEL         20482
-    #define IDICON_TTLIB_CLOSE          20483
-    #define IDICON_TTLIB_OK             20484
-// clang-format on
+    #define IDICON_TTLIB_CANCEL 20482
+    #define IDICON_TTLIB_CLOSE  20483
+    #define IDICON_TTLIB_OK     20484
 #endif  // IDICON_TTLIB_OK

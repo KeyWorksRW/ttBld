@@ -9,7 +9,7 @@
 #pragma once
 
 #ifndef IDTAB_RCMIDL
-#include "resource.h"
+    #include "resource.h"
 #endif
 
 #include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
