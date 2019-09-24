@@ -1,15 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CSrcOptions
-// Purpose:   Class for storing/retrieving options in a .srcfiles file
+// Purpose:   Class for storing/retrieving options in a .srcfiles.yaml file
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-
-#ifndef __TTNINJA_OPTIONS_H__
-#define __TTNINJA_OPTIONS_H__
 
 #include <ttarray.h>  // ttCArray
 
@@ -151,5 +148,3 @@ private:
 
     ttCArray<sfopt::OPT_UPDATE> m_aUpdateOpts;
 };
-
-#endif  // __TTNINJA_OPTIONS_H__

@@ -8,9 +8,6 @@
 
 #pragma once
 
-#ifndef __WRITE_SRCFILES_H__
-#define __WRITE_SRCFILES_H__
-
 #include <ttstr.h>   // ttCStr -- SBCS string class
 #include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
 
@@ -71,5 +68,3 @@ private:
     ptrdiff_t m_posOptions;
     ptrdiff_t m_posInsert;
 };
-
-#endif  // __WRITE_SRCFILES_H__

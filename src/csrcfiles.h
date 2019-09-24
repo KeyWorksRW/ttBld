@@ -8,16 +8,13 @@
 
 #pragma once
 
-#ifndef __CSRCFILES_H__
-    #define __CSRCFILES_H__
+#include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
+#include <ttstr.h>    // ttStr, ttCWD
+#include <ttfile.h>   // ttCFile
+#include <ttarray.h>  // ttCArray
+#include <ttmap.h>    // ttCMap
 
-    #include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
-    #include <ttstr.h>    // ttStr, ttCWD
-    #include <ttfile.h>   // ttCFile
-    #include <ttarray.h>  // ttCArray
-    #include <ttmap.h>    // ttCMap
-
-    #include "options.h"  // CSrcOptions
+#include "options.h"  // CSrcOptions
 
 using namespace sfopt;  // OPT_ options are used extensively, hence using the namespace in the header file
 
@@ -134,5 +131,3 @@ private:
 
     bool m_bRead;  // file has been read and processed
 };
-
-#endif  // __CSRCFILES_H__
