@@ -9,7 +9,7 @@
 #pragma once
 
 #if (defined(_WIN64) || defined(_WIN32)) && !defined(IDDLG_XGETTEXT)
-#include "resource.h"
+    #include "resource.h"
 #endif
 
 #include <ttdlg.h>   // ttCDlg, ttCComboBox, ttCListBox, ttCListView
