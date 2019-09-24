@@ -6,9 +6,12 @@
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
+// Assumes that everything except a .DSP file is an xml file and has been parsed into m_xml
+
 #include "pch.h"
 
-#include <ttenumstr.h>   // ttCEnumStr
+#include <ttenumstr.h>  // ttCEnumStr -- Enumerate through substrings in a string
+#include <ttfile.h>     // ttCFile -- class for reading and writing files, strings, data, etc.
 
 #include "convertdlg.h"  // CConvertDlg
 
@@ -496,5 +499,141 @@ bool CConvertDlg::ConvertVcxProj()
         m_cSrcFiles.UpdateOption(OPT_RC_DBG, "");
     }
 
+    return true;
+}
+
+enum
+{
+    GROUP_UNKNOWN,
+    GROUP_SRC,
+    GROUP_HEADER,
+    GROUP_RESOURCE,
+};
+
+bool CConvertDlg::ConvertDsp()
+{
+    ttCFile file;
+    if (!file.ReadFile(m_cszConvertScript))
+    {
+        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANNOT_OPEN), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        return false;
+    }
+
+    bool bReleaseSection = false;
+    auto Group = GROUP_UNKNOWN;
+
+    while (file.ReadLine())
+    {
+        char* pszBegin = ttFindNonSpace(file);
+        if (!*pszBegin)
+            continue;
+
+        if (ttIsSameSubStrI(pszBegin, "CFG"))
+        {
+            char* pszProject = ttStrChr(pszBegin, '=');
+            if (!pszProject)
+                continue;
+            pszProject = ttFindNonSpace(pszProject + 1);
+            char* pszEndProject = ttFindSpace(pszProject);
+            if (pszEndProject)
+                *pszEndProject = 0;
+            if (ttIsEmpty(m_cSrcFiles.GetProjectName()))
+                m_cSrcFiles.UpdateOption(OPT_PROJECT, pszProject);
+        }
+
+        else if (ttIsSameSubStrI(pszBegin, "!IF") && ttStrStrI(pszBegin, "$(CFG)"))
+        {
+            bReleaseSection = ttStrStrI(pszBegin, " Release") ? true : false;
+        }
+
+        else if (*pszBegin == '#' && ttStrStrI(pszBegin, "Begin Group"))
+        {
+            if (ttStrStrI(pszBegin, "Source Files"))
+                Group = GROUP_SRC;
+            else if (ttStrStrI(pszBegin, "Header Files"))
+                Group = GROUP_HEADER;
+            else if (ttStrStrI(pszBegin, "Resource Files"))
+                Group = GROUP_RESOURCE;
+            else
+                Group = GROUP_UNKNOWN;
+        }
+
+        else if (*pszBegin == '#' && (ttStrStrI(pszBegin, "ADD BASE CPP") || ttStrStrI(pszBegin, "ADD CPP")))
+        {
+            // Since this is a really old project, we ignore any compiler flags -- we just grab the defines
+
+            ttCStr cszCurFlags, cszNewFlags;
+            if (m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_CMN))
+                cszCurFlags = m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_CMN);
+            if (bReleaseSection && m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_REL))
+            {
+                if (ttIsNonEmpty(cszCurFlags))
+                    cszCurFlags += " ";
+                cszCurFlags += m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_REL);
+            }
+            else if (!bReleaseSection && m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_DBG))
+            {
+                if (ttIsNonEmpty(cszCurFlags))
+                {
+                    cszCurFlags += " ";
+                    cszCurFlags += m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_DBG);
+                }
+            }
+
+            char* pszDef = ttStrStr(pszBegin, "/D");
+            if (pszDef)
+            {
+                do
+                {
+                    pszDef = ttStrChr(pszDef, CH_QUOTE);
+                    if (pszDef)
+                    {
+                        ttCStr csz;
+                        csz.GetQuotedString(pszDef);
+                        if (!ttIsSameSubStr(csz, "NDEBUG") && !ttIsSameSubStr(csz, "_DEBUG") &&
+                            !ttIsSameSubStr(csz, "_WIN32"))
+                        {
+                            ttCStr cszFlag("-D");
+                            cszFlag += csz;
+                            // If we don't already have the flag, then add it
+                            if (!ttStrStrI(cszCurFlags, cszFlag))
+                            {
+                                if (ttIsNonEmpty(cszNewFlags))
+                                    cszNewFlags += " ";
+                                cszNewFlags += (char*) cszFlag;
+                            }
+                        }
+                        pszDef = ttStrStr(pszDef, "/D");  // look for the next define
+                    }
+                } while (pszDef);
+            }
+
+            cszCurFlags.Delete();
+            if (cszNewFlags.IsNonEmpty())
+            {
+                if (bReleaseSection && m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_REL))
+                {
+                    cszCurFlags = m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_REL);
+                    cszCurFlags += " ";
+                }
+                cszCurFlags += (char*) cszNewFlags;
+                m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, (char*) cszCurFlags);
+            }
+        }
+
+        else if (ttIsSameSubStrI(pszBegin, "SOURCE"))
+        {
+            if (Group == GROUP_SRC)
+            {
+                char* pszFile = ttStrChr(pszBegin, '=');
+                if (!pszFile)
+                    continue;
+                pszFile = ttFindNonSpace(pszFile + 1);
+                if (ttIsSameSubStr(pszFile, ".\\"))
+                    pszFile += 2;
+                *m_cSrcFiles.GetSrcFilesList() += pszFile;
+            }
+        }
+    }
     return true;
 }

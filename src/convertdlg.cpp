@@ -29,11 +29,13 @@
 static const char* atxtSrcTypes[] = { "*.cpp", "*.cc", "*.cxx", "*.c", nullptr };
 
 // clang-format off
-static const char* atxtProjects[] = {
+static const char* atxtProjects[] =
+{
      "*.vcxproj",  // Visual Studio
      "*.vcproj",   // Old Visual Studio
      "*.project",  // CodeLite
      "*.cbp",      // CodeBlocks
+     "*.dsp",      // Very old Visual Studio project
 
      nullptr
 };
@@ -152,7 +154,7 @@ void CConvertDlg::OnBegin(void)
 void CConvertDlg::OnBtnLocateScript()
 {
     ttCFileDlg dlg(*this);
-    dlg.SetFilter("Visual Studio|*.vcxproj;*.vcproj|CodeLite|*.project|CodeBlocks|*.cbp||");
+    dlg.SetFilter("Visual Studio|*.vcxproj;*.vcproj;*.dsp|CodeLite|*.project|CodeBlocks|*.cbp||");
     dlg.UseCurrentDirectory();
     dlg.RestoreDirectory();
     if (dlg.GetOpenName())
@@ -332,22 +334,27 @@ bool CConvertDlg::doConversion(const char* pszInFile)
     const char* pszExt = ttStrChrR(m_cszConvertScript, '.');
     if (pszExt)
     {
-        HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
-        if (hr != S_OK)
-        {
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_PARSE_ERROR), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
-            return false;
-        }
-
         bool bResult = false;
-        if (ttIsSameStrI(pszExt, ".project"))
-            bResult = ConvertCodeLite();
-        else if (ttIsSameStrI(pszExt, ".cdb"))
-            bResult = ConvertCodeBlocks();
-        else if (ttIsSameStrI(pszExt, ".vcxproj"))
-            bResult = ConvertVcxProj();
-        else if (ttIsSameStrI(pszExt, ".vcproj"))
-            bResult = ConvertVcProj();
+        if (ttIsSameStrI(pszExt, ".dsp"))
+            bResult = ConvertDsp();
+        else
+        {
+            HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
+            if (hr != S_OK)
+            {
+                ttMsgBoxFmt(GETSTRING(IDS_NINJA_PARSE_ERROR), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+                return false;
+            }
+
+            if (ttIsSameStrI(pszExt, ".project"))
+                bResult = ConvertCodeLite();
+            else if (ttIsSameStrI(pszExt, ".cdb"))
+                bResult = ConvertCodeBlocks();
+            else if (ttIsSameStrI(pszExt, ".vcxproj"))
+                bResult = ConvertVcxProj();
+            else if (ttIsSameStrI(pszExt, ".vcproj"))
+                bResult = ConvertVcProj();
+        }
 
         ttChDir(m_cszCWD);  // we may have changed directories during the conversion
 

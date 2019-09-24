@@ -32,11 +32,6 @@ public:
     bool isCreateVsCode() { return m_bCreateVsCode; }
     bool isGitIgnoreAll() { return m_bGitIgnore; }
 
-    bool ConvertCodeLite();
-    bool ConvertCodeBlocks();
-    bool ConvertVcxProj();
-    bool ConvertVcProj();
-
 protected:
     BEGIN_TTCMD_MAP()
         TTCASE_CMD(IDBTN_CHANGE_IN, OnBtnChangeIn)
@@ -53,6 +48,12 @@ protected:
     void OnOK(void);
 
     // Protected functions
+
+    bool ConvertDsp();
+    bool ConvertCodeLite();
+    bool ConvertCodeBlocks();
+    bool ConvertVcxProj();
+    bool ConvertVcProj();
 
     bool doConversion(const char* pszInFile = nullptr);
 
