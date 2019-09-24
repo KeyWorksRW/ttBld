@@ -41,6 +41,8 @@ build $outdir/addfiles.obj: compile addfiles.cpp | $outdir/pch.obj
 
 build $outdir/codelite.obj: compile codelite.cpp | $outdir/pch.obj
 
+build $outdir/convert.obj: compile convert.cpp | $outdir/pch.obj
+
 build $outdir/convertdlg.obj: compile convertdlg.cpp | $outdir/pch.obj
 
 build $outdir/cmplrMsvc.obj: compile cmplrMsvc.cpp | $outdir/pch.obj
@@ -114,6 +116,7 @@ build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/mainapp.obj $
   $outdir/addfiles.obj $
   $outdir/codelite.obj $
+  $outdir/convert.obj $
   $outdir/convertdlg.obj $
   $outdir/cmplrMsvc.obj $
   $outdir/createmakefile.obj $

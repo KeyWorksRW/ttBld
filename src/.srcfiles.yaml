@@ -25,6 +25,7 @@ Files:
 
     addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
     codelite.cpp        # Creates a CodeLite project
+    convert.cpp         # Various conversion methods
     convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
     cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
     createmakefile.cpp  # CreateMakeFile method for creating a makefile
