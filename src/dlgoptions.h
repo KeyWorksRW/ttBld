@@ -9,7 +9,7 @@
 #pragma once
 
 #ifndef IDDLG_OPTIONS
-#include "resource.h"
+    #include "resource.h"
 #endif
 
 #include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
@@ -24,7 +24,7 @@
 #include "tabrcmidl.h"    // CTabRcMidl
 
 #ifdef PRIVATE
-#include ".private/tabprivate.h"  // CTabPrivate
+    #include ".private/tabprivate.h"  // CTabPrivate
 #endif
 
 class CTabOptions : public ttCDlg, public CWriteSrcFiles

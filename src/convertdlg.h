@@ -9,7 +9,7 @@
 #pragma once
 
 #ifndef IDDDLG_CONVERT
-#include "resource.h"
+    #include "resource.h"
 #endif
 
 #include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
