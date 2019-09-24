@@ -9,15 +9,15 @@
 #pragma once
 
 #ifndef __CSRCFILES_H__
-#define __CSRCFILES_H__
+    #define __CSRCFILES_H__
 
-#include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
-#include <ttstr.h>    // ttStr, ttCWD
-#include <ttfile.h>   // ttCFile
-#include <ttarray.h>  // ttCArray
-#include <ttmap.h>    // ttCMap
+    #include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
+    #include <ttstr.h>    // ttStr, ttCWD
+    #include <ttfile.h>   // ttCFile
+    #include <ttarray.h>  // ttCArray
+    #include <ttmap.h>    // ttCMap
 
-#include "options.h"  // CSrcOptions
+    #include "options.h"  // CSrcOptions
 
 using namespace sfopt;  // OPT_ options are used extensively, hence using the namespace in the header file
 
@@ -37,7 +37,10 @@ public:
     bool IsProcessed() { return m_bRead; }
 
     bool IsExeTypeConsole() { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "console")); }  // this is the default
-    bool IsExeTypeDll() { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "dll") || ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx")); }
+    bool IsExeTypeDll()
+    {
+        return (ttStrStrI(GetOption(OPT_EXE_TYPE), "dll") || ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"));
+    }
     bool IsExeTypeLib() { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "lib")); }
     bool IsExeTypeWindow() { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "window")); }
 
@@ -88,10 +91,12 @@ protected:
     void AddCompilerFlag(const char* pszFlag);
     //    void AddLibrary(const char* pszName);     // REVIEW: [KeyWorks - 8/7/2019] doesn't appear to be used
 
-    // Class members (note that these are NOT marked protected or private -- too many callers need to access individual members)
+    // Class members (note that these are NOT marked protected or private -- too many callers need to access individual
+    // members)
 
 public:
-    // REVIEW: [randalphwa - 7/6/2019] Having these public: is a bad design. We should replace them with Get/Set functions
+    // REVIEW: [randalphwa - 7/6/2019] Having these public: is a bad design. We should replace them with Get/Set
+    // functions
 
     ttCStr m_cszLibName;  // name and location of any additional library to build (used by Lib: section)
     ttCStr m_cszRcName;   // resource file to build (if any)
@@ -107,7 +112,7 @@ public:
 
     ttCStrIntList m_lstAddSrcFiles;     // additional .srcfiles.yaml to read into Files: section
     ttCStrIntList m_lstLibAddSrcFiles;  // additional .srcfiles.yaml to read into Lib: section
-    ttCList       m_lstSrcIncluded;     // the names of all files included by all ".include path/.srcfiles.yaml" directives
+    ttCList       m_lstSrcIncluded;  // the names of all files included by all ".include path/.srcfiles.yaml" directives
 
     ttCStr m_cszPchHdr;
     ttCStr m_cszPchCpp;

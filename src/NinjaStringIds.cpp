@@ -23,8 +23,9 @@ typedef struct
     const char* psz;
 } ttIDS_LIST;
 
-static const ttIDS_LIST aNinjaStringIds[] = {
-    // clang-format off
+// clang-format off
+static const ttIDS_LIST aNinjaStringIds[] =
+{
     { IDS_CANT_FIND_COMPILER,        _XGET("Unable to find either the cl.exe or clang-cl.exe compilers in PATH.") },
     { IDS_MAKENINJA_CORRUPTED,       _XGET("ttBld.exe is corrupted -- cannot read the necessary resource.") },
 
@@ -92,12 +93,12 @@ static const ttIDS_LIST aNinjaStringIds[] = {
     { IDS_NINJA_UP_TO_DATE,          _XGET("All ninja scripts are up to date.") },
 
     // TRANSLATORS: Uses a dialog box title string
-    { IDS_NINJA_TITLE_LIB_DIR,          _XGET("Library directory") },
+    { IDS_NINJA_TITLE_LIB_DIR,       _XGET("Library directory") },
 
     // TRANSLATORS: this string should never be used unless there is a bug in the code
     { IDS_NINJA_END_LIST,            _XGET("missing string id") },
-    // clang-format on
 };
+// clang-format on
 
 static ttCIntStrList clsIntStrList;
 
