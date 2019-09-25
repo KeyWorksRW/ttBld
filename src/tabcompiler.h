@@ -30,12 +30,18 @@ public:
 
 protected:
     BEGIN_TTCMD_MAP()
+        TTCASE_CMD(IDBTN_STD, OnBtnStd)
+        TTCASE_CMD(IDBTN_CPLUSPLUS, OnBtnCplusplus)
+        //        TTCASE_CMD(IDBTN_INC_ADD, OnBtnAddInclude)
         TTCASE_CMD(IDBTN_PCH_CPP, OnBtnPchCpp)
         TTCASE_CMD(IDBTN_PCH, OnBtnChangePch)
     END_TTMSG_MAP()
 
     // Message handlers
 
+    void OnBtnStd();
+    void OnBtnCplusplus();
+    //    void OnBtnAddInclude();
     void OnBtnPchCpp();
     void OnBtnChangePch();
 

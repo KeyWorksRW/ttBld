@@ -8,7 +8,8 @@
 
 #include "pch.h"
 
-#include <ttfiledlg.h>  // ttCFileDlg
+#include <ttfiledlg.h>  // ttCFileDlg -- Wrapper around Windows GetOpenFileName() API
+#include <ttdirdlg.h>   // ttCDirDlg -- Class for displaying a dialog to select a directory
 
 #include "dlgoptions.h"
 
@@ -44,7 +45,13 @@ void CTabCompiler::OnBegin(void)
         SetControlText(DLG_ID(IDEDIT_INCDIRS), m_pOpts->GetOption(OPT_INC_DIRS));
 
     if (m_pOpts->GetOption(OPT_CFLAGS_CMN))
+    {
         SetControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->GetOption(OPT_CFLAGS_CMN));
+        if (ttStrStrI(m_pOpts->GetOption(OPT_CFLAGS_CMN), "-Zc:__cplusplus"))
+            DisableControl(IDBTN_CPLUSPLUS);
+        if (ttStrStrI(m_pOpts->GetOption(OPT_CFLAGS_CMN), "-std:c"))
+            DisableControl(IDBTN_STD);
+    }
     if (m_pOpts->GetOption(OPT_CFLAGS_REL))
         SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_CFLAGS_REL));
     if (m_pOpts->GetOption(OPT_CFLAGS_DBG))
@@ -168,3 +175,59 @@ void CTabCompiler::OnBtnPchCpp()
         SetControlText(DLG_ID(IDEDIT_PCH_CPP), cszRelPath);
     }
 }
+
+void CTabCompiler::OnBtnCplusplus()
+{
+    ttCStr csz;
+
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
+    if (!ttStrStrI(csz, "-Zc:__cplusplus"))
+    {
+        if (csz.IsNonEmpty())
+            csz += " ";
+        csz += "-Zc:__cplusplus";
+        SetControlText(DLG_ID(IDEDIT_COMMON), csz);
+        DisableControl(IDBTN_CPLUSPLUS);
+    }
+}
+
+void CTabCompiler::OnBtnStd()
+{
+    ttCStr csz;
+
+    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
+    if (!ttStrStrI(csz, "-std:c"))
+    {
+        if (csz.IsNonEmpty())
+            csz += " ";
+        csz += "-std:c++17";
+        SetControlText(DLG_ID(IDEDIT_COMMON), csz);
+        DisableControl(IDBTN_STD);
+    }
+}
+
+#if 0
+// REVIEW: [KeyWorks - 09-25-2019] This will lock up the app. The problem is that the parent dialog is being launched
+// from a Modeless dialog with a message loop purely to handle the dialog. Apparently the lack of a standard message
+// loop is causing the problem. What will happen is you will select a directory and click ok, and it will simply show
+// the same dialog box again. This time when you click ok, the application crashes. Note that dlg.GetFolderName() never
+// returns.
+
+void CTabCompiler::OnBtnAddInclude()
+{
+    ttCDirDlg dlg;
+    ttCStr    cszCWD;
+    cszCWD.GetCWD();
+
+    dlg.SetStartingDir(cszCWD);
+    if (dlg.GetFolderName((HWND) *m_pOpts))
+    {
+        ttCStr csz;
+        csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
+        csz += ";";
+        csz += (char*) dlg.GetFolderName();
+        SetControlText(DLG_ID(IDEDIT_INCDIRS), csz);
+    }
+}
+
+#endif

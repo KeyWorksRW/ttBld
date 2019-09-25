@@ -49,11 +49,14 @@
 #define IDBTN_PCH_CPP          1045
 #define IDBTN_ADD_LIB          1046
 #define IDBTN_ADD_LIB_CMN      1046
+#define IDBTN_CPLUSPLUS        1046
 #define IDBTN_ADD              1047
 #define IDBTN_ADD_LIB_REL      1047
+#define IDBTN_STD              1047
 #define IDEDIT_CFLAGS          1048
 #define IDBTN_REMOVE           1048
 #define IDBTN_ADD_LIB_DBG      1048
+#define IDBTN_INC_ADD          1048
 #define IDRADIO_MF_NEVER       1049
 #define IDBTN_ADD_LIB_BLDLIB   1049
 #define IDRADIO_MF_MISSING     1050
@@ -117,5 +120,4 @@
         #define _APS_NEXT_SYMED_VALUE    101
     #endif
 #endif
-// clang-format on
 // clang-format on
