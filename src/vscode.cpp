@@ -666,7 +666,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             if (lstIncludes.GetCount() > 1)
             {
                 lstIncludes.Sort();
-                for (size_t pos = 0; pos < lstDefines.GetCount(); ++pos)
+                for (size_t pos = 0; pos < lstIncludes.GetCount(); ++pos)
                 {
                     ttCStr csz;
                     csz.printf("                %kq,", lstIncludes[pos]);
@@ -675,7 +675,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             }
 
             // Always write ${default}
-            if (lstDefines.GetCount() > 0)
+            if (lstIncludes.GetCount() > 0)
             {
                 ttCStr csz;
                 csz.printf("                %kq", "${default}");
