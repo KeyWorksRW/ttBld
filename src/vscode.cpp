@@ -517,9 +517,15 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             {
                 while (kfOut.ReplaceStr("msvcBuild", "gccBuild"))
                     ;
-                while (kfOut.ReplaceStr("nmake.exe -nologo", "make.exe cmplr=gcc"))
+                while (kfOut.ReplaceStr("clangBuild", "llvmBuild"))
+                    ;
+                while (kfOut.ReplaceStr("nmake.exe -nologo", "make cmplr=gcc"))
+                    ;
+                while (kfOut.ReplaceStr("mingw32-make.exe", "make"))
                     ;
                 while (kfOut.ReplaceStr("MSVC", "GCC"))
+                    ;
+                while (kfOut.ReplaceStr("CLANG", "LLVM"))
                     ;
             }
             while (kfOut.ReplaceStr("$msCompile", "$gcc"))
