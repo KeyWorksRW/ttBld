@@ -474,13 +474,16 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             AddTask(kfOut, "View Dependencies", "test", cszMakeCommand, "");
 #endif
 
-            // Test Generate messages.po
+            // REVIEW: [KeyWorks - 10-05-2019] Disabled until we have a method to determine if this task actually
+            // applies to the current project.
 
+#if 0
             if (FindFileEnv("PATH", "xgettext.exe"))
             {
                 cszMakeCommand.printf("nmake.exe -nologo locale %s", (char*) cszMakeFileOption);
                 AddTask(kfOut, "Build messages.pos", "test", cszMakeCommand, "");
             }
+#endif
 
 #if defined(_WIN32)
             // If we're on Windows, then we also look to see if either the clang-cl compiler is available. If so, we add
@@ -786,6 +789,9 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
         }
     }
 }
+
+// REVIEW: [KeyWorks - 10-05-2019] Don't remove this! We'll need it once we support conditional task generation for
+// messages.po
 
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
                     const char* pszProblem)
