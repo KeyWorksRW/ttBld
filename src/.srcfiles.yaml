@@ -59,3 +59,4 @@ Files:
 
     addfuncname.cpp     # CAddFuncName dialog
     dlggettext.cpp      # CDlgGetText dialog
+    dlgvscode.cpp
