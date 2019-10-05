@@ -99,6 +99,8 @@ build $outdir/addfuncname.obj: compile addfuncname.cpp | $outdir/pch.obj
 
 build $outdir/dlggettext.obj: compile dlggettext.cpp | $outdir/pch.obj
 
+build $outdir/dlgvscode.obj: compile dlgvscode.cpp | $outdir/pch.obj
+
 build $resout/ttBldD.res: rc ttBld.rc | $
   resource.h $
   res/cdlprojectpre.txt $
@@ -145,6 +147,7 @@ build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/tabrcmidl.obj $
   $outdir/addfuncname.obj $
   $outdir/dlggettext.obj $
+  $outdir/dlgvscode.obj $
   $outdir/pch.obj $
   ../ttLib/lib64/ttLibD.lib $
   | ttBld.natvis

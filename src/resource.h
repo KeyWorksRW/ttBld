@@ -12,9 +12,20 @@
 #define IDTAB_RCMIDL           107
 #define IDTAB_CLANG            108
 #define IDDLG_XGETTEXT         109
+#define IDDLG_VSCODE           109
 #define IDDLG_FUNC_NAME        110
 #define IDCHECK_VSCODE         1000
 #define IDCHECK_IGNORE_ALL     1001
+#define IDCHECK_MAIN_COMPILER  1002
+#define IDCHECK_CLANG_COMPILER 1003
+#define IDCHECK_NINJA_DEBUG    1004
+#define IDRADIO_PRE_NONE       1005
+#define IDRADIO_PRE_MAIN       1006
+#define IDRADIO_PRE_CLANG      1007
+#define IDRADIO_PRE_NINJA      1008
+#define IDRADIO_MAIN_DEFAULT   1012
+#define IDRADIO_CLANG_DEFAULT  1013
+#define IDRADIO_NINJA_DEFAULT  1014
 #define IDR_PRE_PROJECT        1024
 #define IDEDIT_PROJ_NAME       1024
 #define IDR_POST_PROJECT       1025
@@ -114,9 +125,9 @@
 //
 #ifdef APSTUDIO_INVOKED
     #ifndef APSTUDIO_READONLY_SYMBOLS
-        #define _APS_NEXT_RESOURCE_VALUE 101
+        #define _APS_NEXT_RESOURCE_VALUE 110
         #define _APS_NEXT_COMMAND_VALUE  40001
-        #define _APS_NEXT_CONTROL_VALUE  1002
+        #define _APS_NEXT_CONTROL_VALUE  1006
         #define _APS_NEXT_SYMED_VALUE    101
     #endif
 #endif
