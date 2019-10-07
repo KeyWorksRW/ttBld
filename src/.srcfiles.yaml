@@ -16,8 +16,8 @@ Options:
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ../ttLib/include                  # additional directories for header files
-    BuildLibs:   ../ttLib/src # libraries that need to be built (added to makefile generation)
+    IncDirs:     ../ttLib/include  # additional directories for header files
+    BuildLibs:   ../ttLib/src      # libraries that need to be built (added to makefile generation)
 
 Files:
     ttBld.rc            # Windows resource files
@@ -59,4 +59,4 @@ Files:
 
     addfuncname.cpp     # CAddFuncName dialog
     dlggettext.cpp      # CDlgGetText dialog
-    dlgvscode.cpp
+    dlgvscode.cpp       # vdCode dialog options
