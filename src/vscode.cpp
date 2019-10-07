@@ -333,10 +333,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     ttCStr cszTarget;
 
-    // REVIEW: [KeyWorks - 7/30/2019] If we ever add the ability to set a default compiler for makefile, then should
-    // change this. For now we'll default to MSVC on Windows.
-
-#ifdef _WIN32
+#if defined(_WIN32)
     if (m_PreLaunch == PRELAUNCH_MAIN)
         kf.ReplaceStr("%bld%", "Build Debug MSVC");
     else if (m_PreLaunch == PRELAUNCH_CLANG)
@@ -345,7 +342,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
         kf.ReplaceStr("%bld%", "Ninja Debug Build");
     else
         kf.ReplaceStr("%bld%", "");
-#else
+#else   // not defined(_WIN32)
     if (m_PreLaunch == PRELAUNCH_MAIN)
         kf.ReplaceStr("%bld%", "Build Debug GCC");
     else if (m_PreLaunch == PRELAUNCH_CLANG)
@@ -354,7 +351,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
         kf.ReplaceStr("%bld%", "Ninja Debug Build");
     else
         kf.ReplaceStr("%bld%", "");
-#endif
+#endif  // defined(_WIN32)
 
     if (cSrcFiles.GetBoolOption(OPT_64BIT))
         kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug64());
@@ -446,8 +443,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 AddMsvcTask(kfOut, "Rebuild Release MSVC", txtNormalGroup, cszMakeCommand);
                 if (m_bNinjaTask)
                     AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup,
-                                cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f build/msvcBuild64D.ninja" :
-                                                                     "ninja -f build/msvcBuild32D.ninja");
+                                cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f bld/msvcBuild64D.ninja" :
+                                                                     "ninja -f bld/msvcBuild32D.ninja");
             }
 #if 0
             // REVIEW: [KeyWorks - 8/4/2019] We certainly can add these, but they would be used rarely, if ever. The
@@ -505,12 +502,11 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                                       (char*) cszMakeFileOption);
                 AddClangTask(kfOut, "Rebuild Release CLANG", txtNormalGroup, cszMakeCommand);
                 if (m_bNinjaTask && !m_bMainTasks)
-                    AddMsvcTask(kfOut, "Ninja Debug Build",
-                                (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
-                                cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f build/clangBuild64D.ninja" :
-                                                                     "ninja -f build/clangBuild32D.ninja");
+                    AddClangTask(kfOut, "Ninja Debug Build",
+                                 (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
+                                 cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f bld/clangBuild64D.ninja" :
+                                                                      "ninja -f bld/clangBuild32D.ninja");
             }
-
 #endif
 
 #if !defined(_WIN32)
