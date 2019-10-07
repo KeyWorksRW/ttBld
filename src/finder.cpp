@@ -115,6 +115,7 @@ bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
     return false;
 }
 
+// Specifies various locations to look for a .srcfiles.yaml
 static const char* aSrcFilesLocations[] = {
     // clang-format off
     ".srcfiles.yaml",  // this MUST be the first file

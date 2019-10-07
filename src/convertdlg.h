@@ -52,6 +52,7 @@ protected:
     bool ConvertDsp();
     bool ConvertCodeLite();
     bool ConvertCodeBlocks();
+    bool ConvertSrcfiles();
     bool ConvertVcxProj();
     bool ConvertVcProj();
 

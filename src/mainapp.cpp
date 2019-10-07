@@ -100,15 +100,17 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 enum  // actions that can be run in addition to normal single command actions
 {
     // clang-format off
-    ACT_DRYRUN   = 1 << 0,
+
+    ACT_DRYRUN   = 1 << 0,  // This is a dry run -- don't actually output anything.
     ACT_VS       = 1 << 1,
-    ACT_VSCODE   = 1 << 2,
+    ACT_VSCODE   = 1 << 2,  // Generate .vscode directory and .json files.
     ACT_DIR      = 1 << 3,
     ACT_MAKEFILE = 1 << 4,
-    ACT_ALLNINJA = 1 << 5,
-    ACT_NEW      = 1 << 6,
-    ACT_FORCE    = 1 << 7,
-    ACT_OPTIONS  = 1 << 8,
+    ACT_ALLNINJA = 1 << 5,  // Creates/updates all .ninja scripts, creeates makefile (if missing).
+    ACT_NEW      = 1 << 6,  // Displays a dialog for creating a new .srcfiles.yaml file.
+    ACT_FORCE    = 1 << 7,  // Creates .ninja file even if it hasn't changed.
+    ACT_OPTIONS  = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
+
     // clang-format on
 };
 

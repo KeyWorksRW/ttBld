@@ -12,6 +12,7 @@
 
 #include <ttenumstr.h>  // ttCEnumStr -- Enumerate through substrings in a string
 #include <ttfile.h>     // ttCFile -- class for reading and writing files, strings, data, etc.
+#include <ttenumstr.h>
 
 #include "convertdlg.h"  // CConvertDlg
 
@@ -635,5 +636,161 @@ bool CConvertDlg::ConvertDsp()
             }
         }
     }
+    return true;
+}
+
+bool CConvertDlg::ConvertSrcfiles()
+{
+    CSrcFiles srcOrg;
+    if (!srcOrg.ReadFile(m_cszConvertScript))
+    {
+        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANNOT_OPEN), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        return false;
+    }
+
+    // First we copy all the options. Then we tweak those that will need to be changed to use a different path.
+
+    m_cSrcFiles.UpdateOption(OPT_PROJECT, srcOrg.GetOption(OPT_PROJECT));
+    m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, srcOrg.GetOption(OPT_EXE_TYPE));
+    m_cSrcFiles.UpdateOption(OPT_PCH, srcOrg.GetOption(OPT_PCH));
+
+    m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, srcOrg.GetOption(OPT_OPTIMIZE));
+    m_cSrcFiles.SetRequired(OPT_OPTIMIZE);
+    m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, srcOrg.GetOption(OPT_WARN_LEVEL));
+    m_cSrcFiles.SetRequired(OPT_WARN_LEVEL);
+
+    m_cSrcFiles.UpdateOption(OPT_PERMISSIVE, srcOrg.GetOption(OPT_PERMISSIVE));
+    m_cSrcFiles.UpdateOption(OPT_STDCALL, srcOrg.GetOption(OPT_STDCALL));
+
+    m_cSrcFiles.UpdateOption(OPT_CFLAGS_CMN, srcOrg.GetOption(OPT_CFLAGS_CMN));
+    m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, srcOrg.GetOption(OPT_CFLAGS_REL));
+    m_cSrcFiles.UpdateOption(OPT_CFLAGS_DBG, srcOrg.GetOption(OPT_CFLAGS_DBG));
+
+    m_cSrcFiles.UpdateOption(OPT_CLANG_CMN, srcOrg.GetOption(OPT_CLANG_CMN));
+    m_cSrcFiles.UpdateOption(OPT_CLANG_REL, srcOrg.GetOption(OPT_CLANG_REL));
+    m_cSrcFiles.UpdateOption(OPT_CLANG_DBG, srcOrg.GetOption(OPT_CLANG_DBG));
+
+    m_cSrcFiles.UpdateOption(OPT_LINK_CMN, srcOrg.GetOption(OPT_LINK_CMN));
+    m_cSrcFiles.UpdateOption(OPT_LINK_REL, srcOrg.GetOption(OPT_LINK_REL));
+    m_cSrcFiles.UpdateOption(OPT_LINK_DBG, srcOrg.GetOption(OPT_LINK_DBG));
+
+#if defined(_WIN32)
+    m_cSrcFiles.UpdateOption(OPT_NATVIS, srcOrg.GetOption(OPT_NATVIS));
+
+    m_cSrcFiles.UpdateOption(OPT_RC_CMN, srcOrg.GetOption(OPT_RC_CMN));
+    m_cSrcFiles.UpdateOption(OPT_RC_REL, srcOrg.GetOption(OPT_RC_REL));
+    m_cSrcFiles.UpdateOption(OPT_RC_DBG, srcOrg.GetOption(OPT_RC_DBG));
+
+    m_cSrcFiles.UpdateOption(OPT_MDL_CMN, srcOrg.GetOption(OPT_MDL_CMN));
+    m_cSrcFiles.UpdateOption(OPT_MDL_REL, srcOrg.GetOption(OPT_MDL_REL));
+    m_cSrcFiles.UpdateOption(OPT_MDL_DBG, srcOrg.GetOption(OPT_MDL_DBG));
+
+    m_cSrcFiles.UpdateOption(OPT_DEBUG_RC, srcOrg.GetOption(OPT_DEBUG_RC));
+
+    m_cSrcFiles.UpdateOption(OPT_MS_LINKER, srcOrg.GetOption(OPT_MS_LINKER));
+    m_cSrcFiles.UpdateOption(OPT_MS_RC, srcOrg.GetOption(OPT_MS_RC));
+#endif  // defined(_WIN32)
+
+    m_cSrcFiles.UpdateOption(OPT_STATIC_CRT_REL, srcOrg.GetOption(OPT_STATIC_CRT_REL));
+    m_cSrcFiles.UpdateOption(OPT_STATIC_CRT_DBG, srcOrg.GetOption(OPT_STATIC_CRT_DBG));
+
+    m_cSrcFiles.UpdateOption(OPT_64BIT, srcOrg.GetOption(OPT_64BIT));
+    m_cSrcFiles.UpdateOption(OPT_TARGET_DIR64, srcOrg.GetOption(OPT_TARGET_DIR64));
+    m_cSrcFiles.UpdateOption(OPT_32BIT, srcOrg.GetOption(OPT_32BIT));
+    m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, srcOrg.GetOption(OPT_TARGET_DIR32));
+
+    m_cSrcFiles.UpdateOption(OPT_LIBS_CMN, srcOrg.GetOption(OPT_LIBS_CMN));
+    m_cSrcFiles.UpdateOption(OPT_LIBS_REL, srcOrg.GetOption(OPT_LIBS_REL));
+    m_cSrcFiles.UpdateOption(OPT_LIBS_DBG, srcOrg.GetOption(OPT_LIBS_DBG));
+
+    m_cSrcFiles.UpdateOption(OPT_XGET_FLAGS, srcOrg.GetOption(OPT_XGET_FLAGS));
+
+    ttCStr cszRoot(m_cszConvertScript);
+    char*  pszTmp = ttFindFilePortion(cszRoot);
+    if (pszTmp)
+        *pszTmp = 0;
+    // pszTmp = ttFindLastSlash(cszRoot);
+    // if (pszTmp)
+    // *pszTmp = 0;
+
+    ttCStr cszRelative;
+    ttCStr cszCurCwd;
+    cszCurCwd.GetCWD();
+    ttChDir(cszRoot);
+
+    if (srcOrg.GetOption(OPT_PCH))
+    {
+        ttCStr cszPch(srcOrg.GetOption(OPT_PCH_CPP));
+        if (cszPch.IsEmpty() || ttIsSameStrI(cszPch, "none"))
+        {
+            cszPch = srcOrg.GetOption(OPT_PCH);
+            cszPch.ChangeExtension(".cpp");
+            if (!ttFileExists(cszPch))
+            {
+                cszPch.ChangeExtension(".cc");
+                if (!ttFileExists(cszPch))
+                {
+                    cszPch.ChangeExtension(".cxx");
+                    if (!ttFileExists(cszPch))
+                        cszPch.ChangeExtension(".cpp");  // File can't be found, switch back to original
+                }
+            }
+            cszPch.FullPathName();
+        }
+        else
+        {
+            cszPch = (char*) cszRoot;
+            cszPch.AppendFileName(srcOrg.GetOption(OPT_PCH_CPP));
+        }
+
+        ttConvertToRelative(cszCurCwd, cszPch, cszRelative);
+        m_cSrcFiles.UpdateOption(OPT_PCH_CPP, (char*) cszRelative);
+    }
+
+    ttConvertToRelative(cszCurCwd, m_cszConvertScript, cszRelative);
+
+    ttCStr cszTmp(".include ");
+    cszTmp += (char*) cszRelative;
+
+    *m_cSrcFiles.GetSrcFilesList() += (char*) cszTmp;
+
+    pszTmp = ttFindFilePortion(cszRelative);
+    if (pszTmp)
+        *pszTmp = 0;
+    pszTmp = ttFindLastSlash(cszRelative);
+    if (pszTmp)
+        *pszTmp = 0;
+
+    ttCStr cszIncDirs(cszRelative);
+    if (srcOrg.GetOption(OPT_INC_DIRS))
+    {
+        ttCEnumStr enumStr(srcOrg.GetOption(OPT_INC_DIRS));
+        ttChDir(cszRoot);
+        while (enumStr.Enum())
+        {
+            cszTmp = (char*) enumStr;
+            cszTmp.FullPathName();
+            ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
+            cszIncDirs += ";";
+            cszIncDirs += (char*) cszRelative;
+        }
+
+        cszRelative += srcOrg.GetOption(OPT_INC_DIRS);
+    }
+    m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszIncDirs);
+
+#if defined(_WIN32)
+    if (srcOrg.GetOption(OPT_NATVIS))
+    {
+        cszTmp = srcOrg.GetOption(OPT_NATVIS);
+        cszTmp.FullPathName();
+
+        ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
+        m_cSrcFiles.UpdateOption(OPT_NATVIS, (char*) cszRelative);
+    }
+#endif  // _WIN32
+
+    ttChDir(cszCurCwd);  // Restore our current directory
+
     return true;
 }

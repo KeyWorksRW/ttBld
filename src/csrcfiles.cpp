@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CSrcFiles
-// Purpose:   Class for reading/writing .srcfiles (master file used by makemake.exe to generate build scripts)
+// Purpose:   Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)

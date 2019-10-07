@@ -28,18 +28,19 @@
 
 static const char* atxtSrcTypes[] = { "*.cpp", "*.cc", "*.cxx", "*.c", nullptr };
 
-// clang-format off
-static const char* atxtProjects[] =
-{
-     "*.vcxproj",  // Visual Studio
-     "*.vcproj",   // Old Visual Studio
-     "*.project",  // CodeLite
-     "*.cbp",      // CodeBlocks
-     "*.dsp",      // Very old Visual Studio project
+// Array of project extensions (*.vcxproj, *.project, etc.).
+static const char* atxtProjects[] = {
+    // clang-format off
+    "*.vcxproj",       // Visual Studio
+    "*.vcproj",        // Old Visual Studio
+    "*.project",       // CodeLite
+    "*.cbp",           // CodeBlocks
+    "*.dsp",           // Very old Visual Studio project
+    ".srcfiles.yaml",  // ttBld project files
 
      nullptr
+    // clang-format on
 };
-// clang-format on
 
 CConvertDlg::CConvertDlg(const char* pszDstSrcFiles)
     : ttCDlg(IDDDLG_CONVERT)
@@ -154,7 +155,7 @@ void CConvertDlg::OnBegin(void)
 void CConvertDlg::OnBtnLocateScript()
 {
     ttCFileDlg dlg(*this);
-    dlg.SetFilter("Visual Studio|*.vcxproj;*.vcproj;*.dsp|CodeLite|*.project|CodeBlocks|*.cbp||");
+    dlg.SetFilter("Project Files|*.vcxproj;*.vcproj;*.dsp;*.project;*.cbp;.srcfiles.yaml||");
     dlg.UseCurrentDirectory();
     dlg.RestoreDirectory();
     if (dlg.GetOpenName())
@@ -337,6 +338,8 @@ bool CConvertDlg::doConversion(const char* pszInFile)
         bool bResult = false;
         if (ttIsSameStrI(pszExt, ".dsp"))
             bResult = ConvertDsp();
+        else if (ttStrStrI(m_cszConvertScript, ".srcfiles"))
+            bResult = ConvertSrcfiles();
         else
         {
             HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);

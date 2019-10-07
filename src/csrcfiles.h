@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      CSrcFiles
-// Purpose:   Class for reading/writing .SrcFile (master file used by makemake.exe to generate build scripts)
+// Purpose:   Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -20,16 +20,20 @@ using namespace sfopt;  // OPT_ options are used extensively, hence using the na
 
 extern const char* txtSrcFilesFileName;
 
+// Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 class CSrcFiles : public CSrcOptions
 {
 public:
+    // If specified, pszNinjaDir is the directory to create .ninja scripts in
     CSrcFiles(const char* pszNinjaDir = nullptr);
 
     // Public functions
 
     const char* GetBuildScriptDir();
     void        AddFile(const char* pszFile) { m_lstSrcFiles += pszFile; }
-    bool        ReadFile(const char* pszFile = nullptr);
+
+    // If pszFile is NULL, CSrcFiles will attempt to locate the file (see LocateSrcFiles()).
+    bool ReadFile(const char* pszFile = nullptr);
 
     bool IsProcessed() { return m_bRead; }
 
