@@ -46,8 +46,10 @@ public:
 
     bool IsOptimizeSpeed() { return (ttStrStrI(GetOption(OPT_OPTIMIZE), "speed")); }
 
-    const char* GetDir32() { return GetOption(OPT_TARGET_DIR32); }  // 32-bit target directory
-    const char* GetDir64() { return GetOption(OPT_TARGET_DIR64); }  // 64-bit target directory
+    // 32-bit target directory
+    const char* GetDir32() { return GetOption(OPT_TARGET_DIR32); }
+    // 64-bit target directory
+    const char* GetDir64() { return GetOption(OPT_TARGET_DIR64); }
 
     const char* GetTargetDebug32();
     const char* GetTargetDebug64();
@@ -63,10 +65,13 @@ public:
 
     const char* GetProjectName() { return GetOption(OPT_PROJECT); }
     const char* GetPchHeader();
-    const char* GetPchCpp();  // source file to compile the precompiled header
+    // Source file to compile the precompiled header
+    const char* GetPchCpp();
 
-    const char* GetSrcFiles() { return m_cszSrcFilePath; };  // get name/location of srcfiles (normally .srcfiles.yaml)
-    const char* GetBldDir() { return m_cszBldDir; }          // ninja's builddir should be set to this directory
+    // Gets name/location of srcfiles (normally .srcfiles.yaml)
+    const char* GetSrcFiles() { return m_cszSrcFilePath; };
+    // Ninja's builddir should be set to this directory
+    const char* GetBldDir() { return m_cszBldDir; }
 
     int GetMajorRequired() { return m_RequiredMajor; }
     int GetMinorRequired() { return m_RequiredMinor; }
@@ -95,21 +100,21 @@ public:
     // REVIEW: [randalphwa - 7/6/2019] Having these public: is a bad design. We should replace them with Get/Set
     // functions
 
-    ttCStr m_cszLibName;  // name and location of any additional library to build (used by Lib: section)
-    ttCStr m_cszRcName;   // resource file to build (if any)
+    ttCStr m_cszLibName;  // Name and location of any additional library to build (used by Lib: section)
+    ttCStr m_cszRcName;   // Resource file to build (if any)
     ttCStr m_cszHHPName;  // HTML Help project file
 
-    ttCHeap m_ttHeap;  // all the ttCList files will be attatched to this heap
+    ttCHeap m_ttHeap;  // All the ttCList files will be attatched to this heap
 
-    ttCList m_lstSrcFiles;  // list of all source files
-    ttCList m_lstLibFiles;  // list of any files used to build additional library
-    ttCList m_lstIdlFiles;  // list of any idl files to compile with midl compiler
+    ttCList m_lstSrcFiles;  // List of all source files
+    ttCList m_lstLibFiles;  // List of any files used to build additional library
+    ttCList m_lstIdlFiles;  // List of any idl files to compile with midl compiler
 
-    ttCList m_lstErrors;  // list of any errors that occurred during processing
+    ttCList m_lstErrors;  // List of any errors that occurred during processing
 
-    ttCStrIntList m_lstAddSrcFiles;     // additional .srcfiles.yaml to read into Files: section
-    ttCStrIntList m_lstLibAddSrcFiles;  // additional .srcfiles.yaml to read into Lib: section
-    ttCList       m_lstSrcIncluded;  // the names of all files included by all ".include path/.srcfiles.yaml" directives
+    ttCStrIntList m_lstAddSrcFiles;     // Additional .srcfiles.yaml to read into Files: section
+    ttCStrIntList m_lstLibAddSrcFiles;  // Additional .srcfiles.yaml to read into Lib: section
+    ttCList       m_lstSrcIncluded;  // The names of all files included by all ".include path/.srcfiles.yaml" directives
 
     ttCStr m_cszPchHdr;
     ttCStr m_cszPchCpp;
@@ -123,11 +128,11 @@ private:
     ttCStr m_cszTargetRelease64;
 
     ttCStr m_cszSrcFilePath;
-    ttCStr m_cszBldDir;  // this is where we write the .ninja files, and is ninja's builddir
+    ttCStr m_cszBldDir;  // This is where we write the .ninja files, and is ninja's builddir
 
-    int m_RequiredMajor;  // these three get filled in to the minimum ttBld version required to process
+    int m_RequiredMajor;  // These three get filled in to the minimum ttBld version required to process
     int m_RequiredMinor;
     int m_RequiredSub;
 
-    bool m_bRead;  // file has been read and processed
+    bool m_bRead;  // File has been read and processed
 };

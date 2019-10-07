@@ -158,8 +158,8 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 
-bool CreateVsCodeProject(const char* pszSrcFiles,
-                         ttCList*    plstResults)  // returns true unless unable to write to a file
+// Returns true unless unable to write to a file
+bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
 {
     if (!ttDirExists(".vscode"))
     {
@@ -768,9 +768,8 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     return true;
 }
 
-// Given a string, finds any definitions and stores them in the provided list. Primarily used to parse a CFlags: option
-// string
-
+// Given a string, finds any definitions and stores them in the provided list. Primarily used
+// to parse a CFlags: option string
 void ParseDefines(ttCList& lst, const char* pszDefines)
 {
     const char* pszStart = pszDefines;
@@ -815,9 +814,8 @@ static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup
         fileOut.WriteEol(fileTask);
 }
 
-// AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path instead of the default
-// absolute path
-
+// AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path
+// instead of the default absolute path
 static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand)
 {
     ttCFile fileTask;
@@ -833,7 +831,6 @@ static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszG
 }
 
 // AddClangTask provides it's own problemMatcher -- because $gcc didn't work
-
 static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand)
 {
     ttCFile fileTask;

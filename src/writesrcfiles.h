@@ -14,6 +14,7 @@
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
 
+// Version of CSrcFiles that is capable of writing out a new or updated file
 class CWriteSrcFiles : public CSrcFiles
 {
 public:
@@ -35,7 +36,8 @@ public:
 
     // Public functions
 
-    CWRT_RESULT WriteUpdates(const char* pszFile = txtSrcFilesFileName);  // write updates to the [OPTIONS] section
+    // Write updates to the [OPTIONS] section
+    CWRT_RESULT WriteUpdates(const char* pszFile = txtSrcFilesFileName);
 
     // Writes complete .srcfiles.yaml file (replacing any file that already exists)
     bool WriteNew(const char* pszFile, const char* pszCommentHdr = nullptr);
@@ -53,8 +55,9 @@ public:
 protected:
     // Protected functions
 
-    void      PreProcessOptions();
-    ptrdiff_t GetOptionLine(const char* pszOption);  // on success m_cszOptComment will be filled in
+    void PreProcessOptions();
+    // On success m_cszOptComment will be filled in
+    ptrdiff_t GetOptionLine(const char* pszOption);
     ptrdiff_t FindOption(const char* pszOption, ttCStr& cszDst);
     ptrdiff_t FindSection(const char* pszSection);
 

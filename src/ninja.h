@@ -13,6 +13,7 @@
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
 
+// Class for creating/maintaining build.ninja file for use by ninja.exe build tool
 class CNinja : public CSrcFiles
 {
 public:
@@ -30,7 +31,8 @@ public:
     typedef enum
     {
         // clang-format off
-        CMPLR_MSVC     = 0,     // these MUST match the array of strings aszCompilerPrefix[] in ninja.cpp
+        // These MUST match the array of strings aszCompilerPrefix[] in ninja.cpp
+        CMPLR_MSVC     = 0,
         CMPLR_CLANG    = 1,
         CMPLR_GCC      = 2,
         // clang-format on
@@ -57,10 +59,12 @@ public:
     ttCList* GetLibFileList() { return &m_lstLibFiles; }
     ttCList* GetRcDepList() { return &m_lstRcDependencies; }
 
-    bool IsValidVersion() { return m_bInvalidVersion != true; }  // returns false if .srcfiles.yaml requires a newer version
+    // Returns false if .srcfiles.yaml requires a newer version
+    bool IsValidVersion() { return m_bInvalidVersion != true; }
     bool IsBin64() { return m_bBin64Exists; }
 
-    const char* GetLibName() { return m_cszLibName; }  // name and location of any additional library to build
+    // Name and location of any additional library to build
+    const char* GetLibName() { return m_cszLibName; }
     const char* GetHHPName() { return m_cszHHPName; }
 
     void EnableDryRun() { m_dryrun.Enable(); }
@@ -97,20 +101,20 @@ private:
     ttCFile* m_pkfOut;
     GEN_TYPE m_gentype;
 
-    ttCStr m_cszPCH;         // the .pch name that will be generated
-    ttCStr m_cszCPP_PCH;     // the .cpp name that will be used to create the .pch file
-    ttCStr m_cszPCHObj;      // the .obj file that is built to create the .pch file
-    ttCStr m_cszChmFile;     // set if a .hhp file was specified in .srcfiles.yaml
-    ttCStr m_cszScriptFile;  // the .ninja file
+    ttCStr m_cszPCH;         // The .pch name that will be generated
+    ttCStr m_cszCPP_PCH;     // The .cpp name that will be used to create the .pch file
+    ttCStr m_cszPCHObj;      // The .obj file that is built to create the .pch file
+    ttCStr m_cszChmFile;     // Set if a .hhp file was specified in .srcfiles.yaml
+    ttCStr m_cszScriptFile;  // The .ninja file
 
     ttCList m_lstBuildLibs32D;
     ttCList m_lstBuildLibs64D;
     ttCList m_lstBuildLibs32R;
     ttCList m_lstBuildLibs64R;
 
-    ttCDblList m_dlstTargetDir;  // target name, directory to use
+    ttCDblList m_dlstTargetDir;  // Target name, directory to use
 
-    bool m_bBin64Exists;     // if true, the directory ../bin64 exists
-    bool m_bForceWrite;      // write the ninja file even if it hasn't changed
-    bool m_bInvalidVersion;  // true if a newer version is needed to parse the .srcfiles.yaml
+    bool m_bBin64Exists;     // If true, the directory ../bin64 exists
+    bool m_bForceWrite;      // Write the ninja file even if it hasn't changed
+    bool m_bInvalidVersion;  // True if a newer version is needed to parse the .srcfiles.yaml
 };

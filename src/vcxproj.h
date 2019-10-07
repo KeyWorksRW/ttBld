@@ -10,6 +10,7 @@
 
 #include "ninja.h"  // CNinja
 
+// Class creating a Visual Studio build script
 class CVcxProj : public CNinja
 {
 public:

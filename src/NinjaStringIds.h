@@ -9,15 +9,18 @@
 #pragma once
 
 // Use this macro to return a const char* of a translated string
-
 #define GETSTRING(id) NinjaGetString(id)
 
-// NinjaGetString will store a translated string for fast retrieval if it is needed again.
+// This will store a translated string for fast retrieval if it is needed again.
+const char* NinjaGetString(size_t id);
 
-const char* NinjaGetString(size_t id);  // use id from the following enumerated list (this is preferred)
+// Call this before switching to a different language
+void NinjaResetStringIDs();
 
-void NinjaResetStringIDs();  // call this before switching to a different language
+// Formatting turned off to prevent comment wrapping -- we need single line comments so the entire string shows up in
+// Intellisense tooltip.
 
+// clang-format off
 enum
 {
     IDS_FILE_UPDATED,             // %s updated.\n
@@ -69,3 +72,4 @@ enum
 
     IDS_NINJA_END_LIST
 };
+// clang-format on

@@ -31,27 +31,29 @@ bool isSystemHeaderFile(const char* pszHeaderFile);
 // If pcszStartDir is used, it will be set to the path to the file or dir/file where .srcfiles.yaml was found
 const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);
 
-// returns 0 - no errors, 1 - file already exists, 2 - other error
+// Returns 0 - no errors, 1 - file already exists, 2 - other error
 size_t CreateCodeLiteProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
 
-// creates .json files for Visual Studio
+// Creates .json files for Visual Studio
 bool CreateVsJson(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
 
 // Following functions are for use in setting up a build system for VS Code
 
-bool CreateVsCodeProject(const char* pszSrcFiles = nullptr,
-                         ttCList*    plstResults = nullptr);  // returns true unless unable to write to a file
+// Returns true unless unable to write to a file
+bool CreateVsCodeProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
 bool Yamalize();
 
 #if defined(_WIN32)
 
-bool IsVsCodeAvail();  // Determines if Visual Studio Code is installed
+// Determines if Visual Studio Code is installed
+bool IsVsCodeAvail();
 
 void CreateCodeCmd(const char* pszFile);
 bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64 = false);
 bool FindCurMsvcPath(ttCStr& cszPath);
 bool FindVsCode(ttCStr& cszPath);
-bool IsHost64();  // returns true if we are running on an x64 processor
+// Returns true if we are running on an x64 processor
+bool IsHost64();
 bool JunctionToReal(const char* pszDir, ttCStr& cszDir);
 
 #endif

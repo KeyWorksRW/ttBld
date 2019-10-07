@@ -10,13 +10,13 @@
 
 #include <ttarray.h>  // ttCArray
 
-namespace sfopt
-{  // .srcfiles.yaml otpions
-
+namespace sfopt  // .srcfiles.yaml otpions
+{
     extern const char* txtNinjaVerFormat;  // "# Requires ttMakeNinja version %d.%d.%d or higher to process";
 
     typedef enum
     {
+        // Don't wrap the comments -- wee need them on one line to show up in Intellisense
         // clang-format off
         OPT_ERROR = 0,
 
@@ -56,20 +56,20 @@ namespace sfopt
         OPT_CLANG_REL,      // flags to pass to the CLANG compiler in release builds
         OPT_CLANG_DBG,      // flags to pass to the CLANG compiler in debug builds
 
-        OPT_64BIT,          // generate scripts for 64-bit build
+        OPT_64BIT,          // Generate scripts for 64-bit build
         OPT_TARGET_DIR64,   // 64-bit target directory
 
-        OPT_32BIT,          // generate scripts for 32-bit build
+        OPT_32BIT,          // Generate scripts for 32-bit build
         OPT_TARGET_DIR32,   // 32-bit target directory
 
         OPT_64BIT_SUFFIX,   // true means append "64" to target's directory or .exe name
         OPT_32BIT_SUFFIX,   // true means append "32" to target's directory or .exe name
 
-        OPT_INC_DIRS,       // additional directories for header files
+        OPT_INC_DIRS,       // Additional directories for header files
         OPT_LIB_DIRS64,     // 64-bit library directories
         OPT_LIB_DIRS32,     // 32-bit library directories
-        OPT_LIBS_CMN,       // additional libraries to link to in all builds
-        OPT_LIBS_REL,       // additional libraries to link to in release builds
+        OPT_LIBS_CMN,       // Additional libraries to link to in all builds
+        OPT_LIBS_REL,       // Additional libraries to link to in release builds
         OPT_LIBS_DBG,       // additional libraries to link to in debug builds
         OPT_OPTIMIZE,       // [space | speed] optimization (optimizing for speed can actually make the code run slower due to caching issues) -- default, if not specified, is space
         OPT_WARN_LEVEL,     // [1-4] default, if not specified, is 4
@@ -87,8 +87,8 @@ namespace sfopt
 
     // { OPT_xxx, "name", "def value", boolean, required, "def comment" }
 
-    typedef struct
-    {  // the original default settings for an option
+    typedef struct  // The original default settings for an option
+    {
         OPT_INDEX   opt;
         const char* pszName;
         const char* pszVal;
@@ -97,8 +97,8 @@ namespace sfopt
         const char* pszComment;
     } OPT_SETTING;
 
-    typedef struct
-    {  // the updated version of the option
+    typedef struct  // The updated version of the option
+    {
         char* pszVal;
         char* pszComment;
         bool  bRequired;
@@ -125,12 +125,14 @@ public:
     const char* GetOption(sfopt::OPT_INDEX index);
     bool        GetBoolOption(sfopt::OPT_INDEX index);
     const char* GetOptComment(sfopt::OPT_INDEX index);
-    bool        GetChanged(sfopt::OPT_INDEX index);  // returns true if the option has changed
+
+    // Returns true if the option has changed
+    bool GetChanged(sfopt::OPT_INDEX index);
 
     bool GetRequired(sfopt::OPT_INDEX index);  // returns true if the option is required
     void SetRequired(sfopt::OPT_INDEX index, bool bVal = true);
 
-    // fine to call this for boolean options if pszVal == "true/false" or "yes/no"
+    // Fine to call this for boolean options if pszVal == "true/false" or "yes/no"
     sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, const char* pszVal);
     sfopt::OPT_INDEX UpdateOption(sfopt::OPT_INDEX index, bool bVal);
     sfopt::OPT_INDEX UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment);
@@ -145,6 +147,5 @@ private:
     // Class members
 
     // This structure is similar to OPT_SETTINGS, but is used to store changes to an option
-
     ttCArray<sfopt::OPT_UPDATE> m_aUpdateOpts;
 };

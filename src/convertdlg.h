@@ -68,14 +68,14 @@ private:
     ttCParseXML    m_xml;
     CWriteSrcFiles m_cSrcFiles;
 
-    ttCStr m_cszOutSrcFiles;  // where .srcfiles should be created
+    ttCStr m_cszOutSrcFiles;  // Where .srcfiles should be created
 
     ttCStr m_cszDirSrcFiles;
     ttCStr m_cszConvertScript;
 
     ttCStr m_cszScriptRoot;
     ttCStr m_cszOutRoot;
-    ttCStr m_cszRelative;  // used to create a relative location for a source file
+    ttCStr m_cszRelative;  // Used to create a relative location for a source file
 
     ttCStr m_cszCWD;
 

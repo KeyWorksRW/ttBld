@@ -11,6 +11,7 @@
 #include <ttstr.h>   // ttCStr
 #include <ttfile.h>  // ttCFile
 
+// Class to store information for a dry-run of functionality
 class CDryRun
 {
 public:
@@ -22,7 +23,7 @@ public:
     bool        IsEnabled() { return m_bEnabled; }
     const char* GetFileName() { return m_cszFilename; }
 
-    void NewFile(const char* pszFile);  // will delete m_lstOut and replace m_cszFilename
+    void NewFile(const char* pszFile);
     void DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew);
 
 private:

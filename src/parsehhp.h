@@ -11,6 +11,7 @@
 #include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
 #include <ttstr.h>   // ttCStr
 
+// Parse an HHP file to collect dependencies
 class CParseHHP
 {
 public:
@@ -39,8 +40,8 @@ private:
     // Class members
 
     ttCStr m_cszCWD;
-    ttCStr m_cszRoot;     // root directory to base all filenames and includes to
-    ttCStr m_cszHHPName;  // root level HHP filename
+    ttCStr m_cszRoot;     // Root directory to base all filenames and includes to
+    ttCStr m_cszHHPName;  // Root level HHP filename
 
     size_t m_section;
 };
