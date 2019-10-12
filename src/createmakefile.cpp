@@ -34,11 +34,6 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     ttCStr cszBuildDir(cszBuildRoot);
     // Some repositories use a bld directory which is added to .gitignore. If it exists, we'll use this directory
     cszBuildDir.AppendFileName("bld");
-    if (!ttDirExists(cszBuildDir))
-    {
-        cszBuildDir = cszBuildRoot;
-        cszBuildDir.AppendFileName("build");
-    }
 
     ttCStr cszSrcFiles;
     if (pszDir)

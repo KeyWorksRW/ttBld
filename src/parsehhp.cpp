@@ -301,9 +301,9 @@ bool CNinja::CreateHelpFile()
     if (ttIsEmpty(GetHHPName()))
         return false;
 
-    if (!ttDirExists("build"))
+    if (!ttDirExists("bld"))
     {
-        if (!ttCreateDir("build"))
+        if (!ttCreateDir("bld"))
         {
             AddError("Unable to create the build directory -- so no place to put the .ninja files!\n");
             return false;
