@@ -326,6 +326,12 @@ void CSrcFiles::ProcessFile(char* pszFile)
         ttTrimRight(pszFile);
     }
 
+    if (ttStrChr(pszFile, '*') || ttStrChr(pszFile, '?'))
+    {
+        AddSourcePattern(pszFile);
+        return;
+    }
+
     m_lstSrcFiles += pszFile;
     if (!ttFileExists(pszFile))
     {
