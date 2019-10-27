@@ -567,21 +567,25 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // Gather all of our include directories into a list
 
-    ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
-    ttCList    lstIncludes;
+    ttCList lstIncludes;
     lstIncludes.SetFlags(ttCList::FLG_IGNORE_CASE);
-    while (enumInc.Enum())
+    if (cSrcFiles.GetOption(OPT_INC_DIRS))
     {
-        ttCStr cszPath(enumInc);
+        ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
+
+        while (enumInc.Enum())
+        {
+            ttCStr cszPath(enumInc);
 #if defined(_WIN32)
-        ttCStr cszIncDir;
-        JunctionToReal(cszPath, cszIncDir);
-        ttBackslashToForwardslash(cszIncDir);
-        lstIncludes += cszIncDir;
+            ttCStr cszIncDir;
+            JunctionToReal(cszPath, cszIncDir);
+            ttBackslashToForwardslash(cszIncDir);
+            lstIncludes += cszIncDir;
 #else
-        ttBackslashToForwardslash(cszPath);
-        lstIncludes += cszPath;
+            ttBackslashToForwardslash(cszPath);
+            lstIncludes += cszPath;
 #endif
+        }
     }
 
 #if defined(_WIN32)
