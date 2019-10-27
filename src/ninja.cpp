@@ -143,6 +143,18 @@ CNinja::CNinja(const char* pszNinjaDir)
 
     m_bBin64Exists = ttStrStr(GetDir64(), "64");
 
+    const char* pszEnv = getenv("TTBLD_CFLAGS");
+    if (pszEnv)
+    {
+        ttCStr csz;
+        if (GetOption(OPT_CFLAGS_CMN)) {
+            csz = GetOption(OPT_CFLAGS_CMN);
+            csz += " ";
+        }
+        csz += pszEnv;
+        UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
+    }
+
     ProcessBuildLibs();
 }
 
