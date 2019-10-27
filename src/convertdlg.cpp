@@ -231,28 +231,15 @@ void CConvertDlg::OnOK(void)
     m_bCreateVsCode = GetCheck(DLG_ID(IDCHECK_VSCODE));
     m_bGitIgnore = GetCheck(DLG_ID(IDCHECK_IGNORE_ALL));
 
-    if (m_cszConvertScript.IsNonEmpty())
+    if (m_cszConvertScript.IsNonEmpty() && !ttFileExists(m_cszConvertScript))
     {
-        if (!ttFileExists(m_cszConvertScript))
-        {
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANNOT_OPEN), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
-            CancelEnd();
-            return;
-        }
-        if (!doConversion())
-        {
-            CancelEnd();
-            return;
-        }
+        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANNOT_OPEN), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        CancelEnd();
+        return;
     }
-    else  // We get here if the user didn't specify anything to convert from.
-    {
-        if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles))
-        {
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
-            CancelEnd();
-        }
-    }
+
+    if (!doConversion())
+        CancelEnd();
 }
 
 void CConvertDlg::AddCodeLiteFiles(ttCXMLBranch* pParent)
@@ -332,6 +319,34 @@ bool CConvertDlg::doConversion(const char* pszInFile)
 
     if (pszInFile)
         m_cszConvertScript = pszInFile;
+
+    // If there is no conversion script file, then convert using files in the current directory.
+    if (m_cszConvertScript.IsEmpty())
+    {
+        if (ttIsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT)))
+        {
+            ttCStr cszProject(m_cszOutSrcFiles);
+            char*  pszFilePortion = ttFindFilePortion(cszProject);
+            if (pszFilePortion)
+                *pszFilePortion = 0;
+            m_cSrcFiles.UpdateOption(OPT_PROJECT, ttFindFilePortion(cszProject));
+        }
+
+#if defined(_WIN32)
+        m_cSrcFiles.AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl;*.hhp");
+#else
+        m_cSrcFiles.AddSourcePattern("*.cpp;*.cc;*.cxx");
+#endif
+
+        if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles))
+        {
+            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
+            CancelEnd();
+            return false;
+        }
+        return true;
+    }
+
     const char* pszExt = ttStrChrR(m_cszConvertScript, '.');
     if (pszExt)
     {
