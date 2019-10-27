@@ -30,6 +30,10 @@ const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 #include "vcxproj.h"     // CVcxProj
 #include "funcs.h"       // List of function declarations
 
+#if defined(TESTING)
+    #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
+#endif
+
 void Usage()
 {
     puts("");
@@ -70,6 +74,10 @@ void Usage()
     // puts(TRANSLATE("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
     // puts(TRANSLATE("    -codelite   -- creates or updates files needed to build project using CodeLite"));
     // puts(TRANSLATE("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
+
+#if defined(TESTING)
+    puts("    -tvdlg    -- tests the CDlgVsCode dialog");
+#endif
 }
 
 typedef enum
@@ -110,10 +118,6 @@ enum  // actions that can be run in addition to normal single command actions
     ACT_NEW      = 1 << 6,  // Displays a dialog for creating a new .srcfiles.yaml file.
     ACT_FORCE    = 1 << 7,  // Creates .ninja file even if it hasn't changed.
     ACT_OPTIONS  = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
-
-#if defined(TESTING)
-    ACT_TEST_VCODE_DLG  = 1 << 31,  // Displays VSCode dialog
-#endif
 
     // clang-format on
 };
@@ -206,6 +210,24 @@ int main(int argc, char* argv[])
             }
             return 0;
         }
+#if defined(TESTING) && defined(_DEBUG)
+
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "tvdlg"))  // used in case it was set in environment
+        {
+            CDlgVsCode dlg;
+            if (dlg.DoModal(NULL) != IDOK)
+                return 1;
+
+            DeleteFileA(".vscode/launch.json");
+            DeleteFileA(".vscode/tasks.json");
+
+            // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
+            ttCList lstResults;
+            CreateVsCodeProject(cszSrcFilePath, &lstResults);
+            for (size_t pos = 0; lstResults.InRange(pos); ++pos)
+                puts(lstResults[pos]);
+        }
+#endif
 
         // The following commands can be combined
 
@@ -362,27 +384,6 @@ int main(int argc, char* argv[])
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             puts(lstResults[pos]);
     }
-
-#if defined(TESTING)
-    if (Action & ACT_TEST_VCODE_DLG)
-    {
-        CDlgVsCode dlg;
-        if (dlg.DoModal(NULL) != IDOK)
-            return false;
-
-        if (!ttFileExists(".vscode/launch.json"))
-        {
-            if (!dlg.CreateVsCodeLaunch(cSrcFiles, plstResults))
-                return false;
-        }
-
-        if (!ttFileExists(".vscode/tasks.json"))
-        {
-            if (!dlg.CreateVsCodeTasks(cSrcFiles, plstResults))
-                return false;
-        }
-    }
-#endif
 
     {
         CNinja cNinja;
