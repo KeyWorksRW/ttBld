@@ -50,16 +50,40 @@ void CDlgVsCode::OnOK(void)
     if (GetCheck(DLG_ID(IDRADIO_PRE_NONE)))
         m_PreLaunch = PRELAUNCH_NONE;
     else if (GetCheck(DLG_ID(IDRADIO_PRE_MAIN)))
-        m_PreLaunch = PRELAUNCH_NONE;
+        m_PreLaunch = PRELAUNCH_MAIN;
     else if (GetCheck(DLG_ID(IDRADIO_PRE_CLANG)))
-        m_PreLaunch = PRELAUNCH_NONE;
+        m_PreLaunch = PRELAUNCH_CLANG;
     else
-        m_PreLaunch = PRELAUNCH_NINJA;
+    {
+        if (!m_bNinjaTask)  // Can't prelaunch Ninja task if it's not in the list of Tasks
+            m_PreLaunch = PRELAUNCH_MAIN;
+        else
+            m_PreLaunch = PRELAUNCH_NINJA;
+    }
 
     if (GetCheck(DLG_ID(IDRADIO_MAIN_DEFAULT)))
         m_DefTask = DEFTASK_MAIN;
     else if (GetCheck(DLG_ID(IDRADIO_CLANG_DEFAULT)))
         m_DefTask = DEFTASK_CLANG;
     else
-        m_DefTask = DEFTASK_NINJA;
+    {
+        if (!m_bNinjaTask)  // Can't default to Ninja task if it's not in the list of Tasks
+            m_DefTask = DEFTASK_MAIN;
+        else
+            m_DefTask = DEFTASK_NINJA;
+    }
+}
+
+void CDlgVsCode::OnCheckNinjaDebug()
+{
+    if (GetCheck(IDCHECK_NINJA_DEBUG))
+    {
+        ShowControl(DLG_ID(IDRADIO_PRE_NINJA));
+        ShowControl(DLG_ID(IDRADIO_NINJA_DEFAULT));
+    }
+    else
+    {
+        HideControl(DLG_ID(IDRADIO_PRE_NINJA));
+        HideControl(DLG_ID(IDRADIO_NINJA_DEFAULT));
+    }
 }

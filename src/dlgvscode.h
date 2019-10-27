@@ -50,6 +50,11 @@ public:
 protected:
     // Message handlers
 
+    BEGIN_TTCMD_MAP()
+        TTCASE_CMD(IDCHECK_NINJA_DEBUG, OnCheckNinjaDebug)
+    END_TTMSG_MAP()
+
+    void OnCheckNinjaDebug();
     void OnBegin(void);
     void OnOK(void);
 
