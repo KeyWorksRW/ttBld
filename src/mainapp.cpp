@@ -111,6 +111,10 @@ enum  // actions that can be run in addition to normal single command actions
     ACT_FORCE    = 1 << 7,  // Creates .ninja file even if it hasn't changed.
     ACT_OPTIONS  = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
 
+#if defined(TESTING)
+    ACT_TEST_VCODE_DLG  = 1 << 31,  // Displays VSCode dialog
+#endif
+
     // clang-format on
 };
 
@@ -358,6 +362,27 @@ int main(int argc, char* argv[])
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             puts(lstResults[pos]);
     }
+
+#if defined(TESTING)
+    if (Action & ACT_TEST_VCODE_DLG)
+    {
+        CDlgVsCode dlg;
+        if (dlg.DoModal(NULL) != IDOK)
+            return false;
+
+        if (!ttFileExists(".vscode/launch.json"))
+        {
+            if (!dlg.CreateVsCodeLaunch(cSrcFiles, plstResults))
+                return false;
+        }
+
+        if (!ttFileExists(".vscode/tasks.json"))
+        {
+            if (!dlg.CreateVsCodeTasks(cSrcFiles, plstResults))
+                return false;
+        }
+    }
+#endif
 
     {
         CNinja cNinja;
