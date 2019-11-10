@@ -59,7 +59,7 @@ void Usage()
     // Currently hidden commands
 
     // puts("\t-add [file(s)] -- Adds file(s) to .srcfiles");
-    // puts(TRANSLATE("    -allninja   -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
+    puts(TRANSLATE("    -allninja   -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
     // puts(TRANSLATE("    -dryrun     -- displays what would have happened, but doesn't change anything"));
     // puts(TRANSLATE("    -force      -- create .ninja file even if it hasn't changed"));
     // puts(TRANSLATE("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
