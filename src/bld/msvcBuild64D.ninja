@@ -13,7 +13,7 @@ msvc_deps_prefix = Note: including file:
 # -Z7	// produces object files with full symbolic debugging information
 # -FC	// Full path to source code file in diagnostics
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MDd -Od -Z7 -FC -I"../ttLib/include" /Fp$outdir/ttBld.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -Od -Z7 -FC -DwxGUI=1 -DWXUSINGDLL -DTESTING -I"../ttLibwx/include" /Fp$outdir/ttBld.pch
 
 rule compilePCH
   deps = msvc
@@ -26,7 +26,7 @@ rule compile
   description = compiling $in
 
 rule rc
-  command = rc.exe -nologo -I"../ttLib/include" -d_DEBUG /l 0x409 -fo$out $in
+  command = rc.exe -nologo -I"../ttLibwx/include" -d_DEBUG /l 0x409 -fo$out $in
   description = resource compiler... $in
 
 rule link
@@ -149,6 +149,6 @@ build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/dlggettext.obj $
   $outdir/dlgvscode.obj $
   $outdir/pch.obj $
-  ../ttLib/lib64/ttLibD.lib $
+  ../ttLibwx/lib64/ttLibwxD.lib $
   | ttBld.natvis
 
