@@ -77,16 +77,16 @@ LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja
 
 ########## release section ##########
 
-release: ttBldLib
+release: ttBldLibs
 
-ttBldLib:
+ttBldLibs:
 	ninja -f $(BldScript)
 
 ########## debug section ##########
 
-debug: ttBldLibD
+debug: ttBldLibsD
 
-ttBldLibD:
+ttBldLibsD:
 	ninja -f $(BldScriptD)
 
 ########## localization ##########
