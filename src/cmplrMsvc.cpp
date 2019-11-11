@@ -75,7 +75,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
                          IsExeTypeConsole() ? " -D_CONSOLE" : "",
                          GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
                          GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-                         IsExeTypeLib() ? " -Zl" : (IsStaticCrtDbg() ? " -MTd" : " -MDd"));
+                        IsStaticCrtRel() ? " -MT" : " -MD");
         // clang-format on
     }
     else  // Presumably GEN_RELEASE32 or GEN_RELEASE64
@@ -85,7 +85,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
             "cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s", IsExeTypeConsole() ? " -D_CONSOLE" : "",
             GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
             GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-            IsExeTypeLib() ? " -Zl" : (IsStaticCrtRel() ? " -MT" : " -MD"),
+            IsStaticCrtRel() ? " -MT" : " -MD",
             IsOptimizeSpeed() ? " -O2" : " -O1");
         // clang-format on
     }
