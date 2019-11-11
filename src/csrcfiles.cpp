@@ -580,7 +580,9 @@ const char* CSrcFiles::GetTargetDebug32()
     if (m_cszTargetDebug32.IsNonEmpty())
         return m_cszTargetDebug32;
 
-    ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles.yaml");
+    if (!GetDir32())
+        return nullptr;
+
     m_cszTargetDebug32 = GetDir32();
 
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
@@ -614,7 +616,9 @@ const char* CSrcFiles::GetTargetRelease32()
     if (m_cszTargetRelease32.IsNonEmpty())
         return m_cszTargetRelease32;
 
-    ttASSERT_MSG(GetDir32(), "32-bit target must be set in constructor after reading .srcfiles.yaml");
+    if (!GetDir32())
+        return nullptr;
+
     m_cszTargetRelease32 = GetDir32();
 
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
