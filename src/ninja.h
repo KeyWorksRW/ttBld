@@ -46,7 +46,6 @@ public:
 
     size_t      GetErrorCount() { return m_lstErrors.GetCount(); }
     const char* GetError(size_t pos) { return m_lstErrors[pos]; }
-    void        AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
 
     size_t getSrcCount() { return m_lstSrcFiles.GetCount(); }
 
