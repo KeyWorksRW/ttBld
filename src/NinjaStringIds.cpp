@@ -118,7 +118,11 @@ const char* NinjaGetString(size_t id)
     // Note that if the id is not found, it will get mapped to the same string as IDS_END_LIST
 
 #if defined(_WX_DEFS_H_)
-    return clsIntStrList.Add(id, wxGetTranslation(aNinjaStringIds[pos].psz).utf8_str());
+    return clsIntStrList.Add(id, wxGetTranslation(aNinjaStringIds[pos].psz));
+
+    // REVIEW: [KeyWorks - 11-11-2019] The following code will generate a critical error.
+    // return clsIntStrList.Add(id, wxGetTranslation(aNinjaStringIds[pos].psz).utf8_str());
+
 #else
     return clsIntStrList.Add(id, aNinjaStringIds[pos].psz);
 #endif
