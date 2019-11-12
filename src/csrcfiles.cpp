@@ -294,7 +294,7 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
         if (!ttFileExists(pszLibFile))
         {
             ttCStr cszErrMsg;
-            cszErrMsg.printf("Cannot locate %s", (char*) pszLibFile);
+            cszErrMsg.printf("Cannot locate the file %s.", (char*) pszLibFile);
             m_lstErrors += cszErrMsg;
         }
     }
@@ -336,8 +336,11 @@ void CSrcFiles::ProcessFile(char* pszFile)
     if (!ttFileExists(pszFile))
     {
         ttCStr cszErrMsg;
-        cszErrMsg.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), (char*) pszFile);
-        m_lstErrors += cszErrMsg;
+        if (ttIsNonEmpty(m_cszReportPath))
+            cszErrMsg.printf("%s: Unable to locate the file %s.", GetReportFilename(), pszFile);
+        else
+            cszErrMsg.printf(_("Cannot locate the file %s."), (char*) pszFile);
+        AddError(cszErrMsg);
     }
 
     char* pszExt = ttStrStrI(pszFile, ".idl");
@@ -382,10 +385,21 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     }
 
     CSrcFiles cIncSrcFiles;
+    if (ttIsNonEmpty(m_cszReportPath))
+    {
+        ttCStr cszNewPath(m_cszReportPath);
+        char*  pszFilePortion = ttFindFilePortion(cszNewPath);
+        ttASSERT(pszFilePortion);
+        if (pszFilePortion)
+            *pszFilePortion = 0;
+        cszNewPath += pszFile;
+        cIncSrcFiles.SetReportingFile(cszNewPath);
+    }
+
     if (!cIncSrcFiles.ReadFile(pszFile))
     {
         ttCStr cszMsg;
-        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), pszFile);
+        cszMsg.printf(_("%s: unable to locate the file %s."), GetReportFilename(), pszFile);
         m_lstErrors += cszMsg;
         return;
     }
@@ -474,7 +488,7 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
     {
         ttCStr cszTmp;
         cszTmp.printf(GETSTRING(IDS_NINJA_MISSING_COLON), pszLine);
-        m_lstErrors += cszTmp;
+        AddError(cszTmp);
         return false;
     }
     *pszVal = 0;

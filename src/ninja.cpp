@@ -147,7 +147,8 @@ CNinja::CNinja(const char* pszNinjaDir)
     if (pszEnv)
     {
         ttCStr csz;
-        if (GetOption(OPT_CFLAGS_CMN)) {
+        if (GetOption(OPT_CFLAGS_CMN))
+        {
             csz = GetOption(OPT_CFLAGS_CMN);
             csz += " ";
         }
@@ -549,23 +550,28 @@ void CNinja::ProcessBuildLibs()
             if (!ttChDir(enumLib))
             {
                 ttCStr cszMsg;
-                cszMsg.printf(GETSTRING(IDS_LIB_DIR_FAIL), (char*) enumLib);
-                cszMsg += "\n";
+                cszMsg.printf(_("The library source directory %s specified in BuildLibs: does not exist.\n"),
+                              (char*) enumLib);
                 AddError(cszMsg);
                 continue;
             }
 
             // The current directory may just be the name of the library, but not necessarily where srcfiles is located.
 
-            if (!LocateSrcFiles())
+            ttCStr cszBuildPath(enumLib);
+            ttCStr cszBuildFile;
+            if (!LocateSrcFiles(&cszBuildFile))
             {
                 for (;;)  // empty for loop that we break out of as soon as we find a srcfiles file to use
                 {
                     if (ttDirExists("src"))
                     {
                         ttChDir("src");
-                        if (LocateSrcFiles())
+                        if (LocateSrcFiles(&cszBuildFile))
+                        {
+                            cszBuildPath.AppendFileName("src");
                             break;
+                        }
                         else
                             ttChDir("..");
                     }
@@ -573,8 +579,11 @@ void CNinja::ProcessBuildLibs()
                     if (ttDirExists("source"))
                     {
                         ttChDir("source");
-                        if (LocateSrcFiles())
+                        if (LocateSrcFiles(&cszBuildFile))
+                        {
+                            cszBuildPath.AppendFileName("source");
                             break;
+                        }
                         else
                             ttChDir("..");
                     }
@@ -593,21 +602,31 @@ void CNinja::ProcessBuildLibs()
                     if (ttDirExists(ttFindFilePortion(enumLib)))
                     {
                         ttChDir(ttFindFilePortion(enumLib));
-                        if (LocateSrcFiles())
+                        if (LocateSrcFiles(&cszBuildFile))
+                        {
+                            cszBuildPath.AppendFileName(ttFindFilePortion(enumLib));
                             break;
+                        }
                         else
                             ttChDir("..");
                     }
 
                     // Any further directory searches should go above this -- once we get here, we can't find a
-                    // .srcfiles.yaml. We go ahead an break out of the loop. cSrcFiles.ReadFile() will fail -- we'll use
-                    // whatever error reporting (if any) it uses for a file that cannot be found or read.
+                    // .srcfiles.yaml. We go ahead and break out of the loop. cSrcFiles.ReadFile() will fail -- we'll
+                    // use whatever error reporting (if any) it uses for a file that cannot be found or read.
 
                     break;
                 }
             }
 
+            // We've actually changed to the directory containing the .srcfiles.yaml, so CSrcFiles doesn't actually need
+            // the filename. However, if an error occurs, we need to indicate where the .srcfiles.yaml file is that had
+            // the problem.
+
+            cszBuildPath.AppendFileName(cszBuildFile);
+
             CSrcFiles cSrcFiles;
+            cSrcFiles.SetReportingFile(cszBuildPath);
             if (cSrcFiles.ReadFile())
             {
                 ttCStr cszCurDir;

@@ -83,6 +83,9 @@ public:
 
     ttCList* GetSrcFilesList() { return &m_lstSrcFiles; }
 
+    void SetReportingFile(const char* pszFile) { m_cszReportPath = pszFile; }
+    void AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
+
 protected:
     // Protected functions
 
@@ -97,10 +100,12 @@ protected:
     void AddCompilerFlag(const char* pszFlag);
     //    void AddLibrary(const char* pszName);     // REVIEW: [KeyWorks - 8/7/2019] doesn't appear to be used
 
+    const char* GetReportFilename() { return ttIsNonEmpty(m_cszReportPath) ? m_cszReportPath : m_cszSrcFilePath; }
+
+public:
     // Class members (note that these are NOT marked protected or private -- too many callers need to access individual
     // members)
 
-public:
     // REVIEW: [randalphwa - 7/6/2019] Having these public: is a bad design. We should replace them with Get/Set
     // functions
 
@@ -132,7 +137,8 @@ private:
     ttCStr m_cszTargetRelease64;
 
     ttCStr m_cszSrcFilePath;
-    ttCStr m_cszBldDir;  // This is where we write the .ninja files, and is ninja's builddir
+    ttCStr m_cszReportPath;  // Path to use when reporting a problem
+    ttCStr m_cszBldDir;      // This is where we write the .ninja files, and is ninja's builddir
 
     int m_RequiredMajor;  // These three get filled in to the minimum ttBld version required to process
     int m_RequiredMinor;
