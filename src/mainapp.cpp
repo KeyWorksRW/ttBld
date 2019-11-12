@@ -8,20 +8,35 @@
 
 #include "pch.h"
 
+#ifdef _MSC_VER
+    #define wxMSVC_VERSION_ABI_COMPAT
+    #include <msvc/wx/setup.h>  // This will add #pragmas for the wxWidgets libraries
+
+    #if defined(_WIN32)
+
+        #pragma comment(lib, "kernel32.lib")
+        #pragma comment(lib, "user32.lib")
+        #pragma comment(lib, "gdi32.lib")
+        #pragma comment(lib, "comctl32.lib")
+        #pragma comment(lib, "comdlg32.lib")
+        #pragma comment(lib, "shell32.lib")
+
+        #pragma comment(lib, "rpcrt4.lib")
+        #pragma comment(lib, "advapi32.lib")
+
+        #if wxUSE_URL_NATIVE
+            #pragma comment(lib, "wininet.lib")
+        #endif
+    #endif
+#endif
+
+#include <wx/init.h>
+
 const char* txtVersion = "ttBld 1.2.0.8295";
 const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 
 #include <iostream>
 #include <direct.h>  // Functions for directory handling and creation
-
-// _LINK_ commands combined with wxLibs.h is used to specify what wxWidgets libraries you want to link to. It is not
-// tracked so that you can change these to whatever you want. If you copy the file from ../wxMSW/wxLibs.h you can then
-// modify it to whatever you want (for MSW builds you may not need to change it at all).
-
-#define _LINK_WX_BASE 1
-#define _LINK_WX_CORE 1
-
-#include "wxLibs.h"  // adds pragmas telling the linker which libraries to link to
 
 #include <ttconsole.h>  // ttConsoleColor
 
@@ -124,6 +139,8 @@ enum  // actions that can be run in addition to normal single command actions
 
 int main(int argc, char* argv[])
 {
+    wxInitializer initializer;
+
     ttInitCaller(txtVersion);
     UPDATE_TYPE upType = UPDATE_NORMAL;
     size_t      Action = 0;
