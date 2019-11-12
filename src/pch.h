@@ -24,7 +24,7 @@
     #include "wx/msw/missing.h"
 #endif
 
-#include <wx/translation.h>
+#include <wx/intl.h>
 
 #include <stdexcept>
 #include <stdint.h>
