@@ -13,7 +13,7 @@ msvc_deps_prefix = Note: including file:
 # -Z7	// produces object files with full symbolic debugging information
 # -FC	// Full path to source code file in diagnostics
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -Od -Z7 -FC -DwxGUI=1 -DWXUSINGDLL -DWXUSINGDLL -I"../../ttLibwx/include" /Fp$outdir/ttBld.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -Od -Z7 -FC -DwxGUI=1 -DWXUSINGDLL -DTESTING -DWXUSINGDLL -I"../../ttLibwx/include" /Fp$outdir/ttBld.pch
 
 rule compilePCH
   deps = msvc
@@ -37,6 +37,10 @@ build $outdir/pch.obj: compilePCH pch.cpp
 
 build $outdir/mainapp.obj: compile mainapp.cpp | $outdir/pch.obj
 
+build $outdir/ninja.obj: compile ninja.cpp | $outdir/pch.obj
+
+build $outdir/cmplrMsvc.obj: compile cmplrMsvc.cpp | $outdir/pch.obj
+
 build $outdir/addfiles.obj: compile addfiles.cpp | $outdir/pch.obj
 
 build $outdir/codelite.obj: compile codelite.cpp | $outdir/pch.obj
@@ -44,8 +48,6 @@ build $outdir/codelite.obj: compile codelite.cpp | $outdir/pch.obj
 build $outdir/convert.obj: compile convert.cpp | $outdir/pch.obj
 
 build $outdir/convertdlg.obj: compile convertdlg.cpp | $outdir/pch.obj
-
-build $outdir/cmplrMsvc.obj: compile cmplrMsvc.cpp | $outdir/pch.obj
 
 build $outdir/createmakefile.obj: compile createmakefile.cpp | $outdir/pch.obj
 
@@ -58,8 +60,6 @@ build $outdir/finder.obj: compile finder.cpp | $outdir/pch.obj
 build $outdir/gencmdfiles.obj: compile gencmdfiles.cpp | $outdir/pch.obj
 
 build $outdir/gitfuncs.obj: compile gitfuncs.cpp | $outdir/pch.obj
-
-build $outdir/ninja.obj: compile ninja.cpp | $outdir/pch.obj
 
 build $outdir/options.obj: compile options.cpp | $outdir/pch.obj
 
@@ -114,18 +114,18 @@ build $resout/ttBldD.res: rc ttBld.rc | $
 
 build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/mainapp.obj $
+  $outdir/ninja.obj $
+  $outdir/cmplrMsvc.obj $
   $outdir/addfiles.obj $
   $outdir/codelite.obj $
   $outdir/convert.obj $
   $outdir/convertdlg.obj $
-  $outdir/cmplrMsvc.obj $
   $outdir/createmakefile.obj $
   $outdir/csrcfiles.obj $
   $outdir/dryrun.obj $
   $outdir/finder.obj $
   $outdir/gencmdfiles.obj $
   $outdir/gitfuncs.obj $
-  $outdir/ninja.obj $
   $outdir/options.obj $
   $outdir/parsehhp.obj $
   $outdir/rcdep.obj $
@@ -148,3 +148,4 @@ build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/pch.obj $
   ../ttLibwx/lib64/ttLibwxD.lib $
   | ttBld.natvis
+
