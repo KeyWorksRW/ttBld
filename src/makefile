@@ -40,8 +40,11 @@ cmplr=msvc # \
 !endif #\
 #\
 bdir=bld # \
+libbdir=%libbuild% # \
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja # \
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja # \
+LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja # \
+LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja # \
 # \
 !else
 ######### Following section is for GNU make and variants #########
@@ -63,28 +66,31 @@ ifndef cmplr
 endif
 
 bdir=bld
+libbdir=%libbuild%
 BldScript=$(bdir)/$(cmplr)Build$(bits).ninja
 BldScriptD=$(bdir)/$(cmplr)Build$(bits)D.ninja
+LibBldScript=$(libbdir)/$(cmplr)Build$(bits).ninja
+LibBldScriptD=$(libbdir)/$(cmplr)Build$(bits)D.ninja
 
 # \
 !endif
 
 ########## release section ##########
 
-release: ttLib $(BldScript) ttBld
+release: ttLibwx ttBld
 
-ttLib:
-	cd ../ttLib/src & ninja -f $(BldScript)
+ttLibwx:
+	cd ../ttLibwx/src & ninja -f $(BldScript)
 
 ttBld:
 	ninja -f $(BldScript)
 
 ########## debug section ##########
 
-debug: ttLibD $(BldScriptD) ttBldD
+debug: ttLibwxD ttBldD
 
-ttLibD:
-	cd ../ttLib/src & ninja -f $(BldScriptD)
+ttLibwxD:
+	cd ../ttLibwx/src & ninja -f $(BldScriptD)
 
 ttBldD:
 	ninja -f $(BldScriptD)
@@ -92,39 +98,31 @@ ttBldD:
 ########## localization ##########
 
 locale:
-	xgettext -k_ -kwxGetTranslation -kwxPLURAL -kwxTRANSLATE -i -c --omit-header -fxgen.lst
+	xgettext -k_ -kwxGetTranslation -kwxPLURAL -i -c --omit-header -fxgen.lst
 
 ########## clean release section ##########
 
-clean: $(BldScript)
+clean:
 	ninja -f $(BldScript) -t clean
 
 ########## clean debug section ##########
 
-cleanD: $(BldScriptD)
+cleanD:
 	ninja -f $(BldScriptD) -t clean
 
 ########## special ninja diagnostics ##########
 
-commandsD: $(BldScriptD)
+commandsD:
 	ninja -f $(BldScriptD) -t commands
 
-commandsR: $(BldScript)
+commandsR:
 	ninja -f $(BldScript) -t commands
 
-targetsD: $(BldScriptD)
+targetsD:
 	ninja -f $(BldScriptD) -t targets depth 2
 
-targetsR: $(BldScript)
+targetsR:
 	ninja -f $(BldScript) -t targets depth 2
 
-deps: $(BldScript)
+deps:
 	ninja -f $(BldScript) -t deps
-
-########## Creates or updates ninja file if needed ##########
-
-$(BldScript): .srcfiles.yaml
-	ttBld.exe -u$(cmplr)$(bits)
-
-$(BldScriptD): .srcfiles.yaml
-	ttBld.exe -u$(cmplr)$(bits)D
