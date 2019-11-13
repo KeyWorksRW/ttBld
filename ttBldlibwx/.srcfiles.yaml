@@ -27,6 +27,5 @@ Files:
     ../src/verninja.cpp        # CVerMakeNinja class
     ../src/writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     ../src/dryrun.cpp          # CDryRun class for testing
-    ../src/NinjaStringIds.cpp  # Maps IDS_NINJA_ strings into string to translate
     ../src/finder.cpp          # Routines for finding executables such as the MSVC compiler
     ../src/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
