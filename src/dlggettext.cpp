@@ -49,7 +49,7 @@ void CDlgGetText::OnBtnAdd()
     {
         if (m_lbKeywords.FindString(dlg.GetFuncName()))
         {
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_NAME_ADDED), MB_OK | MB_ICONWARNING, dlg.GetFuncName());
+            ttMsgBoxFmt(_("The name %kq has already been added."), MB_OK | MB_ICONWARNING, dlg.GetFuncName());
             return;
         }
         m_lbKeywords += dlg.GetFuncName();

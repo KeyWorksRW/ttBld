@@ -89,7 +89,7 @@ void CTabGeneral::OnOK(void)
 void CTabGeneral::OnBtnDir32()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(GETSTRING(IDS_NINJA_32BIT_DIR));
+    dlg.SetTitle(_("Select 32-bit Target directory"));
 
     ttCStr cszDir;
     cszDir.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
@@ -110,7 +110,7 @@ void CTabGeneral::OnBtnDir32()
 void CTabGeneral::OnBtnDir64()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(GETSTRING(IDS_NINJA_64BIT_DIR));
+    dlg.SetTitle(_("Select 64-bit target directory"));
 
     ttCStr cszDir;
     cszDir.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));

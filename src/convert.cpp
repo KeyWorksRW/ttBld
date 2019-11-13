@@ -20,14 +20,14 @@ bool CConvertDlg::ConvertCodeBlocks()
 {
     if (!ttFileExists(m_cszConvertScript))
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANNOT_OPEN), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_MISSING_PROJECT), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
@@ -54,7 +54,7 @@ bool CConvertDlg::ConvertCodeLite()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_INVALID_PROJECT), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot locate <CodeLite_Project> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
@@ -84,7 +84,7 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
     if (!pProject)
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_MISSING_VSP), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot locate <VisualStudioProject> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
@@ -94,7 +94,7 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
     if (!pFiles)
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_MISSING_FILES), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot locate <Files> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
     for (size_t iFilter = 0; iFilter < pFiles->GetChildrenCount(); ++iFilter)
@@ -213,7 +213,7 @@ bool CConvertDlg::ConvertVcxProj()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_MISSING_PROJECT), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
@@ -516,7 +516,7 @@ bool CConvertDlg::ConvertDsp()
     ttCFile file;
     if (!file.ReadFile(m_cszConvertScript))
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANNOT_OPEN), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
@@ -644,7 +644,7 @@ bool CConvertDlg::ConvertSrcfiles()
     CSrcFiles srcOrg;
     if (!srcOrg.ReadFile(m_cszConvertScript))
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANNOT_OPEN), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 

@@ -58,7 +58,7 @@ void CreateCodeCmd(const char* pszFile)
     ttBackslashToForwardslash(cszPath);
 
     if (file.WriteFile(cszPath))
-        printf(GETSTRING(IDS_FILE_CREATED), (char*) cszPath);
+        printf(_("%s created.\n"), (char*) cszPath);
     else
     {
         // It's possible to just move the entire VSCode directory and it will continue to work fine. In that case, the
@@ -75,13 +75,13 @@ void CreateCodeCmd(const char* pszFile)
                 cszNewPath.AppendFileName(pszFile);
                 if (file.WriteFile(cszPath))
                 {
-                    printf(GETSTRING(IDS_FILE_CREATED), (char*) cszPath);
+                    printf(_("%s created.\n"), (char*) cszPath);
                     return;
                 }
             }
         }
 
-        printf(GETSTRING(IDS_NINJA_CANT_WRITE), (char*) cszPath);
+        printf(_("Unable to create or write to %s"), (char*) cszPath);
         puts("");
     }
 }

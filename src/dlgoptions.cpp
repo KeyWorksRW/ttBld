@@ -92,7 +92,7 @@ void CTabOptions::OnBegin(void)
     ti.iImage = -1;
 
     ti.mask = TCIF_TEXT;
-    ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_GENERAL);
+    ti.pszText = (char*) (const char*) _("General");
 
 #ifdef _DEBUG
     auto result =
@@ -100,13 +100,13 @@ void CTabOptions::OnBegin(void)
         SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_GENERAL, (LPARAM) &ti);
     ttASSERT(result == 0);
 
-    ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_COMPILER);
+    ti.pszText = (char*) ((const char*) _("Compiler"));
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_COMPILER, (LPARAM) &ti);
 
-    ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_LIBS);
+    ti.pszText = (char*) ((const char*) _("Libs"));
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LIBS, (LPARAM) &ti);
 
-    ti.pszText = (char*) GETSTRING(IDS_NINJA_TAB_LINKER);
+    ti.pszText = (char*) ((const char*) _("Linker"));
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LINKER, (LPARAM) &ti);
 
 #if defined(_WIN32)
@@ -154,12 +154,12 @@ void CTabOptions::SaveChanges()
     if (ttFileExists(GetSrcFiles()))
     {
         if (WriteUpdates(GetSrcFiles()) == CWriteSrcFiles::RSLT_SUCCESS)
-            printf(GETSTRING(IDS_NINJA_OPTIONS_UPDATED), GetSrcFiles());
+            printf(_("%s Options: section updated.\n"), GetSrcFiles());
     }
     else
     {
         if (WriteUpdates() == CWriteSrcFiles::RSLT_SUCCESS)
-            printf(GETSTRING(IDS_FILE_CREATED), GetSrcFiles());
+            printf(_("%s created.\n"), GetSrcFiles());
     }
 }
 

@@ -22,7 +22,7 @@ void CDryRun::NewFile(const char* pszFile)
 void CDryRun::DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew)
 {
     if (m_cszFilename.IsNonEmpty())
-        printf(GETSTRING(IDS_NINJA_DRURUN_CHANGES), (char*) m_cszFilename);
+        printf(_("%s dryrun changes:\n"), (char*) m_cszFilename);
 
     fileNew.PrepForReadLine();
     while (fileNew.ReadLine())
@@ -30,8 +30,8 @@ void CDryRun::DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew)
         fileOrg.ReadLine();
         if (!ttIsSameStr(fileOrg, fileNew))
         {
-            printf(GETSTRING(IDS_NINJA_OLD_FILE), (char*) fileOrg);
-            printf(GETSTRING(IDS_NINJA_NEW_FILE), (char*) fileNew);
+            printf(_("%s Options: section updated.\n"), (char*) fileOrg);
+            printf(_("    new: %s\n"), (char*) fileNew);
         }
     }
 }

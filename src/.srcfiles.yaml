@@ -8,19 +8,22 @@ Options:
     Warn:        4            # [1-4]
     Crt_rel:     dll          # [static | dll] type of CRT to link to in release builds
     Crt_dbg:     dll          # [static | dll] type of CRT to link to in debug builds
+    Ms_linker:   false        # true means use link.exe even when compiling with clang
 
-    CFlags_cmn: -DwxGUI=1 -DWXUSINGDLL
-    CFlags_dbg: -DWXUSINGDLL
+    CFlags_cmn:  -DwxGUI=1 -DWXUSINGDLL            # flags to pass to the compiler in all builds
+    CFlags_dbg:  -DWXUSINGDLL # flags to pass to the compiler in debug builds
 
     64Bit:       true         # [true | false] can project be built as a 64-bit target
     TargetDir64: ../bin64     # 64-bit target directory
-    32Bit:       true         # [true | false] can project be built as a 32-bit target
-    TargetDir32: ../bin32     # 64-bit target directory
+    32Bit:       false         # [true | false] can project be built as a 32-bit target
+#    32Bit:       true         # [true | false] can project be built as a 32-bit target
+#    TargetDir32: ../bin32     # 64-bit target directory
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ../ttLibwx/include  # additional directories for header files
-    BuildLibs:   ../ttLibwx/src      # libraries that need to be built (added to makefile generation)
+    IncDirs:     ../../ttLibwx/include  # temporary location, change before Public release
+#    IncDirs:     ../ttLibwx/include                # additional directories for header files
+    BuildLibs:   ../ttLibwx/src                    # libraries that need to be built (added to makefile generation)
 
 Files:
     ttBld.rc            # Windows resource files
@@ -40,7 +43,6 @@ Files:
     ninja.cpp           # CNinja for creating .ninja scripts
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     parsehhp.cpp        # CParseHHP class for parsing a .hhp file
-    NinjaStringIds.cpp  # Maps IDS_ strings into string to translate
     rcdep.cpp           # Contains functions for parsing RC dependencies
     vcxproj.cpp         # Creates a Visual Studio project file
     verninja.cpp        # CVerMakeNinja class

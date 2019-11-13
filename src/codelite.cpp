@@ -117,13 +117,13 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
 
     if (!kf.WriteFile(cszProjFile))
     {
-        printf(GETSTRING(IDS_NINJA_CANT_WRITE), (const char*) cszProjFile);
+        printf(_("Unable to create or write to %s"), (const char*) cszProjFile);
         puts("");  // add EOL
         return CLP_CANT_WRITE;
     }
     else
     {
-        printf(GETSTRING(IDS_FILE_CREATED), (const char*) cszProjFile);
+        printf(_("%s created.\n"), (const char*) cszProjFile);
     }
 
     return CLP_CREATED;

@@ -466,7 +466,7 @@ int main(int argc, char* argv[])
         if (countNinjas > 0)
             printf(_("Created %d .ninja files\n"), countNinjas);
         else
-            puts(GETSTRING(IDS_NINJA_UP_TO_DATE));
+            puts(_("All ninja scripts are up to date."));
     }
 
     return 0;
@@ -486,42 +486,42 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
         {
             case UPDATE_MSVC64:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_MSVC))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_MSVC32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL64:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_MSVC64D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_MSVC))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_MSVC32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_MSVC))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL64D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
-                    printf(GETSTRING(IDS_FILE_UPDATED), cNinja.GetScriptFile());
+                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             default:

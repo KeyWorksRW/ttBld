@@ -66,7 +66,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
         if (!pszFile)
         {
             ttCStr csz;
-            csz.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), ".srcfiles.yaml");
+            csz.printf(_("Cannot locate the file %s"), ".srcfiles.yaml");
             m_lstErrors += csz;
             return false;  // if we still can't find it, bail
         }
@@ -86,7 +86,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     if (!kfSrcFiles.ReadFile(m_cszSrcFilePath))
     {
         ttCStr csz;
-        csz.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), (char*) m_cszSrcFilePath);
+        csz.printf(_("Cannot open \"%s\"."), (char*) m_cszSrcFilePath);
         m_lstErrors += csz;
 
         return false;
@@ -244,7 +244,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
         UpdateOption(OPT_LINK_CMN, (char*) cszVal);
 
     ttCStr csz;
-    csz.printf(GETSTRING(IDS_NINJA_UNKNOWN_OPTION), (char*) cszName);
+    csz.printf(_("%s is an unknown option"), (char*) cszName);
     m_lstErrors += csz;
 }
 
@@ -493,7 +493,7 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
     if (!pszVal)
     {
         ttCStr cszTmp;
-        cszTmp.printf(GETSTRING(IDS_NINJA_MISSING_COLON), pszLine);
+        cszTmp.printf(_("Option name is missing a ':' (%s)"), pszLine);
         AddError(cszTmp);
         return false;
     }

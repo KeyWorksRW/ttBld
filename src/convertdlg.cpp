@@ -180,7 +180,8 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
         cszSrcFiles.AppendFileName(".srcfiles.yaml");
         if (ttFileExists(cszSrcFiles))
         {
-            if (ttMsgBox(GETSTRING(IDS_NINJA_SRCFILES_EXISTS), MB_YESNO) != IDYES)
+            if (ttMsgBox(_(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"),
+                         MB_YESNO) != IDYES)
                 return;
         }
         SetControlText(DLG_ID(IDEDIT_OUT_DIR), dlg);
@@ -233,7 +234,7 @@ void CConvertDlg::OnOK(void)
 
     if (m_cszConvertScript.IsNonEmpty() && !ttFileExists(m_cszConvertScript))
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANNOT_OPEN), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         CancelEnd();
         return;
     }
@@ -340,7 +341,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
 
         if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles))
         {
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
+            ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
             CancelEnd();
             return false;
         }
@@ -360,7 +361,8 @@ bool CConvertDlg::doConversion(const char* pszInFile)
             HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
             if (hr != S_OK)
             {
-                ttMsgBoxFmt(GETSTRING(IDS_NINJA_PARSE_ERROR), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+                ttMsgBoxFmt(_("An internal error occurred attempting to parse the file %s"), MB_OK | MB_ICONWARNING,
+                            (char*) m_cszConvertScript);
                 return false;
             }
 
@@ -394,7 +396,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
 
             if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles, cszHdr))
             {
-                ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
+                ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
                 return false;
             }
             return true;

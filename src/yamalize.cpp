@@ -97,7 +97,7 @@ bool Yamalize()
 
     if (!cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion))
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, ".vscode/srcfiles.yaml");
+        ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/srcfiles.yaml");
         return false;
     }
 

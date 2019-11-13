@@ -159,13 +159,13 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
             }
             else if (kfOut.WriteFile(cszMakeFile))
             {
-                printf(GETSTRING(IDS_FILE_UPDATED), (char*) cszMakeFile);
+                printf(_("%s updated.\n"), (char*) cszMakeFile);
                 return true;
             }
             else
             {
                 // TRANSLATORS: Don't change the filename "makefile"
-                puts(GETSTRING(IDS_CANT_WRITE_MAKEFILE));
+                puts(_("Unable to write to makefile."));
                 return false;
             }
         }
@@ -175,13 +175,13 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         if (kfOut.WriteFile(cszMakeFile))
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            printf(GETSTRING(IDS_FILE_CREATED), (char*) cszMakeFile);
+            printf(_("%s created.\n"), (char*) cszMakeFile);
             return true;
         }
         else
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            puts(GETSTRING(IDS_CANT_WRITE_MAKEFILE));
+            puts(_("Unable to write to makefile."));
             return false;
         }
     }

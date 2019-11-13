@@ -26,7 +26,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     if (!cSrcFiles.ReadFile())
     {
         ttCStr cszMsg;
-        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_LOCATE), (char*) cSrcFiles.GetSrcFiles());
+        cszMsg.printf(_("Cannot locate the file %s"), (char*) cSrcFiles.GetSrcFiles());
         puts(cszMsg);
         return;
     }
@@ -35,7 +35,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     {
         if (cSrcFiles.m_lstSrcFiles.Find(lstFiles[pos]))
         {
-            printf(GETSTRING(IDS_NINJA_ALREAY_IN_FILES), lstFiles[pos]);
+            printf(_("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
             cSrcFiles.m_lstSrcFiles.Remove(pos);
         }
     }
@@ -46,7 +46,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     if (!kfIn.ReadFile(cSrcFiles.GetSrcFiles()))
     {
         ttCStr cszMsg;
-        cszMsg.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), (char*) cSrcFiles.GetSrcFiles());
+        cszMsg.printf(_("Cannot open \"%s\"."), (char*) cSrcFiles.GetSrcFiles());
         puts(cszMsg);
         return;
     }
@@ -62,7 +62,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         {
             if (!ttFileExists(lstFiles[pos]))
             {
-                printf(GETSTRING(IDS_NINJA_FILE_NOT_ADDED), lstFiles[pos]);
+                printf(_("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
                 continue;
             }
             kfOut.printf("  %s\n", lstFiles[pos]);
@@ -70,11 +70,11 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         }
         if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
         {
-            ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, cSrcFiles.GetSrcFiles());
+            ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, cSrcFiles.GetSrcFiles());
             return;
         }
 
-        printf(GETSTRING(IDS_NINJA_FILES_ADDED), cFilesAdded);
+        printf(_("%u files added."), cFilesAdded);
         return;
     }
 
@@ -98,7 +98,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     {
         if (!ttFileExists(lstFiles[pos]))
         {
-            printf(GETSTRING(IDS_NINJA_FILE_NOT_ADDED), lstFiles[pos]);
+            printf(_("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
             continue;
         }
         kfOut.printf("  %s\n", lstFiles[pos]);
@@ -121,9 +121,9 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 
     if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
     {
-        printf(GETSTRING(IDS_NINJA_CANT_WRITE), cSrcFiles.GetSrcFiles());
+        printf(_("Unable to create or write to %s"), cSrcFiles.GetSrcFiles());
         return;
     }
 
-    printf(GETSTRING(IDS_NINJA_FILES_ADDED), cFilesAdded);
+    printf(_("%u files added."), cFilesAdded);
 }

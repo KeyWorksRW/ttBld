@@ -305,12 +305,11 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kfOut.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, ".vscode/c_cpp_properties.json");
+        ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/c_cpp_properties.json");
         return false;
     }
     else
     {
-        // Note that we can't use IDS_FILE_CREATED since that string adds \n to the end.
         if (plstResults)
             *plstResults += _("Created .vscode/c_cpp_properties.json");
     }
@@ -366,7 +365,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kf.WriteFile(".vscode/launch.json"))
     {
-        ttMsgBoxFmt(GETSTRING(IDS_NINJA_CANT_WRITE), MB_OK | MB_ICONWARNING, ".vscode/launch.json");
+        ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/launch.json");
         return false;
     }
     else
@@ -537,7 +536,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
         if (plstResults)
         {
             ttCStr cszMsg;
-            cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), ".vscode/tasks.json");
+            cszMsg.printf(_("Unable to create or write to %s"), ".vscode/tasks.json");
             *plstResults += (char*) cszMsg;
         }
         return false;
@@ -559,7 +558,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         if (plstResults)
         {
             ttCStr cszErr;
-            cszErr.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), ".vscode/c_cpp_properties.json");
+            cszErr.printf(_("Cannot open \"%s\"."), ".vscode/c_cpp_properties.json");
             *plstResults += cszErr;
             return false;
         }
@@ -734,7 +733,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         if (plstResults)
         {
             ttCStr cszErr;
-            cszErr.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), ".vscode/c_cpp_properties.json");
+            cszErr.printf(_("Cannot open \"%s\"."), ".vscode/c_cpp_properties.json");
             *plstResults += cszErr;
             return false;
         }
@@ -756,7 +755,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             if (plstResults)
             {
                 ttCStr cszErr;
-                cszErr.printf(GETSTRING(IDS_NINJA_CANT_WRITE), ".vscode/c_cpp_properties.json");
+                cszErr.printf(_("Unable to create or write to %s"), ".vscode/c_cpp_properties.json");
                 *plstResults += cszErr;
             }
             return false;

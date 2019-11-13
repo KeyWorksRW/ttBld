@@ -85,7 +85,7 @@ void CTabLinker::OnBtnChange()
 void CTabLinker::OnBtnLibDir()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(GETSTRING(IDS_NINJA_TITLE_LIB_DIR));  // we're repurposing an existing dialog, so change the title
+    dlg.SetTitle(_("Library directory"));  // we're repurposing an existing dialog, so change the title
     if (dlg.GetFolderName(*this))
     {
         ttCStr cszTmp, cszLibDir, cszCurLibDirs;
@@ -100,7 +100,7 @@ void CTabLinker::OnBtnLibDir()
             {
                 if (ttIsSamePath(eLib, cszLibDir))
                 {
-                    ttMsgBoxFmt(GETSTRING(IDS_NINJA_ALREADY_ADDED_DIR), MB_OK | MB_ICONWARNING, (char*) cszLibDir);
+                    ttMsgBoxFmt(_("You've already added the directory %s"), MB_OK | MB_ICONWARNING, (char*) cszLibDir);
                     return;
                 }
             }

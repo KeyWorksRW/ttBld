@@ -37,7 +37,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
         if (!pszHdr)  // we should have already reported a problem with a missing header file
         {
             ttCStr cszErrMsg;
-            cszErrMsg.printf(GETSTRING(IDS_NINJA_CANNOT_OPEN), pszRcFile);
+            cszErrMsg.printf(_("Cannot open \"%s\"."), pszRcFile);
             m_lstErrors += cszErrMsg;
         }
         return false;
@@ -107,7 +107,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                     // report the error, so there's not a huge advantage to reporting here.
 
                     ttCStr cszErrMsg;
-                    cszErrMsg.printf(GETSTRING(IDS_NINJA_MISSING_INCLUDE),
+                    cszErrMsg.printf(_(IDS_NINJA_MISSING_INCLUDE),
                         pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
                     m_lstErrors += cszErrMsg;
 #endif

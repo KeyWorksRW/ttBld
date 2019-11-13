@@ -82,7 +82,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
         if (plstResults)
         {
             ttCStr cszMsg;
-            cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), ".vs/tasks.vs.json");
+            cszMsg.printf(_("Unable to create or write to %s"), ".vs/tasks.vs.json");
             *plstResults += (char*) cszMsg;
         }
         return false;
@@ -123,7 +123,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
         if (plstResults)
         {
             ttCStr cszMsg;
-            cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), ".vs/launch.vs.json");
+            cszMsg.printf(_("Unable to create or write to %s"), ".vs/launch.vs.json");
             *plstResults += (char*) cszMsg;
         }
         return false;

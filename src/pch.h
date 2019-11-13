@@ -38,5 +38,3 @@ using namespace ttch;  // For the CH_ and CHW_ constants
 
 extern const char* txtVersion;
 extern const char* txtCopyRight;
-
-#include "NinjaStringIds.h"  // Maps IDS_NINJA_ strings into string to translate

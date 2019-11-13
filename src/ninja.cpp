@@ -14,6 +14,7 @@
 
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
+#include <ttcwd.h>      // ttCCwd
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
@@ -398,7 +399,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         if (!ttCreateDir(GetBldDir()))
         {
             ttCStr cszMsg;
-            cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), GetBldDir());
+            cszMsg.printf(_("Unable to create or write to %s"), GetBldDir());
             AddError(cszMsg);
             return false;
         }
@@ -423,7 +424,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     if (!file.WriteFile(m_cszScriptFile))
     {
         ttCStr cszMsg;
-        cszMsg.printf(GETSTRING(IDS_NINJA_CANT_WRITE), (char*) m_cszScriptFile);
+        cszMsg.printf(_("Unable to create or write to %s"), (char*) m_cszScriptFile);
         cszMsg += "\n";
         AddError(cszMsg);
         return false;
@@ -540,11 +541,11 @@ void CNinja::ProcessBuildLibs()
     if (GetBuildLibs())
     {
         ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
-        ttCStr     cszSaveCwd;
-        cszSaveCwd.GetCWD();
 
         while (enumLib.Enum())
         {
+            ttCCwd cwdSave;  // Saves the current directory, restores it when we go out of scope.
+
             // Change to the directory that should contain a .srcfiles.yaml and read it
 
             if (!ttChDir(enumLib))
@@ -632,7 +633,7 @@ void CNinja::ProcessBuildLibs()
                 ttCStr cszCurDir;
                 cszCurDir.GetCWD();
                 ttCStr cszRelDir;
-                ttConvertToRelative(cszSaveCwd, cszCurDir, cszRelDir);
+                ttConvertToRelative(cwdSave, cszCurDir, cszRelDir);
                 m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), cszRelDir);
 
                 const char* pszLib;
@@ -645,7 +646,7 @@ void CNinja::ProcessBuildLibs()
                     cszLibDir.AppendFileName(pszLib);
                     cszLibDir.FullPathName();
                     ttCStr cszRelLib;
-                    ttConvertToRelative(cszSaveCwd, cszLibDir, cszRelLib);
+                    ttConvertToRelative(cwdSave, cszLibDir, cszRelLib);
                     m_lstBuildLibs32D += cszRelLib;
                 }
 
@@ -657,7 +658,7 @@ void CNinja::ProcessBuildLibs()
                     cszLibDir.AppendFileName(pszLib);
                     cszLibDir.FullPathName();
                     ttCStr cszRelLib;
-                    ttConvertToRelative(cszSaveCwd, cszLibDir, cszRelLib);
+                    ttConvertToRelative(cwdSave, cszLibDir, cszRelLib);
                     m_lstBuildLibs64D += cszRelLib;
                 }
 
@@ -669,7 +670,7 @@ void CNinja::ProcessBuildLibs()
                     cszLibDir.AppendFileName(pszLib);
                     cszLibDir.FullPathName();
                     ttCStr cszRelLib;
-                    ttConvertToRelative(cszSaveCwd, cszLibDir, cszRelLib);
+                    ttConvertToRelative(cwdSave, cszLibDir, cszRelLib);
                     m_lstBuildLibs32R += cszRelLib;
                 }
 
@@ -681,15 +682,10 @@ void CNinja::ProcessBuildLibs()
                     cszLibDir.AppendFileName(pszLib);
                     cszLibDir.FullPathName();
                     ttCStr cszRelLib;
-                    ttConvertToRelative(cszSaveCwd, cszLibDir, cszRelLib);
+                    ttConvertToRelative(cwdSave, cszLibDir, cszRelLib);
                     m_lstBuildLibs64R += cszRelLib;
                 }
             }
-
-            // Change back to our original directory since library paths will be relative to our master directory, not
-            // to each other
-
-            ttChDir(cszSaveCwd);
         }
     }
 }
