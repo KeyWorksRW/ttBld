@@ -735,12 +735,12 @@ const char* CSrcFiles::GetTargetRelease64()
     return m_cszTargetRelease64;
 }
 
+#if defined(_DEBUG)
 void CSrcFiles::AddError(const char* pszErrMsg)
 {
-#if defined(_DEBUG)
     ttCStr cszMsg(pszErrMsg);
     cszMsg += "\n";
     wxLogDebug((char*) cszMsg);
-#endif  // _DEBUG
     m_lstErrors += pszErrMsg;
 }
+#endif  // _DEBUG
