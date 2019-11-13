@@ -11,6 +11,11 @@
 #include <ttfindfile.h>  // ttCFindFile
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttmem.h>       // ttCMem, ttCTMem
+#include <ttcwd.h>       // ttCCwd
+
+#if defined(_DEBUG)
+    #include <wx/log.h>
+#endif
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "funcs.h"      // List of function declarations
@@ -336,6 +341,9 @@ void CSrcFiles::ProcessFile(char* pszFile)
     if (!ttFileExists(pszFile))
     {
         ttCStr cszErrMsg;
+#if defined(_DEBUG)
+        cszErrMsg.GetCWD();
+#endif  // _DEBUG
         if (ttIsNonEmpty(m_cszReportPath))
             cszErrMsg.printf("%s: Unable to locate the file %s.", GetReportFilename(), pszFile);
         else
@@ -384,31 +392,29 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         return;
     }
 
+    ttCCwd cszCWD;
+
+    ttCStr cszFullPath(pszFile);
+    cszFullPath.FullPathName();
+
     CSrcFiles cIncSrcFiles;
-    if (ttIsNonEmpty(m_cszReportPath))
+    cIncSrcFiles.SetReportingFile(cszFullPath);
+
     {
-        ttCStr cszNewPath(m_cszReportPath);
-        char*  pszFilePortion = ttFindFilePortion(cszNewPath);
-        ttASSERT(pszFilePortion);
+        ttCStr cszNewDir(cszFullPath);
+        char* pszFilePortion = ttFindFilePortion(cszNewDir);
         if (pszFilePortion)
             *pszFilePortion = 0;
-        cszNewPath += pszFile;
-        cIncSrcFiles.SetReportingFile(cszNewPath);
+        ttChDir(cszNewDir);
     }
 
-    if (!cIncSrcFiles.ReadFile(pszFile))
+    if (!cIncSrcFiles.ReadFile(cszFullPath))
     {
         ttCStr cszMsg;
         cszMsg.printf(_("%s: unable to locate the file %s."), GetReportFilename(), pszFile);
         m_lstErrors += cszMsg;
         return;
     }
-
-    ttCStr cszCWD;
-    cszCWD.GetCWD();
-
-    ttCStr cszFullPath(pszFile);
-    cszFullPath.FullPathName();
 
     ttCTMem<char*> szPath(1024);
     ttStrCpy(szPath, 1024, cszFullPath);
@@ -727,4 +733,14 @@ const char* CSrcFiles::GetTargetRelease64()
         m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.exe" : ".exe";
     }
     return m_cszTargetRelease64;
+}
+
+void CSrcFiles::AddError(const char* pszErrMsg)
+{
+#if defined(_DEBUG)
+    ttCStr cszMsg(pszErrMsg);
+    cszMsg += "\n";
+    wxLogDebug((char*) cszMsg);
+#endif  // _DEBUG
+    m_lstErrors += pszErrMsg;
 }

@@ -84,7 +84,12 @@ public:
     ttCList* GetSrcFilesList() { return &m_lstSrcFiles; }
 
     void SetReportingFile(const char* pszFile) { m_cszReportPath = pszFile; }
+
+#if defined(_DEBUG)
+    void AddError(const char* pszErrMsg);
+#else
     void AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
+#endif  // _DEBUG
 
 protected:
     // Protected functions
