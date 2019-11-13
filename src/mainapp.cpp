@@ -57,38 +57,38 @@ void Usage()
 
     // clang-format off
 
-    puts(TRANSLATE("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
-    puts(TRANSLATE("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
+    puts(_("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
+    puts(_("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
 
-    puts(TRANSLATE("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
+    puts(_("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
 #if defined(_WIN32)
-    puts(TRANSLATE("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd"));
+    puts(_("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd"));
 #endif
-    puts(TRANSLATE("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file"));
+    puts(_("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file"));
 
-    puts(TRANSLATE("    -vs        -- creates files used to build and debug a project using Visual Studio"));
-    puts(TRANSLATE("    -vscode    -- creates or updates files used to build and debug a project using VS Code"));
+    puts(_("    -vs        -- creates files used to build and debug a project using Visual Studio"));
+    puts(_("    -vscode    -- creates or updates files used to build and debug a project using VS Code"));
 
     // clang-format on
 
     // Currently hidden commands
 
     // puts("\t-add [file(s)] -- Adds file(s) to .srcfiles");
-    puts(TRANSLATE("    -allninja   -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
-    // puts(TRANSLATE("    -dryrun     -- displays what would have happened, but doesn't change anything"));
-    // puts(TRANSLATE("    -force      -- create .ninja file even if it hasn't changed"));
-    // puts(TRANSLATE("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
-    // puts(TRANSLATE("    -msvcenv64  -- create .ninja file even if it hasn't changed"));
+    puts(_("    -allninja   -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
+    // puts(_("    -dryrun     -- displays what would have happened, but doesn't change anything"));
+    // puts(_("    -force      -- create .ninja file even if it hasn't changed"));
+    // puts(_("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
+    // puts(_("    -msvcenv64  -- create .ninja file even if it hasn't changed"));
 
-    // puts(TRANSLATE("    -help       -- displays usage information"));
-    // puts(TRANSLATE("    -?          -- displays usage information"));
+    // puts(_("    -help       -- displays usage information"));
+    // puts(_("    -?          -- displays usage information"));
 
     // Following commands are no longer supported:
 
     // puts("\nIDE workspace options:");
-    // puts(TRANSLATE("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
-    // puts(TRANSLATE("    -codelite   -- creates or updates files needed to build project using CodeLite"));
-    // puts(TRANSLATE("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
+    // puts(_("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
+    // puts(_("    -codelite   -- creates or updates files needed to build project using CodeLite"));
+    // puts(_("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
 
 #if defined(TESTING)
     puts("    -tvdlg    -- tests the CDlgVsCode dialog");
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
             if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(TRANSLATE("-dir must be followed by the directory to use."));
+                puts(_("-dir must be followed by the directory to use."));
                 return 1;
             }
             cszRootDir = argv[argpos];
@@ -353,8 +353,8 @@ int main(int argc, char* argv[])
             if (!LocateSrcFiles(&cszSrcFilePath))
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
-                               "the location with -dir."));
+                puts(_("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
+                       "the location with -dir."));
                 return 1;
             }
         }
@@ -366,8 +366,8 @@ int main(int argc, char* argv[])
             else
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(TRANSLATE("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
-                               "the location with -dir."));
+                puts(_("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
+                       "the location with -dir."));
                 return 1;
             }
         }
@@ -406,7 +406,7 @@ int main(int argc, char* argv[])
         CNinja cNinja;
         if (!cNinja.IsValidVersion())
         {
-            if (ttMsgBox(TRANSLATE("This version of ttBld is too old -- create ninja scripts anyway?"),
+            if (ttMsgBox(_("This version of ttBld is too old -- create ninja scripts anyway?"),
                          MB_YESNO | MB_ICONWARNING) != IDYES)
                 return 1;
         }
@@ -464,7 +464,7 @@ int main(int argc, char* argv[])
         }
 
         if (countNinjas > 0)
-            printf(TRANSLATE("Created %d .ninja files\n"), countNinjas);
+            printf(_("Created %d .ninja files\n"), countNinjas);
         else
             puts(GETSTRING(IDS_NINJA_UP_TO_DATE));
     }
@@ -532,7 +532,6 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     else
     {
         ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-        puts(
-            TRANSLATE("This version of ttBld is too old to properly create ninja scripts from your current srcfiles."));
+        puts(_("This version of ttBld is too old to properly create ninja scripts from your current srcfiles."));
     }
 }

@@ -54,7 +54,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
     {
         if (!ttCreateDir(".vs"))
         {
-            ttMsgBox(TRANSLATE("Unable to create the required .vs directory."));
+            ttMsgBox(_("Unable to create the required .vs directory."));
             return false;
         }
     }
@@ -90,7 +90,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
     else
     {
         if (plstResults)
-            *plstResults += TRANSLATE("Created .vs/tasks.vs.json");
+            *plstResults += _("Created .vs/tasks.vs.json");
     }
 
     file.Delete();
@@ -131,7 +131,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
     else
     {
         if (plstResults)
-            *plstResults += TRANSLATE("Created .vs/launch.vs.json");
+            *plstResults += _("Created .vs/launch.vs.json");
     }
 
     return true;

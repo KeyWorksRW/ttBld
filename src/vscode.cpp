@@ -165,7 +165,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
     {
         if (!ttCreateDir(".vscode"))
         {
-            ttMsgBox(TRANSLATE("Unable to create the required .vscode directory."));
+            ttMsgBox(_("Unable to create the required .vscode directory."));
             return false;
         }
         ttCStr cszIgnore;
@@ -180,7 +180,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
 
             if (cszIgnore.IsNonEmpty() &&
                 ttMsgBoxFmt(
-                    TRANSLATE(
+                    _(
                         "The directory .vscode is not being ignored by git. Would you like it to be added to %s?"),
                     MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING, (char*) cszIgnore) == IDYES)
             {
@@ -198,7 +198,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
     if (!cSrcFiles.ReadFile(pszSrcFiles))
     {
         if (plstResults)
-            *plstResults += TRANSLATE("Cannot locate a .srcfiles.yaml file need to configure .vscode/*.json files.");
+            *plstResults += _("Cannot locate a .srcfiles.yaml file need to configure .vscode/*.json files.");
         return false;
     }
 
@@ -312,7 +312,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     {
         // Note that we can't use IDS_FILE_CREATED since that string adds \n to the end.
         if (plstResults)
-            *plstResults += TRANSLATE("Created .vscode/c_cpp_properties.json");
+            *plstResults += _("Created .vscode/c_cpp_properties.json");
     }
 
     return true;
@@ -372,7 +372,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     else
     {
         if (plstResults)
-            *plstResults += TRANSLATE("Created .vscode/launch.json");
+            *plstResults += _("Created .vscode/launch.json");
     }
 
     return true;
@@ -545,7 +545,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
     else
     {
         if (plstResults)
-            *plstResults += TRANSLATE("Created .vscode/tasks.json");
+            *plstResults += _("Created .vscode/tasks.json");
     }
 
     return true;
@@ -762,7 +762,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             return false;
         }
         else if (plstResults)
-            *plstResults += TRANSLATE("Updated .vscode/c_cpp_properties.json");
+            *plstResults += _("Updated .vscode/c_cpp_properties.json");
     }
 
     return true;

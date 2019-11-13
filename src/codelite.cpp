@@ -48,13 +48,13 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     {
         // BUGBUG: [KeyWorks - 7/29/2019] This should be wrong. There's no reason we can't open a .vcxproj file and
         // write a CodeLite project file
-        puts(TRANSLATE("Cannot create a CodeLite project file if there is no .srcfiles.yaml file."));
+        puts(_("Cannot create a CodeLite project file if there is no .srcfiles.yaml file."));
         return CLP_NO_SRCFILES;
     }
 
     if (!cSrcFiles.GetProjectName())
     {
-        printf(TRANSLATE("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n"),
+        printf(_("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n"),
                cSrcFiles.GetSrcFiles());
         return CLP_NO_PROJECT;
     }
@@ -71,7 +71,7 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     ttCFile kf;
     if (!kf.ReadResource(IDR_PRE_PROJECT))
     {
-        puts(TRANSLATE("ttBld.exe is corrupted -- cannot read the necessary resource"));
+        puts(_("ttBld.exe is corrupted -- cannot read the necessary resource"));
         return CLP_MISSING_RES;
     }
 
@@ -94,7 +94,7 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     ttCFile kfPost;
     if (!kfPost.ReadResource(IDR_POST_PROJECT))
     {
-        puts(TRANSLATE("ttBld.exe is corrupted -- cannot read the necessary resource"));
+        puts(_("ttBld.exe is corrupted -- cannot read the necessary resource"));
         return CLP_MISSING_RES;
     }
 

@@ -92,7 +92,7 @@ ttBldD:
 ########## localization ##########
 
 locale:
-	xgettext -k_ -kwxGetTranslation -kwxPLURAL -k_XGET -kTRANSLATE -i -c --omit-header -fxgen.lst
+	xgettext -k_ -kwxGetTranslation -kwxPLURAL -kwxTRANSLATE -i -c --omit-header -fxgen.lst
 
 ########## clean release section ##########
 

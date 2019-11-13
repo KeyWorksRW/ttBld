@@ -13,13 +13,13 @@ bool LaunchVsCode()
     ttCStr cszCodePath, cszMSVCPath;
     if (!FindVsCode(cszCodePath))
     {
-        puts(TRANSLATE("Visual Studio Code does not appear to be installed."));
+        puts(_("Visual Studio Code does not appear to be installed."));
         return false;
     }
 
     if (!FindCurMsvcPath(cszMSVCPath))
     {
-        puts(TRANSLATE("Visual Studio does not appear to be installed -- unable to determine path to MS compiler."));
+        puts(_("Visual Studio does not appear to be installed -- unable to determine path to MS compiler."));
         return false;
     }
 

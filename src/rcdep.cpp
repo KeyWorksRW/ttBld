@@ -190,7 +190,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                             // BUGBUG: [KeyWorks - 7/11/2019] See Issue #46
                             // (https://github.com/KeyWorksRW/keyBld/issues/46) Once we commit to wxWidgets, we need to
                             // use wxNumberFormatter to deal with the number.
-                            cszErrMsg.printf(TRANSLATE("%s(%kt,%kt):  warning: cannot locate include file %s"),
+                            cszErrMsg.printf(_("%s(%kt,%kt):  warning: cannot locate include file %s"),
                                              pszHdr ? pszHdr : pszRcFile, curLine,
                                              (size_t)(pszFileName - kf.GetLnPtr()), (char*) cszFile);
                             m_lstErrors += cszErrMsg;
