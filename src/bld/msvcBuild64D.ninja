@@ -13,7 +13,7 @@ msvc_deps_prefix = Note: including file:
 # -Z7	// produces object files with full symbolic debugging information
 # -FC	// Full path to source code file in diagnostics
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -Od -Z7 -FC -DwxGUI=1 -DWXUSINGDLL -DTESTING -I"../ttLibwx/include" /Fp$outdir/ttBld.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -Od -Z7 -FC -DwxGUI=1 -DWXUSINGDLL -DWXUSINGDLL -I"../../ttLibwx/include" /Fp$outdir/ttBld.pch
 
 rule compilePCH
   deps = msvc
@@ -26,11 +26,11 @@ rule compile
   description = compiling $in
 
 rule rc
-  command = rc.exe -nologo -I"../ttLibwx/include" -d_DEBUG /l 0x409 -fo$out $in
+  command = rc.exe -nologo -I"../../ttLibwx/include" -d_DEBUG /l 0x409 -fo$out $in
   description = resource compiler... $in
 
 rule link
-  command = link.exe /nologo /out:$out /manifest:no /machine:x64 /natvis:ttBld.natvis /debug /pdb:$outdir/ttBld.pdb /subsystem:console $in
+  command = link.exe -nologo /out:$out /manifest:no /machine:x64 /natvis:ttBld.natvis /debug /pdb:$outdir/ttBld.pdb /subsystem:console $in
   description = linking $out
 
 build $outdir/pch.obj: compilePCH pch.cpp
@@ -64,8 +64,6 @@ build $outdir/ninja.obj: compile ninja.cpp | $outdir/pch.obj
 build $outdir/options.obj: compile options.cpp | $outdir/pch.obj
 
 build $outdir/parsehhp.obj: compile parsehhp.cpp | $outdir/pch.obj
-
-build $outdir/NinjaStringIds.obj: compile NinjaStringIds.cpp | $outdir/pch.obj
 
 build $outdir/rcdep.obj: compile rcdep.cpp | $outdir/pch.obj
 
@@ -130,7 +128,6 @@ build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/ninja.obj $
   $outdir/options.obj $
   $outdir/parsehhp.obj $
-  $outdir/NinjaStringIds.obj $
   $outdir/rcdep.obj $
   $outdir/vcxproj.obj $
   $outdir/verninja.obj $
@@ -151,4 +148,3 @@ build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/pch.obj $
   ../ttLibwx/lib64/ttLibwxD.lib $
   | ttBld.natvis
-
