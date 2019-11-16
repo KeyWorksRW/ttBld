@@ -21,6 +21,13 @@ public:
     bool ConvertVcxProj();
 
 protected:
+    // Protected functions
+
+    void ProcessCompiler(ttCXMLBranch* pSection, bool bDebug);
+    void ProcessLink(ttCXMLBranch* pSection, bool bDebug);
+    void ProcessMidl(ttCXMLBranch* pSection, bool bDebug);
+    void ProcessRC(ttCXMLBranch* pSection, bool bDebug);
+
     void  ConvertScriptDir(const char* pszDir, ttCStr& cszResult);
     char* MakeSrcRelative(const char* pszFile);
 

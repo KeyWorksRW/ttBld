@@ -120,138 +120,23 @@ bool CVcxRead::ConvertVcxProj()
                     ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
                     if (ttIsSameStrI(pCmd->GetName(), "Midl"))
                     {
-                        ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                ttCStr cszFlags("-D");
-                                cszFlags += pChild->GetData();
-                                cszFlags.ReplaceStr("_DEBUG;", "");
-                                cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"))
-                                    ;
-                                m_pcSrcFiles->UpdateOption(OPT_MDL_DBG, (char*) cszFlags);
-                            }
-                        }
+                        ProcessMidl(pCmd, true);
                     }
                     else if (ttIsSameStrI(pCmd->GetName(), "ResourceCompile"))
                     {
-                        ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                ttCStr cszFlags("-D");
-                                cszFlags += pChild->GetData();
-                                cszFlags.ReplaceStr("_DEBUG;", "");
-                                cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"))
-                                    ;
-                                m_pcSrcFiles->UpdateOption(OPT_RC_DBG, (char*) cszFlags);
-                            }
-                        }
+                        ProcessRC(pCmd, true);
                     }
                     else if (ttIsSameStrI(pCmd->GetName(), "Link"))
                     {
-                        ttCXMLBranch* pFlags = pCmd->FindFirstElement("AdditionalDependencies");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                            }
-                        }
+                        ProcessLink(pCmd, true);
                     }
                     else if (ttIsSameStrI(pCmd->GetName(), "ClCompile"))
                     {
-                        ttCXMLBranch* pFlags = pCmd->FindFirstElement("FavorSizeOrSpeed");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                                m_pcSrcFiles->UpdateOption(
-                                    OPT_OPTIMIZE, ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
-                        }
-                        pFlags = pCmd->FindFirstElement("AdditionalIncludeDirectories");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                const char* pszFirstSemi = ttStrChr(pChild->GetData(), ';');
-                                if (pszFirstSemi)
-                                    ++pszFirstSemi;
-                                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ?
-                                                    pszFirstSemi :
-                                                    pChild->GetData());
-                                cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
-
-                                // Paths will be relative to the location of the script file. We need to make them
-                                // relative to .srcfiles.yaml.
-
-                                ttCEnumStr cszPaths(cszFlags);
-                                ttCStr     cszInc, cszTmp;
-
-                                while (cszPaths.Enum())
-                                {
-                                    ConvertScriptDir(cszPaths, cszTmp);
-                                    if (cszInc.IsNonEmpty())
-                                        cszInc += ";";
-                                    cszInc += cszTmp;
-                                }
-
-                                m_pcSrcFiles->UpdateOption(OPT_INC_DIRS, (char*) cszInc);
-                            }
-                        }
-                        pFlags = pCmd->FindFirstElement("PrecompiledHeaderFile");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                                m_pcSrcFiles->UpdateOption(OPT_PCH, pChild->GetData());
-                        }
-                        pFlags = pCmd->FindFirstElement("WarningLevel");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                const char* pszTmp = pChild->GetData();
-                                while (*pszTmp && !ttIsDigit(*pszTmp))
-                                    ++pszTmp;
-                                m_pcSrcFiles->UpdateOption(OPT_WARN_LEVEL, pszTmp);
-                            }
-                        }
-                        pFlags = pCmd->FindFirstElement("CallingConvention");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData() && ttStrStrI(pChild->GetData(), "stdcall"))
-                            {
-                                m_pcSrcFiles->UpdateOption(OPT_STDCALL, true);
-                            }
-                        }
-                        pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                ttCStr cszFlags("-D");
-                                cszFlags += pChild->GetData();
-                                cszFlags.ReplaceStr("_DEBUG;", "");
-                                cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"))
-                                    ;
-                                m_pcSrcFiles->UpdateOption(OPT_CFLAGS_DBG, (char*) cszFlags);
-                            }
-                        }
+                        ProcessCompiler(pCmd, true);
                     }
                 }
             }
+
             else if (!bRelFlagsSeen && pszCondition &&
                      (ttStrStrI(pszCondition, "Release|Win32") || ttStrStrI(pszCondition, "Release|x64")))
             {
@@ -261,101 +146,27 @@ bool CVcxRead::ConvertVcxProj()
                     ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
                     if (ttIsSameStrI(pCmd->GetName(), "Midl"))
                     {
-                        ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                ttCStr cszFlags("-D");
-                                cszFlags += pChild->GetData();
-                                cszFlags.ReplaceStr("NDEBUG;", "");
-                                cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"))
-                                    ;
-                                m_pcSrcFiles->UpdateOption(OPT_MDL_REL, (char*) cszFlags);
-                            }
-                        }
+                        ProcessMidl(pCmd, false);
                     }
                     else if (ttIsSameStrI(pCmd->GetName(), "ResourceCompile"))
                     {
-                        ttCXMLBranch* pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                ttCStr cszFlags("-D");
-                                cszFlags += pChild->GetData();
-                                cszFlags.ReplaceStr("NDEBUG;", "");
-                                cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"))
-                                    ;
-                                m_pcSrcFiles->UpdateOption(OPT_RC_REL, (char*) cszFlags);
-                            }
-                        }
+                        ProcessRC(pCmd, false);
+                    }
+                    else if (ttIsSameStrI(pCmd->GetName(), "Link"))
+                    {
+                        ProcessLink(pCmd, false);
                     }
                     else if (ttIsSameStrI(pCmd->GetName(), "ClCompile"))
                     {
-                        ttCXMLBranch* pFlags = pCmd->FindFirstElement("FavorSizeOrSpeed");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                                m_pcSrcFiles->UpdateOption(
-                                    OPT_OPTIMIZE, ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
-                        }
-                        pFlags = pCmd->FindFirstElement("PrecompiledHeaderFile");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                                m_pcSrcFiles->UpdateOption(OPT_PCH, pChild->GetData());
-                        }
-                        pFlags = pCmd->FindFirstElement("WarningLevel");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                const char* pszTmp = pChild->GetData();
-                                while (*pszTmp && !ttIsDigit(*pszTmp))
-                                    ++pszTmp;
-                                m_pcSrcFiles->UpdateOption(OPT_WARN_LEVEL, pszTmp);
-                            }
-                        }
-                        pFlags = pCmd->FindFirstElement("CallingConvention");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData() && ttStrStrI(pChild->GetData(), "stdcall"))
-                            {
-                                m_pcSrcFiles->UpdateOption(OPT_STDCALL, true);
-                            }
-                        }
-                        pFlags = pCmd->FindFirstElement("PreprocessorDefinitions");
-                        if (pFlags && pFlags->GetChildrenCount() > 0)
-                        {
-                            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                            if (pChild->GetData())
-                            {
-                                ttCStr cszFlags("-D");
-                                cszFlags += pChild->GetData();
-                                cszFlags.ReplaceStr("NDEBUG;", "");
-                                cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-                                while (cszFlags.ReplaceStr(";", " -D"))
-                                    ;
-                                m_pcSrcFiles->UpdateOption(OPT_CFLAGS_REL, (char*) cszFlags);
-                            }
-                        }
+                        ProcessCompiler(pCmd, false);
                     }
                 }
             }
         }
     }
 
-    // The project file will have specified resouce compiler flags even if there isn't a resource file. If there is no
-    // resource file, then we remove those flags here.
+    // The project file will have specified resouce compiler flags even if there isn't a resource file. If there is
+    // no resource file, then we remove those flags here.
 
     if (m_pcSrcFiles->m_cszRcName.IsEmpty())
     {
@@ -394,6 +205,158 @@ bool CVcxRead::ConvertVcxProj()
     return true;
 }
 
+void CVcxRead::ProcessMidl(ttCXMLBranch* pSection, bool bDebug)
+{
+    ttCXMLBranch* pFlags = pSection->FindFirstElement("PreprocessorDefinitions");
+    if (pFlags && pFlags->GetChildrenCount() > 0)
+    {
+        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+        if (pChild->GetData())
+        {
+            ttCStr cszFlags("-D");
+            cszFlags += pChild->GetData();
+            cszFlags.ReplaceStr("_DEBUG;", "");
+            cszFlags.ReplaceStr("NDEBUG;", "");
+            cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+            while (cszFlags.ReplaceStr(";", " -D"))
+                ;
+            m_pcSrcFiles->UpdateOption(bDebug ? OPT_MDL_DBG : OPT_MDL_REL, (char*) cszFlags);
+        }
+    }
+}
+
+void CVcxRead::ProcessRC(ttCXMLBranch* pSection, bool bDebug)
+{
+    ttCXMLBranch* pFlags = pSection->FindFirstElement("PreprocessorDefinitions");
+    if (pFlags && pFlags->GetChildrenCount() > 0)
+    {
+        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+        if (pChild->GetData())
+        {
+            ttCStr cszFlags("-D");
+            cszFlags += pChild->GetData();
+            cszFlags.ReplaceStr("_DEBUG;", "");
+            cszFlags.ReplaceStr("NDEBUG;", "");
+            cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+            while (cszFlags.ReplaceStr(";", " -D"))
+                ;
+            m_pcSrcFiles->UpdateOption(bDebug ? OPT_RC_DBG : OPT_RC_REL, (char*) cszFlags);
+        }
+    }
+}
+
+void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
+{
+    ttCXMLBranch* pFlags;
+    if (!bDebug)
+    {
+        pFlags = pSection->FindFirstElement("FavorSizeOrSpeed");
+        if (pFlags && pFlags->GetChildrenCount() > 0)
+        {
+            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+            if (pChild->GetData())
+                m_pcSrcFiles->UpdateOption(OPT_OPTIMIZE,
+                                           ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
+        }
+    }
+    if (!m_pcSrcFiles->GetOption(OPT_INC_DIRS))
+    {
+        pFlags = pSection->FindFirstElement("AdditionalIncludeDirectories");
+        if (pFlags && pFlags->GetChildrenCount() > 0)
+        {
+            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+            if (pChild->GetData())
+            {
+                const char* pszFirstSemi = ttStrChr(pChild->GetData(), ';');
+                if (pszFirstSemi)
+                    ++pszFirstSemi;
+                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi :
+                                                                                                 pChild->GetData());
+                cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
+
+                // Paths will be relative to the location of the script file. We need to make them
+                // relative to .srcfiles.yaml.
+
+                ttCEnumStr cszPaths(cszFlags);
+                ttCStr     cszInc, cszTmp;
+
+                while (cszPaths.Enum())
+                {
+                    ConvertScriptDir(cszPaths, cszTmp);
+                    if (cszInc.IsNonEmpty())
+                        cszInc += ";";
+                    cszInc += cszTmp;
+                }
+
+                m_pcSrcFiles->UpdateOption(OPT_INC_DIRS, (char*) cszInc);
+            }
+        }
+    }
+    if (!m_pcSrcFiles->GetOption(OPT_PCH))
+    {
+        pFlags = pSection->FindFirstElement("PrecompiledHeaderFile");
+        if (pFlags && pFlags->GetChildrenCount() > 0)
+        {
+            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+            if (pChild->GetData())
+                m_pcSrcFiles->UpdateOption(OPT_PCH, pChild->GetData());
+        }
+    }
+    if (!m_pcSrcFiles->GetOption(OPT_WARN_LEVEL))
+    {
+        pFlags = pSection->FindFirstElement("WarningLevel");
+        if (pFlags && pFlags->GetChildrenCount() > 0)
+        {
+            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+            if (pChild->GetData())
+            {
+                const char* pszTmp = pChild->GetData();
+                while (*pszTmp && !ttIsDigit(*pszTmp))
+                    ++pszTmp;
+                m_pcSrcFiles->UpdateOption(OPT_WARN_LEVEL, pszTmp);
+            }
+        }
+    }
+    pFlags = pSection->FindFirstElement("CallingConvention");
+    if (pFlags && pFlags->GetChildrenCount() > 0)
+    {
+        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+        if (pChild->GetData() && ttStrStrI(pChild->GetData(), "stdcall"))
+        {
+            m_pcSrcFiles->UpdateOption(OPT_STDCALL, true);
+        }
+    }
+    pFlags = pSection->FindFirstElement("PreprocessorDefinitions");
+    if (pFlags && pFlags->GetChildrenCount() > 0)
+    {
+        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+        if (pChild->GetData())
+        {
+            ttCStr cszFlags("-D");
+            cszFlags += pChild->GetData();
+            cszFlags.ReplaceStr("_DEBUG;", "");
+            cszFlags.ReplaceStr("NDEBUG;", "");
+            cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
+            while (cszFlags.ReplaceStr(";", " -D"))
+                ;
+            m_pcSrcFiles->UpdateOption(bDebug ? OPT_CFLAGS_DBG : OPT_CFLAGS_REL, (char*) cszFlags);
+        }
+    }
+}
+
+
+void CVcxRead::ProcessLink(ttCXMLBranch* pSection, bool bDebug)
+{
+    ttCXMLBranch* pFlags = pSection->FindFirstElement("AdditionalDependencies");
+    if (pFlags && pFlags->GetChildrenCount() > 0)
+    {
+        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+        if (pChild->GetData())
+        {
+        }
+    }
+}
+
 void CVcxRead::ConvertScriptDir(const char* pszDir, ttCStr& cszResult)
 {
     if (pszDir[1] == ':')
@@ -427,8 +390,8 @@ void CVcxRead::ConvertScriptDir(const char* pszDir, ttCStr& cszResult)
     }
 }
 
-// This function first converts the file relative to the location of the build script, and then relative to the location
-// of .srcfiles
+// This function first converts the file relative to the location of the build script, and then relative to the
+// location of .srcfiles
 
 char* CVcxRead::MakeSrcRelative(const char* pszFile)
 {
@@ -441,8 +404,8 @@ char* CVcxRead::MakeSrcRelative(const char* pszFile)
         if (pszFilePortion)
             *pszFilePortion = 0;
 
-        // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory as
-        // the script file
+        // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory
+        // as the script file
 
         ttChDir(m_cszScriptRoot);
     }
