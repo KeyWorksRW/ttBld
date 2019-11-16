@@ -544,6 +544,18 @@ bool CConvertDlg::ConvertVcxProj()
         }
     }
 
+    // The project file will have specified resouce compiler flags even if there isn't a resource file. If there is no
+    // resource file, then we remove those flags here.
+
+    if (m_cSrcFiles.m_cszRcName.IsEmpty()) {
+        if (m_cSrcFiles.GetOption(OPT_RC_CMN))
+            m_cSrcFiles.UpdateOption(OPT_RC_CMN, "");
+        if (m_cSrcFiles.GetOption(OPT_RC_REL))
+            m_cSrcFiles.UpdateOption(OPT_RC_REL, "");
+        if (m_cSrcFiles.GetOption(OPT_RC_DBG))
+            m_cSrcFiles.UpdateOption(OPT_RC_DBG, "");
+    }
+
     // If Debug and Release flags are the same, then remove them and just use the common flag setting
 
     if (m_cSrcFiles.GetOption(OPT_CFLAGS_REL) && m_cSrcFiles.GetOption(OPT_CFLAGS_DBG) &&
