@@ -16,6 +16,8 @@
 
 #include "convertdlg.h"  // CConvertDlg
 
+void ConvertScriptDir(const char* pszScript, const char* pszDir, ttCStr& cszResult);
+
 bool CConvertDlg::ConvertCodeBlocks()
 {
     if (!ttFileExists(m_cszConvertScript))
@@ -167,9 +169,26 @@ bool CConvertDlg::ConvertVcProj()
             pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
             if (pszOption)
             {
-                ttCStr csz(m_cSrcFiles.GetOption(OPT_INC_DIRS));
-                csz += pszOption;
-                m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) csz);
+                ttCStr cszOrgInc(m_cSrcFiles.GetOption(OPT_INC_DIRS));
+
+                // Paths will be relative to the location of the script file. We need to make them
+                // relative to .srcfiles.yaml.
+
+                ttCEnumStr cszPaths(pszOption);
+                ttCStr     cszInc, cszTmp;
+
+                while (cszPaths.Enum())
+                {
+                    ConvertScriptDir(m_cszConvertScript, cszPaths, cszTmp);
+                    if (cszInc.IsNonEmpty())
+                        cszInc += ";";
+                    cszInc += cszTmp;
+                }
+                if (cszOrgInc.IsNonEmpty())
+                    cszOrgInc += ";";
+                cszOrgInc += cszInc;
+
+                m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszOrgInc);
             }
 
             pszOption = pRelease->GetAttribute("PreprocessorDefinitions");
@@ -325,7 +344,22 @@ bool CConvertDlg::ConvertVcxProj()
                                                     pszFirstSemi :
                                                     pChild->GetData());
                                 cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
-                                m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszFlags);
+
+                                // Paths will be relative to the location of the script file. We need to make them
+                                // relative to .srcfiles.yaml.
+
+                                ttCEnumStr cszPaths(cszFlags);
+                                ttCStr     cszInc, cszTmp;
+
+                                while (cszPaths.Enum())
+                                {
+                                    ConvertScriptDir(m_cszConvertScript, cszPaths, cszTmp);
+                                    if (cszInc.IsNonEmpty())
+                                        cszInc += ";";
+                                    cszInc += cszTmp;
+                                }
+
+                                m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszInc);
                             }
                         }
                         pFlags = pCmd->FindFirstElement("PrecompiledHeaderFile");
@@ -825,7 +859,6 @@ bool CConvertDlg::ConvertSrcfiles()
         m_cSrcFiles.UpdateOption(OPT_LIB_DIRS32, (char*) cszRelative);
     }
 
-
     if (srcOrg.GetOption(OPT_BUILD_LIBS))
     {
         cszTmp = srcOrg.GetOption(OPT_BUILD_LIBS);
@@ -838,4 +871,37 @@ bool CConvertDlg::ConvertSrcfiles()
     ttChDir(cszCurCwd);  // Restore our current directory
 
     return true;
+}
+
+void ConvertScriptDir(const char* pszScript, const char* pszDir, ttCStr& cszResult)
+{
+    if (pszDir[1] == ':')
+    {
+        // If the path starts with a drive letter, then we can't make it relative
+        cszResult = pszDir;
+        return;
+    }
+
+    ttCStr cszScript(pszScript);
+    char*  pszFilePortion = ttFindFilePortion(cszScript);
+    ttASSERT(pszFilePortion);
+    *pszFilePortion = 0;
+    cszScript.AppendFileName(pszDir);
+
+    cszScript.FullPathName();
+
+    ttCStr cszCWD;
+    cszCWD.GetCWD();
+
+    // ttConvertToRelative is expecting a filename, so let's make one up.
+
+    cszScript.AppendFileName("pch.h");
+    ttConvertToRelative(cszCWD, cszScript, cszResult);
+    pszFilePortion = ttFindFilePortion(cszResult);
+    if (pszFilePortion)
+    {
+        if (pszFilePortion > cszResult.GetPtr() && pszFilePortion[-1] == '/')
+            --pszFilePortion;  // backup so that we remove the trailing slash
+        *pszFilePortion = 0;
+    }
 }
