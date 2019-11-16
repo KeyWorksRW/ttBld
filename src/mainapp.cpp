@@ -69,12 +69,17 @@ void Usage()
     puts(_("    -vs        -- creates files used to build and debug a project using Visual Studio"));
     puts(_("    -vscode    -- creates or updates files used to build and debug a project using VS Code"));
 
+    // Currently non-finished commands
+
+    puts("\b  Unfinished commands:\n");
+    puts(_("    -allninja     -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
+    puts(_("    -convert file -- Converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml"));
+
     // clang-format on
 
-    // Currently hidden commands
+    // Currently hidden or non-finished commands
 
     // puts("\t-add [file(s)] -- Adds file(s) to .srcfiles");
-    puts(_("    -allninja   -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
     // puts(_("    -dryrun     -- displays what would have happened, but doesn't change anything"));
     // puts(_("    -force      -- create .ninja file even if it hasn't changed"));
     // puts(_("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
@@ -133,6 +138,7 @@ enum  // actions that can be run in addition to normal single command actions
     ACT_NEW      = 1 << 6,  // Displays a dialog for creating a new .srcfiles.yaml file.
     ACT_FORCE    = 1 << 7,  // Creates .ninja file even if it hasn't changed.
     ACT_OPTIONS  = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
+    ACT_CONVERT  = 1 << 9,  // Converts the specified build script file to .srcfiles.yaml
 
     // clang-format on
 };
@@ -202,6 +208,12 @@ int main(int argc, char* argv[])
                 lstFiles += argv[argpos];
             AddFiles(lstFiles, Action & ACT_DRYRUN);
             return 1;
+        }
+        else if (ttIsSameStrI(argv[argpos] + 1, "convert"))
+        {
+            if (++argpos < argc)
+                cszSrcFilePath = argv[argpos++];
+            Action |= ACT_CONVERT;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
         {
@@ -341,6 +353,38 @@ int main(int argc, char* argv[])
                 printf("Added directories and filenames to ignore to %s\n", (char*) cszGitExclude);
         }
     }
+    else if (Action & ACT_CONVERT)
+    {
+        // -dir option will have set cszSrcFilePath, if option not specified, default to current directory
+        CConvertDlg dlg;
+        dlg.SetConvertScritpt(cszSrcFilePath);
+        if (dlg.DoModal(NULL) != IDOK)
+            return 1;
+        cszSrcFilePath = dlg.GetOutSrcFiles();
+
+        // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has been
+        // created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the user wants to
+        // cancel -- that just means they didn't want to change any options. It does NOT mean they want to cancel
+        // running any other commands, such as makefile creation (which doesn't need to know what options are set in
+        // .srcfiles.yaml).
+
+        ChangeOptions(&cszSrcFilePath);
+        if (dlg.isCreateVsCode())
+        {
+            // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
+            ttCList lstResults;
+            CreateVsCodeProject(cszSrcFilePath, &lstResults);
+            for (size_t pos = 0; lstResults.InRange(pos); ++pos)
+                puts(lstResults[pos]);
+        }
+        if (dlg.isGitIgnoreAll())
+        {
+            ttCStr cszGitExclude;
+            if (gitIgnoreAll(cszGitExclude))
+                printf("Added directories and filenames to ignore to %s\n", (char*) cszGitExclude);
+        }
+    }
+
 
     // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we
     // need to locate it.
@@ -420,7 +464,7 @@ int main(int argc, char* argv[])
                               cszRootDir);  // this will create/update it if .srcfiles has a Makefile: section
 
         ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT),
-                     "At least one platform build should have been set in CNinja constructor")
+                     "At least one platform build should have been set in CNinja constructor");
 
             int countNinjas = 0;
         if (cNinja.GetBoolOption(OPT_64BIT))
