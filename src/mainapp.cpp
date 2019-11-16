@@ -42,7 +42,7 @@ const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 
 #include "convertdlg.h"  // CConvertDlg
 #include "ninja.h"       // CNinja
-#include "vcxproj.h"     // CVcxProj
+#include "vcxproj.h"     // CVcxWrite
 #include "funcs.h"       // List of function declarations
 
 #if defined(TESTING)

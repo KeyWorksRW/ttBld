@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CVcxProj
+// Name:      CVcxWrite
 // Purpose:   Class creating a Visual Studio build script
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
@@ -8,13 +8,37 @@
 
 #pragma once
 
-#include "ninja.h"  // CNinja
+#include <ttxml.h>  // ttCXMLBranch, ttCParseXML
 
-// Class creating a Visual Studio build script
-class CVcxProj : public CNinja
+#include "ninja.h"          // CNinja
+#include "writesrcfiles.h"  // CWriteSrcFiles
+
+// Class for reading a vcxproj file and converting it into a .srcfiles.yaml file.
+class CVcxRead
 {
 public:
-    CVcxProj(const char* pszNinjaDir = nullptr)
+    CVcxRead(ttCParseXML* pxml, CWriteSrcFiles* pcSrcFiles, ttCStr* pcszConvertScript);
+    bool ConvertVcxProj();
+
+protected:
+    void  ConvertScriptDir(const char* pszDir, ttCStr& cszResult);
+    char* MakeSrcRelative(const char* pszFile);
+
+private:
+    ttCParseXML*    m_pxml;
+    CWriteSrcFiles* m_pcSrcFiles;
+
+    ttCStr* m_pcszConvertScript;
+    ttCStr  m_cszScriptRoot;
+    ttCStr  m_cszOutRoot;
+    ttCStr  m_cszRelative;  // Used to create a relative location for a source file
+};
+
+// Class creating a Visual Studio build script
+class CVcxWrite : public CNinja
+{
+public:
+    CVcxWrite(const char* pszNinjaDir = nullptr)
         : CNinja(pszNinjaDir)
     {
     }
