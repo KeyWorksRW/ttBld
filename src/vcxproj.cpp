@@ -248,6 +248,33 @@ void CVcxRead::ProcessRC(ttCXMLBranch* pSection, bool bDebug)
 void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
 {
     ttCXMLBranch* pFlags;
+
+    pFlags = pSection->FindFirstElement("AdditionalOptions");
+    if (pFlags && pFlags->GetChildrenCount() > 0)
+    {
+        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+        if (pChild->GetData())
+        {
+            ttCEnumStr enumFlags(pChild->GetData(), CH_SPACE);
+            ttCStr     cszCFlags;
+            if (m_pcSrcFiles->GetOption(OPT_CFLAGS_CMN))
+                cszCFlags = m_pcSrcFiles->GetOption(OPT_CFLAGS_CMN);
+            while (enumFlags.Enum())
+            {
+                if (ttIsSameSubStrI(enumFlags + 1, "std:"))
+                {
+                    if (cszCFlags.IsEmpty() || !ttStrStrI(cszCFlags, enumFlags))
+                    {
+                        if (cszCFlags.IsNonEmpty())
+                            cszCFlags += " ";
+                        cszCFlags += enumFlags;
+                    }
+                }
+            }
+            if (cszCFlags.IsNonEmpty())
+                m_pcSrcFiles->UpdateOption(OPT_CFLAGS_CMN, (char*) cszCFlags);
+        }
+    }
     if (!bDebug)
     {
         pFlags = pSection->FindFirstElement("FavorSizeOrSpeed");
@@ -344,7 +371,6 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
     }
 }
 
-
 void CVcxRead::ProcessLink(ttCXMLBranch* pSection, bool bDebug)
 {
     ttCXMLBranch* pFlags = pSection->FindFirstElement("AdditionalDependencies");
@@ -353,6 +379,20 @@ void CVcxRead::ProcessLink(ttCXMLBranch* pSection, bool bDebug)
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData())
         {
+            ttCEnumStr enumLibs(pChild->GetData());
+            ttCStr     cszCurLibs;
+            while (enumLibs.Enum())
+            {
+                // We only add libraries that are relative to our project
+                if (ttIsSameSubStr(enumLibs, ".."))
+                {
+                    if (cszCurLibs.IsNonEmpty())
+                        cszCurLibs += ";";
+                    cszCurLibs += enumLibs;
+                }
+            }
+            if (cszCurLibs.IsNonEmpty())
+                m_pcSrcFiles->UpdateOption(bDebug ? OPT_LIBS_DBG : OPT_LIBS_REL, (char*) cszCurLibs);
         }
     }
 }
