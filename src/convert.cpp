@@ -12,7 +12,7 @@
 
 #include <ttenumstr.h>  // ttCEnumStr -- Enumerate through substrings in a string
 #include <ttfile.h>     // ttCFile -- class for reading and writing files, strings, data, etc.
-#include <ttenumstr.h>
+#include <ttxml.h>      // ttCXMLBranch
 
 #include "convertdlg.h"  // CConvertDlg
 
@@ -258,20 +258,54 @@ bool CConvertDlg::ConvertVcxProj()
         }
         else if (ttIsSameStrI(pItem->GetName(), "PropertyGroup"))
         {
-            if (bTypeSeen)
-                continue;
-            ttCXMLBranch* pFlags = pItem->FindFirstElement("ConfigurationType");
-            if (pFlags && pFlags->GetChildrenCount() > 0)
+            ttCXMLBranch* pBranch;
+            if (!bTypeSeen)
             {
-                ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                if (pChild->GetData())
+                ttCXMLBranch* pFlags = pItem->FindFirstElement("ConfigurationType");
+                if (pFlags && pFlags->GetChildrenCount() > 0)
                 {
-                    bTypeSeen = true;
-                    if (ttIsSameStrI(pChild->GetData(), "DynamicLibrary"))
-                        m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
-                    else if (ttIsSameStrI(pChild->GetData(), "StaticLibrary"))
-                        m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
-                    // TODO: [randalphwa - 5/9/2019] What are the options for console and gui?
+                    ttCXMLBranch* pChild = pFlags->GetChildAt(0);
+                    if (pChild->GetData())
+                    {
+                        bTypeSeen = true;
+                        if (ttIsSameStrI(pChild->GetData(), "DynamicLibrary"))
+                            m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
+                        else if (ttIsSameStrI(pChild->GetData(), "StaticLibrary"))
+                            m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
+                        // TODO: [randalphwa - 5/9/2019] What are the options for console and gui?
+                        continue;  // We don't care about any other settings in this group
+                    }
+                }
+            }
+            if (pItem->cAttributes == 0 && pItem->cChildren > 0)
+            {
+                for (size_t child = 0; child < pItem->cChildren; ++child)
+                {
+                    // Visual Studio lets you specify different directories and target names for debug and release
+                    // builds. ttBld only supports a single target name and directory and then modifies that based on
+                    // Debug versus Release builds. Since the two methods aren't really compatible, we only use the
+                    // release target name, and whichever output directory we encounter first.
+
+                    ttCXMLBranch* pChild = pItem->GetChildAt(child);
+                    if (ttIsSameSubStrI(pChild->GetName(), "OutDir"))
+                    {
+                        if (!m_cSrcFiles.GetOption(OPT_TARGET_DIR64) && pChild->cChildren > 0)
+                        {
+                            m_cSrcFiles.UpdateOption(OPT_TARGET_DIR64, pChild->GetChildAt(0)->GetData());
+                            m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, pChild->GetChildAt(0)->GetData());
+                        }
+                    }
+                    else if (ttIsSameSubStrI(pChild->GetName(), "TargetName"))
+                    {
+                        if (pChild->GetAttributeAt(0)->pszValue &&
+                            ttStrStrI(pChild->GetAttributeAt(0)->pszValue, "Release"))
+                        {
+                            if (!m_cSrcFiles.GetOption(OPT_PROJECT) && pChild->cChildren > 0)
+                            {
+                                m_cSrcFiles.UpdateOption(OPT_PROJECT, pChild->GetChildAt(0)->GetData());
+                            }
+                        }
+                    }
                 }
             }
         }
