@@ -85,11 +85,11 @@ public:
 
     void SetReportingFile(const char* pszFile) { m_cszReportPath = pszFile; }
 
-#if defined(_DEBUG)
+#if !defined(NDEBUG)  // Starts debug section.
     void AddError(const char* pszErrMsg);
 #else
     void AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
-#endif  // _DEBUG
+#endif
 
 protected:
     // Protected functions

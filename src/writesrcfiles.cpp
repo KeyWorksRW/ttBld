@@ -29,7 +29,7 @@ const char* sfopt::txtNinjaVerFormat = "# Requires ttBld.exe version %d.%d.%d or
 
 CWriteSrcFiles::CWRT_RESULT CWriteSrcFiles::WriteUpdates(const char* pszFile)
 {
-#if defined(_DEBUG)
+#if !defined(NDEBUG)  // Starts debug section.
     // We need to be certain that the current ttBld version is at least as high as any option in the OPT_VERSION
     // array. There isn't a way to check that during compile time, so we check it in DEBUG builds whenever we try to
     // write the .srcfiles.yaml

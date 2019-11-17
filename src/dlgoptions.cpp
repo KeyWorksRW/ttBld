@@ -94,7 +94,7 @@ void CTabOptions::OnBegin(void)
     ti.mask = TCIF_TEXT;
     ti.pszText = (char*) (const char*) _("General");
 
-#ifdef _DEBUG
+#if !defined(NDEBUG)  // Starts debug section.
     auto result =
 #endif
         SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_GENERAL, (LPARAM) &ti);

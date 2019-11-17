@@ -32,7 +32,7 @@ CNinja::CNinja(const char* pszNinjaDir)
     , m_lstBuildLibs32R(m_ttHeap)
     , m_lstBuildLibs64R(m_ttHeap)
 {
-#if defined(_DEBUG)
+#if !defined(NDEBUG)  // Starts debug section.
     ttASSERT(ReadFile());
 #else
     if (!ReadFile())

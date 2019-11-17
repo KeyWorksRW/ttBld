@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
     ttCStr      cszSrcFilePath;  // location of srcfiles.yaml
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
-#if 0 && defined(_DEBUG) && defined(_WIN32)
+#if 0 && !defined(NDEBUG) && defined(_WIN32)
     {
         ttCStr cszTest;
         if (FindCurMsvcPath(cszTest))

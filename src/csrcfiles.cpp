@@ -13,7 +13,7 @@
 #include <ttmem.h>       // ttCMem, ttCTMem
 #include <ttcwd.h>       // ttCCwd
 
-#if defined(_DEBUG)
+#if !defined(NDEBUG)  // Starts debug section.
     #include <wx/log.h>
 #endif
 
@@ -341,9 +341,9 @@ void CSrcFiles::ProcessFile(char* pszFile)
     if (!ttFileExists(pszFile))
     {
         ttCStr cszErrMsg;
-#if defined(_DEBUG)
+#if !defined(NDEBUG)  // Starts debug section.
         cszErrMsg.GetCWD();
-#endif  // _DEBUG
+#endif
         if (ttIsNonEmpty(m_cszReportPath))
             cszErrMsg.printf("%s: Unable to locate the file %s.", GetReportFilename(), pszFile);
         else
@@ -735,7 +735,7 @@ const char* CSrcFiles::GetTargetRelease64()
     return m_cszTargetRelease64;
 }
 
-#if defined(_DEBUG)
+#if !defined(NDEBUG)  // Starts debug section.
 void CSrcFiles::AddError(const char* pszErrMsg)
 {
     ttCStr cszMsg(pszErrMsg);
@@ -743,4 +743,4 @@ void CSrcFiles::AddError(const char* pszErrMsg)
     wxLogDebug((char*) cszMsg);
     m_lstErrors += pszErrMsg;
 }
-#endif  // _DEBUG
+#endif
