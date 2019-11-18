@@ -402,7 +402,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
 
     {
         ttCStr cszNewDir(cszFullPath);
-        char* pszFilePortion = ttFindFilePortion(cszNewDir);
+        char*  pszFilePortion = ttFindFilePortion(cszNewDir);
         if (pszFilePortion)
             *pszFilePortion = 0;
         ttChDir(cszNewDir);
@@ -605,11 +605,21 @@ const char* CSrcFiles::GetTargetDebug32()
 
     m_cszTargetDebug32 = GetDir32();
 
+#if 1
+    // Issue # 211 (https://github.com/KeyWorksRW/ttBld/issues/211) is to remove platform suffix, making it the
+    // caller's responsibility to set different output directory names if needed.
+
+    // We conditionalize the code in case there's a compelling reason later to either append 32/64 or _x86/_x64.
+
+    bool bAddPlatformSuffix = false;
+
+#else
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
     // suffix to the target filename to differentiate between the two builds.
 
     bool bAddPlatformSuffix =
         (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+#endif
 
     if (IsExeTypeLib())
     {
@@ -641,12 +651,22 @@ const char* CSrcFiles::GetTargetRelease32()
 
     m_cszTargetRelease32 = GetDir32();
 
+#if 1
+    // Issue # 211 (https://github.com/KeyWorksRW/ttBld/issues/211) is to remove platform suffix, making it the
+    // caller's responsibility to set different output directory names if needed.
+
+    // We conditionalize the code in case there's a compelling reason later to either append 32/64 or _x86/_x64.
+
+    bool bAddPlatformSuffix = false;
+
+#else
+
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
     // suffix to the target filename to differentiate between the two builds.
 
     bool bAddPlatformSuffix =
         (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
-
+#endif
     if (IsExeTypeLib())
     {
         m_cszTargetRelease32.AppendFileName(GetProjectName());
@@ -675,11 +695,22 @@ const char* CSrcFiles::GetTargetDebug64()
     ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles.yaml");
     m_cszTargetDebug64 = GetDir64();
 
+#if 1
+    // Issue # 211 (https://github.com/KeyWorksRW/ttBld/issues/211) is to remove platform suffix, making it the
+    // caller's responsibility to set different output directory names if needed.
+
+    // We conditionalize the code in case there's a compelling reason later to either append 32/64 or _x86/_x64.
+
+    bool bAddPlatformSuffix = false;
+
+#else
+
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
     // suffix to the target filename to differentiate between the two builds.
 
     bool bAddPlatformSuffix =
         (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+#endif
 
     if (IsExeTypeLib())
     {
@@ -709,11 +740,22 @@ const char* CSrcFiles::GetTargetRelease64()
     ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles.yaml");
     m_cszTargetRelease64 = GetDir64();
 
+#if 1
+    // Issue # 211 (https://github.com/KeyWorksRW/ttBld/issues/211) is to remove platform suffix, making it the
+    // caller's responsibility to set different output directory names if needed.
+
+    // We conditionalize the code in case there's a compelling reason later to either append 32/64 or _x86/_x64.
+
+    bool bAddPlatformSuffix = false;
+
+#else
+
     // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
     // suffix to the target filename to differentiate between the two builds.
 
     bool bAddPlatformSuffix =
         (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
+#endif
 
     if (IsExeTypeLib())
     {

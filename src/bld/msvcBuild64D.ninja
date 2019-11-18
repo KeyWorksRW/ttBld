@@ -13,7 +13,7 @@ msvc_deps_prefix = Note: including file:
 # -Z7	// produces object files with full symbolic debugging information
 # -FC	// Full path to source code file in diagnostics
 
-cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -Od -Z7 -FC -DwxGUI=1 -DWXUSINGDLL -DTESTING -DWXUSINGDLL -I"../../ttLibwx/include" /Fp$outdir/ttBld.pch
+cflags = -nologo -D_DEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -Od -Z7 -FC -DwxGUI=1 -DWXUSINGDLL -DWXUSINGDLL -I"../../ttLibwx/include" /Fp$outdir/ttBld.pch
 
 rule compilePCH
   deps = msvc
@@ -112,7 +112,7 @@ build $resout/ttBldD.res: rc ttBld.rc | $
   ../ttlib/icons/cancel.ico $
   ../ttlib/icons/ok.ico
 
-build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
+build ../bin_x64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/mainapp.obj $
   $outdir/ninja.obj $
   $outdir/cmplrMsvc.obj $
@@ -146,6 +146,6 @@ build ../bin64/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/dlggettext.obj $
   $outdir/dlgvscode.obj $
   $outdir/pch.obj $
-  ../ttLibwx/lib64/ttLibwxD.lib $
+  ../../ttLibwx/lib_x64/ttLibwxD.lib $
   | ttBld.natvis
 
