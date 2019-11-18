@@ -150,62 +150,58 @@ void CTabGeneral::OnCheckExe()
 
 void CTabGeneral::SetTargetDirs()
 {
-    // Start by setting default directories
+    bool bx86Set = false;
+    bool bx64Set = false;
 
-    ttCStr cszDir64, cszDir32;
+    if (m_pOpts->GetOption(OPT_TARGET_DIR32))
+    {
+        SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
+        bx86Set = true;
+    }
+    if (m_pOpts->GetOption(OPT_TARGET_DIR64))
+    {
+        SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
+        bx64Set = true;
+    }
+
+    if (bx86Set && bx64Set)
+        return;
+
+    // Directory names don't actually need to exist, since Ninja will create them if they are missing. We just need to
+    // figure out what names to use.
 
     ttCStr cszCWD;
     cszCWD.GetCWD();
-    bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
-    if (!bSrcDir)
+    const char* pszCurFolder = ttFindFilePortion(cszCWD);
+
+    bool bUseParent = (ttStrStrI(pszCurFolder, "src") || ttStrStrI(pszCurFolder, "source")) ? true : false;
+
+    if (!bUseParent)
     {
-        cszCWD.AppendFileName(m_pOpts->IsExeTypeLib() ? "../lib" : "../bin");
-        if (ttDirExists(cszCWD))
-            bSrcDir = true;
+        // If we aren't in the root of a .git repository, then look at the parent folder for the directories to use. We
+        // check for a filename called .git in case this is a submodule.
+
+        cszCWD.AppendFileName(m_pOpts->IsExeTypeLib() ? "../lib_x64" : "../bin_x64");
+        if (ttDirExists(cszCWD) && !ttDirExists(".git") && !ttFileExists(".git"))
+            bUseParent = true;
     }
 
-    if (bSrcDir)
+    if (bUseParent)
     {
-        cszDir64 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
-        ttCStr cszTmp(cszDir64);
-        cszTmp += "64";
-        if (ttDirExists(cszTmp))  // if there is a ../lib64 or ../bin64, then use that
-        {
-            cszDir64 = cszTmp;
-            cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib" : "../bin";
-            cszTmp = cszDir32;
-            cszTmp += "32";
-            if (ttDirExists(cszTmp))
-                cszDir32 = cszTmp;
-        }
-        else
-            cszDir32 = m_pOpts->IsExeTypeLib() ? "../lib32" : "../bin32";
+        if (!bx64Set)
+            SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->IsExeTypeLib() ? "../lib_x64" : "../bin_x64");
+
+        if (!bx86Set)
+            SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->IsExeTypeLib() ? "../lib_x86" : "../bin_x86");
+        return;
     }
     else
     {
-        cszDir64 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
-        ttCStr cszTmp(cszDir64);
-        cszTmp += "64";
-        if (ttDirExists(cszTmp))  // if there is a lib64 or bin64, then use that
-        {
-            cszDir64 = cszTmp;
-            cszDir32 = m_pOpts->IsExeTypeLib() ? "lib" : "bin";
-            cszTmp = cszDir32;
-            cszTmp += "32";
-            if (ttDirExists(cszTmp))
-                cszDir32 = cszTmp;
-        }
-        else
-            cszDir32 = m_pOpts->IsExeTypeLib() ? "lib32" : "bin32";
+        if (!bx64Set)
+            SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->IsExeTypeLib() ? "lib_x64" : "bin_x64");
+
+        if (!bx86Set)
+            SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->IsExeTypeLib() ? "lib_x86" : "bin_x86");
+        return;
     }
-
-    if (m_pOpts->GetOption(OPT_TARGET_DIR32))
-        SetControlText(DLG_ID(IDEDIT_DIR32), m_pOpts->GetOption(OPT_TARGET_DIR32));
-    else
-        SetControlText(DLG_ID(IDEDIT_DIR32), cszDir32);
-
-    if (m_pOpts->GetOption(OPT_TARGET_DIR64))
-        SetControlText(DLG_ID(IDEDIT_DIR64), m_pOpts->GetOption(OPT_TARGET_DIR64));
-    else
-        SetControlText(DLG_ID(IDEDIT_DIR64), cszDir64);
 }
