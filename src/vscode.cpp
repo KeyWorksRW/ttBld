@@ -442,8 +442,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 AddMsvcTask(kfOut, "Rebuild Release MSVC", txtNormalGroup, cszMakeCommand);
                 if (m_bNinjaTask)
                     AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup,
-                                cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f bld/msvcBuild64D.ninja" :
-                                                                     "ninja -f bld/msvcBuild32D.ninja");
+                                cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f bld/msvc_x64_dbg.ninja" :
+                                                                     "ninja -f bld/msvc_x86_dbg.ninja");
             }
 #if 0
             // REVIEW: [KeyWorks - 8/4/2019] We certainly can add these, but they would be used rarely, if ever. The
@@ -452,7 +452,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
             // Ninja Debug Build
 
             AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup, cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                "ninja -f build/msvcBuild64D.ninja" : "ninja -f build/msvcBuild32D.ninja");
+                "ninja -f build/msvc_x64_dbg.ninja" : "ninja -f build/msvc_x86_dbg.ninja");
 
             // Test: View MSVC build commands
 
@@ -503,8 +503,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 if (m_bNinjaTask && !m_bMainTasks)
                     AddClangTask(kfOut, "Ninja Debug Build",
                                  (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
-                                 cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f bld/clangBuild64D.ninja" :
-                                                                      "ninja -f bld/clangBuild32D.ninja");
+                                 cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f bld/clang_x64_dbg.ninja" :
+                                                                      "ninja -f bld/clang_x86_dbg.ninja");
             }
 #endif
 

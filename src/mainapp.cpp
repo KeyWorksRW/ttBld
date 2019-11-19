@@ -293,21 +293,40 @@ int main(int argc, char* argv[])
 
         // The following commands are called from a makefile to update one .ninja script and immediately exit
 
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64"))  // used in case it was set in environment
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x64"))
             upType = UPDATE_MSVC64;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc32"))  // used in case it was set in environment
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x86"))
             upType = UPDATE_MSVC32;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclangcl64"))  // used in case it was set in environment
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x64"))
             upType = UPDATE_CLANG_CL64;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclangcl32"))  // used in case it was set in environment
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x86"))
             upType = UPDATE_CLANG_CL32;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64D"))  // used in case it was set in environment
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x64D"))
             upType = UPDATE_MSVC64D;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc32D"))  // used in case it was set in environment
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x86D"))
             upType = UPDATE_MSVC32D;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclangcl64D"))  // used in case it was set in environment
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x64D"))
             upType = UPDATE_CLANG_CL64D;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclangcl32D"))  // used in case it was set in environment
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x86D"))
+            upType = UPDATE_CLANG_CL32D;
+
+        // REVIEW: [KeyWorks - 11-19-2019] Remove these after ALL previously generated makefiles have been updated
+
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64"))
+            upType = UPDATE_MSVC64;
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc32"))
+            upType = UPDATE_MSVC32;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang64"))
+            upType = UPDATE_CLANG_CL64;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang32"))
+            upType = UPDATE_CLANG_CL32;
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64D"))
+            upType = UPDATE_MSVC64D;
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc32D"))
+            upType = UPDATE_MSVC32D;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang64D"))
+            upType = UPDATE_CLANG_CL64D;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang32D"))
             upType = UPDATE_CLANG_CL32D;
     }
 
