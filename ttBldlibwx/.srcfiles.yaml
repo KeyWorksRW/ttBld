@@ -15,9 +15,9 @@ Options:
     CFlags_dbg: -DWXUSINGDLL
 
     64Bit:       true            # generate scripts for 64-bit build
-    TargetDir64: ../lib64        # 64-bit target directory
+    TargetDir64: ../lib_x64      # 64-bit target directory
     32Bit:       true            # generate scripts for 32-bit build
-    TargetDir32: ../lib32        # 32-bit target directory
+    TargetDir32: ../lib_x86      # 32-bit target directory
 
     IncDirs:    ../src;../ttLibwx/include
 
