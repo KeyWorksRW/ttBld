@@ -76,7 +76,7 @@ BldScriptD=$(bdir)/$(cmplr)$(bits)_dbg.ninja
 
 ########## release section ##########
 
-release: ttLibwx ttBld
+release: ttLibwx $(BldScript) ttBld
 
 ttLibwx:
 	cd ../../ttLibwx/src & ninja -f $(BldScript)
@@ -86,7 +86,7 @@ ttBld:
 
 ########## debug section ##########
 
-debug: ttLibwxD ttBldD
+debug: ttLibwxD $(BldScriptD) ttBldD
 
 ttLibwxD:
 	cd ../../ttLibwx/src & ninja -f $(BldScriptD)
@@ -101,27 +101,35 @@ locale:
 
 ########## clean release section ##########
 
-clean:
+clean: $(BldScript)
 	ninja -f $(BldScript) -t clean
 
 ########## clean debug section ##########
 
-cleanD:
+cleanD: $(BldScriptD)
 	ninja -f $(BldScriptD) -t clean
 
 ########## special ninja diagnostics ##########
 
-commandsD:
+commandsD: $(BldScriptD)
 	ninja -f $(BldScriptD) -t commands
 
-commandsR:
+commandsR: $(BldScript)
 	ninja -f $(BldScript) -t commands
 
-targetsD:
+targetsD: $(BldScriptD)
 	ninja -f $(BldScriptD) -t targets depth 2
 
-targetsR:
+targetsR: $(BldScript)
 	ninja -f $(BldScript) -t targets depth 2
 
-deps:
+deps: $(BldScript)
 	ninja -f $(BldScript) -t deps
+
+########## Creates or updates ninja file any time .srcfiles.yaml changes ##########
+
+$(BldScript): .srcfiles.yaml
+	ttBld.exe -u$(cmplr)$(bits)
+
+$(BldScriptD): .srcfiles.yaml
+	ttBld.exe -u$(cmplr)$(bits)D
