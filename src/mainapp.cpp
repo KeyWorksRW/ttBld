@@ -32,7 +32,7 @@
 
 #include <wx/init.h>
 
-const char* txtVersion = "ttBld 1.2.0.8295";
+const char* txtVersion = "ttBld 1.3.0.8295";
 const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 
 #include <iostream>
