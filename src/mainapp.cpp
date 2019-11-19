@@ -72,6 +72,8 @@ void Usage()
     // Currently non-finished commands
 
     puts("\b  Unfinished commands:\n");
+    puts(_("    -all          -- equivalent to -allninja and -vscode"));
+    puts(_("    -alld         -- deletes makefile and .vscode/c_cpp_preferences.json before running -all"));
     puts(_("    -allninja     -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
     puts(_("    -convert file -- Converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml"));
 
@@ -139,6 +141,8 @@ enum  // actions that can be run in addition to normal single command actions
     ACT_FORCE    = 1 << 7,  // Creates .ninja file even if it hasn't changed.
     ACT_OPTIONS  = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
     ACT_CONVERT  = 1 << 9,  // Converts the specified build script file to .srcfiles.yaml
+    ACT_ALL      = 1 << 10,  // Mostly equivalent to ACT_ALLNINJA + ACT_VSCODE
+    ACT_ALLD     = 1 << 11,  // Same as ACT_ALL but forces output.
 
     // clang-format on
 };
@@ -262,6 +266,11 @@ int main(int argc, char* argv[])
 
         else if (ttIsSameSubStrI(argv[argpos] + 1, "allninja"))  // -allninja
             Action |= ACT_ALLNINJA;
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "alld"))  // -alld
+            Action |= ACT_ALLD;
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "all"))  // -all
+            Action |= ACT_ALL;
+
         else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))  // -dryryn
             Action |= ACT_DRYRUN;
         else if (ttIsSameStrI(argv[argpos] + 1, "new"))
@@ -404,7 +413,6 @@ int main(int argc, char* argv[])
         }
     }
 
-
     // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we
     // need to locate it.
 
@@ -447,8 +455,10 @@ int main(int argc, char* argv[])
 
     // At this point we have the location of .srcfiles.yaml, and we're ready to use it.
 
-    if (Action & ACT_VSCODE)
+    if (Action & ACT_VSCODE || Action & ACT_ALL || Action & ACT_ALLD)
     {
+        if (Action & ACT_ALLD)
+            wxRemoveFile(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         ttCList lstResults;
         CreateVsCodeProject(cszSrcFilePath, &lstResults);
@@ -479,13 +489,23 @@ int main(int argc, char* argv[])
         else if (Action & ACT_DRYRUN)
             cNinja.EnableDryRun();
 
-        cNinja.CreateMakeFile(Action & ACT_ALLNINJA,
-                              cszRootDir);  // this will create/update it if .srcfiles has a Makefile: section
+        if (Action & ACT_ALLD)
+            wxRemoveFile("makefile");
+
+        if (Action & ACT_ALL || Action & ACT_ALLD)
+        {
+            bool bAllVersion = false;
+            if (cNinja.IsExeTypeLib())
+                bAllVersion = true;
+            cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);
+        }
+        else
+            cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);
 
         ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT),
                      "At least one platform build should have been set in CNinja constructor");
 
-            int countNinjas = 0;
+        int countNinjas = 0;
         if (cNinja.GetBoolOption(OPT_64BIT))
         {
 #if defined(_WIN32)
