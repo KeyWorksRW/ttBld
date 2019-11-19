@@ -24,7 +24,7 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
     if (cmplr == CMPLR_MSVC && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
     {
         // These are only supported by the MSVC compiler
-        m_pkfOut->WriteEol("# -GL\t// Whole program optimization");
+        m_pkfOut->WriteEol("# -GL\t  // Whole program optimization");
     }
 
     if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
@@ -32,9 +32,9 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
         if (GetBoolOption(OPT_STDCALL))
             m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
         if (IsStaticCrtRel())
-            m_pkfOut->WriteEol("# -MT\t// Static multi-threaded library");
+            m_pkfOut->WriteEol("# -MT\t// Static CRT multi-threaded library");
         else
-            m_pkfOut->WriteEol("# -MD\t// DLL version of multi-threaded library");
+            m_pkfOut->WriteEol("# -MD\t// Dynamic CRT multi-threaded library");
         if (IsExeTypeLib())
             m_pkfOut->WriteEol("# -Zl\t// Don't specify default runtime library in .obj file");
         if (IsOptimizeSpeed())
@@ -42,16 +42,16 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
         else
             m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
 
-        m_pkfOut->WriteEol("# -FC\t// Full path to source code file in diagnostics");
+        m_pkfOut->WriteEol("# -FC\t  // Full path to source code file in diagnostics");
     }
     else  // Presumably GEN_DEBUG32 or GEN_DEBUG64
     {
         if (IsStaticCrtDbg())
-            m_pkfOut->WriteEol("# -MTd\t// Multithreaded debug dll (MSVCRTD)");
+            m_pkfOut->WriteEol("# -MD\t// Multithreaded static CRT");
         else
             m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
-        m_pkfOut->WriteEol("# -Z7\t// produces object files with full symbolic debugging information");
-        m_pkfOut->WriteEol("# -FC\t// Full path to source code file in diagnostics");
+        m_pkfOut->WriteEol("# -Z7\t  // Produces object files with full symbolic debugging information");
+        m_pkfOut->WriteEol("# -FC\t  // Full path to source code file in diagnostics");
     }
 
     m_pkfOut->WriteEol();  // force a blank line after the options are listed
@@ -75,7 +75,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
                          IsExeTypeConsole() ? " -D_CONSOLE" : "",
                          GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
                          GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
-                        IsStaticCrtRel() ? " -MT" : " -MD");
+                        IsStaticCrtDbg() ? " -MD" : " -MDd");
         // clang-format on
     }
     else  // Presumably GEN_RELEASE32 or GEN_RELEASE64
