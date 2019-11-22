@@ -31,9 +31,15 @@
 #endif
 
 #include <wx/init.h>
+#include <wx/cmdline.h>
+#include <wx/init.h>
+#include <wx/wxcrtvararg.h>
+
+#include "mainapp.h"  // CMainApp -- Main application class
 
 const char* txtVersion = "ttBld 1.3.0.8295";
 const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
+const char* txtAppName = "ttCode";
 
 #include <iostream>
 #include <direct.h>  // Functions for directory handling and creation
@@ -48,6 +54,24 @@ const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
 #if defined(TESTING)
     #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 #endif
+
+wxIMPLEMENT_APP_CONSOLE(CMainApp);
+
+int oldMain(int argc, char** argv);
+
+bool CMainApp::OnInit()
+{
+    SetAppDisplayName(txtAppName);
+
+    OnRun();
+
+    return false;  // exit the program
+}
+
+int CMainApp::OnRun()
+{
+    return oldMain(argc, argv);
+}
 
 void Usage()
 {
@@ -147,11 +171,8 @@ enum  // actions that can be run in addition to normal single command actions
     // clang-format on
 };
 
-int main(int argc, char* argv[])
+int oldMain(int argc, char* argv[])
 {
-    wxInitializer initializer;
-
-    ttInitCaller(txtVersion);
     UPDATE_TYPE upType = UPDATE_NORMAL;
     size_t      Action = 0;
     ttCStr      cszRootDir;      // this will be set if (Action & ACT_DIR) is set
