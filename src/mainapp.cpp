@@ -63,9 +63,7 @@ bool CMainApp::OnInit()
 {
     SetAppDisplayName(txtAppName);
 
-    OnRun();
-
-    return false;  // exit the program
+    return true;
 }
 
 int CMainApp::OnRun()
