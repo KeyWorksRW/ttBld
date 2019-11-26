@@ -624,19 +624,19 @@ const char* CSrcFiles::GetTargetDebug32()
     if (IsExeTypeLib())
     {
         m_cszTargetDebug32.AppendFileName(GetProjectName());
-        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32D.lib" : "D.lib";
+        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86D.lib" : "D.lib";
     }
     else if (IsExeTypeDll())
     {
         m_cszTargetDebug32.AppendFileName(GetProjectName());
-        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.dll" : ".dll";
+        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86.dll" : ".dll";
         if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
             m_cszTargetDebug32.ReplaceStr(".dll", ".ocx");
     }
     else
     {
         m_cszTargetDebug32.AppendFileName(GetProjectName());
-        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32D.exe" : "D.exe";
+        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86D.exe" : "D.exe";
     }
     return m_cszTargetDebug32;
 }
@@ -670,19 +670,19 @@ const char* CSrcFiles::GetTargetRelease32()
     if (IsExeTypeLib())
     {
         m_cszTargetRelease32.AppendFileName(GetProjectName());
-        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.lib" : ".lib";
+        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86.lib" : ".lib";
     }
     else if (IsExeTypeDll())
     {
         m_cszTargetRelease32.AppendFileName(GetProjectName());
-        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.dll" : ".dll";
+        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86.dll" : ".dll";
         if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
             m_cszTargetRelease32.ReplaceStr(".dll", ".ocx");
     }
     else
     {
         m_cszTargetRelease32.AppendFileName(GetProjectName());
-        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "32.exe" : ".exe";
+        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86.exe" : ".exe";
     }
     return m_cszTargetRelease32;
 }
@@ -715,19 +715,19 @@ const char* CSrcFiles::GetTargetDebug64()
     if (IsExeTypeLib())
     {
         m_cszTargetDebug64.AppendFileName(GetProjectName());
-        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64D.lib" : "D.lib";
+        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64D.lib" : "D.lib";
     }
     else if (IsExeTypeDll())
     {
         m_cszTargetDebug64.AppendFileName(GetProjectName());
-        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.dll" : ".dll";
+        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.dll" : ".dll";
         if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
             m_cszTargetDebug64.ReplaceStr(".dll", ".ocx");
     }
     else
     {
         m_cszTargetDebug64.AppendFileName(GetProjectName());
-        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64D.exe" : "D.exe";
+        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64D.exe" : "D.exe";
     }
     return m_cszTargetDebug64;
 }
@@ -760,19 +760,19 @@ const char* CSrcFiles::GetTargetRelease64()
     if (IsExeTypeLib())
     {
         m_cszTargetRelease64.AppendFileName(GetProjectName());
-        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.lib" : ".lib";
+        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.lib" : ".lib";
     }
     else if (IsExeTypeDll())
     {
         m_cszTargetRelease64.AppendFileName(GetProjectName());
-        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.dll" : ".dll";
+        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.dll" : ".dll";
         if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
             m_cszTargetRelease64.ReplaceStr(".dll", ".ocx");
     }
     else
     {
         m_cszTargetRelease64.AppendFileName(GetProjectName());
-        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "64.exe" : ".exe";
+        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.exe" : ".exe";
     }
     return m_cszTargetRelease64;
 }

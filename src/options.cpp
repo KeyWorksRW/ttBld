@@ -104,10 +104,8 @@ static const OPT_SETTING s_aOptions[] =
     { OPT_LIBS_REL,     "Libs_rel",     nullptr,   false,   false,     _XGET("additional libraries to link to in release builds") },
     { OPT_LIBS_DBG,     "Libs_dbg",     nullptr,   false,   false,     _XGET("additional libraries to link to in debug builds") },
 
-    // The following two should be obsolete, but we still check them elsewhere. Need to remove those checks, then remove these
-
-    { OPT_64BIT_SUFFIX, "b64_suffix",   "false",   true,    false,     _XGET("true means append '64' to target's directory or .exe name") },
-    { OPT_32BIT_SUFFIX, "b32_suffix",   "false",   true,    false,     _XGET("true means append '32' to target's directory or .exe name") },
+    { OPT_64BIT_SUFFIX, "b64_suffix",   "false",   true,    false,     _XGET("true means append '_x64' to target's directory or .exe name") },
+    { OPT_32BIT_SUFFIX, "b32_suffix",   "false",   true,    false,     _XGET("true means append '_x86' to target's directory or .exe name") },
 
     // The following options are for xgettext/msgfmt support
 
