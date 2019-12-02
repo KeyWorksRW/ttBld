@@ -186,32 +186,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
     if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
         return;
 
-    if (ttIsSameStrI(cszName, "BuildLibs"))
-    {
-        while (cszVal.ReplaceStr(".lib", ""))
-            ;  // we want the target name, not the library filename
-
-        ttCStr     cszCleaned;
-        ttCEnumStr cEnumStr(cszVal, ';');
-        while (cEnumStr.Enum())
-        {
-            ttCStr cszLib(cEnumStr);
-            cszLib.TrimRight();
-            char* pszLast = cszLib.FindLastSlash();
-            if (pszLast && !pszLast[1])
-                *pszLast = 0;
-            if (cszLib.StrLen() > 0)  // don't add an empty string
-            {
-                if (cszCleaned.IsNonEmpty())
-                    cszCleaned += ";";
-                cszCleaned += cszLib;
-            }
-        }
-        if (cszCleaned.IsEmpty())
-            return;  // ignore it if it's just a blank line
-        cszVal = cszCleaned;
-    }
-
     OPT_INDEX opt = UpdateReadOption(cszName, cszVal, cszComment);
     if (opt < OPT_OVERFLOW)
     {
@@ -231,16 +205,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
     // If you need to support reading old options, add the code here to convert them into the new options. You will also
     // need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
 
-    if (ttIsSameStrI(cszName, "TargetDirs"))  // first target is 32-bit directory, second is 64-bit directory
-    {
-        ttCEnumStr cenum(cszVal, ';');
-        if (cenum.Enum())
-            UpdateOption(OPT_TARGET_DIR32, (char*) cenum);
-        if (cenum.Enum())
-            UpdateOption(OPT_TARGET_DIR64, (char*) cenum);
-        return;
-    }
-    else if (ttIsSameStrI(cszName, "LinkFlags"))
+    if (ttIsSameStrI(cszName, "LinkFlags"))
         UpdateOption(OPT_LINK_CMN, (char*) cszVal);
 
     ttCStr csz;
