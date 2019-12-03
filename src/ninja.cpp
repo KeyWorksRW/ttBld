@@ -170,7 +170,7 @@ CNinja::CNinja(const char* pszNinjaDir)
         UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
     }
 
-    ProcessBuildLibs();
+    // ProcessBuildLibs();
 }
 
 static const char* aszCompilerPrefix[] = {

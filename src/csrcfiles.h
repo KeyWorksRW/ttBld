@@ -29,6 +29,8 @@ public:
 
     // Public functions
     const char* GetTargetDir();
+    const char* GetTargetRelease();
+    const char* GetTargetDebug();
 
     const char* GetBuildScriptDir();
     void        AddFile(const char* pszFile) { m_lstSrcFiles += pszFile; }
@@ -145,6 +147,9 @@ private:
     ttCStr m_cszSrcFilePath;
     ttCStr m_cszReportPath;  // Path to use when reporting a problem
     ttCStr m_cszBldDir;      // This is where we write the .ninja files, and is ninja's builddir
+
+    ttCStr m_cszTargetRelease;
+    ttCStr m_cszTargetDebug;
 
     std::string m_strTargetDir;
 

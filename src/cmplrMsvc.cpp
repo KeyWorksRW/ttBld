@@ -479,6 +479,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     // this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
     const char* pszTarget;
+    pszTarget = GetTargetDir();
+#if 0
     switch (m_gentype)
     {
         case GEN_DEBUG32:
@@ -495,6 +497,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
             pszTarget = GetTargetRelease64();
             break;
     }
+#endif
 
     if (IsExeTypeLib())
         m_pkfOut->printf("build %s : lib", pszTarget);

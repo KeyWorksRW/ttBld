@@ -869,6 +869,41 @@ const char* CSrcFiles::GetTargetDir()
     return m_strTargetDir.c_str();
 }
 
+const char* CSrcFiles::GetTargetRelease()
+{
+    if (!m_cszTargetRelease.empty())
+        return m_cszTargetRelease;
+
+    m_cszTargetRelease = GetTargetDir();
+    m_cszTargetRelease.AppendFileName(GetProjectName());
+
+    if (IsExeTypeLib())
+        m_cszTargetRelease += ".lib";
+    else if (IsExeTypeDll())
+        m_cszTargetRelease += (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx") ? ".ocx" : ".dll");
+    else
+        m_cszTargetRelease += ".exe";
+    return m_cszTargetRelease;
+}
+
+const char* CSrcFiles::GetTargetDebug()
+{
+    if (!m_cszTargetDebug.empty())
+        return m_cszTargetDebug;
+
+    m_cszTargetDebug = GetTargetDir();
+    m_cszTargetDebug.AppendFileName(GetProjectName());
+    m_cszTargetDebug += "D";
+
+    if (IsExeTypeLib())
+        m_cszTargetDebug += ".lib";
+    else if (IsExeTypeDll())
+        m_cszTargetDebug += (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx") ? ".ocx" : ".dll");
+    else
+        m_cszTargetDebug += ".exe";
+    return m_cszTargetDebug;
+}
+
 #if !defined(NDEBUG)  // Starts debug section.
 void CSrcFiles::AddError(const char* pszErrMsg)
 {
