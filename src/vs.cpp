@@ -1,10 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      vs.cpp
-// Purpose:   Creates .vs/tasks.vs.json and .vs/launch.vs.json
+// Purpose:   Creates .vs/tasks.vs.json and .vs/launch.vs.json (for devenv.exe)
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
+
+// This generates files needed by Visual Studio. See vscode.cpp for generating files for Visual Studio Code.
 
 #include "pch.h"
 
@@ -63,12 +65,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
 
     file.ReadStrFile(txtTasks);
 
-    if (cSrcFiles.GetBoolOption(OPT_64BIT) && cSrcFiles.GetDir64())
-        file.ReplaceStr("%tgtDir%", cSrcFiles.GetDir64());
-    else if (cSrcFiles.GetBoolOption(OPT_32BIT) && cSrcFiles.GetDir32())
-        file.ReplaceStr("%tgtDir%", cSrcFiles.GetDir32());
-    else
-        file.ReplaceStr("%tgtDir%", "bin");
+        file.ReplaceStr("%tgtDir%", cSrcFiles.GetTargetDir());
 
 #if defined(_WIN32)
     file.ReplaceStr("%command%", "nmake.exe -nologo debug");
@@ -96,17 +93,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
     file.Delete();
     file.ReadStrFile(txtLaunch);
 
-    if (cSrcFiles.GetBoolOption(OPT_64BIT) && cSrcFiles.GetTargetDebug64())
-        file.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug64());
-    else if (cSrcFiles.GetBoolOption(OPT_32BIT) && cSrcFiles.GetTargetDebug32())
-        file.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug32());
-    else
-    {
-        ttCStr cszMsg;
-        cszMsg.printf("No build target specified in %s.", cSrcFiles.GetSrcFiles());
-        *plstResults += (char*) cszMsg;
-        return false;
-    }
+    file.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug());
 
     if (cSrcFiles.GetProjectName())
         file.ReplaceStr("%projgect%", cSrcFiles.GetProjectName());
