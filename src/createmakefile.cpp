@@ -81,15 +81,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     ttCFile kfOut;
     while (kf.ReadLine())
     {
-        // Set b32=1 if this is a 32-bit only target
-        if (ttIsSameSubStrI(kf, "#b32=1"))
-        {
-            if (GetBoolOption(OPT_32BIT) && !GetBoolOption(OPT_64BIT))
-                kfOut.WriteEol("b32=1");
-            else
-                kfOut.WriteEol(kf);
-        }
-        else if (ttIsSameSubStrI(kf, "release:") || ttIsSameSubStrI(kf, "debug:"))
+        if (ttIsSameSubStrI(kf, "release:") || ttIsSameSubStrI(kf, "debug:"))
         {
             bool   bDebugTarget = ttIsSameSubStrI(kf, "debug:");  // so we don't have to keep parsing the line
             ttCStr cszNewLine(kf);
