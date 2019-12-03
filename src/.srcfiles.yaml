@@ -1,4 +1,4 @@
-# Requires ttBld.exe version 1.2.0 or higher to process
+# Requires ttBld.exe version 1.4.0 or higher to process
 
 Options:
     Project:     ttBld        # Target name ('D' will be appended to Debug builds, e.g. ttBldD.exe)
@@ -10,13 +10,9 @@ Options:
     Crt_dbg:     dll          # [static | dll] type of CRT to link to in debug builds
     Ms_linker:   false        # true means use link.exe even when compiling with clang
 
-    CFlags_cmn:  -DwxGUI=1 -DWXUSINGDLL  # flags to pass to the compiler in all builds
-    CFlags_dbg:  -DWXUSINGDLL            # flags to pass to the compiler in debug builds
+    CFlags_cmn:  -DWXUSINGDLL  # flags to pass to the compiler in all builds
 
-    64Bit:       true         # [true | false] can project be built as a 64-bit target
-    TargetDir64: ../bin_x64   # 64-bit target directory
-    32Bit:       true         # [true | false] can project be built as a 32-bit target
-    TargetDir32: ../bin_x86   # 32-bit target directory
+    TargetDir: ../bin         # 64-bit target directory
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
