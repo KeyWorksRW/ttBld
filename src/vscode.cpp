@@ -180,8 +180,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
 
             if (cszIgnore.IsNonEmpty() &&
                 ttMsgBoxFmt(
-                    _(
-                        "The directory .vscode is not being ignored by git. Would you like it to be added to %s?"),
+                    _("The directory .vscode is not being ignored by git. Would you like it to be added to %s?"),
                     MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING, (char*) cszIgnore) == IDYES)
             {
                 if (gitAddtoIgnore(cszIgnore, ".vscode/") && plstResults)
@@ -430,9 +429,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
                 // Build MSVC release
 
-                cszLabel.printf("Build %s (release) using MSVC",
-                                ttFindFilePortion(cSrcFiles.GetBoolOption(OPT_64BIT) ? cSrcFiles.GetTargetRelease64() :
-                                                                                       cSrcFiles.GetTargetRelease32()));
+                cszLabel.printf("Build %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetTargetRelease()));
+
                 cszMakeCommand.printf("nmake.exe -nologo release %s", (char*) cszMakeFileOption);
                 AddMsvcTask(kfOut, "Build Release MSVC", txtNormalGroup, cszMakeCommand);
 
@@ -441,34 +439,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 cszMakeCommand.printf("nmake.exe -nologo clean release %s", (char*) cszMakeFileOption);
                 AddMsvcTask(kfOut, "Rebuild Release MSVC", txtNormalGroup, cszMakeCommand);
                 if (m_bNinjaTask)
-                    AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup,
-                                cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f bld/msvc_x64_dbg.ninja" :
-                                                                     "ninja -f bld/msvc_x86_dbg.ninja");
+                    AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup, "ninja -f bld/msvc_dbg.ninja");
             }
-#if 0
-            // REVIEW: [KeyWorks - 8/4/2019] We certainly can add these, but they would be used rarely, if ever. The
-            // Ninja command is risky because if you change compilers, you might also need to change problem matchers
-
-            // Ninja Debug Build
-
-            AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup, cSrcFiles.GetBoolOption(OPT_64BIT) ?
-                "ninja -f build/msvc_x64_dbg.ninja" : "ninja -f build/msvc_x86_dbg.ninja");
-
-            // Test: View MSVC build commands
-
-            cszMakeCommand.printf("nmake.exe -nologo commandsD %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, "View Build Commands", "test", cszMakeCommand, "");
-
-            // Test View debug targets
-
-            cszMakeCommand.printf("nmake.exe -nologo targetsD %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, "View Targets", "test", cszMakeCommand, "");
-
-            // Test View dependencies
-
-            cszMakeCommand.printf("nmake.exe -nologo deps %s", (char*) cszMakeFileOption);
-            AddTask(kfOut, "View Dependencies", "test", cszMakeCommand, "");
-#endif
 
             // REVIEW: [KeyWorks - 10-05-2019] Disabled until we have a method to determine if this task actually
             // applies to the current project.
@@ -503,8 +475,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 if (m_bNinjaTask && !m_bMainTasks)
                     AddClangTask(kfOut, "Ninja Debug Build",
                                  (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
-                                 cSrcFiles.GetBoolOption(OPT_64BIT) ? "ninja -f bld/clang_x64_dbg.ninja" :
-                                                                      "ninja -f bld/clang_x86_dbg.ninja");
+                                 "ninja -f bld/clang_dbg.ninja");
             }
 #endif
 
