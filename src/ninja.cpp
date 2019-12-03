@@ -6,7 +6,6 @@
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-
 #include "pch.h"
 
 #include <ttfile.h>     // ttCFile
@@ -347,9 +346,10 @@ void CNinja::ProcessBuildLibs()
 
             ttCStr cszBuildPath(enumLib);
             ttCStr cszBuildFile(cszBuildPath);  // LocateSrcFiles will update this
-            if (LocateSrcFiles(&cszBuildFile)) {
+            if (LocateSrcFiles(&cszBuildFile))
+            {
                 char* pszTmp = ttFindFilePortion(cszBuildFile);
-                char ch = *pszTmp;
+                char  ch = *pszTmp;
                 *pszTmp = 0;
                 wxSetWorkingDirectory(cszBuildFile.c_str());
                 *pszTmp = ch;
@@ -427,6 +427,30 @@ void CNinja::ProcessBuildLibs()
                 ttCStr cszRelDir;
                 ttConvertToRelative(cwdSave, cszCurDir, cszRelDir);
                 m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), cszRelDir);
+            }
+
+            const char* pszLib = cSrcFiles.GetTargetDebug();
+            if (pszLib)
+            {
+                ttCStr cszLibDir;
+                cszLibDir.GetCWD();
+                cszLibDir.AppendFileName(pszLib);
+                cszLibDir.FullPathName();
+                ttCStr cszLib;
+                ttConvertToRelative(cwdSave, cszLibDir, cszLib);
+                m_lstBldLibsD += cszLib;
+            }
+
+            pszLib = cSrcFiles.GetTargetRelease();
+            if (pszLib)
+            {
+                ttCStr cszLibDir;
+                cszLibDir.GetCWD();
+                cszLibDir.AppendFileName(pszLib);
+                cszLibDir.FullPathName();
+                ttCStr cszLib;
+                ttConvertToRelative(cwdSave, cszLibDir, cszLib);
+                m_lstBldLibsR += cszLib;
             }
         }
     }

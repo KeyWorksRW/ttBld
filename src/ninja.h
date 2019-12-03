@@ -102,6 +102,9 @@ private:
     ttCStr m_cszChmFile;     // Set if a .hhp file was specified in .srcfiles.yaml
     ttCStr m_cszScriptFile;  // The .ninja file
 
+    ttCList m_lstBldLibsD;
+    ttCList m_lstBldLibsR;
+
     ttCDblList m_dlstTargetDir;  // Target name, directory to use
 
     bool m_bForceWrite;      // Write the ninja file even if it hasn't changed
