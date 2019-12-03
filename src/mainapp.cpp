@@ -34,12 +34,13 @@
 #include <wx/cmdline.h>
 #include <wx/init.h>
 #include <wx/wxcrtvararg.h>
+#include <wx/config.h>
 
 #include "mainapp.h"  // CMainApp -- Main application class
 
 const char* txtVersion = "ttBld 1.3.0.8295";
 const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
-const char* txtAppName = "ttCode";
+const char* txtAppName = "ttBld";
 
 #include <iostream>
 #include <direct.h>  // Functions for directory handling and creation
@@ -62,6 +63,8 @@ int oldMain(int argc, char** argv);
 bool CMainApp::OnInit()
 {
     SetAppDisplayName(txtAppName);
+    SetVendorName("KeyWorks");
+    SetVendorDisplayName("KeyWorks Software");
 
     return true;
 }
@@ -122,6 +125,8 @@ void Usage()
 #if defined(TESTING)
     puts("    -tvdlg    -- tests the CDlgVsCode dialog");
 #endif
+    // -bwt -- sets break on warning to true
+    // -bwf -- sets break on warning to false
 }
 
 typedef enum
@@ -278,6 +283,21 @@ int oldMain(int argc, char* argv[])
             CreateVsCodeProject(cszSrcFilePath, &lstResults);
             for (size_t pos = 0; lstResults.InRange(pos); ++pos)
                 puts(lstResults[pos]);
+        }
+#endif
+
+#if !defined(NDEBUG)  // Starts debug section.
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "bwt"))
+        {
+            wxConfig config("ttBld");
+            config.SetPath("/Settings");
+            config.Write("BreakOnWarning", true);
+        }
+        else if (ttIsSameSubStrI(argv[argpos] + 1, "bwf"))
+        {
+            wxConfig config("ttBld");
+            config.SetPath("/Settings");
+            config.Write("BreakOnWarning", false);
         }
 #endif
 
