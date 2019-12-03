@@ -505,13 +505,13 @@ bool CVcxWrite::CreateBuildFile()
         kf.ReadResource(IDR_VCXPROJ_MASTER);
         while (kf.ReplaceStr("%guid%", cszGuid))
             ;
-        while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug32()))
+        while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug()))
             ;
-        while (kf.ReplaceStr("%%ReleaseExe%", GetTargetRelease32()))
+        while (kf.ReplaceStr("%%ReleaseExe%", GetTargetRelease()))
             ;
-        while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug64()))
+        while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug()))
             ;
-        while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease64()))
+        while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease()))
             ;
 
         ttCStr cszSrcFile;
