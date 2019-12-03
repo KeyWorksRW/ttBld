@@ -186,6 +186,12 @@ void CSrcFiles::ProcessOption(char* pszLine)
     if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
         return;
 
+    if (ttIsSameStrI(cszName, "64Bit:"))
+        return;  // The only time we don't build 64-bit is if 32Bit: is true
+
+    if (ttIsSameStrI(cszName, "TargetDir64:"))
+        cszName = "TargetDir";
+
     OPT_INDEX opt = UpdateReadOption(cszName, cszVal, cszComment);
     if (opt < OPT_OVERFLOW)
     {
@@ -740,6 +746,127 @@ const char* CSrcFiles::GetTargetRelease64()
         m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.exe" : ".exe";
     }
     return m_cszTargetRelease64;
+}
+
+const char* CSrcFiles::GetTargetDir()
+{
+    if (!m_strTargetDir.empty())
+        return m_strTargetDir.c_str();
+
+    ttCStr cszDir(IsExeTypeLib() ? "../lib" : "../bin");
+
+    // If it's not 32-bit code then just use lib or bin as the target dir if not specified.
+    if (!GetBoolOption(OPT_32BIT))
+    {
+        if (GetOption(OPT_TARGET_DIR64))
+        {
+            m_strTargetDir = GetOption(OPT_TARGET_DIR64);
+            return m_strTargetDir.c_str();
+        }
+        else if (GetOption(OPT_TARGET_DIR))
+        {
+            m_strTargetDir = GetOption(OPT_TARGET_DIR);
+            return m_strTargetDir.c_str();
+        }
+
+        ttCStr cszCWD;
+        cszCWD.GetCWD();
+        bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
+        if (!bSrcDir)
+        {
+            cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
+            if (ttDirExists(cszCWD))
+                bSrcDir = true;
+        }
+        if (bSrcDir)
+        {
+            cszDir = (IsExeTypeLib() ? "../lib" : "../bin");
+        }
+        else
+        {
+            cszDir = (IsExeTypeLib() ? "lib" : "bin");
+        }
+    }
+
+    // For 32-bit code, check to see if there is a 32, x86, or _x86 suffix to the standard bin and lib directories. If
+    // it exists and the user didn't tell us where to put it, then use that directory.
+    else
+    {
+        if (GetOption(OPT_TARGET_DIR32))
+        {
+            m_strTargetDir = GetOption(OPT_TARGET_DIR32);
+            return m_strTargetDir.c_str();
+        }
+        else if (GetOption(OPT_TARGET_DIR))
+        {
+            m_strTargetDir = GetOption(OPT_TARGET_DIR);
+            return m_strTargetDir.c_str();
+        }
+
+        ttCStr cszCWD;
+        cszCWD.GetCWD();
+        bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
+        if (!bSrcDir)
+        {
+            cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
+            if (ttDirExists(cszCWD))
+                bSrcDir = true;
+        }
+
+        // For 32-bit w
+
+        if (bSrcDir)
+        {
+            cszDir = (IsExeTypeLib() ? "../lib" : "../bin");
+            ttCStr cszTmp(cszDir);
+            cszTmp += "32";
+            if (ttDirExists(cszTmp))
+                cszDir = cszTmp;
+            else
+            {
+                char* pszTmp = strstr(cszTmp, "32");
+                *pszTmp = 0;
+                cszTmp += "x86";
+                if (ttDirExists(cszTmp))
+                    cszDir = cszTmp;
+                else
+                {
+                    pszTmp = strstr(cszTmp, "x86");
+                    *pszTmp = 0;
+                    cszTmp += "_x86";
+                    if (ttDirExists(cszTmp))
+                        cszDir = cszTmp;
+                }
+            }
+        }
+        else
+        {
+            cszDir = (IsExeTypeLib() ? "lib" : "bin");
+            ttCStr cszTmp(cszDir);
+            cszTmp += "32";
+            if (ttDirExists(cszTmp))
+                cszDir = cszTmp;
+            else
+            {
+                char* pszTmp = strstr(cszTmp, "32");
+                *pszTmp = 0;
+                cszTmp += "x86";
+                if (ttDirExists(cszTmp))  // if there is a ../lib32 or ../bin32, then use that
+                    cszDir = cszTmp;
+                else
+                {
+                    pszTmp = strstr(cszTmp, "x86");
+                    *pszTmp = 0;
+                    cszTmp += "_x86";
+                    if (ttDirExists(cszTmp))
+                        cszDir = cszTmp;
+                }
+            }
+        }
+    }
+
+    m_strTargetDir = static_cast<const char*>(cszDir);
+    return m_strTargetDir.c_str();
 }
 
 #if !defined(NDEBUG)  // Starts debug section.

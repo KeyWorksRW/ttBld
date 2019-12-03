@@ -56,6 +56,7 @@ namespace sfopt  // .srcfiles.yaml otpions
         OPT_CLANG_REL,      // flags to pass to the CLANG compiler in release builds
         OPT_CLANG_DBG,      // flags to pass to the CLANG compiler in debug builds
 
+        OPT_TARGET_DIR,     // target directory
         OPT_64BIT,          // Generate scripts for 64-bit build
         OPT_TARGET_DIR64,   // 64-bit target directory
 

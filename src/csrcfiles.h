@@ -28,6 +28,7 @@ public:
     CSrcFiles(const char* pszNinjaDir = nullptr);
 
     // Public functions
+    const char* GetTargetDir();
 
     const char* GetBuildScriptDir();
     void        AddFile(const char* pszFile) { m_lstSrcFiles += pszFile; }
@@ -144,6 +145,8 @@ private:
     ttCStr m_cszSrcFilePath;
     ttCStr m_cszReportPath;  // Path to use when reporting a problem
     ttCStr m_cszBldDir;      // This is where we write the .ninja files, and is ninja's builddir
+
+    std::string m_strTargetDir;
 
     int m_RequiredMajor;  // These three get filled in to the minimum ttBld version required to process
     int m_RequiredMinor;

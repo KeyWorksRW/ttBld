@@ -58,10 +58,12 @@ static const OPT_SETTING s_aOptions[] =
     { OPT_STATIC_CRT_REL, "Crt_rel",    "static",  false,   true,      _XGET("[static | dll] type of CRT to link to in release builds") },
     { OPT_STATIC_CRT_DBG, "Crt_dbg",    "static",  false,   true,      _XGET("[static | dll] type of CRT to link to in debug builds") },
 
-    { OPT_64BIT,        "64Bit",        "false",   true,    true,      _XGET("[true | false] indicates if project can be built as a 64-bit target") },
+    { OPT_TARGET_DIR, "TargetDir",      nullptr,   false,   false,     _XGET("target directory") },
+
+    { OPT_64BIT,        "64Bit",        "true",    true,    false,      _XGET("[true | false] indicates if project can be built as a 64-bit target") },
     { OPT_TARGET_DIR64, "TargetDir64",  nullptr,   false,   false,     _XGET("64-bit target directory") },
 
-    { OPT_32BIT,        "32Bit",        "true",    true,    true,      _XGET("[true | false] indicates if project can be built as a 32-bit target") },
+    { OPT_32BIT,        "32Bit",        "false",   true,    false,      _XGET("[true | false] indicates if project can be built as a 32-bit target") },
     { OPT_TARGET_DIR32, "TargetDir32",  nullptr,   false,   false,     _XGET("32-bit target directory") },
 
     { OPT_PERMISSIVE,   "Permissive",   "false",   true,    false,     _XGET("true means add -permissive- compiler flag") },
