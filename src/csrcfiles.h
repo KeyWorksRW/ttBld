@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
 #include <ttstr.h>    // ttStr, ttCWD
 #include <ttfile.h>   // ttCFile
