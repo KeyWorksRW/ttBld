@@ -53,16 +53,6 @@ public:
 
     bool IsOptimizeSpeed() { return (ttStrStrI(GetOption(OPT_OPTIMIZE), "speed")); }
 
-    // 32-bit target directory
-    const char* GetDir32() { return GetOption(OPT_TARGET_DIR32); }
-    // 64-bit target directory
-    const char* GetDir64() { return GetOption(OPT_TARGET_DIR64); }
-
-    const char* GetTargetDebug32();
-    const char* GetTargetDebug64();
-    const char* GetTargetRelease32();
-    const char* GetTargetRelease64();
-
     const char* GetBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
     const char* GetXgetFlags() { return GetOption(OPT_XGET_FLAGS); }
 
@@ -90,8 +80,14 @@ public:
 
 #if !defined(NDEBUG)  // Starts debug section.
     void AddError(const char* pszErrMsg);
+    #define BREAKONWARNING         \
+        {                          \
+            if (m_bBreakOnWarning) \
+                wxTrap();           \
+        }
 #else
     void AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
+    #define BREAKONWARNING
 #endif
 
 protected:
@@ -139,23 +135,19 @@ public:
 private:
     // Class members
 
-    ttCStr m_cszTargetDebug32;
-    ttCStr m_cszTargetDebug64;
-    ttCStr m_cszTargetRelease32;
-    ttCStr m_cszTargetRelease64;
-
     ttCStr m_cszSrcFilePath;
-    ttCStr m_cszReportPath;  // Path to use when reporting a problem
-    ttCStr m_cszBldDir;      // This is where we write the .ninja files, and is ninja's builddir
+    ttCStr m_cszReportPath;  // Path to use when reporting a problem.
+    ttCStr m_cszBldDir;      // This is where we write the .ninja files, and is ninja's builddir.
 
     ttCStr m_cszTargetRelease;
     ttCStr m_cszTargetDebug;
 
     std::string m_strTargetDir;
 
-    int m_RequiredMajor;  // These three get filled in to the minimum ttBld version required to process
+    int m_RequiredMajor;  // These three get filled in to the minimum ttBld version required to process.
     int m_RequiredMinor;
     int m_RequiredSub;
 
-    bool m_bRead;  // File has been read and processed
+    bool m_bRead;  // File has been read and processed.
+    bool m_bBreakOnWarning;  // Used in debug builds to call wxTrap().
 };

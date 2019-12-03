@@ -351,10 +351,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
         kf.ReplaceStr("%bld%", "");
 #endif  // defined(_WIN32)
 
-    if (cSrcFiles.GetBoolOption(OPT_64BIT))
-        kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug64());
-    else
-        kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug32());
+    kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug());
 
     // REVIEW: [randalphwa - 7/19/2019] Will it work to have a non-existant default.natvis file or will VS Code
     // complain? An alternative would be to insert/remove the entire line

@@ -6,22 +6,6 @@
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
-/*
-    This creates .ninja filenames containing three parts:
-
-        compiler
-        architecture
-        build type
-
-    That means to create a file that uses MSVC compiler to create a 32-bit debug target, we create:
-
-        msvc_x86_dbg.ninja
-
-    To create a clang-cl compiler to create a 64-bit release targets, we create:
-
-        clang_x64_rel.ninja
-
-*/
 
 #include "pch.h"
 
@@ -38,12 +22,6 @@ const char* aCppExt[] = { ".cpp", ".cxx", ".cc", nullptr };
 
 CNinja::CNinja(const char* pszNinjaDir)
     : CSrcFiles(pszNinjaDir)
-    ,
-    // make all ttCList classes use the same sub-heap
-    m_lstBuildLibs32D(m_ttHeap)
-    , m_lstBuildLibs64D(m_ttHeap)
-    , m_lstBuildLibs32R(m_ttHeap)
-    , m_lstBuildLibs64R(m_ttHeap)
 {
 #if !defined(NDEBUG)  // Starts debug section.
     ttASSERT(ReadFile());
@@ -55,78 +33,6 @@ CNinja::CNinja(const char* pszNinjaDir)
 
     CVerMakeNinja verSrcFiles;
     m_bInvalidVersion = verSrcFiles.IsSrcFilesNewer(GetMajorRequired(), GetMinorRequired(), GetSubRequired());
-
-    // If no platform was specified, default to 64-bit
-
-    if (!GetBoolOption(OPT_64BIT) && !GetBoolOption(OPT_32BIT))
-    {
-        UpdateOption(OPT_64BIT, true);          // default to 64-bit build
-        UpdateOption(OPT_64BIT_SUFFIX, false);  // no suffix
-    }
-
-    // Set default target directories if they are missing
-
-    if (GetBoolOption(OPT_64BIT) && !GetDir64())
-    {
-        ttCStr cszCWD;
-        cszCWD.GetCWD();
-        bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
-        if (!bSrcDir)
-        {
-            cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
-            if (ttDirExists(cszCWD))
-                bSrcDir = true;
-        }
-        if (bSrcDir)
-        {
-            ttCStr cszDir64(IsExeTypeLib() ? "../lib" : "../bin");
-            ttCStr cszTmp(cszDir64);
-            cszTmp += "64";
-            if (ttDirExists(cszTmp))  // if there is a ../lib64 or ../bin64, then use that
-                cszDir64 = cszTmp;
-            UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
-        }
-        else
-        {
-            ttCStr cszDir64(IsExeTypeLib() ? "lib" : "bin");
-            ttCStr cszTmp(cszDir64);
-            cszTmp += "64";
-            if (ttDirExists(cszTmp))  // if there is a ../lib64 or ../bin64, then use that
-                cszDir64 = cszTmp;
-            UpdateOption(OPT_TARGET_DIR64, (char*) cszDir64);
-        }
-    }
-
-    if (GetBoolOption(OPT_32BIT) && !GetDir32())
-    {
-        ttCStr cszCWD;
-        cszCWD.GetCWD();
-        bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
-        if (!bSrcDir)
-        {
-            cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
-            if (ttDirExists(cszCWD))
-                bSrcDir = true;
-        }
-        if (bSrcDir)
-        {
-            ttCStr cszDir32(IsExeTypeLib() ? "../lib" : "../bin");
-            ttCStr cszTmp(cszDir32);
-            cszTmp += "32";
-            if (ttDirExists(cszTmp))  // if there is a ../lib32 or ../bin32, then use that
-                cszDir32 = cszTmp;
-            UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
-        }
-        else
-        {
-            ttCStr cszDir32(IsExeTypeLib() ? "lib" : "bin");
-            ttCStr cszTmp(cszDir32);
-            cszTmp += "32";
-            if (ttDirExists(cszTmp))  // if there is a ../lib32 or ../bin32, then use that
-                cszDir32 = cszTmp;
-            UpdateOption(OPT_TARGET_DIR32, (char*) cszDir32);
-        }
-    }
 
     if (!GetProjectName())
     {
@@ -155,8 +61,6 @@ CNinja::CNinja(const char* pszNinjaDir)
     if (m_cszRcName.IsNonEmpty())
         FindRcDependencies(m_cszRcName);
 
-    m_bBin64Exists = ttStrStr(GetDir64(), "64");
-
     const char* pszEnv = getenv("TTBLD_CFLAGS");
     if (pszEnv)
     {
@@ -170,7 +74,7 @@ CNinja::CNinja(const char* pszNinjaDir)
         UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
     }
 
-    // ProcessBuildLibs();
+    ProcessBuildLibs();
 }
 
 static const char* aszCompilerPrefix[] = {
@@ -205,60 +109,20 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     switch (gentype)
     {
-        case GEN_DEBUG32:
+        case GEN_DEBUG:
             cszOutDir += aszCompilerPrefix[cmplr];
-            cszOutDir += "x86_dbg";
+            cszOutDir += "Debug";
             m_cszScriptFile += aszCompilerPrefix[cmplr];
-            m_cszScriptFile += "x86_dbg.ninja";
+            m_cszScriptFile += "dbg.ninja";
             break;
 
-        case GEN_DEBUG64:
-            cszOutDir += aszCompilerPrefix[cmplr];
-            cszOutDir += "x64_dbg";
-            m_cszScriptFile += aszCompilerPrefix[cmplr];
-            m_cszScriptFile += "x64_dbg.ninja";
-            break;
-
-        case GEN_RELEASE32:
-            cszOutDir += aszCompilerPrefix[cmplr];
-            cszOutDir += "x86_rel";
-            m_cszScriptFile += aszCompilerPrefix[cmplr];
-            m_cszScriptFile += "x86_rel.ninja";
-            break;
-
-        case GEN_RELEASE64:
+        case GEN_RELEASE:
         default:
             cszOutDir += aszCompilerPrefix[cmplr];
-            cszOutDir += "x64_rel";
+            cszOutDir += "Release";
             m_cszScriptFile += aszCompilerPrefix[cmplr];
-            m_cszScriptFile += "x64_rel.ninja";
+            m_cszScriptFile += "rel.ninja";
             break;
-    }
-
-    ttCStr cszProj(GetProjectName());  // If needed, add a suffix to the project name
-
-    // Don't add the 'D' to the end of DLL's -- it is perfectly viable for a release app to use a debug dll and that
-    // won't work if the filename has changed. Under MSVC Linker, it will also generate a LNK4070 error if the dll name
-    // is specified in the matching .def file. The downside, of course, is that without the 'D' only the size of the dll
-    // indicates if it is a debug or release version.
-
-    if (IsExeTypeDll())
-    {
-        if (GetBoolOption(OPT_64BIT_SUFFIX))
-            cszProj += "_x64";
-        else if (GetBoolOption(OPT_32BIT_SUFFIX))
-            cszProj += "_x86";
-    }
-    else
-    {
-        if (gentype == GEN_DEBUG64 && GetBoolOption(OPT_64BIT_SUFFIX))
-            cszProj += "_x64D";
-        else if (gentype == GEN_RELEASE64 && GetBoolOption(OPT_64BIT_SUFFIX))
-            cszProj += "_x64";
-        else if (gentype == GEN_DEBUG32 && GetBoolOption(OPT_32BIT_SUFFIX))
-            cszProj += "_x86D";
-        else if (gentype == GEN_RELEASE32 && GetBoolOption(OPT_32BIT_SUFFIX))
-            cszProj += "_x86";
     }
 
     file.SetUnixLF();  // WARNING!!! NINJA doesn't allow \r characters (or \t for that matter)
@@ -387,7 +251,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     {
         cszRes = GetRcFile();
         cszRes.RemoveExtension();
-        cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ? "D.res" : ".res");
+        cszRes += ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
         cszRes.ChangeExtension(".res");
         file.printf("build $resout/%s: rc %s", (char*) cszRes, GetRcFile());
 
@@ -451,107 +315,11 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 {
     ttCStr cszLib(pszLib);
-    char*  pszTmp = ttStrStrI(pszLib, ".lib");
-    if (pszTmp)
-        *pszTmp = 0;
-
-    // Note that if the path to the library contains a "64" or "32" then the "64" suffix is not added. I.e.,
-    // ../ttLib/lib64/ttLib will turn into ttLibD.lib not ttLib64D.lib. Otherwise we always add a platform suffix (64 or
-    // 32).
-
-    switch (gentype)
-    {
-        case GEN_DEBUG32:
-            cszLib += (!ttStrStr(cszLib, "32") && !ttStrStr(cszLib, "x86")) ? "_x86D.lib" : "D.lib";
-            break;
-        case GEN_DEBUG64:
-            cszLib += (!ttStrStr(cszLib, "64") && !ttStrStr(cszLib, "x64")) ? "_x64D.lib" : "D.lib";
-            break;
-        case GEN_RELEASE32:
-            cszLib += (!ttStrStr(cszLib, "32") && !ttStrStr(cszLib, "x86")) ? "_x86.lib" : ".lib";
-            break;
-        case GEN_RELEASE64:
-        default:
-            cszLib += (!ttStrStr(cszLib, "64") && !ttStrStr(cszLib, "x64")) ? "_x64.lib" : ".lib";
-            break;
-    }
+    if (!ttStrStrI(pszLib, ".lib"))
+        cszLib += (gentype == GEN_DEBUG ? "D.lib" : ".lib");
 
     m_pkfOut->WriteChar(CH_SPACE);
     m_pkfOut->WriteStr(cszLib);
-}
-
-// Some libraries will have suffixes appended to the base name to indicate platform and debug versions. If we can find
-// such a version then use that.
-
-void CNinja::GetLibName(const char* pszBaseName, ttCStr& cszLibName)
-{
-    ttASSERT(ttIsNonEmpty(pszBaseName));
-
-    cszLibName = pszBaseName;
-    char*  pszExt = cszLibName.FindExt();
-    ttCStr cszExt;
-
-    if (pszExt && *pszExt == '.')
-    {
-        cszExt = pszExt;
-        *pszExt = 0;
-    }
-    else
-        cszExt = ".lib";
-
-    // BUGBUG: [KeyWorks - 11-25-2019] This following is very likely to now be wrong. We're trying to switch to using
-    // _x86 and _x64 suffixes, though 32 and 64 would also be valid.
-
-    switch (m_gentype)
-    {
-        case GEN_DEBUG32:
-            cszLibName += !ttStrStr(cszLibName, "32") ? "32D" : "D";
-            break;
-        case GEN_DEBUG64:
-            cszLibName += !ttStrStr(cszLibName, "64") ? "64D" : "D";
-            break;
-        case GEN_RELEASE32:
-            cszLibName += !ttStrStr(cszLibName, "32") ? "32" : "";
-            break;
-        case GEN_RELEASE64:
-        default:
-            cszLibName += !ttStrStr(cszLibName, "64") ? "64" : "";
-            break;
-    }
-
-    cszLibName += cszExt;
-
-    if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_RELEASE32) && GetOption(OPT_LIB_DIRS32))
-    {
-        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS32), ';');
-        while (enumLib.Enum())
-        {
-            ttCStr cszPath(enumLib);
-            cszPath.AppendFileName(cszLibName);
-            if (ttFileExists(cszPath))
-                return;  // we found the modified library, so return
-        }
-    }
-    else if ((m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) && GetOption(OPT_LIB_DIRS64))
-    {
-        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS64), ';');
-        while (enumLib.Enum())
-        {
-            ttCStr cszPath(enumLib);
-            cszPath.AppendFileName(cszLibName);
-            if (ttFileExists(cszPath))
-                return;  // we found the modified library, so return
-        }
-    }
-
-    if (FindFileEnv(cszLibName, "LIB"))
-        return;  // we found the modified library, so return
-
-    // If we get here, we couldn't find the modified version
-
-    cszLibName = pszBaseName;
-    if (!ttStrChr(cszLibName, '.'))
-        cszLibName += cszExt;
 }
 
 void CNinja::ProcessBuildLibs()
@@ -578,8 +346,16 @@ void CNinja::ProcessBuildLibs()
             // The current directory may just be the name of the library, but not necessarily where srcfiles is located.
 
             ttCStr cszBuildPath(enumLib);
-            ttCStr cszBuildFile;
-            if (!LocateSrcFiles(&cszBuildFile))
+            ttCStr cszBuildFile(cszBuildPath);  // LocateSrcFiles will update this
+            if (LocateSrcFiles(&cszBuildFile)) {
+                char* pszTmp = ttFindFilePortion(cszBuildFile);
+                char ch = *pszTmp;
+                *pszTmp = 0;
+                wxSetWorkingDirectory(cszBuildFile.c_str());
+                *pszTmp = ch;
+            }
+
+            else
             {
                 for (;;)  // empty for loop that we break out of as soon as we find a srcfiles file to use
                 {
@@ -642,10 +418,8 @@ void CNinja::ProcessBuildLibs()
             // the filename. However, if an error occurs, we need to indicate where the .srcfiles.yaml file is that had
             // the problem.
 
-            cszBuildPath.AppendFileName(cszBuildFile);
-
             CSrcFiles cSrcFiles;
-            cSrcFiles.SetReportingFile(cszBuildPath);
+            cSrcFiles.SetReportingFile(cszBuildFile);
             if (cSrcFiles.ReadFile())
             {
                 ttCStr cszCurDir;
@@ -653,56 +427,6 @@ void CNinja::ProcessBuildLibs()
                 ttCStr cszRelDir;
                 ttConvertToRelative(cwdSave, cszCurDir, cszRelDir);
                 m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), cszRelDir);
-
-                const char* pszLib;
-
-                pszLib = cSrcFiles.GetTargetDebug32();
-                if (pszLib)
-                {
-                    ttCStr cszLibDir;
-                    cszLibDir.GetCWD();
-                    cszLibDir.AppendFileName(pszLib);
-                    cszLibDir.FullPathName();
-                    ttCStr cszRelLib;
-                    ttConvertToRelative(cwdSave, cszLibDir, cszRelLib);
-                    m_lstBuildLibs32D += cszRelLib;
-                }
-
-                pszLib = cSrcFiles.GetTargetDebug64();
-                if (pszLib)
-                {
-                    ttCStr cszLibDir;
-                    cszLibDir.GetCWD();
-                    cszLibDir.AppendFileName(pszLib);
-                    cszLibDir.FullPathName();
-                    ttCStr cszRelLib;
-                    ttConvertToRelative(cwdSave, cszLibDir, cszRelLib);
-                    m_lstBuildLibs64D += cszRelLib;
-                }
-
-                pszLib = cSrcFiles.GetTargetRelease32();
-                if (pszLib)
-                {
-                    ttCStr cszLibDir;
-                    cszLibDir.GetCWD();
-                    cszLibDir.AppendFileName(pszLib);
-                    cszLibDir.FullPathName();
-                    ttCStr cszRelLib;
-                    ttConvertToRelative(cwdSave, cszLibDir, cszRelLib);
-                    m_lstBuildLibs32R += cszRelLib;
-                }
-
-                pszLib = cSrcFiles.GetTargetRelease64();
-                if (pszLib)
-                {
-                    ttCStr cszLibDir;
-                    cszLibDir.GetCWD();
-                    cszLibDir.AppendFileName(pszLib);
-                    cszLibDir.FullPathName();
-                    ttCStr cszRelLib;
-                    ttConvertToRelative(cwdSave, cszLibDir, cszRelLib);
-                    m_lstBuildLibs64R += cszRelLib;
-                }
             }
         }
     }

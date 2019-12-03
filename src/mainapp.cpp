@@ -133,22 +133,22 @@ typedef enum
 {
     UPDATE_NORMAL,
 
-    UPDATE_MSVC64D,
+    UPDATE_MSVCD,
     UPDATE_MSVC32D,
-    UPDATE_CLANG_CL64D,
+    UPDATE_CLANG_CLD,
     UPDATE_CLANG_CL32D,
-    UPDATE_CLANG64D,
+    UPDATE_CLANGD,
     UPDATE_CLANG32D,
-    UPDATE_GCC64D,
+    UPDATE_GCCD,
     UPDATE_GCC32D,
 
-    UPDATE_MSVC64,
+    UPDATE_MSVC,
     UPDATE_MSVC32,
-    UPDATE_CLANG_CL64,
+    UPDATE_CLANG_CL,
     UPDATE_CLANG_CL32,
-    UPDATE_CLANG64,
+    UPDATE_CLANG,
     UPDATE_CLANG32,
-    UPDATE_GCC64,
+    UPDATE_GCC,
     UPDATE_GCC32,
 
 } UPDATE_TYPE;
@@ -341,40 +341,21 @@ int oldMain(int argc, char* argv[])
 
         // The following commands are called from a makefile to update one .ninja script and immediately exit
 
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x64"))
-            upType = UPDATE_MSVC64;
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc"))
+            upType = UPDATE_MSVC;
         else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x86"))
             upType = UPDATE_MSVC32;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x64"))
-            upType = UPDATE_CLANG_CL64;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclang"))
+            upType = UPDATE_CLANG_CL;
         else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x86"))
             upType = UPDATE_CLANG_CL32;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x64D"))
-            upType = UPDATE_MSVC64D;
+        else if (ttIsSameStrI(argv[argpos] + 1, "umsvcD"))
+            upType = UPDATE_MSVCD;
         else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x86D"))
             upType = UPDATE_MSVC32D;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x64D"))
-            upType = UPDATE_CLANG_CL64D;
+        else if (ttIsSameStrI(argv[argpos] + 1, "uclangD"))
+            upType = UPDATE_CLANG_CLD;
         else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x86D"))
-            upType = UPDATE_CLANG_CL32D;
-
-        // REVIEW: [KeyWorks - 11-19-2019] Remove these after ALL previously generated makefiles have been updated
-
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64"))
-            upType = UPDATE_MSVC64;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc32"))
-            upType = UPDATE_MSVC32;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang64"))
-            upType = UPDATE_CLANG_CL64;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang32"))
-            upType = UPDATE_CLANG_CL32;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc64D"))
-            upType = UPDATE_MSVC64D;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc32D"))
-            upType = UPDATE_MSVC32D;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang64D"))
-            upType = UPDATE_CLANG_CL64D;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang32D"))
             upType = UPDATE_CLANG_CL32D;
     }
 
@@ -541,36 +522,17 @@ int oldMain(int argc, char* argv[])
         else
             cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);
 
-        ttASSERT_MSG(cNinja.GetBoolOption(OPT_64BIT) || cNinja.GetBoolOption(OPT_32BIT),
-                     "At least one platform build should have been set in CNinja constructor");
-
         int countNinjas = 0;
-        if (cNinja.GetBoolOption(OPT_64BIT))
-        {
 #if defined(_WIN32)
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_MSVC))
-                countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_MSVC))
-                countNinjas++;
+        if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
+            countNinjas++;
+        if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
+            countNinjas++;
 #endif
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
-                countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
-                countNinjas++;
-        }
-        if (cNinja.GetBoolOption(OPT_32BIT))
-        {
-#if defined(_WIN32)
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_MSVC))
-                countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
-                countNinjas++;
-#endif
-            if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
-                countNinjas++;
-            if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
-                countNinjas++;
-        }
+        if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
+            countNinjas++;
+        if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
+            countNinjas++;
 
         if (ttIsNonEmpty(cNinja.GetHHPName()))
             cNinja.CreateHelpFile();
@@ -606,43 +568,43 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     {
         switch (upType)
         {
-            case UPDATE_MSVC64:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_MSVC))
+            case UPDATE_MSVC:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
                     printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_MSVC32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
                     printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
-            case UPDATE_CLANG_CL64:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE64, CNinja::CMPLR_CLANG))
+            case UPDATE_CLANG_CL:
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
                     printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
                     printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
-            case UPDATE_MSVC64D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_MSVC))
+            case UPDATE_MSVCD:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
                     printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_MSVC32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_MSVC))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
                     printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
-            case UPDATE_CLANG_CL64D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG64, CNinja::CMPLR_CLANG))
+            case UPDATE_CLANG_CLD:
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
                     printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 
             case UPDATE_CLANG_CL32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
                     printf(_("%s updated.\n"), cNinja.GetScriptFile());
                 break;
 

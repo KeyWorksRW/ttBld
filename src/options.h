@@ -63,9 +63,6 @@ namespace sfopt  // .srcfiles.yaml otpions
         OPT_32BIT,          // Generate scripts for 32-bit build
         OPT_TARGET_DIR32,   // 32-bit target directory
 
-        OPT_64BIT_SUFFIX,   // true means append "_x64" to target's directory or .exe name
-        OPT_32BIT_SUFFIX,   // true means append "_x86" to target's directory or .exe name
-
         OPT_INC_DIRS,       // Additional directories for header files
         OPT_LIB_DIRS64,     // 64-bit library directories
         OPT_LIB_DIRS32,     // 32-bit library directories

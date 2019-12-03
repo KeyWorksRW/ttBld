@@ -21,13 +21,13 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
     m_pkfOut->WriteEol("# -EHsc\t// Structured exception handling");
 
     // Write comment section explaining the compiler flags in use
-    if (cmplr == CMPLR_MSVC && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+    if (cmplr == CMPLR_MSVC && m_gentype == GEN_RELEASE)
     {
         // These are only supported by the MSVC compiler
         m_pkfOut->WriteEol("# -GL\t  // Whole program optimization");
     }
 
-    if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
+    if (m_gentype == GEN_RELEASE)
     {
         if (GetBoolOption(OPT_STDCALL))
             m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
@@ -44,7 +44,7 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
 
         m_pkfOut->WriteEol("# -FC\t  // Full path to source code file in diagnostics");
     }
-    else  // Presumably GEN_DEBUG32 or GEN_DEBUG64
+    else
     {
         if (IsStaticCrtDbg())
             m_pkfOut->WriteEol("# -MD\t// Multithreaded static CRT");
@@ -64,7 +64,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 {
     // First we write the flags common to both compilers
 
-    if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+    if (m_gentype == GEN_DEBUG)
     {
         // For MSVC compiler you can either use -Z7 or -FS -Zf -Zi. My testing of the two approaches is that -Z7 yields
         // larger object files but reduces compile/link time by about 20% (compile speed is faster because no serialized
@@ -78,7 +78,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
                         IsStaticCrtDbg() ? " -MD" : " -MDd");
         // clang-format on
     }
-    else  // Presumably GEN_RELEASE32 or GEN_RELEASE64
+    else
     {
         // clang-format off
         m_pkfOut->printf(
@@ -104,25 +104,25 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         m_pkfOut->WriteStr(cszEnv);
     }
 
-    if (GetOption(OPT_CFLAGS_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+    if (GetOption(OPT_CFLAGS_REL) && m_gentype == GEN_RELEASE)
     {
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_REL));
     }
 
-    if ((m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64) && cszEnv.GetEnv("CFLAGSR"))
+    if (m_gentype == GEN_RELEASE && cszEnv.GetEnv("CFLAGSR"))
     {
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(cszEnv);
     }
 
-    if (GetOption(OPT_CFLAGS_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
+    if (GetOption(OPT_CFLAGS_DBG) && m_gentype == GEN_DEBUG)
     {
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_DBG));
     }
 
-    if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) && cszEnv.GetEnv("CFLAGSD"))
+    if (m_gentype == GEN_DEBUG && cszEnv.GetEnv("CFLAGSD"))
     {
         m_pkfOut->WriteChar(' ');
         m_pkfOut->WriteStr(cszEnv);
@@ -134,7 +134,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     {
         if (GetBoolOption(OPT_PERMISSIVE))
             m_pkfOut->WriteStr(" -permissive-");
-        if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
+        if (m_gentype == GEN_RELEASE)
             m_pkfOut->WriteStr(" -GL");  // whole program optimization
     }
 
@@ -142,10 +142,9 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     {
         m_pkfOut->WriteStr(
             " -D__clang__");  // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
-        m_pkfOut->WriteStr(" -fms-compatibility-version=19");  // Version of MSVC to be compatible with
-        m_pkfOut->WriteStr(m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " -m64" :
-                                                                                    " -m32");  // specify the platform
-        if (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64)
+        m_pkfOut->WriteStr(" -fms-compatibility-version=19");              // Version of MSVC to be compatible with
+        m_pkfOut->WriteStr(GetBoolOption(OPT_32BIT) ? " -m32" : " -m64");  // specify the platform
+        if (m_gentype == GEN_RELEASE)
             m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");  // whole program optimization
 
         if (GetOption(OPT_CLANG_CMN))
@@ -153,12 +152,12 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
             m_pkfOut->WriteChar(' ');
             m_pkfOut->WriteStr(GetOption(OPT_CLANG_CMN));
         }
-        if (GetOption(OPT_CLANG_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+        if (m_gentype == GEN_RELEASE && GetOption(OPT_CLANG_REL))
         {
             m_pkfOut->WriteChar(' ');
             m_pkfOut->WriteStr(GetOption(OPT_CLANG_REL));
         }
-        if (GetOption(OPT_CLANG_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
+        if (m_gentype == GEN_DEBUG && GetOption(OPT_CLANG_DBG))
         {
             m_pkfOut->WriteChar(' ');
             m_pkfOut->WriteStr(GetOption(OPT_CLANG_DBG));
@@ -195,7 +194,7 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 
         // Write compile directive
 
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+        if (m_gentype == GEN_DEBUG)
         {
             m_pkfOut->printf("rule compile\n"
                              "  deps = msvc\n"
@@ -225,7 +224,7 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 
         // Write compile directive
 
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+        if (m_gentype == GEN_DEBUG)
         {
             m_pkfOut->printf("rule compile\n"
                              "  deps = msvc\n"  // clang-cl supports -showIncludes, same as msvc
@@ -259,20 +258,20 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
     cszRule += " /out:$out /manifest:no";
     if (IsExeTypeDll())
         cszRule += " /dll";
-    cszRule += (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64 ? " /machine:x64" : " /machine:x86");
+    cszRule += (GetBoolOption(OPT_32BIT) ? " /machine:x86" : " /machine:x64");
 
     if (GetOption(OPT_LINK_CMN))
     {
         cszRule += " ";
         cszRule += GetOption(OPT_LINK_CMN);
     }
-    if (GetOption(OPT_LINK_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+    if (GetOption(OPT_LINK_REL) && (m_gentype == GEN_RELEASE))
     {
         cszRule += " ";
         cszRule += GetOption(OPT_LINK_REL);
     }
 
-    if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+    if (m_gentype == GEN_DEBUG)
     {
         if (GetOption(OPT_LINK_DBG))
         {
@@ -297,38 +296,17 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
     }
     cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
 
-    if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_RELEASE32) && GetOption(OPT_LIB_DIRS32))
-    {
-        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS32), ';');
-        while (enumLib.Enum())
-        {
-            cszRule += " /LIBPATH:";
-            cszRule += enumLib;
-        }
-    }
-    else if ((m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) && GetOption(OPT_LIB_DIRS64))
-    {
-        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS64), ';');
-        while (enumLib.Enum())
-        {
-            cszRule += " /LIBPATH:";
-            cszRule += enumLib;
-        }
-    }
-
     if (GetOption(OPT_LIBS_CMN))
     {
         ttCEnumStr enumLib(GetOption(OPT_LIBS_CMN), ';');
         while (enumLib.Enum())
         {
-            ttCStr cszLib;
-            GetLibName(enumLib, cszLib);
             cszRule += " ";
-            cszRule += cszLib;
+            cszRule += enumLib;
         }
     }
 
-    if (GetOption(OPT_LIBS_DBG) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64))
+    if (GetOption(OPT_LIBS_DBG) && m_gentype == GEN_DEBUG)
     {
         ttCEnumStr enumLib(GetOption(OPT_LIBS_DBG), ';');
         while (enumLib.Enum())
@@ -338,7 +316,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
         }
     }
 
-    if (GetOption(OPT_LIBS_REL) && (m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64))
+    if (GetOption(OPT_LIBS_REL) && (m_gentype == GEN_RELEASE))
     {
         ttCEnumStr enumLib(GetOption(OPT_LIBS_REL), ';');
         while (enumLib.Enum())
@@ -360,7 +338,7 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
         if (IsExeTypeLib())
         {
             m_pkfOut->printf("rule lib\n  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in\n",
-                             (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
+                             (GetBoolOption(OPT_32BIT)) ? "x86" : "x64");
             m_pkfOut->WriteEol("  description = creating library $out\n");
         }
     }
@@ -370,7 +348,7 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
         {
             // MSVC -LTCG option is not supported by lld
             m_pkfOut->printf("rule lib\n  command = lld-link.exe /lib /machine:%s /out:$out $in\n",
-                             (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64) ? "x64" : "x86");
+                             (GetBoolOption(OPT_32BIT)) ? "x86" : "x64");
             m_pkfOut->WriteEol("  description = creating library $out\n");
         }
     }
@@ -397,7 +375,7 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_RC_CMN));
         }
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+        if (m_gentype == GEN_DEBUG)
         {
             m_pkfOut->WriteStr(" -d_DEBUG");
             if (GetOption(OPT_RC_DBG))
@@ -406,7 +384,7 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
                 m_pkfOut->WriteStr(GetOption(OPT_RC_DBG));
             }
         }
-        else if ((m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64) && GetOption(OPT_RC_REL))
+        else if ((m_gentype == GEN_RELEASE) && GetOption(OPT_RC_REL))
         {
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_RC_REL));
@@ -419,10 +397,10 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
 {
     if (m_lstIdlFiles.GetCount())
     {
-        if (m_gentype == GEN_DEBUG64 || m_gentype == GEN_RELEASE64)
-            m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /x64");
-        else
+        if (GetBoolOption(OPT_32BIT))
             m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /win32");
+        else
+            m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /x64");
 
         if (GetOption(OPT_INC_DIRS))
         {
@@ -436,7 +414,7 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_MDL_CMN));
         }
-        if (m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64)
+        if (m_gentype == GEN_DEBUG)
         {
             // m_pkfOut->WriteStr(" -D_DEBUG");
             if (GetOption(OPT_MDL_DBG))
@@ -445,7 +423,7 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
                 m_pkfOut->WriteStr(GetOption(OPT_MDL_DBG));
             }
         }
-        else if ((m_gentype == GEN_RELEASE32 || m_gentype == GEN_RELEASE64) && GetOption(OPT_MDL_REL))
+        else if ((m_gentype == GEN_RELEASE) && GetOption(OPT_MDL_REL))
         {
             m_pkfOut->WriteChar(CH_SPACE);
             m_pkfOut->WriteStr(GetOption(OPT_MDL_REL));
@@ -478,26 +456,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way around
     // this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
-    const char* pszTarget;
-    pszTarget = GetTargetDir();
-#if 0
-    switch (m_gentype)
-    {
-        case GEN_DEBUG32:
-            pszTarget = GetTargetDebug32();
-            break;
-        case GEN_DEBUG64:
-            pszTarget = GetTargetDebug64();
-            break;
-        case GEN_RELEASE32:
-            pszTarget = GetTargetRelease32();
-            break;
-        case GEN_RELEASE64:
-        default:
-            pszTarget = GetTargetRelease64();
-            break;
-    }
-#endif
+    const char* pszTarget = (m_gentype == GEN_DEBUG) ? GetTargetDebug() : GetTargetRelease();
 
     if (IsExeTypeLib())
         m_pkfOut->printf("build %s : lib", pszTarget);
@@ -508,7 +467,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     {
         ttCStr cszRes(GetRcFile());
         cszRes.RemoveExtension();
-        cszRes += ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) ? "D.res" : ".res");
+        cszRes += ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
         m_pkfOut->printf(" $resout/%s", (char*) cszRes);
     }
 
@@ -530,31 +489,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     if (!bPchSeen && m_cszPCHObj.IsNonEmpty())
         m_pkfOut->printf(" $\n  $outdir/%s", (char*) m_cszPCHObj);
 
-    switch (m_gentype)
-    {
-        case GEN_DEBUG32:
-            for (size_t pos = 0; m_lstBuildLibs32D.InRange(pos); ++pos)
-                m_pkfOut->printf(" $\n  %s", (char*) m_lstBuildLibs32D[pos]);
-            break;
-
-        case GEN_DEBUG64:
-            for (size_t pos = 0; m_lstBuildLibs64D.InRange(pos); ++pos)
-                m_pkfOut->printf(" $\n  %s", (char*) m_lstBuildLibs64D[pos]);
-            break;
-
-        case GEN_RELEASE32:
-            for (size_t pos = 0; m_lstBuildLibs32R.InRange(pos); ++pos)
-                m_pkfOut->printf(" $\n  %s", (char*) m_lstBuildLibs32R[pos]);
-            break;
-
-        case GEN_RELEASE64:
-        default:
-            for (size_t pos = 0; m_lstBuildLibs64R.InRange(pos); ++pos)
-                m_pkfOut->printf(" $\n  %s", (char*) m_lstBuildLibs64R[pos]);
-            break;
-    }
-
-    if ((m_gentype == GEN_DEBUG32 || m_gentype == GEN_DEBUG64) && GetOption(OPT_NATVIS))
+    if (m_gentype == GEN_DEBUG && GetOption(OPT_NATVIS))
         m_pkfOut->printf(" $\n  | %s", GetOption(OPT_NATVIS));
 
     m_pkfOut->WriteEol("\n");

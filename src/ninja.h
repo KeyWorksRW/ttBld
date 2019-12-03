@@ -22,10 +22,8 @@ public:
     typedef enum
     {
         GEN_NONE,
-        GEN_DEBUG32,
-        GEN_RELEASE32,
-        GEN_DEBUG64,
-        GEN_RELEASE64
+        GEN_DEBUG,
+        GEN_RELEASE
     } GEN_TYPE;
 
     typedef enum
@@ -60,7 +58,6 @@ public:
 
     // Returns false if .srcfiles.yaml requires a newer version
     bool IsValidVersion() { return m_bInvalidVersion != true; }
-    bool IsBin64() { return m_bBin64Exists; }
 
     // Name and location of any additional library to build
     const char* GetLibName() { return m_cszLibName; }
@@ -72,7 +69,6 @@ public:
 protected:
     // Protected functions
 
-    void GetLibName(const char* pszBaseName, ttCStr& cszLibName);
     void AddDependentLibrary(const char* pszLib, GEN_TYPE gentype);
 
 #if defined(_WIN32)
@@ -106,14 +102,8 @@ private:
     ttCStr m_cszChmFile;     // Set if a .hhp file was specified in .srcfiles.yaml
     ttCStr m_cszScriptFile;  // The .ninja file
 
-    ttCList m_lstBuildLibs32D;
-    ttCList m_lstBuildLibs64D;
-    ttCList m_lstBuildLibs32R;
-    ttCList m_lstBuildLibs64R;
-
     ttCDblList m_dlstTargetDir;  // Target name, directory to use
 
-    bool m_bBin64Exists;     // If true, the directory ../bin64 exists
     bool m_bForceWrite;      // Write the ninja file even if it hasn't changed
     bool m_bInvalidVersion;  // True if a newer version is needed to parse the .srcfiles.yaml
 };

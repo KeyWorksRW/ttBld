@@ -38,3 +38,4 @@ using namespace ttch;  // For the CH_ and CHW_ constants
 
 extern const char* txtVersion;
 extern const char* txtCopyRight;
+extern const char* txtAppName;

@@ -18,7 +18,7 @@
 
 using namespace sfopt;
 
-const char* txtOptVersion = "1.3.0";  // any time you add an option below, you need to increment this version number and
+const char* txtOptVersion = "1.4.0";  // any time you add an option below, you need to increment this version number and
                                       // then add it to the OPT_VERSION list
 
 // clang-format off
@@ -33,6 +33,8 @@ sfopt::OPT_VERSION aoptVersions[] =
     { OPT_XGET_FLAGS, 1, 3, 0 },
     { OPT_MSGFMT_FLAGS, 1, 3, 0 },
     { OPT_MSGFMT_XML, 1, 3, 0 },
+
+    { OPT_TARGET_DIR, 1, 4, 0 },
 
     // All options default to 1.0.0, so only add options above that require a newer version of ttBld
 
@@ -105,9 +107,6 @@ static const OPT_SETTING s_aOptions[] =
     { OPT_LIBS_CMN,     "Libs_cmn",     nullptr,   false,   false,     _XGET("additional libraries to link to in all builds") },
     { OPT_LIBS_REL,     "Libs_rel",     nullptr,   false,   false,     _XGET("additional libraries to link to in release builds") },
     { OPT_LIBS_DBG,     "Libs_dbg",     nullptr,   false,   false,     _XGET("additional libraries to link to in debug builds") },
-
-    { OPT_64BIT_SUFFIX, "b64_suffix",   "false",   true,    false,     _XGET("true means append '_x64' to target's directory or .exe name") },
-    { OPT_32BIT_SUFFIX, "b32_suffix",   "false",   true,    false,     _XGET("true means append '_x86' to target's directory or .exe name") },
 
     // The following options are for xgettext/msgfmt support
 

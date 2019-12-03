@@ -14,6 +14,7 @@
 #include <ttcwd.h>       // ttCCwd
 
 #if !defined(NDEBUG)  // Starts debug section.
+    #include <wx/config.h>
     #include <wx/log.h>
 #endif
 
@@ -56,6 +57,12 @@ CSrcFiles::CSrcFiles(const char* pszNinjaDir)
         m_cszBldDir = pszNinjaDir;
     else
         m_cszBldDir = txtDefBuildDir;
+
+#if !defined(NDEBUG)  // Starts debug section.
+    wxConfig config("ttBld");
+    config.SetPath("/Settings");
+    config.Read("BreakOnWarning", &m_bBreakOnWarning);
+#endif
 }
 
 bool CSrcFiles::ReadFile(const char* pszFile)
@@ -68,6 +75,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
             ttCStr csz;
             csz.printf(_("Cannot locate the file %s"), ".srcfiles.yaml");
             m_lstErrors += csz;
+            BREAKONWARNING;
             return false;  // if we still can't find it, bail
         }
     }
@@ -88,7 +96,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
         ttCStr csz;
         csz.printf(_("Cannot open \"%s\"."), (char*) m_cszSrcFilePath);
         m_lstErrors += csz;
-
+        BREAKONWARNING;
         return false;
     }
 
@@ -186,8 +194,10 @@ void CSrcFiles::ProcessOption(char* pszLine)
     if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
         return;
 
-    if (ttIsSameStrI(cszName, "64Bit:"))
-        return;  // The only time we don't build 64-bit is if 32Bit: is true
+    // Ignore obsolete options
+
+    if (ttIsSameStrI(cszName, "64Bit:") || ttIsSameStrI(cszName, "b64_suffix:") || ttIsSameStrI(cszName, "b32_suffix:"))
+        return;
 
     if (ttIsSameStrI(cszName, "TargetDir64:"))
         cszName = "TargetDir";
@@ -217,6 +227,10 @@ void CSrcFiles::ProcessOption(char* pszLine)
     ttCStr csz;
     csz.printf(_("%s is an unknown option"), (char*) cszName);
     m_lstErrors += csz;
+#if !defined(NDEBUG)  // Starts debug section.
+    if (m_bBreakOnWarning)
+        wxTrap();
+#endif
 }
 
 void CSrcFiles::AddCompilerFlag(const char* pszFlag)
@@ -272,6 +286,10 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
             ttCStr cszErrMsg;
             cszErrMsg.printf("Cannot locate the file %s.", (char*) pszLibFile);
             m_lstErrors += cszErrMsg;
+#if !defined(NDEBUG)  // Starts debug section.
+            if (m_bBreakOnWarning)
+                wxTrap();
+#endif
         }
     }
 }
@@ -384,6 +402,10 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         ttCStr cszMsg;
         cszMsg.printf(_("%s: unable to locate the file %s."), GetReportFilename(), pszFile);
         m_lstErrors += cszMsg;
+#if !defined(NDEBUG)  // Starts debug section.
+        if (m_bBreakOnWarning)
+            wxTrap();
+#endif
         return;
     }
 
@@ -561,202 +583,21 @@ const char* CSrcFiles::GetBuildScriptDir()
     return m_cszBldDir;
 }
 
-// Don't add the 'D' to the end of DLL's -- it is perfectly viable for a release app to use a debug dll and that won't
-// work if the filename has changed. Under MSVC Linker, it will also generate a LNK4070 error if the dll name is
-// specified in the matching .def file. The downside, of course, is that without the 'D' only the size of the dll
-// indicates if it is a debug or release version.
-
-const char* CSrcFiles::GetTargetDebug32()
-{
-    if (m_cszTargetDebug32.IsNonEmpty())
-        return m_cszTargetDebug32;
-
-    if (!GetDir32())
-        return nullptr;
-
-    m_cszTargetDebug32 = GetDir32();
-
-#if 1
-    // Issue # 211 (https://github.com/KeyWorksRW/ttBld/issues/211) is to remove platform suffix, making it the
-    // caller's responsibility to set different output directory names if needed.
-
-    // We conditionalize the code in case there's a compelling reason later to either append 32/64 or _x86/_x64.
-
-    bool bAddPlatformSuffix = false;
-
-#else
-    // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
-    // suffix to the target filename to differentiate between the two builds.
-
-    bool bAddPlatformSuffix =
-        (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
-#endif
-
-    if (IsExeTypeLib())
-    {
-        m_cszTargetDebug32.AppendFileName(GetProjectName());
-        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86D.lib" : "D.lib";
-    }
-    else if (IsExeTypeDll())
-    {
-        m_cszTargetDebug32.AppendFileName(GetProjectName());
-        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86.dll" : ".dll";
-        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
-            m_cszTargetDebug32.ReplaceStr(".dll", ".ocx");
-    }
-    else
-    {
-        m_cszTargetDebug32.AppendFileName(GetProjectName());
-        m_cszTargetDebug32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86D.exe" : "D.exe";
-    }
-    return m_cszTargetDebug32;
-}
-
-const char* CSrcFiles::GetTargetRelease32()
-{
-    if (m_cszTargetRelease32.IsNonEmpty())
-        return m_cszTargetRelease32;
-
-    if (!GetDir32())
-        return nullptr;
-
-    m_cszTargetRelease32 = GetDir32();
-
-#if 1
-    // Issue # 211 (https://github.com/KeyWorksRW/ttBld/issues/211) is to remove platform suffix, making it the
-    // caller's responsibility to set different output directory names if needed.
-
-    // We conditionalize the code in case there's a compelling reason later to either append 32/64 or _x86/_x64.
-
-    bool bAddPlatformSuffix = false;
-
-#else
-
-    // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
-    // suffix to the target filename to differentiate between the two builds.
-
-    bool bAddPlatformSuffix =
-        (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
-#endif
-    if (IsExeTypeLib())
-    {
-        m_cszTargetRelease32.AppendFileName(GetProjectName());
-        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86.lib" : ".lib";
-    }
-    else if (IsExeTypeDll())
-    {
-        m_cszTargetRelease32.AppendFileName(GetProjectName());
-        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86.dll" : ".dll";
-        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
-            m_cszTargetRelease32.ReplaceStr(".dll", ".ocx");
-    }
-    else
-    {
-        m_cszTargetRelease32.AppendFileName(GetProjectName());
-        m_cszTargetRelease32 += (bAddPlatformSuffix || GetBoolOption(OPT_32BIT_SUFFIX)) ? "_x86.exe" : ".exe";
-    }
-    return m_cszTargetRelease32;
-}
-
-const char* CSrcFiles::GetTargetDebug64()
-{
-    if (m_cszTargetDebug64.IsNonEmpty())
-        return m_cszTargetDebug64;
-
-    ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles.yaml");
-    m_cszTargetDebug64 = GetDir64();
-
-#if 1
-    // Issue # 211 (https://github.com/KeyWorksRW/ttBld/issues/211) is to remove platform suffix, making it the
-    // caller's responsibility to set different output directory names if needed.
-
-    // We conditionalize the code in case there's a compelling reason later to either append 32/64 or _x86/_x64.
-
-    bool bAddPlatformSuffix = false;
-
-#else
-
-    // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
-    // suffix to the target filename to differentiate between the two builds.
-
-    bool bAddPlatformSuffix =
-        (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
-#endif
-
-    if (IsExeTypeLib())
-    {
-        m_cszTargetDebug64.AppendFileName(GetProjectName());
-        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64D.lib" : "D.lib";
-    }
-    else if (IsExeTypeDll())
-    {
-        m_cszTargetDebug64.AppendFileName(GetProjectName());
-        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.dll" : ".dll";
-        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
-            m_cszTargetDebug64.ReplaceStr(".dll", ".ocx");
-    }
-    else
-    {
-        m_cszTargetDebug64.AppendFileName(GetProjectName());
-        m_cszTargetDebug64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64D.exe" : "D.exe";
-    }
-    return m_cszTargetDebug64;
-}
-
-const char* CSrcFiles::GetTargetRelease64()
-{
-    if (m_cszTargetRelease64.IsNonEmpty())
-        return m_cszTargetRelease64;
-
-    ttASSERT_MSG(GetDir64(), "64-bit target must be set in constructor after reading .srcfiles.yaml");
-    m_cszTargetRelease64 = GetDir64();
-
-#if 1
-    // Issue # 211 (https://github.com/KeyWorksRW/ttBld/issues/211) is to remove platform suffix, making it the
-    // caller's responsibility to set different output directory names if needed.
-
-    // We conditionalize the code in case there's a compelling reason later to either append 32/64 or _x86/_x64.
-
-    bool bAddPlatformSuffix = false;
-
-#else
-
-    // If 64-bit and 32-bit target builds are enabled and the target directories are identical, then we need to add a
-    // suffix to the target filename to differentiate between the two builds.
-
-    bool bAddPlatformSuffix =
-        (GetBoolOption(OPT_64BIT) && GetBoolOption(OPT_32BIT) && ttIsSameStr(GetDir64(), GetDir32())) ? true : false;
-#endif
-
-    if (IsExeTypeLib())
-    {
-        m_cszTargetRelease64.AppendFileName(GetProjectName());
-        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.lib" : ".lib";
-    }
-    else if (IsExeTypeDll())
-    {
-        m_cszTargetRelease64.AppendFileName(GetProjectName());
-        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.dll" : ".dll";
-        if (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"))
-            m_cszTargetRelease64.ReplaceStr(".dll", ".ocx");
-    }
-    else
-    {
-        m_cszTargetRelease64.AppendFileName(GetProjectName());
-        m_cszTargetRelease64 += (bAddPlatformSuffix || GetBoolOption(OPT_64BIT_SUFFIX)) ? "_x64.exe" : ".exe";
-    }
-    return m_cszTargetRelease64;
-}
-
 const char* CSrcFiles::GetTargetDir()
 {
     if (!m_strTargetDir.empty())
         return m_strTargetDir.c_str();
 
+    if (GetOption(OPT_TARGET_DIR))
+    {
+        m_strTargetDir = GetOption(OPT_TARGET_DIR);
+        return m_strTargetDir.c_str();
+    }
+
     ttCStr cszDir(IsExeTypeLib() ? "../lib" : "../bin");
 
     // If it's not 32-bit code then just use lib or bin as the target dir if not specified.
-    if (!GetBoolOption(OPT_32BIT))
+    if (GetOption(OPT_TARGET_DIR64) || !GetBoolOption(OPT_32BIT))
     {
         if (GetOption(OPT_TARGET_DIR64))
         {
@@ -911,5 +752,7 @@ void CSrcFiles::AddError(const char* pszErrMsg)
     cszMsg += "\n";
     wxLogDebug((char*) cszMsg);
     m_lstErrors += pszErrMsg;
+    if (m_bBreakOnWarning)
+        wxTrap();
 }
 #endif
