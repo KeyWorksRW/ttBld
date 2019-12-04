@@ -737,7 +737,10 @@ const char* CSrcFiles::GetTargetDebug()
 
     m_cszTargetDebug = GetTargetDir();
     m_cszTargetDebug.AppendFileName(GetProjectName());
-    m_cszTargetDebug += "D";
+
+    // Never automatically add a 'D' to a dll.
+    if (!IsExeTypeDll())
+        m_cszTargetDebug += "D";
 
     if (IsExeTypeLib())
         m_cszTargetDebug += ".lib";
