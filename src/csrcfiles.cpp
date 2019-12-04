@@ -194,13 +194,16 @@ void CSrcFiles::ProcessOption(char* pszLine)
     if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
         return;
 
-    // Ignore obsolete options
+    // Ignore or change obsolete options
 
-    if (ttIsSameStrI(cszName, "64Bit:") || ttIsSameStrI(cszName, "b64_suffix:") || ttIsSameStrI(cszName, "b32_suffix:"))
+    if (ttIsSameStrI(cszName, "64Bit") || ttIsSameStrI(cszName, "b64_suffix") || ttIsSameStrI(cszName, "b32_suffix"))
         return;
 
-    if (ttIsSameStrI(cszName, "TargetDir64:"))
+    if (ttIsSameStrI(cszName, "TargetDir64"))
         cszName = "TargetDir";
+
+    if (ttIsSameStrI(cszName, "LibDirs64"))
+        cszName = "LibDirs";
 
     OPT_INDEX opt = UpdateReadOption(cszName, cszVal, cszComment);
     if (opt < OPT_OVERFLOW)

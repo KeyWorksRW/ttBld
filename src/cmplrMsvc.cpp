@@ -296,6 +296,16 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
     }
     cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
 
+    if (GetOption(OPT_LIB_DIRS))
+    {
+        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
+        while (enumLib.Enum())
+        {
+            cszRule += " /LIBPATH:";
+            cszRule += enumLib;
+        }
+    }
+
     if (GetOption(OPT_LIBS_CMN))
     {
         ttCEnumStr enumLib(GetOption(OPT_LIBS_CMN), ';');

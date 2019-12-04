@@ -64,6 +64,8 @@ namespace sfopt  // .srcfiles.yaml otpions
         OPT_TARGET_DIR32,   // 32-bit target directory
 
         OPT_INC_DIRS,       // Additional directories for header files
+        OPT_LIB_DIRS,       // Additional directories for library files
+
         OPT_LIB_DIRS64,     // 64-bit library directories
         OPT_LIB_DIRS32,     // 32-bit library directories
         OPT_LIBS_CMN,       // Additional libraries to link to in all builds

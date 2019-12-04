@@ -101,8 +101,9 @@ static const OPT_SETTING s_aOptions[] =
     { OPT_INC_DIRS,     "IncDirs",      nullptr,   false,   false,     _XGET("additional directories for header files") },
     { OPT_BUILD_LIBS,   "BuildLibs",    nullptr,   false,   false,     _XGET("libraries that need to be built (added to makefile generation)") },
 
-    { OPT_LIB_DIRS64,   "LibDirs64",    nullptr,   false,   false,     _XGET("additional directores for 64-bit library files") },
-    { OPT_LIB_DIRS32,   "LibDirs32",    nullptr,   false,   false,     _XGET("additional directores for 32-bit library files") },
+    { OPT_LIB_DIRS,     "LibDirs",      nullptr,   false,   false,     _XGET("additional directories for library files") },
+    { OPT_LIB_DIRS64,   "LibDirs64",    nullptr,   false,   false,     _XGET("additional directories for 64-bit library files") },
+    { OPT_LIB_DIRS32,   "LibDirs32",    nullptr,   false,   false,     _XGET("additional directories for 32-bit library files") },
 
     { OPT_LIBS_CMN,     "Libs_cmn",     nullptr,   false,   false,     _XGET("additional libraries to link to in all builds") },
     { OPT_LIBS_REL,     "Libs_rel",     nullptr,   false,   false,     _XGET("additional libraries to link to in release builds") },

@@ -76,14 +76,14 @@ bool Yamalize()
     // TODO: [KeyWorks - 7/24/2019] Hook up Crt once it gets changed
 
     cNewSrcFiles.UpdateOption(OPT_64BIT, cOrgSrcFiles.GetOption(OPT_64BIT));
-    cNewSrcFiles.UpdateOption(OPT_TARGET_DIR64, cOrgSrcFiles.GetOption(OPT_TARGET_DIR64));
+    cNewSrcFiles.UpdateOption(OPT_TARGET_DIR, cOrgSrcFiles.GetOption(OPT_TARGET_DIR));
     cNewSrcFiles.UpdateOption(OPT_32BIT, cOrgSrcFiles.GetOption(OPT_32BIT));
     cNewSrcFiles.UpdateOption(OPT_TARGET_DIR32, cOrgSrcFiles.GetOption(OPT_TARGET_DIR32));
 
     cNewSrcFiles.UpdateOption(OPT_INC_DIRS, cOrgSrcFiles.GetOption(OPT_INC_DIRS));
     cNewSrcFiles.UpdateOption(OPT_BUILD_LIBS, cOrgSrcFiles.GetOption(OPT_BUILD_LIBS));
     cNewSrcFiles.UpdateOption(OPT_LIB_DIRS32, cOrgSrcFiles.GetOption(OPT_LIB_DIRS32));
-    cNewSrcFiles.UpdateOption(OPT_LIB_DIRS64, cOrgSrcFiles.GetOption(OPT_LIB_DIRS64));
+    cNewSrcFiles.UpdateOption(OPT_LIB_DIRS, cOrgSrcFiles.GetOption(OPT_LIB_DIRS));
 
     cNewSrcFiles.UpdateOption(OPT_LIBS_CMN, cOrgSrcFiles.GetOption(OPT_LIBS_CMN));
     cNewSrcFiles.UpdateOption(OPT_LIBS_REL, cOrgSrcFiles.GetOption(OPT_LIBS_REL));
