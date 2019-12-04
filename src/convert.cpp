@@ -521,13 +521,13 @@ bool CConvertDlg::ConvertSrcfiles()
     }
 #endif  // _WIN32
 
-    if (srcOrg.GetOption(OPT_TARGET_DIR64))
+    if (srcOrg.GetOption(OPT_TARGET_DIR))
     {
-        cszTmp = srcOrg.GetOption(OPT_TARGET_DIR64);
+        cszTmp = srcOrg.GetOption(OPT_TARGET_DIR);
         cszTmp.FullPathName();
 
         ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_TARGET_DIR64, (char*) cszRelative);
+        m_cSrcFiles.UpdateOption(OPT_TARGET_DIR, (char*) cszRelative);
     }
 
     if (srcOrg.GetOption(OPT_TARGET_DIR32))
@@ -539,13 +539,13 @@ bool CConvertDlg::ConvertSrcfiles()
         m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszRelative);
     }
 
-    if (srcOrg.GetOption(OPT_LIB_DIRS64))
+    if (srcOrg.GetOption(OPT_LIB_DIRS))
     {
-        cszTmp = srcOrg.GetOption(OPT_LIB_DIRS64);
+        cszTmp = srcOrg.GetOption(OPT_LIB_DIRS);
         cszTmp.FullPathName();
 
         ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_LIB_DIRS64, (char*) cszRelative);
+        m_cSrcFiles.UpdateOption(OPT_LIB_DIRS, (char*) cszRelative);
     }
     if (srcOrg.GetOption(OPT_LIB_DIRS32))
     {
