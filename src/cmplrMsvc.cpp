@@ -489,6 +489,22 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     if (!bPchSeen && m_cszPCHObj.IsNonEmpty())
         m_pkfOut->printf(" $\n  $outdir/%s", (char*) m_cszPCHObj);
 
+    switch (m_gentype)
+    {
+        case GEN_DEBUG:
+            for (size_t pos = 0; m_lstBldLibsD.InRange(pos); ++pos) {
+                wxLogDebug((char*) m_lstBldLibsD[pos]);
+                m_pkfOut->printf(" $\n  %s", (char*) m_lstBldLibsD[pos]);
+            }
+            break;
+
+        case GEN_RELEASE:
+        default:
+            for (size_t pos = 0; m_lstBldLibsR.InRange(pos); ++pos)
+                m_pkfOut->printf(" $\n  %s", (char*) m_lstBldLibsR[pos]);
+            break;
+    }
+
     if (m_gentype == GEN_DEBUG && GetOption(OPT_NATVIS))
         m_pkfOut->printf(" $\n  | %s", GetOption(OPT_NATVIS));
 
