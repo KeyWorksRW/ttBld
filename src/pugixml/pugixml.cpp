@@ -11,6 +11,8 @@
  * Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
  */
 
+// DO NOT RUN clang-format on this file! We need to be able to sync changes from the original repository!
+
 // [KeyWorks - 01-11-2020] Added precompiled header so that it can be built with no special requirements
 #include "pch.h"
 
