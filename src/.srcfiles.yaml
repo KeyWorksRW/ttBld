@@ -49,6 +49,9 @@ Files:
     writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
 
+    # This needs to be removed as soon as we switch to pugixml
+    ../../ttlibwx/src/ttxml.cpp
+
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     pugixml/pugixml.cpp # Built directly rather than building a library
 
