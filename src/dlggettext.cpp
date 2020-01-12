@@ -32,7 +32,6 @@ void CDlgGetText::ProcessCurOptions(const char* pszOptions)
         // No current options, so set some defaults
 
         m_lstKeywords += "_";
-        m_lstKeywords += "_XGET";
         m_lstKeywords += "kwxGetTranslation";
         m_lstKeywords += "kwxPLURAL";
 
