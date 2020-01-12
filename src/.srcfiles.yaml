@@ -16,7 +16,7 @@ Options:
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ../../ttLibwx/include  # temporary location, change before Public release
+    IncDirs:     ./;../../ttLibwx/include  # temporary location, change before Public release
     BuildLibs:   ../../ttLibwx/src      # temporary location, change before Public release
 
 #    IncDirs:     ../ttLibwx/include                # additional directories for header files
@@ -48,6 +48,8 @@ Files:
     vscode.cpp          # Creates/updates .vscode files
     writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
+
+    pugixml/pugixml.cpp # Built directly rather than building a library
 
 # Modules for creating the Options UI
 
