@@ -81,9 +81,9 @@ bool CVcxRead::ConvertVcxProj()
                 for (size_t child = 0; child < pItem->cChildren; ++child)
                 {
                     // Visual Studio lets you specify different directories and target names for debug and release
-                    // builds. ttBld only supports a single target name and directory and then modifies that based on
-                    // Debug versus Release builds. Since the two methods aren't really compatible, we only use the
-                    // release target name, and whichever output directory we encounter first.
+                    // builds. ttBld only supports a single target name and directory and then modifies that based
+                    // on Debug versus Release builds. Since the two methods aren't really compatible, we only use
+                    // the release target name, and whichever output directory we encounter first.
 
                     ttCXMLBranch* pChild = pItem->GetChildAt(child);
                     if (ttIsSameSubStrI(pChild->GetName(), "OutDir"))
@@ -297,8 +297,9 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
                 const char* pszFirstSemi = ttStrChr(pChild->GetData(), ';');
                 if (pszFirstSemi)
                     ++pszFirstSemi;
-                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ? pszFirstSemi :
-                                                                                                 pChild->GetData());
+                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ?
+                                    pszFirstSemi :
+                                    pChild->GetData());
                 cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
 
                 // Paths will be relative to the location of the script file. We need to make them
@@ -483,9 +484,10 @@ static bool CreateGuid(ttCStr& cszGuid)
 bool CVcxWrite::CreateBuildFile()
 {
 #ifndef _WINDOWS_
-    // Currently we only support creating VisualStudio projects on Windows. To get this to work on another platform,
-    // a replacement would be needed for creating a GUID, and the templates we store in the .rc file would need to
-    // be added in a different way (perhaps including them directly into the source code instead of the resource).
+    // Currently we only support creating VisualStudio projects on Windows. To get this to work on another
+    // platform, a replacement would be needed for creating a GUID, and the templates we store in the .rc file
+    // would need to be added in a different way (perhaps including them directly into the source code instead of
+    // the resource).
 
     return false;
 #endif  // _WINDOWS_
@@ -519,13 +521,15 @@ bool CVcxWrite::CreateBuildFile()
         {
             if (ttStrStrI(m_lstSrcFiles[pos], ".c"))  // only add C/C++ files
             {
-                cszSrcFile.printf(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>", m_lstSrcFiles[pos]);
+                cszSrcFile.printf(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>",
+                                  m_lstSrcFiles[pos]);
                 kf.WriteEol(cszSrcFile);
             }
         }
         if (m_cszRcName.IsNonEmpty())
         {
-            cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>", (char*) m_cszRcName);
+            cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>",
+                              (char*) m_cszRcName);
             kf.WriteEol(cszSrcFile);
         }
 
@@ -572,8 +576,9 @@ bool CVcxWrite::CreateBuildFile()
         {
             if (ttStrStrI(m_lstSrcFiles[pos], ".c"))  // only add C/C++ files
             {
-                cszSrcFile.printf("    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>",
-                                  m_lstSrcFiles[pos]);
+                cszSrcFile.printf(
+                    "    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>",
+                    m_lstSrcFiles[pos]);
                 kf.WriteEol(cszSrcFile);
             }
         }

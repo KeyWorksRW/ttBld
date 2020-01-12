@@ -8,8 +8,8 @@
 
 /*
     Ideally, s_aOptions would be in a namespace. However, the Visual Studio debugger (2017 version) is not able to
-    display the array even if fully qualified with the namespace. That makes debugging rather difficult since a lot of
-    the functionality of ttBld relies on comparison between a modified option and the original.
+    display the array even if fully qualified with the namespace. That makes debugging rather difficult since a lot
+   of the functionality of ttBld relies on comparison between a modified option and the original.
 */
 
 #include "pch.h"
@@ -18,8 +18,8 @@
 
 using namespace sfopt;
 
-const char* txtOptVersion = "1.4.0";  // any time you add an option below, you need to increment this version number and
-                                      // then add it to the OPT_VERSION list
+const char* txtOptVersion = "1.4.0";  // any time you add an option below, you need to increment this version
+                                      // number and then add it to the OPT_VERSION list
 
 // clang-format off
 sfopt::OPT_VERSION aoptVersions[] =
@@ -133,8 +133,8 @@ const OPT_SETTING* CSrcOptions::GetOrgOptions()
 
 CSrcOptions::CSrcOptions()
 {
-    // By adding OPT_UPDATE structures in the same order as OPT_SETTING, a position in m_aUpdateOpts matches the same
-    // position in s_aOptions
+    // By adding OPT_UPDATE structures in the same order as OPT_SETTING, a position in m_aUpdateOpts matches the
+    // same position in s_aOptions
 
     for (size_t pos = 0; s_aOptions[pos].opt != OPT_OVERFLOW; ++pos)
     {

@@ -12,9 +12,9 @@
 
 // This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode
 // directory does not exist, it will be created. The srcfiles.yaml is not designed to be tracked, so it's fine to
-// customize it based on the current system (what compilers are available, what platform we're on, etc.). A lot of the
-// default options which would not be normally displayed are listed to make them easy to modify in VS Code or any editor
-// that understands YAML format
+// customize it based on the current system (what compilers are available, what platform we're on, etc.). A lot of
+// the default options which would not be normally displayed are listed to make them easy to modify in VS Code or
+// any editor that understands YAML format
 
 using namespace sfopt;
 

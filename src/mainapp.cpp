@@ -379,11 +379,11 @@ int oldMain(int argc, char* argv[])
             return 1;
         cszSrcFilePath = dlg.GetOutSrcFiles();
 
-        // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has been
-        // created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the user wants to
-        // cancel -- that just means they didn't want to change any options. It does NOT mean they want to cancel
-        // running any other commands, such as makefile creation (which doesn't need to know what options are set in
-        // .srcfiles.yaml).
+        // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has
+        // been created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the
+        // user wants to cancel -- that just means they didn't want to change any options. It does NOT mean they
+        // want to cancel running any other commands, such as makefile creation (which doesn't need to know what
+        // options are set in .srcfiles.yaml).
 
         ChangeOptions(&cszSrcFilePath);
         if (dlg.isCreateVsCode())
@@ -410,11 +410,11 @@ int oldMain(int argc, char* argv[])
             return 1;
         cszSrcFilePath = dlg.GetOutSrcFiles();
 
-        // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has been
-        // created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the user wants to
-        // cancel -- that just means they didn't want to change any options. It does NOT mean they want to cancel
-        // running any other commands, such as makefile creation (which doesn't need to know what options are set in
-        // .srcfiles.yaml).
+        // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has
+        // been created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the
+        // user wants to cancel -- that just means they didn't want to change any options. It does NOT mean they
+        // want to cancel running any other commands, such as makefile creation (which doesn't need to know what
+        // options are set in .srcfiles.yaml).
 
         ChangeOptions(&cszSrcFilePath);
         if (dlg.isCreateVsCode())
@@ -433,8 +433,8 @@ int oldMain(int argc, char* argv[])
         }
     }
 
-    // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not, we
-    // need to locate it.
+    // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not,
+    // we need to locate it.
 
     if (cszSrcFilePath.IsEmpty())
     {
@@ -464,8 +464,8 @@ int oldMain(int argc, char* argv[])
         }
     }
 
-    // We now have the location of the .srcfiles.yaml file to use. If -opt was specified, then we need to let the user
-    // change options before continuing.
+    // We now have the location of the .srcfiles.yaml file to use. If -opt was specified, then we need to let the
+    // user change options before continuing.
 
     if (Action & ACT_OPTIONS && !(Action & ACT_NEW))
     {
@@ -558,8 +558,8 @@ int oldMain(int argc, char* argv[])
 
 void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
 {
-    // TODO: [KeyWorks - 7/30/2019] Need to change CNinja to accept a root dir instead of bVsCodeDir, then we can pass
-    // in pszRootDir.
+    // TODO: [KeyWorks - 7/30/2019] Need to change CNinja to accept a root dir instead of bVsCodeDir, then we can
+    // pass in pszRootDir.
 
     CNinja cNinja(pszRootDir);
     cNinja.ForceWrite();

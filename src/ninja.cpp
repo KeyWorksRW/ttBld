@@ -47,8 +47,8 @@ CNinja::CNinja(const char* pszNinjaDir)
             pszTmp = (char*) cszCwd.FindLastSlash();
             if (pszTmp)
             {
-                *pszTmp =
-                    0;  // remove the last slash and filename, forcing the directory name above to be the "filename"
+                *pszTmp = 0;  // remove the last slash and filename, forcing the directory name above to be the
+                              // "filename"
                 pszProj = ttFindFilePortion(cszCwd);
             }
         }
@@ -88,8 +88,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     m_pkfOut = &file;
     m_gentype = gentype;
 
-    // Note that resout goes to the same directory in all builds. The actual filename will have a 'D' appended for debug
-    // builds. Currently, 32 and 64 bit builds of the resource file are identical.
+    // Note that resout goes to the same directory in all builds. The actual filename will have a 'D' appended for
+    // debug builds. Currently, 32 and 64 bit builds of the resource file are identical.
 
     ttCStr cszResOut("resout = ");
     cszResOut += GetBldDir();
@@ -172,14 +172,14 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Issue #80
 
-    // If the project has a .idl file, then the midl compiler will create a matching header file that will be included
-    // in one or more source files. If the .idl file changes, or the header file doesn't exist yet, then we need to run
-    // the midl compiler before compiling any source files. If we knew ahead of time which source files included the
-    // header file, then we could create a dependency. However, that would essentially require an accurate C/C++
-    // preprocessor to run on every source file which is far beyond the scope of this project. Instead, we add the
-    // dependency to the precompiled header if there is one, and if not, we add the dependency to every source file.
-    // Unfortunately that does mean that every time the .idl file changes, then every source file will get rebuilt
-    // whether or not a particular source file actually uses the generated header file.
+    // If the project has a .idl file, then the midl compiler will create a matching header file that will be
+    // included in one or more source files. If the .idl file changes, or the header file doesn't exist yet, then
+    // we need to run the midl compiler before compiling any source files. If we knew ahead of time which source
+    // files included the header file, then we could create a dependency. However, that would essentially require
+    // an accurate C/C++ preprocessor to run on every source file which is far beyond the scope of this project.
+    // Instead, we add the dependency to the precompiled header if there is one, and if not, we add the dependency
+    // to every source file. Unfortunately that does mean that every time the .idl file changes, then every source
+    // file will get rebuilt whether or not a particular source file actually uses the generated header file.
 
     if (GetPchHeader())
     {
@@ -213,15 +213,15 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
             continue;                               // we already handled this
         cszFile.ChangeExtension(".obj");
 
-        if (m_cszPCHObj
-                .IsNonEmpty())  // we add m_cszPCHObj so it appears as a dependency and gets compiled, but not linked to
-            file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile, GetSrcFileList()->GetAt(iPos),
-                        (char*) m_cszPCHObj);
+        if (m_cszPCHObj.IsNonEmpty())  // we add m_cszPCHObj so it appears as a dependency and gets compiled, but
+                                       // not linked to
+            file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile,
+                        GetSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
         else
         {
-            // We get here if we don't have a precompiled header. We might have .idl files, which means we're going to
-            // need to add all the midl-generated header files as dependencies to each source file. See issue #80 for
-            // details.
+            // We get here if we don't have a precompiled header. We might have .idl files, which means we're going
+            // to need to add all the midl-generated header files as dependencies to each source file. See issue
+            // #80 for details.
 
             file.printf("build $outdir/%s: compile %s", (char*) cszFile, GetSrcFileList()->GetAt(iPos));
             if (m_lstIdlFiles.GetCount())
@@ -342,7 +342,8 @@ void CNinja::ProcessBuildLibs()
                 continue;
             }
 
-            // The current directory may just be the name of the library, but not necessarily where srcfiles is located.
+            // The current directory may just be the name of the library, but not necessarily where srcfiles is
+            // located.
 
             ttCStr cszBuildPath(enumLib);
             ttCStr cszBuildFile(cszBuildPath);  // LocateSrcFiles will update this
@@ -407,16 +408,16 @@ void CNinja::ProcessBuildLibs()
                     }
 
                     // Any further directory searches should go above this -- once we get here, we can't find a
-                    // .srcfiles.yaml. We go ahead and break out of the loop. cSrcFiles.ReadFile() will fail -- we'll
-                    // use whatever error reporting (if any) it uses for a file that cannot be found or read.
+                    // .srcfiles.yaml. We go ahead and break out of the loop. cSrcFiles.ReadFile() will fail --
+                    // we'll use whatever error reporting (if any) it uses for a file that cannot be found or read.
 
                     break;
                 }
             }
 
-            // We've actually changed to the directory containing the .srcfiles.yaml, so CSrcFiles doesn't actually need
-            // the filename. However, if an error occurs, we need to indicate where the .srcfiles.yaml file is that had
-            // the problem.
+            // We've actually changed to the directory containing the .srcfiles.yaml, so CSrcFiles doesn't actually
+            // need the filename. However, if an error occurs, we need to indicate where the .srcfiles.yaml file is
+            // that had the problem.
 
             CSrcFiles cSrcFiles;
             cSrcFiles.SetReportingFile(cszBuildFile);

@@ -7,9 +7,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /*
-    Source files specified in a build script are relative to the location of that build script. The .srcfiles file we
-    are creating may be in an entirely different directory. So before we add a file to .srcfiles, we must first make it
-    relative to the location of the build script, and then make it relative to the location of .srcfiles.
+    Source files specified in a build script are relative to the location of that build script. The .srcfiles file
+   we are creating may be in an entirely different directory. So before we add a file to .srcfiles, we must first
+   make it relative to the location of the build script, and then make it relative to the location of .srcfiles.
 */
 
 #include "pch.h"
@@ -164,7 +164,8 @@ void CConvertDlg::OnBtnLocateScript()
         m_comboScripts.SetCurSel(item);
         UnCheck(DLG_ID(IDRADIO_FILES));
         SetCheck(DLG_ID(IDRADIO_CONVERT));
-        // TODO: [randalphwa - 4/2/2019] Need to decide how to handle IDEDIT_IN_DIR since this may no longer be correct
+        // TODO: [randalphwa - 4/2/2019] Need to decide how to handle IDEDIT_IN_DIR since this may no longer be
+        // correct
     }
 }
 
@@ -180,8 +181,9 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
         cszSrcFiles.AppendFileName(".srcfiles.yaml");
         if (ttFileExists(cszSrcFiles))
         {
-            if (ttMsgBox(_(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"),
-                         MB_YESNO) != IDYES)
+            if (ttMsgBox(
+                    _(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"),
+                    MB_YESNO) != IDYES)
                 return;
         }
         SetControlText(DLG_ID(IDEDIT_OUT_DIR), dlg);
@@ -276,8 +278,8 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
     return false;
 }
 
-// This function first converts the file relative to the location of the build script, and then relative to the location
-// of .srcfiles
+// This function first converts the file relative to the location of the build script, and then relative to the
+// location of .srcfiles
 
 char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 {
@@ -292,8 +294,8 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
         if (pszFilePortion)
             *pszFilePortion = 0;
 
-        // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory as
-        // the script file
+        // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory
+        // as the script file
 
         ttChDir(m_cszScriptRoot);
     }
@@ -316,7 +318,8 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 
 bool CConvertDlg::doConversion(const char* pszInFile)
 {
-    ttASSERT_MSG(m_cszOutSrcFiles.IsNonEmpty(), "Need to set path to .srcfiles.yaml before calling doConversion()");
+    ttASSERT_MSG(m_cszOutSrcFiles.IsNonEmpty(),
+                 "Need to set path to .srcfiles.yaml before calling doConversion()");
 
     if (pszInFile)
         m_cszConvertScript = pszInFile;
@@ -361,8 +364,8 @@ bool CConvertDlg::doConversion(const char* pszInFile)
             HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
             if (hr != S_OK)
             {
-                ttMsgBoxFmt(_("An internal error occurred attempting to parse the file %s"), MB_OK | MB_ICONWARNING,
-                            (char*) m_cszConvertScript);
+                ttMsgBoxFmt(_("An internal error occurred attempting to parse the file %s"),
+                            MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
                 return false;
             }
 
@@ -396,7 +399,8 @@ bool CConvertDlg::doConversion(const char* pszInFile)
 
             if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles, cszHdr))
             {
-                ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
+                ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING,
+                            (char*) m_cszOutSrcFiles);
                 return false;
             }
             return true;

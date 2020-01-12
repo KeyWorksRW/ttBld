@@ -10,19 +10,19 @@
 
 #if defined(_WIN32)
 
-#include <ttreg.h>       // ttCRegistry
-#include <ttstr.h>       // ttCStr
-#include <ttfindfile.h>  // ttCFindFile
-#include <ttenumstr.h>   // ttCEnumStr
+    #include <ttreg.h>       // ttCRegistry
+    #include <ttstr.h>       // ttCStr
+    #include <ttfindfile.h>  // ttCFindFile
+    #include <ttenumstr.h>   // ttCEnumStr
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that
-    version may be. At the time this code is being written, those updates occur as often as once a week. That forces you
-    to either hand-edit your PATH every week or so, or to run one of the MS batch files (which stopped working on
-    Windows 7 with the 16.2.0 release).
+    version may be. At the time this code is being written, those updates occur as often as once a week. That
+   forces you to either hand-edit your PATH every week or so, or to run one of the MS batch files (which stopped
+   working on Windows 7 with the 16.2.0 release).
 
-    Unlike the compiler and related tools, the path to devenv.exe is stored in the registry, so using that path we can
-    deduce the current path to the compiler, linker, along with the library and include files.
+    Unlike the compiler and related tools, the path to devenv.exe is stored in the registry, so using that path we
+   can deduce the current path to the compiler, linker, along with the library and include files.
 */
 
 bool FindCurMsvcPath(ttCStr& cszPath)

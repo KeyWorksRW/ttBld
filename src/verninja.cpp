@@ -18,8 +18,8 @@ CVerMakeNinja::CVerMakeNinja()
     m_minMinor = 0;
     m_minSub = 0;
 
-    const char* psz =
-        txtOptVersion;  // we assume this string to be "n.n.n" where n is an integer for major, minor, and sub version
+    const char* psz = txtOptVersion;  // we assume this string to be "n.n.n" where n is an integer for major,
+                                      // minor, and sub version
     m_major = (int) ttAtoi(psz);
     psz = ttStrChr(psz, '.') + 1;
     m_minor = (int) ttAtoi(psz);

@@ -120,7 +120,8 @@ static const char* txtClangSubTasks =
     "                    \"${workspaceFolder}\"\n"
     "                ],\n"
     "                \"pattern\": {\n"
-    "                    \"regexp\": \"^(.*)\\\\((\\\\d+),(\\\\d+)\\\\):\\\\s+(note|warning|error):\\\\s+(.*)$\",\n"
+    "                    \"regexp\": "
+    "\"^(.*)\\\\((\\\\d+),(\\\\d+)\\\\):\\\\s+(note|warning|error):\\\\s+(.*)$\",\n"
     "                    \"file\": 1,\n"
     "                    \"line\": 2,\n"
     "                    \"column\": 3,\n"
@@ -411,18 +412,18 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 // Build MSVC debug
 
                 cszMakeCommand.printf("nmake.exe -nologo debug %s", (char*) cszMakeFileOption);
-                AddMsvcTask(kfOut, "Build Debug MSVC", (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup,
-                            cszMakeCommand);
+                AddMsvcTask(kfOut, "Build Debug MSVC",
+                            (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup, cszMakeCommand);
 
 #else
                 cszMakeCommand.printf("make debug cmplr=gcc %s", (char*) cszMakeFileOption);
-                AddClangTask(kfOut, "Build Debug GCC", (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup,
-                             cszMakeCommand);
+                AddClangTask(kfOut, "Build Debug GCC",
+                             (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup, cszMakeCommand);
 #endif
 
-                // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC compiler.
-                // If we're not on Windows, then before we write the file, we replace nmake.exe with make.exe, and MSVC
-                // with either CLANG or GCC.
+                // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC
+                // compiler. If we're not on Windows, then before we write the file, we replace nmake.exe with
+                // make.exe, and MSVC with either CLANG or GCC.
 
                 // Build MSVC release
 
@@ -451,8 +452,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 #endif
 
 #if defined(_WIN32)
-            // If we're on Windows, then we also look to see if either the clang-cl compiler is available. If so, we add
-            // build targets for it
+            // If we're on Windows, then we also look to see if either the clang-cl compiler is available. If so,
+            // we add build targets for it
 
             if (m_bClangTasks)
             {
@@ -583,15 +584,16 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // BUGBUG: [KeyWorks - 7/27/2019] This is a short-term hack until we have hooked up proper routines for
     // reading/writing .json files. While .json files are typically written out as line-oriented files, there's no
-    // requirement for each element to be on it's own line, which is what we require if we're reading line by line. So,
-    // if we're reading a file we generated that the user didn't touch, we're fine. But if the user decides to edit the
-    // file, we're likely to either lose their changes, or break entirely -- until we have a json class in place.
+    // requirement for each element to be on it's own line, which is what we require if we're reading line by line.
+    // So, if we're reading a file we generated that the user didn't touch, we're fine. But if the user decides to
+    // edit the file, we're likely to either lose their changes, or break entirely -- until we have a json class in
+    // place.
 
     for (int line = 0; line < file.GetMaxLine(); ++line)
     {
-        // Normally defines and includePath place each argument on its own line, but it doesn't have to be done that
-        // way. They could all be on a single line, or they could be on multiple lines interspersed with comment lines,
-        // blank lines, etc. For now, we'll assume it wasn't hand-edited...
+        // Normally defines and includePath place each argument on its own line, but it doesn't have to be done
+        // that way. They could all be on a single line, or they could be on multiple lines interspersed with
+        // comment lines, blank lines, etc. For now, we'll assume it wasn't hand-edited...
 
         if (ttStrStrI(file[line], "\"defines\""))
         {

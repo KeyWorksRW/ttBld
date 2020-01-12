@@ -18,10 +18,10 @@
 
 extern sfopt::OPT_VERSION aoptVersions[];
 
-// At the very least, we preserve any comments the user may have added, as well as any non-blank lines that we don't
-// process (such as '------' used to delimit sections). We do prevent multiple blank lines, trailing spaces, and we do
-// enforce LF EOL (CR/LF will be replaced with just LF). If it's a line we write, we may change the spacing used
-// within the line.
+// At the very least, we preserve any comments the user may have added, as well as any non-blank lines that we
+// don't process (such as '------' used to delimit sections). We do prevent multiple blank lines, trailing spaces,
+// and we do enforce LF EOL (CR/LF will be replaced with just LF). If it's a line we write, we may change the
+// spacing used within the line.
 
 // Put another way, we may change spacing and formating, but we will preserve any custom data like comments
 
@@ -31,8 +31,8 @@ CWriteSrcFiles::CWRT_RESULT CWriteSrcFiles::WriteUpdates(const char* pszFile)
 {
 #if !defined(NDEBUG)  // Starts debug section.
     // We need to be certain that the current ttBld version is at least as high as any option in the OPT_VERSION
-    // array. There isn't a way to check that during compile time, so we check it in DEBUG builds whenever we try to
-    // write the .srcfiles.yaml
+    // array. There isn't a way to check that during compile time, so we check it in DEBUG builds whenever we try
+    // to write the .srcfiles.yaml
 
     static bool bWarned = false;
     if (!bWarned)  // we can be called twice if a private Tab writes to a .private .srcfiles
@@ -56,10 +56,11 @@ CWriteSrcFiles::CWRT_RESULT CWriteSrcFiles::WriteUpdates(const char* pszFile)
         cszVersion.printf(txtNinjaVerFormat, major, minor, sub);
 
         CVerMakeNinja verinfo;
-        ttASSERT_MSG(!verinfo.IsSrcFilesNewer(cszVersion),
-                     "An OPT_ in aoptVersions has a higher version number then txtOptVersion."
-                     " If you write to .srcfiles.yaml without fixing the code first, this version of ttBld will no "
-                     "longer be able to use it.");
+        ttASSERT_MSG(
+            !verinfo.IsSrcFilesNewer(cszVersion),
+            "An OPT_ in aoptVersions has a higher version number then txtOptVersion."
+            " If you write to .srcfiles.yaml without fixing the code first, this version of ttBld will no "
+            "longer be able to use it.");
     }
 #endif
 
@@ -371,13 +372,13 @@ void CWriteSrcFiles::UpdateWriteOption(size_t pos)
             m_cszOptComment = aOptions[pos].pszComment;
 
         if (m_cszOptComment.IsNonEmpty() && ttStrLen(GetOptVal(pos)) > 12)
-            // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier
-            // that we need
+            // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format
+            // specifier that we need
             sprintf_s(szLine, sizeof(szLine), pszLongOptionFmt, (char*) cszName, GetOptVal(pos),
                       (char*) m_cszOptComment);
         else
-            // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format specifier
-            // that we need
+            // we use sprintf instead of ttCStr::printf because ttCStr doesn't support the %-12s width format
+            // specifier that we need
             sprintf_s(szLine, sizeof(szLine), m_cszOptComment.IsNonEmpty() ? pszOptionFmt : pszNoCmtOptionFmt,
                       (char*) cszName, GetOptVal(pos), (char*) m_cszOptComment);
 
@@ -412,8 +413,8 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
                 m_cszOptComment.Delete();
             return pos;
         }
-        // Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts a
-        // new section
+        // Options are supposed to be indented -- any alphabetical character that is non-indented presumably starts
+        // a new section
         else if (ttIsAlpha(*m_lstOriginal[pos]))
             break;
     }

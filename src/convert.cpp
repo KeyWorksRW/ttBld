@@ -57,7 +57,8 @@ bool CConvertDlg::ConvertCodeLite()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(_("Cannot locate <CodeLite_Project> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot locate <CodeLite_Project> in %s"), MB_OK | MB_ICONWARNING,
+                    (char*) m_cszConvertScript);
         return false;
     }
 
@@ -87,7 +88,8 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
     if (!pProject)
     {
-        ttMsgBoxFmt(_("Cannot locate <VisualStudioProject> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_("Cannot locate <VisualStudioProject> in %s"), MB_OK | MB_ICONWARNING,
+                    (char*) m_cszConvertScript);
         return false;
     }
 
@@ -141,9 +143,9 @@ bool CConvertDlg::ConvertVcProj()
         ttCXMLBranch* pOption = pConfiguration->FindFirstAttribute("OutputFile");
         if (pOption)
         {
-            ttCStr cszOutDir(
-                pOption->GetAttribute("OutputFile"));  // will typically be something like: "../bin/$(ProjectName).exe"
-            char* pszFile = ttFindFilePortion(cszOutDir);
+            ttCStr cszOutDir(pOption->GetAttribute(
+                "OutputFile"));  // will typically be something like: "../bin/$(ProjectName).exe"
+            char*  pszFile = ttFindFilePortion(cszOutDir);
             if (pszFile)
                 *pszFile = 0;
             m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszOutDir);
@@ -201,8 +203,9 @@ bool CConvertDlg::ConvertVcProj()
                 {
                     if (ttIsSameStrI(enumFlags, "NDEBUG"))
                         continue;  // we already added this
-                    if (ttIsSameStrI(enumFlags,
-                                     "_CONSOLE"))  // the define is already in use, but make certain exeType matches
+                    if (ttIsSameStrI(
+                            enumFlags,
+                            "_CONSOLE"))  // the define is already in use, but make certain exeType matches
                     {
                         m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
                         continue;

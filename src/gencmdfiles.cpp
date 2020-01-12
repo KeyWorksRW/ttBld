@@ -61,9 +61,9 @@ void CreateCodeCmd(const char* pszFile)
         printf(_("%s created.\n"), (char*) cszPath);
     else
     {
-        // It's possible to just move the entire VSCode directory and it will continue to work fine. In that case, the
-        // registry will still be pointing to the old location, but code.cmd may be located in the PATH, so we can look
-        // for that and use that directory if the registry location is wrong.
+        // It's possible to just move the entire VSCode directory and it will continue to work fine. In that case,
+        // the registry will still be pointing to the old location, but code.cmd may be located in the PATH, so we
+        // can look for that and use that directory if the registry location is wrong.
 
         ttCStr cszNewPath;
         if (FindFileEnv("PATH", "code.cmd", &cszNewPath))
@@ -123,7 +123,8 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
 
     ttCList lstLib;
     // share the sub-heap so that only a single sub-heap will be created/destroyed
-    ttCList lstLib32((HANDLE) lstLib), lstPath((HANDLE) lstLib), lstPath32((HANDLE) lstLib), lstInc((HANDLE) lstLib);
+    ttCList lstLib32((HANDLE) lstLib), lstPath((HANDLE) lstLib), lstPath32((HANDLE) lstLib),
+        lstInc((HANDLE) lstLib);
 
     lstLib.SetFlags(ttCList::FLG_URL_STRINGS);  // ignore case, forward and backslash considered the same
     lstLib32.SetFlags(ttCList::FLG_URL_STRINGS);

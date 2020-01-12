@@ -167,8 +167,8 @@ void CTabGeneral::SetTargetDirs()
     if (bx86Set && bx64Set)
         return;
 
-    // Directory names don't actually need to exist, since Ninja will create them if they are missing. We just need to
-    // figure out what names to use.
+    // Directory names don't actually need to exist, since Ninja will create them if they are missing. We just need
+    // to figure out what names to use.
 
     ttCStr cszCWD;
     cszCWD.GetCWD();
@@ -178,8 +178,8 @@ void CTabGeneral::SetTargetDirs()
 
     if (!bUseParent)
     {
-        // If we aren't in the root of a .git repository, then look at the parent folder for the directories to use. We
-        // check for a filename called .git in case this is a submodule.
+        // If we aren't in the root of a .git repository, then look at the parent folder for the directories to
+        // use. We check for a filename called .git in case this is a submodule.
 
         cszCWD.AppendFileName(m_pOpts->IsExeTypeLib() ? "../lib_x64" : "../bin_x64");
         if (ttDirExists(cszCWD) && !ttDirExists(".git") && !ttFileExists(".git"))

@@ -20,14 +20,15 @@
 
     <File Name="%s"/>
 
-    for every file in .srcfiles (replace %s with the actual filename). Also include the precompiled header, and .srcfiles
+    for every file in .srcfiles (replace %s with the actual filename). Also include the precompiled header, and
+   .srcfiles
 
     Finally add
 
     </VirtualDirectory>
 
-    Next, read post.project. Replace %exepath% with the full path and filename of the debug executable (to run using F5)
-    Replace %cwd% with the directory of the project
+    Next, read post.project. Replace %exepath% with the full path and filename of the debug executable (to run
+   using F5) Replace %cwd% with the directory of the project
 
 */
 

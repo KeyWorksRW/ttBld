@@ -100,7 +100,8 @@ void CTabLinker::OnBtnLibDir()
             {
                 if (ttIsSamePath(eLib, cszLibDir))
                 {
-                    ttMsgBoxFmt(_("You've already added the directory %s"), MB_OK | MB_ICONWARNING, (char*) cszLibDir);
+                    ttMsgBoxFmt(_("You've already added the directory %s"), MB_OK | MB_ICONWARNING,
+                                (char*) cszLibDir);
                     return;
                 }
             }
@@ -121,7 +122,8 @@ void CTabLinker::OnBtnAddLib()
     ttCStr cszCurLibDirs;
     cszCurLibDirs.GetWndText(GetDlgItem(DLG_ID(IDEDIT_LIBDIRS)));
 
-    if (cszCurLibDirs.IsNonEmpty() && !ttStrChr(cszCurLibDirs, ';'))  // set initial directory if one and only one path
+    if (cszCurLibDirs.IsNonEmpty() &&
+        !ttStrChr(cszCurLibDirs, ';'))  // set initial directory if one and only one path
         fdlg.SetInitialDir(cszCurLibDirs);
 
     fdlg.RestoreDirectory();

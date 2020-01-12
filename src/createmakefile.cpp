@@ -103,8 +103,8 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
                     ttCStr cszTarget;
                     cszTarget.printf(" %s%s ", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");
 
-                    // Line is "release: project" so we simply replace the first space with our additional target (which
-                    // begins and ends with a space)
+                    // Line is "release: project" so we simply replace the first space with our additional target
+                    // (which begins and ends with a space)
 
                     cszNewLine.ReplaceStr(" ", cszTarget);
                 }
@@ -119,8 +119,8 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
                 {
                     kfOut.printf("\n%s%s:\n", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");  // the rule
 
-                    // m_dlstTargetDir contains the root directory. We use that to locate .srcfiles.yaml which is the
-                    // directory we need to change to in order to build the library.
+                    // m_dlstTargetDir contains the root directory. We use that to locate .srcfiles.yaml which is
+                    // the directory we need to change to in order to build the library.
                     ttCStr cszBuild(m_dlstTargetDir.GetValAt(pos));
                     LocateSrcFiles(&cszBuild);
                     char* pszFile = ttFindFilePortion(cszBuild);

@@ -109,7 +109,8 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     {
         char* pszBegin = ttFindNonSpace(pszLine);  // ignore any leading spaces
         if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' ||
-            (pszBegin[0] == '-' && pszBegin[1] == '-' && pszBegin[2] == '-'))  // ignore empty, comment or divider lines
+            (pszBegin[0] == '-' && pszBegin[1] == '-' &&
+             pszBegin[2] == '-'))  // ignore empty, comment or divider lines
         {
             continue;
         }
@@ -172,8 +173,8 @@ bool CSrcFiles::ReadFile(const char* pszFile)
         }
     }
 
-    // If no Files: were specified, then we still won't have any files to build. Default to every type of C++ source
-    // file in the current directory.
+    // If no Files: were specified, then we still won't have any files to build. Default to every type of C++
+    // source file in the current directory.
 
     if (m_lstSrcFiles.GetCount() < 1)
     {
@@ -196,7 +197,8 @@ void CSrcFiles::ProcessOption(char* pszLine)
 
     // Ignore or change obsolete options
 
-    if (ttIsSameStrI(cszName, "64Bit") || ttIsSameStrI(cszName, "b64_suffix") || ttIsSameStrI(cszName, "b32_suffix"))
+    if (ttIsSameStrI(cszName, "64Bit") || ttIsSameStrI(cszName, "b64_suffix") ||
+        ttIsSameStrI(cszName, "b32_suffix"))
         return;
 
     if (ttIsSameStrI(cszName, "TargetDir64"))
@@ -221,8 +223,8 @@ void CSrcFiles::ProcessOption(char* pszLine)
         return;
     }
 
-    // If you need to support reading old options, add the code here to convert them into the new options. You will also
-    // need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
+    // If you need to support reading old options, add the code here to convert them into the new options. You will
+    // also need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
 
     if (ttIsSameStrI(cszName, "LinkFlags"))
         UpdateOption(OPT_LINK_CMN, (char*) cszVal);
@@ -268,8 +270,8 @@ void CSrcFiles::AddLibrary(const char* pszName)
 void CSrcFiles::ProcessLibSection(char* pszLibFile)
 {
     // The library is built in the $libout directory, so we don't need to worry about a name conflict -- hence the
-    // default name of "tmplib". The name is also to indicate that this is a temporary library -- it's not designed to
-    // be linked to outside of the scope of the current project.
+    // default name of "tmplib". The name is also to indicate that this is a temporary library -- it's not designed
+    // to be linked to outside of the scope of the current project.
 
     if (m_cszLibName.IsEmpty())
         m_cszLibName = "tmplib";
@@ -419,7 +421,8 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     ttCStr cszRelative;
 
     for (size_t pos = 0;
-         pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.GetCount() : cIncSrcFiles.m_lstLibFiles.GetCount()); ++pos)
+         pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.GetCount() : cIncSrcFiles.m_lstLibFiles.GetCount());
+         ++pos)
     {
         ttStrCpy(pszFilePortion, bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos] : cIncSrcFiles.m_lstLibFiles[pos]);
         ttConvertToRelative(cszCWD, szPath, cszRelative);
@@ -479,8 +482,8 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
     }
 }
 
-// .srcfiles is a YAML file, so the value of the option may be within a single or double quote. That means we can't just
-// search for '#' to find the comment, we must first step over any opening/closing quote.
+// .srcfiles is a YAML file, so the value of the option may be within a single or double quote. That means we can't
+// just search for '#' to find the comment, we must first step over any opening/closing quote.
 
 bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment)
 {
@@ -632,8 +635,8 @@ const char* CSrcFiles::GetTargetDir()
         }
     }
 
-    // For 32-bit code, check to see if there is a 32, x86, or _x86 suffix to the standard bin and lib directories. If
-    // it exists and the user didn't tell us where to put it, then use that directory.
+    // For 32-bit code, check to see if there is a 32, x86, or _x86 suffix to the standard bin and lib directories.
+    // If it exists and the user didn't tell us where to put it, then use that directory.
     else
     {
         if (GetOption(OPT_TARGET_DIR32))

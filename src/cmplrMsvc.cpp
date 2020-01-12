@@ -57,8 +57,8 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
     m_pkfOut->WriteEol();  // force a blank line after the options are listed
 }
 
-// The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for both
-// CLANG and MSVC
+// The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for
+// both CLANG and MSVC
 
 void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 {
@@ -66,9 +66,10 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 
     if (m_gentype == GEN_DEBUG)
     {
-        // For MSVC compiler you can either use -Z7 or -FS -Zf -Zi. My testing of the two approaches is that -Z7 yields
-        // larger object files but reduces compile/link time by about 20% (compile speed is faster because no serialized
-        // writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not recognize -Zf.
+        // For MSVC compiler you can either use -Z7 or -FS -Zf -Zi. My testing of the two approaches is that -Z7
+        // yields larger object files but reduces compile/link time by about 20% (compile speed is faster because
+        // no serialized writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not
+        // recognize -Zf.
 
         // clang-format off
         m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7",
@@ -140,8 +141,8 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 
     else
     {
-        m_pkfOut->WriteStr(
-            " -D__clang__");  // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
+        m_pkfOut->WriteStr(" -D__clang__");  // unlike the non-MSVC compatible version, clang-cl.exe (version 7)
+                                             // doesn't define this
         m_pkfOut->WriteStr(" -fms-compatibility-version=19");              // Version of MSVC to be compatible with
         m_pkfOut->WriteStr(GetBoolOption(OPT_32BIT) ? " -m32" : " -m64");  // specify the platform
         if (m_gentype == GEN_RELEASE)
@@ -445,9 +446,9 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
 void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
 {
     // .idl files have one input file, and two output files: a header file (.h) and a type library file (.tlb).
-    // Typically the header file will be needed by one or more source files and the typelib file will be needed by the
-    // resource compiler. We create the header file as a target, and a phony rule for the typelib pointing to the header
-    // file target.
+    // Typically the header file will be needed by one or more source files and the typelib file will be needed by
+    // the resource compiler. We create the header file as a target, and a phony rule for the typelib pointing to
+    // the header file target.
 
     for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos)
     {
@@ -463,8 +464,8 @@ void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
 void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
 {
     // Note that bin and lib don't need to exist ahead of time as ninja will create them, however if the output is
-    // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way around
-    // this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
+    // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way
+    // around this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
     const char* pszTarget = (m_gentype == GEN_DEBUG) ? GetTargetDebug() : GetTargetRelease();
 
@@ -485,7 +486,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     for (size_t iPos = 0; iPos < getSrcCount(); iPos++)
     {
         ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
-        if (!ttStrStrI(cszFile, ".c"))  // we don't care about any type of file that wasn't compiled into an .obj file
+        if (!ttStrStrI(cszFile,
+                       ".c"))  // we don't care about any type of file that wasn't compiled into an .obj file
             continue;
         cszFile.ChangeExtension(".obj");
         if (!bPchSeen && ttIsSameStrI(cszFile, m_cszPCHObj))
@@ -493,8 +495,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         m_pkfOut->printf(" $\n  $outdir/%s", (char*) cszFile);
     }
 
-    // The precompiled object file must be linked. It may or may not show up in the list of source files. We check here
-    // to make certain it does indeed get written.
+    // The precompiled object file must be linked. It may or may not show up in the list of source files. We check
+    // here to make certain it does indeed get written.
 
     if (!bPchSeen && m_cszPCHObj.IsNonEmpty())
         m_pkfOut->printf(" $\n  $outdir/%s", (char*) m_cszPCHObj);
@@ -502,7 +504,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     switch (m_gentype)
     {
         case GEN_DEBUG:
-            for (size_t pos = 0; m_lstBldLibsD.InRange(pos); ++pos) {
+            for (size_t pos = 0; m_lstBldLibsD.InRange(pos); ++pos)
+            {
                 wxLogDebug((char*) m_lstBldLibsD[pos]);
                 m_pkfOut->printf(" $\n  %s", (char*) m_lstBldLibsD[pos]);
             }

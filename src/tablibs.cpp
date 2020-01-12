@@ -10,10 +10,6 @@
 
 #include "dlgoptions.h"
 
-void CTabLibs::OnBegin(void)
-{
-}
+void CTabLibs::OnBegin(void) {}
 
-void CTabLibs::OnOK(void)
-{
-}
+void CTabLibs::OnOK(void) {}

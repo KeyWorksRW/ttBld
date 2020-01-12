@@ -65,7 +65,7 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
 
     file.ReadStrFile(txtTasks);
 
-        file.ReplaceStr("%tgtDir%", cSrcFiles.GetTargetDir());
+    file.ReplaceStr("%tgtDir%", cSrcFiles.GetTargetDir());
 
 #if defined(_WIN32)
     file.ReplaceStr("%command%", "nmake.exe -nologo debug");

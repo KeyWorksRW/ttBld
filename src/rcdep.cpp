@@ -10,7 +10,7 @@
 
 #if defined(_WIN32)  // only Windows builds use .rc files
 
-#include "ninja.h"  // CNinja
+    #include "ninja.h"  // CNinja
 
 // clang-format off
 static const char* lstRcKeywords[] = {  // list of keywords that load a file
@@ -81,17 +81,17 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
         {
             char* psz = ttFindNonSpace(ttFindNonSpace(kf) + sizeof("#include"));
 
-            // We only care about header files in quotes -- we're not generating dependeices on system files (#include
-            // <foo.h>)
+            // We only care about header files in quotes -- we're not generating dependeices on system files
+            // (#include <foo.h>)
 
             if (*psz == CH_QUOTE)
             {
                 ttCStr cszHeader;
                 cszHeader.GetQuotedString(psz);
 
-                // Older versions of Visual Studio do not allow <> to be placed around header files. Since system header
-                // files rarely change, and when they do they are not likely to require rebuilding our .rc file, we
-                // simply ignore them.
+                // Older versions of Visual Studio do not allow <> to be placed around header files. Since system
+                // header files rarely change, and when they do they are not likely to require rebuilding our .rc
+                // file, we simply ignore them.
 
                 if (ttIsSameSubStrI(cszHeader, "afx") || ttIsSameSubStrI(cszHeader, "atl") ||
                     ttIsSameSubStrI(cszHeader, "winres"))
@@ -101,7 +101,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
 
                 if (!ttFileExists(cszHeader))
                 {
-#if 0
+    #if 0
                     // REVIEW: [randalphwa - 5/16/2019]  We can't really report this as an error unless we first check
                     // the INCLUDE environment variable as well as the IncDIRs option. The resource compiler is going to
                     // report the error, so there's not a huge advantage to reporting here.
@@ -110,7 +110,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                     cszErrMsg.printf(_(IDS_NINJA_MISSING_INCLUDE),
                         pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
                     m_lstErrors += cszErrMsg;
-#endif
+    #endif
                     continue;
                 }
 
@@ -188,8 +188,8 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                         {
                             ttCStr cszErrMsg;
                             // BUGBUG: [KeyWorks - 7/11/2019] See Issue #46
-                            // (https://github.com/KeyWorksRW/keyBld/issues/46) Once we commit to wxWidgets, we need to
-                            // use wxNumberFormatter to deal with the number.
+                            // (https://github.com/KeyWorksRW/keyBld/issues/46) Once we commit to wxWidgets, we
+                            // need to use wxNumberFormatter to deal with the number.
                             cszErrMsg.printf(_("%s(%kt,%kt):  warning: cannot locate include file %s"),
                                              pszHdr ? pszHdr : pszRcFile, curLine,
                                              (size_t)(pszFileName - kf.GetLnPtr()), (char*) cszFile);
