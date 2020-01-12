@@ -16,8 +16,8 @@ Options:
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ./;../../ttLibwx/include  # temporary location, change before Public release
-    BuildLibs:   ../../ttLibwx/src      # temporary location, change before Public release
+    IncDirs:     ./;../../ttwx;../../ttLibwx/include  # temporary location, change before Public release
+    BuildLibs:   ../../ttwx;../../ttLibwx/src      # temporary location, change before Public release
 
 #    IncDirs:     ../ttLibwx/include                # additional directories for header files
 #    BuildLibs:   ../ttLibwx/src                    # libraries that need to be built (added to makefile generation)
