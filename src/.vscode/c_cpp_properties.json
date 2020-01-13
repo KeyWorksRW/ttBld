@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Default",
+             "cStandard": "c11",
+             "cppStandard": "c++17",
+             "defines": [
+                "WXUSINGDLL",
+                "_DEBUG"
+            ],
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/../../ttwx",
+                "${workspaceRoot}/../../ttLibwx/include",
+                "${default}"
+            ]
+        }
+    ],
+    "version": 4
+}
