@@ -76,33 +76,24 @@ int CMainApp::OnRun()
 
 void Usage()
 {
-    puts("");
-    puts(txtVersion);
-    puts(txtCopyRight);
+    std::cout << '\n' << g_txtVersion << '\n' << g_txtCopyright << '\n';
 
-    // clang-format off
-
-    puts(_("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n"));
-    puts(_("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and build/*.ninja\n"));
-
-    puts(_("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml"));
-#if defined(_WIN32)
-    puts(_("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd"));
-#endif
-    puts(_("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file"));
-
-    puts(_("    -vs        -- creates files used to build and debug a project using Visual Studio"));
-    puts(_("    -vscode    -- creates or updates files used to build and debug a project using VS Code"));
+    std::cout << _("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n")
+              << _("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and "
+                   "build/*.ninja\n")
+              << _("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml\n")
+              << _("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd\n")
+              << _("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file\n")
+              << _("    -vs        -- creates files used to build and debug a project using Visual Studio\n")
+              << _("    -vscode    -- creates or updates files used to build and debug a project using VS Code\n");
 
     // Currently non-finished commands
-
-    puts("\b  Unfinished commands:\n");
-    puts(_("    -all          -- equivalent to -allninja and -vscode"));
-    puts(_("    -alld         -- deletes makefile and .vscode/c_cpp_preferences.json before running -all"));
-    puts(_("    -allninja     -- creates/updates all .ninja scripts, creeates makefile (if missing)"));
-    puts(_("    -convert file -- Converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml"));
-
-    // clang-format on
+    std::cout
+        << "\n  Unfinished commands:\n"
+        << _("    -all          -- equivalent to -allninja and -vscode\n")
+        << _("    -alld         -- deletes makefile and .vscode/c_cpp_preferences.json before running -all\n")
+        << _("    -allninja     -- creates/updates all .ninja scripts, creeates makefile (if missing)\n")
+        << _("    -convert file -- Converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml\n");
 
     // Currently hidden or non-finished commands
 
@@ -123,7 +114,7 @@ void Usage()
     // puts(_("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
 
 #if defined(TESTING)
-    puts("    -tvdlg    -- tests the CDlgVsCode dialog");
+    std::cout << "    -tvdlg    -- tests the CDlgVsCode dialog\n";
 #endif
     // -bwt -- sets break on warning to true
     // -bwf -- sets break on warning to false
