@@ -31,10 +31,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <ttwx.h>      // Master header file for ttwx.lib
+#include <ttassert.h>  // Provides an alternative to wxASSERT macros
+
 #include <ttlib.h>    // Master header file for ttLib
 #include <ttdebug.h>  // ttASSERT macros
 
 using namespace ttch;  // For the CH_ and CHW_ constants
+
+constexpr std::string_view g_txtVersion("ttBld 1.3.0.8295");
+constexpr std::string_view g_txtCopyright("Copyright (c) 2002-2020 KeyWorks Software");
+constexpr std::string_view g_txtAppname("ttBld");
 
 extern const char* txtVersion;
 extern const char* txtCopyRight;
