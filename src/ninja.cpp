@@ -284,27 +284,25 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     }
 
     if (m_bForceWrite)
-        return file.WriteFile(m_cszScriptFile);
+        return file.WriteFile(m_cszScriptFile.c_str());
 
     ttCFile fileOrg;
-    if (fileOrg.ReadFile(m_cszScriptFile))
+    if (fileOrg.ReadFile(m_cszScriptFile.c_str()))
     {
         if (strcmp(fileOrg, file) == 0)  // Only write the build script if something changed
             return false;
         else if (m_dryrun.IsEnabled())
         {
-            m_dryrun.NewFile(m_cszScriptFile);
+            m_dryrun.NewFile(m_cszScriptFile.c_str());
             m_dryrun.DisplayFileDiff(fileOrg, file);
             return false;  // because we didn't write anything
         }
     }
 
-    if (!file.WriteFile(m_cszScriptFile))
+    if (!file.WriteFile(m_cszScriptFile.c_str()))
     {
-        ttCStr cszMsg;
-        cszMsg.printf(_("Unable to create or write to %s"), (char*) m_cszScriptFile);
-        cszMsg += "\n";
-        AddError(cszMsg);
+        std::string str(_("Unable to create or write to") + m_cszScriptFile + '\n');
+        AddError(str.c_str());
         return false;
     }
 

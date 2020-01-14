@@ -767,6 +767,7 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
 // REVIEW: [KeyWorks - 10-05-2019] Don't remove this! We'll need it once we support conditional task generation for
 // messages.po
 
+#if 0
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
                     const char* pszProblem)
 {
@@ -782,6 +783,7 @@ static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup
     while (fileTask.ReadLine())
         fileOut.WriteEol(fileTask);
 }
+#endif
 
 // AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path
 // instead of the default absolute path

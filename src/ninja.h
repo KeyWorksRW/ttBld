@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
+#include <ttstring.h>  // ttString, ttStrlist -- String and vector classes with some additional functionality
+#include <ttlist.h>    // ttCList, ttCDblList, ttCStrIntList
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
@@ -50,7 +51,7 @@ public:
     bool CreateMakeFile(bool bAllVersion = false, const char* pszDir = nullptr);
 
     const char* GetRcFile() { return m_cszRcName; }
-    const char* GetScriptFile() { return m_cszScriptFile; }
+    std::string_view GetScriptFile() { return m_cszScriptFile; }
 
     ttCList* GetSrcFileList() { return &m_lstSrcFiles; }
     ttCList* GetLibFileList() { return &m_lstLibFiles; }
@@ -84,7 +85,7 @@ protected:
     void msvcWriteMidlTargets(CMPLR_TYPE cmplr);
 #endif
 
-    bool        FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
+    bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
     const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);
 
     CDryRun m_dryrun;
@@ -96,11 +97,12 @@ private:
     ttCFile* m_pkfOut;
     GEN_TYPE m_gentype;
 
-    ttCStr m_cszPCH;         // The .pch name that will be generated
-    ttCStr m_cszCPP_PCH;     // The .cpp name that will be used to create the .pch file
-    ttCStr m_cszPCHObj;      // The .obj file that is built to create the .pch file
-    ttCStr m_cszChmFile;     // Set if a .hhp file was specified in .srcfiles.yaml
-    ttCStr m_cszScriptFile;  // The .ninja file
+    ttCStr m_cszPCH;      // The .pch name that will be generated
+    ttCStr m_cszCPP_PCH;  // The .cpp name that will be used to create the .pch file
+    ttCStr m_cszPCHObj;   // The .obj file that is built to create the .pch file
+    ttCStr m_cszChmFile;  // Set if a .hhp file was specified in .srcfiles.yaml
+
+    ttString m_cszScriptFile;  // The .ninja file
 
     ttCList m_lstBldLibsD;
     ttCList m_lstBldLibsR;

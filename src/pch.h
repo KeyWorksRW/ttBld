@@ -26,10 +26,19 @@
 
 #include <wx/intl.h>
 
-#include <stdexcept>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <stdexcept>
+
+#include <filesystem>
+// Define a namespace so that either std::filesystem or boost::filesystem can be used
+namespace fs = std::filesystem;
+
+#include <sstream>
+#include <string>
+#include <string_view>
 
 #include <ttwx.h>      // Master header file for ttwx.lib
 #include <ttassert.h>  // Provides an alternative to wxASSERT macros
@@ -39,10 +48,6 @@
 
 using namespace ttch;  // For the CH_ and CHW_ constants
 
-constexpr std::string_view g_txtVersion("ttBld 1.3.0.8295");
-constexpr std::string_view g_txtCopyright("Copyright (c) 2002-2020 KeyWorks Software");
-constexpr std::string_view g_txtAppname("ttBld");
-
-extern const char* txtVersion;
-extern const char* txtCopyRight;
-extern const char* txtAppName;
+constexpr const char* txtVersion = "ttBld 1.3.0.8295";
+constexpr const char* txtCopyright = "Copyright (c) 2002-2020 KeyWorks Software";
+constexpr const char* txtAppname = "ttBld";

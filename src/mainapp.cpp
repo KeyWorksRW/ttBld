@@ -38,10 +38,6 @@
 
 #include "mainapp.h"  // CMainApp -- Main application class
 
-const char* txtVersion = "ttBld 1.3.0.8295";
-const char* txtCopyRight = "Copyright (c) 2002-2019 KeyWorks Software";
-const char* txtAppName = "ttBld";
-
 #include <iostream>
 #include <direct.h>  // Functions for directory handling and creation
 
@@ -62,7 +58,7 @@ int oldMain(int argc, char** argv);
 
 bool CMainApp::OnInit()
 {
-    SetAppDisplayName(txtAppName);
+    SetAppDisplayName(txtAppname);
     SetVendorName("KeyWorks");
     SetVendorDisplayName("KeyWorks Software");
 
@@ -76,7 +72,7 @@ int CMainApp::OnRun()
 
 void Usage()
 {
-    std::cout << '\n' << g_txtVersion << '\n' << g_txtCopyright << '\n';
+    std::cout << '\n' << txtVersion << '\n' << txtCopyright << '\n';
 
     std::cout << _("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n")
               << _("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and "
@@ -469,7 +465,7 @@ int oldMain(int argc, char* argv[])
     if (Action & ACT_VSCODE || Action & ACT_ALL || Action & ACT_ALLD)
     {
         if (Action & ACT_ALLD)
-            wxRemoveFile(".vscode/c_cpp_properties.json");
+            std::filesystem::remove(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         ttCList lstResults;
         CreateVsCodeProject(cszSrcFilePath, &lstResults);
@@ -480,10 +476,10 @@ int oldMain(int argc, char* argv[])
     if (Action & ACT_VS)
     {
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-        ttCList lstResults;
-        CreateVsJson(cszSrcFilePath, &lstResults);
-        for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-            puts(lstResults[pos]);
+        std::vector<std::string> results;
+        CreateVsJson(cszSrcFilePath, results);
+        for (auto msg : results)
+            std::cout << msg << '\n';
     }
 
     {
@@ -549,9 +545,6 @@ int oldMain(int argc, char* argv[])
 
 void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
 {
-    // TODO: [KeyWorks - 7/30/2019] Need to change CNinja to accept a root dir instead of bVsCodeDir, then we can
-    // pass in pszRootDir.
-
     CNinja cNinja(pszRootDir);
     cNinja.ForceWrite();
 
@@ -561,42 +554,42 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
         {
             case UPDATE_MSVC:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
+                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
                 break;
 
             case UPDATE_MSVC32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
+                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
                 break;
 
             case UPDATE_CLANG_CL:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
+                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
                 break;
 
             case UPDATE_CLANG_CL32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
+                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
                 break;
 
             case UPDATE_MSVCD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
+                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
                 break;
 
             case UPDATE_MSVC32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
+                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
                 break;
 
             case UPDATE_CLANG_CLD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
+                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
                 break;
 
             case UPDATE_CLANG_CL32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    printf(_("%s updated.\n"), cNinja.GetScriptFile());
+                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
                 break;
 
             default:
@@ -607,6 +600,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     else
     {
         ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-        puts(_("This version of ttBld is too old to properly create ninja scripts from your current srcfiles."));
+        std::cout << _(
+            "This version of ttBld is too old to properly create ninja scripts from your current srcfiles.");
     }
 }

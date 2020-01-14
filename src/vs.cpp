@@ -10,6 +10,8 @@
 
 #include "pch.h"
 
+#include <filesystem>
+
 #include <ttfile.h>     // ttCFile
 #include "csrcfiles.h"  // CSrcFiles
 
@@ -47,16 +49,18 @@ static const char* txtLaunch =
     "    ]\n"
     "}\n";
 
-bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns true unless unable to write to a file
+// returns true unless unable to write to a file
+bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
 {
     CSrcFiles cSrcFiles;
     cSrcFiles.ReadFile(pszSrcFiles);
 
-    if (!ttDirExists(".vs"))
+    if (!std::filesystem::exists(".vs"))
     {
-        if (!ttCreateDir(".vs"))
+        if (!std::filesystem::create_directory(".vs"))
         {
-            ttMsgBox(_("Unable to create the required .vs directory."));
+            std::string str(_("Unable to create the required .vs directory.").utf8_str());
+            results.push_back(str);
             return false;
         }
     }
@@ -76,18 +80,15 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
 
     if (!file.WriteFile(".vs/tasks.vs.json"))
     {
-        if (plstResults)
-        {
-            ttCStr cszMsg;
-            cszMsg.printf(_("Unable to create or write to %s"), ".vs/tasks.vs.json");
-            *plstResults += (char*) cszMsg;
-        }
+        std::ostringstream str;
+        str << _("Unable to create or write to ") << ".vs/tasks.vs.json";
+        results.push_back(str.str());
         return false;
     }
     else
     {
-        if (plstResults)
-            *plstResults += _("Created .vs/tasks.vs.json");
+        std::string str(_("Created .vs/tasks.vs.json").utf8_str());
+        results.push_back(str);
     }
 
     file.Delete();
@@ -99,26 +100,23 @@ bool CreateVsJson(const char* pszSrcFiles, ttCList* plstResults)  // returns tru
         file.ReplaceStr("%projgect%", cSrcFiles.GetProjectName());
     else
     {
-        ttCStr cszMsg;
-        cszMsg.printf("No project name specified in %s.", cSrcFiles.GetSrcFiles());
-        *plstResults += (char*) cszMsg;
+        std::ostringstream str;
+        str << _("No project name specified in ") << cSrcFiles.GetSrcFiles();
+        results.push_back(str.str());
         return false;
     }
 
     if (!file.WriteFile(".vs/launch.vs.json"))
     {
-        if (plstResults)
-        {
-            ttCStr cszMsg;
-            cszMsg.printf(_("Unable to create or write to %s"), ".vs/launch.vs.json");
-            *plstResults += (char*) cszMsg;
-        }
+        std::ostringstream str;
+        str << _("Unable to create or write to ") << ".vs/launch.vs.json";
+        results.push_back(str.str());
         return false;
     }
     else
     {
-        if (plstResults)
-            *plstResults += _("Created .vs/launch.vs.json");
+        std::string str(_("Created .vs/launch.vs.json"));
+        results.push_back(str);
     }
 
     return true;

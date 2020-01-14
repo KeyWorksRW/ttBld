@@ -35,7 +35,7 @@ const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);
 size_t CreateCodeLiteProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
 
 // Creates .json files for Visual Studio
-bool CreateVsJson(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
+bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results);
 
 // Following functions are for use in setting up a build system for VS Code
 
