@@ -10,6 +10,7 @@
             ],
             "includePath": [
                 "${workspaceRoot}",
+                "${workspaceRoot}/precompile",
                 "${workspaceRoot}/../../ttwx",
                 "${workspaceRoot}/../../ttLibwx/include",
                 "${default}"

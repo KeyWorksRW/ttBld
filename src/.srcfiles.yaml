@@ -10,13 +10,15 @@ Options:
     Crt_dbg:     dll          # [static | dll] type of CRT to link to in debug builds
     Ms_linker:   false        # true means use link.exe even when compiling with clang
 
-    CFlags_cmn:  -std:c++17 -DWXUSINGDLL  # flags to pass to the compiler in all builds
+    CFlags_cmn: /Zc:__cplusplus -DWXUSINGDLL  # flags to pass to the compiler in all builds
+    CFlags_rel: -std:c++17
+    CFlags_dbg: -std:c++latest
 
     TargetDir: ../bin         # 64-bit target directory
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ./;../../ttwx;../../ttLibwx/include  # temporary location, change before Public release
+    IncDirs:     precompile;../../ttwx;../../ttLibwx/include  # temporary location, change before Public release
     BuildLibs:   ../../ttwx;../../ttLibwx/src      # temporary location, change before Public release
 
 #    IncDirs:     ../ttLibwx/include                # additional directories for header files

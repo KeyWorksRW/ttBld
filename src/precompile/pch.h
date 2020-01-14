@@ -2,6 +2,10 @@
 
 #pragma once
 
+#if __cplusplus < 201703L
+    #error "This code requires compiling for C++17 or later (MSVC will need -std:c++17 and /Zc:__cplusplus)"
+#endif
+
 #if defined(_WIN32)
     #define wxMSVC_VERSION_AUTO
 #endif
