@@ -11,11 +11,13 @@ Options:
     Crt_rel:     dll             # [static | dll] type of CRT to link to in release builds
     Crt_dbg:     dll             # [static | dll] type of CRT to link to in debug builds
 
-    CFlags_cmn: -std:c++17 -DWXUSINGDLL
+    CFlags_cmn: /Zc:__cplusplus -DWXUSINGDLL  # flags to pass to the compiler in all builds
+    CFlags_rel: -std:c++17
+    CFlags_dbg: -std:c++latest
 
     TargetDir: ../lib      # target directory
 
-    IncDirs:    ../src;../../ttwx;../ttLibwx/include
+    IncDirs:    ../src/precompile;../src;../../ttwx;../ttLibwx/include
 
 Files:
     ../src/csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
