@@ -104,7 +104,9 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     cszOutDir.AddTrailingSlash();
 
     m_cszScriptFile = GetBldDir();
-    m_cszScriptFile.AddTrailingSlash();
+    m_cszScriptFile.backslashestoforward();
+    if (m_cszScriptFile.back() != '/')
+        m_cszScriptFile.push_back('/');
 
     switch (gentype)
     {
