@@ -70,6 +70,8 @@ public:
     // Source file to compile the precompiled header
     const char* GetPchCpp();
 
+    std::string_view GetRcName() { return m_RCname; }
+
     // Gets name/location of srcfiles (normally .srcfiles.yaml)
     const char* GetSrcFiles() { return m_srcfilename.c_str(); };
     // Ninja's builddir should be set to this directory
@@ -111,7 +113,7 @@ protected:
 
     const char* GetReportFilename() { return (m_ReportPath.empty()) ? "" : m_ReportPath.c_str(); }
 
-public:
+protected:
     // Class members (note that these are NOT marked protected or private -- too many callers need to access
     // individual members)
 

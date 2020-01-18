@@ -17,8 +17,11 @@
 #include "resource.h"
 #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 
+#if 0
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
                     const char* pszProblem);
+#endif
+
 static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
 static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
 

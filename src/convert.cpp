@@ -45,7 +45,7 @@ bool CConvertDlg::ConvertCodeBlocks()
         else if (ttIsSameStrI(pItem->GetName(), "Unit"))
         {
             if (isValidSrcFile(pItem->GetAttribute("filename")))
-                m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("filename"));
+                m_cSrcFiles.GetSrcFilesList().addfile(MakeSrcRelative(pItem->GetAttribute("filename")));
         }
     }
 
@@ -113,7 +113,7 @@ bool CConvertDlg::ConvertVcProj()
                 if (ttIsSameStrI(pItem->GetName(), "File"))
                 {
                     if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
-                        m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("RelativePath"));
+                        m_cSrcFiles.GetSrcFilesList().addfile(MakeSrcRelative(pItem->GetAttribute("RelativePath")));
                 }
             }
         }
@@ -128,7 +128,7 @@ bool CConvertDlg::ConvertVcProj()
             if (ttIsSameStrI(pItem->GetName(), "File"))
             {
                 if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
-                    m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pItem->GetAttribute("RelativePath"));
+                    m_cSrcFiles.GetSrcFilesList().addfile(MakeSrcRelative(pItem->GetAttribute("RelativePath")));
             }
         }
     }
