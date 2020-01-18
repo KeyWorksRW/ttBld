@@ -516,16 +516,16 @@ bool CVcxWrite::CreateBuildFile()
         while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease()))
             ;
 
-        ttCStr cszSrcFile;
-        for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos)
+        for (auto file : m_lstSrcFiles)
         {
-            if (ttStrStrI(m_lstSrcFiles[pos], ".c"))  // only add C/C++ files
-            {
-                cszSrcFile.printf(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>",
-                                  m_lstSrcFiles[pos]);
-                kf.WriteEol(cszSrcFile);
-            }
+            auto ext = file.extension();
+            if (ext.empty() || std::tolower(ext[1] != 'c'))
+                continue;
+            kf.WriteEol(
+                wxString::Format(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>", file.c_str()));
         }
+
+        ttCStr cszSrcFile;
         if (!m_RCname.empty())
         {
             cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>",
@@ -572,13 +572,13 @@ bool CVcxWrite::CreateBuildFile()
 
         kf.WriteEol("  <ItemGroup>");
 
-        for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos)
+        for (size_t pos = 0; pos < m_lstSrcFiles.size(); ++pos)
         {
-            if (ttStrStrI(m_lstSrcFiles[pos], ".c"))  // only add C/C++ files
+            if (ttStrStrI(m_lstSrcFiles[pos].c_str(), ".c"))  // only add C/C++ files
             {
                 cszSrcFile.printf(
                     "    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>",
-                    m_lstSrcFiles[pos]);
+                    m_lstSrcFiles[pos].c_str());
                 kf.WriteEol(cszSrcFile);
             }
         }

@@ -366,7 +366,7 @@ bool CConvertDlg::ConvertDsp()
                 pszFile = ttFindNonSpace(pszFile + 1);
                 if (ttIsSameSubStr(pszFile, ".\\"))
                     pszFile += 2;
-                *m_cSrcFiles.GetSrcFilesList() += pszFile;
+                m_cSrcFiles.GetSrcFilesList().append(pszFile);
             }
         }
     }
@@ -486,7 +486,7 @@ bool CConvertDlg::ConvertSrcfiles()
     ttCStr cszTmp(".include ");
     cszTmp += (char*) cszRelative;
 
-    *m_cSrcFiles.GetSrcFilesList() += (char*) cszTmp;
+    m_cSrcFiles.GetSrcFilesList() += cszTmp.c_str();
 
     pszTmp = ttFindFilePortion(cszRelative);
     if (pszTmp)

@@ -38,7 +38,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
         {
             ttCStr cszErrMsg;
             cszErrMsg.printf(_("Cannot open \"%s\"."), pszRcFile);
-            m_lstErrors += cszErrMsg;
+            m_lstErrMessages.append(cszErrMsg.c_str());
         }
         return false;
     }
@@ -109,7 +109,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                     ttCStr cszErrMsg;
                     cszErrMsg.printf(_(IDS_NINJA_MISSING_INCLUDE),
                         pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
-                    m_lstErrors += cszErrMsg;
+                    m_lstErrMessages.append(cszErrMsg.c_str());
     #endif
                     continue;
                 }
@@ -193,7 +193,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                             cszErrMsg.printf(_("%s(%kt,%kt):  warning: cannot locate include file %s"),
                                              pszHdr ? pszHdr : pszRcFile, curLine,
                                              (size_t)(pszFileName - kf.GetLnPtr()), (char*) cszFile);
-                            m_lstErrors += cszErrMsg;
+                            m_lstErrMessages.append(cszErrMsg.c_str());
                             break;
                         }
                         size_t posHdr = m_lstRcDependencies.GetPos(cszFile);

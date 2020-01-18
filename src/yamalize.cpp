@@ -24,12 +24,12 @@ bool Yamalize()
     cOrgSrcFiles.ReadFile(".srcfiles.yaml");
 
     CWriteSrcFiles cNewSrcFiles;
-    ttCList*       plstFiles = cNewSrcFiles.GetSrcFilesList();
+    ttStrVector&   lstSrcFiles = cNewSrcFiles.GetSrcFilesList();
 
     if (ttFileExists(".srcfiles.yaml"))
-        *plstFiles += ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml";
+        lstSrcFiles += ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml";
     else
-        *plstFiles += "*.c*";  // TODO: this is a placeholder, need to be smarter about what wildcards to use
+        lstSrcFiles += "*.c*";  // TODO: this is a placeholder, need to be smarter about what wildcards to use
 
     cNewSrcFiles.UpdateOption(OPT_PROJECT, cOrgSrcFiles.GetOption(OPT_PROJECT));
     cNewSrcFiles.UpdateOption(OPT_EXE_TYPE, cOrgSrcFiles.GetOption(OPT_EXE_TYPE));

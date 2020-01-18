@@ -38,7 +38,7 @@ public:
     const char* GetTargetDebug();
 
     const char* GetBuildScriptDir();
-    void        AddFile(const char* pszFile) { m_lstSrcFiles += pszFile; }
+    bool        AddFile(const char* pszFile) { return m_lstSrcFiles.addfile(pszFile); }
 
     // If pszFile is NULL, CSrcFiles will attempt to locate the file (see LocateSrcFiles()).
     bool ReadFile(const char* pszFile = nullptr);
@@ -79,7 +79,7 @@ public:
     int GetMinorRequired() { return m_RequiredMinor; }
     int GetSubRequired() { return m_RequiredSub; }
 
-    ttCList* GetSrcFilesList() { return &m_lstSrcFiles; }
+    ttStrVector& GetSrcFilesList() { return m_lstSrcFiles; }
 
     void SetReportingFile(const char* pszFile) { m_ReportPath = pszFile; }
 
@@ -91,7 +91,7 @@ public:
                 wxTrap();          \
         }
 #else
-    void AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
+    void AddError(const char* pszErrMsg) { m_lstErrMessages.append(pszErrMsg); }
     #define BREAKONWARNING
 #endif
 
@@ -124,11 +124,11 @@ public:
 
     ttCHeap m_ttHeap;  // All the ttCList files will be attatched to this heap
 
-    ttCList m_lstSrcFiles;  // List of all source files
-    ttCList m_lstLibFiles;  // List of any files used to build additional library
-    ttCList m_lstIdlFiles;  // List of any idl files to compile with midl compiler
+    ttStrVector m_lstSrcFiles;  // List of all source files
+    ttStrVector m_lstLibFiles;  // List of any files used to build additional library
+    ttStrVector m_lstIdlFiles;  // List of any idl files to compile with midl compiler
 
-    ttCList m_lstErrors;  // List of any errors that occurred during processing
+    ttStrVector m_lstErrMessages;  // List of any errors that occurred during processing
 
     ttCStrIntList m_lstAddSrcFiles;     // Additional .srcfiles.yaml to read into Files: section
     ttCStrIntList m_lstLibAddSrcFiles;  // Additional .srcfiles.yaml to read into Lib: section

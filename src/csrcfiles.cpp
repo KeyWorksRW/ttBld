@@ -34,20 +34,11 @@ typedef enum
 
 CSrcFiles::CSrcFiles(const char* pszNinjaDir)
     : m_ttHeap(true)
-    ,
     // make all ttCList classes use the same sub-heap
-    m_lstSrcFiles(m_ttHeap)
-    , m_lstLibFiles(m_ttHeap)
-    , m_lstIdlFiles(m_ttHeap)
-    , m_lstErrors(m_ttHeap)
     , m_lstLibAddSrcFiles(m_ttHeap)
     , m_lstSrcIncluded(m_ttHeap)
 {
     m_bRead = false;
-
-    m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
-    m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
-    m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
 
     m_RequiredMajor = 1;
     m_RequiredMinor = 0;
@@ -74,7 +65,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
         {
             ttCStr csz;
             csz.printf(_("Cannot locate the file %s"), ".srcfiles.yaml");
-            m_lstErrors += csz;
+            m_lstErrMessages.append(csz.c_str());
             BREAKONWARNING;
             return false;  // if we still can't find it, bail
         }
@@ -94,7 +85,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     {
         ttCStr csz;
         csz.printf(_("Cannot open \"%s\"."), m_srcfilename.c_str());
-        m_lstErrors += csz;
+        m_lstErrMessages.append(csz.c_str());
         BREAKONWARNING;
         return false;
     }
@@ -175,7 +166,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     // If no Files: were specified, then we still won't have any files to build. Default to every type of C++
     // source file in the current directory.
 
-    if (m_lstSrcFiles.GetCount() < 1)
+    if (!m_lstSrcFiles.size())
     {
 #if defined(_WIN32)
         AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl;*.hhp");
@@ -230,7 +221,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
 
     ttCStr csz;
     csz.printf(_("%s is an unknown option"), (char*) cszName);
-    m_lstErrors += csz;
+    m_lstErrMessages.append(csz.c_str());
 #if !defined(NDEBUG)  // Starts debug section.
     if (m_bBreakOnWarning)
         wxTrap();
@@ -287,9 +278,9 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
         m_lstLibFiles += pszLibFile;
         if (!ttFileExists(pszLibFile))
         {
-            ttCStr cszErrMsg;
-            cszErrMsg.printf("Cannot locate the file %s.", (char*) pszLibFile);
-            m_lstErrors += cszErrMsg;
+            ttString str(_("Cannot locate the file "));
+            str += pszLibFile;
+            m_lstErrMessages.append(str);
 #if !defined(NDEBUG)  // Starts debug section.
             if (m_bBreakOnWarning)
                 wxTrap();
@@ -330,18 +321,20 @@ void CSrcFiles::ProcessFile(char* pszFile)
         return;
     }
 
-    m_lstSrcFiles += pszFile;
-    if (!ttFileExists(pszFile))
+    if (m_lstSrcFiles.addfile(pszFile))
     {
-        std::ostringstream str;
+        if (!m_lstSrcFiles.back().fileExists())
+        {
+            std::ostringstream str;
 
 #if !defined(NDEBUG)  // Starts debug section.
-        ttString cwd;
-        cwd.assignCwd();
-        str << cwd << ": ";
+            ttString cwd;
+            cwd.assignCwd();
+            str << cwd << ": ";
 #endif
-        str << _("Unable to locate the file ") << pszFile;
-        AddError(str.str().c_str());
+            str << _("Unable to locate the file ") << pszFile;
+            AddError(str.str().c_str());
+        }
     }
 
     char* pszExt = ttStrStrI(pszFile, ".idl");
@@ -403,9 +396,9 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
 
     if (!cIncSrcFiles.ReadFile(cszFullPath))
     {
-        ttCStr cszMsg;
-        cszMsg.printf(_("%s: unable to locate the file %s."), GetReportFilename(), pszFile);
-        m_lstErrors += cszMsg;
+        ttString str(_("Unable to locate the file "));
+        str += cszFullPath;
+        m_lstErrMessages.append(str);
 #if !defined(NDEBUG)  // Starts debug section.
         if (m_bBreakOnWarning)
             wxTrap();
@@ -420,18 +413,18 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     ttCStr cszRelative;
 
     for (size_t pos = 0;
-         pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.GetCount() : cIncSrcFiles.m_lstLibFiles.GetCount());
-         ++pos)
+         pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.size() : cIncSrcFiles.m_lstLibFiles.size()); ++pos)
     {
-        ttStrCpy(pszFilePortion, bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos] : cIncSrcFiles.m_lstLibFiles[pos]);
+        ttStrCpy(pszFilePortion,
+                 bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos].c_str() : cIncSrcFiles.m_lstLibFiles[pos].c_str());
         ttConvertToRelative(cszCWD, szPath, cszRelative);
         size_t posAdd;
         posAdd = m_lstSrcIncluded.Add(cszRelative);
         lstAddSrcFiles.Add(pszFile, posAdd);
         if (bFileSection)
-            m_lstSrcFiles += cszRelative;
+            m_lstSrcFiles.addfile(cszRelative.c_str());
         else
-            m_lstLibFiles += cszRelative;
+            m_lstLibFiles.addfile(cszRelative.c_str());
     }
 }
 
@@ -455,24 +448,24 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
                 if (ttIsSameStrI(psz, ".c") || ttIsSameStrI(psz, ".cpp") || ttIsSameStrI(psz, ".cc") ||
                     ttIsSameStrI(psz, ".cxx"))
                 {
-                    m_lstSrcFiles += ff;
+                    m_lstSrcFiles += ff.GetFileName();
                 }
                 else if (ttIsSameStrI(psz, ".rc"))
                 {
-                    m_lstSrcFiles += ff;
+                    m_lstSrcFiles += ff.GetFileName();
                     if (m_RCname.empty())
                         m_RCname = ff.GetFileName();
                 }
                 else if (ttIsSameStrI(psz, ".hhp"))
                 {
-                    m_lstSrcFiles += ff;
+                    m_lstSrcFiles += ff.GetFileName();
                     if (m_HPPname.empty())
                         m_HPPname = ff.GetFileName();
                 }
                 else if (ttIsSameStrI(psz, ".idl"))
                 {
-                    m_lstSrcFiles += ff;
-                    m_lstIdlFiles += ff;
+                    m_lstSrcFiles += ff.GetFileName();
+                    m_lstIdlFiles += ff.GetFileName();
                 }
             }
             if (!ff.NextFile())
@@ -759,7 +752,7 @@ void CSrcFiles::AddError(const char* pszErrMsg)
     ttCStr cszMsg(pszErrMsg);
     cszMsg += "\n";
     wxLogDebug((char*) cszMsg);
-    m_lstErrors += pszErrMsg;
+    m_lstErrMessages += pszErrMsg;
     if (m_bBreakOnWarning)
         wxTrap();
 }

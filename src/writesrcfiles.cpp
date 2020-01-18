@@ -190,7 +190,7 @@ bool CWriteSrcFiles::WriteNew(const char* pszFile, const char* pszCommentHdr)
         m_lstOriginal += "";
     }
     m_lstOriginal += "Options:";
-    if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() || !m_RCname.empty())
+    if (m_lstSrcFiles.size() || m_lstIdlFiles.size() || !m_RCname.empty())
     {
         ttCStr cszFile;
         m_lstOriginal += "";
@@ -201,16 +201,16 @@ bool CWriteSrcFiles::WriteNew(const char* pszFile, const char* pszCommentHdr)
             cszFile += m_RCname.c_str();
             m_lstOriginal += cszFile;
         }
-        for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos)
+        for (size_t pos = 0; pos < m_lstIdlFiles.size(); ++pos)
         {
             cszFile = "    ";
-            cszFile += m_lstIdlFiles[pos];
+            cszFile += m_lstIdlFiles[pos].c_str();
             m_lstOriginal += cszFile;
         }
-        for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos)
+        for (size_t pos = 0; pos < m_lstSrcFiles.size(); ++pos)
         {
             cszFile = "    ";
-            cszFile += m_lstSrcFiles[pos];
+            cszFile += m_lstSrcFiles[pos].c_str();
             m_lstOriginal += cszFile;
         }
     }

@@ -406,7 +406,7 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
 
 void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
 {
-    if (m_lstIdlFiles.GetCount())
+    if (m_lstIdlFiles.size())
     {
         if (GetBoolOption(OPT_32BIT))
             m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /win32");
@@ -450,13 +450,13 @@ void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
     // the resource compiler. We create the header file as a target, and a phony rule for the typelib pointing to
     // the header file target.
 
-    for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos)
+    for (size_t pos = 0; pos < m_lstIdlFiles.size(); ++pos)
     {
         ttCStr cszTypeLib(m_lstIdlFiles[pos]);
         cszTypeLib.ChangeExtension(".tlb");
         ttCStr cszHeader(m_lstIdlFiles[pos]);
         cszHeader.ChangeExtension(".h");
-        m_pkfOut->printf("build %s : midl %s\n\n", (char*) cszHeader, m_lstIdlFiles[pos]);
+        m_pkfOut->printf("build %s : midl %s\n\n", (char*) cszHeader, m_lstIdlFiles[pos].c_str());
         m_pkfOut->printf("build %s : phony %s\n\n", (char*) cszTypeLib, (char*) cszHeader);
     }
 }
@@ -483,16 +483,17 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     }
 
     bool bPchSeen = false;
-    for (size_t iPos = 0; iPos < getSrcCount(); iPos++)
+
+    for (auto file : GetSrcFileList())
     {
-        ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
-        if (!ttStrStrI(cszFile,
-                       ".c"))  // we don't care about any type of file that wasn't compiled into an .obj file
+        auto ext = file.extension();
+        if (ext.empty() || std::tolower(ext[1] != 'c'))
             continue;
-        cszFile.ChangeExtension(".obj");
-        if (!bPchSeen && ttIsSameStrI(cszFile, m_cszPCHObj))
+        ttString objFile(file.filename());
+        objFile.replace_extension(".obj");
+        if (!bPchSeen && objFile.issamestri(m_cszPCHObj.c_str()))
             bPchSeen = true;
-        m_pkfOut->printf(" $\n  $outdir/%s", (char*) cszFile);
+        m_pkfOut->printf(" $\n  $outdir/%s", objFile.c_str());
     }
 
     // The precompiled object file must be linked. It may or may not show up in the list of source files. We check

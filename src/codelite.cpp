@@ -83,12 +83,11 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     if (cSrcFiles.GetPchHeader())
         kf.printf("\t\t<File Name=\042%s\042/>\n", (char*) cSrcFiles.GetPchHeader());
 
-    cSrcFiles.m_lstSrcFiles.Sort();
-    cSrcFiles.m_lstSrcFiles.BeginEnum();
-
-    const char* pszFileName;
-    while (cSrcFiles.m_lstSrcFiles.Enum(&pszFileName))
-        kf.printf("\t\t<File Name=\042%s\042/>\n", pszFileName);
+    std::sort(cSrcFiles.GetSrcFilesList().begin(), cSrcFiles.GetSrcFilesList().end());
+    for (auto file : cSrcFiles.GetSrcFilesList())
+    {
+        kf.printf("\t\t<File Name=\042%s\042/>\n", file.c_str());
+    }
 
     kf.WriteEol("\t</VirtualDirectory>");
 

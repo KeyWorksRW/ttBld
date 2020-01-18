@@ -31,16 +31,14 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         return;
     }
 
+    size_t cFilesAdded = 0;
     for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos)
     {
-        if (cSrcFiles.m_lstSrcFiles.Find(lstFiles[pos]))
+        if (cSrcFiles.GetSrcFilesList().appendi(lstFiles[pos]))
         {
-            printf(_("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
-            cSrcFiles.m_lstSrcFiles.Remove(pos);
+            ++cFilesAdded;
         }
     }
-
-    size_t cFilesAdded = 0;
 
     ttCFile kfIn, kfOut;
     if (!kfIn.ReadFile(cSrcFiles.GetSrcFiles()))

@@ -41,9 +41,11 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         cszSrcFiles = pszDir;
         if (!LocateSrcFiles(&cszSrcFiles))
         {
-            cszSrcFiles.printf(_("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
-                               pszDir);
-            m_lstErrors += cszSrcFiles;
+            m_lstErrMessages.append(
+                wxString::Format(_("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
+                                 pszDir)
+                    .utf8_str()
+                    .data());
             return false;
         }
     }
@@ -60,8 +62,10 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL : IDR_MAKEFILE_SINGLE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
-        m_lstErrors +=
-            _("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,");
+        m_lstErrMessages.append(
+            _("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,")
+                .utf8_str()
+                .data());
         return false;
     }
 

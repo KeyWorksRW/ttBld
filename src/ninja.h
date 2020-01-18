@@ -43,19 +43,19 @@ public:
     bool CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr);
     bool CreateHelpFile();
 
-    size_t      GetErrorCount() { return m_lstErrors.GetCount(); }
-    const char* GetError(size_t pos) { return m_lstErrors[pos]; }
+    size_t      GetErrorCount() { return m_lstErrMessages.size(); }
+    const char* GetError(size_t pos) { return m_lstErrMessages[pos].c_str(); }
 
-    size_t getSrcCount() { return m_lstSrcFiles.GetCount(); }
+    size_t getSrcCount() { return m_lstSrcFiles.size(); }
 
     bool CreateMakeFile(bool bAllVersion = false, const char* pszDir = nullptr);
 
     const char*      GetRcFile() { return m_RCname.c_str(); }
     std::string_view GetScriptFile() { return m_cszScriptFile; }
 
-    ttCList* GetSrcFileList() { return &m_lstSrcFiles; }
-    ttCList* GetLibFileList() { return &m_lstLibFiles; }
-    ttCList* GetRcDepList() { return &m_lstRcDependencies; }
+    ttStrVector& GetSrcFileList() { return m_lstSrcFiles; }
+    ttStrVector* GetLibFileList() { return &m_lstLibFiles; }
+    ttCList*     GetRcDepList() { return &m_lstRcDependencies; }
 
     // Returns false if .srcfiles.yaml requires a newer version
     bool IsValidVersion() { return m_bInvalidVersion != true; }
