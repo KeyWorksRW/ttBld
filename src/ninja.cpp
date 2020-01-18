@@ -57,8 +57,8 @@ CNinja::CNinja(const char* pszNinjaDir)
 
     m_lstRcDependencies.SetFlags(ttCList::FLG_URL_STRINGS);
 
-    if (m_cszRcName.IsNonEmpty())
-        FindRcDependencies(m_cszRcName);
+    if (!m_RCname.empty())
+        FindRcDependencies(m_RCname.c_str());
 
     const char* pszEnv = getenv("TTBLD_CFLAGS");
     if (pszEnv)

@@ -168,7 +168,7 @@ bool CVcxRead::ConvertVcxProj()
     // The project file will have specified resouce compiler flags even if there isn't a resource file. If there is
     // no resource file, then we remove those flags here.
 
-    if (m_pcSrcFiles->m_cszRcName.IsEmpty())
+    if (m_pcSrcFiles->m_RCname.empty())
     {
         if (m_pcSrcFiles->GetOption(OPT_RC_CMN))
             m_pcSrcFiles->UpdateOption(OPT_RC_CMN, "");
@@ -526,10 +526,10 @@ bool CVcxWrite::CreateBuildFile()
                 kf.WriteEol(cszSrcFile);
             }
         }
-        if (m_cszRcName.IsNonEmpty())
+        if (!m_RCname.empty())
         {
             cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>",
-                              (char*) m_cszRcName);
+                              m_RCname.c_str());
             kf.WriteEol(cszSrcFile);
         }
 

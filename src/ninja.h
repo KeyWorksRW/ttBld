@@ -50,7 +50,7 @@ public:
 
     bool CreateMakeFile(bool bAllVersion = false, const char* pszDir = nullptr);
 
-    const char* GetRcFile() { return m_cszRcName; }
+    const char*      GetRcFile() { return m_RCname.c_str(); }
     std::string_view GetScriptFile() { return m_cszScriptFile; }
 
     ttCList* GetSrcFileList() { return &m_lstSrcFiles; }
@@ -61,8 +61,8 @@ public:
     bool IsValidVersion() { return m_bInvalidVersion != true; }
 
     // Name and location of any additional library to build
-    const char* GetLibName() { return m_cszLibName; }
-    const char* GetHHPName() { return m_cszHHPName; }
+    const char* GetLibName() { return m_LIBname.c_str(); }
+    const char* GetHHPName() { return m_HPPname.c_str(); }
 
     void EnableDryRun() { m_dryrun.Enable(); }
     void ForceWrite(bool bForceWrite = true) { m_bForceWrite = bForceWrite; }

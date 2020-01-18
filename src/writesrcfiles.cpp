@@ -190,15 +190,15 @@ bool CWriteSrcFiles::WriteNew(const char* pszFile, const char* pszCommentHdr)
         m_lstOriginal += "";
     }
     m_lstOriginal += "Options:";
-    if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() || m_cszRcName.IsNonEmpty())
+    if (m_lstSrcFiles.GetCount() || m_lstIdlFiles.GetCount() || !m_RCname.empty())
     {
         ttCStr cszFile;
         m_lstOriginal += "";
         m_lstOriginal += "Files:";
-        if (m_cszRcName.IsNonEmpty())
+        if (!m_RCname.empty())
         {
             cszFile = "    ";
-            cszFile += (const char*) m_cszRcName;
+            cszFile += m_RCname.c_str();
             m_lstOriginal += cszFile;
         }
         for (size_t pos = 0; pos < m_lstIdlFiles.GetCount(); ++pos)
