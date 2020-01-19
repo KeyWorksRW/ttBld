@@ -10,6 +10,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttenumstr.h>  // ttCEnumStr -- Enumerate through substrings in a string
 #include <ttfile.h>     // ttCFile -- class for reading and writing files, strings, data, etc.
 #include <ttxml.h>      // ttCXMLBranch
@@ -23,14 +25,14 @@ bool CConvertDlg::ConvertCodeBlocks()
 {
     if (!ttFileExists(m_cszConvertScript))
     {
-        ttMsgBoxFmt(_("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(_("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_tt("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
@@ -57,7 +59,7 @@ bool CConvertDlg::ConvertCodeLite()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(_("Cannot locate <CodeLite_Project> in %s"), MB_OK | MB_ICONWARNING,
+        ttMsgBoxFmt(_tt("Cannot locate <CodeLite_Project> in %s"), MB_OK | MB_ICONWARNING,
                     (char*) m_cszConvertScript);
         return false;
     }
@@ -88,7 +90,7 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
     if (!pProject)
     {
-        ttMsgBoxFmt(_("Cannot locate <VisualStudioProject> in %s"), MB_OK | MB_ICONWARNING,
+        ttMsgBoxFmt(_tt("Cannot locate <VisualStudioProject> in %s"), MB_OK | MB_ICONWARNING,
                     (char*) m_cszConvertScript);
         return false;
     }
@@ -99,7 +101,7 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
     if (!pFiles)
     {
-        ttMsgBoxFmt(_("Cannot locate <Files> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_tt("Cannot locate <Files> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
     for (size_t iFilter = 0; iFilter < pFiles->GetChildrenCount(); ++iFilter)
@@ -250,7 +252,7 @@ bool CConvertDlg::ConvertDsp()
     ttCFile file;
     if (!file.ReadFile(m_cszConvertScript))
     {
-        ttMsgBoxFmt(_("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 
@@ -378,7 +380,7 @@ bool CConvertDlg::ConvertSrcfiles()
     CSrcFiles srcOrg;
     if (!srcOrg.ReadFile(m_cszConvertScript))
     {
-        ttMsgBoxFmt(_("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
     }
 

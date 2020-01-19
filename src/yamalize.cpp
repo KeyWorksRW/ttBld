@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include "writesrcfiles.h"  // CWriteSrcFiles
 
 // This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode
@@ -97,7 +99,7 @@ bool Yamalize()
 
     if (!cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion))
     {
-        ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/srcfiles.yaml");
+        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/srcfiles.yaml");
         return false;
     }
 

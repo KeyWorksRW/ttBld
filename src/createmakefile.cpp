@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfile.h>      // ttCFile
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttfindfile.h>  // ttCFindFile
@@ -42,7 +44,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         if (!LocateSrcFiles(&cszSrcFiles))
         {
             m_lstErrMessages.append(
-                wxString::Format(_("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
+                wxString::Format(_tt("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
                                  pszDir)
                     .utf8_str()
                     .data());
@@ -63,9 +65,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     {
         // TRANSLATORS: Don't change the filename "makefile"
         m_lstErrMessages.append(
-            _("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,")
-                .utf8_str()
-                .data());
+            _tt("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,"));
         return false;
     }
 
@@ -155,13 +155,13 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
             }
             else if (kfOut.WriteFile(cszMakeFile))
             {
-                printf(_("%s updated.\n"), (char*) cszMakeFile);
+                printf(_tt("%s updated.\n"), (char*) cszMakeFile);
                 return true;
             }
             else
             {
                 // TRANSLATORS: Don't change the filename "makefile"
-                puts(_("Unable to write to makefile."));
+                puts(_tt("Unable to write to makefile."));
                 return false;
             }
         }
@@ -171,13 +171,13 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         if (kfOut.WriteFile(cszMakeFile))
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            printf(_("%s created.\n"), (char*) cszMakeFile);
+            printf(_tt("%s created.\n"), (char*) cszMakeFile);
             return true;
         }
         else
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            puts(_("Unable to write to makefile."));
+            puts(_tt("Unable to write to makefile."));
             return false;
         }
     }

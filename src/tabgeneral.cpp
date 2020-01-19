@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttdirdlg.h>  // ttCDirDlg
 
 #include "dlgoptions.h"
@@ -89,7 +91,7 @@ void CTabGeneral::OnOK(void)
 void CTabGeneral::OnBtnDir32()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(_("Select 32-bit Target directory"));
+    dlg.SetTitle(_tt("Select 32-bit Target directory"));
 
     ttCStr cszDir;
     cszDir.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR32)));
@@ -110,7 +112,7 @@ void CTabGeneral::OnBtnDir32()
 void CTabGeneral::OnBtnDir64()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(_("Select 64-bit target directory"));
+    dlg.SetTitle(_tt("Select 64-bit target directory"));
 
     ttCStr cszDir;
     cszDir.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DIR64)));

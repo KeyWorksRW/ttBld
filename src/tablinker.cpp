@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfiledlg.h>  // ttCFileDlg
 #include <ttenumstr.h>  // ttCEnumStr
 #include <ttdirdlg.h>   // ttCDirDlg
@@ -85,7 +87,7 @@ void CTabLinker::OnBtnChange()
 void CTabLinker::OnBtnLibDir()
 {
     ttCDirDlg dlg;
-    dlg.SetTitle(_("Library directory"));  // we're repurposing an existing dialog, so change the title
+    dlg.SetTitle(_tt("Library directory"));  // we're repurposing an existing dialog, so change the title
     if (dlg.GetFolderName(*this))
     {
         ttCStr cszTmp, cszLibDir, cszCurLibDirs;
@@ -100,7 +102,7 @@ void CTabLinker::OnBtnLibDir()
             {
                 if (ttIsSamePath(eLib, cszLibDir))
                 {
-                    ttMsgBoxFmt(_("You've already added the directory %s"), MB_OK | MB_ICONWARNING,
+                    ttMsgBoxFmt(_tt("You've already added the directory %s"), MB_OK | MB_ICONWARNING,
                                 (char*) cszLibDir);
                     return;
                 }

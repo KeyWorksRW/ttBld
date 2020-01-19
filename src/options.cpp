@@ -14,6 +14,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include "options.h"
 
 using namespace sfopt;
@@ -49,78 +51,78 @@ static const OPT_SETTING s_aOptions[] =
 {
     // { OPT_xxx,       "name",         "value",   boolean, required, "comment" }
 
-    { OPT_PROJECT,      "Project",      nullptr,   false,   true,      _XGET("project name") },
+    { OPT_PROJECT,      "Project",      nullptr,   false,   true,      ttTR("project name") },
     { OPT_EXE_TYPE,     "Exe_type",     "console", false,   true,     "[window | console | lib | dll]" },
-    { OPT_PCH,          "Pch",          "none",    false,   true,      _XGET("name of precompiled header file, or \042none\042 if not using precompiled headers") },
-    { OPT_PCH_CPP,      "Pch_cpp",      "none",    false,   false,     _XGET("source file used to build precompiled header (default uses same name as PCH option)") },
+    { OPT_PCH,          "Pch",          "none",    false,   true,      ttTR("name of precompiled header file, or \042none\042 if not using precompiled headers") },
+    { OPT_PCH_CPP,      "Pch_cpp",      "none",    false,   false,     ttTR("source file used to build precompiled header (default uses same name as PCH option)") },
 
-    { OPT_OPTIMIZE,     "Optimize",     "space",   false,   true,      _XGET("[space | speed] optimization to use in release builds") },
-    { OPT_WARN_LEVEL,   "Warn",         "4",       false,   true,      _XGET("[1-4] warning level") },
+    { OPT_OPTIMIZE,     "Optimize",     "space",   false,   true,      ttTR("[space | speed] optimization to use in release builds") },
+    { OPT_WARN_LEVEL,   "Warn",         "4",       false,   true,      ttTR("[1-4] warning level") },
 
-    { OPT_STATIC_CRT_REL, "Crt_rel",    "static",  false,   true,      _XGET("[static | dll] type of CRT to link to in release builds") },
-    { OPT_STATIC_CRT_DBG, "Crt_dbg",    "static",  false,   true,      _XGET("[static | dll] type of CRT to link to in debug builds") },
+    { OPT_STATIC_CRT_REL, "Crt_rel",    "static",  false,   true,      ttTR("[static | dll] type of CRT to link to in release builds") },
+    { OPT_STATIC_CRT_DBG, "Crt_dbg",    "static",  false,   true,      ttTR("[static | dll] type of CRT to link to in debug builds") },
 
-    { OPT_TARGET_DIR, "TargetDir",      nullptr,   false,   false,     _XGET("target directory") },
+    { OPT_TARGET_DIR, "TargetDir",      nullptr,   false,   false,     ttTR("target directory") },
 
-    { OPT_64BIT,        "64Bit",        "true",    true,    false,      _XGET("[true | false] indicates if project can be built as a 64-bit target") },
-    { OPT_TARGET_DIR64, "TargetDir64",  nullptr,   false,   false,     _XGET("64-bit target directory") },
+    { OPT_64BIT,        "64Bit",        "true",    true,    false,      ttTR("[true | false] indicates if project can be built as a 64-bit target") },
+    { OPT_TARGET_DIR64, "TargetDir64",  nullptr,   false,   false,     ttTR("64-bit target directory") },
 
-    { OPT_32BIT,        "32Bit",        "false",   true,    false,      _XGET("[true | false] indicates if project can be built as a 32-bit target") },
-    { OPT_TARGET_DIR32, "TargetDir32",  nullptr,   false,   false,     _XGET("32-bit target directory") },
+    { OPT_32BIT,        "32Bit",        "false",   true,    false,      ttTR("[true | false] indicates if project can be built as a 32-bit target") },
+    { OPT_TARGET_DIR32, "TargetDir32",  nullptr,   false,   false,     ttTR("32-bit target directory") },
 
-    { OPT_PERMISSIVE,   "Permissive",   "false",   true,    false,     _XGET("true means add -permissive- compiler flag") },
-    { OPT_STDCALL,      "Stdcall",      "false",   true,    false,     _XGET("true to use stdcall calling convention, false for cdecl (default)") },
+    { OPT_PERMISSIVE,   "Permissive",   "false",   true,    false,     ttTR("true means add -permissive- compiler flag") },
+    { OPT_STDCALL,      "Stdcall",      "false",   true,    false,     ttTR("true to use stdcall calling convention, false for cdecl (default)") },
 
-    { OPT_CFLAGS_CMN,   "CFlags_cmn",   nullptr,   false,   false,     _XGET("flags to pass to the compiler in all builds") },
-    { OPT_CFLAGS_REL,   "CFlags_rel",   nullptr,   false,   false,     _XGET("flags to pass to the compiler in release builds") },
-    { OPT_CFLAGS_DBG,   "CFlags_dbg",   nullptr,   false,   false,     _XGET("flags to pass to the compiler in debug builds") },
+    { OPT_CFLAGS_CMN,   "CFlags_cmn",   nullptr,   false,   false,     ttTR("flags to pass to the compiler in all builds") },
+    { OPT_CFLAGS_REL,   "CFlags_rel",   nullptr,   false,   false,     ttTR("flags to pass to the compiler in release builds") },
+    { OPT_CFLAGS_DBG,   "CFlags_dbg",   nullptr,   false,   false,     ttTR("flags to pass to the compiler in debug builds") },
 
-    { OPT_CLANG_CMN,    "Clang_cmn",    nullptr,   false,   false,     _XGET("flags to pass only to the clang compiler in all builds") },
-    { OPT_CLANG_REL,    "Clang_rel",    nullptr,   false,   false,     _XGET("flags to pass only to the clang compiler in release builds") },
-    { OPT_CLANG_DBG,    "Clang_dbg",    nullptr,   false,   false,     _XGET("flags to pass only to the clang compiler in debug builds") },
+    { OPT_CLANG_CMN,    "Clang_cmn",    nullptr,   false,   false,     ttTR("flags to pass only to the clang compiler in all builds") },
+    { OPT_CLANG_REL,    "Clang_rel",    nullptr,   false,   false,     ttTR("flags to pass only to the clang compiler in release builds") },
+    { OPT_CLANG_DBG,    "Clang_dbg",    nullptr,   false,   false,     ttTR("flags to pass only to the clang compiler in debug builds") },
 
-    { OPT_LINK_CMN,     "LFlags_cmn",   nullptr,   false,   false,     _XGET("flags to pass to the linker in all builds") },
-    { OPT_LINK_REL,     "LFlags_rel",   nullptr,   false,   false,     _XGET("flags to pass to the linker in release builds") },
-    { OPT_LINK_DBG,     "LFlags_dbg",   nullptr,   false,   false,     _XGET("flags to pass to the linker in debug builds") },
+    { OPT_LINK_CMN,     "LFlags_cmn",   nullptr,   false,   false,     ttTR("flags to pass to the linker in all builds") },
+    { OPT_LINK_REL,     "LFlags_rel",   nullptr,   false,   false,     ttTR("flags to pass to the linker in release builds") },
+    { OPT_LINK_DBG,     "LFlags_dbg",   nullptr,   false,   false,     ttTR("flags to pass to the linker in debug builds") },
 
-    { OPT_NATVIS,       "Natvis",       nullptr,   false,   false,     _XGET("MSVC Debug visualizer") },
+    { OPT_NATVIS,       "Natvis",       nullptr,   false,   false,     ttTR("MSVC Debug visualizer") },
 
-    { OPT_RC_CMN,       "Rc_cmn",       nullptr,   false,   false,     _XGET("flags to pass to the resource compiler in all builds") },
-    { OPT_RC_REL,       "Rc_rel",       nullptr,   false,   false,     _XGET("flags to pass to the resource compiler in release builds") },
-    { OPT_RC_DBG,       "Rc_dbg",       nullptr,   false,   false,     _XGET("flags to pass to the resource compiler in debug builds") },
+    { OPT_RC_CMN,       "Rc_cmn",       nullptr,   false,   false,     ttTR("flags to pass to the resource compiler in all builds") },
+    { OPT_RC_REL,       "Rc_rel",       nullptr,   false,   false,     ttTR("flags to pass to the resource compiler in release builds") },
+    { OPT_RC_DBG,       "Rc_dbg",       nullptr,   false,   false,     ttTR("flags to pass to the resource compiler in debug builds") },
 
-    { OPT_MDL_CMN,      "Midl_cmn",     nullptr,   false,   false,     _XGET("flags to pass to the midl compiler in all builds") },
-    { OPT_MDL_REL,      "Midl_rel",     nullptr,   false,   false,     _XGET("flags to pass to the midl compiler in release builds") },
-    { OPT_MDL_DBG,      "Midl_dbg",     nullptr,   false,   false,     _XGET("flags to pass to the midl compiler in debug builds") },
+    { OPT_MDL_CMN,      "Midl_cmn",     nullptr,   false,   false,     ttTR("flags to pass to the midl compiler in all builds") },
+    { OPT_MDL_REL,      "Midl_rel",     nullptr,   false,   false,     ttTR("flags to pass to the midl compiler in release builds") },
+    { OPT_MDL_DBG,      "Midl_dbg",     nullptr,   false,   false,     ttTR("flags to pass to the midl compiler in debug builds") },
 
-    { OPT_DEBUG_RC,     "DebugRC",      "false",   true,    false,     _XGET("true means build a -D_DEBUG version of the project's rc file") },
+    { OPT_DEBUG_RC,     "DebugRC",      "false",   true,    false,     ttTR("true means build a -D_DEBUG version of the project's rc file") },
 
-    { OPT_MS_LINKER,    "Ms_linker",    "true",    true,    false,     _XGET("true means use link.exe even when compiling with clang") },
-    { OPT_MS_RC,        "Ms_rc",        "true",    true,    false,     _XGET("use rc.exe even when compiling with CLANG-CL") },
+    { OPT_MS_LINKER,    "Ms_linker",    "true",    true,    false,     ttTR("true means use link.exe even when compiling with clang") },
+    { OPT_MS_RC,        "Ms_rc",        "true",    true,    false,     ttTR("use rc.exe even when compiling with CLANG-CL") },
 
-    { OPT_INC_DIRS,     "IncDirs",      nullptr,   false,   false,     _XGET("additional directories for header files") },
-    { OPT_BUILD_LIBS,   "BuildLibs",    nullptr,   false,   false,     _XGET("libraries that need to be built (added to makefile generation)") },
+    { OPT_INC_DIRS,     "IncDirs",      nullptr,   false,   false,     ttTR("additional directories for header files") },
+    { OPT_BUILD_LIBS,   "BuildLibs",    nullptr,   false,   false,     ttTR("libraries that need to be built (added to makefile generation)") },
 
-    { OPT_LIB_DIRS,     "LibDirs",      nullptr,   false,   false,     _XGET("additional directories for library files") },
-    { OPT_LIB_DIRS64,   "LibDirs64",    nullptr,   false,   false,     _XGET("additional directories for 64-bit library files") },
-    { OPT_LIB_DIRS32,   "LibDirs32",    nullptr,   false,   false,     _XGET("additional directories for 32-bit library files") },
+    { OPT_LIB_DIRS,     "LibDirs",      nullptr,   false,   false,     ttTR("additional directories for library files") },
+    { OPT_LIB_DIRS64,   "LibDirs64",    nullptr,   false,   false,     ttTR("additional directories for 64-bit library files") },
+    { OPT_LIB_DIRS32,   "LibDirs32",    nullptr,   false,   false,     ttTR("additional directories for 32-bit library files") },
 
-    { OPT_LIBS_CMN,     "Libs_cmn",     nullptr,   false,   false,     _XGET("additional libraries to link to in all builds") },
-    { OPT_LIBS_REL,     "Libs_rel",     nullptr,   false,   false,     _XGET("additional libraries to link to in release builds") },
-    { OPT_LIBS_DBG,     "Libs_dbg",     nullptr,   false,   false,     _XGET("additional libraries to link to in debug builds") },
+    { OPT_LIBS_CMN,     "Libs_cmn",     nullptr,   false,   false,     ttTR("additional libraries to link to in all builds") },
+    { OPT_LIBS_REL,     "Libs_rel",     nullptr,   false,   false,     ttTR("additional libraries to link to in release builds") },
+    { OPT_LIBS_DBG,     "Libs_dbg",     nullptr,   false,   false,     ttTR("additional libraries to link to in debug builds") },
 
     // The following options are for xgettext/msgfmt support
 
-    { OPT_XGET_OUT,      "XGet_out",     nullptr, false, false, _XGET("output filename for xgettext") },
-    { OPT_XGET_KEYWORDS, "XGet_kwrds",   nullptr, false, false, _XGET("additional keywords (separated by semi-colon) to pass to xgettext") },
-    { OPT_XGET_FLAGS,    "XGet_flags",   nullptr, false, false, _XGET("additional flags to pass to xgettext") },
-    { OPT_MSGFMT_FLAGS,  "Msgfmt_flags", nullptr, false, false, _XGET("additional flags to pass to msgfmt") },
-    { OPT_MSGFMT_XML,    "Msgfmt_xml",   nullptr, false, false, _XGET("the name of the xml template file for msgfmt to use") },
+    { OPT_XGET_OUT,      "XGet_out",     nullptr, false, false, ttTR("output filename for xgettext") },
+    { OPT_XGET_KEYWORDS, "XGet_kwrds",   nullptr, false, false, ttTR("additional keywords (separated by semi-colon) to pass to xgettext") },
+    { OPT_XGET_FLAGS,    "XGet_flags",   nullptr, false, false, ttTR("additional flags to pass to xgettext") },
+    { OPT_MSGFMT_FLAGS,  "Msgfmt_flags", nullptr, false, false, ttTR("additional flags to pass to msgfmt") },
+    { OPT_MSGFMT_XML,    "Msgfmt_xml",   nullptr, false, false, ttTR("the name of the xml template file for msgfmt to use") },
 
-//    { OPT_LIB_DIRS,     "LibDirs",      nullptr,   false,   false,     _XGET("additional directores for lib files") },
-//    { OPT_LIBS,         "Libs",         nullptr,   false,   false,     _XGET("additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)") },
-//    { OPT_LIBS_REL,     "LibsR",        nullptr,   false,   false,     _XGET("additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)") },
-//    { OPT_LIBS_DBG,     "LibsD",        nullptr,   false,   false,     _XGET("additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)") },
+//    { OPT_LIB_DIRS,     "LibDirs",      nullptr,   false,   false,     ttTR("additional directores for lib files") },
+//    { OPT_LIBS,         "Libs",         nullptr,   false,   false,     ttTR("additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)") },
+//    { OPT_LIBS_REL,     "LibsR",        nullptr,   false,   false,     ttTR("additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)") },
+//    { OPT_LIBS_DBG,     "LibsD",        nullptr,   false,   false,     ttTR("additional libraries to link to (see OPT_BUILD_LIBS to both build and link to a library)") },
 
     { OPT_OVERFLOW, "", "", false, false, "" },
 };

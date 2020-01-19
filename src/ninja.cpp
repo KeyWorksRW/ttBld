@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
 
@@ -282,7 +284,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         if (!ttCreateDir(GetBldDir()))
         {
             ttCStr cszMsg;
-            cszMsg.printf(_("Unable to create or write to %s"), GetBldDir());
+            cszMsg.printf(_tt("Unable to create or write to %s"), GetBldDir());
             AddError(cszMsg);
             return false;
         }
@@ -306,7 +308,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     if (!file.WriteFile(m_cszScriptFile.c_str()))
     {
-        std::string str(_("Unable to create or write to") + m_cszScriptFile + '\n');
+        std::string str(_tt("Unable to create or write to") + m_cszScriptFile + '\n');
         AddError(str.c_str());
         return false;
     }
@@ -339,7 +341,7 @@ void CNinja::ProcessBuildLibs()
             if (!ttChDir(enumLib))
             {
                 ttCStr cszMsg;
-                cszMsg.printf(_("The library source directory %s specified in BuildLibs: does not exist.\n"),
+                cszMsg.printf(_tt("The library source directory %s specified in BuildLibs: does not exist.\n"),
                               (char*) enumLib);
                 AddError(cszMsg);
                 continue;

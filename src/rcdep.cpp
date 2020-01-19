@@ -8,6 +8,9 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
+
 #if defined(_WIN32)  // only Windows builds use .rc files
 
     #include "ninja.h"  // CNinja
@@ -37,7 +40,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
         if (!pszHdr)  // we should have already reported a problem with a missing header file
         {
             ttCStr cszErrMsg;
-            cszErrMsg.printf(_("Cannot open \"%s\"."), pszRcFile);
+            cszErrMsg.printf(_tt("Cannot open \"%s\"."), pszRcFile);
             m_lstErrMessages.append(cszErrMsg.c_str());
         }
         return false;
@@ -107,7 +110,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                     // report the error, so there's not a huge advantage to reporting here.
 
                     ttCStr cszErrMsg;
-                    cszErrMsg.printf(_(IDS_NINJA_MISSING_INCLUDE),
+                    cszErrMsg.printf(_tt(IDS_NINJA_MISSING_INCLUDE),
                         pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
                     m_lstErrMessages.append(cszErrMsg.c_str());
     #endif
@@ -190,7 +193,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
                             // BUGBUG: [KeyWorks - 7/11/2019] See Issue #46
                             // (https://github.com/KeyWorksRW/keyBld/issues/46) Once we commit to wxWidgets, we
                             // need to use wxNumberFormatter to deal with the number.
-                            cszErrMsg.printf(_("%s(%kt,%kt):  warning: cannot locate include file %s"),
+                            cszErrMsg.printf(_tt("%s(%kt,%kt):  warning: cannot locate include file %s"),
                                              pszHdr ? pszHdr : pszRcFile, curLine,
                                              (size_t)(pszFileName - kf.GetLnPtr()), (char*) cszFile);
                             m_lstErrMessages.append(cszErrMsg.c_str());

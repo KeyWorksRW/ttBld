@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfindfile.h>  // ttCFindFile
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttmem.h>       // ttCMem, ttCTMem
@@ -65,7 +67,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
         if (!pszFile)
         {
             ttCStr csz;
-            csz.printf(_("Cannot locate the file %s"), ".srcfiles.yaml");
+            csz.printf(_tt("Cannot locate the file %s"), ".srcfiles.yaml");
             m_lstErrMessages.append(csz.c_str());
             BREAKONWARNING;
             return false;  // if we still can't find it, bail
@@ -85,7 +87,7 @@ bool CSrcFiles::ReadFile(const char* pszFile)
     if (!kfSrcFiles.ReadFile(m_srcfilename.c_str()))
     {
         ttCStr csz;
-        csz.printf(_("Cannot open \"%s\"."), m_srcfilename.c_str());
+        csz.printf(_tt("Cannot open \"%s\"."), m_srcfilename.c_str());
         m_lstErrMessages.append(csz.c_str());
         BREAKONWARNING;
         return false;
@@ -221,7 +223,7 @@ void CSrcFiles::ProcessOption(char* pszLine)
         UpdateOption(OPT_LINK_CMN, (char*) cszVal);
 
     ttCStr csz;
-    csz.printf(_("%s is an unknown option"), (char*) cszName);
+    csz.printf(_tt("%s is an unknown option"), (char*) cszName);
     m_lstErrMessages.append(csz.c_str());
 #if !defined(NDEBUG)  // Starts debug section.
     if (m_bBreakOnWarning)
@@ -279,7 +281,7 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
         m_lstLibFiles += pszLibFile;
         if (!ttFileExists(pszLibFile))
         {
-            ttString str(_("Cannot locate the file "));
+            ttString str(_tt("Cannot locate the file "));
             str += pszLibFile;
             m_lstErrMessages.append(str);
 #if !defined(NDEBUG)  // Starts debug section.
@@ -333,7 +335,7 @@ void CSrcFiles::ProcessFile(char* pszFile)
             cwd.assignCwd();
             str << cwd << ": ";
 #endif
-            str << _("Unable to locate the file ") << pszFile;
+            str << _tt("Unable to locate the file ") << pszFile;
             AddError(str.str().c_str());
         }
     }
@@ -397,7 +399,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
 
     if (!cIncSrcFiles.ReadFile(cszFullPath))
     {
-        ttString str(_("Unable to locate the file "));
+        ttString str(_tt("Unable to locate the file "));
         str += cszFullPath;
         m_lstErrMessages.append(str);
 #if !defined(NDEBUG)  // Starts debug section.
@@ -485,7 +487,7 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
     if (!pszVal)
     {
         ttCStr cszTmp;
-        cszTmp.printf(_("Option name is missing a ':' (%s)"), pszLine);
+        cszTmp.printf(_tt("Option name is missing a ':' (%s)"), pszLine);
         AddError(cszTmp);
         return false;
     }

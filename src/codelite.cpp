@@ -10,6 +10,8 @@
 
 #include <ttfile.h>  // ttCFile
 
+#include <ttTR.h>  // Function for translating strings
+
 #include "csrcfiles.h"  // CSrcFiles
 
 #include "resource.h"
@@ -49,13 +51,13 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     {
         // BUGBUG: [KeyWorks - 7/29/2019] This should be wrong. There's no reason we can't open a .vcxproj file and
         // write a CodeLite project file
-        puts(_("Cannot create a CodeLite project file if there is no .srcfiles.yaml file."));
+        puts(_tt("Cannot create a CodeLite project file if there is no .srcfiles.yaml file."));
         return CLP_NO_SRCFILES;
     }
 
     if (!cSrcFiles.GetProjectName())
     {
-        printf(_("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n"),
+        printf(_tt("Cannot create a CodeLite project file if %s doesn't specifiy the name of the project.\n"),
                cSrcFiles.GetSrcFiles());
         return CLP_NO_PROJECT;
     }
@@ -72,7 +74,7 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     ttCFile kf;
     if (!kf.ReadResource(IDR_PRE_PROJECT))
     {
-        puts(_("ttBld.exe is corrupted -- cannot read the necessary resource"));
+        puts(_tt("ttBld.exe is corrupted -- cannot read the necessary resource"));
         return CLP_MISSING_RES;
     }
 
@@ -94,7 +96,7 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
     ttCFile kfPost;
     if (!kfPost.ReadResource(IDR_POST_PROJECT))
     {
-        puts(_("ttBld.exe is corrupted -- cannot read the necessary resource"));
+        puts(_tt("ttBld.exe is corrupted -- cannot read the necessary resource"));
         return CLP_MISSING_RES;
     }
 
@@ -117,13 +119,13 @@ size_t CreateCodeLiteProject(const char* pszSrcFiles, ttCList* /* plstResults */
 
     if (!kf.WriteFile(cszProjFile))
     {
-        printf(_("Unable to create or write to %s"), (const char*) cszProjFile);
+        printf(_tt("Unable to create or write to %s"), (const char*) cszProjFile);
         puts("");  // add EOL
         return CLP_CANT_WRITE;
     }
     else
     {
-        printf(_("%s created.\n"), (const char*) cszProjFile);
+        printf(_tt("%s created.\n"), (const char*) cszProjFile);
     }
 
     return CLP_CREATED;

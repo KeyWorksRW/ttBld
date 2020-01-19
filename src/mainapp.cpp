@@ -36,6 +36,8 @@
 #include <wx/wxcrtvararg.h>
 #include <wx/config.h>
 
+#include <ttTR.h>  // Function for translating strings
+
 #include "mainapp.h"  // CMainApp -- Main application class
 
 #include <iostream>
@@ -74,40 +76,40 @@ void Usage()
 {
     std::cout << '\n' << txtVersion << '\n' << txtCopyright << '\n';
 
-    std::cout << _("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n")
-              << _("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and "
+    std::cout << _tt("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n")
+              << _tt("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and "
                    "build/*.ninja\n")
-              << _("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml\n")
-              << _("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd\n")
-              << _("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file\n")
-              << _("    -vs        -- creates files used to build and debug a project using Visual Studio\n")
-              << _("    -vscode    -- creates or updates files used to build and debug a project using VS Code\n");
+              << _tt("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml\n")
+              << _tt("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd\n")
+              << _tt("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file\n")
+              << _tt("    -vs        -- creates files used to build and debug a project using Visual Studio\n")
+              << _tt("    -vscode    -- creates or updates files used to build and debug a project using VS Code\n");
 
     // Currently non-finished commands
     std::cout
         << "\n  Unfinished commands:\n"
-        << _("    -all          -- equivalent to -allninja and -vscode\n")
-        << _("    -alld         -- deletes makefile and .vscode/c_cpp_preferences.json before running -all\n")
-        << _("    -allninja     -- creates/updates all .ninja scripts, creeates makefile (if missing)\n")
-        << _("    -convert file -- Converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml\n");
+        << _tt("    -all          -- equivalent to -allninja and -vscode\n")
+        << _tt("    -alld         -- deletes makefile and .vscode/c_cpp_preferences.json before running -all\n")
+        << _tt("    -allninja     -- creates/updates all .ninja scripts, creeates makefile (if missing)\n")
+        << _tt("    -convert file -- Converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml\n");
 
     // Currently hidden or non-finished commands
 
     // puts("\t-add [file(s)] -- Adds file(s) to .srcfiles");
-    // puts(_("    -dryrun     -- displays what would have happened, but doesn't change anything"));
-    // puts(_("    -force      -- create .ninja file even if it hasn't changed"));
-    // puts(_("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
-    // puts(_("    -msvcenv64  -- create .ninja file even if it hasn't changed"));
+    // puts(_tt("    -dryrun     -- displays what would have happened, but doesn't change anything"));
+    // puts(_tt("    -force      -- create .ninja file even if it hasn't changed"));
+    // puts(_tt("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
+    // puts(_tt("    -msvcenv64  -- create .ninja file even if it hasn't changed"));
 
-    // puts(_("    -help       -- displays usage information"));
-    // puts(_("    -?          -- displays usage information"));
+    // puts(_tt("    -help       -- displays usage information"));
+    // puts(_tt("    -?          -- displays usage information"));
 
     // Following commands are no longer supported:
 
     // puts("\nIDE workspace options:");
-    // puts(_("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
-    // puts(_("    -codelite   -- creates or updates files needed to build project using CodeLite"));
-    // puts(_("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
+    // puts(_tt("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
+    // puts(_tt("    -codelite   -- creates or updates files needed to build project using CodeLite"));
+    // puts(_tt("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
 
 #if defined(TESTING)
     std::cout << "    -tvdlg    -- tests the CDlgVsCode dialog\n";
@@ -316,7 +318,7 @@ int oldMain(int argc, char* argv[])
             if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(_("-dir must be followed by the directory to use."));
+                puts(_tt("-dir must be followed by the directory to use."));
                 return 1;
             }
             cszRootDir = argv[argpos];
@@ -431,7 +433,7 @@ int oldMain(int argc, char* argv[])
             if (!LocateSrcFiles(&cszSrcFilePath))
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(_("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
+                puts(_tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
                        "the location with -dir."));
                 return 1;
             }
@@ -444,7 +446,7 @@ int oldMain(int argc, char* argv[])
             else
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(_("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
+                puts(_tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
                        "the location with -dir."));
                 return 1;
             }
@@ -486,7 +488,7 @@ int oldMain(int argc, char* argv[])
         CNinja cNinja;
         if (!cNinja.IsValidVersion())
         {
-            if (ttMsgBox(_("This version of ttBld is too old -- create ninja scripts anyway?"),
+            if (ttMsgBox(_tt("This version of ttBld is too old -- create ninja scripts anyway?"),
                          MB_YESNO | MB_ICONWARNING) != IDYES)
                 return 1;
         }
@@ -535,9 +537,9 @@ int oldMain(int argc, char* argv[])
         }
 
         if (countNinjas > 0)
-            printf(_("Created %d .ninja files\n"), countNinjas);
+            printf(_tt("Created %d .ninja files\n"), countNinjas);
         else
-            puts(_("All ninja scripts are up to date."));
+            puts(_tt("All ninja scripts are up to date."));
     }
 
     return 0;
@@ -554,42 +556,42 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
         {
             case UPDATE_MSVC:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
                 break;
 
             case UPDATE_MSVC32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
                 break;
 
             case UPDATE_CLANG_CL:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
                 break;
 
             case UPDATE_CLANG_CL32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
                 break;
 
             case UPDATE_MSVCD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
                 break;
 
             case UPDATE_MSVC32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
                 break;
 
             case UPDATE_CLANG_CLD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
                 break;
 
             case UPDATE_CLANG_CL32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
                 break;
 
             default:
@@ -600,7 +602,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     else
     {
         ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-        std::cout << _(
+        std::cout << _tt(
             "This version of ttBld is too old to properly create ninja scripts from your current srcfiles.");
     }
 }

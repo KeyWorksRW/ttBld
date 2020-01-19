@@ -13,6 +13,8 @@
     #pragma comment(lib, "Rpcrt4.lib")
 #endif
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttenumstr.h>   // ttCEnumStr -- Enumerate through substrings in a string
 #include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
@@ -32,7 +34,7 @@ bool CVcxRead::ConvertVcxProj()
     ttCXMLBranch* pProject = m_pxml->GetRootBranch()->FindFirstElement("Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(_("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) *m_pcszConvertScript);
+        ttMsgBoxFmt(_tt("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) *m_pcszConvertScript);
         return false;
     }
 
