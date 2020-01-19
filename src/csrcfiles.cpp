@@ -11,7 +11,8 @@
 #include <ttfindfile.h>  // ttCFindFile
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttmem.h>       // ttCMem, ttCTMem
-#include <ttcwd.h>       // ttCCwd
+
+#include <ttcwd.h>  // ttCwd -- Class for saving, setting, and restoring current directory
 
 #if !defined(NDEBUG)  // Starts debug section.
     #include <wx/config.h>
@@ -378,7 +379,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         return;
     }
 
-    ttCCwd cszCWD;
+    ttCwd cwd;
 
     ttCStr cszFullPath(pszFile);
     cszFullPath.FullPathName();
@@ -391,7 +392,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         char*  pszFilePortion = ttFindFilePortion(cszNewDir);
         if (pszFilePortion)
             *pszFilePortion = 0;
-        ttChDir(cszNewDir);
+        cwd.SetCwd(cszNewDir.c_str());
     }
 
     if (!cIncSrcFiles.ReadFile(cszFullPath))
@@ -417,7 +418,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     {
         ttStrCpy(pszFilePortion,
                  bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos].c_str() : cIncSrcFiles.m_lstLibFiles[pos].c_str());
-        ttConvertToRelative(cszCWD, szPath, cszRelative);
+        ttConvertToRelative(cwd.c_str(), szPath, cszRelative);
         size_t posAdd;
         posAdd = m_lstSrcIncluded.Add(cszRelative);
         lstAddSrcFiles.Add(pszFile, posAdd);

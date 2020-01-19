@@ -10,7 +10,8 @@
 
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
-#include <ttcwd.h>      // ttCCwd
+
+#include <ttcwd.h>  // ttCwd -- Class for saving, setting, and restoring current directory
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
@@ -331,7 +332,7 @@ void CNinja::ProcessBuildLibs()
 
         while (enumLib.Enum())
         {
-            ttCCwd cwdSave;  // Saves the current directory, restores it when we go out of scope.
+            ttCwd cwd;
 
             // Change to the directory that should contain a .srcfiles.yaml and read it
 
@@ -428,7 +429,7 @@ void CNinja::ProcessBuildLibs()
                 ttCStr cszCurDir;
                 cszCurDir.GetCWD();
                 ttCStr cszRelDir;
-                ttConvertToRelative(cwdSave, cszCurDir, cszRelDir);
+                ttConvertToRelative(cwd.c_str(), cszCurDir, cszRelDir);
                 m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), cszRelDir);
             }
 
@@ -440,7 +441,7 @@ void CNinja::ProcessBuildLibs()
                 cszLibDir.AppendFileName(pszLib);
                 cszLibDir.FullPathName();
                 ttCStr cszLib;
-                ttConvertToRelative(cwdSave, cszLibDir, cszLib);
+                ttConvertToRelative(cwd.c_str(), cszLibDir, cszLib);
                 m_lstBldLibsD += cszLib;
             }
 
@@ -452,7 +453,7 @@ void CNinja::ProcessBuildLibs()
                 cszLibDir.AppendFileName(pszLib);
                 cszLibDir.FullPathName();
                 ttCStr cszLib;
-                ttConvertToRelative(cwdSave, cszLibDir, cszLib);
+                ttConvertToRelative(cwd.c_str(), cszLibDir, cszLib);
                 m_lstBldLibsR += cszLib;
             }
         }
