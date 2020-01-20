@@ -50,6 +50,10 @@ namespace fs = std::filesystem;
 #include <ttlib.h>    // Master header file for ttLib
 #include <ttdebug.h>  // ttASSERT macros
 
+// WARNING: ttstr.h must appear before ttstring.h!
+#include <ttstr.h>
+#include <ttstring.h>
+
 using namespace ttch;  // For the CH_ and CHW_ constants
 
 constexpr const char* txtVersion = "ttBld 1.3.0.8295";
