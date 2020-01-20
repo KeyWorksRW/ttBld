@@ -80,6 +80,7 @@ static const char* txtTasks =
     "    ]\n"
     "}\n";
 
+#if 0
 static const char* txtSubTasks =
 
     "        {\n"
@@ -89,6 +90,7 @@ static const char* txtSubTasks =
     "            \"group\": \"%group%\",\n"
     "            \"problemMatcher\": [ %problem% ]\n"
     "        },\n";
+#endif
 
 static const char* txtMsvcSubTasks =
 
