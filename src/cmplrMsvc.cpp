@@ -467,19 +467,20 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way
     // around this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
-    const char* pszTarget = (m_gentype == GEN_DEBUG) ? GetTargetDebug() : GetTargetRelease();
+    std::stringstream line;
+    // "build file : cmd"
+    line << "build " << ((m_gentype == GEN_DEBUG) ? GetTargetDebug() : GetTargetRelease()) << " : ";
 
     if (IsExeTypeLib())
-        m_pkfOut->printf("build %s : lib", pszTarget);
+        line << "lib";
     else
-        m_pkfOut->printf("build %s : link", pszTarget);
+        line << "link";
 
     if (ttFileExists(GetRcFile()))
     {
-        ttCStr cszRes(GetRcFile());
-        cszRes.RemoveExtension();
-        cszRes += ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
-        m_pkfOut->printf(" $resout/%s", (char*) cszRes);
+        ttString name(GetRcFile());
+        name.replace_extension("");
+        line << " $resout/" << name << ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
     }
 
     bool bPchSeen = false;
@@ -493,14 +494,22 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         objFile.replace_extension(".obj");
         if (!bPchSeen && objFile.issamestri(m_cszPCHObj.c_str()))
             bPchSeen = true;
-        m_pkfOut->printf(" $\n  $outdir/%s", objFile.c_str());
+        line << " $";
+        m_pkfOut->WriteEol(line.str().c_str());
+        line.str("");
+        line << "  $outdir/" << objFile;
     }
 
     // The precompiled object file must be linked. It may or may not show up in the list of source files. We check
     // here to make certain it does indeed get written.
 
     if (!bPchSeen && m_cszPCHObj.IsNonEmpty())
-        m_pkfOut->printf(" $\n  $outdir/%s", (char*) m_cszPCHObj);
+    {
+        line << " $";
+        m_pkfOut->WriteEol(line.str().c_str());
+        line.str("");
+        line << "  $outdir/" << m_cszPCHObj.c_str();
+    }
 
     switch (m_gentype)
     {
@@ -508,21 +517,34 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
             for (size_t pos = 0; m_lstBldLibsD.InRange(pos); ++pos)
             {
                 wxLogDebug((char*) m_lstBldLibsD[pos]);
-                m_pkfOut->printf(" $\n  %s", (char*) m_lstBldLibsD[pos]);
+                line << " $";
+                m_pkfOut->WriteEol(line.str().c_str());
+                line.str("");
+                line << "  " << (const char*) m_lstBldLibsD[pos];
             }
             break;
 
         case GEN_RELEASE:
         default:
             for (size_t pos = 0; m_lstBldLibsR.InRange(pos); ++pos)
-                m_pkfOut->printf(" $\n  %s", (char*) m_lstBldLibsR[pos]);
+            {
+                line << " $";
+                m_pkfOut->WriteEol(line.str().c_str());
+                line.str("");
+                line << "  " << (const char*) m_lstBldLibsR[pos];
+            }
             break;
     }
 
     if (m_gentype == GEN_DEBUG && GetOption(OPT_NATVIS))
-        m_pkfOut->printf(" $\n  | %s", GetOption(OPT_NATVIS));
+    {
+        line << " $";
+        m_pkfOut->WriteEol(line.str().c_str());
+        line.str("");
+        line << "  | " << GetOption(OPT_NATVIS);
+    }
 
-    m_pkfOut->WriteEol("\n");
+    m_pkfOut->WriteEol(line.str().c_str());
 }
 
 #endif  // defined(_WIN32)

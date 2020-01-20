@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
 
@@ -295,7 +297,7 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
     m_lstDependencies += (const char*) cszRelative;
 }
 
-const char* txtHelpNinja = "build/ChmHelp.ninja";
+const char* txtHelpNinja = "bld/ChmHelp.ninja";
 
 bool CNinja::CreateHelpFile()
 {
@@ -362,9 +364,9 @@ bool CNinja::CreateHelpFile()
 
     if (!file.WriteFile(txtHelpNinja))
     {
-        ttCStr cszMsg;
-        cszMsg.printf("Cannot write to %s\n", txtHelpNinja);
-        AddError(cszMsg);
+        std::string msg = _tt("Cannot write to ");
+        msg += txtHelpNinja;
+        AddError(msg);
         return false;
     }
 

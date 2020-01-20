@@ -41,7 +41,7 @@ public:
     bool        AddFile(const char* pszFile) { return m_lstSrcFiles.addfile(pszFile); }
 
     // If pszFile is NULL, CSrcFiles will attempt to locate the file (see LocateSrcFiles()).
-    bool ReadFile(const char* pszFile = nullptr);
+    bool ReadFile(std::string_view filename = "");
 
     bool IsProcessed() { return m_bRead; }
 
@@ -86,14 +86,14 @@ public:
     void SetReportingFile(const char* pszFile) { m_ReportPath = pszFile; }
 
 #if !defined(NDEBUG)  // Starts debug section.
-    void AddError(const char* pszErrMsg);
-    #define BREAKONWARNING         \
-        {                          \
-            if (m_bBreakOnWarning) \
-                wxTrap();          \
+    void AddError(std::string_view err);
+    #define BREAKONWARNING                                  \
+        {                                                   \
+            if (m_bBreakOnWarning && wxIsDebuggerRunning()) \
+                wxTrap();                                   \
         }
 #else
-    void AddError(const char* pszErrMsg) { m_lstErrMessages.append(pszErrMsg); }
+    void AddError(std::string_view err) { m_lstErrMessages.append(err); }
     #define BREAKONWARNING
 #endif
 

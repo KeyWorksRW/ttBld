@@ -59,36 +59,35 @@ CSrcFiles::CSrcFiles(const char* pszNinjaDir)
 #endif
 }
 
-bool CSrcFiles::ReadFile(const char* pszFile)
+bool CSrcFiles::ReadFile(std::string_view filename)
 {
-    if (!pszFile)
+    if (filename.empty())
     {
-        pszFile = LocateSrcFiles();
+        auto pszFile = LocateSrcFiles();
         if (!pszFile)
         {
-            ttCStr csz;
-            csz.printf(_tt("Cannot locate the file %s"), ".srcfiles.yaml");
-            m_lstErrMessages.append(csz.c_str());
+            m_lstErrMessages.append(_tt("Cannot locate .srcfiles.yaml"));
             BREAKONWARNING;
             return false;  // if we still can't find it, bail
         }
+        m_srcfilename = pszFile;
     }
-
-    m_srcfilename = pszFile;
+    else
+        m_srcfilename = filename;
 
     if (m_bldFolder.empty())
     {
         // pszFile might now point to a sub-directory, so we need to create the .ninja directory under that
-        m_bldFolder = pszFile;
+        m_bldFolder = m_srcfilename;
         m_bldFolder.replace_filename(txtDefBuildDir);
     }
 
     ttCFile kfSrcFiles;
     if (!kfSrcFiles.ReadFile(m_srcfilename.c_str()))
     {
-        ttCStr csz;
-        csz.printf(_tt("Cannot open \"%s\"."), m_srcfilename.c_str());
-        m_lstErrMessages.append(csz.c_str());
+        std::string msg = _tt("Cannot open ");
+        msg += m_srcfilename;
+        m_lstErrMessages.append(msg);
         BREAKONWARNING;
         return false;
     }
@@ -150,20 +149,12 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
     if (ttIsEmpty(GetProjectName()))
     {
-        ttCStr cszProj;
-        cszProj.GetCWD();
-        char* pszProj = ttFindFilePortion(cszProj);
-        if (pszProj && !ttIsSameStrI(pszProj, "src"))
-            UpdateOption(OPT_PROJECT, pszProj);
-        else
-        {
-            if (pszProj > cszProj.GetPtr())
-                --pszProj;
-            *pszProj = 0;
-            pszProj = ttFindFilePortion(cszProj);
-            if (pszProj)
-                UpdateOption(OPT_PROJECT, pszProj);
-        }
+        ttString projectname;
+        projectname.assignCwd();
+        if (tt::issamestri(projectname.filename(), "src"))
+            projectname.replace_filename("");
+        std::string name(projectname.filename());
+        UpdateOption(OPT_PROJECT, name.c_str());
     }
 
     // If no Files: were specified, then we still won't have any files to build. Default to every type of C++
@@ -238,10 +229,9 @@ void CSrcFiles::AddCompilerFlag(const char* pszFlag)
     // else append the flag if it hasn't already been added
     else if (!ttStrStrI(GetOption(OPT_CFLAGS_CMN), pszFlag))
     {
-        ttCStr csz(GetOption(OPT_CFLAGS_CMN));
-        csz += " ";
-        csz += pszFlag;
-        UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
+        std::stringstream flag;
+        flag << GetOption(OPT_CFLAGS_CMN) << ' ' << pszFlag;
+        UpdateOption(OPT_CFLAGS_CMN, flag.str().c_str());
     }
 }
 
@@ -328,15 +318,9 @@ void CSrcFiles::ProcessFile(char* pszFile)
     {
         if (!m_lstSrcFiles.back().fileExists())
         {
-            std::ostringstream str;
-
-#if !defined(NDEBUG)  // Starts debug section.
-            ttString cwd;
-            cwd.assignCwd();
-            str << cwd << ": ";
-#endif
-            str << _tt("Unable to locate the file ") << pszFile;
-            AddError(str.str().c_str());
+            ttString msg(_tt("Unable to locate the file "));
+            msg += pszFile;
+            AddError(msg.c_str());
         }
     }
 
@@ -397,7 +381,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         cwd.SetCwd(cszNewDir.c_str());
     }
 
-    if (!cIncSrcFiles.ReadFile(cszFullPath))
+    if (!cIncSrcFiles.ReadFile(cszFullPath.c_str()))
     {
         ttString str(_tt("Unable to locate the file "));
         str += cszFullPath;
@@ -483,12 +467,9 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment)
 {
     char* pszVal = strpbrk(pszLine, ":=");
-    ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
     if (!pszVal)
     {
-        ttCStr cszTmp;
-        cszTmp.printf(_tt("Option name is missing a ':' (%s)"), pszLine);
-        AddError(cszTmp);
+        AddError(_tt("Invalid Option -- missing ':' or '=' character"));
         return false;
     }
     *pszVal = 0;
@@ -750,13 +731,15 @@ const char* CSrcFiles::GetTargetDebug()
 }
 
 #if !defined(NDEBUG)  // Starts debug section.
-void CSrcFiles::AddError(const char* pszErrMsg)
+void CSrcFiles::AddError(std::string_view err)
 {
-    ttCStr cszMsg(pszErrMsg);
-    cszMsg += "\n";
-    wxLogDebug((char*) cszMsg);
-    m_lstErrMessages += pszErrMsg;
-    if (m_bBreakOnWarning)
-        wxTrap();
+    ttString msg(err);
+    msg += "\n";
+    if (m_lstErrMessages.append(msg))
+    {
+        wxLogDebug(msg.c_str());
+        if (m_bBreakOnWarning)
+            ttFAIL_MSG(msg.c_str());
+    }
 }
 #endif

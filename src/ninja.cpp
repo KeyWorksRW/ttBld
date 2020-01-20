@@ -283,9 +283,9 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     {
         if (!ttCreateDir(GetBldDir()))
         {
-            ttCStr cszMsg;
-            cszMsg.printf(_tt("Unable to create or write to %s"), GetBldDir());
-            AddError(cszMsg);
+            std::string msg = _tt("Unable to create or write to ");
+            msg += GetBldDir();
+            AddError(msg);
             return false;
         }
     }
@@ -343,7 +343,7 @@ void CNinja::ProcessBuildLibs()
                 ttCStr cszMsg;
                 cszMsg.printf(_tt("The library source directory %s specified in BuildLibs: does not exist.\n"),
                               (char*) enumLib);
-                AddError(cszMsg);
+                AddError(cszMsg.c_str());
                 continue;
             }
 

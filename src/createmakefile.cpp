@@ -37,11 +37,11 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     // Some repositories use a bld directory which is added to .gitignore. If it exists, we'll use this directory
     cszBuildDir.AppendFileName("bld");
 
-    ttCStr cszSrcFiles;
+    ttString srcfiles;
     if (pszDir)
     {
-        cszSrcFiles = pszDir;
-        if (!LocateSrcFiles(&cszSrcFiles))
+        srcfiles = pszDir;
+        if (!FindProjectFile(&srcfiles))
         {
             m_lstErrMessages.append(
                 wxString::Format(_tt("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
@@ -57,7 +57,7 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         if (!pszSrcFiles)
             bAllVersion = true;  // can't create a dependency on .srcfiles.yaml if we don't know where it is
         else
-            cszSrcFiles = pszSrcFiles;
+            srcfiles = pszSrcFiles;
     }
 
     ttCFile kf;
@@ -73,8 +73,8 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         ;
     //    while (kf.ReplaceStr("%libbuild%", cszBuildDir));
 
-    if (!bAllVersion && cszSrcFiles.IsNonEmpty())
-        while (kf.ReplaceStr("%srcfiles%", cszSrcFiles))
+    if (!bAllVersion && !srcfiles.empty())
+        while (kf.ReplaceStr("%srcfiles%", srcfiles.c_str()))
             ;
 
     while (kf.ReplaceStr("%project%", GetProjectName()))

@@ -497,7 +497,7 @@ bool CVcxWrite::CreateBuildFile()
     ttCStr cszGuid;
     if (!CreateGuid(cszGuid))
     {
-        AddError("Unable to create a UUID -- cannot create .vcxproj without it.");
+        AddError(_tt("Unable to create a UUID -- cannot create .vcxproj without it."));
         return false;
     }
 
@@ -552,9 +552,9 @@ bool CVcxWrite::CreateBuildFile()
 
         if (!kf.WriteFile(cszProjVC))
         {
-            ttCStr cszMsg;
-            cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
-            AddError(cszMsg);
+            std::string msg = _tt("Unable to write to ");
+            msg += cszProjVC.c_str();
+            AddError(msg);
             return false;
         }
         else
@@ -589,9 +589,9 @@ bool CVcxWrite::CreateBuildFile()
         cszProjVC += ".filters";
         if (!kf.WriteFile(cszProjVC))
         {
-            ttCStr cszMsg;
-            cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
-            AddError(cszMsg);
+            std::string msg = _tt("Unable to write to ");
+            msg += cszProjVC.c_str();
+            AddError(msg);
             return false;
         }
         else

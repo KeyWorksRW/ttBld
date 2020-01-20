@@ -378,7 +378,7 @@ bool CConvertDlg::ConvertDsp()
 bool CConvertDlg::ConvertSrcfiles()
 {
     CSrcFiles srcOrg;
-    if (!srcOrg.ReadFile(m_cszConvertScript))
+    if (!srcOrg.ReadFile(m_cszConvertScript.c_str()))
     {
         ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         return false;
