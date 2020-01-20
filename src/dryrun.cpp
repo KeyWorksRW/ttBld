@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <stdio.h>
 
 #include "dryrun.h"  // CDryRun
@@ -22,7 +24,7 @@ void CDryRun::NewFile(const char* pszFile)
 void CDryRun::DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew)
 {
     if (m_cszFilename.IsNonEmpty())
-        printf(_("%s dryrun changes:\n"), (char*) m_cszFilename);
+        printf(_tt("%s dryrun changes:\n"), (char*) m_cszFilename);
 
     fileNew.PrepForReadLine();
     while (fileNew.ReadLine())
@@ -30,8 +32,8 @@ void CDryRun::DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew)
         fileOrg.ReadLine();
         if (!ttIsSameStr(fileOrg, fileNew))
         {
-            printf(_("%s Options: section updated.\n"), (char*) fileOrg);
-            printf(_("    new: %s\n"), (char*) fileNew);
+            printf(_tt("%s Options: section updated.\n"), (char*) fileOrg);
+            printf(_tt("    new: %s\n"), (char*) fileNew);
         }
     }
 }

@@ -13,6 +13,8 @@
     #pragma comment(lib, "Rpcrt4.lib")
 #endif
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttenumstr.h>   // ttCEnumStr -- Enumerate through substrings in a string
 #include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
@@ -32,7 +34,7 @@ bool CVcxRead::ConvertVcxProj()
     ttCXMLBranch* pProject = m_pxml->GetRootBranch()->FindFirstElement("Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(_("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) *m_pcszConvertScript);
+        ttMsgBoxFmt(_tt("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) *m_pcszConvertScript);
         return false;
     }
 
@@ -52,7 +54,7 @@ bool CVcxRead::ConvertVcxProj()
                 {
                     const char* pszFile = pCmd->GetAttribute("Include");
                     if (pszFile && *pszFile)
-                        m_pcSrcFiles->m_lstSrcFiles += MakeSrcRelative(pszFile);
+                        m_pcSrcFiles->GetSrcFilesList().addfile(MakeSrcRelative(pszFile));
                 }
             }
         }
@@ -168,7 +170,7 @@ bool CVcxRead::ConvertVcxProj()
     // The project file will have specified resouce compiler flags even if there isn't a resource file. If there is
     // no resource file, then we remove those flags here.
 
-    if (m_pcSrcFiles->m_cszRcName.IsEmpty())
+    if (m_pcSrcFiles->GetRcName().empty())
     {
         if (m_pcSrcFiles->GetOption(OPT_RC_CMN))
             m_pcSrcFiles->UpdateOption(OPT_RC_CMN, "");
@@ -495,7 +497,7 @@ bool CVcxWrite::CreateBuildFile()
     ttCStr cszGuid;
     if (!CreateGuid(cszGuid))
     {
-        AddError("Unable to create a UUID -- cannot create .vcxproj without it.");
+        AddError(_tt("Unable to create a UUID -- cannot create .vcxproj without it."));
         return false;
     }
 
@@ -516,20 +518,20 @@ bool CVcxWrite::CreateBuildFile()
         while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease()))
             ;
 
-        ttCStr cszSrcFile;
-        for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos)
+        for (auto file : m_lstSrcFiles)
         {
-            if (ttStrStrI(m_lstSrcFiles[pos], ".c"))  // only add C/C++ files
-            {
-                cszSrcFile.printf(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>",
-                                  m_lstSrcFiles[pos]);
-                kf.WriteEol(cszSrcFile);
-            }
+            auto ext = file.extension();
+            if (ext.empty() || std::tolower(ext[1] != 'c'))
+                continue;
+            kf.WriteEol(
+                wxString::Format(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>", file.c_str()));
         }
-        if (m_cszRcName.IsNonEmpty())
+
+        ttCStr cszSrcFile;
+        if (!m_RCname.empty())
         {
             cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>",
-                              (char*) m_cszRcName);
+                              m_RCname.c_str());
             kf.WriteEol(cszSrcFile);
         }
 
@@ -550,9 +552,9 @@ bool CVcxWrite::CreateBuildFile()
 
         if (!kf.WriteFile(cszProjVC))
         {
-            ttCStr cszMsg;
-            cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
-            AddError(cszMsg);
+            std::string msg = _tt("Unable to write to ");
+            msg += cszProjVC.c_str();
+            AddError(msg);
             return false;
         }
         else
@@ -572,13 +574,13 @@ bool CVcxWrite::CreateBuildFile()
 
         kf.WriteEol("  <ItemGroup>");
 
-        for (size_t pos = 0; pos < m_lstSrcFiles.GetCount(); ++pos)
+        for (size_t pos = 0; pos < m_lstSrcFiles.size(); ++pos)
         {
-            if (ttStrStrI(m_lstSrcFiles[pos], ".c"))  // only add C/C++ files
+            if (ttStrStrI(m_lstSrcFiles[pos].c_str(), ".c"))  // only add C/C++ files
             {
                 cszSrcFile.printf(
                     "    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>",
-                    m_lstSrcFiles[pos]);
+                    m_lstSrcFiles[pos].c_str());
                 kf.WriteEol(cszSrcFile);
             }
         }
@@ -587,9 +589,9 @@ bool CVcxWrite::CreateBuildFile()
         cszProjVC += ".filters";
         if (!kf.WriteFile(cszProjVC))
         {
-            ttCStr cszMsg;
-            cszMsg.printf("Unable to write to %s", (char*) cszProjVC);
-            AddError(cszMsg);
+            std::string msg = _tt("Unable to write to ");
+            msg += cszProjVC.c_str();
+            AddError(msg);
             return false;
         }
         else

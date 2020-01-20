@@ -8,18 +8,20 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 bool LaunchVsCode()
 {
     ttCStr cszCodePath, cszMSVCPath;
     if (!FindVsCode(cszCodePath))
     {
-        puts(_("Visual Studio Code does not appear to be installed."));
+        puts(_tt("Visual Studio Code does not appear to be installed."));
         return false;
     }
 
     if (!FindCurMsvcPath(cszMSVCPath))
     {
-        puts(_("Visual Studio does not appear to be installed -- unable to determine path to MS compiler."));
+        puts(_tt("Visual Studio does not appear to be installed -- unable to determine path to MS compiler."));
         return false;
     }
 

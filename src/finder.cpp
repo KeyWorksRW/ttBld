@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttstring.h>
+
 #if defined(_WIN32)
 
     #include <ttreg.h>       // ttCRegistry
@@ -145,6 +147,34 @@ const char* LocateSrcFiles(ttCStr* pcszStartDir)
             {
                 *pcszStartDir = (const char*) cszPath;
                 return *pcszStartDir;
+            }
+        }
+    }
+    else
+    {
+        for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
+        {
+            if (ttFileExists(aSrcFilesLocations[pos]))
+                return aSrcFilesLocations[pos];
+        }
+    }
+
+    return nullptr;
+}
+
+const char* FindProjectFile(ttString* pStartDir)
+{
+    if (pStartDir)
+    {
+        ttString path;
+        for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
+        {
+            path = *pStartDir;
+            path.append_filename(aSrcFilesLocations[pos]);
+            if (path.fileExists())
+            {
+                *pStartDir = path;
+                return pStartDir->c_str();
             }
         }
     }

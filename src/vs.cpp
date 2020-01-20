@@ -12,6 +12,8 @@
 
 #include <filesystem>
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfile.h>     // ttCFile
 #include "csrcfiles.h"  // CSrcFiles
 
@@ -59,8 +61,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     {
         if (!std::filesystem::create_directory(".vs"))
         {
-            std::string str(_("Unable to create the required .vs directory.").utf8_str());
-            results.push_back(str);
+            results.push_back(_tt("Unable to create the required .vs directory."));
             return false;
         }
     }
@@ -81,14 +82,13 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     if (!file.WriteFile(".vs/tasks.vs.json"))
     {
         std::ostringstream str;
-        str << _("Unable to create or write to ") << ".vs/tasks.vs.json";
+        str << _tt("Unable to create or write to ") << ".vs/tasks.vs.json";
         results.push_back(str.str());
         return false;
     }
     else
     {
-        std::string str(_("Created .vs/tasks.vs.json").utf8_str());
-        results.push_back(str);
+        results.push_back(_tt("Created .vs/tasks.vs.json"));
     }
 
     file.Delete();
@@ -101,7 +101,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     else
     {
         std::ostringstream str;
-        str << _("No project name specified in ") << cSrcFiles.GetSrcFiles();
+        str << _tt("No project name specified in ") << cSrcFiles.GetSrcFiles();
         results.push_back(str.str());
         return false;
     }
@@ -109,13 +109,13 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     if (!file.WriteFile(".vs/launch.vs.json"))
     {
         std::ostringstream str;
-        str << _("Unable to create or write to ") << ".vs/launch.vs.json";
+        str << _tt("Unable to create or write to ") << ".vs/launch.vs.json";
         results.push_back(str.str());
         return false;
     }
     else
     {
-        std::string str(_("Created .vs/launch.vs.json"));
+        std::string str(_tt("Created .vs/launch.vs.json"));
         results.push_back(str);
     }
 

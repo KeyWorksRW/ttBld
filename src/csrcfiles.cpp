@@ -8,10 +8,13 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfindfile.h>  // ttCFindFile
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttmem.h>       // ttCMem, ttCTMem
-#include <ttcwd.h>       // ttCCwd
+
+#include <ttcwd.h>  // ttCwd -- Class for saving, setting, and restoring current directory
 
 #if !defined(NDEBUG)  // Starts debug section.
     #include <wx/config.h>
@@ -34,29 +37,20 @@ typedef enum
 
 CSrcFiles::CSrcFiles(const char* pszNinjaDir)
     : m_ttHeap(true)
-    ,
     // make all ttCList classes use the same sub-heap
-    m_lstSrcFiles(m_ttHeap)
-    , m_lstLibFiles(m_ttHeap)
-    , m_lstIdlFiles(m_ttHeap)
-    , m_lstErrors(m_ttHeap)
     , m_lstLibAddSrcFiles(m_ttHeap)
     , m_lstSrcIncluded(m_ttHeap)
 {
     m_bRead = false;
-
-    m_lstSrcFiles.SetFlags(ttCList::FLG_URL_STRINGS);
-    m_lstLibFiles.SetFlags(ttCList::FLG_URL_STRINGS);
-    m_lstErrors.SetFlags(ttCList::FLG_IGNORE_CASE);
 
     m_RequiredMajor = 1;
     m_RequiredMinor = 0;
     m_RequiredSub = 0;
 
     if (pszNinjaDir)
-        m_cszBldDir = pszNinjaDir;
+        m_bldFolder = pszNinjaDir;
     else
-        m_cszBldDir = txtDefBuildDir;
+        m_bldFolder = txtDefBuildDir;
 
 #if !defined(NDEBUG)  // Starts debug section.
     wxConfig config("ttBld");
@@ -65,37 +59,35 @@ CSrcFiles::CSrcFiles(const char* pszNinjaDir)
 #endif
 }
 
-bool CSrcFiles::ReadFile(const char* pszFile)
+bool CSrcFiles::ReadFile(std::string_view filename)
 {
-    if (!pszFile)
+    if (filename.empty())
     {
-        pszFile = LocateSrcFiles();
+        auto pszFile = LocateSrcFiles();
         if (!pszFile)
         {
-            ttCStr csz;
-            csz.printf(_("Cannot locate the file %s"), ".srcfiles.yaml");
-            m_lstErrors += csz;
+            m_lstErrMessages.append(_tt("Cannot locate .srcfiles.yaml"));
             BREAKONWARNING;
             return false;  // if we still can't find it, bail
         }
+        m_srcfilename = pszFile;
     }
+    else
+        m_srcfilename = filename;
 
-    m_cszSrcFilePath = pszFile;
-
-    if (m_cszBldDir.IsEmpty())
+    if (m_bldFolder.empty())
     {
         // pszFile might now point to a sub-directory, so we need to create the .ninja directory under that
-        m_cszBldDir = pszFile;
-        *(ttFindFilePortion(m_cszBldDir)) = 0;  // remove the file portion
-        m_cszBldDir.AppendFileName(txtDefBuildDir);
+        m_bldFolder = m_srcfilename;
+        m_bldFolder.replace_filename(txtDefBuildDir);
     }
 
     ttCFile kfSrcFiles;
-    if (!kfSrcFiles.ReadFile(m_cszSrcFilePath))
+    if (!kfSrcFiles.ReadFile(m_srcfilename.c_str()))
     {
-        ttCStr csz;
-        csz.printf(_("Cannot open \"%s\"."), (char*) m_cszSrcFilePath);
-        m_lstErrors += csz;
+        std::string msg = _tt("Cannot open ");
+        msg += m_srcfilename;
+        m_lstErrMessages.append(msg);
         BREAKONWARNING;
         return false;
     }
@@ -157,26 +149,18 @@ bool CSrcFiles::ReadFile(const char* pszFile)
 
     if (ttIsEmpty(GetProjectName()))
     {
-        ttCStr cszProj;
-        cszProj.GetCWD();
-        char* pszProj = ttFindFilePortion(cszProj);
-        if (pszProj && !ttIsSameStrI(pszProj, "src"))
-            UpdateOption(OPT_PROJECT, pszProj);
-        else
-        {
-            if (pszProj > cszProj.GetPtr())
-                --pszProj;
-            *pszProj = 0;
-            pszProj = ttFindFilePortion(cszProj);
-            if (pszProj)
-                UpdateOption(OPT_PROJECT, pszProj);
-        }
+        ttString projectname;
+        projectname.assignCwd();
+        if (tt::issamestri(projectname.filename(), "src"))
+            projectname.replace_filename("");
+        std::string name(projectname.filename());
+        UpdateOption(OPT_PROJECT, name.c_str());
     }
 
     // If no Files: were specified, then we still won't have any files to build. Default to every type of C++
     // source file in the current directory.
 
-    if (m_lstSrcFiles.GetCount() < 1)
+    if (!m_lstSrcFiles.size())
     {
 #if defined(_WIN32)
         AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl;*.hhp");
@@ -230,8 +214,8 @@ void CSrcFiles::ProcessOption(char* pszLine)
         UpdateOption(OPT_LINK_CMN, (char*) cszVal);
 
     ttCStr csz;
-    csz.printf(_("%s is an unknown option"), (char*) cszName);
-    m_lstErrors += csz;
+    csz.printf(_tt("%s is an unknown option"), (char*) cszName);
+    m_lstErrMessages.append(csz.c_str());
 #if !defined(NDEBUG)  // Starts debug section.
     if (m_bBreakOnWarning)
         wxTrap();
@@ -245,10 +229,9 @@ void CSrcFiles::AddCompilerFlag(const char* pszFlag)
     // else append the flag if it hasn't already been added
     else if (!ttStrStrI(GetOption(OPT_CFLAGS_CMN), pszFlag))
     {
-        ttCStr csz(GetOption(OPT_CFLAGS_CMN));
-        csz += " ";
-        csz += pszFlag;
-        UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
+        std::stringstream flag;
+        flag << GetOption(OPT_CFLAGS_CMN) << ' ' << pszFlag;
+        UpdateOption(OPT_CFLAGS_CMN, flag.str().c_str());
     }
 }
 
@@ -273,8 +256,8 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
     // default name of "tmplib". The name is also to indicate that this is a temporary library -- it's not designed
     // to be linked to outside of the scope of the current project.
 
-    if (m_cszLibName.IsEmpty())
-        m_cszLibName = "tmplib";
+    if (m_LIBname.empty())
+        m_LIBname = "tmplib";
 
     if (ttStrStrI(pszLibFile, ".lib"))  // this was used before we created a default name
         return;
@@ -288,9 +271,9 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
         m_lstLibFiles += pszLibFile;
         if (!ttFileExists(pszLibFile))
         {
-            ttCStr cszErrMsg;
-            cszErrMsg.printf("Cannot locate the file %s.", (char*) pszLibFile);
-            m_lstErrors += cszErrMsg;
+            ttString str(_tt("Cannot locate the file "));
+            str += pszLibFile;
+            m_lstErrMessages.append(str);
 #if !defined(NDEBUG)  // Starts debug section.
             if (m_bBreakOnWarning)
                 wxTrap();
@@ -331,18 +314,14 @@ void CSrcFiles::ProcessFile(char* pszFile)
         return;
     }
 
-    m_lstSrcFiles += pszFile;
-    if (!ttFileExists(pszFile))
+    if (m_lstSrcFiles.addfile(pszFile))
     {
-        ttCStr cszErrMsg;
-#if !defined(NDEBUG)  // Starts debug section.
-        cszErrMsg.GetCWD();
-#endif
-        if (ttIsNonEmpty(m_cszReportPath))
-            cszErrMsg.printf("%s: Unable to locate the file %s.", GetReportFilename(), pszFile);
-        else
-            cszErrMsg.printf(_("Cannot locate the file %s."), (char*) pszFile);
-        AddError(cszErrMsg);
+        if (!m_lstSrcFiles.back().fileExists())
+        {
+            ttString msg(_tt("Unable to locate the file "));
+            msg += pszFile;
+            AddError(msg.c_str());
+        }
     }
 
     char* pszExt = ttStrStrI(pszFile, ".idl");
@@ -355,14 +334,14 @@ void CSrcFiles::ProcessFile(char* pszFile)
     pszExt = ttStrStrI(pszFile, ".rc");
     if (pszExt && !pszExt[3])  // ignore .rc2, .resources, etc.
     {
-        m_cszRcName = pszFile;
+        m_RCname = pszFile;
         return;
     }
 
     pszExt = ttStrStrI(pszFile, ".hhp");
     if (pszExt)  // ignore .rc2, .resources, etc.
     {
-        m_cszHHPName = pszFile;
+        m_HPPname = pszFile;
         return;
     }
 }
@@ -386,7 +365,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         return;
     }
 
-    ttCCwd cszCWD;
+    ttCwd cwd;
 
     ttCStr cszFullPath(pszFile);
     cszFullPath.FullPathName();
@@ -399,14 +378,14 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         char*  pszFilePortion = ttFindFilePortion(cszNewDir);
         if (pszFilePortion)
             *pszFilePortion = 0;
-        ttChDir(cszNewDir);
+        cwd.SetCwd(cszNewDir.c_str());
     }
 
-    if (!cIncSrcFiles.ReadFile(cszFullPath))
+    if (!cIncSrcFiles.ReadFile(cszFullPath.c_str()))
     {
-        ttCStr cszMsg;
-        cszMsg.printf(_("%s: unable to locate the file %s."), GetReportFilename(), pszFile);
-        m_lstErrors += cszMsg;
+        ttString str(_tt("Unable to locate the file "));
+        str += cszFullPath;
+        m_lstErrMessages.append(str);
 #if !defined(NDEBUG)  // Starts debug section.
         if (m_bBreakOnWarning)
             wxTrap();
@@ -421,18 +400,18 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     ttCStr cszRelative;
 
     for (size_t pos = 0;
-         pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.GetCount() : cIncSrcFiles.m_lstLibFiles.GetCount());
-         ++pos)
+         pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.size() : cIncSrcFiles.m_lstLibFiles.size()); ++pos)
     {
-        ttStrCpy(pszFilePortion, bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos] : cIncSrcFiles.m_lstLibFiles[pos]);
-        ttConvertToRelative(cszCWD, szPath, cszRelative);
+        ttStrCpy(pszFilePortion,
+                 bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos].c_str() : cIncSrcFiles.m_lstLibFiles[pos].c_str());
+        ttConvertToRelative(cwd.c_str(), szPath, cszRelative);
         size_t posAdd;
         posAdd = m_lstSrcIncluded.Add(cszRelative);
         lstAddSrcFiles.Add(pszFile, posAdd);
         if (bFileSection)
-            m_lstSrcFiles += cszRelative;
+            m_lstSrcFiles.addfile(cszRelative.c_str());
         else
-            m_lstLibFiles += cszRelative;
+            m_lstLibFiles.addfile(cszRelative.c_str());
     }
 }
 
@@ -456,24 +435,24 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
                 if (ttIsSameStrI(psz, ".c") || ttIsSameStrI(psz, ".cpp") || ttIsSameStrI(psz, ".cc") ||
                     ttIsSameStrI(psz, ".cxx"))
                 {
-                    m_lstSrcFiles += ff;
+                    m_lstSrcFiles += ff.GetFileName();
                 }
                 else if (ttIsSameStrI(psz, ".rc"))
                 {
-                    m_lstSrcFiles += ff;
-                    if (m_cszRcName.IsEmpty())
-                        m_cszRcName = ff;
+                    m_lstSrcFiles += ff.GetFileName();
+                    if (m_RCname.empty())
+                        m_RCname = ff.GetFileName();
                 }
                 else if (ttIsSameStrI(psz, ".hhp"))
                 {
-                    m_lstSrcFiles += ff;
-                    if (m_cszHHPName.IsEmpty())
-                        m_cszHHPName = ff;
+                    m_lstSrcFiles += ff.GetFileName();
+                    if (m_HPPname.empty())
+                        m_HPPname = ff.GetFileName();
                 }
                 else if (ttIsSameStrI(psz, ".idl"))
                 {
-                    m_lstSrcFiles += ff;
-                    m_lstIdlFiles += ff;
+                    m_lstSrcFiles += ff.GetFileName();
+                    m_lstIdlFiles += ff.GetFileName();
                 }
             }
             if (!ff.NextFile())
@@ -488,12 +467,9 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
 bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment)
 {
     char* pszVal = strpbrk(pszLine, ":=");
-    ttASSERT_MSG(pszVal, "Invalid Option -- missing ':' or '=' character");
     if (!pszVal)
     {
-        ttCStr cszTmp;
-        cszTmp.printf(_("Option name is missing a ':' (%s)"), pszLine);
-        AddError(cszTmp);
+        AddError(_tt("Invalid Option -- missing ':' or '=' character"));
         return false;
     }
     *pszVal = 0;
@@ -549,44 +525,44 @@ const char* CSrcFiles::GetPchCpp()
     const char* pszPch = GetOption(OPT_PCH_CPP);
     if (pszPch && !ttIsSameStrI(pszPch, "none"))
     {
-        m_cszPchCpp = GetOption(OPT_PCH_CPP);
-        return m_cszPchCpp;
+        m_pchCPPname = GetOption(OPT_PCH_CPP);
+        return m_pchCPPname.c_str();
     }
 
     if (!GetPchHeader())
         return nullptr;
 
-    m_cszPchCpp = GetPchHeader();
-    m_cszPchCpp.ChangeExtension(".cpp");
-    if (ttFileExists(m_cszPchCpp))
-        return m_cszPchCpp;
+    m_pchCPPname = GetPchHeader();
+    m_pchCPPname.replace_extension(".cpp");
+    if (m_pchCPPname.fileExists())
+        return m_pchCPPname.c_str();
 
     // Check for other possible extensions
 
-    m_cszPchCpp.ChangeExtension(".cc");
-    if (ttFileExists(m_cszPchCpp))
-        return m_cszPchCpp;
+    m_pchCPPname.replace_extension(".cc");
+    if (m_pchCPPname.fileExists())
+        return m_pchCPPname.c_str();
 
-    m_cszPchCpp.ChangeExtension(".cxx");
-    if (ttFileExists(m_cszPchCpp))
-        return m_cszPchCpp;
+    m_pchCPPname.replace_extension(".cxx");
+    if (m_pchCPPname.fileExists())
+        return m_pchCPPname.c_str();
 
-    m_cszPchCpp.ChangeExtension(".cpp");  // file doesn't exist, we'll generate a warning about it later
-    return m_cszPchCpp;
+    m_pchCPPname.replace_extension(".cpp");  // file doesn't exist, we'll generate a warning about it later
+    return m_pchCPPname.c_str();
 }
 
 const char* CSrcFiles::GetBuildScriptDir()
 {
-    if (m_cszBldDir.IsNonEmpty())
-        return m_cszBldDir;
+    if (!m_bldFolder.empty())
+        return m_bldFolder.c_str();
 
-    if (m_cszSrcFilePath.IsEmpty())
+    if (m_srcfilename.empty())
     {
-        m_cszBldDir = txtDefBuildDir;
-        return m_cszBldDir;
+        m_bldFolder = txtDefBuildDir;
+        return m_bldFolder.c_str();
     }
 
-    return m_cszBldDir;
+    return m_bldFolder.c_str();
 }
 
 const char* CSrcFiles::GetTargetDir()
@@ -718,50 +694,52 @@ const char* CSrcFiles::GetTargetDir()
 
 const char* CSrcFiles::GetTargetRelease()
 {
-    if (!m_cszTargetRelease.empty())
-        return m_cszTargetRelease;
+    if (!m_relTargetFolder.empty())
+        return m_relTargetFolder.c_str();
 
-    m_cszTargetRelease = GetTargetDir();
-    m_cszTargetRelease.AppendFileName(GetProjectName());
+    m_relTargetFolder = GetTargetDir();
+    m_relTargetFolder.append_filename(GetProjectName());
 
     if (IsExeTypeLib())
-        m_cszTargetRelease += ".lib";
+        m_relTargetFolder += ".lib";
     else if (IsExeTypeDll())
-        m_cszTargetRelease += (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx") ? ".ocx" : ".dll");
+        m_relTargetFolder += (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx") ? ".ocx" : ".dll");
     else
-        m_cszTargetRelease += ".exe";
-    return m_cszTargetRelease;
+        m_relTargetFolder += ".exe";
+    return m_relTargetFolder.c_str();
 }
 
 const char* CSrcFiles::GetTargetDebug()
 {
-    if (!m_cszTargetDebug.empty())
-        return m_cszTargetDebug;
+    if (!m_dbgTargetFolder.empty())
+        return m_dbgTargetFolder.c_str();
 
-    m_cszTargetDebug = GetTargetDir();
-    m_cszTargetDebug.AppendFileName(GetProjectName());
+    m_dbgTargetFolder = GetTargetDir();
+    m_dbgTargetFolder.append_filename(GetProjectName());
 
     // Never automatically add a 'D' to a dll.
     if (!IsExeTypeDll())
-        m_cszTargetDebug += "D";
+        m_dbgTargetFolder += "D";
 
     if (IsExeTypeLib())
-        m_cszTargetDebug += ".lib";
+        m_dbgTargetFolder += ".lib";
     else if (IsExeTypeDll())
-        m_cszTargetDebug += (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx") ? ".ocx" : ".dll");
+        m_dbgTargetFolder += (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx") ? ".ocx" : ".dll");
     else
-        m_cszTargetDebug += ".exe";
-    return m_cszTargetDebug;
+        m_dbgTargetFolder += ".exe";
+    return m_dbgTargetFolder.c_str();
 }
 
 #if !defined(NDEBUG)  // Starts debug section.
-void CSrcFiles::AddError(const char* pszErrMsg)
+void CSrcFiles::AddError(std::string_view err)
 {
-    ttCStr cszMsg(pszErrMsg);
-    cszMsg += "\n";
-    wxLogDebug((char*) cszMsg);
-    m_lstErrors += pszErrMsg;
-    if (m_bBreakOnWarning)
-        wxTrap();
+    ttString msg(err);
+    msg += "\n";
+    if (m_lstErrMessages.append(msg))
+    {
+        wxLogDebug(msg.c_str());
+        if (m_bBreakOnWarning)
+            ttFAIL_MSG(msg.c_str());
+    }
 }
 #endif

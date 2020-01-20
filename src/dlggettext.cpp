@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include "dlggettext.h"
 #include "addfuncname.h"  // CAddFuncName
 
@@ -48,7 +50,7 @@ void CDlgGetText::OnBtnAdd()
     {
         if (m_lbKeywords.FindString(dlg.GetFuncName()))
         {
-            ttMsgBoxFmt(_("The name %kq has already been added."), MB_OK | MB_ICONWARNING, dlg.GetFuncName());
+            ttMsgBoxFmt(_tt("The name %kq has already been added."), MB_OK | MB_ICONWARNING, dlg.GetFuncName());
             return;
         }
         m_lbKeywords += dlg.GetFuncName();

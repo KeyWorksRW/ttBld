@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
 #include <ttlist.h>      // ttCList
@@ -17,8 +19,11 @@
 #include "resource.h"
 #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 
+#if 0
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
                     const char* pszProblem);
+#endif
+
 static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
 static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
 
@@ -166,7 +171,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
     {
         if (!ttCreateDir(".vscode"))
         {
-            ttMsgBox(_("Unable to create the required .vscode directory."));
+            ttMsgBox(_tt("Unable to create the required .vscode directory."));
             return false;
         }
         ttCStr cszIgnore;
@@ -181,7 +186,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
 
             if (cszIgnore.IsNonEmpty() &&
                 ttMsgBoxFmt(
-                    _("The directory .vscode is not being ignored by git. Would you like it to be added to %s?"),
+                    _tt("The directory .vscode is not being ignored by git. Would you like it to be added to %s?"),
                     MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING, (char*) cszIgnore) == IDYES)
             {
                 if (gitAddtoIgnore(cszIgnore, ".vscode/") && plstResults)
@@ -198,7 +203,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
     if (!cSrcFiles.ReadFile(pszSrcFiles))
     {
         if (plstResults)
-            *plstResults += _("Cannot locate a .srcfiles.yaml file need to configure .vscode/*.json files.");
+            *plstResults += _tt("Cannot locate a .srcfiles.yaml file need to configure .vscode/*.json files.");
         return false;
     }
 
@@ -305,13 +310,13 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kfOut.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/c_cpp_properties.json");
+        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/c_cpp_properties.json");
         return false;
     }
     else
     {
         if (plstResults)
-            *plstResults += _("Created .vscode/c_cpp_properties.json");
+            *plstResults += _tt("Created .vscode/c_cpp_properties.json");
     }
 
     return true;
@@ -362,13 +367,13 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kf.WriteFile(".vscode/launch.json"))
     {
-        ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/launch.json");
+        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/launch.json");
         return false;
     }
     else
     {
         if (plstResults)
-            *plstResults += _("Created .vscode/launch.json");
+            *plstResults += _tt("Created .vscode/launch.json");
     }
 
     return true;
@@ -505,7 +510,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
         if (plstResults)
         {
             ttCStr cszMsg;
-            cszMsg.printf(_("Unable to create or write to %s"), ".vscode/tasks.json");
+            cszMsg.printf(_tt("Unable to create or write to %s"), ".vscode/tasks.json");
             *plstResults += (char*) cszMsg;
         }
         return false;
@@ -513,7 +518,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
     else
     {
         if (plstResults)
-            *plstResults += _("Created .vscode/tasks.json");
+            *plstResults += _tt("Created .vscode/tasks.json");
     }
 
     return true;
@@ -527,7 +532,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         if (plstResults)
         {
             ttCStr cszErr;
-            cszErr.printf(_("Cannot open \"%s\"."), ".vscode/c_cpp_properties.json");
+            cszErr.printf(_tt("Cannot open \"%s\"."), ".vscode/c_cpp_properties.json");
             *plstResults += cszErr;
             return false;
         }
@@ -703,7 +708,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         if (plstResults)
         {
             ttCStr cszErr;
-            cszErr.printf(_("Cannot open \"%s\"."), ".vscode/c_cpp_properties.json");
+            cszErr.printf(_tt("Cannot open \"%s\"."), ".vscode/c_cpp_properties.json");
             *plstResults += cszErr;
             return false;
         }
@@ -725,13 +730,13 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             if (plstResults)
             {
                 ttCStr cszErr;
-                cszErr.printf(_("Unable to create or write to %s"), ".vscode/c_cpp_properties.json");
+                cszErr.printf(_tt("Unable to create or write to %s"), ".vscode/c_cpp_properties.json");
                 *plstResults += cszErr;
             }
             return false;
         }
         else if (plstResults)
-            *plstResults += _("Updated .vscode/c_cpp_properties.json");
+            *plstResults += _tt("Updated .vscode/c_cpp_properties.json");
     }
 
     return true;

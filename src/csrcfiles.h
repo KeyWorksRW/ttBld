@@ -9,12 +9,15 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <iostream>
 
 #include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
-#include <ttstr.h>    // ttStr, ttCWD
 #include <ttfile.h>   // ttCFile
 #include <ttarray.h>  // ttCArray
 #include <ttmap.h>    // ttCMap
+
+#include <ttstring.h>  // ttString, ttStrlist -- String and vector classes with some additional functionality
 
 #include "options.h"  // CSrcOptions
 
@@ -35,10 +38,10 @@ public:
     const char* GetTargetDebug();
 
     const char* GetBuildScriptDir();
-    void        AddFile(const char* pszFile) { m_lstSrcFiles += pszFile; }
+    bool        AddFile(const char* pszFile) { return m_lstSrcFiles.addfile(pszFile); }
 
     // If pszFile is NULL, CSrcFiles will attempt to locate the file (see LocateSrcFiles()).
-    bool ReadFile(const char* pszFile = nullptr);
+    bool ReadFile(std::string_view filename = "");
 
     bool IsProcessed() { return m_bRead; }
 
@@ -67,28 +70,30 @@ public:
     // Source file to compile the precompiled header
     const char* GetPchCpp();
 
+    std::string_view GetRcName() { return m_RCname; }
+
     // Gets name/location of srcfiles (normally .srcfiles.yaml)
-    const char* GetSrcFiles() { return m_cszSrcFilePath; };
+    const char* GetSrcFiles() { return m_srcfilename.c_str(); };
     // Ninja's builddir should be set to this directory
-    const char* GetBldDir() { return m_cszBldDir; }
+    const char* GetBldDir() { return m_bldFolder.c_str(); }
 
     int GetMajorRequired() { return m_RequiredMajor; }
     int GetMinorRequired() { return m_RequiredMinor; }
     int GetSubRequired() { return m_RequiredSub; }
 
-    ttCList* GetSrcFilesList() { return &m_lstSrcFiles; }
+    ttStrVector& GetSrcFilesList() { return m_lstSrcFiles; }
 
-    void SetReportingFile(const char* pszFile) { m_cszReportPath = pszFile; }
+    void SetReportingFile(const char* pszFile) { m_ReportPath = pszFile; }
 
 #if !defined(NDEBUG)  // Starts debug section.
-    void AddError(const char* pszErrMsg);
-    #define BREAKONWARNING         \
-        {                          \
-            if (m_bBreakOnWarning) \
-                wxTrap();           \
+    void AddError(std::string_view err);
+    #define BREAKONWARNING                                  \
+        {                                                   \
+            if (m_bBreakOnWarning && wxIsDebuggerRunning()) \
+                wxTrap();                                   \
         }
 #else
-    void AddError(const char* pszErrMsg) { m_lstErrors += pszErrMsg; }
+    void AddError(std::string_view err) { m_lstErrMessages.append(err); }
     #define BREAKONWARNING
 #endif
 
@@ -106,43 +111,42 @@ protected:
     void AddCompilerFlag(const char* pszFlag);
     //    void AddLibrary(const char* pszName);     // REVIEW: [KeyWorks - 8/7/2019] doesn't appear to be used
 
-    const char* GetReportFilename() { return ttIsNonEmpty(m_cszReportPath) ? m_cszReportPath : m_cszSrcFilePath; }
+    const char* GetReportFilename() { return (m_ReportPath.empty()) ? "" : m_ReportPath.c_str(); }
 
-public:
-    // Class members (note that these are NOT marked protected or private -- too many callers need to access individual
-    // members)
+protected:
+    // Class members (note that these are NOT marked protected or private -- too many callers need to access
+    // individual members)
 
     // REVIEW: [randalphwa - 7/6/2019] Having these public: is a bad design. We should replace them with Get/Set
     // functions
 
-    ttCStr m_cszLibName;  // Name and location of any additional library to build (used by Lib: section)
-    ttCStr m_cszRcName;   // Resource file to build (if any)
-    ttCStr m_cszHHPName;  // HTML Help project file
+    ttString m_LIBname;  // Name and location of any additional library to build (used by Lib: section)
+    ttString m_RCname;   // Resource file to build (if any)
+    ttString m_HPPname;  // HTML Help project file
 
     ttCHeap m_ttHeap;  // All the ttCList files will be attatched to this heap
 
-    ttCList m_lstSrcFiles;  // List of all source files
-    ttCList m_lstLibFiles;  // List of any files used to build additional library
-    ttCList m_lstIdlFiles;  // List of any idl files to compile with midl compiler
+    ttStrVector m_lstSrcFiles;  // List of all source files
+    ttStrVector m_lstLibFiles;  // List of any files used to build additional library
+    ttStrVector m_lstIdlFiles;  // List of any idl files to compile with midl compiler
 
-    ttCList m_lstErrors;  // List of any errors that occurred during processing
+    ttStrVector m_lstErrMessages;  // List of any errors that occurred during processing
 
     ttCStrIntList m_lstAddSrcFiles;     // Additional .srcfiles.yaml to read into Files: section
     ttCStrIntList m_lstLibAddSrcFiles;  // Additional .srcfiles.yaml to read into Lib: section
-    ttCList       m_lstSrcIncluded;  // The names of all files included by all ".include path/.srcfiles.yaml" directives
+    ttCList m_lstSrcIncluded;  // The names of all files included by all ".include path/.srcfiles.yaml" directives
 
-    ttCStr m_cszPchHdr;
-    ttCStr m_cszPchCpp;
+    ttString m_pchCPPname;
 
 private:
     // Class members
 
-    ttCStr m_cszSrcFilePath;
-    ttCStr m_cszReportPath;  // Path to use when reporting a problem.
-    ttCStr m_cszBldDir;      // This is where we write the .ninja files, and is ninja's builddir.
+    ttString m_srcfilename;
+    ttString m_ReportPath;  // Path to use when reporting a problem.
+    ttString m_bldFolder;   // This is where we write the .ninja files, and is ninja's builddir.
 
-    ttCStr m_cszTargetRelease;
-    ttCStr m_cszTargetDebug;
+    ttString m_relTargetFolder;
+    ttString m_dbgTargetFolder;
 
     std::string m_strTargetDir;
 
@@ -150,6 +154,6 @@ private:
     int m_RequiredMinor;
     int m_RequiredSub;
 
-    bool m_bRead;  // File has been read and processed.
+    bool m_bRead;            // File has been read and processed.
     bool m_bBreakOnWarning;  // Used in debug builds to call wxTrap().
 };

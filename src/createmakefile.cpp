@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfile.h>      // ttCFile
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttfindfile.h>  // ttCFindFile
@@ -35,15 +37,17 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
     // Some repositories use a bld directory which is added to .gitignore. If it exists, we'll use this directory
     cszBuildDir.AppendFileName("bld");
 
-    ttCStr cszSrcFiles;
+    ttString srcfiles;
     if (pszDir)
     {
-        cszSrcFiles = pszDir;
-        if (!LocateSrcFiles(&cszSrcFiles))
+        srcfiles = pszDir;
+        if (!FindProjectFile(&srcfiles))
         {
-            cszSrcFiles.printf(_("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
-                               pszDir);
-            m_lstErrors += cszSrcFiles;
+            m_lstErrMessages.append(
+                wxString::Format(_tt("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
+                                 pszDir)
+                    .utf8_str()
+                    .data());
             return false;
         }
     }
@@ -53,15 +57,15 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         if (!pszSrcFiles)
             bAllVersion = true;  // can't create a dependency on .srcfiles.yaml if we don't know where it is
         else
-            cszSrcFiles = pszSrcFiles;
+            srcfiles = pszSrcFiles;
     }
 
     ttCFile kf;
     if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL : IDR_MAKEFILE_SINGLE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
-        m_lstErrors +=
-            _("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,");
+        m_lstErrMessages.append(
+            _tt("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,"));
         return false;
     }
 
@@ -69,8 +73,8 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         ;
     //    while (kf.ReplaceStr("%libbuild%", cszBuildDir));
 
-    if (!bAllVersion && cszSrcFiles.IsNonEmpty())
-        while (kf.ReplaceStr("%srcfiles%", cszSrcFiles))
+    if (!bAllVersion && !srcfiles.empty())
+        while (kf.ReplaceStr("%srcfiles%", srcfiles.c_str()))
             ;
 
     while (kf.ReplaceStr("%project%", GetProjectName()))
@@ -151,13 +155,13 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
             }
             else if (kfOut.WriteFile(cszMakeFile))
             {
-                printf(_("%s updated.\n"), (char*) cszMakeFile);
+                printf(_tt("%s updated.\n"), (char*) cszMakeFile);
                 return true;
             }
             else
             {
                 // TRANSLATORS: Don't change the filename "makefile"
-                puts(_("Unable to write to makefile."));
+                puts(_tt("Unable to write to makefile."));
                 return false;
             }
         }
@@ -167,13 +171,13 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
         if (kfOut.WriteFile(cszMakeFile))
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            printf(_("%s created.\n"), (char*) cszMakeFile);
+            printf(_tt("%s created.\n"), (char*) cszMakeFile);
             return true;
         }
         else
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            puts(_("Unable to write to makefile."));
+            puts(_tt("Unable to write to makefile."));
             return false;
         }
     }

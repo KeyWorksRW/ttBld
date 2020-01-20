@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include "writesrcfiles.h"  // CWriteSrcFiles
 
 // This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode
@@ -24,12 +26,12 @@ bool Yamalize()
     cOrgSrcFiles.ReadFile(".srcfiles.yaml");
 
     CWriteSrcFiles cNewSrcFiles;
-    ttCList*       plstFiles = cNewSrcFiles.GetSrcFilesList();
+    ttStrVector&   lstSrcFiles = cNewSrcFiles.GetSrcFilesList();
 
     if (ttFileExists(".srcfiles.yaml"))
-        *plstFiles += ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml";
+        lstSrcFiles += ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml";
     else
-        *plstFiles += "*.c*";  // TODO: this is a placeholder, need to be smarter about what wildcards to use
+        lstSrcFiles += "*.c*";  // TODO: this is a placeholder, need to be smarter about what wildcards to use
 
     cNewSrcFiles.UpdateOption(OPT_PROJECT, cOrgSrcFiles.GetOption(OPT_PROJECT));
     cNewSrcFiles.UpdateOption(OPT_EXE_TYPE, cOrgSrcFiles.GetOption(OPT_EXE_TYPE));
@@ -97,7 +99,7 @@ bool Yamalize()
 
     if (!cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion))
     {
-        ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/srcfiles.yaml");
+        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/srcfiles.yaml");
         return false;
     }
 

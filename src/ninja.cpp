@@ -8,9 +8,12 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
-#include <ttcwd.h>      // ttCCwd
+
+#include <ttcwd.h>  // ttCwd -- Class for saving, setting, and restoring current directory
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
@@ -57,8 +60,8 @@ CNinja::CNinja(const char* pszNinjaDir)
 
     m_lstRcDependencies.SetFlags(ttCList::FLG_URL_STRINGS);
 
-    if (m_cszRcName.IsNonEmpty())
-        FindRcDependencies(m_cszRcName);
+    if (!m_RCname.empty())
+        FindRcDependencies(m_RCname.c_str());
 
     const char* pszEnv = getenv("TTBLD_CFLAGS");
     if (pszEnv)
@@ -186,18 +189,18 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     if (GetPchHeader())
     {
         file.printf("build $outdir/%s: compilePCH %s", (char*) m_cszPCHObj, (char*) m_cszCPP_PCH);
-        if (m_lstIdlFiles.GetCount())
+        if (m_lstIdlFiles.size())
         {
             file.WriteEol(" | $");
             size_t pos;
             ttCStr cszHdr;
-            for (pos = 0; pos < m_lstIdlFiles.GetCount() - 1; ++pos)
+            for (pos = 0; pos < m_lstIdlFiles.size() - 1; ++pos)
             {
-                cszHdr = m_lstIdlFiles[pos];
+                cszHdr = m_lstIdlFiles[pos].c_str();
                 cszHdr.ChangeExtension(".h");
                 file.printf("  %s $\n", (char*) cszHdr);
             }
-            cszHdr = m_lstIdlFiles[pos];
+            cszHdr = m_lstIdlFiles[pos].c_str();
             cszHdr.ChangeExtension(".h");
             file.printf("  %s", (char*) cszHdr);  // write the last one without the trailing pipe
         }
@@ -206,38 +209,40 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Write the build rules for all source files
 
-    for (size_t iPos = 0; iPos < GetSrcFileList()->GetCount(); iPos++)
+    for (auto srcFile : GetSrcFileList())
     {
-        ttCStr cszFile(ttFindFilePortion(GetSrcFileList()->GetAt(iPos)));
-        if (!ttStrStrI(cszFile, ".c") ||
-            (m_cszCPP_PCH.IsNonEmpty() &&
-             ttIsSameStrI(cszFile, m_cszCPP_PCH)))  // we already handled resources and pre-compiled headers
-            continue;                               // we already handled this
-        cszFile.ChangeExtension(".obj");
+        auto ext = srcFile.extension();
+        if (ext.empty() || std::tolower(ext[1] != 'c'))
+            continue;
+        if (srcFile.issamestr(m_cszCPP_PCH.c_str()))
+            continue;
+
+        ttString objFile(srcFile.filename());
+        objFile.replace_extension(".obj");
 
         if (m_cszPCHObj.IsNonEmpty())  // we add m_cszPCHObj so it appears as a dependency and gets compiled, but
                                        // not linked to
-            file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", (char*) cszFile,
-                        GetSrcFileList()->GetAt(iPos), (char*) m_cszPCHObj);
+            file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", objFile.c_str(), srcFile.c_str(),
+                        m_cszPCHObj.c_str());
         else
         {
             // We get here if we don't have a precompiled header. We might have .idl files, which means we're going
             // to need to add all the midl-generated header files as dependencies to each source file. See issue
             // #80 for details.
 
-            file.printf("build $outdir/%s: compile %s", (char*) cszFile, GetSrcFileList()->GetAt(iPos));
-            if (m_lstIdlFiles.GetCount())
+            file.printf("build $outdir/%s: compile %s", objFile.c_str(), srcFile.c_str());
+            if (m_lstIdlFiles.size())
             {
                 file.WriteEol(" | $");
                 size_t pos;
                 ttCStr cszHdr;
-                for (pos = 0; pos < m_lstIdlFiles.GetCount() - 1; ++pos)
+                for (pos = 0; pos < m_lstIdlFiles.size() - 1; ++pos)
                 {
-                    cszHdr = m_lstIdlFiles[pos];
+                    cszHdr = m_lstIdlFiles[pos].c_str();
                     cszHdr.ChangeExtension(".h");
                     file.printf("  %s $\n", (char*) cszHdr);
                 }
-                cszHdr = m_lstIdlFiles[pos];
+                cszHdr = m_lstIdlFiles[pos].c_str();
                 cszHdr.ChangeExtension(".h");
                 file.printf("  %s", (char*) cszHdr);  // write the last one without the trailing pipe
             }
@@ -278,9 +283,9 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     {
         if (!ttCreateDir(GetBldDir()))
         {
-            ttCStr cszMsg;
-            cszMsg.printf(_("Unable to create or write to %s"), GetBldDir());
-            AddError(cszMsg);
+            std::string msg = _tt("Unable to create or write to ");
+            msg += GetBldDir();
+            AddError(msg);
             return false;
         }
     }
@@ -303,7 +308,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     if (!file.WriteFile(m_cszScriptFile.c_str()))
     {
-        std::string str(_("Unable to create or write to") + m_cszScriptFile + '\n');
+        std::string str(_tt("Unable to create or write to") + m_cszScriptFile + '\n');
         AddError(str.c_str());
         return false;
     }
@@ -329,16 +334,16 @@ void CNinja::ProcessBuildLibs()
 
         while (enumLib.Enum())
         {
-            ttCCwd cwdSave;  // Saves the current directory, restores it when we go out of scope.
+            ttCwd cwd;
 
             // Change to the directory that should contain a .srcfiles.yaml and read it
 
             if (!ttChDir(enumLib))
             {
                 ttCStr cszMsg;
-                cszMsg.printf(_("The library source directory %s specified in BuildLibs: does not exist.\n"),
+                cszMsg.printf(_tt("The library source directory %s specified in BuildLibs: does not exist.\n"),
                               (char*) enumLib);
-                AddError(cszMsg);
+                AddError(cszMsg.c_str());
                 continue;
             }
 
@@ -426,7 +431,7 @@ void CNinja::ProcessBuildLibs()
                 ttCStr cszCurDir;
                 cszCurDir.GetCWD();
                 ttCStr cszRelDir;
-                ttConvertToRelative(cwdSave, cszCurDir, cszRelDir);
+                ttConvertToRelative(cwd.c_str(), cszCurDir, cszRelDir);
                 m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), cszRelDir);
             }
 
@@ -438,7 +443,7 @@ void CNinja::ProcessBuildLibs()
                 cszLibDir.AppendFileName(pszLib);
                 cszLibDir.FullPathName();
                 ttCStr cszLib;
-                ttConvertToRelative(cwdSave, cszLibDir, cszLib);
+                ttConvertToRelative(cwd.c_str(), cszLibDir, cszLib);
                 m_lstBldLibsD += cszLib;
             }
 
@@ -450,7 +455,7 @@ void CNinja::ProcessBuildLibs()
                 cszLibDir.AppendFileName(pszLib);
                 cszLibDir.FullPathName();
                 ttCStr cszLib;
-                ttConvertToRelative(cwdSave, cszLibDir, cszLib);
+                ttConvertToRelative(cwd.c_str(), cszLibDir, cszLib);
                 m_lstBldLibsR += cszLib;
             }
         }

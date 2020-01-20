@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
 
@@ -19,8 +21,8 @@ extern const char* txtDefBuildDir;  // "bld";
 CParseHHP::CParseHHP(const char* pszHHPName)
 {
     m_section = SECTION_UNKNOWN;
-    m_cszHHPName = pszHHPName;
-    m_cszChmFile = (char*) m_cszHHPName;
+    m_HPPname = pszHHPName;
+    m_cszChmFile = (char*) m_HPPname;
     m_cszChmFile.ChangeExtension(".chm");
     m_cszRoot = pszHHPName;
     m_cszRoot.FullPathName();
@@ -50,7 +52,7 @@ namespace
 void CParseHHP::ParseHhpFile(const char* pszHHP)
 {
     if (!pszHHP)
-        pszHHP = m_cszHHPName;  // use root name
+        pszHHP = m_HPPname;  // use root name
 
     ttCFile kf;
     if (!kf.ReadFile(pszHHP))
@@ -247,7 +249,7 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
     ttCStr cszRelative;
     ttCStr cszHHP;
 
-    if (!ttIsSameStrI(pszHHP, m_cszHHPName))
+    if (!ttIsSameStrI(pszHHP, m_HPPname))
     {
         // If we're in a nested .HHP file, then we need to first get the location of the nested .HHP, use that to
         // get the location of the pszFile;
@@ -295,7 +297,7 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
     m_lstDependencies += (const char*) cszRelative;
 }
 
-const char* txtHelpNinja = "build/ChmHelp.ninja";
+const char* txtHelpNinja = "bld/ChmHelp.ninja";
 
 bool CNinja::CreateHelpFile()
 {
@@ -362,9 +364,9 @@ bool CNinja::CreateHelpFile()
 
     if (!file.WriteFile(txtHelpNinja))
     {
-        ttCStr cszMsg;
-        cszMsg.printf("Cannot write to %s\n", txtHelpNinja);
-        AddError(cszMsg);
+        std::string msg = _tt("Cannot write to ");
+        msg += txtHelpNinja;
+        AddError(msg);
         return false;
     }
 

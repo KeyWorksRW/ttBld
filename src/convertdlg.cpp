@@ -14,6 +14,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include "convertdlg.h"  // CConvertDlg
 
 #include <direct.h>  // Functions for directory handling and creation
@@ -182,7 +184,7 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
         if (ttFileExists(cszSrcFiles))
         {
             if (ttMsgBox(
-                    _(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"),
+                    _tt(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"),
                     MB_YESNO) != IDYES)
                 return;
         }
@@ -236,7 +238,7 @@ void CConvertDlg::OnOK(void)
 
     if (m_cszConvertScript.IsNonEmpty() && !ttFileExists(m_cszConvertScript))
     {
-        ttMsgBoxFmt(_("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
         CancelEnd();
         return;
     }
@@ -253,7 +255,7 @@ void CConvertDlg::AddCodeLiteFiles(ttCXMLBranch* pParent)
         if (ttIsSameStrI(pFile->GetName(), "File"))
         {
             if (isValidSrcFile(pFile->GetAttribute("Name")))
-                m_cSrcFiles.m_lstSrcFiles += MakeSrcRelative(pFile->GetAttribute("Name"));
+                m_cSrcFiles.GetSrcFilesList().addfile(MakeSrcRelative(pFile->GetAttribute("Name")));
         }
         // CodeLite nests resources in a sub <VirtualDirectory> tag
         else if (ttIsSameStrI(pFile->GetName(), "VirtualDirectory"))
@@ -344,7 +346,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
 
         if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles))
         {
-            ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
+            ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
             CancelEnd();
             return false;
         }
@@ -364,7 +366,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
             HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
             if (hr != S_OK)
             {
-                ttMsgBoxFmt(_("An internal error occurred attempting to parse the file %s"),
+                ttMsgBoxFmt(_tt("An internal error occurred attempting to parse the file %s"),
                             MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
                 return false;
             }
@@ -399,7 +401,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
 
             if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles, cszHdr))
             {
-                ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING,
+                ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING,
                             (char*) m_cszOutSrcFiles);
                 return false;
             }

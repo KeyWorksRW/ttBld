@@ -11,6 +11,8 @@
 #include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
 #include <ttfile.h>  // ttCFile
 
+#include <ttTR.h>  // Function for translating strings
+
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
 
@@ -26,27 +28,25 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     if (!cSrcFiles.ReadFile())
     {
         ttCStr cszMsg;
-        cszMsg.printf(_("Cannot locate the file %s"), (char*) cSrcFiles.GetSrcFiles());
+        cszMsg.printf(_tt("Cannot locate the file %s"), (char*) cSrcFiles.GetSrcFiles());
         puts(cszMsg);
         return;
     }
 
+    size_t cFilesAdded = 0;
     for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos)
     {
-        if (cSrcFiles.m_lstSrcFiles.Find(lstFiles[pos]))
+        if (cSrcFiles.GetSrcFilesList().appendi(lstFiles[pos]))
         {
-            printf(_("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
-            cSrcFiles.m_lstSrcFiles.Remove(pos);
+            ++cFilesAdded;
         }
     }
-
-    size_t cFilesAdded = 0;
 
     ttCFile kfIn, kfOut;
     if (!kfIn.ReadFile(cSrcFiles.GetSrcFiles()))
     {
         ttCStr cszMsg;
-        cszMsg.printf(_("Cannot open \"%s\"."), (char*) cSrcFiles.GetSrcFiles());
+        cszMsg.printf(_tt("Cannot open \"%s\"."), (char*) cSrcFiles.GetSrcFiles());
         puts(cszMsg);
         return;
     }
@@ -62,7 +62,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         {
             if (!ttFileExists(lstFiles[pos]))
             {
-                printf(_("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
+                printf(_tt("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
                 continue;
             }
             kfOut.printf("  %s\n", lstFiles[pos]);
@@ -70,11 +70,11 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
         }
         if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
         {
-            ttMsgBoxFmt(_("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, cSrcFiles.GetSrcFiles());
+            ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, cSrcFiles.GetSrcFiles());
             return;
         }
 
-        printf(_("%u files added."), cFilesAdded);
+        printf(_tt("%u files added."), cFilesAdded);
         return;
     }
 
@@ -98,7 +98,7 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
     {
         if (!ttFileExists(lstFiles[pos]))
         {
-            printf(_("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
+            printf(_tt("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
             continue;
         }
         kfOut.printf("  %s\n", lstFiles[pos]);
@@ -121,9 +121,9 @@ void AddFiles(ttCList& lstFiles, bool bDryRun)
 
     if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
     {
-        printf(_("Unable to create or write to %s"), cSrcFiles.GetSrcFiles());
+        printf(_tt("Unable to create or write to %s"), cSrcFiles.GetSrcFiles());
         return;
     }
 
-    printf(_("%u files added."), cFilesAdded);
+    printf(_tt("%u files added."), cFilesAdded);
 }

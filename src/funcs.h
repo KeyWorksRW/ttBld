@@ -10,6 +10,7 @@
 
 class ttCList;  // forward definition
 class ttCStr;
+class ttString;
 class CSrcFiles;
 
 bool gitIgnoreAll(ttCStr& cszGitExclude);
@@ -30,6 +31,12 @@ bool isSystemHeaderFile(const char* pszHeaderFile);
 
 // If pcszStartDir is used, it will be set to the path to the file or dir/file where .srcfiles.yaml was found
 const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);
+
+// Try to locate .srcfiles.yaml and return a pointer to it's location if found.
+//
+// If pPath is specified, it will be assigned the path (including the .srcfiles.yaml
+// filename)
+const char* FindProjectFile(ttString* pPath = nullptr);
 
 // Returns 0 - no errors, 1 - file already exists, 2 - other error
 size_t CreateCodeLiteProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);

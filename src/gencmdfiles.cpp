@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <ttTR.h>  // Function for translating strings
+
 #include <ttfile.h>     // ttCFile
 #include <ttlist.h>     // ttCList
 #include <ttenumstr.h>  // ttCEnumStr
@@ -58,7 +60,7 @@ void CreateCodeCmd(const char* pszFile)
     ttBackslashToForwardslash(cszPath);
 
     if (file.WriteFile(cszPath))
-        printf(_("%s created.\n"), (char*) cszPath);
+        printf(_tt("%s created.\n"), (char*) cszPath);
     else
     {
         // It's possible to just move the entire VSCode directory and it will continue to work fine. In that case,
@@ -75,13 +77,13 @@ void CreateCodeCmd(const char* pszFile)
                 cszNewPath.AppendFileName(pszFile);
                 if (file.WriteFile(cszPath))
                 {
-                    printf(_("%s created.\n"), (char*) cszPath);
+                    printf(_tt("%s created.\n"), (char*) cszPath);
                     return;
                 }
             }
         }
 
-        printf(_("Unable to create or write to %s"), (char*) cszPath);
+        printf(_tt("Unable to create or write to %s"), (char*) cszPath);
         puts("");
     }
 }
