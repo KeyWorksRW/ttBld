@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <sstream>
+
 #include <ttTR.h>  // Function for translating strings
 
 #include <ttfindfile.h>  // ttCFindFile
@@ -94,6 +96,8 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
     m_bRead = true;
 
+    InitOptions();
+
     char*       pszLine;
     SRC_SECTION section = SECTION_UNKNOWN;
 
@@ -172,26 +176,115 @@ bool CSrcFiles::ReadFile(std::string_view filename)
     return true;
 }
 
+void CSrcFiles::ParseOption(std::string_view yamlLine)
+{
+    ttString name;
+    ttString value;
+    ttString comment;
+
+    ttString line = tt::findnonspace(yamlLine);
+    auto     pos = line.findoneof(":=");
+    if (pos == ttString::npos)
+    {
+        AddError(_tt("Invalid Option -- missing ':' or '=' character"));
+        return;
+    }
+
+    name.assign(line.substr(0, pos));
+
+    // Ignore or change obsolete options
+
+    if (name.issamestri("64Bit") || name.issamestri("b64_suffix") || name.issamestri("b32_suffix"))
+    {
+        return;
+    }
+
+    pos = line.stepover(pos);
+    if (pos == ttString::npos)
+    {
+        std::stringstream msg;
+        msg << _tt("The option ") << name << _tt(" does not have a value");
+        AddError(msg.str());
+        return;
+    }
+
+    if (line[pos] == '"')
+    {
+        auto posNext = value.ExtractString(line, pos);
+        if (posNext == ttString::npos)
+        {
+            std::stringstream msg;
+            msg << _tt("The value for ") << name << _tt(" has an opening quote, but no closing quote.");
+            AddError(msg.str());
+            value.assign(line.substr(pos));
+            posNext = pos;
+        }
+        posNext = line.find('#', posNext + 1);
+        if (posNext != ttString::npos)
+        {
+            // Technically we should check the preceeeding character and determine if it is a backslash. Shouldn't
+            // ever occur in .srcfiles.yanml files, but it is allowed in the YAML spec.
+            comment.assign(line.substr(line.findnonspace(posNext + 1)));
+        }
+    }
+    else
+    {
+        auto posComment = line.find('#', pos);
+        if (posComment != ttString::npos)
+        {
+            // Technically we should check the preceeeding character and determine if it is a backslash. Shouldn't
+            // ever occur in .srcfiles.yanml files, but it is allowed in the YAML spec.
+            comment.assign(line.substr(line.findnonspace(posComment + 1)));
+            value.assign(line.substr(pos, posComment - pos));
+            value.trim();
+        }
+        else
+        {
+            value.assign(line.substr(pos));
+            value.trim();
+        }
+    }
+
+    auto& option = FindOption(name);
+    if (option.optionID == Opt::LAST)
+    {
+        std::stringstream msg;
+        msg << name << _tt(" is an unrecognized option and will be ignored.");
+        AddError(msg.str());
+        return;
+    }
+
+    option.value = value;
+    option.comment = comment;
+}
+
 void CSrcFiles::ProcessOption(char* pszLine)
 {
+    ParseOption(pszLine);
+
     ttCStr cszName, cszVal, cszComment;
 
     if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
         return;
 
+    ttString name(cszName);
+    ttString value(cszVal);
+    ttString comment(cszComment);
+
     // Ignore or change obsolete options
 
-    if (ttIsSameStrI(cszName, "64Bit") || ttIsSameStrI(cszName, "b64_suffix") ||
-        ttIsSameStrI(cszName, "b32_suffix"))
+    if (name.issamestri("64Bit") || name.issamestri("b64_suffix") || name.issamestri("b32_suffix"))
+    {
         return;
+    }
 
-    if (ttIsSameStrI(cszName, "TargetDir64"))
-        cszName = "TargetDir";
+    if (name.issamestri("TargetDir64"))
+        name = "TargetDir";
 
-    if (ttIsSameStrI(cszName, "LibDirs64"))
-        cszName = "LibDirs";
+    else if (name.issamestri("LibDirs64"))
+        name = "LibDirs";
 
-    OPT_INDEX opt = UpdateReadOption(cszName, cszVal, cszComment);
+    OPT_INDEX opt = UpdateReadOption(name.c_str(), value.c_str(), comment.c_str());
     if (opt < OPT_OVERFLOW)
     {
         const OPT_VERSION* pVer = GetOptionMinVersion(opt);
@@ -210,12 +303,15 @@ void CSrcFiles::ProcessOption(char* pszLine)
     // If you need to support reading old options, add the code here to convert them into the new options. You will
     // also need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
 
-    if (ttIsSameStrI(cszName, "LinkFlags"))
-        UpdateOption(OPT_LINK_CMN, (char*) cszVal);
+    if (name.issamestri("LinkFlags"))
+    {
+        UpdateOption(OPT_LINK_CMN, value.c_str());
+        SetOptionValue(Opt::LINK_CMN, value);
+    }
 
-    ttCStr csz;
-    csz.printf(_tt("%s is an unknown option"), (char*) cszName);
-    m_lstErrMessages.append(csz.c_str());
+    ttString msg(name);
+    msg += _tt(" is an unknown option");
+    m_lstErrMessages.append(msg);
 #if !defined(NDEBUG)  // Starts debug section.
     if (m_bBreakOnWarning)
         wxTrap();
@@ -509,6 +605,7 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
         ttTrimRight(pszVal);  // remove any trailing whitespace
         cszVal = pszVal;
     }
+
     return true;
 }
 
@@ -731,6 +828,7 @@ const char* CSrcFiles::GetTargetDebug()
 }
 
 #if !defined(NDEBUG)  // Starts debug section.
+
 void CSrcFiles::AddError(std::string_view err)
 {
     ttString msg(err);
@@ -742,4 +840,5 @@ void CSrcFiles::AddError(std::string_view err)
             ttFAIL_MSG(msg.c_str());
     }
 }
+
 #endif

@@ -8,12 +8,124 @@
 
 #pragma once
 
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include <ttarray.h>  // ttCArray
+
+#define OLD_OPTIONS
+
+class Opt
+{
+public:
+    enum : size_t
+    {
+        BIT32,
+        BIT64,
+        BUILD_LIBS,
+        CFLAGS_CMN,
+        CFLAGS_DBG,
+        CFLAGS_REL,
+        CLANG_CMN,
+        CLANG_DBG,
+        CLANG_REL,
+        CRT_DBG,
+        CRT_REL,
+        DEBUG_RC,
+        EXE_TYPE,
+        INC_DIRS,
+        LIBS_CMN,
+        LIBS_DBG,
+        LIBS_REL,
+        LIB_DIRS,
+        LIB_DIRS32,
+        LIB_DIRS64,
+        LINK_CMN,
+        LINK_DBG,
+        LINK_REL,
+        MIDL_CMN,
+        MIDL_DBG,
+        MIDL_REL,
+        MSGFMT_FLAGS,
+        MSGFMT_XML,
+        MS_LINKER,
+        MS_RC,
+        NATVIS,
+        OPTIMIZE,
+        PCH,
+        PCH_CPP,
+        PROJECT,
+        RC_CMN,
+        RC_DBG,
+        RC_REL,
+        TARGET_DIR,
+        TARGET_DIR32,
+        TARGET_DIR64,
+        WARN,
+        XGET_FLAGS,
+        XGET_KEYWORDS,
+        XGET_OUT,
+
+        // Last enumeration used to determine size of containers
+        LAST
+    };
+
+    struct ORIGINAL_OPTIONS
+    {
+        size_t optionID;
+
+        const char* name;
+        const char* value;
+        const char* comment;
+
+        bool BooleanValue;
+        bool Required;
+    };
+
+    // Contains current information about an option.
+    struct OPTION
+    {
+        size_t optionID;
+
+        const char* OriginalName;
+        const char* OriginalValue;
+        const char* OriginalComment;
+
+        std::string value;
+        std::string comment;
+
+        bool BooleanValue;
+        bool Required;
+    };
+
+    std::vector<OPTION> m_Options;
+
+    const char* getOptValue(size_t index)
+    {
+        ttASSERT(index < LAST);
+        return m_Options.at(index).value.c_str();
+    }
+
+    void setOptValue(size_t index, std::string_view value);
+
+    const char* getCmtValue(size_t index)
+    {
+        ttASSERT(index < LAST);
+        return m_Options.at(index).comment.c_str();
+    }
+    void setCmtValue(size_t index, std::string_view value)
+    {
+        ttASSERT(index < LAST);
+        m_Options.at(index).comment = value;
+    }
+};
 
 namespace sfopt  // .srcfiles.yaml otpions
 {
     extern const char* txtNinjaVerFormat;  // "# Requires ttBld version %d.%d.%d or higher to process";
 
+    // Used as an index into all currently supported options.
     typedef enum
     {
         // Don't wrap the comments -- wee need them on one line to show up in Intellisense
@@ -122,6 +234,10 @@ public:
 
     // Public functions
 
+    // Call this when a .srcfiles.yaml file is first read. It will initialize m_Options with
+    // all of the default values and comments.
+    void InitOptions();
+
     const char* GetOption(sfopt::OPT_INDEX index);
     bool        GetBoolOption(sfopt::OPT_INDEX index);
     const char* GetOptComment(sfopt::OPT_INDEX index);
@@ -142,6 +258,22 @@ public:
     const sfopt::OPT_SETTING* GetOrgOptions();
 
     const char* GetOptVal(size_t pos) const { return m_aUpdateOpts[pos].pszVal; }
+
+    // const char* getOptValue(sfopt::OPT_INDEX index);
+    // void        setOptValue(sfopt::OPT_INDEX index, std::string_view value);
+    // const char* getCmtValue(sfopt::OPT_INDEX index);
+    // void        setCmtValue(sfopt::OPT_INDEX index, std::string_view value);
+
+    void setOptRequired(sfopt::OPT_INDEX index, bool bVal = true);
+
+    // Call this when reading an entire option line
+    void setOptLine(std::string& name, std::string& value, std::string comment);
+
+    const Opt::ORIGINAL_OPTIONS& FindOriginal(size_t option);
+
+    Opt::OPTION& FindOption(const std::string& name);
+
+    Opt m_opt;
 
 private:
     // Class members

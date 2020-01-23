@@ -41,7 +41,7 @@ BldScriptD=$(bdir)/$(cmplr)_dbg.ninja
 release: ttLibwx ttwx $(BldScript) ttBld
 
 ttwx:
-	cd ../../ttwx & ninja -f $(BldScript)
+	cd ../../ttwx/src & ninja -f $(BldScript)
 
 ttLibwx:
 	cd ../../ttLibwx/src & ninja -f $(BldScript)
@@ -54,7 +54,7 @@ ttBld:
 debug: ttLibwxD ttwxD $(BldScriptD) ttBldD
 
 ttwxD:
-	cd ../../ttwx & ninja -f $(BldScriptD)
+	cd ../../ttwx/src & ninja -f $(BldScriptD)
 
 ttLibwxD:
 	cd ../../ttLibwx/src & ninja -f $(BldScriptD)
@@ -65,7 +65,7 @@ ttBldD:
 ########## localization ##########
 
 locale:
-	xgettext -k_ -kwxPLURAL -kwxTRANSLATE -k_tt -i -c --omit-header -fxgen.lst
+	xgettext -k_ -kwxPLURAL -kwxTRANSLATE -k_XGET -i -c --omit-header -fxgen.lst
 
 ########## clean release section ##########
 

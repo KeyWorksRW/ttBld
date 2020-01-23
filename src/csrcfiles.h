@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 
 #include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
 #include <ttfile.h>   // ttCFile
@@ -33,6 +34,7 @@ public:
     CSrcFiles(const char* pszNinjaDir = nullptr);
 
     // Public functions
+
     const char* GetTargetDir();
     const char* GetTargetRelease();
     const char* GetTargetDebug();
@@ -97,8 +99,14 @@ public:
     #define BREAKONWARNING
 #endif
 
+    const char* GetOptionValue(size_t index) { return m_opt.getOptValue(index); }
+    void        SetOptionValue(size_t index, std::string_view value) { return m_opt.setOptValue(index, value); }
+    Opt::OPTION& GetOpt(size_t index) { return m_opt.m_Options.at(index); }
+
 protected:
     // Protected functions
+
+    void ParseOption(std::string_view yamlLine);
 
     void ProcessFile(char* pszFile);
     void ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFiles, bool bFileSection);
@@ -114,12 +122,6 @@ protected:
     const char* GetReportFilename() { return (m_ReportPath.empty()) ? "" : m_ReportPath.c_str(); }
 
 protected:
-    // Class members (note that these are NOT marked protected or private -- too many callers need to access
-    // individual members)
-
-    // REVIEW: [randalphwa - 7/6/2019] Having these public: is a bad design. We should replace them with Get/Set
-    // functions
-
     ttString m_LIBname;  // Name and location of any additional library to build (used by Lib: section)
     ttString m_RCname;   // Resource file to build (if any)
     ttString m_HPPname;  // HTML Help project file
