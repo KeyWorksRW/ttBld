@@ -210,7 +210,7 @@ void CSrcFiles::ParseOption(std::string_view yamlLine)
 
     if (line[pos] == '"')
     {
-        auto posNext = value.ExtractString(line, pos);
+        auto posNext = value.ExtractSubString(line, pos);
         if (posNext == ttString::npos)
         {
             std::stringstream msg;

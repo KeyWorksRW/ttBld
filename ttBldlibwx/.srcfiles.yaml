@@ -17,7 +17,7 @@ Options:
 
     TargetDir: ../lib      # target directory
 
-    IncDirs:    ../src/precompile;../src;../../ttwx;../ttLibwx/include
+    IncDirs:    ../src/precompile;../src;../../ttwx/src;../ttLibwx/include
 
 Files:
     ../src/csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
