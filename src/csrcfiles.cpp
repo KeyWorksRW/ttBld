@@ -410,7 +410,7 @@ void CSrcFiles::ProcessFile(char* pszFile)
         return;
     }
 
-    if (m_lstSrcFiles.addfile(pszFile))
+    if (m_lstSrcFiles.addfilename(pszFile))
     {
         if (!m_lstSrcFiles.back().fileExists())
         {
@@ -505,9 +505,9 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         posAdd = m_lstSrcIncluded.Add(cszRelative);
         lstAddSrcFiles.Add(pszFile, posAdd);
         if (bFileSection)
-            m_lstSrcFiles.addfile(cszRelative.c_str());
+            m_lstSrcFiles.addfilename(cszRelative.c_str());
         else
-            m_lstLibFiles.addfile(cszRelative.c_str());
+            m_lstLibFiles.addfilename(cszRelative.c_str());
     }
 }
 

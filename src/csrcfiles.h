@@ -40,7 +40,7 @@ public:
     const char* GetTargetDebug();
 
     const char* GetBuildScriptDir();
-    bool        AddFile(const char* pszFile) { return m_lstSrcFiles.addfile(pszFile); }
+    bool        AddFile(const char* pszFile) { return m_lstSrcFiles.addfilename(pszFile); }
 
     // If pszFile is NULL, CSrcFiles will attempt to locate the file (see LocateSrcFiles()).
     bool ReadFile(std::string_view filename = "");

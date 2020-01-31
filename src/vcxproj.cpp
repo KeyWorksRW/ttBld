@@ -54,7 +54,7 @@ bool CVcxRead::ConvertVcxProj()
                 {
                     const char* pszFile = pCmd->GetAttribute("Include");
                     if (pszFile && *pszFile)
-                        m_pcSrcFiles->GetSrcFilesList().addfile(MakeSrcRelative(pszFile));
+                        m_pcSrcFiles->GetSrcFilesList().addfilename(MakeSrcRelative(pszFile));
                 }
             }
         }

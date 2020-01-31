@@ -255,7 +255,7 @@ void CConvertDlg::AddCodeLiteFiles(ttCXMLBranch* pParent)
         if (ttIsSameStrI(pFile->GetName(), "File"))
         {
             if (isValidSrcFile(pFile->GetAttribute("Name")))
-                m_cSrcFiles.GetSrcFilesList().addfile(MakeSrcRelative(pFile->GetAttribute("Name")));
+                m_cSrcFiles.GetSrcFilesList().addfilename(MakeSrcRelative(pFile->GetAttribute("Name")));
         }
         // CodeLite nests resources in a sub <VirtualDirectory> tag
         else if (ttIsSameStrI(pFile->GetName(), "VirtualDirectory"))
