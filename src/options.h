@@ -238,6 +238,39 @@ public:
     // all of the default values and comments.
     void InitOptions();
 
+    // [KeyWorks - 01-31-2020] The Get/Set functions use the old s_aInitialOptions/m_aUpdateOpts arrays.
+    // Newer code should use the get/set functions (lowercase leading letter) to use the new Opt class vector.
+
+    std::string_view getOptValue(size_t index) const
+    {
+        assert(index < Opt::LAST);
+        return m_opt.m_Options.at(index).value;
+    }
+
+    std::string_view getCmtValue(size_t index) const
+    {
+        assert(index < Opt::LAST);
+        return m_opt.m_Options.at(index).comment;
+    }
+
+    void setOptValue(size_t index, std::string_view value) { m_opt.setOptValue(index, value); }
+    void setOptComment(size_t index, std::string_view value) { m_opt.setCmtValue(index, value); }
+
+    void setOptRequired(sfopt::OPT_INDEX index, bool bVal = true);
+
+    // Call this when reading an entire option line
+    void setOptLine(std::string& name, std::string& value, std::string comment);
+
+    size_t findID(std::string name) const;
+
+    const Opt::ORIGINAL_OPTIONS& FindOriginal(size_t option) const;
+
+    Opt::OPTION& FindOption(const std::string& name);
+
+    Opt m_opt;
+
+    // [KeyWorks - 01-31-2020] All of the following functions are obsolete!
+
     const char* GetOption(sfopt::OPT_INDEX index);
     bool        GetBoolOption(sfopt::OPT_INDEX index);
     const char* GetOptComment(sfopt::OPT_INDEX index);
@@ -258,22 +291,6 @@ public:
     const sfopt::OPT_SETTING* GetOrgOptions();
 
     const char* GetOptVal(size_t pos) const { return m_aUpdateOpts[pos].pszVal; }
-
-    // const char* getOptValue(sfopt::OPT_INDEX index);
-    // void        setOptValue(sfopt::OPT_INDEX index, std::string_view value);
-    // const char* getCmtValue(sfopt::OPT_INDEX index);
-    // void        setCmtValue(sfopt::OPT_INDEX index, std::string_view value);
-
-    void setOptRequired(sfopt::OPT_INDEX index, bool bVal = true);
-
-    // Call this when reading an entire option line
-    void setOptLine(std::string& name, std::string& value, std::string comment);
-
-    const Opt::ORIGINAL_OPTIONS& FindOriginal(size_t option);
-
-    Opt::OPTION& FindOption(const std::string& name);
-
-    Opt m_opt;
 
 private:
     // Class members

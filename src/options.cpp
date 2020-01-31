@@ -431,7 +431,7 @@ void CSrcOptions::InitOptions()
     last.optionID = Opt::LAST;
 }
 
-const Opt::ORIGINAL_OPTIONS& CSrcOptions::FindOriginal(size_t option)
+const Opt::ORIGINAL_OPTIONS& CSrcOptions::FindOriginal(size_t option) const
 {
     ttASSERT(option < Opt::LAST);
 
@@ -462,6 +462,23 @@ Opt::OPTION& CSrcOptions::FindOption(const std::string& name)
             return m_opt.m_Options[pos];
     }
     return m_opt.m_Options.back();
+}
+
+size_t CSrcOptions::findID(std::string name) const
+{
+    assert(!name.empty());
+    if (name.empty())
+        return Opt::LAST;
+
+    for (size_t pos = 0; pos < m_opt.m_Options.size(); ++pos)
+    {
+        if (m_opt.m_Options[pos].optionID == Opt::LAST)
+            return m_opt.m_Options[pos].optionID;
+        else if (tt::issamestri(name, m_opt.m_Options[pos].OriginalName))
+            return m_opt.m_Options[pos].optionID;
+    }
+    return Opt::LAST;
+
 }
 
 void Opt::setOptValue(size_t index, std::string_view value)
