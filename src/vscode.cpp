@@ -9,6 +9,7 @@
 #include "pch.h"
 
 #include <ttTR.h>  // Function for translating strings
+#include <ttenum.h>  // ttEnumStr, ttEnumView -- A class for enumerating through substrings
 
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
@@ -546,20 +547,12 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     lstIncludes.SetFlags(ttCList::FLG_IGNORE_CASE);
     if (cSrcFiles.GetOption(OPT_INC_DIRS))
     {
-        ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
-
-        while (enumInc.Enum())
+        ttEnumStr IncludeDirs(cSrcFiles.GetOption(OPT_INC_DIRS));
+        for (auto iter : IncludeDirs)
         {
-            ttCStr cszPath(enumInc);
-#if defined(_WIN32)
-            ttCStr cszIncDir;
-            JunctionToReal(cszPath, cszIncDir);
-            ttBackslashToForwardslash(cszIncDir);
-            lstIncludes += cszIncDir;
-#else
-            ttBackslashToForwardslash(cszPath);
-            lstIncludes += cszPath;
-#endif
+
+            iter.backslashestoforward();
+            lstIncludes += iter.c_str();
         }
     }
 
