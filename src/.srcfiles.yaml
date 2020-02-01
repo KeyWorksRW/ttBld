@@ -18,8 +18,8 @@ Options:
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     precompile;../../ttwx/src;../../ttLibwx/include  # temporary location, change before Public release
-    BuildLibs:   ../../ttwx/src;../../ttLibwx/src      # temporary location, change before Public release
+    IncDirs:     precompile;../../ttlib/include;../../ttlib/ttwx  # temporary location, change before Public release
+    BuildLibs:   ../../ttLib/winsrc;;../../ttlib/ttwx      # temporary location, change before Public release
 
 #    IncDirs:     ../ttLibwx/include                # additional directories for header files
 #    BuildLibs:   ../ttLibwx/src                    # libraries that need to be built (added to makefile generation)
@@ -50,9 +50,6 @@ Files:
     vscode.cpp          # Creates/updates .vscode files
     writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
-
-    # This needs to be removed as soon as we switch to pugixml
-    ../../ttlibwx/src/ttxml.cpp
 
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     pugixml/pugixml.cpp # Built directly rather than building a library

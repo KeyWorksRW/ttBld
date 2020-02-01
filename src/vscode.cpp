@@ -9,7 +9,6 @@
 #include "pch.h"
 
 #include <ttTR.h>  // Function for translating strings
-#include <ttenum.h>  // ttEnumStr, ttEnumView -- A class for enumerating through substrings
 
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class

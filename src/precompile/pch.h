@@ -44,11 +44,9 @@ namespace fs = std::filesystem;
 #include <string>
 #include <string_view>
 
-#include <ttwx.h>      // Master header file for ttwx.lib
 #include <ttassert.h>  // Provides an alternative to wxASSERT macros
 
-#include <ttlib.h>    // Master header file for ttLib
-#include <ttdebug.h>  // ttASSERT macros
+#include <ttlibwin.h>    // Master header file for ttLibwin
 
 // WARNING: ttstr.h must appear before ttstring.h!
 #include <ttstr.h>
