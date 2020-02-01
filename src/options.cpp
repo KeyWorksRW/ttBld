@@ -49,7 +49,7 @@ OPT_VERSION aoptVersions[] =
 // clang-format off
 
 // These are in the order they should be written in a new .srcfiles.yaml file.
-static const std::array<Opt::ORIGINAL_OPTIONS, Opt::LAST> DefaultOptions =
+static const std::array<Opt::ORIGINAL_OPTIONS, Opt::LAST + 1> DefaultOptions =
 {{
 
     { Opt::PROJECT,  "Project",  nullptr,   "project name", false, true },
@@ -68,7 +68,7 @@ static const std::array<Opt::ORIGINAL_OPTIONS, Opt::LAST> DefaultOptions =
     { Opt::BIT64, "64Bit", "true", "[true | false] indicates whether buildable as a 64-bit target", true, false },
     { Opt::TARGET_DIR64, "TargetDir64",  nullptr, "64-bit target directory", false, false },
 
-    { Opt::BIT32, "32Bit", "true", "[true | false] indicates whether buildable as a 32-bit target", true, false },
+    { Opt::BIT32, "32Bit", "false", "[true | false] indicates whether buildable as a 32-bit target", true, false },
     { Opt::TARGET_DIR32, "TargetDir32", nullptr, "32-bit target directory", false, false },
 
     { Opt::CFLAGS_CMN, "CFlags_cmn", nullptr, "common compiler flags", false, false },
@@ -90,7 +90,6 @@ static const std::array<Opt::ORIGINAL_OPTIONS, Opt::LAST> DefaultOptions =
     { Opt::MIDL_CMN, "Midl_cmn", nullptr, "common compiler flags", false, false },
     { Opt::MIDL_REL, "Midl_rel", nullptr, "release build compiler flags", false, false },
     { Opt::MIDL_DBG, "Midl_dbg", nullptr, "debug build compiler flags", false, false },
-
 
     { Opt::NATVIS, "Natvis", nullptr, "Debug visualizer", false, false },
 
@@ -116,7 +115,7 @@ static const std::array<Opt::ORIGINAL_OPTIONS, Opt::LAST> DefaultOptions =
     { Opt::MSGFMT_FLAGS,  "Msgfmt_flags", nullptr, "msgfmt flags", false, false },
     { Opt::MSGFMT_XML,    "Msgfmt_xml",   nullptr, "xml template file for msgfmt", false, false },
 
-    { Opt::LAST, nullptr, nullptr, nullptr, false, false}
+    { Opt::LAST, "", nullptr, nullptr, false, false}
 
 }};
 
@@ -250,6 +249,13 @@ sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* p
     if (!pszVal)
     {
         m_aUpdateOpts[pos].pszVal = nullptr;
+
+        auto newID = ConvertID(index);
+        if (newID != Opt::LAST)
+        {
+            setOptValue(newID, ttEmptyString);
+        }
+
         return s_aInitialOptions[pos].opt;
     }
 
@@ -261,6 +267,13 @@ sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* p
         pszVal = "false";
 
     m_aUpdateOpts[pos].pszVal = ttStrDup(pszVal);
+
+    auto newID = ConvertID(index);
+    if (newID != Opt::LAST)
+    {
+        setOptValue(newID, pszVal);
+    }
+
     return s_aInitialOptions[pos].opt;
 }
 
@@ -278,11 +291,28 @@ sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, bool bVal)
 
     ttFree(m_aUpdateOpts[pos].pszVal);
     m_aUpdateOpts[pos].pszVal = ttStrDup(bVal ? "true" : "false");
+
+    auto newID = ConvertID(index);
+    if (newID != Opt::LAST)
+    {
+        setOptValue(newID, bVal ? "true" : "false");
+    }
+
     return s_aInitialOptions[pos].opt;
 }
 
 const char* CSrcOptions::GetOption(sfopt::OPT_INDEX index)
 {
+    auto newID = ConvertID(index);
+    if (newID != Opt::LAST)
+    {
+        if (!m_opt.m_Options.at(newID).value.empty())
+            return m_opt.m_Options.at(newID).value.c_str();
+    }
+
+    return nullptr;
+
+#if 0
     const char* pszNewOption = nullptr;
     for (auto where = 0U; s_aInitialOptions[where].opt != OPT_OVERFLOW; where++)
     {
@@ -301,35 +331,58 @@ const char* CSrcOptions::GetOption(sfopt::OPT_INDEX index)
     {
         if (s_aInitialOptions[pos].opt == index)
         {
-#if !defined(NDEBUG)
+    #if !defined(NDEBUG)
             const char* pszOldOption = m_aUpdateOpts[pos].pszVal ? m_aUpdateOpts[pos].pszVal : "";
             ttASSERT(tt::issamestr(pszOldOption, pszNewOption));
-#endif  // NDEBUG
+    #endif  // NDEBUG
 
             return m_aUpdateOpts[pos].pszVal;
         }
     }
     return nullptr;
+#endif
 }
 
 const char* CSrcOptions::GetOptComment(sfopt::OPT_INDEX index)
 {
+    auto newID = ConvertID(index);
+    if (newID != Opt::LAST)
+    {
+        if (!m_opt.m_Options.at(newID).comment.empty())
+            return m_opt.m_Options.at(newID).comment.c_str();
+    }
+
+    return nullptr;
+
+#if 0
+
     for (size_t pos = 0; s_aInitialOptions[pos].opt != OPT_OVERFLOW; ++pos)
     {
         if (s_aInitialOptions[pos].opt == index)
             return m_aUpdateOpts[pos].pszComment;
     }
     return nullptr;
+#endif
 }
 
 bool CSrcOptions::GetBoolOption(sfopt::OPT_INDEX index)
 {
+    auto newID = ConvertID(index);
+    if (newID != Opt::LAST)
+    {
+        return tt::issamestr(m_opt.m_Options.at(newID).value, "true");
+    }
+
+    return false;
+
+#if 0
     for (size_t pos = 0; s_aInitialOptions[pos].opt != OPT_OVERFLOW; ++pos)
     {
         if (s_aInitialOptions[pos].opt == index)
             return ttIsSameStrI(m_aUpdateOpts[pos].pszVal, "true");
     }
     return false;
+#endif
 }
 
 bool CSrcOptions::GetChanged(sfopt::OPT_INDEX index)
@@ -433,7 +486,7 @@ void CSrcOptions::InitOptions()
 
 const Opt::ORIGINAL_OPTIONS& CSrcOptions::FindOriginal(size_t option) const
 {
-    ttASSERT(option < Opt::LAST);
+    assert(option < Opt::LAST);
 
     if (option >= Opt::LAST)
     {
@@ -448,7 +501,7 @@ const Opt::ORIGINAL_OPTIONS& CSrcOptions::FindOriginal(size_t option) const
     return DefaultOptions.back();
 }
 
-Opt::OPTION& CSrcOptions::FindOption(const std::string& name)
+Opt::OPTION& CSrcOptions::FindOption(const std::string_view name)
 {
     ttASSERT(!name.empty());
     if (name.empty())
@@ -464,26 +517,37 @@ Opt::OPTION& CSrcOptions::FindOption(const std::string& name)
     return m_opt.m_Options.back();
 }
 
-size_t CSrcOptions::findID(std::string name) const
+size_t CSrcOptions::findID(std::string_view name) const
 {
     assert(!name.empty());
     if (name.empty())
         return Opt::LAST;
 
-    for (size_t pos = 0; pos < m_opt.m_Options.size(); ++pos)
+    for (size_t pos = 0; pos < Opt::LAST; ++pos)
     {
-        if (m_opt.m_Options[pos].optionID == Opt::LAST)
-            return m_opt.m_Options[pos].optionID;
-        else if (tt::issamestri(name, m_opt.m_Options[pos].OriginalName))
-            return m_opt.m_Options[pos].optionID;
+        if (DefaultOptions[pos].optionID == Opt::LAST)
+            return DefaultOptions[pos].optionID;
+        else if (tt::issamestri(name, DefaultOptions[pos].name))
+            return DefaultOptions[pos].optionID;
     }
     return Opt::LAST;
+}
 
+size_t CSrcOptions::ConvertID(sfopt::OPT_INDEX index) const
+{
+    for (size_t pos = 0; s_aInitialOptions[pos].opt != OPT_OVERFLOW; ++pos)
+    {
+        if (s_aInitialOptions[pos].opt == index)
+        {
+            return findID(s_aInitialOptions[pos].pszName);
+        }
+    }
+    return Opt::LAST;
 }
 
 void Opt::setOptValue(size_t index, std::string_view value)
 {
-    ttASSERT(index < LAST);
+    assert(index < Opt::LAST);
 
     if (!m_Options.at(index).BooleanValue)
         m_Options.at(index).value = value;

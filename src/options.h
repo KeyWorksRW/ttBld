@@ -32,7 +32,6 @@ public:
         CLANG_REL,
         CRT_DBG,
         CRT_REL,
-        DEBUG_RC,
         EXE_TYPE,
         INC_DIRS,
         LIBS_CMN,
@@ -247,6 +246,12 @@ public:
         return m_opt.m_Options.at(index).value;
     }
 
+    bool getOptBoolean(size_t index) const
+    {
+        assert(index < Opt::LAST);
+        return tt::issamestr(m_opt.m_Options.at(index).value, "true");
+    }
+
     std::string_view getCmtValue(size_t index) const
     {
         assert(index < Opt::LAST);
@@ -261,11 +266,14 @@ public:
     // Call this when reading an entire option line
     void setOptLine(std::string& name, std::string& value, std::string comment);
 
-    size_t findID(std::string name) const;
+    size_t findID(std::string_view name) const;
+
+    // Convert an sfopt: id to a Opt:: id
+    size_t ConvertID(sfopt::OPT_INDEX index) const;
 
     const Opt::ORIGINAL_OPTIONS& FindOriginal(size_t option) const;
 
-    Opt::OPTION& FindOption(const std::string& name);
+    Opt::OPTION& FindOption(const std::string_view name);
 
     Opt m_opt;
 

@@ -156,7 +156,11 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         ttString projectname;
         projectname.assignCwd();
         if (tt::issamestri(projectname.filename(), "src"))
+        {
             projectname.replace_filename("");
+            // remove trailing slash
+            projectname.erase(projectname.length() - 1, 1);
+        }
         std::string name(projectname.filename());
         UpdateOption(OPT_PROJECT, name.c_str());
     }
