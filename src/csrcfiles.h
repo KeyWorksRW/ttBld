@@ -72,7 +72,9 @@ public:
     // Source file to compile the precompiled header
     const char* GetPchCpp();
 
-    std::string_view GetRcName() { return m_RCname; }
+    void SetRcName(std::string_view name) { m_RCname = name; }
+    const char* GetRcName() { return m_RCname.c_str(); }
+    std::string_view getRcName() { return m_RCname; }
 
     // Gets name/location of srcfiles (normally .srcfiles.yaml)
     const char* GetSrcFiles() { return m_srcfilename.c_str(); };
