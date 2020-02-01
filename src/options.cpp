@@ -424,8 +424,8 @@ void CSrcOptions::SetRequired(sfopt::OPT_INDEX index, bool bVal)
 
 sfopt::OPT_INDEX CSrcOptions::UpdateReadOption(const char* pszName, const char* pszVal, const char* pszComment)
 {
-    ttASSERT_NONEMPTY(pszName);
-    ttASSERT_MSG(pszVal, "NULL pointer!");
+    assert(pszName);
+    assert(pszVal);
 
     size_t pos;
     for (pos = 0; s_aInitialOptions[pos].opt != OPT_OVERFLOW; ++pos)
