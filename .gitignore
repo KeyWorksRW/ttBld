@@ -13,9 +13,6 @@ archive/
 backup/
 tests/
 
-# remove ttLibwx/ when it switches to a submodule
-ttLibwx/
-
 # Generated files to ignore
 wxLibs.h
 messages.po
