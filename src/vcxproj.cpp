@@ -170,7 +170,7 @@ bool CVcxRead::ConvertVcxProj()
     // The project file will have specified resouce compiler flags even if there isn't a resource file. If there is
     // no resource file, then we remove those flags here.
 
-    if (m_pcSrcFiles->GetRcName().empty())
+    if (m_pcSrcFiles->getRcName().empty())
     {
         if (m_pcSrcFiles->GetOption(OPT_RC_CMN))
             m_pcSrcFiles->UpdateOption(OPT_RC_CMN, "");
