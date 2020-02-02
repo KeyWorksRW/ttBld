@@ -2,10 +2,6 @@
 
 #pragma once
 
-#if __cplusplus < 201703L
-    #error "This code requires compiling for C++17 or later (MSVC will need -std:c++17 and /Zc:__cplusplus)"
-#endif
-
 #if defined(_WIN32)
     #define wxMSVC_VERSION_AUTO
 #endif
@@ -34,19 +30,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <stdexcept>
-
 #include <filesystem>
 // Define a namespace so that either std::filesystem or boost::filesystem can be used
 namespace fs = std::filesystem;
 
+#include <cassert>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
 #include <ttassert.h>  // Provides an alternative to wxASSERT macros
-
-#include <ttlibwin.h>    // Master header file for ttLibwin
+#include <ttlibwin.h>  // Master header file for ttLibwin
 
 // WARNING: ttstr.h must appear before ttstring.h!
 #include <ttstr.h>
@@ -54,6 +49,6 @@ namespace fs = std::filesystem;
 
 using namespace ttch;  // For the CH_ and CHW_ constants
 
-constexpr const char* txtVersion = "ttBld 1.3.0.8295";
+constexpr const char* txtVersion = "ttBld 1.4.0.8295";
 constexpr const char* txtCopyright = "Copyright (c) 2002-2020 KeyWorks Software";
 constexpr const char* txtAppname = "ttBld";
