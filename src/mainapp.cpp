@@ -76,14 +76,15 @@ void Usage()
 {
     std::cout << '\n' << txtVersion << '\n' << txtCopyright << '\n';
 
-    std::cout << _tt("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n")
-              << _tt("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and "
-                   "build/*.ninja\n")
-              << _tt("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml\n")
-              << _tt("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd\n")
-              << _tt("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file\n")
-              << _tt("    -vs        -- creates files used to build and debug a project using Visual Studio\n")
-              << _tt("    -vscode    -- creates or updates files used to build and debug a project using VS Code\n");
+    std::cout
+        << _tt("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n")
+        << _tt("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and "
+               "build/*.ninja\n")
+        << _tt("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml\n")
+        << _tt("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd\n")
+        << _tt("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file\n")
+        << _tt("    -vs        -- creates files used to build and debug a project using Visual Studio\n")
+        << _tt("    -vscode    -- creates or updates files used to build and debug a project using VS Code\n");
 
     // Currently non-finished commands
     std::cout
@@ -271,7 +272,9 @@ int oldMain(int argc, char* argv[])
             ttCList lstResults;
             CreateVsCodeProject(cszSrcFilePath, &lstResults);
             for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-                puts(lstResults[pos]);
+            {
+                std::cout << lstResults[pos] << '\n';
+            }
         }
 #endif
 
@@ -318,7 +321,7 @@ int oldMain(int argc, char* argv[])
             if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(_tt("-dir must be followed by the directory to use."));
+                std::cout << _tt("-dir must be followed by the directory to use.") << '\n';
                 return 1;
             }
             cszRootDir = argv[argpos];
@@ -381,13 +384,17 @@ int oldMain(int argc, char* argv[])
             ttCList lstResults;
             CreateVsCodeProject(cszSrcFilePath, &lstResults);
             for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-                puts(lstResults[pos]);
+            {
+                std::cout << lstResults[pos] << '\n';
+            }
         }
         if (dlg.isGitIgnoreAll())
         {
             ttCStr cszGitExclude;
             if (gitIgnoreAll(cszGitExclude))
-                printf("Added directories and filenames to ignore to %s\n", (char*) cszGitExclude);
+            {
+                std::cout << _tt("Added directories and filenames to ignore to ") << cszGitExclude.c_str() << '\n';
+            }
         }
     }
     else if (Action & ACT_CONVERT)
@@ -412,7 +419,9 @@ int oldMain(int argc, char* argv[])
             ttCList lstResults;
             CreateVsCodeProject(cszSrcFilePath, &lstResults);
             for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-                puts(lstResults[pos]);
+            {
+                std::cout << lstResults[pos] << '\n';
+            }
         }
         if (dlg.isGitIgnoreAll())
         {
@@ -433,8 +442,9 @@ int oldMain(int argc, char* argv[])
             if (!LocateSrcFiles(&cszSrcFilePath))
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(_tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
-                       "the location with -dir."));
+                std::cout << _tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, "
+                                 "or set the location with -dir.")
+                          << '\n';
                 return 1;
             }
         }
@@ -446,8 +456,9 @@ int oldMain(int argc, char* argv[])
             else
             {
                 ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                puts(_tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set "
-                       "the location with -dir."));
+                std::cout << _tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, "
+                                 "or set the location with -dir.")
+                          << '\n';
                 return 1;
             }
         }
@@ -472,7 +483,9 @@ int oldMain(int argc, char* argv[])
         ttCList lstResults;
         CreateVsCodeProject(cszSrcFilePath, &lstResults);
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-            puts(lstResults[pos]);
+        {
+            std::cout << lstResults[pos] << '\n';
+        }
     }
 
     if (Action & ACT_VS)
@@ -532,14 +545,18 @@ int oldMain(int argc, char* argv[])
         {
             ttConsoleColor clr(ttConsoleColor::LIGHTRED);
             for (size_t pos = 0; pos < cNinja.GetErrorCount(); pos++)
-                puts(cNinja.GetError(pos));
-            puts("");
+            {
+                std::cout << cNinja.GetError(pos) << '\n';
+            }
+            std::cout << "\n\n";
         }
 
         if (countNinjas > 0)
-            printf(_tt("Created %d .ninja files\n"), countNinjas);
+        {
+            std::cout << "Created " << countNinjas << " .ninja files" << '\n';
+        }
         else
-            puts(_tt("All ninja scripts are up to date."));
+            std::cout << _tt("All ninja scripts are up to date.") << '\n';
     }
 
     return 0;
@@ -556,42 +573,42 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
         {
             case UPDATE_MSVC:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt(" updated.\n");
                 break;
 
             case UPDATE_MSVC32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt(" updated.\n");
                 break;
 
             case UPDATE_CLANG_CL:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt(" updated.\n");
                 break;
 
             case UPDATE_CLANG_CL32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt(" updated.\n");
                 break;
 
             case UPDATE_MSVCD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt(" updated.\n");
                 break;
 
             case UPDATE_MSVC32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt(" updated.\n");
                 break;
 
             case UPDATE_CLANG_CLD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt(" updated.\n");
                 break;
 
             case UPDATE_CLANG_CL32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt("%s updated.\n");
+                    std::cout << cNinja.GetScriptFile() << _tt(" updated.\n");
                 break;
 
             default:
