@@ -91,6 +91,7 @@ public:
 
 #if !defined(NDEBUG)  // Starts debug section.
     void AddError(std::string_view err);
+    void AddError(const std::stringstream& msg) { AddError(msg.str()); };
     #define BREAKONWARNING                                  \
         {                                                   \
             if (m_bBreakOnWarning && wxIsDebuggerRunning()) \

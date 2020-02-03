@@ -12,8 +12,8 @@
 
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
-
-#include <ttstring.h>  // ttString, ttCwd, ttStrVector
+#include <ttpath.h>     // Contains functions for working with filesystem::path and filesystem::directory
+#include <ttstring.h>   // ttString, ttCwd, ttStrVector
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
@@ -328,67 +328,48 @@ void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
 
 void CNinja::ProcessBuildLibs()
 {
-    if (GetBuildLibs())
+    if (!getOptValue(Opt::BUILD_LIBS).empty())
     {
-        ttCEnumStr enumLib(ttFindNonSpace(GetBuildLibs()), ';');
-
-        while (enumLib.Enum())
+        ttEnumStr enumLib(tt::findnonspace(getOptValue(Opt::BUILD_LIBS)), ';');
+        for (auto iter : enumLib)
         {
             ttCwd cwd;
 
             // Change to the directory that should contain a .srcfiles.yaml and read it
 
-            if (!ttChDir(enumLib))
+            if (!tt::ChangeDir(iter))
             {
-                ttCStr cszMsg;
-                cszMsg.printf(_tt("The library source directory %s specified in BuildLibs: does not exist.\n"),
-                              (char*) enumLib);
-                AddError(cszMsg.c_str());
+                std::stringstream msg;
+                msg << _tt("The library source directory ") << iter
+                    << _tt(" specified in BuildLibs: does not exist.");
+                AddError(msg);
                 continue;
             }
 
             // The current directory may just be the name of the library, but not necessarily where srcfiles is
             // located.
 
-            ttCStr cszBuildPath(enumLib);
-            ttCStr cszBuildFile(cszBuildPath);  // LocateSrcFiles will update this
-            if (LocateSrcFiles(&cszBuildFile))
-            {
-                char* pszTmp = ttFindFilePortion(cszBuildFile);
-                char  ch = *pszTmp;
-                *pszTmp = 0;
-                wxSetWorkingDirectory(cszBuildFile.c_str());
-                *pszTmp = ch;
-            }
+            ttString BuildDirectory(iter);
+            ttString BuildFile(BuildDirectory);
 
+            auto pPath = locateProjectFile();
+            if (!pPath->empty())
+            {
+                ttString dir(*pPath);
+                dir.remove_filename();
+                if (!dir.empty())
+                {
+                    tt::ChangeDir(dir);
+                    BuildDirectory.assignCwd();
+                }
+
+                BuildFile = BuildDirectory;
+                BuildFile.append_filename(*pPath);
+            }
             else
             {
                 for (;;)  // empty for loop that we break out of as soon as we find a srcfiles file to use
                 {
-                    if (ttDirExists("src"))
-                    {
-                        ttChDir("src");
-                        if (LocateSrcFiles(&cszBuildFile))
-                        {
-                            cszBuildPath.AppendFileName("src");
-                            break;
-                        }
-                        else
-                            ttChDir("..");
-                    }
-
-                    if (ttDirExists("source"))
-                    {
-                        ttChDir("source");
-                        if (LocateSrcFiles(&cszBuildFile))
-                        {
-                            cszBuildPath.AppendFileName("source");
-                            break;
-                        }
-                        else
-                            ttChDir("..");
-                    }
-
                     /*
                         It's unusual, but possible for there to be a sub-directory with the same name as the root
                         directory:
@@ -400,16 +381,23 @@ void CNinja::ProcessBuildLibs()
 
                     */
 
-                    if (ttDirExists(ttFindFilePortion(enumLib)))
+                    if (tt::dirExists(iter.filename()))
                     {
-                        ttChDir(ttFindFilePortion(enumLib));
-                        if (LocateSrcFiles(&cszBuildFile))
+                        tt::ChangeDir(iter.filename());
+                        pPath = locateProjectFile(BuildDirectory);
+                        if (!pPath->empty())
                         {
-                            cszBuildPath.AppendFileName(ttFindFilePortion(enumLib));
+                            BuildDirectory.append_filename(iter.filename());
+                            BuildFile = BuildDirectory;
+                            BuildFile.append_filename(*pPath);
                             break;
                         }
                         else
-                            ttChDir("..");
+                        {
+                            // We tried changing into a directory to find the file, that didn't work so we need to
+                            // back out.
+                            tt::ChangeDir("..");
+                        }
                     }
 
                     // Any further directory searches should go above this -- once we get here, we can't find a
@@ -425,37 +413,39 @@ void CNinja::ProcessBuildLibs()
             // that had the problem.
 
             CSrcFiles cSrcFiles;
-            cSrcFiles.SetReportingFile(cszBuildFile);
-            if (cSrcFiles.ReadFile())
+            cSrcFiles.SetReportingFile(BuildFile.c_str());
+            // At this point, we should be in the same directory as .srcfiles.yaml
+            if (cSrcFiles.ReadFile(".srcfiles.yaml"))
             {
-                ttCStr cszCurDir;
-                cszCurDir.GetCWD();
+                ttString CurDir;
+                CurDir.assignCwd();
                 ttCStr cszRelDir;
-                ttConvertToRelative(cwd.c_str(), cszCurDir, cszRelDir);
+                // REVIEW: [KeyWorks - 02-03-2020] Could we just all CurDir.make_relative()?
+                ttConvertToRelative(cwd.c_str(), CurDir.c_str(), cszRelDir);
                 m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), cszRelDir);
             }
 
             const char* pszLib = cSrcFiles.GetTargetDebug();
             if (pszLib)
             {
-                ttCStr cszLibDir;
-                cszLibDir.GetCWD();
-                cszLibDir.AppendFileName(pszLib);
-                cszLibDir.FullPathName();
+                ttString LibDir;
+                LibDir.assignCwd();
+                LibDir.append_filename(pszLib);
+                LibDir.make_absolute();
                 ttCStr cszLib;
-                ttConvertToRelative(cwd.c_str(), cszLibDir, cszLib);
+                ttConvertToRelative(cwd.c_str(), LibDir.c_str(), cszLib);
                 m_lstBldLibsD += cszLib;
             }
 
             pszLib = cSrcFiles.GetTargetRelease();
             if (pszLib)
             {
-                ttCStr cszLibDir;
-                cszLibDir.GetCWD();
-                cszLibDir.AppendFileName(pszLib);
-                cszLibDir.FullPathName();
+                ttString LibDir;
+                LibDir.assignCwd();
+                LibDir.append_filename(pszLib);
+                LibDir.make_absolute();
                 ttCStr cszLib;
-                ttConvertToRelative(cwd.c_str(), cszLibDir, cszLib);
+                ttConvertToRelative(cwd.c_str(), LibDir.c_str(), cszLib);
                 m_lstBldLibsR += cszLib;
             }
         }

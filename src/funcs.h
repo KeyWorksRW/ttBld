@@ -32,6 +32,9 @@ bool isSystemHeaderFile(const char* pszHeaderFile);
 // If pcszStartDir is used, it will be set to the path to the file or dir/file where .srcfiles.yaml was found
 const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);
 
+// Attempts to locate .srcfiles.yaml
+std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir = ttEmptyString);
+
 // Try to locate .srcfiles.yaml and return a pointer to it's location if found.
 //
 // If pPath is specified, it will be assigned the path (including the .srcfiles.yaml

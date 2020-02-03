@@ -65,14 +65,18 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 {
     if (filename.empty())
     {
-        auto pszFile = LocateSrcFiles();
-        if (!pszFile)
+        auto pFile = locateProjectFile();
+        if (pFile->empty())
         {
-            m_lstErrMessages.append(_tt("Cannot locate .srcfiles.yaml"));
+            ttString cwd;
+            cwd.assignCwd();
+            std::stringstream msg;
+            msg << "Cannot locate .srcfiles.yaml starting in " << cwd;
+            m_lstErrMessages.append(msg.str());
             BREAKONWARNING;
             return false;  // if we still can't find it, bail
         }
-        m_srcfilename = pszFile;
+        m_srcfilename = *pFile;
     }
     else
         m_srcfilename = filename;
