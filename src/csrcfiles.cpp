@@ -16,7 +16,7 @@
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttmem.h>       // ttCMem, ttCTMem
 
-#include <ttcwd.h>  // ttCwd -- Class for saving, setting, and restoring current directory
+#include <ttstring.h>  // ttString, ttCwd, ttStrVector
 
 #if !defined(NDEBUG)  // Starts debug section.
     #include <wx/config.h>
@@ -473,12 +473,17 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     CSrcFiles cIncSrcFiles;
     cIncSrcFiles.SetReportingFile(cszFullPath);
 
+    try
     {
         ttCStr cszNewDir(cszFullPath);
         char*  pszFilePortion = ttFindFilePortion(cszNewDir);
         if (pszFilePortion)
             *pszFilePortion = 0;
-        cwd.SetCwd(cszNewDir.c_str());
+        fs::current_path(cszNewDir.c_str());
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
     }
 
     if (!cIncSrcFiles.ReadFile(cszFullPath.c_str()))

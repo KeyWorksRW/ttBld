@@ -13,7 +13,7 @@
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
 
-#include <ttcwd.h>  // ttCwd -- Class for saving, setting, and restoring current directory
+#include <ttstring.h>  // ttString, ttCwd, ttStrVector
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
