@@ -8,7 +8,8 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
+#include <ttTR.h>        // Function for translating strings
+#include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
@@ -312,7 +313,8 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kfOut.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/c_cpp_properties.json");
+        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING,
+                    ".vscode/c_cpp_properties.json");
         return false;
     }
     else
@@ -528,44 +530,57 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 {
-    ttCLineFile file;
+    ttTextFile file;
     if (!file.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        if (plstResults)
-        {
-            ttCStr cszErr;
-            cszErr.printf(_tt("Cannot open \"%s\"."), ".vscode/c_cpp_properties.json");
-            *plstResults += cszErr;
-            return false;
-        }
+        std::stringstream msg;
+        msg << _tt("Cannot open ") << ".vscode/c_cpp_properties.json";
+        *plstResults += msg.str().c_str();
+        return false;
     }
 
     // Gather all of our include directories into a list
 
-    ttCList lstIncludes;
-    lstIncludes.SetFlags(ttCList::FLG_IGNORE_CASE);
-    if (cSrcFiles.GetOption(OPT_INC_DIRS))
+    ttStrVector Includes;
+
+    if (!cSrcFiles.getOptValue(Opt::INC_DIRS).empty())
     {
-        ttEnumStr IncludeDirs(cSrcFiles.GetOption(OPT_INC_DIRS));
+        ttEnumStr IncludeDirs(cSrcFiles.getOptValue(Opt::INC_DIRS));
         for (auto iter : IncludeDirs)
         {
+            // If it's not already a relative path, make it relative
+            if (iter.at(0) != '.')
+            {
+                iter.make_relative(".");
+            }
+#if defined(_WIN32)
 
             iter.backslashestoforward();
-            lstIncludes += iter.c_str();
+#endif
+            std::string workspace("${workspaceRoot}/");
+            workspace += iter;
+            Includes.addfilename(workspace);
         }
     }
 
-#if defined(_WIN32)
+#if 0
+    // REVIEW: [KeyWorks - 02-03-2020] Because MSVC frequently changes the path to the header files,
+    // adding this ensures that VS Code has access to the current header files. That works great for a local
+    // copy of c_cpp_properties but wreaks havoc if it's under Source control management (e.g., git).
+    #if defined(_WIN32)
     ttCStr cszMSVC;
     if (FindCurMsvcPath(cszMSVC))
     {
         cszMSVC.AppendFileName("include");
         ttBackslashToForwardslash(cszMSVC);  // so we don't have to escape all the backslashes
-        lstIncludes += cszMSVC;
+        Includes.append(cszMSVC.c_str());
     }
+    #endif
 #endif
 
-    // Gather all the commonad and debug defines specified in CFlags: and CFlagsD:
+    // Gather all the common and debug defines specified in CFlags: and CFlagsD:
+
+    ttStrVector Defines;
 
     ttCList lstDefines;
     if (cSrcFiles.GetOption(OPT_CFLAGS_CMN))
@@ -581,6 +596,12 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     if (cszEnv.GetEnv("CFLAGSD"))
         ParseDefines(lstDefines, cszEnv);
 
+    // REVIEW: [KeyWorks - 02-02-2020] Hack Alert!!! This only exists until lstDefines gets replaced, which
+    // requires an updated version of ParseDefines().
+
+    for (size_t hack = 0; hack < lstDefines.GetCount(); ++hack)
+        Defines.append(lstDefines[hack]);
+
     // BUGBUG: [KeyWorks - 7/27/2019] This is a short-term hack until we have hooked up proper routines for
     // reading/writing .json files. While .json files are typically written out as line-oriented files, there's no
     // requirement for each element to be on it's own line, which is what we require if we're reading line by line.
@@ -588,150 +609,164 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     // edit the file, we're likely to either lose their changes, or break entirely -- until we have a json class in
     // place.
 
-    for (int line = 0; line < file.GetMaxLine(); ++line)
+    size_t line = 0;
+    for (; line < file.size(); ++line)
     {
         // Normally defines and includePath place each argument on its own line, but it doesn't have to be done
         // that way. They could all be on a single line, or they could be on multiple lines interspersed with
         // comment lines, blank lines, etc. For now, we'll assume it wasn't hand-edited...
 
-        if (ttStrStrI(file[line], "\"defines\""))
+        if (tt::contains(file[line], "\"defines\""))
         {
-            if (ttStrChr(file[line], CH_RIGHT_BRACKET))
+            if (file[line].find(']') != tt::npos)
                 continue;  // all on one line, we don't process it
-            for (++line; line < file.GetMaxLine();)
+            auto insertpos = line + 1;
+
+            for (++line; line < file.size();)
             {
-                if (ttStrChr(file[line], CH_RIGHT_BRACKET))
+                if (file[line].find(']') != tt::npos)
                     break;
-                const char* pszDef = ttStrChr(file[line], CH_QUOTE);
-                if (pszDef)
-                {
-                    ttCStr cszDef;
-                    cszDef.GetQuotedString(pszDef);
-                    lstDefines += cszDef;   // this will only get added if it isn't a duplicate
-                    file.DeleteLine(line);  // we delete the line now, we'll add it back later
-                }
-                else
-                {
-                    if (!file[line][0])
-                        file.DeleteLine(line);  // we delete the line now, we'll add it back later
-                    else
-                        ++line;  // we don't know what it is, so we'll just leave it at the top
-                }
+                auto start = file[line].findnonspace();
+                if (start == tt::npos)
+                    continue;
+                ttString tmp;
+                tmp.ExtractSubString(file[line], start);
+                Defines.append(tmp);  // Only gets added if it doesn't already exist
+                file.erase(file.begin() + line, file.begin() + line + 1);
             }
-
-            if (lstDefines.GetCount() > 1)
+            if (Defines.size())
             {
-                lstDefines.Sort();
-                for (size_t pos = 0; pos < lstDefines.GetCount() - 1; ++pos)
+                size_t defpos = 0;
+                for (; defpos < Defines.size() - 1; ++defpos)
                 {
-                    ttCStr csz;
-                    csz.printf("                %kq,", lstDefines[pos]);
-                    file.InsertLine(line++, csz);
+                    std::stringstream str;
+                    str << "                \"" << Defines[defpos] << "\",";
+                    file.insert(file.begin() + insertpos, str.str().c_str());
+                    ++insertpos;
                 }
-            }
 
-            // Write the last one without a comma
-            if (lstDefines.GetCount() > 0)
-            {
-                ttCStr csz;
-                csz.printf("                %kq", lstDefines[lstDefines.GetCount() - 1]);
-                file.InsertLine(line++, csz);
+                // Write the last one without a trailing comma
+                std::stringstream str;
+                str << "                \"" << Defines[defpos] << "\"";
+                file.insert(file.begin() + insertpos, str.str().c_str());
+                ++insertpos;
             }
+            line = insertpos;
             continue;
         }
-        else if (ttStrStrI(file[line], "\"includePath\""))
+
+        if (tt::contains(file[line], "\"includePath\""))
         {
-            if (ttStrChr(file[line], CH_RIGHT_BRACKET))
+            if (file[line].find(']') != tt::npos)
                 continue;  // all on one line, we don't process it
-            for (++line; line < file.GetMaxLine();)
+            auto insertpos = line + 1;
+
+            for (++line; line < file.size();)
             {
-                if (ttStrChr(file[line], CH_RIGHT_BRACKET))
+                if (file[line].find(']') != tt::npos)
                     break;
-                const char* psz = ttStrChr(file[line], CH_QUOTE);
-                if (psz)
+                auto start = file[line].findnonspace();
+                if (start == tt::npos)
+                    continue;
+                ttString path;
+                path.ExtractSubString(file[line], start);
+                if (!tt::contains(path, "${workspaceRoot}") && !tt::contains(path, "${default}"))
                 {
-                    ttCStr csz;
-                    csz.GetQuotedString(psz);
-                    if (!ttIsSameStrI(csz, "${default}"))
+                    // If it's not already a relative path, make it relative
+                    if (path.at(0) != '.')
                     {
-#if defined(_WIN32)
-                        ttCStr cszIncDir;
-                        JunctionToReal(csz, cszIncDir);
-                        ttBackslashToForwardslash(cszIncDir);
-                        lstIncludes += cszIncDir;
-#else
-                        lstIncludes += csz;  // this will only get added if it isn't a duplicate
-#endif  // _WIN32
+                        path.make_relative(".");
                     }
-                    file.DeleteLine(line);  // we delete the line now, we'll add it back later
+#if defined(_WIN32)
+                    path.backslashestoforward();
+#endif
+                    if (!tt::contains(path, ":"))
+                    {
+                        std::string workspace("${workspaceRoot}/");
+                        workspace += path;
+                        Includes.addfilename(workspace);
+                    }
+                    else
+                    {
+                        Includes.addfilename(path);
+                    }
                 }
                 else
                 {
-                    if (!file[line][0])
-                        file.DeleteLine(line);  // we delete the line now, we'll add it back later
-                    else
-                        ++line;  // we don't know what it is, so we'll just leave it at the top
+                    Includes.addfilename(path);
                 }
+                file.erase(file.begin() + line, file.begin() + line + 1);
             }
 
-            if (lstIncludes.GetCount() > 1)
+            if (Includes.size())
             {
-                lstIncludes.Sort();
-                for (size_t pos = 0; pos < lstIncludes.GetCount(); ++pos)
+                size_t defpos = 0;
+                for (; defpos < Includes.size() - 1; ++defpos)
                 {
-                    ttCStr csz;
-                    csz.printf("                %kq,", lstIncludes[pos]);
-                    file.InsertLine(line++, csz);
-                }
-            }
+                    // ':' is checked in case a drive letter is specified
+                    if (!tt::contains(Includes[defpos], "${workspaceRoot}") &&
+                        !tt::contains(Includes[defpos], "${default}") && !tt::contains(Includes[defpos], ":"))
+                    {
+                        ttString tmp(Includes[defpos]);
+                        Includes[defpos] = "${workspaceRoot}/";
+                        Includes[defpos] += tmp;
+                    }
 
-            // Always write ${default}
-            if (lstIncludes.GetCount() > 0)
-            {
-                ttCStr csz;
-                csz.printf("                %kq", "${default}");
-                file.InsertLine(line++, csz);
+                    std::stringstream str;
+                    str << "                \"" << Includes[defpos] << "\",";
+                    file.insert(file.begin() + insertpos, str.str().c_str());
+                    ++insertpos;
+                }
+
+                // Write the last one without a trailing comma
+                std::stringstream str;
+                str << "                \"" << Includes[defpos] << "\"";
+                file.insert(file.begin() + insertpos, str.str().c_str());
+                ++insertpos;
             }
+            line = insertpos;
             continue;
         }
     }
-
-    ttCFile fileOrg;
-    if (!fileOrg.ReadFile(".vscode/c_cpp_properties.json"))
+    ttViewFile orgfile;
+    if (!orgfile.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        if (plstResults)
-        {
-            ttCStr cszErr;
-            cszErr.printf(_tt("Cannot open \"%s\"."), ".vscode/c_cpp_properties.json");
-            *plstResults += cszErr;
-            return false;
-        }
+        std::stringstream msg;
+        msg << _tt("Cannot open ") << ".vscode/c_cpp_properties.json";
+        *plstResults += msg.str().c_str();
+        return false;
     }
 
-    int line;
-    for (line = 0; line <= file.GetMaxLine(); ++line)
+    bool Modified = false;
+    if (file.size() != orgfile.size())
+        Modified = true;
+    else
     {
-        if (!fileOrg.ReadLine())
-            break;
-        if (!ttIsSameStr(fileOrg, file[line]))
-            break;
-    }
-
-    if (line <= file.GetMaxLine())
-    {
-        if (!file.WriteFile())
+        for (line = 0; line < file.size(); ++line)
         {
-            if (plstResults)
+            if (!file[line].issamestr(orgfile[line]))
             {
-                ttCStr cszErr;
-                cszErr.printf(_tt("Unable to create or write to %s"), ".vscode/c_cpp_properties.json");
-                *plstResults += cszErr;
+                Modified = true;
+                break;
             }
-            return false;
         }
-        else if (plstResults)
-            *plstResults += _tt("Updated .vscode/c_cpp_properties.json");
     }
+
+    if (!Modified)
+    {
+        *plstResults += "c_cpp_properties.json is up to date";
+        return false;
+    }
+
+    if (!file.WriteFile(".vscode/c_cpp_properties.json"))
+    {
+        std::stringstream msg;
+        msg << _tt("Unable to create or write to ") << ".vscode/c_cpp_properties.json";
+        *plstResults += msg.str().c_str();
+        return false;
+    }
+
+    *plstResults += _tt("Updated .vscode/c_cpp_properties.json");
 
     return true;
 }
@@ -763,8 +798,8 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
     }
 }
 
-// REVIEW: [KeyWorks - 10-05-2019] Don't remove this! We'll need it once we support conditional task generation for
-// messages.po
+// REVIEW: [KeyWorks - 10-05-2019] Don't remove this! We'll need it once we support conditional task
+// generation for messages.po
 
 #if 0
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
