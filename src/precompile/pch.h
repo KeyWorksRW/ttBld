@@ -26,6 +26,8 @@
 
 #include <wx/intl.h>
 
+#include <wx/msgdlg.h>
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
