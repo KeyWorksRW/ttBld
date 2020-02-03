@@ -20,61 +20,44 @@
 
 extern const char* txtHelpNinja;
 
-bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
+bool CNinja::CreateMakeFile(bool bAllVersion, std::string_view Dir)
 {
-    ttCStr cszBuildRoot;
-    cszBuildRoot = pszDir ? pszDir : "";
+    ttString BuildRoot(Dir);
 
-    ttCStr cszMakeFile(cszBuildRoot);
-    cszMakeFile.AppendFileName("makefile");
+    ttString MakeFile(BuildRoot);
+    MakeFile.append_filename("makefile");
 
-    if (ttFileExists(cszMakeFile))
+    if (MakeFile.fileExists())
         return true;  // Don't overwrite an existing makefile
 
     // We get here if the makefile is missing
 
-    ttCStr cszBuildDir(cszBuildRoot);
+    ttString BuildDir(BuildRoot);
     // Some repositories use a bld directory which is added to .gitignore. If it exists, we'll use this directory
-    cszBuildDir.AppendFileName("bld");
+    BuildDir.append_filename("bld");
 
-    ttString srcfiles;
-    if (pszDir)
+    auto pProjectFile = locateProjectFile(Dir);
+    if (pProjectFile->empty())
     {
-        srcfiles = pszDir;
-        if (!FindProjectFile(&srcfiles))
-        {
-            m_lstErrMessages.append(
-                wxString::Format(_tt("Cannot locate .srcfiles.yaml in the %s directory. Makefile not created."),
-                                 pszDir)
-                    .utf8_str()
-                    .data());
-            return false;
-        }
-    }
-    else
-    {
-        const char* pszSrcFiles = LocateSrcFiles();  // it's fine if pszDir is a nullptr
-        if (!pszSrcFiles)
-            bAllVersion = true;  // can't create a dependency on .srcfiles.yaml if we don't know where it is
-        else
-            srcfiles = pszSrcFiles;
+        m_lstErrMessages += _tt("Cannot locate .srcfiles.yaml. Makefile not created.");
+        return false;
     }
 
     ttCFile kf;
     if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL : IDR_MAKEFILE_SINGLE))
     {
         // TRANSLATORS: Don't change the filename "makefile"
-        m_lstErrMessages.append(
-            _tt("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,"));
+        m_lstErrMessages +=
+            _tt("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,");
         return false;
     }
 
-    while (kf.ReplaceStr("%build%", cszBuildDir))
+    while (kf.ReplaceStr("%build%", BuildDir.c_str()))
         ;
-    //    while (kf.ReplaceStr("%libbuild%", cszBuildDir));
+    //    while (kf.ReplaceStr("%libbuild%", BuildDir));
 
-    if (!bAllVersion && !srcfiles.empty())
-        while (kf.ReplaceStr("%srcfiles%", srcfiles.c_str()))
+    if (!bAllVersion)
+        while (kf.ReplaceStr("%srcfiles%", pProjectFile->c_str()))
             ;
 
     while (kf.ReplaceStr("%project%", GetProjectName()))
@@ -143,41 +126,41 @@ bool CNinja::CreateMakeFile(bool bAllVersion, const char* pszDir)
 
     // If the makefile already exists, don't write to it unless something has actually changed
 
-    if (ttFileExists(cszMakeFile))
+    if (MakeFile.fileExists())
     {
         ttCFile kfOrg;
-        if (!kfOrg.ReadFile(cszMakeFile) || strcmp(kfOrg, kfOut) != 0)
+        if (!kfOrg.ReadFile(MakeFile.c_str()) || strcmp(kfOrg, kfOut) != 0)
         {
             if (m_dryrun.IsEnabled())
             {
-                m_dryrun.NewFile(cszMakeFile);
+                m_dryrun.NewFile(MakeFile.c_str());
                 m_dryrun.DisplayFileDiff(kfOrg, kfOut);
             }
-            else if (kfOut.WriteFile(cszMakeFile))
+            else if (kfOut.WriteFile(MakeFile.c_str()))
             {
-                printf(_tt("%s updated.\n"), (char*) cszMakeFile);
+                printf(_tt("%s updated.\n"), (char*) MakeFile.c_str());
                 return true;
             }
             else
             {
                 // TRANSLATORS: Don't change the filename "makefile"
-                puts(_tt("Unable to write to makefile."));
+                std::cout << _tt("Unable to write to makefile.") << '\n';
                 return false;
             }
         }
     }
     else
     {
-        if (kfOut.WriteFile(cszMakeFile))
+        if (kfOut.WriteFile(MakeFile.c_str()))
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            printf(_tt("%s created.\n"), (char*) cszMakeFile);
+            std::cout << MakeFile << _tt(" created.") << '\n';
             return true;
         }
         else
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            puts(_tt("Unable to write to makefile."));
+            std::cout << _tt("Unable to write to makefile.") << '\n';
             return false;
         }
     }

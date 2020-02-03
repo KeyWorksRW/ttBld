@@ -14,11 +14,12 @@
 
 #include "dlgoptions.h"
 
-bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun)
+bool ChangeOptions(std::string& ProjectFile, bool bDryRun)
 {
     CTabOptions dlg;
     if (bDryRun)
         dlg.EnableDryRun();
+
 
     HWND hwndDlg = dlg.DoModeless(NULL);
 
@@ -39,7 +40,7 @@ bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun)
     if (result == IDOK)
     {
         dlg.SaveChanges();
-        *pcszSrcFiles = dlg.GetSrcFiles();
+        ProjectFile = dlg.GetSrcFiles();
         return true;
     }
     else

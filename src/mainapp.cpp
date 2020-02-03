@@ -168,8 +168,9 @@ int oldMain(int argc, char* argv[])
 {
     UPDATE_TYPE upType = UPDATE_NORMAL;
     size_t      Action = 0;
-    ttCStr      cszRootDir;      // this will be set if (Action & ACT_DIR) is set
-    ttCStr      cszSrcFilePath;  // location of srcfiles.yaml
+
+    ttString RootDir;      // this will be set if (Action & ACT_DIR) is set
+    ttString SrcFilePath;  // location of srcfiles.yaml
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && !defined(NDEBUG) && defined(_WIN32)
@@ -192,10 +193,10 @@ int oldMain(int argc, char* argv[])
     }
 #endif
 
-    const char* pszEnv = getenv("TTBLD");
+    auto pszEnv = std::getenv("TTBLD");
     if (pszEnv)
     {
-        char* pszArg = ttFindNonSpace(pszEnv);
+        auto pszArg = ttFindNonSpace(pszEnv);
         while (*pszArg)
         {
             if (*pszArg == '-' || *pszArg == '/')
@@ -230,7 +231,7 @@ int oldMain(int argc, char* argv[])
         else if (ttIsSameStrI(argv[argpos] + 1, "convert"))
         {
             if (++argpos < argc)
-                cszSrcFilePath = argv[argpos++];
+                SrcFilePath = argv[argpos++];
             Action |= ACT_CONVERT;
         }
         else if (ttIsSameSubStrI(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
@@ -270,7 +271,7 @@ int oldMain(int argc, char* argv[])
 
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
             ttCList lstResults;
-            CreateVsCodeProject(cszSrcFilePath, &lstResults);
+            CreateVsCodeProject(SrcFilePath, &lstResults);
             for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             {
                 std::cout << lstResults[pos] << '\n';
@@ -324,10 +325,10 @@ int oldMain(int argc, char* argv[])
                 std::cout << _tt("-dir must be followed by the directory to use.") << '\n';
                 return 1;
             }
-            cszRootDir = argv[argpos];
+            RootDir = argv[argpos];
             Action |= ACT_DIR;
-            cszSrcFilePath = cszRootDir;
-            cszSrcFilePath.AppendFileName("srcfiles.yaml");
+            SrcFilePath = RootDir;
+            SrcFilePath.append_filename("srcfiles.yaml");
             continue;
         }
 
@@ -356,7 +357,7 @@ int oldMain(int argc, char* argv[])
 
     if (upType != UPDATE_NORMAL)
     {
-        MakeFileCaller(upType, cszRootDir);
+        MakeFileCaller(upType, RootDir.c_str());
         return 0;
     }
 
@@ -365,11 +366,11 @@ int oldMain(int argc, char* argv[])
 
     if (Action & ACT_NEW)
     {
-        // -dir option will have set cszSrcFilePath, if option not specified, default to current directory
-        CConvertDlg dlg(cszSrcFilePath.IsNonEmpty() ? (char*) cszSrcFilePath : ".srcfiles.yaml");
+        // -dir option will have set SrcFilePath, if option not specified, default to current directory
+        CConvertDlg dlg(!SrcFilePath.empty() ? SrcFilePath.c_str() : ".srcfiles.yaml");
         if (dlg.DoModal(NULL) != IDOK)
             return 1;
-        cszSrcFilePath = dlg.GetOutSrcFiles();
+        SrcFilePath = dlg.GetOutSrcFiles();
 
         // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has
         // been created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the
@@ -377,12 +378,13 @@ int oldMain(int argc, char* argv[])
         // want to cancel running any other commands, such as makefile creation (which doesn't need to know what
         // options are set in .srcfiles.yaml).
 
-        ChangeOptions(&cszSrcFilePath);
+        ChangeOptions(SrcFilePath);
+
         if (dlg.isCreateVsCode())
         {
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
             ttCList lstResults;
-            CreateVsCodeProject(cszSrcFilePath, &lstResults);
+            CreateVsCodeProject(SrcFilePath.c_str(), &lstResults);
             for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             {
                 std::cout << lstResults[pos] << '\n';
@@ -399,12 +401,12 @@ int oldMain(int argc, char* argv[])
     }
     else if (Action & ACT_CONVERT)
     {
-        // -dir option will have set cszSrcFilePath, if option not specified, default to current directory
+        // -dir option will have set SrcFilePath, if option not specified, default to current directory
         CConvertDlg dlg;
-        dlg.SetConvertScritpt(cszSrcFilePath);
+        dlg.SetConvertScritpt(SrcFilePath.c_str());
         if (dlg.DoModal(NULL) != IDOK)
             return 1;
-        cszSrcFilePath = dlg.GetOutSrcFiles();
+        SrcFilePath = dlg.GetOutSrcFiles();
 
         // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has
         // been created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the
@@ -412,12 +414,12 @@ int oldMain(int argc, char* argv[])
         // want to cancel running any other commands, such as makefile creation (which doesn't need to know what
         // options are set in .srcfiles.yaml).
 
-        ChangeOptions(&cszSrcFilePath);
+        ChangeOptions(SrcFilePath);
         if (dlg.isCreateVsCode())
         {
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
             ttCList lstResults;
-            CreateVsCodeProject(cszSrcFilePath, &lstResults);
+            CreateVsCodeProject(SrcFilePath.c_str(), &lstResults);
             for (size_t pos = 0; lstResults.InRange(pos); ++pos)
             {
                 std::cout << lstResults[pos] << '\n';
@@ -434,34 +436,18 @@ int oldMain(int argc, char* argv[])
     // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not,
     // we need to locate it.
 
-    if (cszSrcFilePath.IsEmpty())
+    if (!SrcFilePath.empty())
     {
-        if (cszRootDir.IsNonEmpty())
+        auto pPath = locateProjectFile(RootDir);
+        if (pPath->empty())
         {
-            cszSrcFilePath = cszRootDir;
-            if (!LocateSrcFiles(&cszSrcFilePath))
-            {
-                ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                std::cout << _tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, "
-                                 "or set the location with -dir.")
-                          << '\n';
-                return 1;
-            }
+            ttConsoleColor clr(ttConsoleColor::LIGHTRED);
+            std::cout << _tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, "
+                             "or set the location with -dir.")
+                      << '\n';
+            return 1;
         }
-        else
-        {
-            const char* pszFile = LocateSrcFiles();
-            if (pszFile)
-                cszSrcFilePath = pszFile;
-            else
-            {
-                ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-                std::cout << _tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, "
-                                 "or set the location with -dir.")
-                          << '\n';
-                return 1;
-            }
-        }
+        SrcFilePath = *pPath;
     }
 
     // We now have the location of the .srcfiles.yaml file to use. If -opt was specified, then we need to let the
@@ -469,7 +455,7 @@ int oldMain(int argc, char* argv[])
 
     if (Action & ACT_OPTIONS && !(Action & ACT_NEW))
     {
-        if (!ChangeOptions(&cszSrcFilePath, Action & ACT_DRYRUN))
+        if (!ChangeOptions(SrcFilePath, Action & ACT_DRYRUN))
             return 1;
     }
 
@@ -481,7 +467,7 @@ int oldMain(int argc, char* argv[])
             std::filesystem::remove(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         ttCList lstResults;
-        CreateVsCodeProject(cszSrcFilePath, &lstResults);
+        CreateVsCodeProject(SrcFilePath.c_str(), &lstResults);
         for (size_t pos = 0; lstResults.InRange(pos); ++pos)
         {
             std::cout << lstResults[pos] << '\n';
@@ -492,7 +478,7 @@ int oldMain(int argc, char* argv[])
     {
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         std::vector<std::string> results;
-        CreateVsJson(cszSrcFilePath, results);
+        CreateVsJson(SrcFilePath.c_str(), results);
         for (auto msg : results)
             std::cout << msg << '\n';
     }
@@ -519,10 +505,10 @@ int oldMain(int argc, char* argv[])
             bool bAllVersion = false;
             if (cNinja.IsExeTypeLib())
                 bAllVersion = true;
-            cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);
+            cNinja.CreateMakeFile(Action & ACT_ALLNINJA, RootDir.c_str());
         }
         else
-            cNinja.CreateMakeFile(Action & ACT_ALLNINJA, cszRootDir);
+            cNinja.CreateMakeFile(Action & ACT_ALLNINJA, RootDir.c_str());
 
         int countNinjas = 0;
 #if defined(_WIN32)

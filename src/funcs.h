@@ -20,7 +20,11 @@ bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile);
 bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile);
 
 void AddFiles(ttCList& lstFiles, bool bDryRun);
-bool ChangeOptions(ttCStr* pcszSrcFiles, bool bDryRun = false);
+
+// Successful return will have filled in ProjectFile with the path to the projectfile that
+// was located.
+bool ChangeOptions(std::string& ProjectFile, bool bDryRun = false);
+
 bool ConvertBuildScript(const char* pszBldFile);
 
 // Search PATH, LIB, or INCLUDE (or variants)
