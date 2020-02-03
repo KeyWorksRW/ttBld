@@ -14,6 +14,7 @@
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
 #include <ttlist.h>      // ttCList
+#include <ttpath.h>      // Contains functions for working with filesystem::path and filesystem::directory
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "funcs.h"      // List of function declarations
@@ -170,21 +171,21 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 // Returns true unless unable to write to a file
 bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
 {
-    if (!ttDirExists(".vscode"))
+    if (!tt::dirExists(".vscode"))
     {
         if (!ttCreateDir(".vscode"))
         {
-            ttMsgBox(_tt("Unable to create the required .vscode directory."));
+            wxMessageBox(_tt("Unable to create the required .vscode directory."));
             return false;
         }
         ttCStr cszIgnore;
         if (!gitIsFileIgnored(cszIgnore, ".vscode/") && !gitIsExcluded(cszIgnore, ".vscode/"))
         {
-            if (ttDirExists(".git"))
+            if (tt::dirExists(".git"))
                 cszIgnore = ".git/info/exclude";
-            else if (ttDirExists("../.git"))
+            else if (tt::dirExists("../.git"))
                 cszIgnore = "../.git/info/exclude";
-            else if (ttDirExists("../../.git"))
+            else if (tt::dirExists("../../.git"))
                 cszIgnore = "../../.git/info/exclude";
 
             if (cszIgnore.IsNonEmpty() &&
@@ -194,9 +195,9 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
             {
                 if (gitAddtoIgnore(cszIgnore, ".vscode/") && plstResults)
                 {
-                    ttCStr cszMsg;
-                    cszMsg.printf(".vscode/ added to %s\n", (char*) cszIgnore);
-                    *plstResults += cszMsg;
+                    std::stringstream msg;
+                    msg << _tt(".vscode/ added to ") << cszIgnore.c_str() << '\n';
+                    *plstResults += msg.str().c_str();
                 }
             }
         }
@@ -210,9 +211,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
         return false;
     }
 
-    ttCFile kf;
-
-    if (ttFileExists(".vscode/c_cpp_properties.json"))
+    if (tt::fileExists(".vscode/c_cpp_properties.json"))
     {
         if (!UpdateVsCodeProps(cSrcFiles, plstResults))
             return false;
@@ -223,19 +222,19 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
             return false;
     }
 
-    if (!ttFileExists(".vscode/launch.json") || !ttFileExists(".vscode/tasks.json"))
+    if (!tt::fileExists(".vscode/launch.json") || !tt::fileExists(".vscode/tasks.json"))
     {
         CDlgVsCode dlg;
         if (dlg.DoModal(NULL) != IDOK)
             return false;
 
-        if (!ttFileExists(".vscode/launch.json"))
+        if (!tt::fileExists(".vscode/launch.json"))
         {
             if (!dlg.CreateVsCodeLaunch(cSrcFiles, plstResults))
                 return false;
         }
 
-        if (!ttFileExists(".vscode/tasks.json"))
+        if (!tt::fileExists(".vscode/tasks.json"))
         {
             if (!dlg.CreateVsCodeTasks(cSrcFiles, plstResults))
                 return false;
@@ -313,8 +312,9 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kfOut.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING,
-                    ".vscode/c_cpp_properties.json");
+        wxString msg(_("Unable to create or write to "));
+        msg += ".vscode/c_cpp_properties.json";
+        wxMessageBox(msg);
         return false;
     }
     else
@@ -371,7 +371,9 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kf.WriteFile(".vscode/launch.json"))
     {
-        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/launch.json");
+        wxString msg(_("Unable to create or write to "));
+        msg += ".vscode/launch.json";
+        wxMessageBox(msg);
         return false;
     }
     else
