@@ -16,8 +16,8 @@ Options:
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     precompile;../../ttlib/include;../../ttlib/ttwx  # temporary location, change before Public release
-    BuildLibs:   ../../ttLib/winsrc;../../ttlib/ttwx      # temporary location, change before Public release
+    IncDirs:     precompile;../../ttlib/include  # temporary location, change before Public release
+    BuildLibs:   ../../ttLib/winsrc              # temporary location, change before Public release
 
 Files:
     ttBld.rc            # Windows resource files
@@ -45,6 +45,10 @@ Files:
     vscode.cpp          # Creates/updates .vscode files
     writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
+
+    # Until we can link to ttLibwx instead of ttLibwin, we need these additional wxWidgets modules
+    ../../ttLib/wxsrc/ttTR.cpp
+    ../../ttLib/wxsrc/ttassert.cpp
 
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     pugixml/pugixml.cpp # Built directly rather than building a library
