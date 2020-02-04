@@ -89,9 +89,9 @@ public:
 
     void SetReportingFile(const char* pszFile) { m_ReportPath = pszFile; }
 
+    void AddError(const std::stringstream& msg) { AddError(msg.str()); };
 #if !defined(NDEBUG)  // Starts debug section.
     void AddError(std::string_view err);
-    void AddError(const std::stringstream& msg) { AddError(msg.str()); };
     #define BREAKONWARNING                                  \
         {                                                   \
             if (m_bBreakOnWarning && wxIsDebuggerRunning()) \
