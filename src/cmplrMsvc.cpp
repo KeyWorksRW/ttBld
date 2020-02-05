@@ -9,7 +9,7 @@
 #include "pch.h"
 
 #include <ttfile.h>     // ttCFile
-#include <ttenumstr.h>  // ttCEnumStr
+#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 
 #include "ninja.h"  // CNinja
 
@@ -167,9 +167,11 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 
     if (GetOption(OPT_INC_DIRS))
     {
-        ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
-        while (cEnumStr.Enum())
-            m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
+        ttEnumStr IncDirs(getOptValue(Opt::INC_DIRS));
+        for (auto dir :IncDirs)
+        {
+            m_pkfOut->printf(" -I%kq", dir.c_str());
+        }
     }
 
     if (GetPchHeader())
@@ -249,7 +251,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
     if (IsExeTypeLib())
         return;  // lib directive should be used if the project is a library
 
-    ttCStr cszRule("rule link\n  command = ");
+    ttString cszRule("rule link\n  command = ");
 
     if (GetBoolOption(OPT_MS_LINKER))
         cszRule += "link.exe /nologo";
@@ -299,46 +301,46 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
 
     if (GetOption(OPT_LIB_DIRS))
     {
-        ttCEnumStr enumLib(GetOption(OPT_LIB_DIRS), ';');
-        while (enumLib.Enum())
+        ttEnumView enumLib(getOptValue(Opt::LIB_DIRS), ';');
+        for (auto iter : enumLib)
         {
             cszRule += " /LIBPATH:";
-            cszRule += enumLib;
+            cszRule += iter;
         }
     }
 
     if (GetOption(OPT_LIBS_CMN))
     {
-        ttCEnumStr enumLib(GetOption(OPT_LIBS_CMN), ';');
-        while (enumLib.Enum())
+        ttEnumView enumLib(getOptValue(Opt::LIBS_CMN), ';');
+        for (auto iter : enumLib)
         {
             cszRule += " ";
-            cszRule += enumLib;
+            cszRule += iter;
         }
     }
 
     if (GetOption(OPT_LIBS_DBG) && m_gentype == GEN_DEBUG)
     {
-        ttCEnumStr enumLib(GetOption(OPT_LIBS_DBG), ';');
-        while (enumLib.Enum())
+        ttEnumView enumLib(getOptValue(Opt::LIBS_DBG), ';');
+        for (auto iter : enumLib)
         {
             cszRule += " ";
-            cszRule += enumLib;
+            cszRule += iter;
         }
     }
 
     if (GetOption(OPT_LIBS_REL) && (m_gentype == GEN_RELEASE))
     {
-        ttCEnumStr enumLib(GetOption(OPT_LIBS_REL), ';');
-        while (enumLib.Enum())
+        ttEnumView enumLib(getOptValue(Opt::LIBS_REL), ';');
+        for (auto iter : enumLib)
         {
             cszRule += " ";
-            cszRule += enumLib;
+            cszRule += iter;
         }
     }
 
-    cszRule += " $in";
-    m_pkfOut->WriteEol(cszRule);
+    cszRule += " $in\n";
+    m_pkfOut->WriteText(cszRule);
     m_pkfOut->WriteEol("  description = linking $out\n");
 }
 
@@ -376,9 +378,17 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
 
         if (GetOption(OPT_INC_DIRS))
         {
-            ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
-            while (cEnumStr.Enum())
-                m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
+            ttEnumStr enumDirs(getOptValue(Opt::INC_DIRS));
+            for (auto iter : enumDirs)
+            {
+                std::stringstream out;
+                // If the header file contains a space, then put it in quotes
+                if (iter.find(' ') != tt::npos)
+                    out << " -I\"" << iter << '\'';
+                else
+                    out << " -I" << iter;
+                m_pkfOut->WriteText(out);
+            }
         }
 
         if (GetOption(OPT_RC_CMN))
@@ -415,9 +425,17 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
 
         if (GetOption(OPT_INC_DIRS))
         {
-            ttCEnumStr cEnumStr(GetOption(OPT_INC_DIRS));
-            while (cEnumStr.Enum())
-                m_pkfOut->printf(" -I%kq", (const char*) cEnumStr);
+            ttEnumStr enumDirs(getOptValue(Opt::INC_DIRS));
+            for (auto iter : enumDirs)
+            {
+                std::stringstream out;
+                // If the header file contains a space, then put it in quotes
+                if (iter.find(' ') != tt::npos)
+                    out << " -I\"" << iter << '\'';
+                else
+                    out << " -I" << iter;
+                m_pkfOut->WriteText(out);
+            }
         }
 
         if (GetOption(OPT_MDL_CMN))

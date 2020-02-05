@@ -529,13 +529,10 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
     if (!pszFilePattern || !*pszFilePattern)
         return;
 
-    ttCStr      cszPattern(pszFilePattern);
-    ttCEnumStr  enumstr(cszPattern, ';');
-    const char* pszPattern;
-
-    while (enumstr.Enum(&pszPattern))
+    ttEnumStr  enumPattern(pszFilePattern, ';');
+    for (auto pattern : enumPattern)
     {
-        ttCFindFile ff(pszPattern);
+        ttCFindFile ff(pattern.c_str());
         while (ff.IsValid())
         {
             char* psz = ttStrChrR(ff, '.');
