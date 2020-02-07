@@ -92,8 +92,8 @@ bool IsHost64()
 
 bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
 {
-    ttASSERT_MSG(pszEnv, "NULL pointer!");
-    ttASSERT_MSG(pszFile, "NULL pointer!");
+    assert(pszEnv);
+    assert(pszFile);
 
     ttCStr cszEnv, cszPath;
     if (!pcszPath)

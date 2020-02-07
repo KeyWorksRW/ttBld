@@ -586,7 +586,7 @@ void ConvertScriptDir(const char* pszScript, const char* pszDir, ttCStr& cszResu
 
     ttCStr cszScript(pszScript);
     char*  pszFilePortion = ttFindFilePortion(cszScript);
-    ttASSERT(pszFilePortion);
+    assert(pszFilePortion);
     *pszFilePortion = 0;
     cszScript.AppendFileName(pszDir);
 

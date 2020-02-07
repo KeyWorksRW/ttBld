@@ -101,7 +101,7 @@ void CTabOptions::OnBegin(void)
     auto result =
 #endif
         SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_GENERAL, (LPARAM) &ti);
-    ttASSERT(result == 0);
+    assert(result == 0);
 
     ti.pszText = (char*) ((const char*) _tt("Compiler"));
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_COMPILER, (LPARAM) &ti);

@@ -216,7 +216,7 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
 
 const char* CNinja::NormalizeHeader(const char* pszRoot, ttCStr& cszHeader)
 {
-    ttASSERT(cszHeader.IsNonEmpty());
+    assert(cszHeader.IsNonEmpty());
 
     if (pszRoot && *pszRoot)
         ttConvertToRelative(pszRoot, cszHeader, cszHeader);

@@ -14,7 +14,6 @@
 #include <ttenumstr.h>   // ttCEnumStr
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
 #include <ttlist.h>      // ttCList
-#include <ttpath.h>      // Contains functions for working with filesystem::path and filesystem::directory
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "funcs.h"      // List of function declarations

@@ -103,7 +103,7 @@ public:
 
     const char* getOptValue(size_t index)
     {
-        ttASSERT(index < LAST);
+        assert(index < LAST);
         return m_Options.at(index).value.c_str();
     }
 
@@ -111,12 +111,12 @@ public:
 
     const char* getCmtValue(size_t index)
     {
-        ttASSERT(index < LAST);
+        assert(index < LAST);
         return m_Options.at(index).comment.c_str();
     }
     void setCmtValue(size_t index, std::string_view value)
     {
-        ttASSERT(index < LAST);
+        assert(index < LAST);
         m_Options.at(index).comment = value;
     }
 };

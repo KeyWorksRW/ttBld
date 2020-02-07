@@ -12,7 +12,6 @@
 
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
-#include <ttpath.h>     // Contains functions for working with filesystem::path and filesystem::directory
 #include <ttstring.h>   // ttString, ttCwd, ttStrVector
 
 #include "ninja.h"     // CNinja
@@ -26,7 +25,7 @@ CNinja::CNinja(const char* pszNinjaDir)
     : CSrcFiles(pszNinjaDir)
 {
 #if !defined(NDEBUG)  // Starts debug section.
-    ttASSERT(ReadFile());
+    assert(ReadFile());
 #else
     if (!ReadFile())
         return;

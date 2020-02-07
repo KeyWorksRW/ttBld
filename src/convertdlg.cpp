@@ -285,7 +285,7 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 
 char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 {
-    ttASSERT(m_cszConvertScript.IsNonEmpty());
+    assert(m_cszConvertScript.IsNonEmpty());
 
     if (m_cszScriptRoot.IsEmpty())
     {

@@ -411,7 +411,7 @@ void CVcxRead::ConvertScriptDir(const char* pszDir, ttCStr& cszResult)
 
     ttCStr cszScript(*m_pcszConvertScript);
     char*  pszFilePortion = ttFindFilePortion(cszScript);
-    ttASSERT(pszFilePortion);
+    assert(pszFilePortion);
     *pszFilePortion = 0;
     cszScript.AppendFileName(pszDir);
 

@@ -847,7 +847,7 @@ void CSrcFiles::AddError(std::string_view err)
     {
         wxLogDebug(msg.c_str());
         if (m_bBreakOnWarning)
-            ttFAIL_MSG(msg.c_str());
+            wxTrap();
     }
 }
 

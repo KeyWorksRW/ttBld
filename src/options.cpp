@@ -241,7 +241,7 @@ sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, const char* p
         if (s_aInitialOptions[pos].opt == index)
             break;
     }
-    ttASSERT(s_aInitialOptions[pos].opt != OPT_OVERFLOW);
+    assert(s_aInitialOptions[pos].opt != OPT_OVERFLOW);
     if (s_aInitialOptions[pos].opt == OPT_OVERFLOW)
         return OPT_OVERFLOW;  // invalid option
     ttFree(m_aUpdateOpts[pos].pszVal);
@@ -285,7 +285,7 @@ sfopt::OPT_INDEX CSrcOptions::UpdateOption(sfopt::OPT_INDEX index, bool bVal)
         if (s_aInitialOptions[pos].opt == index)
             break;
     }
-    ttASSERT(s_aInitialOptions[pos].opt != OPT_OVERFLOW);
+    assert(s_aInitialOptions[pos].opt != OPT_OVERFLOW);
     if (s_aInitialOptions[pos].opt == OPT_OVERFLOW)
         return OPT_OVERFLOW;  // invalid option
 
@@ -333,7 +333,7 @@ const char* CSrcOptions::GetOption(sfopt::OPT_INDEX index)
         {
     #if !defined(NDEBUG)
             const char* pszOldOption = m_aUpdateOpts[pos].pszVal ? m_aUpdateOpts[pos].pszVal : "";
-            ttASSERT(tt::issamestr(pszOldOption, pszNewOption));
+            assert(tt::issamestr(pszOldOption, pszNewOption));
     #endif  // NDEBUG
 
             return m_aUpdateOpts[pos].pszVal;
@@ -503,7 +503,7 @@ const Opt::ORIGINAL_OPTIONS& CSrcOptions::FindOriginal(size_t option) const
 
 Opt::OPTION& CSrcOptions::FindOption(const std::string_view name)
 {
-    ttASSERT(!name.empty());
+    assert(!name.empty());
     if (name.empty())
         return m_opt.m_Options.back();
 
