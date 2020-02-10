@@ -16,39 +16,26 @@ Options:
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     precompile;../../ttlib/include  # temporary location, change before Public release
+    IncDirs:     precompile;../src;../../ttlib/include  # temporary location, change before Public release
     BuildLibs:   ../../ttLib/winsrc              # temporary location, change before Public release
 
 Files:
     ttBld.rc            # Windows resource files
     mainapp.cpp         # entry point, global strings, library pragmas
 
-    ninja.cpp           # CNinja for creating .ninja scripts
-    cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
-
     addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
     codelite.cpp        # Creates a CodeLite project
     convert.cpp         # Various conversion methods
     convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
     createmakefile.cpp  # CreateMakeFile method for creating a makefile
-    csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
-    dryrun.cpp          # CDryRun class for testing
     finder.cpp          # Routines for finding executables such as the MSVC compiler
     gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
     gitfuncs.cpp        # Functions for working with .git
-    options.cpp         # contains all Options strings and CSrcOptions class for working with them
-    parsehhp.cpp        # CParseHHP class for parsing a .hhp file
-    rcdep.cpp           # Contains functions for parsing RC dependencies
     vcxproj.cpp         # Creates a Visual Studio project file
-    verninja.cpp        # CVerMakeNinja class
     vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
     vscode.cpp          # Creates/updates .vscode files
     writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
-
-    # Until we can link to ttLibwx instead of ttLibwin, we need these additional wxWidgets modules
-    ../../ttLib/wxsrc/ttTR.cpp
-    ../../ttLib/wxsrc/ttassert.cpp
 
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     pugixml/pugixml.cpp # Built directly rather than building a library
@@ -67,3 +54,12 @@ Files:
     addfuncname.cpp     # CAddFuncName dialog
     dlggettext.cpp      # CDlgGetText dialog
     dlgvscode.cpp       # CDlgVsCode dialog
+
+    ../src/cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
+    ../src/csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
+    ../src/dryrun.cpp          # CDryRun class for testing
+    ../src/ninja.cpp           # CNinja for creating .ninja scripts
+    ../src/options.cpp         # contains all Options strings and CSrcOptions class for working with them
+    ../src/parsehhp.cpp        # CParseHHP class for parsing a .hhp file
+    ../src/rcdep.cpp           # Contains functions for parsing RC dependencies
+    ../src/verninja.cpp        # CVerMakeNinja class

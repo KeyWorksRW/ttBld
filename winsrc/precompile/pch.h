@@ -42,7 +42,6 @@ namespace fs = std::filesystem;
 #include <string>
 #include <string_view>
 
-#include <ttassert.h>  // Provides an alternative to wxASSERT macros
 #include <ttlibwin.h>  // Master header file for ttLibwin
 
 // WARNING: ttstr.h must appear before ttstring.h!

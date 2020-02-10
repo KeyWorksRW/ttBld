@@ -6,13 +6,15 @@
              "cppStandard": "c++17",
              "defines": [
                 "WXUSINGDLL",
+                "_WIN32",
                 "_DEBUG"
             ],
             "includePath": [
-                "${workspaceRoot}",
-                "${workspaceRoot}/../../ttLib/include",
-                "${workspaceRoot}/../../ttLib/ttwx",
+                "${workspaceRoot}/",
                 "${workspaceRoot}/precompile",
+                "${workspaceRoot}/../src",
+                "${workspaceRoot}/../../ttlib/include",
+                "${workspaceRoot}/../../ttLib/ttwx",
                 "${default}"
             ]
         }

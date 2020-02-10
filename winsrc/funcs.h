@@ -37,7 +37,7 @@ bool isSystemHeaderFile(const char* pszHeaderFile);
 const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);
 
 // Attempts to locate .srcfiles.yaml
-std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir = ttEmptyString);
+// std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir = ttEmptyString);
 
 // Try to locate .srcfiles.yaml and return a pointer to it's location if found.
 //

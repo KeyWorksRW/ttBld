@@ -24,7 +24,7 @@
 #endif
 
 #include "csrcfiles.h"  // CSrcFiles
-#include "funcs.h"      // List of function declarations
+// #include "funcs.h"      // List of function declarations
 
 const char* txtSrcFilesFileName = ".srcfiles.yaml";
 const char* txtDefBuildDir = "bld";
@@ -529,7 +529,7 @@ void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
     if (!pszFilePattern || !*pszFilePattern)
         return;
 
-    ttEnumStr  enumPattern(pszFilePattern, ';');
+    ttEnumStr enumPattern(pszFilePattern, ';');
     for (auto pattern : enumPattern)
     {
         ttCFindFile ff(pattern.c_str());
@@ -852,3 +852,48 @@ void CSrcFiles::AddError(std::string_view err)
 }
 
 #endif
+
+static const char* aProjectLocations[] = {
+    // clang-format off
+    ".srcfiles.yaml",  // this MUST be the first file
+    "src/.srcfiles.yaml",
+    "source/.srcfiles.yaml",
+    ".private/.srcfiles.yaml",
+    "bld/.srcfiles.yaml",
+    "build/.srcfiles.yaml",
+    // clang-format on
+};
+
+std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir)
+{
+#if !defined(NDEBUG)  // Starts debug section.
+    ttString cwd;
+    cwd.assignCwd();
+#endif
+    auto pPath = std::make_unique<ttString>();
+    if (!StartDir.empty())
+    {
+        for (auto iter : aProjectLocations)
+        {
+            pPath->assign(StartDir);
+            pPath->append_filename(iter);
+            if (pPath->fileExists())
+            {
+                return pPath;
+            }
+        }
+    }
+    else
+    {
+        for (auto iter : aProjectLocations)
+        {
+            pPath->assign(iter);
+            if (pPath->fileExists())
+            {
+                return pPath;
+            }
+        }
+    }
+    pPath->clear();
+    return pPath;
+}

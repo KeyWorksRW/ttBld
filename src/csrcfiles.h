@@ -26,6 +26,9 @@ using namespace sfopt;  // OPT_ options are used extensively, hence using the na
 
 extern const char* txtSrcFilesFileName;
 
+// Attempts to locate .srcfiles.yaml
+std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir = ttEmptyString);
+
 // Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 class CSrcFiles : public CSrcOptions
 {

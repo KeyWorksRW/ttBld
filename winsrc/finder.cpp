@@ -145,40 +145,6 @@ static const char* aProjectLocations[] = {
     // clang-format on
 };
 
-std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir)
-{
-#if !defined(NDEBUG)  // Starts debug section.
-    ttString cwd;
-    cwd.assignCwd();
-#endif
-    auto pPath = std::make_unique<ttString>();
-    if (!StartDir.empty())
-    {
-        for (auto iter : aProjectLocations)
-        {
-            pPath->assign(StartDir);
-            pPath->append_filename(iter);
-            if (pPath->fileExists())
-            {
-                return pPath;
-            }
-        }
-    }
-    else
-    {
-        for (auto iter : aProjectLocations)
-        {
-            pPath->assign(iter);
-            if (pPath->fileExists())
-            {
-                return pPath;
-            }
-        }
-    }
-    pPath->clear();
-    return pPath;
-}
-
 const char* LocateSrcFiles(ttCStr* pcszStartDir)
 {
     if (pcszStartDir)
