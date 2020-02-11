@@ -15,7 +15,7 @@
 
 #include <ttTR.h>  // Function for translating strings
 
-#include <ttenumstr.h>   // ttCEnumStr -- Enumerate through substrings in a string
+#include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
 
@@ -257,19 +257,19 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData())
         {
-            ttCEnumStr enumFlags(pChild->GetData(), CH_SPACE);
+            ttEnumStr enumFlags(pChild->GetData(), CH_SPACE);
             ttCStr     cszCFlags;
             if (m_pcSrcFiles->GetOption(OPT_CFLAGS_CMN))
                 cszCFlags = m_pcSrcFiles->GetOption(OPT_CFLAGS_CMN);
-            while (enumFlags.Enum())
+            for (auto iter : enumFlags)
             {
-                if (ttIsSameSubStrI(enumFlags + 1, "std:"))
+                if (ttIsSameSubStrI(iter.c_str() + 1, "std:"))
                 {
-                    if (cszCFlags.IsEmpty() || !ttStrStrI(cszCFlags, enumFlags))
+                    if (cszCFlags.IsEmpty() || !tt::contains(cszCFlags.c_str(), iter, false))
                     {
                         if (cszCFlags.IsNonEmpty())
                             cszCFlags += " ";
-                        cszCFlags += enumFlags;
+                        cszCFlags += iter.c_str();
                     }
                 }
             }
@@ -307,12 +307,11 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
                 // Paths will be relative to the location of the script file. We need to make them
                 // relative to .srcfiles.yaml.
 
-                ttCEnumStr cszPaths(cszFlags);
+                ttEnumStr enumPaths(cszFlags.c_str());
                 ttCStr     cszInc, cszTmp;
-
-                while (cszPaths.Enum())
+                for (auto iter : enumPaths)
                 {
-                    ConvertScriptDir(cszPaths, cszTmp);
+                    ConvertScriptDir(iter.c_str(), cszTmp);
                     if (cszInc.IsNonEmpty())
                         cszInc += ";";
                     cszInc += cszTmp;
@@ -382,16 +381,16 @@ void CVcxRead::ProcessLink(ttCXMLBranch* pSection, bool bDebug)
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData())
         {
-            ttCEnumStr enumLibs(pChild->GetData());
+            ttEnumStr enumLibs(pChild->GetData());
             ttCStr     cszCurLibs;
-            while (enumLibs.Enum())
+            for (auto iter : enumLibs)
             {
                 // We only add libraries that are relative to our project
-                if (ttIsSameSubStr(enumLibs, ".."))
+                if (tt::issamesubstr(iter, ".."))
                 {
                     if (cszCurLibs.IsNonEmpty())
                         cszCurLibs += ";";
-                    cszCurLibs += enumLibs;
+                    cszCurLibs += iter.c_str();
                 }
             }
             if (cszCurLibs.IsNonEmpty())

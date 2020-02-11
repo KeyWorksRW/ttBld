@@ -12,7 +12,7 @@
 
 #include <ttTR.h>  // Function for translating strings
 
-#include <ttenumstr.h>  // ttCEnumStr -- Enumerate through substrings in a string
+#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfile.h>     // ttCFile -- class for reading and writing files, strings, data, etc.
 #include <ttxml.h>      // ttCXMLBranch
 
@@ -115,7 +115,8 @@ bool CConvertDlg::ConvertVcProj()
                 if (ttIsSameStrI(pItem->GetName(), "File"))
                 {
                     if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
-                        m_cSrcFiles.GetSrcFilesList().addfilename(MakeSrcRelative(pItem->GetAttribute("RelativePath")));
+                        m_cSrcFiles.GetSrcFilesList().addfilename(
+                            MakeSrcRelative(pItem->GetAttribute("RelativePath")));
                 }
             }
         }
@@ -130,7 +131,8 @@ bool CConvertDlg::ConvertVcProj()
             if (ttIsSameStrI(pItem->GetName(), "File"))
             {
                 if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
-                    m_cSrcFiles.GetSrcFilesList().addfilename(MakeSrcRelative(pItem->GetAttribute("RelativePath")));
+                    m_cSrcFiles.GetSrcFilesList().addfilename(
+                        MakeSrcRelative(pItem->GetAttribute("RelativePath")));
             }
         }
     }
@@ -179,12 +181,11 @@ bool CConvertDlg::ConvertVcProj()
                 // Paths will be relative to the location of the script file. We need to make them
                 // relative to .srcfiles.yaml.
 
-                ttCEnumStr cszPaths(pszOption);
-                ttCStr     cszInc, cszTmp;
-
-                while (cszPaths.Enum())
+                ttEnumStr enumPaths(pszOption);
+                ttCStr    cszInc, cszTmp;
+                for (auto iter : enumPaths)
                 {
-                    ConvertScriptDir(m_cszConvertScript, cszPaths, cszTmp);
+                    ConvertScriptDir(m_cszConvertScript, iter.c_str(), cszTmp);
                     if (cszInc.IsNonEmpty())
                         cszInc += ";";
                     cszInc += cszTmp;
@@ -199,32 +200,35 @@ bool CConvertDlg::ConvertVcProj()
             pszOption = pRelease->GetAttribute("PreprocessorDefinitions");
             if (pszOption)
             {
-                ttCEnumStr enumFlags(pszOption);
-                ttCStr     cszCFlags;
-                while (enumFlags.Enum())
+                ttEnumStr enumFlags(pszOption);
+                ttCStr    cszCFlags;
+                for (auto iter : enumFlags)
                 {
-                    if (ttIsSameStrI(enumFlags, "NDEBUG"))
+                    if (tt::issamestr(iter, "NDEBUG"))
                         continue;  // we already added this
-                    if (ttIsSameStrI(
-                            enumFlags,
-                            "_CONSOLE"))  // the define is already in use, but make certain exeType matches
+
+                    // the define is already in use, but make certain exeType matches
+                    if (tt::issamestr(iter, "_CONSOLE"))
                     {
                         m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
                         continue;
                     }
-                    if (ttIsSameStrI(enumFlags,
-                                     "_USRDLL"))  // the define is already in use, but make certain exeType matches
+
+                    // the define is already in use, but make certain exeType matches
+                    if (tt::issamestr(iter, "_USRDLL"))
                     {
                         m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
                         continue;  // do we need to add this?
                     }
-                    if (ttIsSameSubStrI(enumFlags, "$("))  // Visual Studio specific, ignore it
+
+                      // Visual Studio specific, ignore it
+                    if (tt::issamesubstr(iter, "$("))
                         continue;
 
                     if (cszCFlags.IsNonEmpty())
                         cszCFlags += " ";
                     cszCFlags += "-D";
-                    cszCFlags += enumFlags;
+                    cszCFlags += iter.c_str();
                 }
                 m_cSrcFiles.UpdateOption(OPT_CFLAGS_CMN, (char*) cszCFlags);
             }
@@ -500,11 +504,11 @@ bool CConvertDlg::ConvertSrcfiles()
     ttCStr cszIncDirs(cszRelative);
     if (srcOrg.GetOption(OPT_INC_DIRS))
     {
-        ttCEnumStr enumStr(srcOrg.GetOption(OPT_INC_DIRS));
+        ttEnumStr enumPaths(srcOrg.getOptValue(Opt::INC_DIRS));
         ttChDir(cszRoot);
-        while (enumStr.Enum())
+        for (auto iter : enumPaths)
         {
-            cszTmp = (char*) enumStr;
+            cszTmp = iter.c_str();
             cszTmp.FullPathName();
             ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
             cszIncDirs += ";";

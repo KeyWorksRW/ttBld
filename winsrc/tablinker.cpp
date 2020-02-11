@@ -11,7 +11,7 @@
 #include <ttTR.h>  // Function for translating strings
 
 #include <ttfiledlg.h>  // ttCFileDlg
-#include <ttenumstr.h>  // ttCEnumStr
+#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 #include <ttdirdlg.h>   // ttCDirDlg
 
 #include "dlgoptions.h"
@@ -97,10 +97,10 @@ void CTabLinker::OnBtnLibDir()
 
         if (cszCurLibDirs.IsNonEmpty())
         {
-            ttCEnumStr eLib(cszCurLibDirs);
-            while (eLib.Enum())
+            ttEnumStr enumPaths(cszCurLibDirs.c_str());
+            for (auto iter : enumPaths)
             {
-                if (ttIsSamePath(eLib, cszLibDir))
+                if (ttIsSamePath(iter.c_str(), cszLibDir))
                 {
                     ttMsgBoxFmt(_tt("You've already added the directory %s"), MB_OK | MB_ICONWARNING,
                                 (char*) cszLibDir);

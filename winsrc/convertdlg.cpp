@@ -21,7 +21,7 @@
 #include <direct.h>  // Functions for directory handling and creation
 
 #include <ttdirdlg.h>    // ttCDirDlg
-#include <ttenumstr.h>   // ttCEnumStr
+#include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfiledlg.h>   // ttCFileDlg
 #include <ttfindfile.h>  // ttCFindFile
 

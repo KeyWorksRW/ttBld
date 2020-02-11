@@ -15,7 +15,7 @@
     #include <ttreg.h>       // ttCRegistry
     #include <ttstr.h>       // ttCStr
     #include <ttfindfile.h>  // ttCFindFile
-    #include <ttenumstr.h>   // ttCEnumStr
+    #include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that
@@ -104,10 +104,10 @@ bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
         cszEnv.ReSize(cbEnv + 1);
         if (getenv_s(&cbEnv, cszEnv.GetPtr(), cbEnv, pszEnv) == 0)
         {
-            ttCEnumStr enumLib(cszEnv, ';');
-            while (enumLib.Enum())
+            ttEnumStr enumPaths(cszEnv.c_str());
+            for (auto iter : enumPaths)
             {
-                *pcszPath = enumLib;
+                *pcszPath = iter.c_str();
                 pcszPath->AppendFileName(pszFile);
                 if (ttFileExists(*pcszPath))
                     return true;

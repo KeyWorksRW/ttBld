@@ -11,7 +11,7 @@
 #include <ttTR.h>        // Function for translating strings
 #include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 
-#include <ttenumstr.h>   // ttCEnumStr
+#include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
 #include <ttlist.h>      // ttCList
 
@@ -284,10 +284,10 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
             if (cSrcFiles.GetOption(OPT_INC_DIRS))
             {
-                ttCEnumStr enumInc(cSrcFiles.GetOption(OPT_INC_DIRS));
-                while (enumInc.Enum())
+                ttEnumStr enumInc(cSrcFiles.getOptValue(Opt::INC_DIRS));
+                for (auto iter : enumInc)
                 {
-                    ttCStr cszInclude(enumInc);
+                    ttCStr cszInclude(iter.c_str());
                     cszInclude.FullPathName();
 #if defined(_WIN32)
                     ttCStr cszIncDir;

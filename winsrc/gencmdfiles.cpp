@@ -12,7 +12,7 @@
 
 #include <ttfile.h>     // ttCFile
 #include <ttlist.h>     // ttCList
-#include <ttenumstr.h>  // ttCEnumStr
+#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 
 #include "funcs.h"  // List of function declarations
 
@@ -99,10 +99,10 @@ static void AddToList(const char* pszEnv, ttCList& lstPaths)
         cszEnv.ReSize(cbEnv + 1);
         if (getenv_s(&cbEnv, cszEnv.GetPtr(), cbEnv, pszEnv) == 0)
         {
-            ttCEnumStr enumLib(cszEnv, ';');
-            while (enumLib.Enum())
+            ttEnumStr enumLib(cszEnv.c_str());
+            for (auto iter : enumLib)
             {
-                cszPath = enumLib;
+                cszPath = iter.c_str();
                 ttForwardslashToBackslash(cszPath);  // just to be certain that they are consistent
                 lstPaths += cszPath;
             }

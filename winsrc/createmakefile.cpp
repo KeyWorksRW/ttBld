@@ -11,7 +11,7 @@
 #include <ttTR.h>  // Function for translating strings
 
 #include <ttfile.h>      // ttCFile
-#include <ttenumstr.h>   // ttCEnumStr
+#include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfindfile.h>  // ttCFindFile
 
 #include "ninja.h"     // CNinja
