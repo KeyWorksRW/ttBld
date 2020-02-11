@@ -95,14 +95,8 @@ public:
     void AddError(const std::stringstream& msg) { AddError(msg.str()); };
 #if !defined(NDEBUG)  // Starts debug section.
     void AddError(std::string_view err);
-    #define BREAKONWARNING                                  \
-        {                                                   \
-            if (m_bBreakOnWarning && wxIsDebuggerRunning()) \
-                wxTrap();                                   \
-        }
 #else
     void AddError(std::string_view err) { m_lstErrMessages.append(err); }
-    #define BREAKONWARNING
 #endif
 
     const char* GetOptionValue(size_t index) { return m_opt.getOptValue(index); }
@@ -163,5 +157,4 @@ private:
     int m_RequiredSub;
 
     bool m_bRead;            // File has been read and processed.
-    bool m_bBreakOnWarning;  // Used in debug builds to call wxTrap().
 };

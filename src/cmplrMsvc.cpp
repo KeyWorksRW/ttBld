@@ -10,6 +10,7 @@
 
 #include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+#include <ttstr.h>
 
 #include "ninja.h"  // CNinja
 
@@ -470,9 +471,9 @@ void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
 
     for (size_t pos = 0; pos < m_lstIdlFiles.size(); ++pos)
     {
-        ttCStr cszTypeLib(m_lstIdlFiles[pos]);
+        ttCStr cszTypeLib(m_lstIdlFiles[pos].c_str());
         cszTypeLib.ChangeExtension(".tlb");
-        ttCStr cszHeader(m_lstIdlFiles[pos]);
+        ttCStr cszHeader(m_lstIdlFiles[pos].c_str());
         cszHeader.ChangeExtension(".h");
         m_pkfOut->printf("build %s : midl %s\n\n", (char*) cszHeader, m_lstIdlFiles[pos].c_str());
         m_pkfOut->printf("build %s : phony %s\n\n", (char*) cszTypeLib, (char*) cszHeader);
@@ -534,7 +535,6 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         case GEN_DEBUG:
             for (size_t pos = 0; m_lstBldLibsD.InRange(pos); ++pos)
             {
-                wxLogDebug((char*) m_lstBldLibsD[pos]);
                 line << " $";
                 m_pkfOut->WriteEol(line.str().c_str());
                 line.str("");

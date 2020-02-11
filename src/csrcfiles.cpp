@@ -18,13 +18,7 @@
 
 #include <ttstring.h>  // ttString, ttCwd, ttStrVector
 
-#if !defined(NDEBUG)  // Starts debug section.
-    #include <wx/config.h>
-    #include <wx/log.h>
-#endif
-
 #include "csrcfiles.h"  // CSrcFiles
-// #include "funcs.h"      // List of function declarations
 
 const char* txtSrcFilesFileName = ".srcfiles.yaml";
 const char* txtDefBuildDir = "bld";
@@ -53,12 +47,6 @@ CSrcFiles::CSrcFiles(const char* pszNinjaDir)
         m_bldFolder = pszNinjaDir;
     else
         m_bldFolder = txtDefBuildDir;
-
-#if !defined(NDEBUG)  // Starts debug section.
-    wxConfig config("ttBld");
-    config.SetPath("/Settings");
-    config.Read("BreakOnWarning", &m_bBreakOnWarning);
-#endif
 }
 
 bool CSrcFiles::ReadFile(std::string_view filename)
@@ -73,7 +61,6 @@ bool CSrcFiles::ReadFile(std::string_view filename)
             std::stringstream msg;
             msg << "Cannot locate .srcfiles.yaml starting in " << cwd;
             m_lstErrMessages.append(msg.str());
-            BREAKONWARNING;
             return false;  // if we still can't find it, bail
         }
         m_srcfilename = *pFile;
@@ -94,7 +81,6 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         std::string msg = _tt("Cannot open ");
         msg += m_srcfilename;
         m_lstErrMessages.append(msg);
-        BREAKONWARNING;
         return false;
     }
 
@@ -320,10 +306,6 @@ void CSrcFiles::ProcessOption(char* pszLine)
     ttString msg(name);
     msg += _tt(" is an unknown option");
     m_lstErrMessages.append(msg);
-#if !defined(NDEBUG)  // Starts debug section.
-    if (m_bBreakOnWarning)
-        wxTrap();
-#endif
 }
 
 void CSrcFiles::AddCompilerFlag(const char* pszFlag)
@@ -378,10 +360,6 @@ void CSrcFiles::ProcessLibSection(char* pszLibFile)
             ttString str(_tt("Cannot locate the file "));
             str += pszLibFile;
             m_lstErrMessages.append(str);
-#if !defined(NDEBUG)  // Starts debug section.
-            if (m_bBreakOnWarning)
-                wxTrap();
-#endif
         }
     }
 }
@@ -495,10 +473,6 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         ttString str(_tt("Unable to locate the file "));
         str += cszFullPath;
         m_lstErrMessages.append(str);
-#if !defined(NDEBUG)  // Starts debug section.
-        if (m_bBreakOnWarning)
-            wxTrap();
-#endif
         return;
     }
 
@@ -843,12 +817,7 @@ void CSrcFiles::AddError(std::string_view err)
 {
     ttString msg(err);
     msg += "\n";
-    if (m_lstErrMessages.append(msg))
-    {
-        wxLogDebug(msg.c_str());
-        if (m_bBreakOnWarning)
-            wxTrap();
-    }
+    m_lstErrMessages.append(msg);
 }
 
 #endif
