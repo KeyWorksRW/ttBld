@@ -10,10 +10,10 @@
                 "_DEBUG"
             ],
             "includePath": [
-                "${workspaceRoot}/",
                 "${workspaceRoot}/precompile",
                 "${workspaceRoot}/../src",
                 "${workspaceRoot}/../../ttlib/include",
+                "${workspaceRoot}/",
                 "${workspaceRoot}/../../ttLib/ttwx",
                 "${default}"
             ]
