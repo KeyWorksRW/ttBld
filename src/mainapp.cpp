@@ -154,13 +154,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    else
-    {
-        ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-        std::cout << _tt(
-            "This version of ttBld is too old to properly create ninja scripts from your current srcfiles.");
-    }
-
     // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not,
     // we need to locate it.
 
