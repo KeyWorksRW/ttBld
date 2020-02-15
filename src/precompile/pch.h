@@ -1,8 +1,8 @@
 // This header file is used to create a pre-compiled header for use in the entire project
 
-// Caller should '#define wxMSVC_VERSION_AUTO' to use wxWidgets libraries
+// Caller should '#define wxWIDGETS' to use wxWidgets libraries
 
-#if defined(_WIN32) && !defined(wxMSVC_VERSION_AUTO)
+#if defined(_WIN32) && !defined(wxWIDGETS)
     #define NOATOM
     #define NOCOMM
     #define NODRIVERS
@@ -32,7 +32,7 @@
     #include <stdlib.h>
 #endif  // defined(_WIN32)
 
-#if defined(wxMSVC_VERSION_AUTO)
+#if defined(wxWIDGETS)
     #if defined(_WIN32)
         #define wxMSVC_VERSION_AUTO
     #endif
