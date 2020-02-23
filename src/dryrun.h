@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <ttlibwin.h>
+#include <ttnamespace.h>
+
 #include <ttstr.h>   // ttCStr
 #include <ttfile.h>  // ttCFile
 

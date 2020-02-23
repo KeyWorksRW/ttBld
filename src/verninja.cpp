@@ -8,6 +8,10 @@
 
 #include "pch.h"
 
+#include <ttlibwin.h>
+#include <ttnamespace.h>
+#include <ttstr.h>
+
 #include "verninja.h"  // CVerMakeNinja
 
 extern const char* txtOptVersion;  // The minimum version of ttBld required by a .srcfiles.yaml

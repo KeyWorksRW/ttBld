@@ -10,6 +10,8 @@
 
 #include <stdio.h>  // for sprintf
 
+#include <ttlibwin.h>
+#include <ttnamespace.h>
 #include <ttfile.h>  // ttCFile
 
 #include "writesrcfiles.h"

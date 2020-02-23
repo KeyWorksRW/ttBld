@@ -13,6 +13,9 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <ttlibwin.h>
+#include <ttnamespace.h>
+
 #include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
 #include <ttfile.h>   // ttCFile
 #include <ttarray.h>  // ttCArray

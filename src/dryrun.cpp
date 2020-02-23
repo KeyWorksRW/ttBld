@@ -8,6 +8,9 @@
 
 #include "pch.h"
 
+#include <ttlibwin.h>
+#include <ttnamespace.h>
+
 #include <ttTR.h>  // Function for translating strings
 
 #include <stdio.h>

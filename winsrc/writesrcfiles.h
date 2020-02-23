@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <ttlibwin.h>
+#include <ttnamespace.h>
 #include <ttstr.h>   // ttCStr -- SBCS string class
 #include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
 

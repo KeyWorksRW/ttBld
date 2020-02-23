@@ -174,7 +174,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
     {
         if (!ttCreateDir(".vscode"))
         {
-            wxMessageBox(_tt("Unable to create the required .vscode directory."));
+            tt::MsgBox(_tt("Unable to create the required .vscode directory."));
             return false;
         }
         ttCStr cszIgnore;
@@ -311,9 +311,9 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kfOut.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        wxString msg(_("Unable to create or write to "));
+        std::string msg(_tt("Unable to create or write to "));
         msg += ".vscode/c_cpp_properties.json";
-        wxMessageBox(msg);
+        tt::MsgBox(msg);
         return false;
     }
     else
@@ -370,9 +370,9 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kf.WriteFile(".vscode/launch.json"))
     {
-        wxString msg(_("Unable to create or write to "));
+        std::string msg(_tt("Unable to create or write to "));
         msg += ".vscode/launch.json";
-        wxMessageBox(msg);
+        tt::MsgBox(msg);
         return false;
     }
     else
@@ -779,7 +779,7 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
     const char* pszStart = pszDefines;
     while (*pszStart)
     {
-        if (*pszStart == '-' || *pszStart == CH_FORWARDSLASH)
+        if (*pszStart == '-' || *pszStart == '/')
         {
             ++pszStart;
             if (*pszStart != 'D')
@@ -788,7 +788,7 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
                 continue;  // it's not a define
             }
             ttCStr cszTmp;
-            cszTmp.GetString(pszStart, *pszStart, CH_SPACE);
+            cszTmp.GetString(pszStart, *pszStart, ' ');
             lst += cszTmp;
             pszStart += ttStrLen(cszTmp);
         }

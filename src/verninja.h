@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <ttlibwin.h>
+#include <ttnamespace.h>
+
 #include <ttstr.h>  // ttCStr
 
 // Used to read, write, and compare ttBld version number
