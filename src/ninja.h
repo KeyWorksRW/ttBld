@@ -86,8 +86,7 @@ protected:
     void msvcWriteMidlTargets(CMPLR_TYPE cmplr);
 #endif
 
-    bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
-    const char* NormalizeHeader(ttlib::cview BaseFile, ttCStr& cszHeader);
+    bool FindRcDependencies(std::string_view rcfile, std::string_view header = {}, std::string_view relpath = {});
 
     CDryRun m_dryrun;
     ttCList m_lstRcDependencies;

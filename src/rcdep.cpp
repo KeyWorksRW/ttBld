@@ -2,227 +2,178 @@
 // Name:      rcdep.cpp
 // Purpose:   Contains functions for parsing RC dependencies
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
+#include <exception>
+#include <sstream>
 
+#include <ttTR.h>        // Function for translating strings
+#include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
-#if defined(_WIN32)  // only Windows builds use .rc files
-
-    #include "ninja.h"  // CNinja
+#include "ninja.h"  // CNinja
 
 // clang-format off
-static const char* lstRcKeywords[] = {  // list of keywords that load a file
-    "BITMP",
-    "CURSOR",
-    "FONT",
-    "HTML",
-    "ICON",
-    "RCDATA",
-    "TYPELIB",
-    "MESSAGETABLE",
 
-    nullptr
+// list of keywords that load a file
+static const char* RcKeywords[]
+{
+    "BITMP ",
+    "CURSOR ",
+    "FONT ",
+    "HTML ",
+    "ICON ",
+    "RCDATA ",
 };
+
+static const char* aRemovals[]
+{
+    "PRELOAD",
+    "LOADONCALL",
+    "FIXED",
+    "MOVEABLE",
+    "DISCARDABLE",
+    "PURE",
+    "IMPURE",
+    "SHARED",
+    "NONSHARED",
+};
+
 // clang-format on
 
-// This is called to parse .rc files to find dependencies
-
-bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const char* pszRelPath)
+// Unlike the various C compilers, the Windows resource compiler does not output any dependent filenames. We parse
+// the .rc file looking for #include directives, and add any found as a dependent. If a header file is #included,
+// we also parse that to see if it also includes any additional header files.
+//
+// Note that we only add header files in quotes -- we don't add system files (inside angle brackets) as a
+// dependency.
+bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header, std::string_view relpath)
 {
-    ttCFile kf;
-    if (!kf.ReadFile(pszHdr ? pszHdr : pszRcFile))
+    std::string inFilename{ !header.empty() ? header : rcfile };
+    ttlib::viewfile file;
+    try
     {
-        if (!pszHdr)  // we should have already reported a problem with a missing header file
+        if (!file.ReadFile(inFilename))
         {
-            ttCStr cszErrMsg;
-            cszErrMsg.printf(_tt("Cannot open \"%s\"."), pszRcFile);
-            m_lstErrMessages.append(cszErrMsg.c_str());
+            std::string msg(_tt("Cannot open "));
+            msg += inFilename;
+            m_lstErrMessages.append(msg);
+            return false;
         }
+    }
+    catch (const std::exception& e)
+    {
+        std::stringstream msg;
+        msg << _tt("An exception occurred while reading ") << inFilename << ": " << e.what();
+        m_lstErrMessages.append(msg.str());
         return false;
     }
 
-    // If passed a path, use that, otherwise see if the SrcFile contained a path, and if so, use that path.
-    // If non-empty, the location of any header file is considered relative to the cszRelPath location
-
-    ttCStr cszRelPath;
-    if (pszRelPath)
-        cszRelPath = pszRelPath;
+    ttlib::cstr reldir;
+    if (!relpath.empty())
+        reldir = relpath;
     else
     {
-        if (pszHdr)
-        {
-            char* pszFilePortion = ttFindFilePortion(pszHdr);
-            if (pszFilePortion != pszHdr)
-            {
-                cszRelPath = pszHdr;
-                pszFilePortion = ttFindFilePortion(cszRelPath);
-                *pszFilePortion = 0;
-            }
-        }
-        else
-        {
-            char* pszFilePortion = ttFindFilePortion(pszRcFile);
-            if (pszFilePortion != pszRcFile)
-            {
-                cszRelPath = pszRcFile;
-                pszFilePortion = ttFindFilePortion(cszRelPath);
-                *pszFilePortion = 0;
-            }
-        }
+        reldir = inFilename;
+        reldir.remove_filename();
     }
 
-    size_t curLine = 0;
-    while (kf.ReadLine())
+    for (auto line : file)
     {
-        ++curLine;
-        if (ttIsSameSubStrI(ttFindNonSpace(kf), "#include"))
+        line = ttlib::findnonspace(line);
+        if (!line.length())
+            continue;
+
+        if (ttlib::issameprefix(line, "#include"))
         {
-            char* psz = ttFindNonSpace(ttFindNonSpace(kf) + sizeof("#include"));
+            line = ttlib::stepover(line);
+            if (line.empty())
+                continue;
 
-            // We only care about header files in quotes -- we're not generating dependeices on system files
-            // (#include <foo.h>)
-
-            if (*psz == CH_QUOTE)
+            if (line[0] == '\"')
             {
-                ttCStr cszHeader;
-                cszHeader.GetQuotedString(psz);
+                ttlib::cstr incName;
+                incName.ExtractSubString(line);
 
                 // Older versions of Visual Studio do not allow <> to be placed around header files. Since system
-                // header files rarely change, and when they do they are not likely to require rebuilding our .rc
+                // header files rarely change, and when they do they are not likely to require rebuilding the .rc
                 // file, we simply ignore them.
 
-                if (ttIsSameSubStrI(cszHeader, "afx") || ttIsSameSubStrI(cszHeader, "atl") ||
-                    ttIsSameSubStrI(cszHeader, "winres"))
+                if (incName.issameprefix("afx") || incName.issameprefix("atl") || incName.issameprefix("winres"))
                     continue;
 
-                NormalizeHeader(pszHdr ? pszHdr : pszRcFile, cszHeader);
+                ttlib::cstr root{ inFilename };
+                root.remove_filename();
+                incName.make_relative(root);
+                incName.backslashestoforward();
 
-                if (!ttFileExists(cszHeader))
+                if (!incName.fileExists())
                 {
-    #if 0
-                    // REVIEW: [randalphwa - 5/16/2019]  We can't really report this as an error unless we first check
-                    // the INCLUDE environment variable as well as the IncDIRs option. The resource compiler is going to
-                    // report the error, so there's not a huge advantage to reporting here.
-
-                    ttCStr cszErrMsg;
-                    cszErrMsg.printf(_tt(IDS_NINJA_MISSING_INCLUDE),
-                        pszHdr ? pszHdr : pszRcFile, curLine, (size_t) (psz - kf.GetLnPtr()),  (char*) cszHeader);
-                    m_lstErrMessages.append(cszErrMsg.c_str());
-    #endif
+                    // We can't really report this as an error unless we first check the INCLUDE environment
+                    // variable as well as the IncDirs option in .srcfiles.yaml. The resource compiler is going to
+                    // report the error, so there's not a huge advantage to reporting it here.
                     continue;
                 }
 
-                size_t posHdr = m_lstRcDependencies.GetPos(cszHeader);
-                bool   bHdrSeenBefore = (posHdr != (size_t) -1);
-                if (!bHdrSeenBefore)
-                    posHdr = m_lstRcDependencies.Add(cszHeader);
+                size_t posHdr = m_lstRcDependencies.GetPos(incName.c_str());
+                bool HdrSeenBefore = (posHdr != ttlib::npos);
+                if (!HdrSeenBefore)
+                    m_lstRcDependencies.Add(incName.c_str());
 
-                if (!bHdrSeenBefore)
-                    FindRcDependencies(pszRcFile, cszHeader,
-                                       cszRelPath);  // now search the header file for any #includes it might have
+                if (!HdrSeenBefore)
+                {
+                    // Search the header file for any #includes it might have -- those will also be dependents
+                    FindRcDependencies(rcfile, incName, relpath);
+                }
             }
         }
-
-        // Not a header file, but might still be something we are dependent on
-
         else
         {
-            char* pszKeyWord = ttFindNonSpace(kf);
-            if (!pszKeyWord || pszKeyWord[0] == '/' ||
-                pszKeyWord[0] == CH_QUOTE)  // TEXTINCLUDE typically puts things in quotes
-                continue;                   // blank line or comment line
-            pszKeyWord = ttFindSpace(pszKeyWord);
-            if (!pszKeyWord)
-                continue;  // means it's not a line that will include anything
-            pszKeyWord = ttFindNonSpace(pszKeyWord);
-            if (!pszKeyWord)
-                continue;  // means it's not a line that will include anything
-
-            for (size_t pos = 0; lstRcKeywords[pos]; ++pos)
+            // Check the RC keywords that can include files
+            for (auto keyword : RcKeywords)
             {
-                if (ttIsSameSubStr(pszKeyWord, lstRcKeywords[pos]))
+                auto posKeyword = ttlib::findstr_pos(line, keyword);
+                if (posKeyword != ttlib::npos)
                 {
-                    const char* pszFileName = ttStrChr(pszKeyWord, CH_QUOTE);
+                    // Make certain the keyword starts with whitespace. The RcKeywords list includes the trailing
+                    // space so we don't need to check for that.
+                    if (posKeyword > 0 && !ttlib::iswhitespace(line[posKeyword - 1]))
+                        continue;
 
-                    // Some keywords use quotes which aren't actually filenames -- e.g., RCDATA { "string" }
+                    auto filename = ttlib::stepover(ttlib::findstr(line, keyword));
 
-                    if (pszFileName && ttStrChr(pszFileName + 1, CH_QUOTE) && !ttStrChr(pszFileName, '{'))
+                    // Old resource files may have some old 16-bit declarations before the filename.
+                    for (auto skip : aRemovals)
                     {
-                        ttCStr cszFile;
-                        cszFile.GetQuotedString(pszFileName);
-
-                        // Backslashes are doubled -- so convert them into forward slashes
-
-                        char* pszSlash = ttStrStr(cszFile, "\\\\");
-                        if (pszSlash)
+                        if (ttlib::issameprefix(filename, skip))
                         {
-                            do
-                            {
-                                *pszSlash++ = '/';
-                                ttStrCpy(pszSlash, pszSlash + 1);
-                                pszSlash = ttStrStr(pszSlash, "\\\\");
-                            } while (pszSlash);
+                            filename = ttlib::stepover(filename);
                         }
-
-                        if (pszHdr)
-                        {
-                            ttCStr cszHdr(pszHdr);
-                            if (ttFileExists(cszHdr))  // we only want the directory
-                            {
-                                char* pszFilePortion = ttFindFilePortion(cszHdr);
-                                *pszFilePortion = 0;
-                            }
-                            // First we normalize it to the header
-                            NormalizeHeader(pszHdr, cszFile);
-                            cszHdr.AppendFileName(cszFile);
-                            // Then we normalize it to our RC file
-                            NormalizeHeader(pszRcFile, cszHdr);
-                            cszFile = cszHdr;
-                        }
-                        else
-                            NormalizeHeader(pszRcFile, cszFile);
-
-                        if (!ttFileExists(cszFile))
-                        {
-                            ttCStr cszErrMsg;
-                            // BUGBUG: [KeyWorks - 7/11/2019] See Issue #46
-                            // (https://github.com/KeyWorksRW/keyBld/issues/46) Once we commit to wxWidgets, we
-                            // need to use wxNumberFormatter to deal with the number.
-                            cszErrMsg.printf(_tt("%s(%kt,%kt):  warning: cannot locate include file %s"),
-                                             pszHdr ? pszHdr : pszRcFile, curLine,
-                                             (size_t)(pszFileName - kf.GetLnPtr()), (char*) cszFile);
-                            m_lstErrMessages.append(cszErrMsg.c_str());
-                            break;
-                        }
-                        size_t posHdr = m_lstRcDependencies.GetPos(cszFile);
-                        bool   bHdrSeenBefore = (posHdr != (size_t) -1);
-                        if (!bHdrSeenBefore)
-                            posHdr = m_lstRcDependencies.Add(cszFile);
                     }
-                    break;
+
+                    // Some keywords such as FONT are also used in DIALOGs and don't actually load a file. By only
+                    // looking at names within quotes and even then only processing it if the file actually exists,
+                    // we avoid misinterpreting a DIALOG directive versus something that actually includes a file.
+                    if (!filename.empty() && filename[0] == '\"')
+                    {
+                        ttlib::cstr parseName;
+                        parseName.ExtractSubString(filename);
+                        if (!parseName.empty() && parseName.fileExists())
+                        {
+                            ttlib::cstr root{ inFilename };
+                            root.remove_filename();
+                            parseName.make_relative(root);
+                            parseName.backslashestoforward();
+
+                            m_lstRcDependencies.Add(parseName.c_str());
+                        }
+                    }
                 }
             }
         }
     }
     return true;
 }
-
-// We need all header files to use the same path for comparison purposes
-
-const char* CNinja::NormalizeHeader(ttlib::cview BaseFile, ttCStr& cszHeader)
-{
-    assert(cszHeader.IsNonEmpty());
-
-    if (!BaseFile.empty())
-        ttConvertToRelative(BaseFile, cszHeader, cszHeader);
-
-    cszHeader.MakeLower();
-    return cszHeader;
-}
-
-#endif
