@@ -8,35 +8,45 @@
 
 #include "pch.h"
 
-#include <ttlibwin.h>
-#include <ttnamespace.h>
+#include <iostream>
 
 #include <ttTR.h>  // Function for translating strings
 
-#include <stdio.h>
-
 #include "dryrun.h"  // CDryRun
 
-void CDryRun::NewFile(const char* pszFile)
+void CDryRun::NewFile(std::string_view filename)
 {
-    ttASSERT_MSG(pszFile, "NULL pointer!");
+    ttASSERT(!filename.empty());
 
-    m_cszFilename = pszFile;
+    m_filename = filename;
 }
 
-void CDryRun::DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew)
+void CDryRun::DisplayFileDiff(const ttlib::viewfile& orgfile, const ttlib::textfile& newfile)
 {
-    if (m_cszFilename.IsNonEmpty())
-        printf(_tt("%s dryrun changes:\n"), (char*) m_cszFilename);
-
-    fileNew.PrepForReadLine();
-    while (fileNew.ReadLine())
+    if (!m_filename.empty())
     {
-        fileOrg.ReadLine();
-        if (!ttIsSameStr(fileOrg, fileNew))
+        std::cout << m_filename << _tt(" dryrun changes:") << '\n';
+    }
+
+    size_t posOrg = 0;
+    size_t posNew = 0;
+
+    for (; posOrg < orgfile.size() && posNew < newfile.size(); ++posOrg, ++posNew)
+    {
+        if (!newfile[posOrg].issameas(orgfile[posNew]))
         {
-            printf(_tt("%s Options: section updated.\n"), (char*) fileOrg);
-            printf(_tt("    new: %s\n"), (char*) fileNew);
+            auto posSync = newfile.FindLineContaining(orgfile[posOrg]);
+            if (posSync != ttlib::npos)
+            {
+                while (posNew < posSync)
+                {
+                    std::cout << "new: " << newfile[posNew++] << '\n';
+                }
+                continue;
+            }
+
+            std::cout << posOrg << ": " << orgfile[posOrg] << '\n';
+            std::cout << posNew << ": " << newfile[posNew] << '\n';
         }
     }
 }

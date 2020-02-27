@@ -101,19 +101,20 @@ public:
 
     std::vector<OPTION> m_Options;
 
-    const char* getOptValue(size_t index)
+    const std::string& getOptValue(size_t index) const
     {
         assert(index < LAST);
-        return m_Options.at(index).value.c_str();
+        return m_Options.at(index).value;
     }
 
     void setOptValue(size_t index, std::string_view value);
 
-    const char* getCmtValue(size_t index)
+    const std::string& getCmtValue(size_t index) const
     {
         assert(index < LAST);
-        return m_Options.at(index).comment.c_str();
+        return m_Options.at(index).comment;
     }
+
     void setCmtValue(size_t index, std::string_view value)
     {
         assert(index < LAST);
@@ -241,7 +242,7 @@ public:
     // [KeyWorks - 01-31-2020] The Get/Set functions use the old s_aInitialOptions/m_aUpdateOpts arrays.
     // Newer code should use the get/set functions (lowercase leading letter) to use the new Opt class vector.
 
-    std::string_view getOptValue(size_t index) const
+    const std::string& getOptValue(size_t index) const
     {
         assert(index < Opt::LAST);
         return m_opt.m_Options.at(index).value;
@@ -253,7 +254,7 @@ public:
         return tt::issamestr(m_opt.m_Options.at(index).value, "true");
     }
 
-    std::string_view getCmtValue(size_t index) const
+    const std::string& getCmtValue(size_t index) const
     {
         assert(index < Opt::LAST);
         return m_opt.m_Options.at(index).comment;

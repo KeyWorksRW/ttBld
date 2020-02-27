@@ -8,30 +8,30 @@
 
 #pragma once
 
-#include <ttlibwin.h>
-#include <ttnamespace.h>
-
-#include <ttstr.h>   // ttCStr
-#include <ttfile.h>  // ttCFile
+#include <ttlibspace.h>
+#include <ttcstr.h>
+#include <ttcview.h>
+#include <tttextfile.h>
 
 // Class to store information for a dry-run of functionality
 class CDryRun
 {
 public:
-    CDryRun() { m_bEnabled = false; }
+    CDryRun() {  }
 
     // Class functions
 
-    void        Enable() { m_bEnabled = true; }
-    bool        IsEnabled() { return m_bEnabled; }
-    const char* GetFileName() { return m_cszFilename; }
+    void Enable() { isEnabled = true; }
+    bool IsEnabled() { return isEnabled; }
+    ttlib::cview GetFileName() { return m_filename; }
 
-    void NewFile(const char* pszFile);
-    void DisplayFileDiff(ttCFile& fileOrg, ttCFile& fileNew);
+    void NewFile(std::string_view filename);
+    // Display each line that differs from the original
+    void DisplayFileDiff(const ttlib::viewfile& orgfile, const ttlib::textfile& newfile);
 
 private:
     // Class members
 
-    ttCStr m_cszFilename;
-    bool   m_bEnabled;
+    ttlib::cstr m_filename;
+    bool isEnabled{false};
 };

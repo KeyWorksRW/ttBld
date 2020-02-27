@@ -14,14 +14,17 @@
 #include <unordered_map>
 
 #include <ttlibwin.h>
-#include <ttnamespace.h>
+
+#include <ttnamespace.h>  // Contains the tt namespace functions common to all tt libraries
+#include <ttcstr.h>       // Classes for handling zero-terminated char strings.
+#include <ttcvector.h>    // Vector of ttlib::cstr strings
 
 #include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
 #include <ttfile.h>   // ttCFile
 #include <ttarray.h>  // ttCArray
 #include <ttmap.h>    // ttCMap
 
-#include <ttstring.h>  // ttString, ttStrlist -- String and vector classes with some additional functionality
+#include <ttstr.h>  // ttlib::cstr, ttStrlist -- String and vector classes with some additional functionality
 
 #include "options.h"  // CSrcOptions
 
@@ -30,14 +33,15 @@ using namespace sfopt;  // OPT_ options are used extensively, hence using the na
 extern const char* txtSrcFilesFileName;
 
 // Attempts to locate .srcfiles.yaml
-std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir = ttEmptyString);
+ttlib::cstr locateProjectFile(std::string_view StartDir = ttEmptyString);
 
 // Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 class CSrcFiles : public CSrcOptions
 {
 public:
-    // If specified, pszNinjaDir is the directory to create .ninja scripts in
-    CSrcFiles(const char* pszNinjaDir = nullptr);
+    CSrcFiles();
+    // NinjaDir is the directory to create .ninja scripts in
+    CSrcFiles(std::string_view NinjaDir);
 
     // Public functions
 
@@ -46,7 +50,7 @@ public:
     const char* GetTargetDebug();
 
     const char* GetBuildScriptDir();
-    bool        AddFile(const char* pszFile) { return m_lstSrcFiles.addfilename(pszFile); }
+    bool AddFile(const char* pszFile) { return m_lstSrcFiles.addfilename(pszFile); }
 
     // If pszFile is NULL, CSrcFiles will attempt to locate the file (see LocateSrcFiles()).
     bool ReadFile(std::string_view filename = "");
@@ -74,7 +78,7 @@ public:
     // These are just for convenience--it's fine to call GetOption directly
 
     const char* GetProjectName() { return GetOption(OPT_PROJECT); }
-    const char* GetPchHeader();
+    const char* GetPchHeader() const;
     // Source file to compile the precompiled header
     const char* GetPchCpp();
 
@@ -91,9 +95,9 @@ public:
     int GetMinorRequired() { return m_RequiredMinor; }
     int GetSubRequired() { return m_RequiredSub; }
 
-    ttStrVector& GetSrcFilesList() { return m_lstSrcFiles; }
+    ttlib::cstrVector& GetSrcFilesList() { return m_lstSrcFiles; }
 
-    void SetReportingFile(const char* pszFile) { m_ReportPath = pszFile; }
+    void SetReportingFile(std::string_view filename) { m_ReportPath = filename; }
 
     void AddError(const std::stringstream& msg) { AddError(msg.str()); };
 #if !defined(NDEBUG)  // Starts debug section.
@@ -102,8 +106,8 @@ public:
     void AddError(std::string_view err) { m_lstErrMessages.append(err); }
 #endif
 
-    const char* GetOptionValue(size_t index) { return m_opt.getOptValue(index); }
-    void        SetOptionValue(size_t index, std::string_view value) { return m_opt.setOptValue(index, value); }
+    const char* GetOptionValue(size_t index) { return m_opt.getOptValue(index).c_str(); }
+    void SetOptionValue(size_t index, std::string_view value) { return m_opt.setOptValue(index, value); }
     Opt::OPTION& GetOpt(size_t index) { return m_opt.m_Options.at(index); }
 
 protected:
@@ -125,39 +129,39 @@ protected:
     const char* GetReportFilename() { return (m_ReportPath.empty()) ? "" : m_ReportPath.c_str(); }
 
 protected:
-    ttString m_LIBname;  // Name and location of any additional library to build (used by Lib: section)
-    ttString m_RCname;   // Resource file to build (if any)
-    ttString m_HPPname;  // HTML Help project file
+    ttlib::cstr m_LIBname;  // Name and location of any additional library to build (used by Lib: section)
+    ttlib::cstr m_RCname;   // Resource file to build (if any)
+    ttlib::cstr m_HPPname;  // HTML Help project file
 
     ttCHeap m_ttHeap;  // All the ttCList files will be attatched to this heap
 
-    ttStrVector m_lstSrcFiles;  // List of all source files
-    ttStrVector m_lstLibFiles;  // List of any files used to build additional library
-    ttStrVector m_lstIdlFiles;  // List of any idl files to compile with midl compiler
+    ttlib::cstrVector m_lstSrcFiles;  // List of all source files
+    ttlib::cstrVector m_lstLibFiles;  // List of any files used to build additional library
+    ttlib::cstrVector m_lstIdlFiles;  // List of any idl files to compile with midl compiler
 
-    ttStrVector m_lstErrMessages;  // List of any errors that occurred during processing
+    ttlib::cstrVector m_lstErrMessages;  // List of any errors that occurred during processing
 
     ttCStrIntList m_lstAddSrcFiles;     // Additional .srcfiles.yaml to read into Files: section
     ttCStrIntList m_lstLibAddSrcFiles;  // Additional .srcfiles.yaml to read into Lib: section
     ttCList m_lstSrcIncluded;  // The names of all files included by all ".include path/.srcfiles.yaml" directives
 
-    ttString m_pchCPPname;
+    ttlib::cstr m_pchCPPname;
 
 private:
     // Class members
 
-    ttString m_srcfilename;
-    ttString m_ReportPath;  // Path to use when reporting a problem.
-    ttString m_bldFolder;   // This is where we write the .ninja files, and is ninja's builddir.
+    ttlib::cstr m_srcfilename;
+    ttlib::cstr m_ReportPath;  // Path to use when reporting a problem.
+    ttlib::cstr m_bldFolder;   // This is where we write the .ninja files, and is ninja's builddir.
 
-    ttString m_relTargetFolder;
-    ttString m_dbgTargetFolder;
+    ttlib::cstr m_relTargetFolder;
+    ttlib::cstr m_dbgTargetFolder;
 
     std::string m_strTargetDir;
 
-    int m_RequiredMajor;  // These three get filled in to the minimum ttBld version required to process.
-    int m_RequiredMinor;
-    int m_RequiredSub;
+    int m_RequiredMajor{ 1 };  // These three get filled in to the minimum ttBld version required to process.
+    int m_RequiredMinor{ 0 };
+    int m_RequiredSub{ 0 };
 
-    bool m_bRead;            // File has been read and processed.
+    bool m_bRead{ false };  // File has been read and processed.
 };

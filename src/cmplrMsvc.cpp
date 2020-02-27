@@ -8,9 +8,10 @@
 
 #include "pch.h"
 
-#include <ttfile.h>     // ttCFile
+#include <ttlibspace.h>
 #include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
-#include <ttstr.h>
+#include <ttcstr.h>
+#include <ttcview.h>
 
 #include "ninja.h"  // CNinja
 
@@ -18,44 +19,45 @@
 
 void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
 {
-    m_pkfOut->WriteEol("msvc_deps_prefix = Note: including file:\n");
-    m_pkfOut->WriteEol("# -EHsc\t// Structured exception handling");
+    m_ninjafile.push_back("msvc_deps_prefix = Note: including file:");
+    m_ninjafile.addblankline();
+    m_ninjafile.push_back("# -EHsc\t// Structured exception handling");
 
     // Write comment section explaining the compiler flags in use
     if (cmplr == CMPLR_MSVC && m_gentype == GEN_RELEASE)
     {
         // These are only supported by the MSVC compiler
-        m_pkfOut->WriteEol("# -GL\t  // Whole program optimization");
+        m_ninjafile.push_back("# -GL\t  // Whole program optimization");
     }
 
     if (m_gentype == GEN_RELEASE)
     {
         if (GetBoolOption(OPT_STDCALL))
-            m_pkfOut->WriteEol("# -Gz\t// __stdcall calling convention");
+            m_ninjafile.push_back("# -Gz\t// __stdcall calling convention");
         if (IsStaticCrtRel())
-            m_pkfOut->WriteEol("# -MT\t// Static CRT multi-threaded library");
+            m_ninjafile.push_back("# -MT\t// Static CRT multi-threaded library");
         else
-            m_pkfOut->WriteEol("# -MD\t// Dynamic CRT multi-threaded library");
+            m_ninjafile.push_back("# -MD\t// Dynamic CRT multi-threaded library");
         if (IsExeTypeLib())
-            m_pkfOut->WriteEol("# -Zl\t// Don't specify default runtime library in .obj file");
+            m_ninjafile.push_back("# -Zl\t// Don't specify default runtime library in .obj file");
         if (IsOptimizeSpeed())
-            m_pkfOut->WriteEol("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
+            m_ninjafile.push_back("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
         else
-            m_pkfOut->WriteEol("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
+            m_ninjafile.push_back("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
 
-        m_pkfOut->WriteEol("# -FC\t  // Full path to source code file in diagnostics");
+        m_ninjafile.push_back("# -FC\t  // Full path to source code file in diagnostics");
     }
     else
     {
         if (IsStaticCrtDbg())
-            m_pkfOut->WriteEol("# -MD\t// Multithreaded static CRT");
+            m_ninjafile.push_back("# -MD\t// Multithreaded static CRT");
         else
-            m_pkfOut->WriteEol("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
-        m_pkfOut->WriteEol("# -Z7\t  // Produces object files with full symbolic debugging information");
-        m_pkfOut->WriteEol("# -FC\t  // Full path to source code file in diagnostics");
+            m_ninjafile.push_back("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
+        m_ninjafile.push_back("# -Z7\t  // Produces object files with full symbolic debugging information");
+        m_ninjafile.push_back("# -FC\t  // Full path to source code file in diagnostics");
     }
 
-    m_pkfOut->WriteEol();  // force a blank line after the options are listed
+    m_ninjafile.addblankline();  // force a blank line after the options are listed
 }
 
 // The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for
@@ -63,6 +65,7 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
 
 void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 {
+    auto& tmpline = m_ninjafile.GetTempLine();
     // First we write the flags common to both compilers
 
     if (m_gentype == GEN_DEBUG)
@@ -73,7 +76,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         // recognize -Zf.
 
         // clang-format off
-        m_pkfOut->printf("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7",
+        tmpline.Format("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s%s%s -Od -Z7",
                          IsExeTypeConsole() ? " -D_CONSOLE" : "",
                          GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
                          GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
@@ -83,7 +86,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     else
     {
         // clang-format off
-        m_pkfOut->printf(
+        tmpline.Format(
             "cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s%s%s%s", IsExeTypeConsole() ? " -D_CONSOLE" : "",
             GetOption(OPT_WARN_LEVEL) ? GetOption(OPT_WARN_LEVEL) : "4",
             GetBoolOption(OPT_STDCALL) ? " -Gz" : "",
@@ -91,160 +94,141 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
             IsOptimizeSpeed() ? " -O2" : " -O1");
         // clang-format on
     }
-    m_pkfOut->WriteStr(" -FC");
 
-    if (GetOption(OPT_CFLAGS_CMN))
+    tmpline += " -FC";
+
+    if (!getOptValue(Opt::CFLAGS_CMN).empty())
     {
-        m_pkfOut->WriteChar(' ');
-        m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_CMN));
+        tmpline += (" " + getOptValue(Opt::CFLAGS_CMN));
     }
 
-    ttCStr cszEnv;
-    if (cszEnv.GetEnv("CFLAGS"))
     {
-        m_pkfOut->WriteChar(' ');
-        m_pkfOut->WriteStr(cszEnv);
+        ttlib::cstr env;
+        if (env.assignEnvVar("CFLAGS"))
+        {
+            tmpline += " " + env;
+        }
     }
-
-    if (GetOption(OPT_CFLAGS_REL) && m_gentype == GEN_RELEASE)
+    if (m_gentype == GEN_RELEASE)
     {
-        m_pkfOut->WriteChar(' ');
-        m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_REL));
+        if (!getOptValue(Opt::CFLAGS_REL).empty())
+        {
+            tmpline += (" " + getOptValue(Opt::CFLAGS_REL));
+        }
+        ttlib::cstr env;
+        if (env.assignEnvVar("CFLAGSR"))
+        {
+            tmpline += " " + env;
+        }
     }
-
-    if (m_gentype == GEN_RELEASE && cszEnv.GetEnv("CFLAGSR"))
+    else if (m_gentype == GEN_DEBUG)
     {
-        m_pkfOut->WriteChar(' ');
-        m_pkfOut->WriteStr(cszEnv);
-    }
-
-    if (GetOption(OPT_CFLAGS_DBG) && m_gentype == GEN_DEBUG)
-    {
-        m_pkfOut->WriteChar(' ');
-        m_pkfOut->WriteStr(GetOption(OPT_CFLAGS_DBG));
-    }
-
-    if (m_gentype == GEN_DEBUG && cszEnv.GetEnv("CFLAGSD"))
-    {
-        m_pkfOut->WriteChar(' ');
-        m_pkfOut->WriteStr(cszEnv);
+        if (!getOptValue(Opt::CFLAGS_DBG).empty())
+        {
+            tmpline += (" " + getOptValue(Opt::CFLAGS_DBG));
+        }
+        ttlib::cstr env;
+        if (env.assignEnvVar("CFLAGSD"))
+        {
+            tmpline += " " + env;
+        }
     }
 
     // Now write out the compiler-specific flags
 
     if (cmplr == CMPLR_MSVC)
     {
-        if (GetBoolOption(OPT_PERMISSIVE))
-            m_pkfOut->WriteStr(" -permissive-");
         if (m_gentype == GEN_RELEASE)
-            m_pkfOut->WriteStr(" -GL");  // whole program optimization
+            tmpline += " -GL";
     }
 
     else
     {
-        m_pkfOut->WriteStr(" -D__clang__");  // unlike the non-MSVC compatible version, clang-cl.exe (version 7)
-                                             // doesn't define this
-        m_pkfOut->WriteStr(" -fms-compatibility-version=19");              // Version of MSVC to be compatible with
-        m_pkfOut->WriteStr(GetBoolOption(OPT_32BIT) ? " -m32" : " -m64");  // specify the platform
-        if (m_gentype == GEN_RELEASE)
-            m_pkfOut->WriteStr(" -flto -fwhole-program-vtables");  // whole program optimization
+        // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
+        tmpline += " -D__clang__";
+        tmpline += " -fms-compatibility-version=19";
+        tmpline += getOptBoolean(Opt::BIT32) ? " -m32" : " -m64";
 
-        if (GetOption(OPT_CLANG_CMN))
+        if (m_gentype == GEN_RELEASE)
         {
-            m_pkfOut->WriteChar(' ');
-            m_pkfOut->WriteStr(GetOption(OPT_CLANG_CMN));
+            tmpline += " -flto -fwhole-program-vtables";
+            if (!getOptValue(Opt::CLANG_REL).empty())
+                tmpline += (" " + getOptValue(Opt::CLANG_REL));
         }
-        if (m_gentype == GEN_RELEASE && GetOption(OPT_CLANG_REL))
+
+        if (!getOptValue(Opt::CLANG_CMN).empty())
         {
-            m_pkfOut->WriteChar(' ');
-            m_pkfOut->WriteStr(GetOption(OPT_CLANG_REL));
+            tmpline += (" " + getOptValue(Opt::CLANG_CMN));
         }
-        if (m_gentype == GEN_DEBUG && GetOption(OPT_CLANG_DBG))
+
+        if (m_gentype == GEN_DEBUG && !getOptValue(Opt::CLANG_DBG).empty())
         {
-            m_pkfOut->WriteChar(' ');
-            m_pkfOut->WriteStr(GetOption(OPT_CLANG_DBG));
+            tmpline += (" " + getOptValue(Opt::CLANG_DBG));
         }
     }
 
-    if (GetOption(OPT_INC_DIRS))
+    if (!getOptValue(Opt::INC_DIRS).empty())
     {
         ttEnumStr IncDirs(getOptValue(Opt::INC_DIRS));
-        for (auto dir :IncDirs)
+        for (auto dir : IncDirs)
         {
-            m_pkfOut->printf(" -I%kq", dir.c_str());
+            ttlib::cstr tmp;
+            tmpline += tmp.Format(" -I%ks", dir.c_str());
         }
     }
 
     if (GetPchHeader())
-        m_pkfOut->printf(" /Fp$outdir/%s", (char*) m_cszPCH);
-
-    m_pkfOut->WriteEol("\n");
+    {
+        ttlib::cstr tmp;
+        tmpline += tmp.Format(" /Fp$outdir/%s", m_pchHdrName.c_str());
+    }
+    m_ninjafile.WriteTempLine();
+    m_ninjafile.addblankline();
 }
 
 void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 {
-    if (cmplr == CMPLR_MSVC)
+    ttlib::cview compiler = (cmplr == CMPLR_MSVC ? "cl.exe" : "clang-cl.exe");
+    auto& tmpline = m_ninjafile.GetTempLine();
+
+    if (GetPchHeader())
     {
-        if (GetPchHeader())
-        {
-            m_pkfOut->printf("rule compilePCH\n"
-                             "  deps = msvc\n"
-                             "  command = cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
-                             GetProjectName(),
-                             GetPchHeader()  // typically stdafx.h or precomp.h
-            );
-            m_pkfOut->WriteEol("  description = compiling $in\n");
-        }
+        m_ninjafile.push_back("rule compilePCH");
+        m_ninjafile.push_back("  deps = msvc");
+        tmpline.Format("  command = %s -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s", compiler.c_str(),
+                       GetProjectName(),
+                       GetPchHeader()  // typically stdafx.h or precomp.h
+        );
+        m_ninjafile.WriteTempLine();
+        m_ninjafile.push_back("  description = compiling $in");
+        m_ninjafile.addblankline();
+    }
 
-        // Write compile directive
+    m_ninjafile.push_back("rule compile");
+    m_ninjafile.push_back("  deps = msvc");
 
-        if (m_gentype == GEN_DEBUG)
-        {
-            m_pkfOut->printf("rule compile\n"
-                             "  deps = msvc\n"
-                             "  command = cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
-                             GetProjectName(), GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
-        }
-        else
-        {
-            m_pkfOut->printf("rule compile\n"
-                             "  deps = msvc\n"
-                             "  command = cl.exe -c $cflags -Fo$out $in %s%s\n",
-                             GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
-        }
+    ttlib::cstr addyu;
+    if (GetPchHeader())
+    {
+        addyu = " -Yu";
+        addyu += GetPchHeader();
+    }
+
+    if (m_gentype == GEN_DEBUG)
+    {
+        tmpline.Format("  command = %s -c $cflags -Fo$out $in -Fd$outdir/%s.pdb", compiler.c_str(),
+                       GetProjectName());
     }
     else
     {
-        if (GetPchHeader())
-        {
-            m_pkfOut->printf("rule compilePCH\n"
-                             "  deps = msvc\n"
-                             "  command = clang-cl.exe -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s\n",
-                             GetProjectName(),
-                             GetPchHeader()  // typically stdafx.h or precomp.h
-            );
-            m_pkfOut->WriteEol("  description = compiling $in\n");
-        }
-
-        // Write compile directive
-
-        if (m_gentype == GEN_DEBUG)
-        {
-            m_pkfOut->printf("rule compile\n"
-                             "  deps = msvc\n"  // clang-cl supports -showIncludes, same as msvc
-                             "  command = clang-cl.exe -c $cflags -Fo$out $in -Fd$outdir/%s.pdb %s%s\n",
-                             GetProjectName(), GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
-        }
-        else
-        {
-            m_pkfOut->printf("rule compile\n"
-                             "  deps = msvc\n"
-                             "  command = clang-cl.exe -c $cflags -Fo$out $in %s%s\n",
-                             GetPchHeader() ? "-Yu" : "", GetPchHeader() ? GetPchHeader() : "");
-        }
+        tmpline.Format("  command = %s -c $cflags -Fo$out $in", compiler.c_str());
     }
+    if (!addyu.empty())
+        tmpline += addyu;
+    m_ninjafile.WriteTempLine();
 
-    m_pkfOut->WriteEol("  description = compiling $in\n");
+    m_ninjafile.WriteTempLine("  description = compiling $in");
+    m_ninjafile.addblankline();
 }
 
 void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
@@ -252,214 +236,199 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
     if (IsExeTypeLib())
         return;  // lib directive should be used if the project is a library
 
-    ttString cszRule("rule link\n  command = ");
+    m_ninjafile.push_back("rule link");
+    auto& tmpline = m_ninjafile.GetTempLine();
+    tmpline = "  command = ";
 
-    if (GetBoolOption(OPT_MS_LINKER))
-        cszRule += "link.exe /nologo";
+    if (getOptBoolean(Opt::MS_LINKER))
+        tmpline += "link.exe /nologo";
     else
-        cszRule += (cmplr == CMPLR_MSVC ? "link.exe -nologo" : "lld-link.exe");
+        tmpline += (cmplr == CMPLR_MSVC ? "link.exe -nologo" : "lld-link.exe");
 
-    cszRule += " /out:$out /manifest:no";
+    tmpline += " /out:$out /manifest:no";
     if (IsExeTypeDll())
-        cszRule += " /dll";
-    cszRule += (GetBoolOption(OPT_32BIT) ? " /machine:x86" : " /machine:x64");
+        tmpline += " /dll";
+    tmpline += (getOptBoolean(Opt::BIT32) ? " /machine:x86" : " /machine:x64");
 
-    if (GetOption(OPT_LINK_CMN))
-    {
-        cszRule += " ";
-        cszRule += GetOption(OPT_LINK_CMN);
-    }
-    if (GetOption(OPT_LINK_REL) && (m_gentype == GEN_RELEASE))
-    {
-        cszRule += " ";
-        cszRule += GetOption(OPT_LINK_REL);
-    }
+    if (!getOptValue(Opt::LINK_CMN).empty())
+        tmpline += (" " + getOptValue(Opt::LINK_CMN));
+
+    if (m_gentype == GEN_RELEASE && !getOptValue(Opt::LINK_REL).empty())
+        tmpline += (" " + getOptValue(Opt::LINK_REL));
 
     if (m_gentype == GEN_DEBUG)
     {
-        if (GetOption(OPT_LINK_DBG))
-        {
-            cszRule += " ";
-            cszRule += GetOption(OPT_LINK_DBG);
-        }
+        if (!getOptValue(Opt::LINK_DBG).empty())
+            tmpline += (" " + getOptValue(Opt::LINK_DBG));
 
-        if (GetOption(OPT_NATVIS))
-        {
-            cszRule += " /natvis:";
-            cszRule += GetOption(OPT_NATVIS);
-        }
-        cszRule += " /debug /pdb:$outdir/";
-        cszRule += GetProjectName();
-        cszRule += ".pdb";
+        if (!getOptValue(Opt::NATVIS).empty())
+            tmpline += (" /natvis:" + getOptValue(Opt::NATVIS));
+
+        tmpline += " /debug /pdb:$outdir/";
+        tmpline += GetProjectName();
+        tmpline += ".pdb";
     }
     else
     {
-        cszRule += " /opt:ref /opt:icf";
+        tmpline += " /opt:ref /opt:icf";
         if (cmplr == CMPLR_MSVC)
-            cszRule += " /ltcg";  // whole program optimization, MSVC only
+            tmpline += " /ltcg";  // whole program optimization, MSVC only
     }
-    cszRule += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
+    tmpline += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
 
-    if (GetOption(OPT_LIB_DIRS))
+    if (!getOptValue(Opt::LIB_DIRS).empty())
     {
         ttEnumView enumLib(getOptValue(Opt::LIB_DIRS), ';');
         for (auto iter : enumLib)
         {
-            cszRule += " /LIBPATH:";
-            cszRule += iter;
+            tmpline += " /LIBPATH:";
+            tmpline += iter;
         }
     }
 
-    if (GetOption(OPT_LIBS_CMN))
+    if (!getOptValue(Opt::LIBS_CMN).empty())
     {
         ttEnumView enumLib(getOptValue(Opt::LIBS_CMN), ';');
         for (auto iter : enumLib)
         {
-            cszRule += " ";
-            cszRule += iter;
+            tmpline += " ";
+            tmpline += iter;
         }
     }
 
-    if (GetOption(OPT_LIBS_DBG) && m_gentype == GEN_DEBUG)
+    if (m_gentype == GEN_DEBUG && !getOptValue(Opt::LIBS_DBG).empty())
     {
         ttEnumView enumLib(getOptValue(Opt::LIBS_DBG), ';');
         for (auto iter : enumLib)
         {
-            cszRule += " ";
-            cszRule += iter;
+            tmpline += " ";
+            tmpline += iter;
         }
     }
 
-    if (GetOption(OPT_LIBS_REL) && (m_gentype == GEN_RELEASE))
+    if (m_gentype == GEN_RELEASE && !getOptValue(Opt::LIBS_REL).empty())
     {
         ttEnumView enumLib(getOptValue(Opt::LIBS_REL), ';');
         for (auto iter : enumLib)
         {
-            cszRule += " ";
-            cszRule += iter;
+            tmpline += " ";
+            tmpline += iter;
         }
     }
 
-    cszRule += " $in\n";
-    m_pkfOut->WriteText(cszRule);
-    m_pkfOut->WriteEol("  description = linking $out\n");
+    m_ninjafile.WriteTempLine(" $in");
+    m_ninjafile.push_back("  description = linking $out");
+    m_ninjafile.addblankline();
 }
 
 void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
 {
+    if (!IsExeTypeLib())
+        return;
+
+    auto& tmpline = m_ninjafile.GetTempLine();
+
+    m_ninjafile.push_back("rule lib");
     if (cmplr == CMPLR_MSVC)
     {
-        if (IsExeTypeLib())
-        {
-            m_pkfOut->printf("rule lib\n  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in\n",
-                             (GetBoolOption(OPT_32BIT)) ? "x86" : "x64");
-            m_pkfOut->WriteEol("  description = creating library $out\n");
-        }
+        tmpline.Format("  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in",
+                       (GetBoolOption(OPT_32BIT)) ? "x86" : "x64");
+        m_ninjafile.WriteTempLine();
     }
     else
     {
-        if (IsExeTypeLib())
-        {
-            // MSVC -LTCG option is not supported by lld
-            m_pkfOut->printf("rule lib\n  command = lld-link.exe /lib /machine:%s /out:$out $in\n",
-                             (GetBoolOption(OPT_32BIT)) ? "x86" : "x64");
-            m_pkfOut->WriteEol("  description = creating library $out\n");
-        }
+        // MSVC -LTCG option is not supported by lld
+        tmpline.Format("  command = lld-link.exe /lib /machine:%s /out:$out $in",
+                       (GetBoolOption(OPT_32BIT)) ? "x86" : "x64");
+        m_ninjafile.WriteTempLine();
     }
+    m_ninjafile.push_back("  description = creating library $out");
+    m_ninjafile.addblankline();
 }
 
 void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
 {
-    if (ttFileExists(GetRcFile()))
+    if (!GetRcFile().fileExists())
+        return;
+
+    auto& tmpline = m_ninjafile.GetTempLine();
+    m_ninjafile.push_back("rule rc");
+
+    if (cmplr == CMPLR_CLANG && !getOptBoolean(Opt::MS_RC))
+        tmpline = "  command = llvm-rc.exe -nologo";
+    else
+        tmpline = "  command = rc.exe -nologo";
+
+    if (!getOptValue(Opt::INC_DIRS).empty())
     {
-        if (cmplr == CMPLR_CLANG && !GetBoolOption(OPT_MS_RC))
-            m_pkfOut->WriteStr("rule rc\n  command = llvm-rc.exe -nologo");
-        else
-            m_pkfOut->WriteStr("rule rc\n  command = rc.exe -nologo");
-
-        if (GetOption(OPT_INC_DIRS))
+        ttEnumStr enumDirs(getOptValue(Opt::INC_DIRS));
+        for (auto iter : enumDirs)
         {
-            ttEnumStr enumDirs(getOptValue(Opt::INC_DIRS));
-            for (auto iter : enumDirs)
-            {
-                std::stringstream out;
-                // If the header file contains a space, then put it in quotes
-                if (iter.find(' ') != tt::npos)
-                    out << " -I\"" << iter << '\'';
-                else
-                    out << " -I" << iter;
-                m_pkfOut->WriteText(out);
-            }
+            ttlib::cstr tmp;
+            if (iter.contains(" "))
+                tmp.Format(" -I%ks", iter.c_str());
+            else
+                tmp.Format(" -I%s", iter.c_str());
+            tmpline += tmp;
         }
-
-        if (GetOption(OPT_RC_CMN))
-        {
-            m_pkfOut->WriteChar(CH_SPACE);
-            m_pkfOut->WriteStr(GetOption(OPT_RC_CMN));
-        }
-        if (m_gentype == GEN_DEBUG)
-        {
-            m_pkfOut->WriteStr(" -d_DEBUG");
-            if (GetOption(OPT_RC_DBG))
-            {
-                m_pkfOut->WriteChar(CH_SPACE);
-                m_pkfOut->WriteStr(GetOption(OPT_RC_DBG));
-            }
-        }
-        else if ((m_gentype == GEN_RELEASE) && GetOption(OPT_RC_REL))
-        {
-            m_pkfOut->WriteChar(CH_SPACE);
-            m_pkfOut->WriteStr(GetOption(OPT_RC_REL));
-        }
-        m_pkfOut->WriteEol(" /l 0x409 -fo$out $in\n  description = resource compiler... $in\n");
     }
+
+    if (!getOptValue(Opt::RC_CMN).empty())
+        tmpline += (" " + getOptValue(Opt::RC_CMN));
+
+    if (m_gentype == GEN_DEBUG)
+    {
+        tmpline += " -d_DEBUG";
+        if (!getOptValue(Opt::RC_DBG).empty())
+            tmpline += (" " + getOptValue(Opt::RC_DBG));
+    }
+    else if (m_gentype == GEN_RELEASE && !getOptValue(Opt::RC_REL).empty())
+    {
+        tmpline += (" " + getOptValue(Opt::RC_REL));
+    }
+    m_ninjafile.WriteTempLine(" /l 0x409 -fo$out $in");
+    m_ninjafile.push_back("  description = resource compiler... $in");
+    m_ninjafile.addblankline();
 }
 
 void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
 {
-    if (m_lstIdlFiles.size())
+    if (!m_lstIdlFiles.size())
+        return;
+
+    auto& tmpline = m_ninjafile.GetTempLine();
+    m_ninjafile.push_back("rule midl");
+
+    if (getOptBoolean(Opt::BIT32))
+        tmpline = "  command = midl.exe /nologo /win32";
+    else
+        tmpline = "  command = midl.exe /nologo /x64";
+
+    if (!getOptValue(Opt::INC_DIRS).empty())
     {
-        if (GetBoolOption(OPT_32BIT))
-            m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /win32");
-        else
-            m_pkfOut->WriteStr("rule midl\n  command = midl.exe /nologo /x64");
-
-        if (GetOption(OPT_INC_DIRS))
+        ttEnumStr enumDirs(getOptValue(Opt::INC_DIRS));
+        for (auto iter : enumDirs)
         {
-            ttEnumStr enumDirs(getOptValue(Opt::INC_DIRS));
-            for (auto iter : enumDirs)
-            {
-                std::stringstream out;
-                // If the header file contains a space, then put it in quotes
-                if (iter.find(' ') != tt::npos)
-                    out << " -I\"" << iter << '\'';
-                else
-                    out << " -I" << iter;
-                m_pkfOut->WriteText(out);
-            }
+            ttlib::cstr tmp;
+            if (iter.contains(" "))
+                tmp.Format(" -I%ks", iter.c_str());
+            else
+                tmp.Format(" -I%s", iter.c_str());
+            tmpline += tmp;
         }
-
-        if (GetOption(OPT_MDL_CMN))
-        {
-            m_pkfOut->WriteChar(CH_SPACE);
-            m_pkfOut->WriteStr(GetOption(OPT_MDL_CMN));
-        }
-        if (m_gentype == GEN_DEBUG)
-        {
-            // m_pkfOut->WriteStr(" -D_DEBUG");
-            if (GetOption(OPT_MDL_DBG))
-            {
-                m_pkfOut->WriteChar(CH_SPACE);
-                m_pkfOut->WriteStr(GetOption(OPT_MDL_DBG));
-            }
-        }
-        else if ((m_gentype == GEN_RELEASE) && GetOption(OPT_MDL_REL))
-        {
-            m_pkfOut->WriteChar(CH_SPACE);
-            m_pkfOut->WriteStr(GetOption(OPT_MDL_REL));
-        }
-        m_pkfOut->WriteEol(" $in\n  description = midl compiler... $in\n");
     }
+
+    if (!getOptValue(Opt::MIDL_CMN).empty())
+        tmpline += (" " + getOptValue(Opt::MIDL_CMN));
+
+    if (m_gentype == GEN_DEBUG && !getOptValue(Opt::MIDL_DBG).empty())
+        tmpline += (" " + getOptValue(Opt::MIDL_DBG));
+    else if (m_gentype == GEN_RELEASE && !getOptValue(Opt::MIDL_DBG).empty())
+        tmpline += (" " + getOptValue(Opt::MIDL_DBG));
+
+    m_ninjafile.WriteTempLine(" $in");
+    m_ninjafile.push_back("  description = midl compiler... $in");
+    m_ninjafile.addblankline();
 }
 
 void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
@@ -471,12 +440,17 @@ void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
 
     for (size_t pos = 0; pos < m_lstIdlFiles.size(); ++pos)
     {
-        ttCStr cszTypeLib(m_lstIdlFiles[pos].c_str());
-        cszTypeLib.ChangeExtension(".tlb");
-        ttCStr cszHeader(m_lstIdlFiles[pos].c_str());
-        cszHeader.ChangeExtension(".h");
-        m_pkfOut->printf("build %s : midl %s\n\n", (char*) cszHeader, m_lstIdlFiles[pos].c_str());
-        m_pkfOut->printf("build %s : phony %s\n\n", (char*) cszTypeLib, (char*) cszHeader);
+        ttlib::cstr TypeLib(m_lstIdlFiles[pos]);
+        TypeLib.replace_extension(".tlb");
+        ttlib::cstr Header(m_lstIdlFiles[pos]);
+        Header.replace_extension(".h");
+        m_ninjafile.GetTempLine().Format("build %s : midl %s", Header.c_str(), m_lstIdlFiles[pos].c_str());
+        m_ninjafile.WriteTempLine();
+        m_ninjafile.addblankline();
+
+        m_ninjafile.GetTempLine().Format("build %s : phony %s", TypeLib.c_str(), Header.c_str());
+        m_ninjafile.WriteTempLine();
+        m_ninjafile.addblankline();
     }
 }
 
@@ -486,20 +460,23 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way
     // around this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
+    auto& tmpline = m_ninjafile.GetTempLine();
+
     std::stringstream line;
     // "build file : cmd"
-    line << "build " << ((m_gentype == GEN_DEBUG) ? GetTargetDebug() : GetTargetRelease()) << " : ";
+    tmpline.Format("build %s : ", m_gentype == GEN_DEBUG ? GetTargetDebug() : GetTargetRelease());
 
     if (IsExeTypeLib())
-        line << "lib";
+        tmpline += "lib";
     else
-        line << "link";
+        tmpline += "link";
 
-    if (ttFileExists(GetRcFile()))
+    if (GetRcFile().fileExists())
     {
-        ttString name(GetRcFile());
+        ttlib::cstr name(GetRcFile());
         name.replace_extension("");
-        line << " $resout/" << name << ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
+        tmpline += (" $resout/" + name);
+        tmpline += m_gentype == GEN_DEBUG ? "D.res" : ".res";
     }
 
     bool bPchSeen = false;
@@ -509,25 +486,22 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         auto ext = file.extension();
         if (ext.empty() || std::tolower(ext[1] != 'c'))
             continue;
-        ttString objFile(file.filename());
+        ttlib::cstr objFile(file.filename());
         objFile.replace_extension(".obj");
-        if (!bPchSeen && objFile.issamestri(m_cszPCHObj.c_str()))
+        if (!bPchSeen && objFile.issameas(m_pchHdrNameObj, ttlib::CASE::utf8))
             bPchSeen = true;
-        line << " $";
-        m_pkfOut->WriteEol(line.str().c_str());
-        line.str("");
-        line << "  $outdir/" << objFile;
+        tmpline += " $";
+        m_ninjafile.WriteTempLine();
+        tmpline = ("  $outdir/" + objFile);
     }
 
     // The precompiled object file must be linked. It may or may not show up in the list of source files. We check
     // here to make certain it does indeed get written.
 
-    if (!bPchSeen && m_cszPCHObj.IsNonEmpty())
+    if (!bPchSeen && !m_pchHdrNameObj.empty())
     {
-        line << " $";
-        m_pkfOut->WriteEol(line.str().c_str());
-        line.str("");
-        line << "  $outdir/" << m_cszPCHObj.c_str();
+        m_ninjafile.WriteTempLine(" $");
+        tmpline = ("  $outdir/" + m_pchHdrNameObj);
     }
 
     switch (m_gentype)
@@ -535,10 +509,9 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         case GEN_DEBUG:
             for (size_t pos = 0; m_lstBldLibsD.InRange(pos); ++pos)
             {
-                line << " $";
-                m_pkfOut->WriteEol(line.str().c_str());
-                line.str("");
-                line << "  " << (const char*) m_lstBldLibsD[pos];
+                m_ninjafile.WriteTempLine(" $");
+                tmpline = "  ";
+                tmpline += (const char*) m_lstBldLibsD[pos];
             }
             break;
 
@@ -546,23 +519,19 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         default:
             for (size_t pos = 0; m_lstBldLibsR.InRange(pos); ++pos)
             {
-                line << " $";
-                m_pkfOut->WriteEol(line.str().c_str());
-                line.str("");
-                line << "  " << (const char*) m_lstBldLibsR[pos];
+                m_ninjafile.WriteTempLine(" $");
+                tmpline = "  ";
+                tmpline += (const char*) m_lstBldLibsR[pos];
             }
             break;
     }
 
-    if (m_gentype == GEN_DEBUG && GetOption(OPT_NATVIS))
+    if (m_gentype == GEN_DEBUG && !getOptValue(Opt::NATVIS).empty())
     {
-        line << " $";
-        m_pkfOut->WriteEol(line.str().c_str());
-        line.str("");
-        line << "  | " << GetOption(OPT_NATVIS);
+        m_ninjafile.WriteTempLine(" $");
+        tmpline = ("  | " + getOptValue(Opt::NATVIS));
     }
-
-    m_pkfOut->WriteEol(line.str().c_str());
+    m_ninjafile.WriteTempLine();
 }
 
 #endif  // defined(_WIN32)

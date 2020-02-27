@@ -29,6 +29,7 @@
 #include <iostream>
 
 #include <ttconsole.h>
+#include <ttcstr.h>
 
 #include "ninja.h"  // CNinja
 
@@ -90,8 +91,8 @@ int main(int argc, char** argv)
     UPDATE_TYPE upType = UPDATE_NORMAL;
     size_t      Action = 0;
 
-    ttString RootDir;      // this will be set if (Action & ACT_DIR) is set
-    ttString SrcFilePath;  // location of srcfiles.yaml
+    ttlib::cstr RootDir;      // this will be set if (Action & ACT_DIR) is set
+    ttlib::cstr SrcFilePath;  // location of srcfiles.yaml
 
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
@@ -159,8 +160,8 @@ int main(int argc, char** argv)
 
     if (SrcFilePath.empty())
     {
-        auto pPath = locateProjectFile(RootDir);
-        if (pPath->empty())
+        auto path = locateProjectFile(RootDir);
+        if (path.empty())
         {
             ttConsoleColor clr(ttConsoleColor::LIGHTRED);
             std::cout << _tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, "
@@ -168,7 +169,7 @@ int main(int argc, char** argv)
                       << '\n';
             return 1;
         }
-        SrcFilePath = *pPath;
+        SrcFilePath = std::move(path);
     }
 
     CNinja cNinja;
@@ -199,12 +200,12 @@ int main(int argc, char** argv)
 
     // Display any errors that occurred during processing
 
-    if (cNinja.GetErrorCount())
+    if (cNinja.getErrorMsgs().size())
     {
         ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-        for (size_t pos = 0; pos < cNinja.GetErrorCount(); pos++)
+        for (auto iter : cNinja.getErrorMsgs())
         {
-            std::cout << cNinja.GetError(pos) << '\n';
+            std::cout << iter << '\n';
         }
         std::cout << "\n\n";
     }

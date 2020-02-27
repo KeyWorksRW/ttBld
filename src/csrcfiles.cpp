@@ -17,6 +17,7 @@
 #include <ttmem.h>       // ttCMem, ttCTMem
 
 #include <ttstring.h>  // ttString, ttCwd, ttStrVector
+#include <ttcwd.h>     // Class for storing and optionally restoring the current directory
 
 #include "csrcfiles.h"  // CSrcFiles
 
@@ -31,39 +32,37 @@ typedef enum
     SECTION_LIB,
 } SRC_SECTION;
 
-CSrcFiles::CSrcFiles(const char* pszNinjaDir)
+CSrcFiles::CSrcFiles()
     : m_ttHeap(true)
     // make all ttCList classes use the same sub-heap
     , m_lstLibAddSrcFiles(m_ttHeap)
     , m_lstSrcIncluded(m_ttHeap)
 {
-    m_bRead = false;
+}
 
-    m_RequiredMajor = 1;
-    m_RequiredMinor = 0;
-    m_RequiredSub = 0;
-
-    if (pszNinjaDir)
-        m_bldFolder = pszNinjaDir;
-    else
-        m_bldFolder = txtDefBuildDir;
+CSrcFiles::CSrcFiles(std::string_view NinjaDir)
+    : m_ttHeap(true)
+    // make all ttCList classes use the same sub-heap
+    , m_lstLibAddSrcFiles(m_ttHeap)
+    , m_lstSrcIncluded(m_ttHeap)
+{
+    m_bldFolder = NinjaDir;
 }
 
 bool CSrcFiles::ReadFile(std::string_view filename)
 {
     if (filename.empty())
     {
-        auto pFile = locateProjectFile();
-        if (pFile->empty())
+        auto project = locateProjectFile();
+        if (project.empty())
         {
-            ttString cwd;
-            cwd.assignCwd();
+            ttlib::cwd cwd;
             std::stringstream msg;
             msg << "Cannot locate .srcfiles.yaml starting in " << cwd;
             m_lstErrMessages.append(msg.str());
             return false;  // if we still can't find it, bail
         }
-        m_srcfilename = *pFile;
+        m_srcfilename = std::move(project);
     }
     else
         m_srcfilename = filename;
@@ -88,7 +87,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
     InitOptions();
 
-    char*       pszLine;
+    char* pszLine;
     SRC_SECTION section = SECTION_UNKNOWN;
 
     while (kfSrcFiles.ReadLine(&pszLine))
@@ -177,7 +176,7 @@ void CSrcFiles::ParseOption(std::string_view yamlLine)
     ttString comment;
 
     ttString line = tt::findnonspace(yamlLine);
-    auto     pos = line.findoneof(":=");
+    auto pos = line.findoneof(":=");
     if (pos == ttString::npos)
     {
         AddError(_tt("Invalid Option -- missing ':' or '=' character"));
@@ -372,7 +371,7 @@ void CSrcFiles::ProcessFile(char* pszFile)
         if (pszIncFile)
         {
             ttCStr cszFile(pszIncFile);
-            char*  pszTmp = ttStrChr(cszFile, '#');
+            char* pszTmp = ttStrChr(cszFile, '#');
             if (pszTmp)
             {
                 *pszTmp = 0;
@@ -436,7 +435,7 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         if (pszIncFile)
         {
             ttCStr cszFile(pszIncFile);
-            char*  pszTmp = ttStrChr(cszFile, '#');
+            char* pszTmp = ttStrChr(cszFile, '#');
             if (pszTmp)
             {
                 *pszTmp = 0;
@@ -447,37 +446,35 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
         return;
     }
 
-    ttCwd cwd;
+    ttlib::cwd cwd(true);
 
-    ttCStr cszFullPath(pszFile);
-    cszFullPath.FullPathName();
+    ttlib::cstr FullPath(pszFile);
+    FullPath.make_absolute();
 
     CSrcFiles cIncSrcFiles;
-    cIncSrcFiles.SetReportingFile(cszFullPath);
+    cIncSrcFiles.SetReportingFile(FullPath);
 
     try
     {
-        ttCStr cszNewDir(cszFullPath);
-        char*  pszFilePortion = ttFindFilePortion(cszNewDir);
-        if (pszFilePortion)
-            *pszFilePortion = 0;
-        fs::current_path(cszNewDir.c_str());
+        ttlib::cstr NewDir(FullPath);
+        auto filename = NewDir.filename();\
+        if (!filename.empty())
+        fs::current_path(filename.c_str());
     }
     catch (const std::exception& e)
     {
         std::cerr << e.what() << '\n';
     }
 
-    if (!cIncSrcFiles.ReadFile(cszFullPath.c_str()))
+    if (!cIncSrcFiles.ReadFile(FullPath))
     {
-        ttString str(_tt("Unable to locate the file "));
-        str += cszFullPath;
+        ttlib::cstr str(_tt("Unable to locate the file ") + FullPath);
         m_lstErrMessages.append(str);
         return;
     }
 
     ttCTMem<char*> szPath(1024);
-    ttStrCpy(szPath, 1024, cszFullPath);
+    ttStrCpy(szPath, 1024, FullPath.c_str());
     char* pszFilePortion = ttFindFilePortion(szPath);
 
     ttCStr cszRelative;
@@ -593,12 +590,9 @@ bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, t
     return true;
 }
 
-const char* CSrcFiles::GetPchHeader()
+const char* CSrcFiles::GetPchHeader() const
 {
-    const char* pszPch = GetOption(OPT_PCH);
-    if (pszPch && ttIsSameStrI(pszPch, "none"))
-        return nullptr;
-    return pszPch;
+    return !getOptValue(Opt::PCH).empty() ? getOptValue(Opt::PCH).c_str() : nullptr;
 }
 
 const char* CSrcFiles::GetPchCpp()
@@ -833,22 +827,21 @@ static const char* aProjectLocations[] = {
     // clang-format on
 };
 
-std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir)
+ttlib::cstr locateProjectFile(std::string_view StartDir)
 {
 #if !defined(NDEBUG)  // Starts debug section.
-    ttString cwd;
-    cwd.assignCwd();
+    ttlib::cwd cwd;
 #endif
-    auto pPath = std::make_unique<ttString>();
+    ttlib::cstr path;
     if (!StartDir.empty())
     {
         for (auto iter : aProjectLocations)
         {
-            pPath->assign(StartDir);
-            pPath->append_filename(iter);
-            if (pPath->fileExists())
+            path.assign(StartDir);
+            path.append_filename(iter);
+            if (path.fileExists())
             {
-                return pPath;
+                return path;
             }
         }
     }
@@ -856,13 +849,13 @@ std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir)
     {
         for (auto iter : aProjectLocations)
         {
-            pPath->assign(iter);
-            if (pPath->fileExists())
+            path.assign(iter);
+            if (path.fileExists())
             {
-                return pPath;
+                return path;
             }
         }
     }
-    pPath->clear();
-    return pPath;
+    path.clear();
+    return path;
 }

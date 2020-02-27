@@ -10,19 +10,18 @@
 
 #include <ttTR.h>  // Function for translating strings
 
-#include <ttfile.h>     // ttCFile
 #include <ttenumstr.h>  // ttCEnumStr
-#include <ttstring.h>   // ttString, ttCwd, ttStrVector
+#include <ttcwd.h>      // Class for storing and optionally restoring the current directory
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
 #include "verninja.h"  // CVerMakeNinja
 // #include "funcs.h"     // List of function declarations
 
-const char* aCppExt[] = { ".cpp", ".cxx", ".cc", nullptr };
+const char* aCppExt[]{ ".cpp", ".cxx", ".cc", nullptr };
 
-CNinja::CNinja(const char* pszNinjaDir)
-    : CSrcFiles(pszNinjaDir)
+CNinja::CNinja(std::string_view NinjaDir)
+    : CSrcFiles(NinjaDir)
 {
 #if !defined(NDEBUG)  // Starts debug section.
     assert(ReadFile());
@@ -30,31 +29,24 @@ CNinja::CNinja(const char* pszNinjaDir)
     if (!ReadFile())
         return;
 #endif
-    m_bForceWrite = false;
+    m_isWriteIfNoChange = false;
 
     CVerMakeNinja verSrcFiles;
-    m_bInvalidVersion = verSrcFiles.IsSrcFilesNewer(GetMajorRequired(), GetMinorRequired(), GetSubRequired());
+    m_isInvalidVersion = verSrcFiles.IsSrcFilesNewer(GetMajorRequired(), GetMinorRequired(), GetSubRequired());
 
     if (!GetProjectName())
     {
-        ttCStr cszCwd;
-        cszCwd.GetCWD();
-        char* pszTmp = (char*) cszCwd.FindLastSlash();
-        if (!pszTmp[1])  // if path ends with a slash, remove it -- we need that last directory name
-            *pszTmp = 0;
+        ttlib::cstr projname;
+        projname.assignCwd();
+        projname.backslashestoforward();
+        if (projname.back() == '/')
+            projname.erase(projname.size() - 1);
 
-        char* pszProj = ttFindFilePortion(cszCwd);
-        if (ttIsSameStrI(pszProj, "src"))  // Use the parent folder for the root if the current directory is "src"
+        if (projname.hasFilename("src"))
         {
-            pszTmp = (char*) cszCwd.FindLastSlash();
-            if (pszTmp)
-            {
-                *pszTmp = 0;  // remove the last slash and filename, forcing the directory name above to be the
-                              // "filename"
-                pszProj = ttFindFilePortion(cszCwd);
-            }
+            projname.remove_filename();
         }
-        UpdateOption(OPT_PROJECT, pszProj);
+        UpdateOption(OPT_PROJECT, projname.subview().viewfilename());
     }
 
     m_lstRcDependencies.SetFlags(ttCList::FLG_URL_STRINGS);
@@ -62,23 +54,23 @@ CNinja::CNinja(const char* pszNinjaDir)
     if (!m_RCname.empty())
         FindRcDependencies(m_RCname.c_str());
 
-    const char* pszEnv = getenv("TTBLD_CFLAGS");
-    if (pszEnv)
+    auto envBldCFlags = getenv("TTBLD_CFLAGS");
+    if (envBldCFlags)
     {
-        ttCStr csz;
-        if (GetOption(OPT_CFLAGS_CMN))
+        ttlib::cstr flags;
+        if (!getOptValue(Opt::CFLAGS_CMN).empty())
         {
-            csz = GetOption(OPT_CFLAGS_CMN);
-            csz += " ";
+            flags = getOptValue(Opt::CFLAGS_CMN);
+            flags += " ";
         }
-        csz += pszEnv;
-        UpdateOption(OPT_CFLAGS_CMN, (char*) csz);
+        flags += envBldCFlags;
+        setOptValue(Opt::CFLAGS_CMN, flags);
     }
 
     ProcessBuildLibs();
 }
 
-static const char* aszCompilerPrefix[] = {
+static const char* aszCompilerPrefix[]{
     "msvc_",
     "clang_",
     "gcc_",
@@ -86,80 +78,80 @@ static const char* aszCompilerPrefix[] = {
 
 bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 {
-    ttCFile file;
-    m_pkfOut = &file;
+    m_ninjafile.clear();
+
     m_gentype = gentype;
 
     // Note that resout goes to the same directory in all builds. The actual filename will have a 'D' appended for
     // debug builds. Currently, 32 and 64 bit builds of the resource file are identical.
 
-    ttCStr cszResOut("resout = ");
-    cszResOut += GetBldDir();
-    cszResOut.AddTrailingSlash();
-    cszResOut.AppendFileName("res");
+    ttlib::cstr resout("resout = ");
+    resout += GetBldDir();
+    resout.append_filename("res");
 
-    ttCStr cszBuildDir("builddir = ");
-    cszBuildDir += GetBldDir();
+    ttlib::cstr builddir("builddir = ");
+    builddir += GetBldDir();
 
-    ttCStr cszOutDir("outdir = ");
-    cszOutDir += GetBldDir();
-    cszOutDir.AddTrailingSlash();
+    ttlib::cstr outdir("outdir = ");
+    outdir += GetBldDir();
+    outdir.addtrailingslash();
 
-    m_cszScriptFile = GetBldDir();
-    m_cszScriptFile.backslashestoforward();
-    if (m_cszScriptFile.back() != '/')
-        m_cszScriptFile.push_back('/');
+    m_scriptFilename = GetBldDir();
+    m_scriptFilename.backslashestoforward();
+    m_scriptFilename.addtrailingslash();
 
     switch (gentype)
     {
         case GEN_DEBUG:
-            cszOutDir += aszCompilerPrefix[cmplr];
-            cszOutDir += "Debug";
-            m_cszScriptFile += aszCompilerPrefix[cmplr];
-            m_cszScriptFile += "dbg.ninja";
+            outdir += aszCompilerPrefix[cmplr];
+            outdir += "Debug";
+            m_scriptFilename += aszCompilerPrefix[cmplr];
+            m_scriptFilename += "dbg.ninja";
             break;
 
         case GEN_RELEASE:
         default:
-            cszOutDir += aszCompilerPrefix[cmplr];
-            cszOutDir += "Release";
-            m_cszScriptFile += aszCompilerPrefix[cmplr];
-            m_cszScriptFile += "rel.ninja";
+            outdir += aszCompilerPrefix[cmplr];
+            outdir += "Release";
+            m_scriptFilename += aszCompilerPrefix[cmplr];
+            m_scriptFilename += "rel.ninja";
             break;
     }
 
-    file.SetUnixLF();  // WARNING!!! NINJA doesn't allow \r characters (or \t for that matter)
-    file.printf("# WARNING: This file is auto-generated by %s.\n# Changes you make will be lost if it is "
-                "auto-generated again!\n\n",
-                txtVersion);
+    auto& temp = m_ninjafile.GetTempLine();
+    temp += "# WARNING: This file is auto-generated by ";
+    temp += txtVersion;
+    m_ninjafile.WriteTempLine(".");
+    m_ninjafile.push_back("# Changes you make will be lost if it is auto-generated again!");
+    m_ninjafile.addblankline();
 
     // REVIEW: [KeyWorks - 11-19-2019] We don't write any new features, could probably state 1.0 and it would work.
-    file.WriteEol("ninja_required_version = 1.8\n");
-    file.WriteEol(cszBuildDir);
+    m_ninjafile.push_back("ninja_required_version = 1.8");
+    m_ninjafile.addblankline();
 
-    file.WriteEol(cszOutDir);
-    file.WriteEol(cszResOut);
-
-    file.WriteEol();
+    m_ninjafile.push_back(builddir);
+    m_ninjafile.push_back(outdir);
+    m_ninjafile.push_back(resout);
+    m_ninjafile.addblankline();
 
     // Figure out the filenames to use for the source and output for a precompiled header
 
     if (GetPchHeader())
     {
-        m_cszPCH = GetProjectName();
-        m_cszPCH.ChangeExtension(".pch");
+        m_pchHdrName = GetProjectName();
+        m_pchHdrName.replace_extension(".pch");
 
-        m_cszCPP_PCH = GetPchCpp();
-        m_cszPCHObj = ttFindFilePortion(m_cszCPP_PCH);
-        m_cszPCHObj.ChangeExtension(".obj");
+        m_pchCppName = GetPchCpp();
+        m_pchHdrNameObj.assign(m_pchCppName.filename());
+        m_pchHdrNameObj.replace_extension(".obj");
 
-        if (!ttFileExists(m_cszCPP_PCH))
+        if (!m_pchCppName.fileExists())
         {
-            ttCStr cszErrorMsg;
-            cszErrorMsg.printf(
-                "No C++ source file found that matches %s -- precompiled header will not build correctly.\n",
+            ttlib::cstr msg;
+            msg.Format(
+                _tt("No C++ source file found that matches %s -- precompiled header will not build correctly."),
                 GetPchHeader());
-            puts(cszErrorMsg);
+            AddError(msg);
         }
     }
 
@@ -182,28 +174,35 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     // files included the header file, then we could create a dependency. However, that would essentially require
     // an accurate C/C++ preprocessor to run on every source file which is far beyond the scope of this project.
     // Instead, we add the dependency to the precompiled header if there is one, and if not, we add the dependency
-    // to every source file. Unfortunately that does mean that every time the .idl file changes, then every source
-    // file will get rebuilt whether or not a particular source file actually uses the generated header file.
+    // to every source m_ninjafile. Unfortunately that does mean that every time the .idl file changes, then every
+    // source file will get rebuilt whether or not a particular source file actually uses the generated header
+    // m_ninjafile.
 
     if (GetPchHeader())
     {
-        file.printf("build $outdir/%s: compilePCH %s", (char*) m_cszPCHObj, (char*) m_cszCPP_PCH);
+        temp = m_ninjafile.GetTempLine();
+        temp.Format("build $outdir/%s: compilePCH %s", m_pchHdrNameObj.c_str(), m_pchCppName.c_str());
         if (m_lstIdlFiles.size())
         {
-            file.WriteEol(" | $");
+            temp += " | $";
+            m_ninjafile.WriteTempLine();
             size_t pos;
-            ttCStr cszHdr;
+            ttlib::cstr header;
             for (pos = 0; pos < m_lstIdlFiles.size() - 1; ++pos)
             {
-                cszHdr = m_lstIdlFiles[pos].c_str();
-                cszHdr.ChangeExtension(".h");
-                file.printf("  %s $\n", (char*) cszHdr);
+                header.assign(m_lstIdlFiles[pos]);
+                header.replace_extension(".h");
+                temp.Format("  %s $", header.c_str());
+                m_ninjafile.WriteTempLine();
             }
-            cszHdr = m_lstIdlFiles[pos].c_str();
-            cszHdr.ChangeExtension(".h");
-            file.printf("  %s", (char*) cszHdr);  // write the last one without the trailing pipe
+            header.assign(m_lstIdlFiles[pos]);
+            header.replace_extension(".h");
+            temp.Format("  %s", header.c_str());
+            m_ninjafile.WriteTempLine();
         }
-        file.WriteEol("\n");
+        if (!temp.empty())
+            m_ninjafile.WriteTempLine();
+        m_ninjafile.addblankline();
     }
 
     // Write the build rules for all source files
@@ -213,61 +212,74 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         auto ext = srcFile.extension();
         if (ext.empty() || std::tolower(ext[1] != 'c'))
             continue;
-        if (srcFile.issamestr(m_cszCPP_PCH.c_str()))
+        if (srcFile.issameas(m_pchCppName))
             continue;
 
-        ttString objFile(srcFile.filename());
+        ttlib::cstr objFile(srcFile.filename());
         objFile.replace_extension(".obj");
 
-        if (m_cszPCHObj.IsNonEmpty())  // we add m_cszPCHObj so it appears as a dependency and gets compiled, but
-                                       // not linked to
-            file.printf("build $outdir/%s: compile %s | $outdir/%s\n\n", objFile.c_str(), srcFile.c_str(),
-                        m_cszPCHObj.c_str());
+        if (!m_pchHdrNameObj.empty())
+        {
+            // we add m_pchHdrNameObj so it appears as a dependency and gets compiled, but not linked to
+            m_ninjafile.GetTempLine().Format("build $outdir/%s: compile %s | $outdir/%s", objFile.c_str(),
+                                             srcFile.c_str(), m_pchHdrNameObj.c_str());
+            m_ninjafile.WriteTempLine();
+            m_ninjafile.addblankline();
+        }
         else
         {
             // We get here if we don't have a precompiled header. We might have .idl files, which means we're going
-            // to need to add all the midl-generated header files as dependencies to each source file. See issue
-            // #80 for details.
+            // to need to add all the midl-generated header files as dependencies to each source m_ninjafile. See
+            // issue #80 for details.
 
-            file.printf("build $outdir/%s: compile %s", objFile.c_str(), srcFile.c_str());
+            m_ninjafile.GetTempLine().Format("build $outdir/%s: compile %s", objFile.c_str(), srcFile.c_str());
             if (m_lstIdlFiles.size())
             {
-                file.WriteEol(" | $");
+                m_ninjafile.WriteTempLine(" | $");
                 size_t pos;
-                ttCStr cszHdr;
+                ttlib::cstr header;
                 for (pos = 0; pos < m_lstIdlFiles.size() - 1; ++pos)
                 {
-                    cszHdr = m_lstIdlFiles[pos].c_str();
-                    cszHdr.ChangeExtension(".h");
-                    file.printf("  %s $\n", (char*) cszHdr);
+                    header.assign(m_lstIdlFiles[pos]);
+                    header.replace_extension(".h");
+                    m_ninjafile.GetTempLine().Format("  %s $", header.c_str());
+                    m_ninjafile.WriteTempLine();
                 }
-                cszHdr = m_lstIdlFiles[pos].c_str();
-                cszHdr.ChangeExtension(".h");
-                file.printf("  %s", (char*) cszHdr);  // write the last one without the trailing pipe
+                header.assign(m_lstIdlFiles[pos]);
+                header.replace_extension(".h");
+                // write the last one without the trailing pipe
+                m_ninjafile.GetTempLine().Format("  %s", header.c_str());
             }
-            file.WriteEol("\n");
+            m_ninjafile.WriteTempLine();
+            m_ninjafile.addblankline();
         }
     }
 
     // Write the build rule for the resource compiler if an .rc file was specified as a source
 
-    ttCStr cszRes;
-    if (ttFileExists(GetRcFile()))
+    if (GetRcFile().fileExists())
     {
-        cszRes = GetRcFile();
-        cszRes.RemoveExtension();
-        cszRes += ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
-        cszRes.ChangeExtension(".res");
-        file.printf("build $resout/%s: rc %s", (char*) cszRes, GetRcFile());
+        ttlib::cstr resource{ GetRcFile() };
+
+        resource.replace_extension("");
+        resource += ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
+
+        m_ninjafile.GetTempLine().Format("build $resout/%s: rc %s", resource.c_str(), GetRcFile().c_str());
 
         if (GetRcDepList()->GetCount())
-            file.WriteStr(" |");
-        for (size_t nPos = 0; nPos < GetRcDepList()->GetCount(); nPos++)
         {
-            file.WriteStr(" $\n  ");
-            file.WriteStr(GetRcDepList()->Get(nPos));
+            m_ninjafile.WriteTempLine(" | $");
+            size_t nPos = 0;
+            for (; nPos < GetRcDepList()->GetCount() - 1; nPos++)
+            {
+                temp = "  ";
+                temp += GetRcDepList()->Get(nPos);
+                m_ninjafile.WriteTempLine(" $");
+            }
+            temp = "  ";
+            m_ninjafile.WriteTempLine(GetRcDepList()->Get(nPos));
         }
-        file.WriteEol("\n");
+        m_ninjafile.addblankline();
     }
 
     // Write the final build rules to complete the project
@@ -289,54 +301,48 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         }
     }
 
-    if (m_bForceWrite)
-        return file.WriteFile(m_cszScriptFile.c_str());
+    if (m_isWriteIfNoChange)
+        return m_ninjafile.WriteFile(m_scriptFilename);
 
-    ttCFile fileOrg;
-    if (fileOrg.ReadFile(m_cszScriptFile.c_str()))
+    ttlib::viewfile fileOrg;
+    if (fileOrg.ReadFile(m_scriptFilename))
     {
-        if (strcmp(fileOrg, file) == 0)  // Only write the build script if something changed
-            return false;
-        else if (m_dryrun.IsEnabled())
+        if (m_dryrun.IsEnabled())
         {
-            m_dryrun.NewFile(m_cszScriptFile.c_str());
-            m_dryrun.DisplayFileDiff(fileOrg, file);
+            m_dryrun.NewFile(m_scriptFilename);
+            m_dryrun.DisplayFileDiff(fileOrg, m_ninjafile);
             return false;  // because we didn't write anything
+        }
+
+        if (fileOrg.issameas(m_ninjafile))
+        {
+            return false;  // nothing changed
         }
     }
 
-    if (!file.WriteFile(m_cszScriptFile.c_str()))
+    if (!m_ninjafile.WriteFile(m_scriptFilename))
     {
-        std::string str(_tt("Unable to create or write to") + m_cszScriptFile + '\n');
-        AddError(str.c_str());
+        m_ninjafile.clear();
+        std::string str(_tt("Unable to create or write to") + m_scriptFilename + '\n');
+        AddError(str);
         return false;
     }
 
     return true;
 }
 
-void CNinja::AddDependentLibrary(const char* pszLib, GEN_TYPE gentype)
-{
-    ttCStr cszLib(pszLib);
-    if (!ttStrStrI(pszLib, ".lib"))
-        cszLib += (gentype == GEN_DEBUG ? "D.lib" : ".lib");
-
-    m_pkfOut->WriteChar(CH_SPACE);
-    m_pkfOut->WriteStr(cszLib);
-}
-
 void CNinja::ProcessBuildLibs()
 {
     if (!getOptValue(Opt::BUILD_LIBS).empty())
     {
-        ttEnumStr enumLib(tt::findnonspace(getOptValue(Opt::BUILD_LIBS)), ';');
+        ttEnumStr enumLib(ttlib::findnonspace(getOptValue(Opt::BUILD_LIBS)), ';');
         for (auto iter : enumLib)
         {
-            ttCwd cwd;
+            ttlib::cwd cwd(true);
 
             // Change to the directory that should contain a .srcfiles.yaml and read it
 
-            if (!tt::ChangeDir(iter))
+            if (!ttlib::ChangeDir(iter))
             {
                 std::stringstream msg;
                 msg << _tt("The library source directory ") << iter
@@ -348,22 +354,22 @@ void CNinja::ProcessBuildLibs()
             // The current directory may just be the name of the library, but not necessarily where srcfiles is
             // located.
 
-            ttString BuildDirectory(iter);
-            ttString BuildFile(BuildDirectory);
+            ttlib::cstr BuildDirectory(iter);
+            ttlib::cstr BuildFile(BuildDirectory);
 
-            auto pPath = locateProjectFile();
-            if (!pPath->empty())
+            auto path = locateProjectFile();
+            if (!path.empty())
             {
-                ttString dir(*pPath);
+                ttlib::cstr dir = path;
                 dir.remove_filename();
                 if (!dir.empty())
                 {
-                    tt::ChangeDir(dir);
+                    ttlib::ChangeDir(dir);
                     BuildDirectory.assignCwd();
                 }
 
                 BuildFile = BuildDirectory;
-                BuildFile.append_filename(*pPath);
+                BuildFile.append_filename(path);
             }
             else
             {
@@ -380,22 +386,22 @@ void CNinja::ProcessBuildLibs()
 
                     */
 
-                    if (tt::dirExists(iter.filename()))
+                    if (ttlib::dirExists(iter.filename()))
                     {
-                        tt::ChangeDir(iter.filename());
-                        pPath = locateProjectFile(BuildDirectory);
-                        if (!pPath->empty())
+                        ttlib::ChangeDir(iter.filename());
+                        path = std::move(locateProjectFile(BuildDirectory));
+                        if (!path.empty())
                         {
                             BuildDirectory.append_filename(iter.filename());
                             BuildFile = BuildDirectory;
-                            BuildFile.append_filename(*pPath);
+                            BuildFile.append_filename(path);
                             break;
                         }
                         else
                         {
                             // We tried changing into a directory to find the file, that didn't work so we need to
                             // back out.
-                            tt::ChangeDir("..");
+                            ttlib::ChangeDir("..");
                         }
                     }
 
@@ -412,40 +418,49 @@ void CNinja::ProcessBuildLibs()
             // that had the problem.
 
             CSrcFiles cSrcFiles;
-            cSrcFiles.SetReportingFile(BuildFile.c_str());
+            cSrcFiles.SetReportingFile(BuildFile);
             // At this point, we should be in the same directory as .srcfiles.yaml
             if (cSrcFiles.ReadFile(".srcfiles.yaml"))
             {
-                ttString CurDir;
+                // REVIEW: [KeyWorks - 02-03-2020] Could we just all CurDir.make_relative()?
+
+                ttlib::cstr RelDir;
+                RelDir.assignCwd();
+                RelDir.make_relative(cwd);
+                RelDir.backslashestoforward();
+#if 1
+                // REVIEW: [KeyWorks - 02-26-2020] Once we're confident the result is identical, remove
+                // this conditional code block
+                ttlib::cstr CurDir;
                 CurDir.assignCwd();
                 ttCStr cszRelDir;
-                // REVIEW: [KeyWorks - 02-03-2020] Could we just all CurDir.make_relative()?
                 ttConvertToRelative(cwd.c_str(), CurDir.c_str(), cszRelDir);
-                m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), cszRelDir);
+                ttASSERT_MSG(ttlib::issameas(RelDir, cszRelDir.c_str()),
+                             "RelDir and cszRelDir should be identical!");
+#endif
+                m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), RelDir.c_str());
             }
 
             const char* pszLib = cSrcFiles.GetTargetDebug();
             if (pszLib)
             {
-                ttString LibDir;
+                ttlib::cstr LibDir;
                 LibDir.assignCwd();
                 LibDir.append_filename(pszLib);
-                LibDir.make_absolute();
-                ttCStr cszLib;
-                ttConvertToRelative(cwd.c_str(), LibDir.c_str(), cszLib);
-                m_lstBldLibsD += cszLib;
+                LibDir.make_relative(cwd);
+                LibDir.backslashestoforward();
+                m_lstBldLibsD += LibDir.c_str();
             }
 
             pszLib = cSrcFiles.GetTargetRelease();
             if (pszLib)
             {
-                ttString LibDir;
+                ttlib::cstr LibDir;
                 LibDir.assignCwd();
                 LibDir.append_filename(pszLib);
-                LibDir.make_absolute();
-                ttCStr cszLib;
-                ttConvertToRelative(cwd.c_str(), LibDir.c_str(), cszLib);
-                m_lstBldLibsR += cszLib;
+                LibDir.make_relative(cwd);
+                LibDir.backslashestoforward();
+                m_lstBldLibsR += LibDir.c_str();
             }
         }
     }

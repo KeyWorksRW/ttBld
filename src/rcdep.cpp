@@ -214,12 +214,12 @@ bool CNinja::FindRcDependencies(const char* pszRcFile, const char* pszHdr, const
 
 // We need all header files to use the same path for comparison purposes
 
-const char* CNinja::NormalizeHeader(const char* pszRoot, ttCStr& cszHeader)
+const char* CNinja::NormalizeHeader(ttlib::cview BaseFile, ttCStr& cszHeader)
 {
     assert(cszHeader.IsNonEmpty());
 
-    if (pszRoot && *pszRoot)
-        ttConvertToRelative(pszRoot, cszHeader, cszHeader);
+    if (!BaseFile.empty())
+        ttConvertToRelative(BaseFile, cszHeader, cszHeader);
 
     cszHeader.MakeLower();
     return cszHeader;

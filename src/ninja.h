@@ -8,8 +8,10 @@
 
 #pragma once
 
-#include <ttstring.h>  // ttString, ttStrlist -- String and vector classes with some additional functionality
-#include <ttlist.h>    // ttCList, ttCDblList, ttCStrIntList
+#include <ttcstr.h>      // Classes for handling zero-terminated char strings.
+#include <tttextfile.h>  // ttCFile
+
+#include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
@@ -18,59 +20,58 @@
 class CNinja : public CSrcFiles
 {
 public:
-    CNinja(const char* pszNinjaDir = nullptr);
+    CNinja(std::string_view NinjaDir = ttlib::emptystring);
 
-    typedef enum
+    enum GEN_TYPE : size_t
     {
         GEN_NONE,
         GEN_DEBUG,
         GEN_RELEASE
-    } GEN_TYPE;
+    };
 
-    typedef enum
+    enum CMPLR_TYPE : size_t
     {
-        // clang-format off
         // These MUST match the array of strings aszCompilerPrefix[] in ninja.cpp
-        CMPLR_MSVC     = 0,
-        CMPLR_CLANG    = 1,
-        CMPLR_GCC      = 2,
-        // clang-format on
-    } CMPLR_TYPE;
+        CMPLR_MSVC = 0,
+        CMPLR_CLANG = 1,
+        CMPLR_GCC = 2,
+    };
 
     // Public functions
 
     void ProcessBuildLibs();
+
+    // Warning: this will first clear m_ninjafile.
     bool CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr);
     bool CreateHelpFile();
 
-    size_t      GetErrorCount() { return m_lstErrMessages.size(); }
-    const char* GetError(size_t pos) { return m_lstErrMessages[pos].c_str(); }
+    const ttlib::cstrVector& getErrorMsgs() { return m_lstErrMessages; }
 
     size_t getSrcCount() { return m_lstSrcFiles.size(); }
 
     bool CreateMakeFile(bool bAllVersion = false, std::string_view Dir = ttEmptyString);
 
-    const char*      GetRcFile() { return m_RCname.c_str(); }
-    std::string_view GetScriptFile() { return m_cszScriptFile; }
+    const ttlib::cstr& GetRcFile() { return m_RCname; }
+    std::string_view GetScriptFile() { return m_scriptFilename; }
 
-    ttStrVector& GetSrcFileList() { return m_lstSrcFiles; }
-    ttStrVector* GetLibFileList() { return &m_lstLibFiles; }
-    ttCList*     GetRcDepList() { return &m_lstRcDependencies; }
+    ttlib::cstrVector& GetSrcFileList() { return m_lstSrcFiles; }
+    ttlib::cstrVector* GetLibFileList() { return &m_lstLibFiles; }
+    ttCList* GetRcDepList() { return &m_lstRcDependencies; }
 
     // Returns false if .srcfiles.yaml requires a newer version
-    bool IsValidVersion() { return m_bInvalidVersion != true; }
+    bool IsValidVersion() { return m_isInvalidVersion != true; }
 
     // Name and location of any additional library to build
-    const char* GetLibName() { return m_LIBname.c_str(); }
-    const char* GetHHPName() { return m_HPPname.c_str(); }
+    ttlib::cview GetLibName() { return m_LIBname; }
+    ttlib::cview GetHHPName() { return m_HPPname; }
 
     void EnableDryRun() { m_dryrun.Enable(); }
-    void ForceWrite(bool bForceWrite = true) { m_bForceWrite = bForceWrite; }
+    void ForceWrite(bool bForceWrite = true) { m_isWriteIfNoChange = bForceWrite; }
 
 protected:
     // Protected functions
 
-    void AddDependentLibrary(const char* pszLib, GEN_TYPE gentype);
+    // void AddDependentLibrary(std::string_view libname, GEN_TYPE gentype);
 
 #if defined(_WIN32)
     void msvcWriteCompilerComments(CMPLR_TYPE cmplr);
@@ -86,7 +87,7 @@ protected:
 #endif
 
     bool FindRcDependencies(const char* pszSrc, const char* pszHdr = nullptr, const char* pszRelPath = nullptr);
-    const char* NormalizeHeader(const char* pszBaseFile, ttCStr& cszHeader);
+    const char* NormalizeHeader(ttlib::cview BaseFile, ttCStr& cszHeader);
 
     CDryRun m_dryrun;
     ttCList m_lstRcDependencies;
@@ -94,21 +95,21 @@ protected:
 private:
     // Class members
 
-    ttCFile* m_pkfOut;
+    ttlib::textfile m_ninjafile;
     GEN_TYPE m_gentype;
 
-    ttCStr m_cszPCH;      // The .pch name that will be generated
-    ttCStr m_cszCPP_PCH;  // The .cpp name that will be used to create the .pch file
-    ttCStr m_cszPCHObj;   // The .obj file that is built to create the .pch file
-    ttCStr m_cszChmFile;  // Set if a .hhp file was specified in .srcfiles.yaml
+    ttlib::cstr m_pchHdrName;     // The .pch name that will be generated
+    ttlib::cstr m_pchCppName;     // The .cpp name that will be used to create the .pch file
+    ttlib::cstr m_pchHdrNameObj;  // The .obj file that is built to create the .pch file
+    ttlib::cstr m_chmFilename;    // Set if a .hhp file was specified in .srcfiles.yaml
 
-    ttString m_cszScriptFile;  // The .ninja file
+    ttlib::cstr m_scriptFilename;  // The .ninja file
 
     ttCList m_lstBldLibsD;
     ttCList m_lstBldLibsR;
 
     ttCDblList m_dlstTargetDir;  // Target name, directory to use
 
-    bool m_bForceWrite;      // Write the ninja file even if it hasn't changed
-    bool m_bInvalidVersion;  // True if a newer version is needed to parse the .srcfiles.yaml
+    bool m_isWriteIfNoChange{ false };  // Write the ninja file even if it hasn't changed
+    bool m_isInvalidVersion{ false };   // True if a newer version is needed to parse the .srcfiles.yaml
 };
