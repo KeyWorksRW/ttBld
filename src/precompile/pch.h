@@ -26,10 +26,10 @@
     #define _WIN32_WINNT 0x0600
     #define _WIN32_IE    0x0700
 
-    #include <windows.h>
     #include <stdint.h>
     #include <stdio.h>
     #include <stdlib.h>
+    #include <windows.h>
 #endif  // defined(_WIN32)
 
 #if defined(wxWIDGETS)
@@ -46,8 +46,8 @@
     #include "wx/chartype.h"
 
     #if defined(__WINDOWS__)
-        #include "wx/msw/wrapcctl.h"
         #include "wx/msw/private.h"
+        #include "wx/msw/wrapcctl.h"
 
         #if wxUSE_COMMON_DIALOGS
             #include <commdlg.h>
@@ -70,8 +70,8 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-#include <ttlibwin.h>  // Master header file for ttLibwin
 #include <ttTR.h>
+#include <ttlibwin.h>  // Master header file for ttLibwin
 
 // WARNING: ttstr.h must appear before ttstring.h!
 #include <ttstr.h>
