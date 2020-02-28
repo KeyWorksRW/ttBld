@@ -16,7 +16,6 @@
 #include <ttmem.h>      // ttCMem, ttCTMem
 
 #include <ttcwd.h>       // Class for storing and optionally restoring the current directory
-#include <ttstring.h>    // ttlib::cstr, ttCwd, ttStrVector
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 #include <ttwinff.h>     // Wrapper around Windows FindFile
 
@@ -30,7 +29,6 @@ typedef enum
     SECTION_UNKNOWN,
     SECTION_OPTIONS,
     SECTION_FILES,
-    SECTION_LIB,
 } SRC_SECTION;
 
 // make all ttCList classes use the same sub-heap
@@ -102,10 +100,6 @@ bool CSrcFiles::ReadFile(std::string_view filename)
             {
                 section = SECTION_OPTIONS;
             }
-
-            // REVIEW: [KeyWorks - 02-27-2020] The entire LIB section processing needs to go away.
-            // else if (ttlib::issameprefix(line, "Lib:"))
-            // section = SECTION_LIB;
             else
             {
                 section = SECTION_UNKNOWN;
@@ -120,11 +114,6 @@ bool CSrcFiles::ReadFile(std::string_view filename)
             case SECTION_FILES:
                 ProcessFile(begin);
                 break;
-
-                // REVIEW: [KeyWorks - 02-27-2020] The entire LIB section processing needs to go away.
-                // case SECTION_LIB:
-                // ProcessLibSection(begin);
-                // break;
 
             case SECTION_OPTIONS:
                 ProcessOption(begin);
@@ -258,21 +247,6 @@ void CSrcFiles::AddCompilerFlag(std::string_view flag)
         option.value += " ";
     option.value += flag;
 }
-
-#if 0
-// REVIEW: [KeyWorks - 8/7/2019] doesn't appear to be used
-void CSrcFiles::AddLibrary(const char* pszName)
-{
-    if (!ttStrStrI(GetOption(OPT_LIBS), pszName))
-    {
-        ttCStr csz(GetOption(OPT_LIBS));
-        if (csz.IsNonEmpty())
-            csz += " ";
-        csz += pszName;
-        UpdateOption(OPT_LIBS, (char*) csz);
-    }
-}
-#endif
 
 void CSrcFiles::ProcessFile(std::string_view line)
 {

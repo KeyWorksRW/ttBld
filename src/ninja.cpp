@@ -8,15 +8,13 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
-
+#include <ttTR.h>       // Function for translating strings
 #include <ttcwd.h>      // Class for storing and optionally restoring the current directory
 #include <ttenumstr.h>  // ttCEnumStr
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
 #include "verninja.h"  // CVerMakeNinja
-// #include "funcs.h"     // List of function declarations
 
 const char* aCppExt[] { ".cpp", ".cxx", ".cc", nullptr };
 
@@ -422,7 +420,7 @@ void CNinja::ProcessBuildLibs()
                 RelDir.assignCwd();
                 RelDir.make_relative(cwd);
                 RelDir.backslashestoforward();
-#if 1
+    #if 1
                 // REVIEW: [KeyWorks - 02-26-2020] Once we're confident the result is identical, remove
                 // this conditional code block
                 ttlib::cstr CurDir;
@@ -431,7 +429,7 @@ void CNinja::ProcessBuildLibs()
                 ttConvertToRelative(cwd.c_str(), CurDir.c_str(), cszRelDir);
                 ttASSERT_MSG(ttlib::issameas(RelDir, cszRelDir.c_str()),
                              "RelDir and cszRelDir should be identical!");
-#endif
+    #endif
                 m_dlstTargetDir.Add(cSrcFiles.GetProjectName().c_str(), RelDir.c_str());
 #endif
             }
