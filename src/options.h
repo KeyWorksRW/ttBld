@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      options.h
-// Purpose:   Class for storing/retrieving options in a .srcfiles.yaml file
+// Purpose:   Structures and enum for storing/retrieving options in a .srcfiles.yaml file
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)

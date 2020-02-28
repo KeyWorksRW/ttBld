@@ -8,9 +8,8 @@
 
 #include "pch.h"
 
-#include <ttlibwin.h>
-#include <ttnamespace.h>
-#include <ttstr.h>
+#include <ttcview.h>     // string_view functionality on a zero-terminated char string.
+#include <ttlibspace.h>  // Contains the ttlib namespace functions/declarations common to all ttLib libraries
 
 #include "verninja.h"  // CVerMakeNinja
 
@@ -22,38 +21,17 @@ CVerMakeNinja::CVerMakeNinja()
     m_minMinor = 0;
     m_minSub = 0;
 
-    const char* psz = txtOptVersion;  // we assume this string to be "n.n.n" where n is an integer for major,
-                                      // minor, and sub version
-    m_major = (int) ttAtoi(psz);
-    psz = ttStrChr(psz, '.') + 1;
-    m_minor = (int) ttAtoi(psz);
-    psz = ttStrChr(psz, '.') + 1;
-    ttASSERT_MSG(ttIsDigit(*psz), "Invalid txtOptVersion string! Many bad things can happen if this isn't fixed!");
-    m_sub = (int) ttAtoi(psz);
-}
+    ttlib::cview version = txtOptVersion;  // we assume this string to be "n.n.n" where n is an integer for major,
+                                           // minor, and sub version
+    m_major = ttlib::atoi(version);
+    auto pos = version.find('.');
+    version = version.subview(pos + 1);
 
-bool CVerMakeNinja::IsSrcFilesNewer(const char* pszRequired)
-{
-    ttASSERT_MSG(pszRequired, "NULL pointer!");
+    m_minor = ttlib::atoi(version);
+    pos = version.find('.');
+    version = version.subview(pos + 1);
 
-    while (!ttIsDigit(*pszRequired))
-        ++pszRequired;
-
-    int major = (int) ttAtoi(pszRequired);
-
-    pszRequired = ttStrChr(pszRequired, '.');
-    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttBld version line!");
-    if (!pszRequired || !ttIsDigit(pszRequired[1]))
-        return false;  // we don't know what the version number is
-    int minor = (int) ttAtoi(++pszRequired);
-
-    pszRequired = ttStrChr(pszRequired, '.');
-    ttASSERT_MSG(pszRequired && ttIsDigit(pszRequired[1]), "Invalid ttBld version line!");
-    if (!pszRequired || !ttIsDigit(pszRequired[1]))
-        return false;  // we don't know what the version number is
-    int sub = (int) ttAtoi(++pszRequired);
-
-    return IsSrcFilesNewer(major, minor, sub);
+    m_sub = ttlib::atoi(version);
 }
 
 bool CVerMakeNinja::IsSrcFilesNewer(int majorSrcFiles, int minorSrcFiles, int subSrcFiles)

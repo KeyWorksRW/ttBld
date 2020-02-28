@@ -27,6 +27,8 @@ Files:
     dryrun.cpp          # CDryRun class for testing
     ninja.cpp           # CNinja for creating .ninja scripts
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
-    parsehhp.cpp        # CParseHHP class for parsing a .hhp file
     rcdep.cpp           # Contains functions for parsing RC dependencies
     verninja.cpp        # CVerMakeNinja class
+
+    # This doesn't currently compile -- need some valid help projects to test it out on first
+    # parsehhp.cpp        # CParseHHP class for parsing a .hhp file

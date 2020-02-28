@@ -8,7 +8,9 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
+#include <ttTR.h>        // Function for translating strings
+#include <ttlibspace.h>  // Contains the ttlib namespace functions/declarations common to all ttLib libraries
+#include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
 #include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
@@ -22,14 +24,12 @@ CParseHHP::CParseHHP(const char* pszHHPName)
 {
     m_section = SECTION_UNKNOWN;
     m_HPPname = pszHHPName;
-    m_chmFilename = (char*) m_HPPname;
+    m_chmFilename = m_HPPname;
     m_chmFilename.replace_extension(".chm");
     m_cszRoot = pszHHPName;
-    m_cszRoot.FullPathName();
-    char* pszFile = ttFindFilePortion(m_cszRoot);
-    if (pszFile)
-        *pszFile = 0;
-    m_cszCWD.GetCWD();
+    m_cszRoot.make_absolute();
+    m_cszRoot.remove_filename();
+    m_cszCWD.assignCwd();
 }
 
 // clang-format off
@@ -49,13 +49,10 @@ namespace
 
 // This function can be called recursively if the .HHP file has a #include directive to #include another .hhp file
 
-void CParseHHP::ParseHhpFile(const char* pszHHP)
+void CParseHHP::ParseHhpFile(std::string_view filename)
 {
-    if (!pszHHP)
-        pszHHP = m_HPPname;  // use root name
-
     ttlib::viewfile file;
-    if (!file.ReadFile(pszHHP))
+    if (!file.ReadFile(filename))
     {
         // REVIEW: [randalphwa - 11/29/2018] Need a way to add error msgs to CNinja
         //      ttCStr cszMsg;
@@ -107,7 +104,7 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
             // A couple of sections sometimes include .h files -- but we only care about an #included .hhp file
 
             if (incName.hasExtension(".hhp"))
-                ParseHhpFile(incName.c_str());
+                ParseHhpFile(incName);
             continue;
         }
 
@@ -150,7 +147,7 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
                             // authoring systems don't use them -- so remove any comment just to be sure.
 
                             incName.eraseFrom(';');
-                            AddDependency(pszHHP, incName.c_str());
+                            AddDependency(filename.c_str(), incName.c_str());
                         }
                     }
                 }
@@ -175,7 +172,7 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
                     if (!incName.empty())
                     {
                         incName.eraseFrom(';');
-                        AddDependency(pszHHP, incName.c_str());
+                        AddDependency(filename, incName);
                     }
                 }
             }
@@ -210,7 +207,7 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
     }
 }
 
-void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
+void CParseHHP::AddDependency(std::string_view HHPfilename, std::string_view filename)
 {
     /*
        The problem we need to solve with this function is that filename locations in the .hhp file will be
@@ -227,13 +224,14 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
         We need to create a dependency to ../Help/html/bar.html
     */
 
-    ttCStr cszRelative;
-    ttCStr cszHHP;
+    ttlib::cstr cszRelative;
+    ttlib::cstr cszHHP;
 
-    if (!ttIsSameStrI(pszHHP, m_HPPname))
+    if (!ttlib::issameas(HHPfilename, filename))
     {
         // If we're in a nested .HHP file, then we need to first get the location of the nested .HHP, use that
         // to get the location of the pszFile;
+
 
         ttConvertToRelative(m_cszRoot, pszHHP, cszHHP);
         cszHHP.FullPathName();  // now that we have the location relative to our original .hhp file, convert it

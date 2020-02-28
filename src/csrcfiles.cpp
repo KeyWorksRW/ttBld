@@ -31,11 +31,7 @@ typedef enum
     SECTION_FILES,
 } SRC_SECTION;
 
-// make all ttCList classes use the same sub-heap
-CSrcFiles::CSrcFiles() : m_ttHeap(true), m_lstLibAddSrcFiles(m_ttHeap), m_lstSrcIncluded(m_ttHeap) {}
-
-CSrcFiles::CSrcFiles(std::string_view NinjaDir) :
-    m_ttHeap(true), m_lstLibAddSrcFiles(m_ttHeap), m_lstSrcIncluded(m_ttHeap)
+CSrcFiles::CSrcFiles(std::string_view NinjaDir)
 {
     m_bldFolder = NinjaDir;
 }
@@ -257,30 +253,20 @@ void CSrcFiles::ProcessFile(std::string_view line)
             filename.ExtractSubString(filename);
         else
         {
-            // If the filename isn't in quotes, then remove any trailing comment
-            auto pos = filename.find('#');
-            if (pos != ttlib::npos)
-            {
-                filename.erase(pos);
-                filename.trim();
-            }
+            // Remove any comment
+            filename.eraseFrom('#');
         }
         if (!filename.empty())
-            ProcessInclude(filename.c_str(), m_lstAddSrcFiles, true);
+            ProcessIncludeDirective(filename);
         return;
     }
 
     ttlib::cstr filename = line;
-    auto pos = filename.find('#');
-    if (pos != ttlib::npos)
-    {
-        filename.erase(pos);
-        filename.trim();
-    }
+    filename.eraseFrom('#');
 
     if (filename.find('*') || filename.find('?'))
     {
-        AddSourcePattern(filename.c_str());
+        AddSourcePattern(filename);
         return;
     }
 
@@ -288,8 +274,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
     {
         if (!m_lstSrcFiles.back().fileExists())
         {
-            ttlib::cstr msg(_tt("Unable to locate the file ") + filename);
-            AddError(msg);
+            AddError(_tt("Unable to locate the file ") + filename);
         }
     }
 
@@ -303,39 +288,37 @@ void CSrcFiles::ProcessFile(std::string_view line)
     {
         m_RCname = filename;
     }
-
     else if (filename.hasExtension(".hhp"))
     {
         m_HPPname = filename;
     }
 }
 
-void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFiles, bool bFileSection)
+// Process a ".include" directive
+void CSrcFiles::ProcessIncludeDirective(std::string_view file, ttlib::cstr root)
 {
-    if (ttIsSameSubStrI(pszFile, ".include"))
+    if (ttlib::issameprefix(file, ".include"))
     {
-        const char* pszIncFile = ttFindNonSpace(ttFindSpace(pszFile));
-        if (pszIncFile)
+        ttlib::cstr filename = ttlib::stepover(file);
+        filename.eraseFrom('#');
+        if (!filename.empty())
         {
-            ttCStr cszFile(pszIncFile);
-            char* pszTmp = ttStrChr(cszFile, '#');
-            if (pszTmp)
-            {
-                *pszTmp = 0;
-                cszFile.TrimRight();
-            }
-            ProcessInclude(cszFile, m_lstLibAddSrcFiles, false);
+            ProcessIncludeDirective(filename);
         }
         return;
     }
 
     ttlib::cwd cwd(true);
+    if (root.empty())
+        root = cwd;
 
-    ttlib::cstr FullPath(pszFile);
+    ttlib::cstr FullPath(file);
     FullPath.make_absolute();
 
     CSrcFiles cIncSrcFiles;
     cIncSrcFiles.SetReportingFile(FullPath);
+    ttlib::cstr incRoot = FullPath;
+    incRoot.remove_filename();
 
     try
     {
@@ -346,35 +329,25 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     }
     catch (const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::stringstream msg;
+        msg << _tt("An exception occurred while reading ") << FullPath << ": " << e.what();
+        m_lstErrMessages.append(msg.str());
+        return;
     }
 
     if (!cIncSrcFiles.ReadFile(FullPath))
     {
-        ttlib::cstr str(_tt("Unable to locate the file ") + FullPath);
-        m_lstErrMessages.append(str);
+        m_lstErrMessages.append(_tt("Unable to locate the file ") + FullPath);
         return;
     }
 
-    ttCTMem<char*> szPath(1024);
-    ttStrCpy(szPath, 1024, FullPath.c_str());
-    char* pszFilePortion = ttFindFilePortion(szPath);
-
-    ttCStr cszRelative;
-
-    for (size_t pos = 0;
-         pos < (bFileSection ? cIncSrcFiles.m_lstSrcFiles.size() : cIncSrcFiles.m_lstLibFiles.size()); ++pos)
+    for (auto& incFile: cIncSrcFiles.GetSrcFilesList())
     {
-        ttStrCpy(pszFilePortion,
-                 bFileSection ? cIncSrcFiles.m_lstSrcFiles[pos].c_str() : cIncSrcFiles.m_lstLibFiles[pos].c_str());
-        ttConvertToRelative(cwd.c_str(), szPath, cszRelative);
-        size_t posAdd;
-        posAdd = m_lstSrcIncluded.Add(cszRelative);
-        lstAddSrcFiles.Add(pszFile, posAdd);
-        if (bFileSection)
-            m_lstSrcFiles.addfilename(cszRelative.c_str());
-        else
-            m_lstLibFiles.addfilename(cszRelative.c_str());
+        ttlib::cstr filename = incFile;
+        filename.make_relative(incRoot);
+        filename.make_absolute();
+        filename.make_relative(root);
+        m_lstSrcFiles.addfilename(filename);
     }
 }
 
@@ -416,64 +389,59 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
     }
 }
 
-const char* CSrcFiles::GetPchHeader() const
-{
-    return hasOptValue(OPT::PCH) ? getOptValue(OPT::PCH).c_str() : nullptr;
-}
-
-const char* CSrcFiles::GetPchCpp()
+const ttlib::cstr& CSrcFiles::GetPchCpp()
 {
     if (hasOptValue(OPT::PCH_CPP) && !isOptValue(OPT::PCH_CPP, "none"))
     {
         m_pchCPPname = getOptValue(OPT::PCH_CPP);
-        return m_pchCPPname.c_str();
+        return m_pchCPPname;
     }
 
-    if (!GetPchHeader())
-        return nullptr;
+    if (!hasOptValue(OPT::PCH))
+        return m_pchCPPname;
 
-    m_pchCPPname = GetPchHeader();
+    m_pchCPPname = getOptValue(OPT::PCH);
     m_pchCPPname.replace_extension(".cpp");
     if (m_pchCPPname.fileExists())
-        return m_pchCPPname.c_str();
+        return m_pchCPPname;
 
     // Check for other possible extensions
 
     m_pchCPPname.replace_extension(".cc");
     if (m_pchCPPname.fileExists())
-        return m_pchCPPname.c_str();
+        return m_pchCPPname;
 
     m_pchCPPname.replace_extension(".cxx");
     if (m_pchCPPname.fileExists())
-        return m_pchCPPname.c_str();
+        return m_pchCPPname;
 
     m_pchCPPname.replace_extension(".cpp");  // file doesn't exist, we'll generate a warning about it later
-    return m_pchCPPname.c_str();
+    return m_pchCPPname;
 }
 
-const char* CSrcFiles::GetBuildScriptDir()
+const ttlib::cstr& CSrcFiles::GetBuildScriptDir()
 {
     if (!m_bldFolder.empty())
-        return m_bldFolder.c_str();
+        return m_bldFolder;
 
     if (m_srcfilename.empty())
     {
         m_bldFolder = txtDefBuildDir;
-        return m_bldFolder.c_str();
+        return m_bldFolder;
     }
 
-    return m_bldFolder.c_str();
+    return m_bldFolder;
 }
 
-const char* CSrcFiles::GetTargetDir()
+const std::string& CSrcFiles::GetTargetDir()
 {
     if (!m_strTargetDir.empty())
-        return m_strTargetDir.c_str();
+        return m_strTargetDir;
 
     if (hasOptValue(OPT::TARGET_DIR))
     {
         m_strTargetDir = getOptValue(OPT::TARGET_DIR);
-        return m_strTargetDir.c_str();
+        return m_strTargetDir;
     }
 
     ttlib::cstr dir(IsExeTypeLib() ? "../lib" : "../bin");
@@ -484,12 +452,12 @@ const char* CSrcFiles::GetTargetDir()
         if (hasOptValue(OPT::TARGET_DIR64))
         {
             m_strTargetDir = getOptValue(OPT::TARGET_DIR64);
-            return m_strTargetDir.c_str();
+            return m_strTargetDir;
         }
         else if (hasOptValue(OPT::TARGET_DIR))
         {
             m_strTargetDir = getOptValue(OPT::TARGET_DIR);
-            return m_strTargetDir.c_str();
+            return m_strTargetDir;
         }
 
         ttlib::cstr cwd;
@@ -518,12 +486,12 @@ const char* CSrcFiles::GetTargetDir()
         if (hasOptValue(OPT::TARGET_DIR32))
         {
             m_strTargetDir = getOptValue(OPT::TARGET_DIR32);
-            return m_strTargetDir.c_str();
+            return m_strTargetDir;
         }
         else if (hasOptValue(OPT::TARGET_DIR))
         {
             m_strTargetDir = getOptValue(OPT::TARGET_DIR);
-            return m_strTargetDir.c_str();
+            return m_strTargetDir;
         }
 
         ttlib::cstr cwd;
@@ -562,13 +530,13 @@ const char* CSrcFiles::GetTargetDir()
     }
 
     m_strTargetDir = dir;
-    return m_strTargetDir.c_str();
+    return m_strTargetDir;
 }
 
-const char* CSrcFiles::GetTargetRelease()
+const ttlib::cstr& CSrcFiles::GetTargetRelease()
 {
     if (!m_relTarget.empty())
-        return m_relTarget.c_str();
+        return m_relTarget;
 
     m_relTarget = GetTargetDir();
     m_relTarget.append_filename(GetProjectName());
@@ -579,13 +547,13 @@ const char* CSrcFiles::GetTargetRelease()
         m_relTarget += (getOptValue(OPT::EXE_TYPE).contains("ocx", ttlib::CASE::either) ? ".ocx" : ".dll");
     else
         m_relTarget += ".exe";
-    return m_relTarget.c_str();
+    return m_relTarget;
 }
 
-const char* CSrcFiles::GetTargetDebug()
+const ttlib::cstr& CSrcFiles::GetTargetDebug()
 {
     if (!m_dbgTarget.empty())
-        return m_dbgTarget.c_str();
+        return m_dbgTarget;
 
     m_dbgTarget = GetTargetDir();
     m_dbgTarget.append_filename(GetProjectName());
@@ -600,7 +568,7 @@ const char* CSrcFiles::GetTargetDebug()
         m_dbgTarget += (getOptValue(OPT::EXE_TYPE).contains("ocx", ttlib::CASE::either) ? ".ocx" : ".dll");
     else
         m_dbgTarget += ".exe";
-    return m_dbgTarget.c_str();
+    return m_dbgTarget;
 }
 
 #if !defined(NDEBUG)  // Starts debug section.

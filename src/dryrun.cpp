@@ -10,7 +10,8 @@
 
 #include <iostream>
 
-#include <ttTR.h>  // Function for translating strings
+#include <ttTR.h>     // Function for translating strings
+#include <ttdebug.h>  // ttASSERT macros
 
 #include "dryrun.h"  // CDryRun
 

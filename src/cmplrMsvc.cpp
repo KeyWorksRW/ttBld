@@ -170,7 +170,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         }
     }
 
-    if (GetPchHeader())
+    if (hasOptValue(OPT::PCH))
     {
         ttlib::cstr tmp;
         tmpline += (" /Fp$outdir/" + m_pchHdrName);
@@ -184,14 +184,12 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
     ttlib::cview compiler = (cmplr == CMPLR_MSVC ? "cl.exe" : "clang-cl.exe");
     auto& tmpline = m_ninjafile.GetTempLine();
 
-    if (GetPchHeader())
+    if (hasOptValue(OPT::PCH))
     {
         m_ninjafile.push_back("rule compilePCH");
         m_ninjafile.push_back("  deps = msvc");
         tmpline.Format("  command = %s -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s", compiler.c_str(),
-                       GetProjectName().c_str(),
-                       GetPchHeader()  // typically stdafx.h or precomp.h
-        );
+                       GetProjectName().c_str(), getOptValue(OPT::PCH).c_str());
         m_ninjafile.WriteTempLine();
         m_ninjafile.push_back("  description = compiling $in");
         m_ninjafile.addblankline();
@@ -201,10 +199,9 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
     m_ninjafile.push_back("  deps = msvc");
 
     ttlib::cstr addyu;
-    if (GetPchHeader())
+    if (hasOptValue(OPT::PCH))
     {
-        addyu = " -Yu";
-        addyu += GetPchHeader();
+        addyu = (" -Yu" + getOptValue(OPT::PCH));
     }
 
     if (m_gentype == GEN_DEBUG)
@@ -257,9 +254,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
         if (hasOptValue(OPT::NATVIS))
             tmpline += (" /natvis:" + getOptValue(OPT::NATVIS));
 
-        tmpline += " /debug /pdb:$outdir/";
-        tmpline += GetProjectName();
-        tmpline += ".pdb";
+        tmpline += (" /debug /pdb:$outdir/" + GetProjectName() + ".pdb");
     }
     else
     {
@@ -457,7 +452,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
 
     std::stringstream line;
     // "build file : cmd"
-    tmpline.Format("build %s : ", m_gentype == GEN_DEBUG ? GetTargetDebug() : GetTargetRelease());
+    tmpline.Format("build %s : ", m_gentype == GEN_DEBUG ? GetTargetDebug().c_str() : GetTargetRelease().c_str());
 
     if (IsExeTypeLib())
         tmpline += "lib";

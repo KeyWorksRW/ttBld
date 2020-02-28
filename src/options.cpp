@@ -132,6 +132,11 @@ void CSrcFiles::InitOptions()
         option.isBooleanValue = original.isBooleanValue;
         option.isRequired = original.isRequired;
     }
+
+    // We special-case PCH and PCH_CPP to replace the default "none" with an empty string
+    m_Options[OPT::PCH].value.clear();
+    m_Options[OPT::PCH_CPP].value.clear();
+
 #if !defined(NDEBUG)
     m_Options[OPT::LAST].OriginalName = "Don't Use this id!";
     // The options are all indexed by the enumerated id, so it is imperative that each option appears in

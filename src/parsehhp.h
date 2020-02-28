@@ -8,8 +8,10 @@
 
 #pragma once
 
-#include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
-#include <ttstr.h>   // ttCStr
+#include <ttcstr.h>
+
+#include <ttlibwin.h>  // ttString;, ttCStr;, ttCEnumStr -- Master header file for ttLibwin
+#include <ttlist.h>    // ttCList, ttCDblList, ttCStrIntList
 
 // Parse an HHP file to collect dependencies
 class CParseHHP
@@ -28,20 +30,20 @@ public:
 
     // Class functions
 
-    void ParseHhpFile(const char* pszHHP = nullptr);
+    void ParseHhpFile(std::string_view filename);
 
     ttCList m_lstDependencies;
-    ttlib::cstr  m_chmFilename;
+    ttlib::cstr m_chmFilename;
 
 protected:
-    void AddDependency(const char* pszHHP, const char* pszFile);
+    void AddDependency(std::string_view HHPfilename, std::string_view file);
 
 private:
     // Class members
 
-    ttCStr m_cszCWD;
-    ttCStr m_cszRoot;  // Root directory to base all filenames and includes to
-    ttCStr m_HPPname;  // Root level HHP filename
+    ttlib::cstr m_cszCWD;
+    ttlib::cstr m_cszRoot;  // Root directory to base all filenames and includes to
+    ttlib::cstr m_HPPname;  // Root level HHP filename
 
     size_t m_section;
 };

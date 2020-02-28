@@ -48,7 +48,7 @@ public:
 
     size_t getSrcCount() { return m_lstSrcFiles.size(); }
 
-    bool CreateMakeFile(bool bAllVersion = false, std::string_view Dir = ttEmptyString);
+    bool CreateMakeFile(bool bAllVersion = false, std::string_view Dir = std::string_view{});
 
     const ttlib::cstr& GetRcFile() { return m_RCname; }
     std::string_view GetScriptFile() { return m_scriptFilename; }

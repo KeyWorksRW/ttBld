@@ -13,31 +13,22 @@
 #include <unordered_map>
 #include <vector>
 
-#include <ttlibwin.h>
-
 #include <ttcstr.h>       // Classes for handling zero-terminated char strings.
 #include <ttcvector.h>    // Vector of ttlib::cstr strings
 #include <ttnamespace.h>  // Contains the tt namespace functions common to all tt libraries
 
-#include <ttarray.h>  // ttCArray
-#include <ttfile.h>   // ttCFile
-#include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
-#include <ttmap.h>    // ttCMap
-
-#include <ttstr.h>  // ttlib::cstr, ttStrlist -- String and vector classes with some additional functionality
-
-#include "options.h"  // OPT:: enumerated Options
+#include "options.h"  // OPT -- Structures and enum for storing/retrieving options in a .srcfiles.yaml file
 
 extern const char* txtSrcFilesFileName;
 
 // Attempts to locate .srcfiles.yaml
-ttlib::cstr locateProjectFile(std::string_view StartDir = ttEmptyString);
+ttlib::cstr locateProjectFile(std::string_view StartDir = std::string_view{});
 
 // Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 class CSrcFiles : public OPT
 {
 public:
-    CSrcFiles();
+    CSrcFiles() {};
     // NinjaDir is the directory to create .ninja scripts in
     CSrcFiles(std::string_view NinjaDir);
 
@@ -54,10 +45,7 @@ public:
         return ttlib::issameas(m_Options[index].value, "true", ttlib::CASE::either);
     }
 
-    bool hasOptValue(size_t option) const
-    {
-        return (!getOptValue(option).empty());
-    }
+    bool hasOptValue(size_t option) const noexcept { return (!getOptValue(option).empty()); }
 
     const ttlib::cstr& getOptValue(size_t index) const noexcept
     {
@@ -79,11 +67,10 @@ public:
         m_Options[index].comment = value;
     }
 
-    const char* GetTargetDir();
-    const char* GetTargetRelease();
-    const char* GetTargetDebug();
-
-    const char* GetBuildScriptDir();
+    const std::string& GetTargetDir();
+    const ttlib::cstr& GetTargetRelease();
+    const ttlib::cstr& GetTargetDebug();
+    const ttlib::cstr& GetBuildScriptDir();
 
     // If filename is not specified, CSrcFiles will attempt to locate the file.
     bool ReadFile(std::string_view filename = std::string_view {});
@@ -98,18 +85,13 @@ public:
     bool IsStaticCrtDbg() const { return (isOptValue(OPT::CRT_DBG, "static")); }
     bool IsOptimizeSpeed() const { return (isOptValue(OPT::OPTIMIZE, "speed")); }
 
-    // const char* GetBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
-    // const char* GetXgetFlags() { return GetOption(OPT_XGET_FLAGS); }
-
     bool AddFile(std::string_view filename) { return m_lstSrcFiles.addfilename(filename); }
     void AddSourcePattern(std::string_view FilePattern);
 
     // These are just for convenience--it's fine to call GetOption directly
 
     const ttlib::cstr& GetProjectName() { return m_Options[OPT::PROJECT].value; }
-    const char* GetPchHeader() const;
-    // Source file to compile the precompiled header
-    const char* GetPchCpp();
+    const ttlib::cstr& GetPchCpp();
 
     void SetRcName(std::string_view name) { m_RCname = name; }
     const ttlib::cstr& getRcName() { return m_RCname; }
@@ -143,11 +125,9 @@ protected:
     void ProcessFile(std::string_view line);
     void ProcessOption(std::string_view line);
 
-    void ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFiles, bool bFileSection);
-    void ProcessTarget(char* pszLine);
+    void ProcessIncludeDirective(std::string_view file, ttlib::cstr root = std::string {});
 
     void AddCompilerFlag(std::string_view flag);
-    //    void AddLibrary(const char* pszName);     // REVIEW: [KeyWorks - 8/7/2019] doesn't appear to be used
 
     const ttlib::cstr& GetReportFilename() { return m_ReportPath; }
 
@@ -164,17 +144,12 @@ protected:
     ttlib::cstr m_RCname;   // Resource file to build (if any)
     ttlib::cstr m_HPPname;  // HTML Help project file
 
-    ttCHeap m_ttHeap;  // All the ttCList files will be attatched to this heap
-
     ttlib::cstrVector m_lstSrcFiles;  // List of all source files
     ttlib::cstrVector m_lstLibFiles;  // List of any files used to build additional library
     ttlib::cstrVector m_lstIdlFiles;  // List of any idl files to compile with midl compiler
 
     ttlib::cstrVector m_lstErrMessages;  // List of any errors that occurred during processing
-
-    ttCStrIntList m_lstAddSrcFiles;     // Additional .srcfiles.yaml to read into Files: section
-    ttCStrIntList m_lstLibAddSrcFiles;  // Additional .srcfiles.yaml to read into Lib: section
-    ttCList m_lstSrcIncluded;  // The names of all files included by all ".include path/.srcfiles.yaml" directives
+    ttlib::cstrVector m_lstIncludeSrcFiles;
 
     ttlib::cstr m_pchCPPname;
 

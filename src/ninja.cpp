@@ -131,7 +131,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Figure out the filenames to use for the source and output for a precompiled header
 
-    if (GetPchHeader())
+    if (hasOptValue(OPT::PCH))
     {
         m_pchHdrName = GetProjectName();
         m_pchHdrName.replace_extension(".pch");
@@ -145,7 +145,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
             ttlib::cstr msg;
             msg.Format(
                 _tt("No C++ source file found that matches %s -- precompiled header will not build correctly."),
-                GetPchHeader());
+                getOptValue(OPT::PCH).c_str());
             AddError(msg);
         }
     }
@@ -173,7 +173,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     // source file will get rebuilt whether or not a particular source file actually uses the generated header
     // m_ninjafile.
 
-    if (GetPchHeader())
+    if (hasOptValue(OPT::PCH))
     {
         temp = m_ninjafile.GetTempLine();
         temp.Format("build $outdir/%s: compilePCH %s", m_pchHdrNameObj.c_str(), m_pchCppName.c_str());
@@ -434,23 +434,23 @@ void CNinja::ProcessBuildLibs()
 #endif
             }
 
-            const char* pszLib = cSrcFiles.GetTargetDebug();
-            if (pszLib)
+            auto targetDir = cSrcFiles.GetTargetDebug();
+            if (!targetDir.empty())
             {
                 ttlib::cstr LibDir;
                 LibDir.assignCwd();
-                LibDir.append_filename(pszLib);
+                LibDir.append_filename(targetDir);
                 LibDir.make_relative(cwd);
                 LibDir.backslashestoforward();
                 m_BldLibsDbg.addfilename(LibDir);
             }
 
-            pszLib = cSrcFiles.GetTargetRelease();
-            if (pszLib)
+            targetDir = cSrcFiles.GetTargetRelease();
+            if (!targetDir.empty())
             {
                 ttlib::cstr LibDir;
                 LibDir.assignCwd();
-                LibDir.append_filename(pszLib);
+                LibDir.append_filename(targetDir);
                 LibDir.make_relative(cwd);
                 LibDir.backslashestoforward();
                 m_lstBldLibsRel.addfilename(LibDir);
