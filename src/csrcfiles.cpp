@@ -12,12 +12,13 @@
 
 #include <ttTR.h>  // Function for translating strings
 
-#include <ttfindfile.h>  // ttCFindFile
-#include <ttenumstr.h>   // ttCEnumStr
-#include <ttmem.h>       // ttCMem, ttCTMem
+#include <ttenumstr.h>  // ttCEnumStr
+#include <ttmem.h>      // ttCMem, ttCTMem
 
-#include <ttstring.h>  // ttString, ttCwd, ttStrVector
-#include <ttcwd.h>     // Class for storing and optionally restoring the current directory
+#include <ttcwd.h>       // Class for storing and optionally restoring the current directory
+#include <ttstring.h>    // ttlib::cstr, ttCwd, ttStrVector
+#include <tttextfile.h>  // Classes for reading and writing line-oriented files
+#include <ttwinff.h>     // Wrapper around Windows FindFile
 
 #include "csrcfiles.h"  // CSrcFiles
 
@@ -32,19 +33,11 @@ typedef enum
     SECTION_LIB,
 } SRC_SECTION;
 
-CSrcFiles::CSrcFiles()
-    : m_ttHeap(true)
-    // make all ttCList classes use the same sub-heap
-    , m_lstLibAddSrcFiles(m_ttHeap)
-    , m_lstSrcIncluded(m_ttHeap)
-{
-}
+// make all ttCList classes use the same sub-heap
+CSrcFiles::CSrcFiles() : m_ttHeap(true), m_lstLibAddSrcFiles(m_ttHeap), m_lstSrcIncluded(m_ttHeap) {}
 
-CSrcFiles::CSrcFiles(std::string_view NinjaDir)
-    : m_ttHeap(true)
-    // make all ttCList classes use the same sub-heap
-    , m_lstLibAddSrcFiles(m_ttHeap)
-    , m_lstSrcIncluded(m_ttHeap)
+CSrcFiles::CSrcFiles(std::string_view NinjaDir) :
+    m_ttHeap(true), m_lstLibAddSrcFiles(m_ttHeap), m_lstSrcIncluded(m_ttHeap)
 {
     m_bldFolder = NinjaDir;
 }
@@ -74,11 +67,10 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         m_bldFolder.replace_filename(txtDefBuildDir);
     }
 
-    ttCFile kfSrcFiles;
-    if (!kfSrcFiles.ReadFile(m_srcfilename.c_str()))
+    ttlib::viewfile SrcFile;
+    if (!SrcFile.ReadFile(m_srcfilename))
     {
-        std::string msg = _tt("Cannot open ");
-        msg += m_srcfilename;
+        std::string msg = (_tt("Cannot open ") + m_srcfilename);
         m_lstErrMessages.append(msg);
         return false;
     }
@@ -87,49 +79,55 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
     InitOptions();
 
-    char* pszLine;
     SRC_SECTION section = SECTION_UNKNOWN;
 
-    while (kfSrcFiles.ReadLine(&pszLine))
+    for (auto line: SrcFile)
     {
-        char* pszBegin = ttFindNonSpace(pszLine);  // ignore any leading spaces
-        if (ttIsEmpty(pszBegin) || pszBegin[0] == '#' ||
-            (pszBegin[0] == '-' && pszBegin[1] == '-' &&
-             pszBegin[2] == '-'))  // ignore empty, comment or divider lines
-        {
+        // Note that we are only looking for leading characters that would appear in a .srcfiles.yaml file, not all
+        // of the special characters allowed in the full YAML specification.
+        if (line.empty() || line[0] == '#' || line[0] == '-')
             continue;
-        }
 
-        if (ttIsSameSubStrI(pszBegin, "%YAML"))  // not required, but possible a YAML editor could add this
+        // If the line doesn't begin with whitespace, then they only thing we look at is whether it is a section
+        // name
+        if (ttlib::isalpha(line[0]))
         {
-            continue;
-        }
-
-        if (ttIsAlpha(*pszLine))  // sections always begin with an alphabetical character
-        {
-            if (ttIsSameSubStrI(pszBegin, "Files:") || ttIsSameSubStrI(pszBegin, "[FILES]"))
+            if (ttlib::issameprefix(line, "Files:", ttlib::CASE::either) ||
+                ttlib::issameprefix(line, "[FILES]", ttlib::CASE::either))
+            {
                 section = SECTION_FILES;
-            else if (ttIsSameSubStrI(pszBegin, "Options:") || ttIsSameSubStrI(pszBegin, "[OPTIONS]"))
+            }
+            else if (ttlib::issameprefix(line, "Options:", ttlib::CASE::either) ||
+                     ttlib::issameprefix(line, "[OPTIONS]"))
+            {
                 section = SECTION_OPTIONS;
-            else if (ttIsSameSubStrI(pszBegin, "Lib:"))
-                section = SECTION_LIB;
+            }
+
+            // REVIEW: [KeyWorks - 02-27-2020] The entire LIB section processing needs to go away.
+            // else if (ttlib::issameprefix(line, "Lib:"))
+            // section = SECTION_LIB;
             else
+            {
                 section = SECTION_UNKNOWN;
+            }
             continue;
         }
+
+        auto begin = ttlib::findnonspace(line);
 
         switch (section)
         {
             case SECTION_FILES:
-                ProcessFile(pszBegin);
+                ProcessFile(begin);
                 break;
 
-            case SECTION_LIB:
-                ProcessLibSection(pszBegin);
-                break;
+                // REVIEW: [KeyWorks - 02-27-2020] The entire LIB section processing needs to go away.
+                // case SECTION_LIB:
+                // ProcessLibSection(begin);
+                // break;
 
             case SECTION_OPTIONS:
-                ProcessOption(pszBegin);
+                ProcessOption(begin);
                 break;
 
             case SECTION_UNKNOWN:
@@ -140,18 +138,18 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
     // Everything has been processed, if options were not specified that are needed, make some default assumptions
 
-    if (ttIsEmpty(GetProjectName()))
+    if (getOptValue(OPT::PROJECT).empty())
     {
-        ttString projectname;
+        ttlib::cstr projectname;
         projectname.assignCwd();
-        if (tt::issamestri(projectname.filename(), "src"))
+        if (ttlib::issameprefix(projectname.filename(), "src", ttlib::CASE::either))
         {
             projectname.replace_filename("");
             // remove trailing slash
             projectname.erase(projectname.length() - 1, 1);
         }
         std::string name(projectname.filename());
-        UpdateOption(OPT_PROJECT, name.c_str());
+        setOptValue(OPT::PROJECT, name);
     }
 
     // If no Files: were specified, then we still won't have any files to build. Default to every type of C++
@@ -169,15 +167,15 @@ bool CSrcFiles::ReadFile(std::string_view filename)
     return true;
 }
 
-void CSrcFiles::ParseOption(std::string_view yamlLine)
+void CSrcFiles::ProcessOption(std::string_view yamlLine)
 {
-    ttString name;
-    ttString value;
-    ttString comment;
+    ttlib::cstr name;
+    ttlib::cstr value;
+    ttlib::cstr comment;
 
-    ttString line = tt::findnonspace(yamlLine);
+    ttlib::cstr line = tt::findnonspace(yamlLine);
     auto pos = line.findoneof(":=");
-    if (pos == ttString::npos)
+    if (pos == ttlib::cstr::npos)
     {
         AddError(_tt("Invalid Option -- missing ':' or '=' character"));
         return;
@@ -187,13 +185,13 @@ void CSrcFiles::ParseOption(std::string_view yamlLine)
 
     // Ignore or change obsolete options
 
-    if (name.issamestri("64Bit") || name.issamestri("b64_suffix") || name.issamestri("b32_suffix"))
+    if (name.issameprefix("64Bit") || name.issameprefix("b64_suffix") || name.issameprefix("b32_suffix"))
     {
         return;
     }
 
     pos = line.stepover(pos);
-    if (pos == ttString::npos)
+    if (pos == ttlib::cstr::npos)
     {
         std::stringstream msg;
         msg << _tt("The option ") << name << _tt(" does not have a value");
@@ -204,7 +202,7 @@ void CSrcFiles::ParseOption(std::string_view yamlLine)
     if (line[pos] == '"')
     {
         auto posNext = value.ExtractSubString(line, pos);
-        if (posNext == ttString::npos)
+        if (posNext == ttlib::cstr::npos)
         {
             std::stringstream msg;
             msg << _tt("The value for ") << name << _tt(" has an opening quote, but no closing quote.");
@@ -213,7 +211,7 @@ void CSrcFiles::ParseOption(std::string_view yamlLine)
             posNext = pos;
         }
         posNext = line.find('#', posNext + 1);
-        if (posNext != ttString::npos)
+        if (posNext != ttlib::cstr::npos)
         {
             // Technically we should check the preceeeding character and determine if it is a backslash. Shouldn't
             // ever occur in .srcfiles.yanml files, but it is allowed in the YAML spec.
@@ -223,7 +221,7 @@ void CSrcFiles::ParseOption(std::string_view yamlLine)
     else
     {
         auto posComment = line.find('#', pos);
-        if (posComment != ttString::npos)
+        if (posComment != ttlib::cstr::npos)
         {
             // Technically we should check the preceeeding character and determine if it is a backslash. Shouldn't
             // ever occur in .srcfiles.yanml files, but it is allowed in the YAML spec.
@@ -238,8 +236,8 @@ void CSrcFiles::ParseOption(std::string_view yamlLine)
         }
     }
 
-    auto& option = FindOption(name);
-    if (option.optionID == Opt::LAST)
+    auto option = FindOption(name);
+    if (option == OPT::LAST)
     {
         std::stringstream msg;
         msg << name << _tt(" is an unrecognized option and will be ignored.");
@@ -247,77 +245,18 @@ void CSrcFiles::ParseOption(std::string_view yamlLine)
         return;
     }
 
-    option.value = value;
-    option.comment = comment;
+    m_Options[option].value = value;
+    m_Options[option].comment = comment;
 }
 
-void CSrcFiles::ProcessOption(char* pszLine)
+void CSrcFiles::AddCompilerFlag(std::string_view flag)
 {
-    ParseOption(pszLine);
-
-    ttCStr cszName, cszVal, cszComment;
-
-    if (!GetOptionParts(pszLine, cszName, cszVal, cszComment))
+    auto& option = getOption(OPT::CFLAGS_CMN);
+    if (option.value.contains(flag))
         return;
-
-    ttString name(cszName);
-    ttString value(cszVal);
-    ttString comment(cszComment);
-
-    // Ignore or change obsolete options
-
-    if (name.issamestri("64Bit") || name.issamestri("b64_suffix") || name.issamestri("b32_suffix"))
-    {
-        return;
-    }
-
-    if (name.issamestri("TargetDir64"))
-        name = "TargetDir";
-
-    else if (name.issamestri("LibDirs64"))
-        name = "LibDirs";
-
-    OPT_INDEX opt = UpdateReadOption(name.c_str(), value.c_str(), comment.c_str());
-    if (opt < OPT_OVERFLOW)
-    {
-        const OPT_VERSION* pVer = GetOptionMinVersion(opt);
-        if (pVer)
-        {
-            if (pVer->major > m_RequiredMajor)
-                m_RequiredMajor = pVer->major;
-            if (pVer->minor > m_RequiredMinor)
-                m_RequiredMinor = pVer->minor;
-            if (pVer->sub > m_RequiredSub)
-                m_RequiredSub = pVer->sub;
-        }
-        return;
-    }
-
-    // If you need to support reading old options, add the code here to convert them into the new options. You will
-    // also need to add code in CWriteSrcFiles::WriteUpdates to prevent writing the line out again.
-
-    if (name.issamestri("LinkFlags"))
-    {
-        UpdateOption(OPT_LINK_CMN, value.c_str());
-        SetOptionValue(Opt::LINK_CMN, value);
-    }
-
-    ttString msg(name);
-    msg += _tt(" is an unknown option");
-    m_lstErrMessages.append(msg);
-}
-
-void CSrcFiles::AddCompilerFlag(const char* pszFlag)
-{
-    if (!GetOption(OPT_CFLAGS_CMN))
-        UpdateOption(OPT_CFLAGS_CMN, pszFlag);
-    // else append the flag if it hasn't already been added
-    else if (!ttStrStrI(GetOption(OPT_CFLAGS_CMN), pszFlag))
-    {
-        std::stringstream flag;
-        flag << GetOption(OPT_CFLAGS_CMN) << ' ' << pszFlag;
-        UpdateOption(OPT_CFLAGS_CMN, flag.str().c_str());
-    }
+    if (!option.value.empty())
+        option.value += " ";
+    option.value += flag;
 }
 
 #if 0
@@ -335,95 +274,65 @@ void CSrcFiles::AddLibrary(const char* pszName)
 }
 #endif
 
-void CSrcFiles::ProcessLibSection(char* pszLibFile)
+void CSrcFiles::ProcessFile(std::string_view line)
 {
-    // The library is built in the $libout directory, so we don't need to worry about a name conflict -- hence the
-    // default name of "tmplib". The name is also to indicate that this is a temporary library -- it's not designed
-    // to be linked to outside of the scope of the current project.
-
-    if (m_LIBname.empty())
-        m_LIBname = "tmplib";
-
-    if (ttStrStrI(pszLibFile, ".lib"))  // this was used before we created a default name
-        return;
-    else if (ttIsSameSubStrI(pszLibFile, ".include"))
+    if (ttlib::issameprefix(line, ".include", ttlib::CASE::either))
     {
-        char* pszIncFile = ttFindNonSpace(ttFindSpace(pszLibFile));
-        ProcessInclude(pszIncFile, m_lstLibAddSrcFiles, false);
-    }
-    else
-    {
-        m_lstLibFiles += pszLibFile;
-        if (!ttFileExists(pszLibFile))
+        ttlib::cstr filename = ttlib::stepover(line);
+        if (filename[0] == '\"')
+            filename.ExtractSubString(filename);
+        else
         {
-            ttString str(_tt("Cannot locate the file "));
-            str += pszLibFile;
-            m_lstErrMessages.append(str);
-        }
-    }
-}
-
-void CSrcFiles::ProcessFile(char* pszFile)
-{
-    if (ttIsSameSubStrI(pszFile, ".include"))
-    {
-        const char* pszIncFile = ttFindNonSpace(ttFindSpace(pszFile));
-        if (pszIncFile)
-        {
-            ttCStr cszFile(pszIncFile);
-            char* pszTmp = ttStrChr(cszFile, '#');
-            if (pszTmp)
+            // If the filename isn't in quotes, then remove any trailing comment
+            auto pos = filename.find('#');
+            if (pos != ttlib::npos)
             {
-                *pszTmp = 0;
-                cszFile.TrimRight();
+                filename.erase(pos);
+                filename.trim();
             }
-            ProcessInclude(cszFile, m_lstAddSrcFiles, true);
         }
+        if (!filename.empty())
+            ProcessInclude(filename.c_str(), m_lstAddSrcFiles, true);
         return;
     }
 
-    char* pszComment = ttStrChr(pszFile, '#');
-    if (pszComment)
+    ttlib::cstr filename = line;
+    auto pos = filename.find('#');
+    if (pos != ttlib::npos)
     {
-        *pszComment = 0;
-        ttTrimRight(pszFile);
+        filename.erase(pos);
+        filename.trim();
     }
 
-    if (ttStrChr(pszFile, '*') || ttStrChr(pszFile, '?'))
+    if (filename.find('*') || filename.find('?'))
     {
-        AddSourcePattern(pszFile);
+        AddSourcePattern(filename.c_str());
         return;
     }
 
-    if (m_lstSrcFiles.addfilename(pszFile))
+    if (m_lstSrcFiles.addfilename(filename))
     {
         if (!m_lstSrcFiles.back().fileExists())
         {
-            ttString msg(_tt("Unable to locate the file "));
-            msg += pszFile;
-            AddError(msg.c_str());
+            ttlib::cstr msg(_tt("Unable to locate the file ") + filename);
+            AddError(msg);
         }
     }
 
-    char* pszExt = ttStrStrI(pszFile, ".idl");
-    if (pszExt)
+    if (filename.hasExtension(".idl"))
     {
-        m_lstIdlFiles += pszFile;
-        return;
+        m_lstIdlFiles += filename.c_str();
     }
 
-    pszExt = ttStrStrI(pszFile, ".rc");
-    if (pszExt && !pszExt[3])  // ignore .rc2, .resources, etc.
+    // ignore .rc2, .resources, etc.
+    else if (filename.hasExtension(".rc") && filename.extension().length() < 3)
     {
-        m_RCname = pszFile;
-        return;
+        m_RCname = filename;
     }
 
-    pszExt = ttStrStrI(pszFile, ".hhp");
-    if (pszExt)  // ignore .rc2, .resources, etc.
+    else if (filename.hasExtension(".hhp"))
     {
-        m_HPPname = pszFile;
-        return;
+        m_HPPname = filename;
     }
 }
 
@@ -457,9 +366,9 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     try
     {
         ttlib::cstr NewDir(FullPath);
-        auto filename = NewDir.filename();\
+        auto filename = NewDir.filename();
         if (!filename.empty())
-        fs::current_path(filename.c_str());
+            fs::current_path(filename.c_str());
     }
     catch (const std::exception& e)
     {
@@ -495,112 +404,54 @@ void CSrcFiles::ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFile
     }
 }
 
-void CSrcFiles::AddSourcePattern(const char* pszFilePattern)
+void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
 {
-    if (!pszFilePattern || !*pszFilePattern)
+    if (FilePattern.empty())
         return;
 
-    ttEnumStr enumPattern(pszFilePattern, ';');
-    for (auto pattern : enumPattern)
+    ttEnumStr enumPattern(FilePattern, ';');
+    for (auto pattern: enumPattern)
     {
-        ttCFindFile ff(pattern.c_str());
-        while (ff.IsValid())
+        ttlib::winff ff(pattern);
+        while (ff.isvalid())
         {
-            char* psz = ttStrChrR(ff, '.');
-            if (psz)
+            auto name = ff.GetFileName();
+            if (name.hasExtension(".c") || name.hasExtension(".cpp") || name.hasExtension(".cxx"))
             {
-                if (ttIsSameStrI(psz, ".c") || ttIsSameStrI(psz, ".cpp") || ttIsSameStrI(psz, ".cc") ||
-                    ttIsSameStrI(psz, ".cxx"))
-                {
-                    m_lstSrcFiles += ff.GetFileName();
-                }
-                else if (ttIsSameStrI(psz, ".rc"))
-                {
-                    m_lstSrcFiles += ff.GetFileName();
-                    if (m_RCname.empty())
-                        m_RCname = ff.GetFileName();
-                }
-                else if (ttIsSameStrI(psz, ".hhp"))
-                {
-                    m_lstSrcFiles += ff.GetFileName();
-                    if (m_HPPname.empty())
-                        m_HPPname = ff.GetFileName();
-                }
-                else if (ttIsSameStrI(psz, ".idl"))
-                {
-                    m_lstSrcFiles += ff.GetFileName();
-                    m_lstIdlFiles += ff.GetFileName();
-                }
+                m_lstSrcFiles += name;
             }
-            if (!ff.NextFile())
+            else if (name.hasExtension(".rc"))
+            {
+                m_lstSrcFiles += name;
+                m_RCname = name;
+            }
+            else if (name.hasExtension(".hhp"))
+            {
+                m_lstSrcFiles += name;
+                m_HPPname = name;
+            }
+            else if (name.hasExtension(".idl"))
+            {
+                m_lstSrcFiles += name;
+                m_lstIdlFiles += name;
+            }
+
+            if (!ff.next())
                 break;
         }
     }
 }
 
-// .srcfiles is a YAML file, so the value of the option may be within a single or double quote. That means we can't
-// just search for '#' to find the comment, we must first step over any opening/closing quote.
-
-bool CSrcFiles::GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment)
-{
-    char* pszVal = strpbrk(pszLine, ":=");
-    if (!pszVal)
-    {
-        AddError(_tt("Invalid Option -- missing ':' or '=' character"));
-        return false;
-    }
-    *pszVal = 0;
-    cszName = pszLine;
-    pszVal = ttFindNonSpace(pszVal + 1);
-
-    if (*pszVal == CH_QUOTE || *pszVal == CH_SQUOTE || *pszVal == CH_START_QUOTE)
-    {
-        cszVal.GetQuotedString(pszVal);
-        pszVal += (cszVal.StrLen() + 2);
-        char* pszComment = ttStrChr(pszVal + cszVal.StrLen() + 2, '#');
-        if (pszComment)
-        {
-            pszComment = ttStepOver(pszComment);
-            ttTrimRight(pszComment);  // remove any trailing whitespace
-            cszComment = pszComment;
-        }
-        else
-        {
-            cszComment.Delete();
-        }
-    }
-    else  // non-quoted option
-    {
-        char* pszComment = ttStrChr(pszVal, '#');
-        if (pszComment)
-        {
-            *pszComment = 0;
-            pszComment = ttStepOver(pszComment);
-            ttTrimRight(pszComment);  // remove any trailing whitespace
-            cszComment = pszComment;
-        }
-        else
-        {
-            cszComment.Delete();
-        }
-        ttTrimRight(pszVal);  // remove any trailing whitespace
-        cszVal = pszVal;
-    }
-
-    return true;
-}
-
 const char* CSrcFiles::GetPchHeader() const
 {
-    return !getOptValue(Opt::PCH).empty() ? getOptValue(Opt::PCH).c_str() : nullptr;
+    return hasOptValue(OPT::PCH) ? getOptValue(OPT::PCH).c_str() : nullptr;
 }
 
 const char* CSrcFiles::GetPchCpp()
 {
-    const char* pszPch = GetOption(OPT_PCH_CPP);
-    if (pszPch && !ttIsSameStrI(pszPch, "none"))
+    if (hasOptValue(OPT::PCH_CPP) && !isOptValue(OPT::PCH_CPP, "none"))
     {
-        m_pchCPPname = GetOption(OPT_PCH_CPP);
+        m_pchCPPname = getOptValue(OPT::PCH_CPP);
         return m_pchCPPname.c_str();
     }
 
@@ -645,44 +496,44 @@ const char* CSrcFiles::GetTargetDir()
     if (!m_strTargetDir.empty())
         return m_strTargetDir.c_str();
 
-    if (GetOption(OPT_TARGET_DIR))
+    if (hasOptValue(OPT::TARGET_DIR))
     {
-        m_strTargetDir = GetOption(OPT_TARGET_DIR);
+        m_strTargetDir = getOptValue(OPT::TARGET_DIR);
         return m_strTargetDir.c_str();
     }
 
-    ttCStr cszDir(IsExeTypeLib() ? "../lib" : "../bin");
+    ttlib::cstr dir(IsExeTypeLib() ? "../lib" : "../bin");
 
     // If it's not 32-bit code then just use lib or bin as the target dir if not specified.
-    if (GetOption(OPT_TARGET_DIR64) || !GetBoolOption(OPT_32BIT))
+    if (hasOptValue(OPT::TARGET_DIR64) || !isOptTrue(OPT::BIT32))
     {
-        if (GetOption(OPT_TARGET_DIR64))
+        if (hasOptValue(OPT::TARGET_DIR64))
         {
-            m_strTargetDir = GetOption(OPT_TARGET_DIR64);
+            m_strTargetDir = getOptValue(OPT::TARGET_DIR64);
             return m_strTargetDir.c_str();
         }
-        else if (GetOption(OPT_TARGET_DIR))
+        else if (hasOptValue(OPT::TARGET_DIR))
         {
-            m_strTargetDir = GetOption(OPT_TARGET_DIR);
+            m_strTargetDir = getOptValue(OPT::TARGET_DIR);
             return m_strTargetDir.c_str();
         }
 
-        ttCStr cszCWD;
-        cszCWD.GetCWD();
-        bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
-        if (!bSrcDir)
+        ttlib::cstr cwd;
+        cwd.assignCwd();
+        bool isSrcDir = ttlib::issameas(cwd.filename(), "src", ttlib::CASE::either) ? true : false;
+        if (!isSrcDir)
         {
-            cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
-            if (ttDirExists(cszCWD))
-                bSrcDir = true;
+            cwd.append_filename(IsExeTypeLib() ? "../lib" : "../bin");
+            if (cwd.dirExists())
+                isSrcDir = true;
         }
-        if (bSrcDir)
+        if (isSrcDir)
         {
-            cszDir = (IsExeTypeLib() ? "../lib" : "../bin");
+            dir = (IsExeTypeLib() ? "../lib" : "../bin");
         }
         else
         {
-            cszDir = (IsExeTypeLib() ? "lib" : "bin");
+            dir = (IsExeTypeLib() ? "lib" : "bin");
         }
     }
 
@@ -690,126 +541,99 @@ const char* CSrcFiles::GetTargetDir()
     // If it exists and the user didn't tell us where to put it, then use that directory.
     else
     {
-        if (GetOption(OPT_TARGET_DIR32))
+        if (hasOptValue(OPT::TARGET_DIR32))
         {
-            m_strTargetDir = GetOption(OPT_TARGET_DIR32);
+            m_strTargetDir = getOptValue(OPT::TARGET_DIR32);
             return m_strTargetDir.c_str();
         }
-        else if (GetOption(OPT_TARGET_DIR))
+        else if (hasOptValue(OPT::TARGET_DIR))
         {
-            m_strTargetDir = GetOption(OPT_TARGET_DIR);
+            m_strTargetDir = getOptValue(OPT::TARGET_DIR);
             return m_strTargetDir.c_str();
         }
 
-        ttCStr cszCWD;
-        cszCWD.GetCWD();
-        bool bSrcDir = ttStrStrI(ttFindFilePortion(cszCWD), "src") ? true : false;
-        if (!bSrcDir)
+        ttlib::cstr cwd;
+        cwd.assignCwd();
+        bool isSrcDir = ttlib::issameas(cwd.filename(), "src", ttlib::CASE::either) ? true : false;
+        if (!isSrcDir)
         {
-            cszCWD.AppendFileName(IsExeTypeLib() ? "../lib" : "../bin");
-            if (ttDirExists(cszCWD))
-                bSrcDir = true;
+            cwd.append_filename(IsExeTypeLib() ? "../lib" : "../bin");
+            if (cwd.dirExists())
+                isSrcDir = true;
         }
 
-        // For 32-bit w
+        // For 32-bit
 
-        if (bSrcDir)
-        {
-            cszDir = (IsExeTypeLib() ? "../lib" : "../bin");
-            ttCStr cszTmp(cszDir);
-            cszTmp += "32";
-            if (ttDirExists(cszTmp))
-                cszDir = cszTmp;
-            else
-            {
-                char* pszTmp = strstr(cszTmp, "32");
-                *pszTmp = 0;
-                cszTmp += "x86";
-                if (ttDirExists(cszTmp))
-                    cszDir = cszTmp;
-                else
-                {
-                    pszTmp = strstr(cszTmp, "x86");
-                    *pszTmp = 0;
-                    cszTmp += "_x86";
-                    if (ttDirExists(cszTmp))
-                        cszDir = cszTmp;
-                }
-            }
-        }
+        if (isSrcDir)
+            dir = (IsExeTypeLib() ? "../lib" : "../bin");
+        else
+            dir = (IsExeTypeLib() ? "lib" : "bin");
+
+        ttlib::cstr tmp(dir);
+        tmp += "32";
+        if (tmp.dirExists())
+            dir = tmp;
         else
         {
-            cszDir = (IsExeTypeLib() ? "lib" : "bin");
-            ttCStr cszTmp(cszDir);
-            cszTmp += "32";
-            if (ttDirExists(cszTmp))
-                cszDir = cszTmp;
+            tmp = (dir + "x86");
+            if (tmp.dirExists())
+                dir = tmp;
             else
             {
-                char* pszTmp = strstr(cszTmp, "32");
-                *pszTmp = 0;
-                cszTmp += "x86";
-                if (ttDirExists(cszTmp))  // if there is a ../lib32 or ../bin32, then use that
-                    cszDir = cszTmp;
-                else
-                {
-                    pszTmp = strstr(cszTmp, "x86");
-                    *pszTmp = 0;
-                    cszTmp += "_x86";
-                    if (ttDirExists(cszTmp))
-                        cszDir = cszTmp;
-                }
+                tmp = (dir + "_x86");
+                if (tmp.dirExists())
+                    dir = tmp;
             }
         }
     }
 
-    m_strTargetDir = static_cast<const char*>(cszDir);
+    m_strTargetDir = dir;
     return m_strTargetDir.c_str();
 }
 
 const char* CSrcFiles::GetTargetRelease()
 {
-    if (!m_relTargetFolder.empty())
-        return m_relTargetFolder.c_str();
+    if (!m_relTarget.empty())
+        return m_relTarget.c_str();
 
-    m_relTargetFolder = GetTargetDir();
-    m_relTargetFolder.append_filename(GetProjectName());
+    m_relTarget = GetTargetDir();
+    m_relTarget.append_filename(GetProjectName());
 
     if (IsExeTypeLib())
-        m_relTargetFolder += ".lib";
+        m_relTarget += ".lib";
     else if (IsExeTypeDll())
-        m_relTargetFolder += (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx") ? ".ocx" : ".dll");
+        m_relTarget += (getOptValue(OPT::EXE_TYPE).contains("ocx", ttlib::CASE::either) ? ".ocx" : ".dll");
     else
-        m_relTargetFolder += ".exe";
-    return m_relTargetFolder.c_str();
+        m_relTarget += ".exe";
+    return m_relTarget.c_str();
 }
 
 const char* CSrcFiles::GetTargetDebug()
 {
-    if (!m_dbgTargetFolder.empty())
-        return m_dbgTargetFolder.c_str();
+    if (!m_dbgTarget.empty())
+        return m_dbgTarget.c_str();
 
-    m_dbgTargetFolder = GetTargetDir();
-    m_dbgTargetFolder.append_filename(GetProjectName());
+    m_dbgTarget = GetTargetDir();
+    m_dbgTarget.append_filename(GetProjectName());
 
     // Never automatically add a 'D' to a dll.
     if (!IsExeTypeDll())
-        m_dbgTargetFolder += "D";
+        m_dbgTarget += "D";
 
     if (IsExeTypeLib())
-        m_dbgTargetFolder += ".lib";
+        m_dbgTarget += ".lib";
     else if (IsExeTypeDll())
-        m_dbgTargetFolder += (ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx") ? ".ocx" : ".dll");
+        m_dbgTarget += (getOptValue(OPT::EXE_TYPE).contains("ocx", ttlib::CASE::either) ? ".ocx" : ".dll");
     else
-        m_dbgTargetFolder += ".exe";
-    return m_dbgTargetFolder.c_str();
+        m_dbgTarget += ".exe";
+    return m_dbgTarget.c_str();
 }
 
 #if !defined(NDEBUG)  // Starts debug section.
 
 void CSrcFiles::AddError(std::string_view err)
 {
-    ttString msg(err);
+    ttlib::cstr msg(err);
     msg += "\n";
     m_lstErrMessages.append(msg);
 }
@@ -835,7 +659,7 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
     ttlib::cstr path;
     if (!StartDir.empty())
     {
-        for (auto iter : aProjectLocations)
+        for (auto iter: aProjectLocations)
         {
             path.assign(StartDir);
             path.append_filename(iter);
@@ -847,7 +671,7 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
     }
     else
     {
-        for (auto iter : aProjectLocations)
+        for (auto iter: aProjectLocations)
         {
             path.assign(iter);
             if (path.fileExists())

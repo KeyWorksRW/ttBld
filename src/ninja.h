@@ -9,9 +9,8 @@
 #pragma once
 
 #include <ttcstr.h>      // Classes for handling zero-terminated char strings.
-#include <tttextfile.h>  // ttCFile
-
-#include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
+#include <ttcvector.h>   // Vector of ttlib::cstr strings
+#include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
@@ -56,7 +55,6 @@ public:
 
     ttlib::cstrVector& GetSrcFileList() { return m_lstSrcFiles; }
     ttlib::cstrVector* GetLibFileList() { return &m_lstLibFiles; }
-    ttCList* GetRcDepList() { return &m_lstRcDependencies; }
 
     // Returns false if .srcfiles.yaml requires a newer version
     bool IsValidVersion() { return m_isInvalidVersion != true; }
@@ -70,8 +68,6 @@ public:
 
 protected:
     // Protected functions
-
-    // void AddDependentLibrary(std::string_view libname, GEN_TYPE gentype);
 
 #if defined(_WIN32)
     void msvcWriteCompilerComments(CMPLR_TYPE cmplr);
@@ -89,7 +85,6 @@ protected:
     bool FindRcDependencies(std::string_view rcfile, std::string_view header = {}, std::string_view relpath = {});
 
     CDryRun m_dryrun;
-    ttCList m_lstRcDependencies;
 
 private:
     // Class members
@@ -104,11 +99,12 @@ private:
 
     ttlib::cstr m_scriptFilename;  // The .ninja file
 
-    ttCList m_lstBldLibsD;
-    ttCList m_lstBldLibsR;
+    ttlib::cstrVector m_RcDependencies;
+    ttlib::cstrVector m_BldLibsDbg;
+    ttlib::cstrVector m_lstBldLibsRel;
 
-    ttCDblList m_dlstTargetDir;  // Target name, directory to use
+    // ttCDblList m_dlstTargetDir;  // Target name, directory to use
 
-    bool m_isWriteIfNoChange{ false };  // Write the ninja file even if it hasn't changed
-    bool m_isInvalidVersion{ false };   // True if a newer version is needed to parse the .srcfiles.yaml
+    bool m_isWriteIfNoChange { false };  // Write the ninja file even if it hasn't changed
+    bool m_isInvalidVersion { false };   // True if a newer version is needed to parse the .srcfiles.yaml
 };

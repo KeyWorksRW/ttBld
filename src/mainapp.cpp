@@ -175,7 +175,7 @@ int main(int argc, char** argv)
     CNinja cNinja;
     if (!cNinja.IsValidVersion())
     {
-        if (ttMsgBox(_tt("This version of ttBld is too old -- create ninja scripts anyway?"),
+        if (ttlib::MsgBox(_tt("This version of ttBld is too old -- create ninja scripts anyway?"),
                      MB_YESNO | MB_ICONWARNING) != IDYES)
             return 1;
     }

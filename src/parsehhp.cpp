@@ -13,8 +13,8 @@
 #include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
 
-#include "parsehhp.h"  // CParseHHP
 #include "ninja.h"     // CNinja
+#include "parsehhp.h"  // CParseHHP
 
 extern const char* txtDefBuildDir;  // "bld";
 
@@ -23,7 +23,7 @@ CParseHHP::CParseHHP(const char* pszHHPName)
     m_section = SECTION_UNKNOWN;
     m_HPPname = pszHHPName;
     m_chmFilename = (char*) m_HPPname;
-    m_chmFilename.ChangeExtension(".chm");
+    m_chmFilename.replace_extension(".chm");
     m_cszRoot = pszHHPName;
     m_cszRoot.FullPathName();
     char* pszFile = ttFindFilePortion(m_cszRoot);
@@ -54,8 +54,8 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
     if (!pszHHP)
         pszHHP = m_HPPname;  // use root name
 
-    ttCFile kf;
-    if (!kf.ReadFile(pszHHP))
+    ttlib::viewfile file;
+    if (!file.ReadFile(pszHHP))
     {
         // REVIEW: [randalphwa - 11/29/2018] Need a way to add error msgs to CNinja
         //      ttCStr cszMsg;
@@ -79,44 +79,46 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
         [WINDOWS]
     */
 
-    while (kf.ReadLine())
+    for (auto line: file)
     {
-        if (!kf[0])
-            continue;  // blank line
-        if (ttIsSameSubStrI(kf, "#include"))
+        line = ttlib::findnonspace(line);
+        if (!line.length())
+            continue;
+
+        ttlib::cstr incName;
+
+        if (ttlib::issameprefix(line, "#include", ttlib::CASE::either))
         {
-            char* pszFile = ttFindNonSpace(ttFindSpace(kf));
-            if (!*pszFile)
-                continue;  // invalid #include -- doesn't specify a filename
-            ttCStr cszFile;
-            if (*pszFile == CH_QUOTE)
-                cszFile.GetQuotedString(pszFile);
+            line = ttlib::stepover(line);
+            if (line.empty())
+                continue;
+
+            if (line[0] == '\"')
+            {
+                incName.ExtractSubString(line);
+            }
             else
-                cszFile = pszFile;
-
-            // [KeyWorksRW - 11-29-2018] It's not clear from HH docs when comments are allowed on a line -- we
-            // remove it here just in case.
-
-            char* pszComment = ttStrChr(cszFile, ';');
-            if (pszComment)
-                *pszComment = 0;
-            ttTrimRight(cszFile);
+            {
+                incName = line;
+                // Remove any comment
+                incName.eraseFrom(';');
+            }
 
             // A couple of sections sometimes include .h files -- but we only care about an #included .hhp file
 
-            if (ttStrStrI(cszFile, ".hhp"))
-                ParseHhpFile(cszFile);
+            if (incName.hasExtension(".hhp"))
+                ParseHhpFile(incName.c_str());
             continue;
         }
 
-        if (kf[0] == '[')  // sections are placed in brackets
+        if (line[0] == '[')  // sections are placed in brackets
         {
             m_section = SECTION_UNKNOWN;
-            if (ttIsSameSubStrI(kf, "[ALIAS"))
+            if (ttlib::issameprefix(line, "[ALIAS", ttlib::CASE::either))
                 m_section = SECTION_ALIAS;
-            else if (ttIsSameSubStrI(kf, "[FILE"))
+            else if (ttlib::issameprefix(line, "[FILE", ttlib::CASE::either))
                 m_section = SECTION_FILES;
-            else if (ttIsSameSubStrI(kf, "[OPTION"))
+            else if (ttlib::issameprefix(line, "[CURRENT", ttlib::CASE::either))
                 m_section = SECTION_OPTIONS;
             continue;
         }
@@ -132,39 +134,33 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
                 size_t pos;
                 for (pos = 0; aOptions[pos]; ++pos)
                 {
-                    if (ttIsSameSubStrI(kf, aOptions[pos]))
+                    if (ttlib::issameprefix(line, aOptions[pos]))
                         break;
                 }
                 if (aOptions[pos])
                 {
-                    char* pszFile = ttStrChr(kf, '=');
-                    if (pszFile)
+                    auto posFile = line.find('=');
+                    if (posFile != ttlib::npos)
                     {
-                        pszFile = ttFindNonSpace(pszFile + 1);
-                        if (*pszFile)
+                        incName = ttlib::findnonspace(line.substr(posFile + 1));
+                        if (!incName.empty())
                         {
-                            // [KeyWorksRW - 11-29-2018] I don't believe the HH compiler from MS supports comments
-                            // after filenames, but we can't be certain other compilers and/or authoring systems
-                            // don't use them -- so remove any comment just to be sure.
+                            // [KeyWorksRW - 11-29-2018] I don't believe the HH compiler from MS supports
+                            // comments after filenames, but we can't be certain other compilers and/or
+                            // authoring systems don't use them -- so remove any comment just to be sure.
 
-                            char* pszComment = ttStrChr(pszFile, ';');
-                            if (pszComment)
-                                *pszComment = 0;
-                            ttTrimRight(pszFile);
-                            AddDependency(pszHHP, pszFile);
+                            incName.eraseFrom(';');
+                            AddDependency(pszHHP, incName.c_str());
                         }
                     }
                 }
-                else if (ttIsSameSubStrI(kf, "Compiled file"))
+                else if (ttlib::issameprefix(line, "Compiled file"))
                 {
-                    char* pszFile = ttStrChr(kf, '=');
-                    if (pszFile)
+                    auto posFile = line.find('=');
+                    if (posFile != ttlib::npos)
                     {
-                        char* pszComment = ttStrChr(pszFile, ';');
-                        if (pszComment)
-                            *pszComment = 0;
-                        ttTrimRight(pszFile);
-                        m_chmFilename = ttFindNonSpace(pszFile + 1);
+                        m_chmFilename = ttlib::findnonspace(line.substr(posFile + 1));
+                        m_chmFilename.eraseFrom(';');
                     }
                 }
             }
@@ -172,19 +168,14 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 
             case SECTION_ALIAS:
             {
-                char* pszFile = ttStrChr(kf, ';');  // remove any comment
-                if (pszFile)
+                auto posFile = line.find('=');
+                if (posFile != ttlib::npos)
                 {
-                    *pszFile = 0;
-                    ttTrimRight(kf);
-                }
-                pszFile = ttStrChr(kf, '=');
-                if (pszFile)
-                {
-                    pszFile = ttFindSpace(pszFile + 1);
-                    if (*pszFile)
+                    incName = ttlib::findnonspace(line.substr(posFile + 1));
+                    if (!incName.empty())
                     {
-                        AddDependency(pszHHP, pszFile);
+                        incName.eraseFrom(';');
+                        AddDependency(pszHHP, incName.c_str());
                     }
                 }
             }
@@ -192,37 +183,27 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 
             case SECTION_TEXT_POPUPS:
             {
-                char* pszFile = ttStrChr(kf, ';');  // remove any comment
-                if (pszFile)
+                incName = line;
+                if (!incName.empty())
                 {
-                    *pszFile = 0;
-                    ttTrimRight(kf);
+                    incName.eraseFrom(';');
+                    AddDependency(pszHHP, incName.c_str());
                 }
-
-                // This section may include .h files that are parsed, but not compiled, but we need them for
-                // dependency checking.
-
-                AddDependency(pszHHP, kf);
             }
             break;
 
             case SECTION_FILES:
             {
                 // [KeyWorksRW - 11-29-2018] I don't think HHC actually allows comments in the [FILES] section,
-                // though it should. I'm supporting comments here just to be sure we can support other file formats
-                // like YAML which do allow for comments
+                // though it should. I'm supporting comments here just to be sure we can support other file
+                // formats like YAML which do allow for comments
 
-                char* pszFile = ttStrChr(kf, ';');  // remove any comment
-                if (pszFile)
+                incName = line;
+                if (!incName.empty())
                 {
-                    *pszFile = 0;
-                    ttTrimRight(kf);
+                    incName.eraseFrom(';');
+                    AddDependency(pszHHP, incName.c_str());
                 }
-
-                // This section may include .h files that are parsed, but not compiled, but we need them for
-                // dependency checking.
-
-                AddDependency(pszHHP, kf);
             }
             break;
         }
@@ -232,9 +213,9 @@ void CParseHHP::ParseHhpFile(const char* pszHHP)
 void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
 {
     /*
-       The problem we need to solve with this function is that filename locations in the .hhp file will be relative
-       to the .hhp file -- which in turn can be in a different location. So for example, you might have the
-       following:
+       The problem we need to solve with this function is that filename locations in the .hhp file will be
+       relative to the .hhp file -- which in turn can be in a different location. So for example, you might
+       have the following:
 
             ../Help/foo.hhp
 
@@ -251,12 +232,12 @@ void CParseHHP::AddDependency(const char* pszHHP, const char* pszFile)
 
     if (!ttIsSameStrI(pszHHP, m_HPPname))
     {
-        // If we're in a nested .HHP file, then we need to first get the location of the nested .HHP, use that to
-        // get the location of the pszFile;
+        // If we're in a nested .HHP file, then we need to first get the location of the nested .HHP, use that
+        // to get the location of the pszFile;
 
         ttConvertToRelative(m_cszRoot, pszHHP, cszHHP);
-        cszHHP.FullPathName();  // now that we have the location relative to our original .hhp file, convert it to
-                                // a full path
+        cszHHP.FullPathName();  // now that we have the location relative to our original .hhp file, convert it
+                                // to a full path
         char* pszFilePortion = ttFindFilePortion(cszHHP);
         *pszFilePortion = 0;
         ttConvertToRelative(cszHHP, pszFile, cszRelative);
@@ -315,7 +296,7 @@ bool CNinja::CreateHelpFile()
 
     CParseHHP chhp(GetHHPName());
     chhp.ParseHhpFile();  // this will figure out all of the dependencies
-    m_chmFilename = (const char*) chhp.m_chmFilename;
+    m_chmFilename = chhp.m_chmFilename;
 
     ttlib::textfile file;
 
@@ -325,8 +306,8 @@ bool CNinja::CreateHelpFile()
         txtVersion);
     file.WriteTempLine();
     file.addblankline();
-    file.push_back("ninja_required_version = 1.8\n");
-    file.GetTempLine().Format(("builddir = %s", txtDefBuildDir));
+    file.push_back("ninja_required_version = 1.8");
+    file.GetTempLine().Format("builddir = %s", txtDefBuildDir);
     file.WriteTempLine();
 
     file.push_back("rule compile");
@@ -353,8 +334,8 @@ bool CNinja::CreateHelpFile()
         file.WriteTempLine();
     }
 
-    // We don't want to touch the build script if it hasn't changed, since that would change the timestamp causing
-    // git and other tools that check timestamp to think something is different.
+    // We don't want to touch the build script if it hasn't changed, since that would change the timestamp
+    // causing git and other tools that check timestamp to think something is different.
 
     if (m_dryrun.IsEnabled())
     {

@@ -31,7 +31,7 @@ public:
     void ParseHhpFile(const char* pszHHP = nullptr);
 
     ttCList m_lstDependencies;
-    ttCStr  m_chmFilename;
+    ttlib::cstr  m_chmFilename;
 
 protected:
     void AddDependency(const char* pszHHP, const char* pszFile);

@@ -8,27 +8,25 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
 #include <iostream>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <ttlibwin.h>
 
-#include <ttnamespace.h>  // Contains the tt namespace functions common to all tt libraries
 #include <ttcstr.h>       // Classes for handling zero-terminated char strings.
 #include <ttcvector.h>    // Vector of ttlib::cstr strings
+#include <ttnamespace.h>  // Contains the tt namespace functions common to all tt libraries
 
-#include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
-#include <ttfile.h>   // ttCFile
 #include <ttarray.h>  // ttCArray
+#include <ttfile.h>   // ttCFile
+#include <ttlist.h>   // ttCList, ttCDblList, ttCStrIntList
 #include <ttmap.h>    // ttCMap
 
 #include <ttstr.h>  // ttlib::cstr, ttStrlist -- String and vector classes with some additional functionality
 
-#include "options.h"  // CSrcOptions
-
-using namespace sfopt;  // OPT_ options are used extensively, hence using the namespace in the header file
+#include "options.h"  // OPT:: enumerated Options
 
 extern const char* txtSrcFilesFileName;
 
@@ -36,7 +34,7 @@ extern const char* txtSrcFilesFileName;
 ttlib::cstr locateProjectFile(std::string_view StartDir = ttEmptyString);
 
 // Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
-class CSrcFiles : public CSrcOptions
+class CSrcFiles : public OPT
 {
 public:
     CSrcFiles();
@@ -45,51 +43,82 @@ public:
 
     // Public functions
 
+    bool isOptValue(size_t option, std::string_view value) const
+    {
+        return (getOptValue(option).issameas(value, ttlib::CASE::either));
+    }
+
+    bool isOptTrue(size_t index) const
+    {
+        assert(index < OPT::LAST);
+        return ttlib::issameas(m_Options[index].value, "true", ttlib::CASE::either);
+    }
+
+    bool hasOptValue(size_t option) const
+    {
+        return (!getOptValue(option).empty());
+    }
+
+    const ttlib::cstr& getOptValue(size_t index) const noexcept
+    {
+        assert(index < OPT::LAST);
+        return m_Options[index].value;
+    }
+
+    void setOptValue(size_t index, std::string_view value);
+
+    const std::string& getOptComment(size_t index) const noexcept
+    {
+        assert(index < OPT::LAST);
+        return m_Options[index].comment;
+    }
+
+    void setOptComment(size_t index, std::string_view value)
+    {
+        assert(index < OPT::LAST);
+        m_Options[index].comment = value;
+    }
+
     const char* GetTargetDir();
     const char* GetTargetRelease();
     const char* GetTargetDebug();
 
     const char* GetBuildScriptDir();
-    bool AddFile(const char* pszFile) { return m_lstSrcFiles.addfilename(pszFile); }
 
-    // If pszFile is NULL, CSrcFiles will attempt to locate the file (see LocateSrcFiles()).
-    bool ReadFile(std::string_view filename = "");
+    // If filename is not specified, CSrcFiles will attempt to locate the file.
+    bool ReadFile(std::string_view filename = std::string_view {});
 
     bool IsProcessed() { return m_bRead; }
 
-    bool IsExeTypeConsole() { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "console")); }  // this is the default
-    bool IsExeTypeDll()
-    {
-        return (ttStrStrI(GetOption(OPT_EXE_TYPE), "dll") || ttStrStrI(GetOption(OPT_EXE_TYPE), "ocx"));
-    }
-    bool IsExeTypeLib() { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "lib")); }
-    bool IsExeTypeWindow() { return (ttStrStrI(GetOption(OPT_EXE_TYPE), "window")); }
+    bool IsExeTypeConsole() const { return (isOptValue(OPT::EXE_TYPE, "console")); }
+    bool IsExeTypeDll() const { return (isOptValue(OPT::EXE_TYPE, "dll") || isOptValue(OPT::EXE_TYPE, "ocx")); }
+    bool IsExeTypeLib() const { return (isOptValue(OPT::EXE_TYPE, "lib")); }
+    bool IsExeTypeWindow() const { return (isOptValue(OPT::EXE_TYPE, "window")); }
+    bool IsStaticCrtRel() const { return (isOptValue(OPT::CRT_REL, "static")); }
+    bool IsStaticCrtDbg() const { return (isOptValue(OPT::CRT_DBG, "static")); }
+    bool IsOptimizeSpeed() const { return (isOptValue(OPT::OPTIMIZE, "speed")); }
 
-    bool IsStaticCrtRel() { return (ttStrStrI(GetOption(OPT_STATIC_CRT_REL), "static")); }
-    bool IsStaticCrtDbg() { return (ttStrStrI(GetOption(OPT_STATIC_CRT_DBG), "static")); }
+    // const char* GetBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
+    // const char* GetXgetFlags() { return GetOption(OPT_XGET_FLAGS); }
 
-    bool IsOptimizeSpeed() { return (ttStrStrI(GetOption(OPT_OPTIMIZE), "speed")); }
-
-    const char* GetBuildLibs() { return GetOption(OPT_BUILD_LIBS); }
-    const char* GetXgetFlags() { return GetOption(OPT_XGET_FLAGS); }
-
-    void AddSourcePattern(const char* pszFilePattern);
+    bool AddFile(std::string_view filename) { return m_lstSrcFiles.addfilename(filename); }
+    void AddSourcePattern(std::string_view FilePattern);
 
     // These are just for convenience--it's fine to call GetOption directly
 
-    const char* GetProjectName() { return GetOption(OPT_PROJECT); }
+    const ttlib::cstr& GetProjectName() { return m_Options[OPT::PROJECT].value; }
     const char* GetPchHeader() const;
     // Source file to compile the precompiled header
     const char* GetPchCpp();
 
     void SetRcName(std::string_view name) { m_RCname = name; }
-    const char* GetRcName() { return m_RCname.c_str(); }
-    std::string_view getRcName() { return m_RCname; }
+    const ttlib::cstr& getRcName() { return m_RCname; }
 
     // Gets name/location of srcfiles (normally .srcfiles.yaml)
-    const char* GetSrcFiles() { return m_srcfilename.c_str(); };
+    const ttlib::cstr& GetSrcFilesName() { return m_srcfilename; };
+
     // Ninja's builddir should be set to this directory
-    const char* GetBldDir() { return m_bldFolder.c_str(); }
+    const ttlib::cstr& GetBldDir() { return m_bldFolder; }
 
     int GetMajorRequired() { return m_RequiredMajor; }
     int GetMinorRequired() { return m_RequiredMinor; }
@@ -106,27 +135,29 @@ public:
     void AddError(std::string_view err) { m_lstErrMessages.append(err); }
 #endif
 
-    const char* GetOptionValue(size_t index) { return m_opt.getOptValue(index).c_str(); }
-    void SetOptionValue(size_t index, std::string_view value) { return m_opt.setOptValue(index, value); }
-    Opt::OPTION& GetOpt(size_t index) { return m_opt.m_Options.at(index); }
-
 protected:
     // Protected functions
 
     void ParseOption(std::string_view yamlLine);
 
-    void ProcessFile(char* pszFile);
+    void ProcessFile(std::string_view line);
+    void ProcessOption(std::string_view line);
+
     void ProcessInclude(const char* pszFile, ttCStrIntList& lstAddSrcFiles, bool bFileSection);
-    void ProcessLibSection(char* pszLibFile);
-    void ProcessOption(char* pszLine);
     void ProcessTarget(char* pszLine);
 
-    bool GetOptionParts(char* pszLine, ttCStr& cszName, ttCStr& cszVal, ttCStr& cszComment);
-
-    void AddCompilerFlag(const char* pszFlag);
+    void AddCompilerFlag(std::string_view flag);
     //    void AddLibrary(const char* pszName);     // REVIEW: [KeyWorks - 8/7/2019] doesn't appear to be used
 
-    const char* GetReportFilename() { return (m_ReportPath.empty()) ? "" : m_ReportPath.c_str(); }
+    const ttlib::cstr& GetReportFilename() { return m_ReportPath; }
+
+    void InitOptions();
+
+    CURRENT& getOption(size_t index)
+    {
+        assert(index < LAST);
+        return m_Options[index];
+    }
 
 protected:
     ttlib::cstr m_LIBname;  // Name and location of any additional library to build (used by Lib: section)
@@ -147,21 +178,25 @@ protected:
 
     ttlib::cstr m_pchCPPname;
 
+    size_t FindOption(const std::string_view name) const;
+
 private:
     // Class members
+
+    std::vector<CURRENT> m_Options { OPT::LAST + 1 };
 
     ttlib::cstr m_srcfilename;
     ttlib::cstr m_ReportPath;  // Path to use when reporting a problem.
     ttlib::cstr m_bldFolder;   // This is where we write the .ninja files, and is ninja's builddir.
 
-    ttlib::cstr m_relTargetFolder;
-    ttlib::cstr m_dbgTargetFolder;
+    ttlib::cstr m_relTarget;
+    ttlib::cstr m_dbgTarget;
 
     std::string m_strTargetDir;
 
-    int m_RequiredMajor{ 1 };  // These three get filled in to the minimum ttBld version required to process.
-    int m_RequiredMinor{ 0 };
-    int m_RequiredSub{ 0 };
+    int m_RequiredMajor { 1 };  // These three get filled in to the minimum ttBld version required to process.
+    int m_RequiredMinor { 0 };
+    int m_RequiredSub { 0 };
 
-    bool m_bRead{ false };  // File has been read and processed.
+    bool m_bRead { false };  // File has been read and processed.
 };

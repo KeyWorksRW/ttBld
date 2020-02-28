@@ -52,15 +52,13 @@ static const char* aRemovals[]
 // dependency.
 bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header, std::string_view relpath)
 {
-    std::string inFilename{ !header.empty() ? header : rcfile };
+    std::string inFilename { !header.empty() ? header : rcfile };
     ttlib::viewfile file;
     try
     {
         if (!file.ReadFile(inFilename))
         {
-            std::string msg(_tt("Cannot open "));
-            msg += inFilename;
-            m_lstErrMessages.append(msg);
+            m_lstErrMessages.append(_tt("Cannot open ") + inFilename);
             return false;
         }
     }
@@ -81,7 +79,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
         reldir.remove_filename();
     }
 
-    for (auto line : file)
+    for (auto line: file)
     {
         line = ttlib::findnonspace(line);
         if (!line.length())
@@ -105,7 +103,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                 if (incName.issameprefix("afx") || incName.issameprefix("atl") || incName.issameprefix("winres"))
                     continue;
 
-                ttlib::cstr root{ inFilename };
+                ttlib::cstr root { inFilename };
                 root.remove_filename();
                 incName.make_relative(root);
                 incName.backslashestoforward();
@@ -118,14 +116,9 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                     continue;
                 }
 
-                size_t posHdr = m_lstRcDependencies.GetPos(incName.c_str());
-                bool HdrSeenBefore = (posHdr != ttlib::npos);
-                if (!HdrSeenBefore)
-                    m_lstRcDependencies.Add(incName.c_str());
-
-                if (!HdrSeenBefore)
+                if (!m_RcDependencies.hasFilename(incName))
                 {
-                    // Search the header file for any #includes it might have -- those will also be dependents
+                    m_RcDependencies.push_back(incName);
                     FindRcDependencies(rcfile, incName, relpath);
                 }
             }
@@ -133,7 +126,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
         else
         {
             // Check the RC keywords that can include files
-            for (auto keyword : RcKeywords)
+            for (auto keyword: RcKeywords)
             {
                 auto posKeyword = ttlib::findstr_pos(line, keyword);
                 if (posKeyword != ttlib::npos)
@@ -146,7 +139,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                     auto filename = ttlib::stepover(ttlib::findstr(line, keyword));
 
                     // Old resource files may have some old 16-bit declarations before the filename.
-                    for (auto skip : aRemovals)
+                    for (auto skip: aRemovals)
                     {
                         if (ttlib::issameprefix(filename, skip))
                         {
@@ -163,12 +156,12 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                         parseName.ExtractSubString(filename);
                         if (!parseName.empty() && parseName.fileExists())
                         {
-                            ttlib::cstr root{ inFilename };
+                            ttlib::cstr root { inFilename };
                             root.remove_filename();
                             parseName.make_relative(root);
                             parseName.backslashestoforward();
 
-                            m_lstRcDependencies.Add(parseName.c_str());
+                            m_RcDependencies.addfilename(parseName);
                         }
                     }
                 }

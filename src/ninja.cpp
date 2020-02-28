@@ -10,18 +10,17 @@
 
 #include <ttTR.h>  // Function for translating strings
 
-#include <ttenumstr.h>  // ttCEnumStr
 #include <ttcwd.h>      // Class for storing and optionally restoring the current directory
+#include <ttenumstr.h>  // ttCEnumStr
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
 #include "verninja.h"  // CVerMakeNinja
 // #include "funcs.h"     // List of function declarations
 
-const char* aCppExt[]{ ".cpp", ".cxx", ".cc", nullptr };
+const char* aCppExt[] { ".cpp", ".cxx", ".cc", nullptr };
 
-CNinja::CNinja(std::string_view NinjaDir)
-    : CSrcFiles(NinjaDir)
+CNinja::CNinja(std::string_view NinjaDir) : CSrcFiles(NinjaDir)
 {
 #if !defined(NDEBUG)  // Starts debug section.
     assert(ReadFile());
@@ -34,7 +33,7 @@ CNinja::CNinja(std::string_view NinjaDir)
     CVerMakeNinja verSrcFiles;
     m_isInvalidVersion = verSrcFiles.IsSrcFilesNewer(GetMajorRequired(), GetMinorRequired(), GetSubRequired());
 
-    if (!GetProjectName())
+    if (GetProjectName().empty())
     {
         ttlib::cstr projname;
         projname.assignCwd();
@@ -46,31 +45,29 @@ CNinja::CNinja(std::string_view NinjaDir)
         {
             projname.remove_filename();
         }
-        UpdateOption(OPT_PROJECT, projname.subview().viewfilename());
+        setOptValue(OPT::PROJECT, projname.filename());
     }
 
-    m_lstRcDependencies.SetFlags(ttCList::FLG_URL_STRINGS);
-
     if (!m_RCname.empty())
-        FindRcDependencies(m_RCname.c_str());
+        FindRcDependencies(m_RCname);
 
     auto envBldCFlags = getenv("TTBLD_CFLAGS");
     if (envBldCFlags)
     {
         ttlib::cstr flags;
-        if (!getOptValue(Opt::CFLAGS_CMN).empty())
+        if (hasOptValue(OPT::CFLAGS_CMN))
         {
-            flags = getOptValue(Opt::CFLAGS_CMN);
+            flags = getOptValue(OPT::CFLAGS_CMN);
             flags += " ";
         }
         flags += envBldCFlags;
-        setOptValue(Opt::CFLAGS_CMN, flags);
+        setOptValue(OPT::CFLAGS_CMN, flags);
     }
 
     ProcessBuildLibs();
 }
 
-static const char* aszCompilerPrefix[]{
+static const char* aszCompilerPrefix[] {
     "msvc_",
     "clang_",
     "gcc_",
@@ -207,7 +204,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Write the build rules for all source files
 
-    for (auto srcFile : GetSrcFileList())
+    for (auto srcFile: GetSrcFileList())
     {
         auto ext = srcFile.extension();
         if (ext.empty() || std::tolower(ext[1] != 'c'))
@@ -259,25 +256,23 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     if (GetRcFile().fileExists())
     {
-        ttlib::cstr resource{ GetRcFile() };
+        ttlib::cstr resource { GetRcFile() };
 
         resource.replace_extension("");
         resource += ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
 
         m_ninjafile.GetTempLine().Format("build $resout/%s: rc %s", resource.c_str(), GetRcFile().c_str());
 
-        if (GetRcDepList()->GetCount())
+        if (m_RcDependencies.size())
         {
             m_ninjafile.WriteTempLine(" | $");
-            size_t nPos = 0;
-            for (; nPos < GetRcDepList()->GetCount() - 1; nPos++)
+            size_t pos = 0;
+            for (; pos < m_RcDependencies.size() - 1; pos++)
             {
-                temp = "  ";
-                temp += GetRcDepList()->Get(nPos);
+                temp = ("  " + m_RcDependencies[pos]);
                 m_ninjafile.WriteTempLine(" $");
             }
-            temp = "  ";
-            m_ninjafile.WriteTempLine(GetRcDepList()->Get(nPos));
+            m_ninjafile.push_back("  " + m_RcDependencies[pos]);
         }
         m_ninjafile.addblankline();
     }
@@ -290,13 +285,11 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         msvcWriteLinkTargets(cmplr);
     }
 
-    if (!ttDirExists(GetBldDir()))
+    if (!GetBldDir().dirExists())
     {
-        if (!ttCreateDir(GetBldDir()))
+        if (!ttCreateDir(GetBldDir().c_str()))
         {
-            std::string msg = _tt("Unable to create or write to ");
-            msg += GetBldDir();
-            AddError(msg);
+            AddError(_tt("Unable to create or write to ") + GetBldDir());
             return false;
         }
     }
@@ -333,10 +326,10 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
 void CNinja::ProcessBuildLibs()
 {
-    if (!getOptValue(Opt::BUILD_LIBS).empty())
+    if (hasOptValue(OPT::BUILD_LIBS))
     {
-        ttEnumStr enumLib(ttlib::findnonspace(getOptValue(Opt::BUILD_LIBS)), ';');
-        for (auto iter : enumLib)
+        ttEnumStr enumLib(ttlib::findnonspace(getOptValue(OPT::BUILD_LIBS)), ';');
+        for (auto iter: enumLib)
         {
             ttlib::cwd cwd(true);
 
@@ -422,6 +415,7 @@ void CNinja::ProcessBuildLibs()
             // At this point, we should be in the same directory as .srcfiles.yaml
             if (cSrcFiles.ReadFile(".srcfiles.yaml"))
             {
+#if 0
                 // REVIEW: [KeyWorks - 02-03-2020] Could we just all CurDir.make_relative()?
 
                 ttlib::cstr RelDir;
@@ -438,7 +432,8 @@ void CNinja::ProcessBuildLibs()
                 ttASSERT_MSG(ttlib::issameas(RelDir, cszRelDir.c_str()),
                              "RelDir and cszRelDir should be identical!");
 #endif
-                m_dlstTargetDir.Add(cSrcFiles.GetProjectName(), RelDir.c_str());
+                m_dlstTargetDir.Add(cSrcFiles.GetProjectName().c_str(), RelDir.c_str());
+#endif
             }
 
             const char* pszLib = cSrcFiles.GetTargetDebug();
@@ -449,7 +444,7 @@ void CNinja::ProcessBuildLibs()
                 LibDir.append_filename(pszLib);
                 LibDir.make_relative(cwd);
                 LibDir.backslashestoforward();
-                m_lstBldLibsD += LibDir.c_str();
+                m_BldLibsDbg.addfilename(LibDir);
             }
 
             pszLib = cSrcFiles.GetTargetRelease();
@@ -460,7 +455,7 @@ void CNinja::ProcessBuildLibs()
                 LibDir.append_filename(pszLib);
                 LibDir.make_relative(cwd);
                 LibDir.backslashestoforward();
-                m_lstBldLibsR += LibDir.c_str();
+                m_lstBldLibsRel.addfilename(LibDir);
             }
         }
     }
