@@ -17,43 +17,43 @@
 
 void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
 {
-    m_ninjafile.push_back("msvc_deps_prefix = Note: including file:");
-    m_ninjafile.addblankline();
-    m_ninjafile.push_back("# -EHsc\t// Structured exception handling");
+    m_ninjafile.emplace_back("msvc_deps_prefix = Note: including file:");
+    m_ninjafile.addEmptyLine();
+    m_ninjafile.emplace_back("# -EHsc\t// Structured exception handling");
 
     // Write comment section explaining the compiler flags in use
     if (cmplr == CMPLR_MSVC && m_gentype == GEN_RELEASE)
     {
         // These are only supported by the MSVC compiler
-        m_ninjafile.push_back("# -GL\t  // Whole program optimization");
+        m_ninjafile.emplace_back("# -GL\t  // Whole program optimization");
     }
 
     if (m_gentype == GEN_RELEASE)
     {
         if (IsStaticCrtRel())
-            m_ninjafile.push_back("# -MT\t// Static CRT multi-threaded library");
+            m_ninjafile.emplace_back("# -MT\t// Static CRT multi-threaded library");
         else
-            m_ninjafile.push_back("# -MD\t// Dynamic CRT multi-threaded library");
+            m_ninjafile.emplace_back("# -MD\t// Dynamic CRT multi-threaded library");
         if (IsExeTypeLib())
-            m_ninjafile.push_back("# -Zl\t// Don't specify default runtime library in .obj file");
+            m_ninjafile.emplace_back("# -Zl\t// Don't specify default runtime library in .obj file");
         if (IsOptimizeSpeed())
-            m_ninjafile.push_back("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
+            m_ninjafile.emplace_back("# -O2\t// Optimize for speed (/Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy)");
         else
-            m_ninjafile.push_back("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
+            m_ninjafile.emplace_back("# -O1\t// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)");
 
-        m_ninjafile.push_back("# -FC\t  // Full path to source code file in diagnostics");
+        m_ninjafile.emplace_back("# -FC\t  // Full path to source code file in diagnostics");
     }
     else
     {
         if (IsStaticCrtDbg())
-            m_ninjafile.push_back("# -MD\t// Multithreaded static CRT");
+            m_ninjafile.emplace_back("# -MD\t// Multithreaded static CRT");
         else
-            m_ninjafile.push_back("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
-        m_ninjafile.push_back("# -Z7\t  // Produces object files with full symbolic debugging information");
-        m_ninjafile.push_back("# -FC\t  // Full path to source code file in diagnostics");
+            m_ninjafile.emplace_back("# -MDd\t// Multithreaded debug dll (MSVCRTD)");
+        m_ninjafile.emplace_back("# -Z7\t  // Produces object files with full symbolic debugging information");
+        m_ninjafile.emplace_back("# -FC\t  // Full path to source code file in diagnostics");
     }
 
-    m_ninjafile.addblankline();  // force a blank line after the options are listed
+    m_ninjafile.addEmptyLine();  // force a blank line after the options are listed
 }
 
 // The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for
@@ -61,7 +61,7 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
 
 void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 {
-    auto& tmpline = m_ninjafile.GetTempLine();
+    auto& line = m_ninjafile.addEmptyLine();
     // First we write the flags common to both compilers
 
     if (m_gentype == GEN_DEBUG)
@@ -71,55 +71,55 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         // no serialized writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not
         // recognize -Zf.
 
-        tmpline.Format("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s %s -Od -Z7",
-                       IsExeTypeConsole() ? " -D_CONSOLE" : "", getOptValue(OPT::WARN).c_str(),
-                       IsStaticCrtDbg() ? "-MD" : "-MDd");
+        line.Format("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s %s -Od -Z7",
+                    IsExeTypeConsole() ? " -D_CONSOLE" : "", getOptValue(OPT::WARN).c_str(),
+                    IsStaticCrtDbg() ? "-MD" : "-MDd");
     }
     else
     {
-        tmpline.Format("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s %s %s",
-                       IsExeTypeConsole() ? " -D_CONSOLE" : "", getOptValue(OPT::WARN).c_str(),
-                       IsStaticCrtRel() ? "-MT" : "-MD", IsOptimizeSpeed() ? "-O2" : "-O1");
+        line.Format("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s %s %s",
+                    IsExeTypeConsole() ? " -D_CONSOLE" : "", getOptValue(OPT::WARN).c_str(),
+                    IsStaticCrtRel() ? "-MT" : "-MD", IsOptimizeSpeed() ? "-O2" : "-O1");
     }
 
-    tmpline += " -FC";
+    line += " -FC";
 
     if (hasOptValue(OPT::CFLAGS_CMN))
     {
-        tmpline += (" " + getOptValue(OPT::CFLAGS_CMN));
+        line += (" " + getOptValue(OPT::CFLAGS_CMN));
     }
 
     {
         ttlib::cstr env;
         if (env.assignEnvVar("CFLAGS"))
         {
-            tmpline += " " + env;
+            line += " " + env;
         }
     }
     if (m_gentype == GEN_RELEASE)
     {
         if (hasOptValue(OPT::CFLAGS_REL))
         {
-            tmpline += (" " + getOptValue(OPT::CFLAGS_REL));
+            line += (" " + getOptValue(OPT::CFLAGS_REL));
         }
 
         ttlib::cstr env;
         if (env.assignEnvVar("CFLAGSR"))
         {
-            tmpline += " " + env;
+            line += (" " + env);
         }
     }
     else if (m_gentype == GEN_DEBUG)
     {
         if (hasOptValue(OPT::CFLAGS_DBG))
         {
-            tmpline += (" " + getOptValue(OPT::CFLAGS_DBG));
+            line += (" " + getOptValue(OPT::CFLAGS_DBG));
         }
 
         ttlib::cstr env;
         if (env.assignEnvVar("CFLAGSD"))
         {
-            tmpline += " " + env;
+            line += " " + env;
         }
     }
 
@@ -128,31 +128,31 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     if (cmplr == CMPLR_MSVC)
     {
         if (m_gentype == GEN_RELEASE)
-            tmpline += " -GL";
+            line += " -GL";
     }
 
     else
     {
         // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
-        tmpline += " -D__clang__";
-        tmpline += " -fms-compatibility-version=19";
-        tmpline += isOptTrue(OPT::BIT32) ? " -m32" : " -m64";
+        line += " -D__clang__";
+        line += " -fms-compatibility-version=19";
+        line += isOptTrue(OPT::BIT32) ? " -m32" : " -m64";
 
         if (m_gentype == GEN_RELEASE)
         {
-            tmpline += " -flto -fwhole-program-vtables";
+            line += " -flto -fwhole-program-vtables";
             if (hasOptValue(OPT::CLANG_REL))
-                tmpline += (" " + getOptValue(OPT::CLANG_REL));
+                line += (" " + getOptValue(OPT::CLANG_REL));
         }
 
         if (hasOptValue(OPT::CLANG_CMN))
         {
-            tmpline += (" " + getOptValue(OPT::CLANG_CMN));
+            line += (" " + getOptValue(OPT::CLANG_CMN));
         }
 
         if (m_gentype == GEN_DEBUG && hasOptValue(OPT::CLANG_DBG))
         {
-            tmpline += (" " + getOptValue(OPT::CLANG_DBG));
+            line += (" " + getOptValue(OPT::CLANG_DBG));
         }
     }
 
@@ -164,39 +164,38 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
             ttlib::cstr tmp;
             // If the directory name contains a space, then place it in quotes
             if (dir.find(' ') != ttlib::npos)
-                tmpline += tmp.Format(" -I%ks", dir.c_str());
+                line += tmp.Format(" -I%ks", dir.c_str());
             else
-                tmpline += tmp.Format(" -I%s", dir.c_str());
+                line += tmp.Format(" -I%s", dir.c_str());
         }
     }
 
     if (hasOptValue(OPT::PCH))
     {
         ttlib::cstr tmp;
-        tmpline += (" /Fp$outdir/" + m_pchHdrName);
+        line += (" /Fp$outdir/" + m_pchHdrName);
     }
-    m_ninjafile.WriteTempLine();
-    m_ninjafile.addblankline();
+    m_ninjafile.addEmptyLine();
 }
 
 void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 {
     ttlib::cview compiler = (cmplr == CMPLR_MSVC ? "cl.exe" : "clang-cl.exe");
-    auto& tmpline = m_ninjafile.GetTempLine();
 
     if (hasOptValue(OPT::PCH))
     {
-        m_ninjafile.push_back("rule compilePCH");
-        m_ninjafile.push_back("  deps = msvc");
-        tmpline.Format("  command = %s -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s", compiler.c_str(),
-                       GetProjectName().c_str(), getOptValue(OPT::PCH).c_str());
-        m_ninjafile.WriteTempLine();
-        m_ninjafile.push_back("  description = compiling $in");
-        m_ninjafile.addblankline();
+        m_ninjafile.emplace_back("rule compilePCH");
+        m_ninjafile.emplace_back("  deps = msvc");
+        m_ninjafile.addEmptyLine().Format("  command = %s -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s",
+                                          compiler.c_str(), GetProjectName().c_str(),
+                                          getOptValue(OPT::PCH).c_str());
+        m_ninjafile.emplace_back("  description = compiling $in");
+        m_ninjafile.addEmptyLine();
     }
 
-    m_ninjafile.push_back("rule compile");
-    m_ninjafile.push_back("  deps = msvc");
+    m_ninjafile.emplace_back("rule compile");
+    m_ninjafile.emplace_back("  deps = msvc");
+    auto& line = m_ninjafile.addEmptyLine();
 
     ttlib::cstr addyu;
     if (hasOptValue(OPT::PCH))
@@ -206,19 +205,18 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 
     if (m_gentype == GEN_DEBUG)
     {
-        tmpline.Format("  command = %s -c $cflags -Fo$out $in -Fd$outdir/%s.pdb", compiler.c_str(),
-                       GetProjectName().c_str());
+        line.Format("  command = %s -c $cflags -Fo$out $in -Fd$outdir/%s.pdb", compiler.c_str(),
+                    GetProjectName().c_str());
     }
     else
     {
-        tmpline.Format("  command = %s -c $cflags -Fo$out $in", compiler.c_str());
+        line.Format("  command = %s -c $cflags -Fo$out $in", compiler.c_str());
     }
     if (!addyu.empty())
-        tmpline += addyu;
-    m_ninjafile.WriteTempLine();
+        line += addyu;
 
-    m_ninjafile.WriteTempLine("  description = compiling $in");
-    m_ninjafile.addblankline();
+    m_ninjafile.emplace_back("  description = compiling $in");
+    m_ninjafile.addEmptyLine();
 }
 
 void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
@@ -226,51 +224,51 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
     if (IsExeTypeLib())
         return;  // lib directive should be used if the project is a library
 
-    m_ninjafile.push_back("rule link");
-    auto& tmpline = m_ninjafile.GetTempLine();
-    tmpline = "  command = ";
+    m_ninjafile.emplace_back("rule link");
+    auto& line = m_ninjafile.addEmptyLine();
+    line = "  command = ";
 
     if (isOptTrue(OPT::MS_LINKER))
-        tmpline += "link.exe /nologo";
+        line += "link.exe /nologo";
     else
-        tmpline += (cmplr == CMPLR_MSVC ? "link.exe -nologo" : "lld-link.exe");
+        line += (cmplr == CMPLR_MSVC ? "link.exe -nologo" : "lld-link.exe");
 
-    tmpline += " /out:$out /manifest:no";
+    line += " /out:$out /manifest:no";
     if (IsExeTypeDll())
-        tmpline += " /dll";
-    tmpline += (isOptTrue(OPT::BIT32) ? " /machine:x86" : " /machine:x64");
+        line += " /dll";
+    line += (isOptTrue(OPT::BIT32) ? " /machine:x86" : " /machine:x64");
 
     if (hasOptValue(OPT::LINK_CMN))
-        tmpline += (" " + getOptValue(OPT::LINK_CMN));
+        line += (" " + getOptValue(OPT::LINK_CMN));
 
     if (m_gentype == GEN_RELEASE && hasOptValue(OPT::LINK_REL))
-        tmpline += (" " + getOptValue(OPT::LINK_REL));
+        line += (" " + getOptValue(OPT::LINK_REL));
 
     if (m_gentype == GEN_DEBUG)
     {
         if (hasOptValue(OPT::LINK_DBG))
-            tmpline += (" " + getOptValue(OPT::LINK_DBG));
+            line += (" " + getOptValue(OPT::LINK_DBG));
 
         if (hasOptValue(OPT::NATVIS))
-            tmpline += (" /natvis:" + getOptValue(OPT::NATVIS));
+            line += (" /natvis:" + getOptValue(OPT::NATVIS));
 
-        tmpline += (" /debug /pdb:$outdir/" + GetProjectName() + ".pdb");
+        line += (" /debug /pdb:$outdir/" + GetProjectName() + ".pdb");
     }
     else
     {
-        tmpline += " /opt:ref /opt:icf";
+        line += " /opt:ref /opt:icf";
         if (cmplr == CMPLR_MSVC)
-            tmpline += " /ltcg";  // whole program optimization, MSVC only
+            line += " /ltcg";  // whole program optimization, MSVC only
     }
-    tmpline += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
+    line += IsExeTypeConsole() ? " /subsystem:console" : " /subsystem:windows";
 
     if (hasOptValue(OPT::LIB_DIRS))
     {
         ttEnumView enumLib(getOptValue(OPT::LIB_DIRS), ';');
         for (auto iter: enumLib)
         {
-            tmpline += " /LIBPATH:";
-            tmpline += iter;
+            line += " /LIBPATH:";
+            line += iter;
         }
     }
 
@@ -279,8 +277,8 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
         ttEnumView enumLib(getOptValue(OPT::LIBS_CMN), ';');
         for (auto iter: enumLib)
         {
-            tmpline += " ";
-            tmpline += iter;
+            line += " ";
+            line += iter;
         }
     }
 
@@ -289,8 +287,8 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
         ttEnumView enumLib(getOptValue(OPT::LIBS_DBG), ';');
         for (auto iter: enumLib)
         {
-            tmpline += " ";
-            tmpline += iter;
+            line += " ";
+            line += iter;
         }
     }
 
@@ -299,14 +297,13 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
         ttEnumView enumLib(getOptValue(OPT::LIBS_REL), ';');
         for (auto iter: enumLib)
         {
-            tmpline += " ";
-            tmpline += iter;
+            line += " ";
+            line += iter;
         }
     }
-
-    m_ninjafile.WriteTempLine(" $in");
-    m_ninjafile.push_back("  description = linking $out");
-    m_ninjafile.addblankline();
+    line += " $in";
+    m_ninjafile.emplace_back("  description = linking $out");
+    m_ninjafile.addEmptyLine();
 }
 
 void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
@@ -314,24 +311,22 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
     if (!IsExeTypeLib())
         return;
 
-    auto& tmpline = m_ninjafile.GetTempLine();
+    auto& line = m_ninjafile.addEmptyLine();
 
-    m_ninjafile.push_back("rule lib");
+    m_ninjafile.emplace_back("rule lib");
     if (cmplr == CMPLR_MSVC)
     {
-        tmpline.Format("  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in",
-                       (isOptTrue(OPT::BIT32) ? "x86" : "x64"));
-        m_ninjafile.WriteTempLine();
+        line.Format("  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in",
+                    (isOptTrue(OPT::BIT32) ? "x86" : "x64"));
     }
     else
     {
         // MSVC -LTCG option is not supported by lld
-        tmpline.Format("  command = lld-link.exe /lib /machine:%s /out:$out $in",
-                       (isOptTrue(OPT::BIT32)) ? "x86" : "x64");
-        m_ninjafile.WriteTempLine();
+        line.Format("  command = lld-link.exe /lib /machine:%s /out:$out $in",
+                    (isOptTrue(OPT::BIT32)) ? "x86" : "x64");
     }
-    m_ninjafile.push_back("  description = creating library $out");
-    m_ninjafile.addblankline();
+    m_ninjafile.emplace_back("  description = creating library $out");
+    m_ninjafile.addEmptyLine();
 }
 
 void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
@@ -339,13 +334,13 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
     if (!GetRcFile().fileExists())
         return;
 
-    auto& tmpline = m_ninjafile.GetTempLine();
-    m_ninjafile.push_back("rule rc");
+    m_ninjafile.emplace_back("rule rc");
+    auto& line = m_ninjafile.addEmptyLine();
 
     if (cmplr == CMPLR_CLANG && !isOptTrue(OPT::MS_RC))
-        tmpline = "  command = llvm-rc.exe -nologo";
+        line = "  command = llvm-rc.exe -nologo";
     else
-        tmpline = "  command = rc.exe -nologo";
+        line = "  command = rc.exe -nologo";
 
     if (hasOptValue(OPT::INC_DIRS))
     {
@@ -357,26 +352,26 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
                 tmp.Format(" -I%ks", iter.c_str());
             else
                 tmp.Format(" -I%s", iter.c_str());
-            tmpline += tmp;
+            line += tmp;
         }
     }
 
     if (hasOptValue(OPT::RC_CMN))
-        tmpline += (" " + getOptValue(OPT::RC_CMN));
+        line += (" " + getOptValue(OPT::RC_CMN));
 
     if (m_gentype == GEN_DEBUG)
     {
-        tmpline += " -d_DEBUG";
+        line += " -d_DEBUG";
         if (hasOptValue(OPT::RC_DBG))
-            tmpline += (" " + getOptValue(OPT::RC_DBG));
+            line += (" " + getOptValue(OPT::RC_DBG));
     }
     else if (m_gentype == GEN_RELEASE && hasOptValue(OPT::RC_REL))
     {
-        tmpline += (" " + getOptValue(OPT::RC_REL));
+        line += (" " + getOptValue(OPT::RC_REL));
     }
-    m_ninjafile.WriteTempLine(" /l 0x409 -fo$out $in");
-    m_ninjafile.push_back("  description = resource compiler... $in");
-    m_ninjafile.addblankline();
+    line += " /l 0x409 -fo$out $in";
+    m_ninjafile.emplace_back("  description = resource compiler... $in");
+    m_ninjafile.addEmptyLine();
 }
 
 void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
@@ -384,13 +379,13 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
     if (!m_lstIdlFiles.size())
         return;
 
-    auto& tmpline = m_ninjafile.GetTempLine();
-    m_ninjafile.push_back("rule midl");
+    m_ninjafile.emplace_back("rule midl");
+    auto& line = m_ninjafile.addEmptyLine();
 
     if (isOptTrue(OPT::BIT32))
-        tmpline = "  command = midl.exe /nologo /win32";
+        line = "  command = midl.exe /nologo /win32";
     else
-        tmpline = "  command = midl.exe /nologo /x64";
+        line = "  command = midl.exe /nologo /x64";
 
     if (hasOptValue(OPT::INC_DIRS))
     {
@@ -402,21 +397,21 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
                 tmp.Format(" -I%ks", iter.c_str());
             else
                 tmp.Format(" -I%s", iter.c_str());
-            tmpline += tmp;
+            line += tmp;
         }
     }
 
     if (hasOptValue(OPT::MIDL_CMN))
-        tmpline += (" " + getOptValue(OPT::MIDL_CMN));
+        line += (" " + getOptValue(OPT::MIDL_CMN));
 
     if (m_gentype == GEN_DEBUG && hasOptValue(OPT::MIDL_DBG))
-        tmpline += (" " + getOptValue(OPT::MIDL_DBG));
+        line += (" " + getOptValue(OPT::MIDL_DBG));
     else if (m_gentype == GEN_RELEASE && hasOptValue(OPT::MIDL_DBG))
-        tmpline += (" " + getOptValue(OPT::MIDL_DBG));
+        line += (" " + getOptValue(OPT::MIDL_DBG));
 
-    m_ninjafile.WriteTempLine(" $in");
-    m_ninjafile.push_back("  description = midl compiler... $in");
-    m_ninjafile.addblankline();
+    line += " $in";
+    m_ninjafile.emplace_back("  description = midl compiler... $in");
+    m_ninjafile.addEmptyLine();
 }
 
 void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
@@ -432,13 +427,11 @@ void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
         TypeLib.replace_extension(".tlb");
         ttlib::cstr Header(m_lstIdlFiles[pos]);
         Header.replace_extension(".h");
-        m_ninjafile.GetTempLine().Format("build %s : midl %s", Header.c_str(), m_lstIdlFiles[pos].c_str());
-        m_ninjafile.WriteTempLine();
-        m_ninjafile.addblankline();
+        m_ninjafile.addEmptyLine().Format("build %s : midl %s", Header.c_str(), m_lstIdlFiles[pos].c_str());
+        m_ninjafile.addEmptyLine();
 
-        m_ninjafile.GetTempLine().Format("build %s : phony %s", TypeLib.c_str(), Header.c_str());
-        m_ninjafile.WriteTempLine();
-        m_ninjafile.addblankline();
+        m_ninjafile.addEmptyLine().Format("build %s : phony %s", TypeLib.c_str(), Header.c_str());
+        m_ninjafile.addEmptyLine();
     }
 }
 
@@ -448,23 +441,22 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way
     // around this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
-    auto& tmpline = m_ninjafile.GetTempLine();
+    m_ninjafile.addEmptyLine();
 
-    std::stringstream line;
     // "build file : cmd"
-    tmpline.Format("build %s : ", m_gentype == GEN_DEBUG ? GetTargetDebug().c_str() : GetTargetRelease().c_str());
+    lastline().Format("build %s : ", m_gentype == GEN_DEBUG ? GetTargetDebug().c_str() : GetTargetRelease().c_str());
 
     if (IsExeTypeLib())
-        tmpline += "lib";
+        lastline() += "lib";
     else
-        tmpline += "link";
+        lastline() += "link";
 
     if (GetRcFile().fileExists())
     {
         ttlib::cstr name(GetRcFile());
         name.replace_extension("");
-        tmpline += (" $resout/" + name);
-        tmpline += m_gentype == GEN_DEBUG ? "D.res" : ".res";
+        lastline() += (" $resout/" + name);
+        lastline() += m_gentype == GEN_DEBUG ? "D.res" : ".res";
     }
 
     bool bPchSeen = false;
@@ -478,9 +470,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         objFile.replace_extension(".obj");
         if (!bPchSeen && objFile.issameas(m_pchHdrNameObj, ttlib::CASE::utf8))
             bPchSeen = true;
-        tmpline += " $";
-        m_ninjafile.WriteTempLine();
-        tmpline = ("  $outdir/" + objFile);
+        lastline() += " $";
+        m_ninjafile.emplace_back("  $outdir/" + objFile);
     }
 
     // The precompiled object file must be linked. It may or may not show up in the list of source files. We check
@@ -488,8 +479,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
 
     if (!bPchSeen && !m_pchHdrNameObj.empty())
     {
-        m_ninjafile.WriteTempLine(" $");
-        tmpline = ("  $outdir/" + m_pchHdrNameObj);
+        lastline() += " $";
+        m_ninjafile.emplace_back("  $outdir/" + m_pchHdrNameObj);
     }
 
     switch (m_gentype)
@@ -497,8 +488,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         case GEN_DEBUG:
             for (auto& dir: m_BldLibsDbg)
             {
-                m_ninjafile.WriteTempLine(" $");
-                tmpline = ("  " + dir);
+                lastline() += " $";
+                m_ninjafile.emplace_back("  " + dir);
             }
             break;
 
@@ -506,16 +497,15 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         default:
             for (auto& dir: m_lstBldLibsRel)
             {
-                m_ninjafile.WriteTempLine(" $");
-                tmpline = ("  " + dir);
+                lastline() += " $";
+                m_ninjafile.emplace_back("  " + dir);
             }
             break;
     }
 
     if (m_gentype == GEN_DEBUG && hasOptValue(OPT::NATVIS))
     {
-        m_ninjafile.WriteTempLine(" $");
-        tmpline = ("  | " + getOptValue(OPT::NATVIS));
+        lastline() += " $";
+        m_ninjafile.emplace_back("  | " + getOptValue(OPT::NATVIS));
     }
-    m_ninjafile.WriteTempLine();
 }
