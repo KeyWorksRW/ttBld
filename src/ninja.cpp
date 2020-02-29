@@ -406,7 +406,7 @@ void CNinja::ProcessBuildLibs()
         // At this point, we should be in the same directory as .srcfiles.yaml
         if (!cSrcFiles.ReadFile(".srcfiles.yaml"))
         {
-            m_lstErrMessages.append("Cannot read .srcfiles.yaml in " + BuildFile);
+            AddError(_tt("Cannot read .srcfiles.yaml in ") + BuildFile);
             continue;
         }
 
@@ -414,7 +414,7 @@ void CNinja::ProcessBuildLibs()
         {
             for (auto& err: cSrcFiles.getErrorMsgs())
             {
-                m_lstErrMessages.append(BuildFile + ": " + err);
+                AddError(BuildFile + ": " + err);
             }
         }
 
@@ -423,7 +423,7 @@ void CNinja::ProcessBuildLibs()
 
         if (cSrcFiles.GetTargetRelease().empty() || cSrcFiles.GetTargetDebug().empty())
         {
-            m_lstErrMessages.append("Invalid .srcfiles.yaml: " + BuildFile);
+            AddError("Invalid .srcfiles.yaml: " + BuildFile);
             continue;
         }
 

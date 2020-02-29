@@ -89,7 +89,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 int main(int argc, char** argv)
 {
     UPDATE_TYPE upType = UPDATE_NORMAL;
-    size_t      Action = 0;
+    size_t Action = 0;
 
     ttlib::cstr RootDir;      // this will be set if (Action & ACT_DIR) is set
     ttlib::cstr SrcFilePath;  // location of srcfiles.yaml
@@ -176,12 +176,23 @@ int main(int argc, char** argv)
     if (!cNinja.IsValidVersion())
     {
         if (ttlib::MsgBox(_tt("This version of ttBld is too old -- create ninja scripts anyway?"),
-                     MB_YESNO | MB_ICONWARNING) != IDYES)
+                          MB_YESNO | MB_ICONWARNING) != IDYES)
             return 1;
     }
 
     if (Action & ACT_FORCE)  // force write ignores any request for dryrun
         cNinja.ForceWrite();
+
+    if (Action & ACT_ALLD)
+    {
+        fs::remove("makefile");
+        cNinja.CreateMakeFile(true, RootDir);
+    }
+
+    if (Action & ACT_ALL)
+    {
+        cNinja.CreateMakeFile(true, RootDir);
+    }
 
     int countNinjas = 0;
 #if defined(_WIN32)
@@ -205,7 +216,7 @@ int main(int argc, char** argv)
     if (cNinja.getErrorMsgs().size())
     {
         ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-        for (auto iter : cNinja.getErrorMsgs())
+        for (auto iter: cNinja.getErrorMsgs())
         {
             std::cout << iter << '\n';
         }

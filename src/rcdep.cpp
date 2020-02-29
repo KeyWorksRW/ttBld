@@ -58,15 +58,13 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
     {
         if (!file.ReadFile(inFilename))
         {
-            m_lstErrMessages.append(_tt("Cannot open ") + inFilename);
+            AddError(_tt("Cannot open ") + inFilename);
             return false;
         }
     }
     catch (const std::exception& e)
     {
-        std::stringstream msg;
-        msg << _tt("An exception occurred while reading ") << inFilename << ": " << e.what();
-        m_lstErrMessages.append(msg.str());
+        AddError(_tt("An exception occurred while reading ") + inFilename + ": " + e.what());
         return false;
     }
 

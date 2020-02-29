@@ -150,7 +150,6 @@ protected:
     ttlib::cstrVector m_lstLibFiles;  // List of any files used to build additional library
     ttlib::cstrVector m_lstIdlFiles;  // List of any idl files to compile with midl compiler
 
-    ttlib::cstrVector m_lstErrMessages;  // List of any errors that occurred during processing
     ttlib::cstrVector m_lstIncludeSrcFiles;
 
     ttlib::cstr m_pchCPPname;
@@ -159,6 +158,8 @@ protected:
 
 private:
     // Class members
+
+    ttlib::cstrVector m_lstErrMessages;  // List of any errors that occurred during processing
 
     std::vector<CURRENT> m_Options { OPT::LAST + 1 };
 

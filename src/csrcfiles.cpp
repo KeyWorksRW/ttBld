@@ -44,9 +44,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         if (project.empty())
         {
             ttlib::cwd cwd;
-            std::stringstream msg;
-            msg << "Cannot locate .srcfiles.yaml starting in " << cwd;
-            m_lstErrMessages.append(msg.str());
+            AddError(_tt("Cannot locate .srcfiles.yaml starting in ") + cwd);
             return false;  // if we still can't find it, bail
         }
         m_srcfilename = std::move(project);
@@ -64,8 +62,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
     ttlib::viewfile SrcFile;
     if (!SrcFile.ReadFile(m_srcfilename))
     {
-        std::string msg = (_tt("Cannot open ") + m_srcfilename);
-        m_lstErrMessages.append(msg);
+        AddError(_tt("Cannot open ") + m_srcfilename);
         return false;
     }
 
@@ -75,7 +72,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
     SRC_SECTION section = SECTION_UNKNOWN;
 
-    for (auto line: SrcFile)
+    for (auto& line: SrcFile)
     {
         // Note that we are only looking for leading characters that would appear in a .srcfiles.yaml file, not all
         // of the special characters allowed in the full YAML specification.
@@ -104,6 +101,8 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         }
 
         auto begin = ttlib::findnonspace(line);
+        if (begin.empty() || begin[0] == '#')
+            continue;
 
         switch (section)
         {
@@ -329,15 +328,13 @@ void CSrcFiles::ProcessIncludeDirective(std::string_view file, ttlib::cstr root)
     }
     catch (const std::exception& e)
     {
-        std::stringstream msg;
-        msg << _tt("An exception occurred while reading ") << FullPath << ": " << e.what();
-        m_lstErrMessages.append(msg.str());
+        AddError(_tt("An exception occurred while reading ") + FullPath + ": " + e.what());
         return;
     }
 
     if (!cIncSrcFiles.ReadFile(FullPath))
     {
-        m_lstErrMessages.append(_tt("Unable to locate the file ") + FullPath);
+        AddError(_tt("Unable to locate the file ") + FullPath);
         return;
     }
 
@@ -575,9 +572,7 @@ const ttlib::cstr& CSrcFiles::GetTargetDebug()
 
 void CSrcFiles::AddError(std::string_view err)
 {
-    ttlib::cstr msg(err);
-    msg += "\n";
-    m_lstErrMessages.append(msg);
+    m_lstErrMessages.append(err);
 }
 
 #endif
