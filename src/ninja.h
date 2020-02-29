@@ -84,6 +84,9 @@ protected:
 
     bool FindRcDependencies(std::string_view rcfile, std::string_view header = {}, std::string_view relpath = {});
 
+    // Retrieve a reference to the last line in the current ninja script file.
+    ttlib::cstr& lastline() noexcept { return m_ninjafile.back(); }
+
     CDryRun m_dryrun;
 
 private:
