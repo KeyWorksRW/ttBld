@@ -20,6 +20,7 @@ Options:
     BuildLibs:   ../../ttLib/winsrc              # temporary location, change before Public release
 
 Files:
+    ttBld.rc
     mainapp.cpp
 
     cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
