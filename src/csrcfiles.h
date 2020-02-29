@@ -106,6 +106,8 @@ public:
     int GetMinorRequired() { return m_RequiredMinor; }
     int GetSubRequired() { return m_RequiredSub; }
 
+    const ttlib::cstrVector& getErrorMsgs() { return m_lstErrMessages; }
+
     ttlib::cstrVector& GetSrcFilesList() { return m_lstSrcFiles; }
 
     void SetReportingFile(std::string_view filename) { m_ReportPath = filename; }

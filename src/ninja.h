@@ -43,12 +43,9 @@ public:
     // Warning: this will first clear m_ninjafile.
     bool CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr);
     bool CreateHelpFile();
-
-    const ttlib::cstrVector& getErrorMsgs() { return m_lstErrMessages; }
+    bool CreateMakeFile(bool isAllVersion, std::string_view Dir);
 
     size_t getSrcCount() { return m_lstSrcFiles.size(); }
-
-    bool CreateMakeFile(bool bAllVersion = false, std::string_view Dir = std::string_view{});
 
     const ttlib::cstr& GetRcFile() { return m_RCname; }
     std::string_view GetScriptFile() { return m_scriptFilename; }
@@ -103,8 +100,15 @@ private:
     ttlib::cstr m_scriptFilename;  // The .ninja file
 
     ttlib::cstrVector m_RcDependencies;
-    ttlib::cstrVector m_BldLibsDbg;
-    ttlib::cstrVector m_lstBldLibsRel;
+
+    struct BLD_LIB
+    {
+        ttlib::cstr shortname;
+        ttlib::cstr srcDir;
+        ttlib::cstr libPathDbg;
+        ttlib::cstr libPathRel;
+    };
+    std::vector<BLD_LIB> m_bldLibs;
 
     // ttCDblList m_dlstTargetDir;  // Target name, directory to use
 

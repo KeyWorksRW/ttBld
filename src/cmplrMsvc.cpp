@@ -486,19 +486,19 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     switch (m_gentype)
     {
         case GEN_DEBUG:
-            for (auto& dir: m_BldLibsDbg)
+            for (auto& dir: m_bldLibs)
             {
                 lastline() += " $";
-                m_ninjafile.emplace_back("  " + dir);
+                m_ninjafile.emplace_back("  " + dir.libPathDbg);
             }
             break;
 
         case GEN_RELEASE:
         default:
-            for (auto& dir: m_lstBldLibsRel)
+            for (auto& dir: m_bldLibs)
             {
                 lastline() += " $";
-                m_ninjafile.emplace_back("  " + dir);
+                m_ninjafile.emplace_back("  " + dir.libPathRel);
             }
             break;
     }

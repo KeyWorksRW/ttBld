@@ -318,137 +318,131 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
 void CNinja::ProcessBuildLibs()
 {
-    if (hasOptValue(OPT::BUILD_LIBS))
+    if (!hasOptValue(OPT::BUILD_LIBS))
+        return;
+
+    ttEnumStr enumLib(ttlib::findnonspace(getOptValue(OPT::BUILD_LIBS)), ';');
+    for (auto& libPath: enumLib)
     {
-        ttEnumStr enumLib(ttlib::findnonspace(getOptValue(OPT::BUILD_LIBS)), ';');
-        for (auto iter: enumLib)
+        ttlib::cwd cwd(true);
+
+        // Change to the directory that should contain a .srcfiles.yaml and read it
+
+        if (!ttlib::ChangeDir(libPath))
         {
-            ttlib::cwd cwd(true);
+            AddError(_tt("The library source directory ") + libPath +
+                     _tt(" specified in BuildLibs: does not exist."));
+            continue;
+        }
 
-            // Change to the directory that should contain a .srcfiles.yaml and read it
+        // The current directory may just be the name of the library, but not necessarily where srcfiles is
+        // located.
 
-            if (!ttlib::ChangeDir(iter))
+        ttlib::cstr BuildDirectory(libPath);
+        ttlib::cstr BuildFile(BuildDirectory);
+
+        auto path = locateProjectFile();
+        if (!path.empty())
+        {
+            ttlib::cstr dir = path;
+            dir.remove_filename();
+            if (!dir.empty())
             {
-                std::stringstream msg;
-                msg << _tt("The library source directory ") << iter
-                    << _tt(" specified in BuildLibs: does not exist.");
-                AddError(msg);
-                continue;
+                ttlib::ChangeDir(dir);
+                BuildDirectory.assignCwd();
             }
 
-            // The current directory may just be the name of the library, but not necessarily where srcfiles is
-            // located.
-
-            ttlib::cstr BuildDirectory(iter);
-            ttlib::cstr BuildFile(BuildDirectory);
-
-            auto path = locateProjectFile();
-            if (!path.empty())
+            BuildFile = BuildDirectory;
+            BuildFile.append_filename(path);
+        }
+        else
+        {
+            // empty for loop that we break out of as soon as we find a srcfiles file to use
+            for (;;)
             {
-                ttlib::cstr dir = path;
-                dir.remove_filename();
-                if (!dir.empty())
+                /*
+                    It's unusual, but possible for there to be a sub-directory with the same name as the root
+                    directory:
+
+                    foo
+                        foo -- src for foo.lib
+                        bar -- src for bar.lib
+                        app -- src for some related app
+
+                */
+
+                if (ttlib::dirExists(libPath.filename()))
                 {
-                    ttlib::ChangeDir(dir);
-                    BuildDirectory.assignCwd();
-                }
-
-                BuildFile = BuildDirectory;
-                BuildFile.append_filename(path);
-            }
-            else
-            {
-                for (;;)  // empty for loop that we break out of as soon as we find a srcfiles file to use
-                {
-                    /*
-                        It's unusual, but possible for there to be a sub-directory with the same name as the root
-                        directory:
-
-                        foo
-                            foo -- src for foo.lib
-                            bar -- src for bar.lib
-                            app -- src for some related app
-
-                    */
-
-                    if (ttlib::dirExists(iter.filename()))
+                    ttlib::ChangeDir(libPath.filename());
+                    path.assign(locateProjectFile(BuildDirectory));
+                    if (!path.empty())
                     {
-                        ttlib::ChangeDir(iter.filename());
-                        path = std::move(locateProjectFile(BuildDirectory));
-                        if (!path.empty())
-                        {
-                            BuildDirectory.append_filename(iter.filename());
-                            BuildFile = BuildDirectory;
-                            BuildFile.append_filename(path);
-                            break;
-                        }
-                        else
-                        {
-                            // We tried changing into a directory to find the file, that didn't work so we need to
-                            // back out.
-                            ttlib::ChangeDir("..");
-                        }
+                        BuildDirectory.append_filename(libPath.filename());
+                        BuildFile = BuildDirectory;
+                        BuildFile.append_filename(path);
+                        break;
                     }
-
-                    // Any further directory searches should go above this -- once we get here, we can't find a
-                    // .srcfiles.yaml. We go ahead and break out of the loop. cSrcFiles.ReadFile() will fail --
-                    // we'll use whatever error reporting (if any) it uses for a file that cannot be found or read.
-
-                    break;
+                    else
+                    {
+                        // We tried changing into a directory to find the file, that didn't work so we need to
+                        // back out.
+                        ttlib::ChangeDir("..");
+                    }
                 }
-            }
 
-            // We've actually changed to the directory containing the .srcfiles.yaml, so CSrcFiles doesn't actually
-            // need the filename. However, if an error occurs, we need to indicate where the .srcfiles.yaml file is
-            // that had the problem.
+                // Any further directory searches should go above this -- once we get here, we can't find a
+                // .srcfiles.yaml. We go ahead and break out of the loop. cSrcFiles.ReadFile() will fail --
+                // we'll use whatever error reporting (if any) it uses for a file that cannot be found or read.
 
-            CSrcFiles cSrcFiles;
-            cSrcFiles.SetReportingFile(BuildFile);
-            // At this point, we should be in the same directory as .srcfiles.yaml
-            if (cSrcFiles.ReadFile(".srcfiles.yaml"))
-            {
-#if 0
-                // REVIEW: [KeyWorks - 02-03-2020] Could we just all CurDir.make_relative()?
-
-                ttlib::cstr RelDir;
-                RelDir.assignCwd();
-                RelDir.make_relative(cwd);
-                RelDir.backslashestoforward();
-    #if 1
-                // REVIEW: [KeyWorks - 02-26-2020] Once we're confident the result is identical, remove
-                // this conditional code block
-                ttlib::cstr CurDir;
-                CurDir.assignCwd();
-                ttCStr cszRelDir;
-                ttConvertToRelative(cwd.c_str(), CurDir.c_str(), cszRelDir);
-                ttASSERT_MSG(ttlib::issameas(RelDir, cszRelDir.c_str()),
-                             "RelDir and cszRelDir should be identical!");
-    #endif
-                m_dlstTargetDir.Add(cSrcFiles.GetProjectName().c_str(), RelDir.c_str());
-#endif
-            }
-
-            auto targetDir = cSrcFiles.GetTargetDebug();
-            if (!targetDir.empty())
-            {
-                ttlib::cstr LibDir;
-                LibDir.assignCwd();
-                LibDir.append_filename(targetDir);
-                LibDir.make_relative(cwd);
-                LibDir.backslashestoforward();
-                m_BldLibsDbg.addfilename(LibDir);
-            }
-
-            targetDir = cSrcFiles.GetTargetRelease();
-            if (!targetDir.empty())
-            {
-                ttlib::cstr LibDir;
-                LibDir.assignCwd();
-                LibDir.append_filename(targetDir);
-                LibDir.make_relative(cwd);
-                LibDir.backslashestoforward();
-                m_lstBldLibsRel.addfilename(LibDir);
+                break;
             }
         }
+
+        // We've actually changed to the directory containing the .srcfiles.yaml, so CSrcFiles doesn't actually
+        // need the filename. However, if an error occurs, we need to indicate where the .srcfiles.yaml file is
+        // that had the problem.
+
+        CSrcFiles cSrcFiles;
+        // At this point, we should be in the same directory as .srcfiles.yaml
+        if (!cSrcFiles.ReadFile(".srcfiles.yaml"))
+        {
+            m_lstErrMessages.append("Cannot read .srcfiles.yaml in " + BuildFile);
+            continue;
+        }
+
+        if (cSrcFiles.getErrorMsgs().size())
+        {
+            for (auto& err: cSrcFiles.getErrorMsgs())
+            {
+                m_lstErrMessages.append(BuildFile + ": " + err);
+            }
+        }
+
+        assertm(!cSrcFiles.GetTargetRelease().empty(), "Must have a release library target");
+        assertm(!cSrcFiles.GetTargetDebug().empty(), "Must have a debug library target");
+
+        if (cSrcFiles.GetTargetRelease().empty() || cSrcFiles.GetTargetDebug().empty())
+        {
+            m_lstErrMessages.append("Invalid .srcfiles.yaml: " + BuildFile);
+            continue;
+        }
+
+        auto& bldLib = m_bldLibs.emplace_back();
+
+        bldLib.shortname = cSrcFiles.GetProjectName();
+
+        bldLib.srcDir = BuildFile;
+        bldLib.srcDir.remove_filename();
+
+        bldLib.libPathDbg.assignCwd();
+        bldLib.libPathRel = bldLib.libPathDbg;
+
+        bldLib.libPathDbg.append_filename(cSrcFiles.GetTargetDebug());
+        bldLib.libPathDbg.make_relative(cwd);
+        bldLib.libPathDbg.backslashestoforward();
+
+        bldLib.libPathRel.append_filename(cSrcFiles.GetTargetRelease());
+        bldLib.libPathRel.make_relative(cwd);
+        bldLib.libPathRel.backslashestoforward();
     }
 }
