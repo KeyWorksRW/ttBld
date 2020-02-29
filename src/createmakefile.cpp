@@ -8,23 +8,19 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
-
-#include <ttfile.h>      // ttCFile
-#include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
-#include <ttfindfile.h>  // ttCFindFile
+#include <ttcstr.h>     // Classes for handling zero-terminated char strings.
+#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
 
 #include "ninja.h"     // CNinja
 #include "resource.h"  // IDR_MAKEFILE
-#include "funcs.h"     // List of function declarations
 
 extern const char* txtHelpNinja;
 
-bool CNinja::CreateMakeFile(bool bAllVersion, std::string_view Dir)
+bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
 {
-    ttString BuildRoot(Dir);
+    ttlib::cstr BuildRoot(Dir);
 
-    ttString MakeFile(BuildRoot);
+    ttlib::cstr MakeFile(BuildRoot);
     MakeFile.append_filename("makefile");
 
     if (MakeFile.fileExists())
@@ -32,135 +28,165 @@ bool CNinja::CreateMakeFile(bool bAllVersion, std::string_view Dir)
 
     // We get here if the makefile is missing
 
-    ttString BuildDir(BuildRoot);
+    ttlib::cstr BuildDir(BuildRoot);
     // Some repositories use a bld directory which is added to .gitignore. If it exists, we'll use this directory
     BuildDir.append_filename("bld");
 
-    auto pProjectFile = locateProjectFile(Dir);
-    if (pProjectFile->empty())
+    auto ProjectFile = locateProjectFile(Dir);
+    if (ProjectFile.empty())
     {
-        m_lstErrMessages += _tt("Cannot locate .srcfiles.yaml. Makefile not created.");
+        AddError(_tt("Cannot locate .srcfiles.yaml. Makefile not created."));
         return false;
     }
 
-    ttCFile kf;
-    if (!kf.ReadResource(bAllVersion ? IDR_MAKEFILE_ALL : IDR_MAKEFILE_SINGLE))
+    ttlib::textfile file;
+    // Put resText in a block so that it gets deleted after we've read it.
     {
-        // TRANSLATORS: Don't change the filename "makefile"
-        m_lstErrMessages +=
-            _tt("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,");
-        return false;
+        auto resText = ttlib::LoadTextResource(isAllVersion ? IDR_MAKEFILE_ALL : IDR_MAKEFILE_SINGLE);
+        if (resText.empty())
+        {
+            // TRANSLATORS: Don't change the filename "makefile"
+            AddError(
+                _tt("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,"));
+            return false;
+        }
+
+        file.ReadString(resText);
     }
 
-    while (kf.ReplaceStr("%build%", BuildDir.c_str()))
-        ;
-    //    while (kf.ReplaceStr("%libbuild%", BuildDir));
+    size_t pos;
 
-    if (!bAllVersion)
-        while (kf.ReplaceStr("%srcfiles%", pProjectFile->c_str()))
-            ;
+    while (pos = file.FindLineContaining("%build%"), pos != ttlib::npos)
+    {
+        file[pos].Replace("%build%", BuildDir, true);
+    }
 
-    while (kf.ReplaceStr("%project%", GetProjectName()))
-        ;
+    if (!isAllVersion)
+    {
+        while (pos = file.FindLineContaining("%srcfiles%"), pos != ttlib::npos)
+        {
+            file[pos].Replace("%srcfiles%", ProjectFile, true);
+        }
+    }
+
+    while (pos = file.FindLineContaining("%project%"), pos != ttlib::npos)
+    {
+        file[pos].Replace("%project%", GetProjectName(), true);
+    }
 
     // Now we parse the file as if we had read it, changing or adding as needed
 
-    ttCFile kfOut;
-    while (kf.ReadLine())
+    ttlib::textfile outFile;
+
+    for (pos = 0; pos < file.size(); ++pos)
     {
-        if (ttIsSameSubStrI(kf, "release:") || ttIsSameSubStrI(kf, "debug:"))
+        auto& line = file[pos];
+        if (line.issameprefix("release:"))
         {
-            bool   bDebugTarget = ttIsSameSubStrI(kf, "debug:");  // so we don't have to keep parsing the line
-            ttCStr cszNewLine(kf);
-            if (!ttIsEmpty(GetHHPName()))
+            if (!GetHHPName().empty())
             {
-                cszNewLine.ReplaceStr(" ", " ChmHelp ");
-                if (!GetBuildLibs())
-                {
-                    kfOut.WriteEol(cszNewLine);
-                    kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
-                    continue;
-                }
+                line.Replace(" ", " ChmHelp ");
             }
 
-            if (m_dlstTargetDir.GetCount())
+            // add all build libs to the target list
+            for (auto& bldLib: m_bldLibs)
             {
-                for (size_t pos = 0; m_dlstTargetDir.InRange(pos); ++pos)
-                {
-                    ttCStr cszTarget;
-                    cszTarget.printf(" %s%s ", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");
-
-                    // Line is "release: project" so we simply replace the first space with our additional target
-                    // (which begins and ends with a space)
-
-                    cszNewLine.ReplaceStr(" ", cszTarget);
-                }
-                kfOut.WriteEol(cszNewLine);
-
-                if (!ttIsEmpty(GetHHPName()))
-                    kfOut.printf("\nChmHelp:\n\tninja -f %s\n", txtHelpNinja);
-
-                // Now that we've added the targets to the release: or debug: line, we need to add the rule
-
-                for (size_t pos = 0; m_dlstTargetDir.InRange(pos); ++pos)
-                {
-                    kfOut.printf("\n%s%s:\n", m_dlstTargetDir.GetKeyAt(pos), bDebugTarget ? "D" : "");  // the rule
-
-                    // m_dlstTargetDir contains the root directory. We use that to locate .srcfiles.yaml which is
-                    // the directory we need to change to in order to build the library.
-                    ttCStr cszBuild(m_dlstTargetDir.GetValAt(pos));
-                    LocateSrcFiles(&cszBuild);
-                    char* pszFile = ttFindFilePortion(cszBuild);
-                    if (pszFile && ttIsSameSubStrI(pszFile, ".srcfiles"))
-                        pszFile[-1] = 0;
-                    // The leading \t before the command is required or make will fail
-                    kfOut.printf("\tcd %s & ninja -f $(BldScript%s)\n", (char*) cszBuild, bDebugTarget ? "D" : "");
-                }
+                line.Replace(" ", (" " + bldLib.shortname + " "));
             }
-            else
-                kfOut.WriteEol(kf);
+
+            // Now that the target list is updated, add specific build commands to match the targets we added.
+            ++pos;
+            assert(pos < file.size());
+
+            if (!GetHHPName().empty())
+            {
+                file.insertEmptyLine(pos++);
+                file.insertEmptyLine(pos++) = "ChmHelp:";
+                file.insertEmptyLine(pos++) = "\t ninja -f bld/ChmHelp.ninja";
+            }
+
+            for (auto& bldLib: m_bldLibs)
+            {
+                file.insertEmptyLine(pos++);
+                file.insertEmptyLine(pos++) = bldLib.shortname + ":";
+                file.insertEmptyLine(pos++) = "\tcd " + bldLib.srcDir + " & ninja -f $(BldScript)";
+            }
         }
-        else
-            kfOut.WriteEol(kf);
+        else if (line.issameprefix("debug:"))
+        {
+            // add all build libs to the target list
+            for (auto& bldLib: m_bldLibs)
+            {
+                line.Replace(" ", (" " + bldLib.shortname + "D "));
+            }
+
+            // Now that the target list is updated, add specific build commands to match the targets we added.
+            ++pos;
+            assert(pos < file.size());
+
+            for (auto& bldLib: m_bldLibs)
+            {
+                file.insertEmptyLine(pos++);
+                file.insertEmptyLine(pos++) = bldLib.shortname + "D:";
+                file.insertEmptyLine(pos++) = "\tcd " + bldLib.srcDir + " & ninja -f $(BldScript)";
+            }
+        }
+    }
+
+    // REVIEW: [KeyWorks - 02-29-2020] Hack Alert! We still haven't worked out a good solution for when
+    // the makefile will require ttBld.exe to be used. For now, if "-alld" was specified on the command line,
+    // then we add the code to force using ttBld.exe (the advantage of requiring ttBld is that ninja scripts get
+    // automatically updated whenever .srcfiles.yaml changes)
+    if (isAllVersion)
+    {
+        file.addEmptyLine();
+        file.emplace_back("########## Creates or updates ninja file any time .srcfiles.yaml changes ##########");
+
+        file.addEmptyLine();
+        file.emplace_back("$(BldScript): .srcfiles.yaml");
+        file.emplace_back("\tttBld.exe -u$(cmplr)");
+
+        file.addEmptyLine();
+        file.emplace_back("$(BldScriptD): .srcfiles.yaml");
+        file.emplace_back("\tttBld.exe -u$(cmplr)D");
     }
 
     // If the makefile already exists, don't write to it unless something has actually changed
 
     if (MakeFile.fileExists())
     {
-        ttCFile kfOrg;
-        if (!kfOrg.ReadFile(MakeFile.c_str()) || strcmp(kfOrg, kfOut) != 0)
+        ttlib::viewfile oldMakefile;
+        if (!oldMakefile.ReadFile(MakeFile) || !file.issameas(oldMakefile))
         {
             if (m_dryrun.IsEnabled())
             {
-                m_dryrun.NewFile(MakeFile.c_str());
-                m_dryrun.DisplayFileDiff(kfOrg, kfOut);
+                m_dryrun.NewFile(MakeFile);
+                m_dryrun.DisplayFileDiff(oldMakefile, file);
             }
-            else if (kfOut.WriteFile(MakeFile.c_str()))
+            else if (file.WriteFile(MakeFile))
             {
-                printf(_tt("%s updated.\n"), (char*) MakeFile.c_str());
+                std::cout << MakeFile << _tt(" updated") << '\n';
                 return true;
             }
             else
             {
                 // TRANSLATORS: Don't change the filename "makefile"
-                std::cout << _tt("Unable to write to makefile.") << '\n';
+                std::cout << _tt("Unable to write to") << MakeFile << '\n';
                 return false;
             }
         }
     }
     else
     {
-        if (kfOut.WriteFile(MakeFile.c_str()))
+        if (file.WriteFile(MakeFile))
         {
-            // TRANSLATORS: Don't change the filename "makefile"
-            std::cout << MakeFile << _tt(" created.") << '\n';
+            std::cout << MakeFile << _tt(" updated") << '\n';
             return true;
         }
         else
         {
             // TRANSLATORS: Don't change the filename "makefile"
-            std::cout << _tt("Unable to write to makefile.") << '\n';
+            std::cout << _tt("Unable to write to") << MakeFile << '\n';
             return false;
         }
     }
