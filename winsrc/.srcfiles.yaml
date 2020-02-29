@@ -27,7 +27,6 @@ Files:
     codelite.cpp        # Creates a CodeLite project
     convert.cpp         # Various conversion methods
     convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
-    createmakefile.cpp  # CreateMakeFile method for creating a makefile
     finder.cpp          # Routines for finding executables such as the MSVC compiler
     gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
     gitfuncs.cpp        # Functions for working with .git
@@ -56,6 +55,7 @@ Files:
     dlgvscode.cpp       # CDlgVsCode dialog
 
     ../src/cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
+    ../src/createmakefile.cpp  # CreateMakeFile method for creating a makefile
     ../src/csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
     ../src/dryrun.cpp          # CDryRun class for testing
     ../src/ninja.cpp           # CNinja for creating .ninja scripts

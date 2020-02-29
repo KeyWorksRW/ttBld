@@ -23,6 +23,7 @@ Files:
     mainapp.cpp
 
     cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
+    createmakefile.cpp  # Creates an MS nmake and GNU-make compatible makefile
     csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
     dryrun.cpp          # CDryRun class for testing
     ninja.cpp           # CNinja for creating .ninja scripts
