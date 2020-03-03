@@ -359,7 +359,7 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
         ttlib::winff ff(pattern);
         while (ff.isvalid())
         {
-            auto name = ff.GetFileName();
+            auto& name = ff.getcstr();
             if (name.hasExtension(".c") || name.hasExtension(".cpp") || name.hasExtension(".cxx"))
             {
                 m_lstSrcFiles += name;
