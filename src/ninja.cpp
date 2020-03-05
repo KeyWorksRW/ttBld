@@ -321,7 +321,7 @@ void CNinja::ProcessBuildLibs()
     if (!hasOptValue(OPT::BUILD_LIBS))
         return;
 
-    ttEnumStr enumLib(ttlib::findnonspace(getOptValue(OPT::BUILD_LIBS)), ';');
+    ttlib::enumstr enumLib(ttlib::findnonspace(getOptValue(OPT::BUILD_LIBS)), ';');
     for (auto& libPath: enumLib)
     {
         ttlib::cwd cwd(true);

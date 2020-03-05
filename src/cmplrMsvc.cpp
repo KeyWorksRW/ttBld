@@ -10,7 +10,7 @@
 
 #include <ttcstr.h>
 #include <ttcview.h>
-#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+#include <ttenumstr.h>  // ttlib::enumstr, ttlib::enumview -- Enumerate through substrings in a string
 #include <ttlibspace.h>
 
 #include "ninja.h"  // CNinja
@@ -158,7 +158,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 
     if (hasOptValue(OPT::INC_DIRS))
     {
-        ttEnumStr IncDirs(getOptValue(OPT::INC_DIRS));
+        ttlib::enumstr IncDirs(getOptValue(OPT::INC_DIRS));
         for (auto dir: IncDirs)
         {
             ttlib::cstr tmp;
@@ -264,7 +264,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
 
     if (hasOptValue(OPT::LIB_DIRS))
     {
-        ttEnumView enumLib(getOptValue(OPT::LIB_DIRS), ';');
+        ttlib::enumview enumLib(getOptValue(OPT::LIB_DIRS), ';');
         for (auto iter: enumLib)
         {
             line += " /LIBPATH:";
@@ -274,7 +274,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
 
     if (hasOptValue(OPT::LIBS_CMN))
     {
-        ttEnumView enumLib(getOptValue(OPT::LIBS_CMN), ';');
+        ttlib::enumview enumLib(getOptValue(OPT::LIBS_CMN), ';');
         for (auto iter: enumLib)
         {
             line += " ";
@@ -284,7 +284,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
 
     if (m_gentype == GEN_DEBUG && hasOptValue(OPT::LIBS_DBG))
     {
-        ttEnumView enumLib(getOptValue(OPT::LIBS_DBG), ';');
+        ttlib::enumview enumLib(getOptValue(OPT::LIBS_DBG), ';');
         for (auto iter: enumLib)
         {
             line += " ";
@@ -294,7 +294,7 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
 
     if (m_gentype == GEN_RELEASE && hasOptValue(OPT::LIBS_REL))
     {
-        ttEnumView enumLib(getOptValue(OPT::LIBS_REL), ';');
+        ttlib::enumview enumLib(getOptValue(OPT::LIBS_REL), ';');
         for (auto iter: enumLib)
         {
             line += " ";
@@ -344,7 +344,7 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
 
     if (hasOptValue(OPT::INC_DIRS))
     {
-        ttEnumStr enumDirs(getOptValue(OPT::INC_DIRS));
+        ttlib::enumstr enumDirs(getOptValue(OPT::INC_DIRS));
         for (auto iter: enumDirs)
         {
             ttlib::cstr tmp;
@@ -389,7 +389,7 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
 
     if (hasOptValue(OPT::INC_DIRS))
     {
-        ttEnumStr enumDirs(getOptValue(OPT::INC_DIRS));
+        ttlib::enumstr enumDirs(getOptValue(OPT::INC_DIRS));
         for (auto iter: enumDirs)
         {
             ttlib::cstr tmp;

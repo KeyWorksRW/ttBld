@@ -353,7 +353,7 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
     if (FilePattern.empty())
         return;
 
-    ttEnumStr enumPattern(FilePattern, ';');
+    ttlib::enumstr enumPattern(FilePattern, ';');
     for (auto pattern: enumPattern)
     {
         ttlib::winff ff(pattern);
