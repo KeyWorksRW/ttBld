@@ -10,26 +10,22 @@
 
 #include <sstream>
 
-#include <ttTR.h>  // Function for translating strings
-
-#include <ttenumstr.h>  // ttCEnumStr
-#include <ttmem.h>      // ttCMem, ttCTMem
-
+#include <ttTR.h>        // Function for translating strings
 #include <ttcwd.h>       // Class for storing and optionally restoring the current directory
+#include <ttenumstr.h>   // ttCEnumStr
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 #include <ttwinff.h>     // Wrapper around Windows FindFile
 
 #include "csrcfiles.h"  // CSrcFiles
 
-const char* txtSrcFilesFileName = ".srcfiles.yaml";
-const char* txtDefBuildDir = "bld";
-
-typedef enum
+enum SRC_SECTION : size_t
 {
     SECTION_UNKNOWN,
     SECTION_OPTIONS,
     SECTION_FILES,
-} SRC_SECTION;
+};
+
+CSrcFiles::CSrcFiles() {}
 
 CSrcFiles::CSrcFiles(std::string_view NinjaDir)
 {
@@ -70,7 +66,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
     InitOptions();
 
-    SRC_SECTION section = SECTION_UNKNOWN;
+    auto section = SECTION_UNKNOWN;
 
     for (auto& line: SrcFile)
     {
@@ -338,7 +334,7 @@ void CSrcFiles::ProcessIncludeDirective(std::string_view file, ttlib::cstr root)
         return;
     }
 
-    for (auto& incFile: cIncSrcFiles.GetSrcFilesList())
+    for (auto& incFile: cIncSrcFiles.m_lstSrcFiles)
     {
         ttlib::cstr filename = incFile;
         filename.make_relative(incRoot);
@@ -354,7 +350,7 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
         return;
 
     ttlib::enumstr enumPattern(FilePattern, ';');
-    for (auto pattern: enumPattern)
+    for (auto& pattern: enumPattern)
     {
         ttlib::winff ff(pattern);
         while (ff.isvalid())
@@ -577,46 +573,78 @@ void CSrcFiles::AddError(std::string_view err)
 
 #endif
 
-static const char* aProjectLocations[] = {
+static const char* aProjectLocations[] {
     // clang-format off
-    ".srcfiles.yaml",  // this MUST be the first file
-    "src/.srcfiles.yaml",
-    "source/.srcfiles.yaml",
-    ".private/.srcfiles.yaml",
-    "bld/.srcfiles.yaml",
-    "build/.srcfiles.yaml",
+    "src/",
+    "source/",
+    "bld/",
+    "build/",
+    ".private/",
     // clang-format on
 };
 
 ttlib::cstr locateProjectFile(std::string_view StartDir)
 {
+#if defined(_WIN32)
+    constexpr const char* txtPlatformName { ".srcfiles.win.yaml" };
+#elif defined(__APPLE__)
+    constexpr const char* txtPlatformName { ".srcfiles.mac.yaml" };
+#else
+    constexpr const char* txtPlatformName { ".srcfiles.unix.yaml" };
+#endif  // _WIN32
+
 #if !defined(NDEBUG)  // Starts debug section.
+    // Just so you can tell what the current directory is in a debugger.
     ttlib::cwd cwd;
 #endif
+
     ttlib::cstr path;
     if (!StartDir.empty())
     {
+        path.assign(StartDir);
+        path.addtrailingslash();
+        path.append_filename(txtPlatformName);
+        if (path.fileExists())
+            return path;
+        path.replace_filename(".srcfiles.yaml");
+        if (path.fileExists())
+            return path;
+
+        // Search common sub directories for the file.
         for (auto iter: aProjectLocations)
         {
             path.assign(StartDir);
+            path.addtrailingslash();
             path.append_filename(iter);
+            path.append_filename(txtPlatformName);
             if (path.fileExists())
-            {
                 return path;
-            }
+            path.replace_filename(".srcfiles.yaml");
+            if (path.fileExists())
+                return path;
         }
     }
     else
     {
+        path.assign(txtPlatformName);
+        if (path.fileExists())
+            return path;
+        path.replace_filename(".srcfiles.yaml");
+        if (path.fileExists())
+            return path;
+
         for (auto iter: aProjectLocations)
         {
             path.assign(iter);
+            path.append_filename(txtPlatformName);
             if (path.fileExists())
-            {
                 return path;
-            }
+            path.replace_filename(".srcfiles.yaml");
+            if (path.fileExists())
+                return path;
         }
     }
+
     path.clear();
     return path;
 }
