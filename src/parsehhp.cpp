@@ -18,8 +18,6 @@
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
 
-extern const char* txtDefBuildDir;  // "bld";
-
 CParseHHP::CParseHHP(const char* pszHHPName)
 {
     m_section = SECTION_UNKNOWN;

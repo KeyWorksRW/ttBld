@@ -19,16 +19,17 @@
 
 #include "options.h"  // OPT -- Structures and enum for storing/retrieving options in a .srcfiles.yaml file
 
-extern const char* txtSrcFilesFileName;
+constexpr const char* txtSrcFilesFileName { ".srcfiles.yaml" };
+constexpr const char* txtDefBuildDir { "bld" };
 
 // Attempts to locate .srcfiles.yaml
-ttlib::cstr locateProjectFile(std::string_view StartDir = std::string_view{});
+ttlib::cstr locateProjectFile(std::string_view StartDir = std::string_view {});
 
 // Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 class CSrcFiles : public OPT
 {
 public:
-    CSrcFiles() {};
+    CSrcFiles();
     // NinjaDir is the directory to create .ninja scripts in
     CSrcFiles(std::string_view NinjaDir);
 
@@ -108,7 +109,7 @@ public:
 
     const ttlib::cstrVector& getErrorMsgs() { return m_lstErrMessages; }
 
-    ttlib::cstrVector& GetSrcFilesList() { return m_lstSrcFiles; }
+    ttlib::cstrVector& GetSrcFileList() { return m_lstSrcFiles; }
 
     void SetReportingFile(std::string_view filename) { m_ReportPath = filename; }
 
