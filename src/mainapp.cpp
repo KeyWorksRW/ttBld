@@ -170,9 +170,10 @@ int main(int argc, char** argv)
             return 1;
         }
         SrcFilePath = std::move(path);
+        SrcFilePath.remove_filename();
     }
 
-    CNinja cNinja;
+    CNinja cNinja(SrcFilePath);
     if (!cNinja.IsValidVersion())
     {
         if (ttlib::MsgBox(_tt("This version of ttBld is too old -- create ninja scripts anyway?"),
