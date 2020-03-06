@@ -10,7 +10,7 @@ Options:
     Crt_dbg:     dll          # [static | dll] type of CRT to link to in debug builds
     Ms_linker:   false        # true means use link.exe even when compiling with clang
 
-    CFlags_cmn: -std:c++17 /Zc:__cplusplus -DwxWIDGETS -DWXUSINGDLL  # flags to pass to the compiler in all builds
+    CFlags_cmn: -std:c++17 /Zc:__cplusplus -DwxWIDGETS -DWXUSINGDLL -DTTLIB_INTERNAL_BUILD
 
     TargetDir: ../bin         # 64-bit target directory
 
@@ -24,7 +24,6 @@ Files:
     winsrc/mainapp.cpp         # entry point, global strings, library pragmas
 
     winsrc/addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
-    winsrc/codelite.cpp        # Creates a CodeLite project
     winsrc/convert.cpp         # Various conversion methods
     winsrc/convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
     winsrc/finder.cpp          # Routines for finding executables such as the MSVC compiler
