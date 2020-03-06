@@ -55,6 +55,7 @@ public:
     }
 
     void setOptValue(size_t index, std::string_view value);
+    void setOptValue(size_t index, bool value = true);
 
     const std::string& getOptComment(size_t index) const noexcept
     {
@@ -66,6 +67,12 @@ public:
     {
         assert(index < OPT::LAST);
         m_Options[index].comment = value;
+    }
+
+    void SetRequired(size_t index, bool isRequired = true)
+    {
+        assert(index < OPT::LAST);
+        m_Options[index].isRequired = isRequired;
     }
 
     const std::string& GetTargetDir();
@@ -89,7 +96,7 @@ public:
     bool AddFile(std::string_view filename) { return m_lstSrcFiles.addfilename(filename); }
     void AddSourcePattern(std::string_view FilePattern);
 
-    // These are just for convenience--it's fine to call GetOption directly
+    // These are just for convenience--it's fine to call getOptValue directly
 
     const ttlib::cstr& GetProjectName() { return m_Options[OPT::PROJECT].value; }
     const ttlib::cstr& GetPchCpp();
@@ -135,12 +142,6 @@ protected:
     const ttlib::cstr& GetReportFilename() { return m_ReportPath; }
 
     void InitOptions();
-
-    CURRENT& getOption(size_t index)
-    {
-        assert(index < LAST);
-        return m_Options[index];
-    }
 
 protected:
     ttlib::cstr m_LIBname;  // Name and location of any additional library to build (used by Lib: section)
