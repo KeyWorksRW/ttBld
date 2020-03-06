@@ -22,7 +22,7 @@
 
 // Any time you add an option below, you need to increment this version number and then add it to the aoptVersions
 // list
-const char* txtOptVersion{ "1.4.0" };
+const char* txtOptVersion { "1.4.0" };
 
 // clang-format off
 static OPT::VERSION aoptVersions[]
@@ -115,7 +115,7 @@ static const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
 
 void CSrcFiles::InitOptions()
 {
-    for (auto original : DefaultOptions)
+    for (auto original: DefaultOptions)
     {
         auto& option = m_Options[original.optionID];
         if (original.optionID == OPT::LAST)
@@ -155,7 +155,7 @@ size_t CSrcFiles::FindOption(const std::string_view name) const
     if (name.empty())
         return OPT::LAST;
 
-    size_t pos{ 0 };
+    size_t pos { 0 };
     for (; pos < m_Options.size(); ++pos)
     {
         if (ttlib::issameas(name, m_Options[pos].OriginalName, ttlib::CASE::either))
@@ -178,4 +178,15 @@ void CSrcFiles::setOptValue(size_t index, std::string_view value)
         else
             m_Options[index].value = "false";
     }
+}
+
+void CSrcFiles::setOptValue(size_t index, bool value)
+{
+    assert(index < OPT::LAST);
+    assert(m_Options[index].isBooleanValue);
+
+    if (value)
+        m_Options[index].value = "true";
+    else
+        m_Options[index].value = "false";
 }
