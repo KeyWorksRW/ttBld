@@ -311,9 +311,8 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
     if (!IsExeTypeLib())
         return;
 
-    auto& line = m_ninjafile.addEmptyLine();
-
     m_ninjafile.emplace_back("rule lib");
+    auto& line = m_ninjafile.addEmptyLine();
     if (cmplr == CMPLR_MSVC)
     {
         line.Format("  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in",
@@ -444,7 +443,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     m_ninjafile.addEmptyLine();
 
     // "build file : cmd"
-    lastline().Format("build %s : ", m_gentype == GEN_DEBUG ? GetTargetDebug().c_str() : GetTargetRelease().c_str());
+    lastline().Format("build %s : ",
+                      m_gentype == GEN_DEBUG ? GetTargetDebug().c_str() : GetTargetRelease().c_str());
 
     if (IsExeTypeLib())
         lastline() += "lib";

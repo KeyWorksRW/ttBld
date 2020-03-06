@@ -259,7 +259,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
     ttlib::cstr filename = line;
     filename.eraseFrom('#');
 
-    if (filename.find('*') || filename.find('?'))
+    if (filename.find('*') != ttlib::npos || filename.find('?') != ttlib::npos)
     {
         AddSourcePattern(filename);
         return;
