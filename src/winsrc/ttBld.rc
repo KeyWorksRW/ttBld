@@ -52,12 +52,12 @@ END
 // Data
 //
 
-IDR_PRE_PROJECT         RCDATA    "res/cdlprojectpre.txt"
-IDR_POST_PROJECT        RCDATA    "res/cdlprojectpost.txt"
-IDR_VCXPROJ_MASTER      RCDATA    "res/vcxproj.xml"
-IDR_VCXPROJ_FILTERS     RCDATA    "res/vcxproj.filters.xml"
-IDR_MAKEFILE_ALL        RCDATA    "res/makefileAll.txt"
-IDR_MAKEFILE_SINGLE     RCDATA    "res/makefileSng.txt"
+IDR_PRE_PROJECT         RCDATA    "../winres/cdlprojectpre.txt"
+IDR_POST_PROJECT        RCDATA    "../winres/cdlprojectpost.txt"
+IDR_VCXPROJ_MASTER      RCDATA    "../winres/vcxproj.xml"
+IDR_VCXPROJ_FILTERS     RCDATA    "../winres/vcxproj.filters.xml"
+IDR_MAKEFILE_ALL        RCDATA    "../winres/makefileAll.txt"
+IDR_MAKEFILE_SINGLE     RCDATA    "../winres/makefileSng.txt"
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
