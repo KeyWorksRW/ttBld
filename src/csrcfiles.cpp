@@ -279,7 +279,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
     }
 
     // ignore .rc2, .resources, etc.
-    else if (filename.hasExtension(".rc") && filename.extension().length() < 3)
+    else if (filename.hasExtension(".rc") && filename.extension().length() < sizeof(".rc"))
     {
         m_RCname = filename;
     }
