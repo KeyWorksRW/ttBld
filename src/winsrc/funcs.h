@@ -12,6 +12,7 @@ class ttCList;  // forward definition
 class ttCStr;
 class ttString;
 class CSrcFiles;
+class ttlib::cstrVector;
 
 bool gitIgnoreAll(ttCStr& cszGitExclude);
 bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile);
@@ -19,7 +20,7 @@ bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile);
 bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile);
 bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile);
 
-void AddFiles(ttCList& lstFiles, bool bDryRun);
+void AddFiles(const ttlib::cstrVector& lstFiles);
 
 // Successful return will have filled in ProjectFile with the path to the projectfile that
 // was located.

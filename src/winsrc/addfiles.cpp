@@ -8,122 +8,79 @@
 
 #include "pch.h"
 
-#include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
-#include <ttfile.h>  // ttCFile
-
-#include <ttTR.h>  // Function for translating strings
+#include <ttcvector.h>   // Vector of ttlib::cstr strings
+#include <ttfile.h>      // ttCFile
+#include <ttlist.h>      // ttCList, ttCDblList, ttCStrIntList
+#include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
 
-void AddFiles(ttCList& lstFiles, bool bDryRun)
+void AddFiles(const ttlib::cstrVector& lstFiles)
 {
-    if (lstFiles.GetCount() < 1)
+    if (lstFiles.size() < 1)
     {
-        puts("You didn't specify any files to add!");
+        std::cout << _tt("You didn't specify any files to add!") << '\n';
         return;
     }
 
     CSrcFiles cSrcFiles;
     if (!cSrcFiles.ReadFile())
     {
-        ttCStr cszMsg;
-        cszMsg.printf(_tt("Cannot locate the file %s"), (char*) cSrcFiles.GetSrcFiles());
-        puts(cszMsg);
+        std::cout << _tt("Cannot locate the file ") << cSrcFiles.GetSrcFilesName() << '\n';
         return;
     }
 
     size_t cFilesAdded = 0;
-    for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos)
+    for (auto& iter: lstFiles)
     {
-        if (cSrcFiles.GetSrcFilesList().appendi(lstFiles[pos]))
-        {
+        if (cSrcFiles.GetSrcFileList().addfilename(iter))
             ++cFilesAdded;
-        }
     }
 
-    ttCFile kfIn, kfOut;
-    if (!kfIn.ReadFile(cSrcFiles.GetSrcFiles()))
+    ttlib::textfile file;
+    if (!file.ReadFile(cSrcFiles.GetSrcFilesName()))
     {
-        ttCStr cszMsg;
-        cszMsg.printf(_tt("Cannot open \"%s\"."), (char*) cSrcFiles.GetSrcFiles());
-        puts(cszMsg);
+        std::cout << _tt("Cannot locate read the file ") << cSrcFiles.GetSrcFilesName() << '\n';
         return;
     }
-    kfIn.MakeCopy();
 
-    while (kfIn.ReadLine() && !ttIsSameSubStrI(kfIn, "Files:"))
-        kfOut.WriteEol(kfIn);
-
-    if (kfOut.IsEndOfFile())  // means there was no Files: section
+    auto pos = file.FindLineContaining("Files:");
+    if (pos == ttlib::npos)
     {
-        kfOut.WriteEol("Files:");
-        for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos)
+        file.emplace_back("Files:");
+        for (auto& iter: lstFiles)
         {
-            if (!ttFileExists(lstFiles[pos]))
+            auto& line = file.addEmptyLine();
+            line.assign("    " + iter);
+        }
+    }
+    else
+    {
+        for (++pos; pos < file.size(); ++pos)
+        {
+            if (file[pos].empty())
             {
-                printf(_tt("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
-                continue;
+                if (pos < file.size())
+                    ++pos;
+                break;
             }
-            kfOut.printf("  %s\n", lstFiles[pos]);
-            ++cFilesAdded;
         }
-        if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
+
+        for (auto& iter: lstFiles)
         {
-            ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, cSrcFiles.GetSrcFiles());
-            return;
+            auto line = file.insertEmptyLine(pos++);
+            line.assign("    " + iter);
         }
-
-        printf(_tt("%u files added."), cFilesAdded);
-        return;
     }
 
-    kfOut.WriteEol(kfIn);  // This will be the Files: line
-    while (kfIn.ReadLine())
+    if (!file.WriteFile(cSrcFiles.GetSrcFilesName()))
     {
-        if (ttIsAlpha(*(const char*) kfIn))  // Alphabetical character in first column is a new section
-            break;
-        else if (!ttFindNonSpace(kfIn))  // blank line, insert after it
-        {
-            kfOut.WriteEol(kfIn);
-            break;
-        }
-        else
-            kfOut.WriteEol(kfIn);
+        std::cout << _tt("Unable to create or write to ") << cSrcFiles.GetSrcFilesName() << '\n';
     }
-
-    // We are now after a blank line, at the beginning of a section, or at the end of the file
-
-    for (size_t pos = 0; pos < lstFiles.GetCount(); ++pos)
+    else
     {
-        if (!ttFileExists(lstFiles[pos]))
-        {
-            printf(_tt("The file %s is already in .srcfiles.yaml\n"), lstFiles[pos]);
-            continue;
-        }
-        kfOut.printf("  %s\n", lstFiles[pos]);
-        ++cFilesAdded;
+        std::cout << cFilesAdded << _tt("files added.") << '\n';
     }
-
-    // Now that the file(s) have been inserted, add everything else
-
-    while (kfIn.ReadLine())
-        kfOut.WriteEol(kfIn);
-
-    if (bDryRun)
-    {
-        CDryRun dryrun;
-        dryrun.Enable();
-        dryrun.NewFile(cSrcFiles.GetSrcFiles());
-        dryrun.DisplayFileDiff(kfIn, kfOut);
-        return;
-    }
-
-    if (!kfOut.WriteFile(cSrcFiles.GetSrcFiles()))
-    {
-        printf(_tt("Unable to create or write to %s"), cSrcFiles.GetSrcFiles());
-        return;
-    }
-
-    printf(_tt("%u files added."), cFilesAdded);
+    return;
 }

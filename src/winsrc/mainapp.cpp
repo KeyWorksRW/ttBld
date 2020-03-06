@@ -36,14 +36,13 @@
 #include <wx/wxcrtvararg.h>
 #include <wx/config.h>
 
-#include <ttTR.h>  // Function for translating strings
-
 #include "mainapp.h"  // CMainApp -- Main application class
 
 #include <iostream>
 #include <direct.h>  // Functions for directory handling and creation
 
 #include <ttconsole.h>  // ttConsoleColor
+#include <ttcvector.h>  // Vector of ttlib::cstr strings
 
 #include "convertdlg.h"  // CConvertDlg
 #include "ninja.h"       // CNinja
@@ -80,6 +79,7 @@ void Usage()
         << _tt("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n")
         << _tt("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and "
                "build/*.ninja\n")
+        << _tt("    -add [file(s)] -- Adds file(s) to .srcfiles")
         << _tt("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml\n")
         << _tt("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd\n")
         << _tt("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file\n")
@@ -222,10 +222,10 @@ int oldMain(int argc, char* argv[])
         }
         else if (ttIsSameStrI(argv[argpos] + 1, "add"))
         {
-            ttCList lstFiles;
+            ttlib::cstrVector lstFiles;
             for (++argpos; argpos < argc; ++argpos)
                 lstFiles += argv[argpos];
-            AddFiles(lstFiles, Action & ACT_DRYRUN);
+            AddFiles(lstFiles);
             return 1;
         }
         else if (ttIsSameStrI(argv[argpos] + 1, "convert"))
