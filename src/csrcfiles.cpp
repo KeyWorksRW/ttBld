@@ -231,12 +231,11 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
 
 void CSrcFiles::AddCompilerFlag(std::string_view flag)
 {
-    auto& option = getOption(OPT::CFLAGS_CMN);
-    if (option.value.contains(flag))
+    if (m_Options[OPT::CFLAGS_CMN].value.contains(flag))
         return;
-    if (!option.value.empty())
-        option.value += " ";
-    option.value += flag;
+    if (!m_Options[OPT::CFLAGS_CMN].value.empty())
+        m_Options[OPT::CFLAGS_CMN].value += " ";
+    m_Options[OPT::CFLAGS_CMN].value += flag;
 }
 
 void CSrcFiles::ProcessFile(std::string_view line)
