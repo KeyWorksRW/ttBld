@@ -90,8 +90,8 @@ deps: $(BldScript)
 
 ########## Creates or updates ninja file any time .srcfiles.yaml changes ##########
 
-$(BldScript): .srcfiles.yaml
+$(BldScript): .srcfiles.win.yaml
 	ttBld.exe -u$(cmplr)
 
-$(BldScriptD): .srcfiles.yaml
+$(BldScriptD): .srcfiles.win.yaml
 	ttBld.exe -u$(cmplr)D
