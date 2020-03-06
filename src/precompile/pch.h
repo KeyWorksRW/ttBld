@@ -71,6 +71,7 @@
 namespace fs = std::filesystem;
 
 #include <ttTR.h>
+#include <ttcstr.h>
 
 constexpr const char* txtVersion = "ttBld 1.5.0";
 constexpr const char* txtCopyright = "Copyright (c) 2002-2020 KeyWorks Software";
