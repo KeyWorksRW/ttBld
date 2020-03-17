@@ -2,7 +2,7 @@
 // Name:      CTabGeneral
 // Purpose:   IDTAB_GENERAL dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,8 +16,6 @@
 
 void CTabGeneral::OnBegin(void)
 {
-    // CHECK_DLG_ID(IDCHECK_);
-    // CHECK_DLG_ID(IDEDIT_DIR);
     CHECK_DLG_ID(IDEDIT_PROJ_NAME);
     CHECK_DLG_ID(IDRADIO_CONSOLE);
     CHECK_DLG_ID(IDRADIO_DLL);
@@ -25,22 +23,19 @@ void CTabGeneral::OnBegin(void)
     CHECK_DLG_ID(IDRADIO_NORMAL);
 
     if (m_pOpts->hasOptValue(OPT::PROJECT))
-        setControlText(IDEDIT_PROJ_NAME, m_pOpts->GetProjectName());
+        SetControlText(IDEDIT_PROJ_NAME, m_pOpts->GetProjectName());
     else
     {
-        char szCwd[MAX_PATH];
-        GetCurrentDirectoryA(sizeof(szCwd), szCwd);
-        char* pszProject = ttFindFilePortion(szCwd);
+        // If project name not specified, use the current directory name as the project name.
+        ttlib::cstr cwd;
+        cwd.assignCwd();
 
-        // If cwd is "src", then use the parent directory as the project name
+        // If current directory is src or source, then the project name should be the parent directory name.
+        if (cwd.filename().issameas("src", tt::CASE::either) ||
+            cwd.filename().issameas("source", tt::CASE::either))
+            cwd.remove_filename();
 
-        if (ttIsSameStrI(pszProject, "src"))
-        {
-            pszProject--;
-            *pszProject = 0;
-            pszProject = ttFindFilePortion(szCwd);
-        }
-        SetControlText(IDEDIT_PROJ_NAME, pszProject);
+        SetControlText(IDEDIT_PROJ_NAME, cwd.filename());
     }
 
     if (m_pOpts->IsExeTypeConsole())
@@ -65,10 +60,10 @@ void CTabGeneral::OnBegin(void)
 
 void CTabGeneral::OnOK(void)
 {
-    ttCStr csz;
+    ttlib::cstr csz;
 
-    csz.GetWndText(GetDlgItem(IDEDIT_PROJ_NAME));
-    m_pOpts->setOptValue(OPT::PROJECT, (char*) csz);
+    csz.GetWndText(gethwnd(IDEDIT_PROJ_NAME));
+    m_pOpts->setOptValue(OPT::PROJECT, csz);
 
     if (GetCheck(IDRADIO_CONSOLE))
         m_pOpts->setOptValue(OPT::EXE_TYPE, "console");
@@ -79,33 +74,36 @@ void CTabGeneral::OnOK(void)
     else
         m_pOpts->setOptValue(OPT::EXE_TYPE, "window");
 
-    m_pOpts->setOptValue(OPT::BIT32, GetCheck(IDCHECK_32BIT));
+    m_pOpts->setBoolOptValue(OPT::BIT32, GetCheck(IDCHECK_32BIT));
     if (GetCheck(IDCHECK_32BIT))
     {
-        csz.GetWndText(GetDlgItem(IDEDIT_DIR32));
-        if (csz.IsNonEmpty())
-            m_pOpts->setOptValue(OPT::TARGET_DIR32, (char*) csz);
+        csz.GetWndText(gethwnd(IDEDIT_DIR32));
+        if (!csz.empty())
+            m_pOpts->setOptValue(OPT::TARGET_DIR32, csz);
     }
 
-    m_pOpts->setOptValue(OPT::BIT64, GetCheck(IDCHECK_64BIT));
+    m_pOpts->setBoolOptValue(OPT::BIT64, GetCheck(IDCHECK_64BIT));
     if (GetCheck(IDCHECK_64BIT))
     {
-        csz.GetWndText(GetDlgItem(IDEDIT_DIR64));
-        if (csz.IsNonEmpty())
-            m_pOpts->setOptValue(OPT::TARGET_DIR64, (char*) csz);
+        csz.GetWndText(gethwnd(IDEDIT_DIR64));
+        if (!csz.empty())
+            m_pOpts->setOptValue(OPT::TARGET_DIR64, csz);
     }
 }
 
 void CTabGeneral::OnBtnDir32()
 {
+// REVIEW: [KeyWorks - 03-17-2020] On hold -- currently this blows up, probably because we aren't a proper
+// Windows application.
+#if 0
     ttCDirDlg dlg;
     dlg.SetTitle(_tt("Select 32-bit Target directory"));
 
-    ttCStr cszDir;
-    cszDir.GetWndText(GetDlgItem(IDEDIT_DIR32));
-    cszDir.FullPathName();
-    if (!ttDirExists(cszDir))  // SHCreateItemFromParsingName will fail if the folder doesn't already exist
-        cszDir.GetCWD();
+    ttlib::cstr cszDir;
+    cszDir.GetWndText(gethwnd(IDEDIT_DIR32));
+    cszDir.make_absolute();
+    if (!cszDir.dirExists())  // SHCreateItemFromParsingName will fail if the folder doesn't already exist
+        cszDir.assignCwd();
 
     dlg.SetStartingDir(cszDir);
     if (dlg.GetFolderName(*this))
@@ -115,15 +113,19 @@ void CTabGeneral::OnBtnDir32()
         ttConvertToRelative(cszCWD, dlg, cszDir);
         SetControlText(IDEDIT_DIR32, cszDir);
     }
+#endif
 }
 
 void CTabGeneral::OnBtnDir64()
 {
+// REVIEW: [KeyWorks - 03-17-2020] On hold -- currently this blows up, probably because we aren't a proper
+// Windows application.
+#if 0
     ttCDirDlg dlg;
     dlg.SetTitle(_tt("Select 64-bit target directory"));
 
     ttCStr cszDir;
-    cszDir.GetWndText(GetDlgItem(IDEDIT_DIR64));
+    cszDir.GetWndText(gethwnd(IDEDIT_DIR64));
     cszDir.FullPathName();
     if (!ttDirExists(cszDir))  // SHCreateItemFromParsingName will fail if the folder doesn't already exist
         cszDir.GetCWD();
@@ -136,6 +138,7 @@ void CTabGeneral::OnBtnDir64()
         ttConvertToRelative(cszCWD, dlg, cszDir);
         SetControlText(IDEDIT_DIR64, cszDir);
     }
+#endif
 }
 
 void CTabGeneral::OnCheckLib()
@@ -160,57 +163,57 @@ void CTabGeneral::OnCheckExe()
 
 void CTabGeneral::SetTargetDirs()
 {
-    bool bx86Set = false;
-    bool bx64Set = false;
+    bool is_x86 = false;
+    bool is_x64 = false;
 
     if (m_pOpts->hasOptValue(OPT::TARGET_DIR32))
     {
-        setControlText(IDEDIT_DIR32, m_pOpts->getOptValue(OPT::TARGET_DIR32));
-        bx86Set = true;
+        SetControlText(IDEDIT_DIR32, m_pOpts->getOptValue(OPT::TARGET_DIR32));
+        is_x86 = true;
     }
     if (m_pOpts->hasOptValue(OPT::TARGET_DIR64))
     {
-        setControlText(IDEDIT_DIR64, m_pOpts->getOptValue(OPT::TARGET_DIR64));
-        bx64Set = true;
+        SetControlText(IDEDIT_DIR64, m_pOpts->getOptValue(OPT::TARGET_DIR64));
+        is_x64 = true;
     }
 
-    if (bx86Set && bx64Set)
+    if (is_x86 && is_x64)
         return;
 
     // Directory names don't actually need to exist, since Ninja will create them if they are missing. We just need
     // to figure out what names to use.
 
-    ttCStr cszCWD;
-    cszCWD.GetCWD();
-    const char* pszCurFolder = ttFindFilePortion(cszCWD);
+    ttlib::cstr cwd;
+    cwd.assignCwd();
 
-    bool bUseParent = (ttStrStrI(pszCurFolder, "src") || ttStrStrI(pszCurFolder, "source")) ? true : false;
+    bool UseParent =
+        (cwd.filename().issameas("src", tt::CASE::either) || cwd.filename().issameas("src", tt::CASE::either));
 
-    if (!bUseParent)
+    if (!UseParent)
     {
         // If we aren't in the root of a .git repository, then look at the parent folder for the directories to
         // use. We check for a filename called .git in case this is a submodule.
 
-        cszCWD.AppendFileName(m_pOpts->IsExeTypeLib() ? "../lib_x64" : "../bin_x64");
-        if (ttDirExists(cszCWD) && !ttDirExists(".git") && !ttFileExists(".git"))
-            bUseParent = true;
+        cwd.append_filename(m_pOpts->IsExeTypeLib() ? "../lib_x64" : "../bin_x64");
+        if (cwd.dirExists() && !ttlib::dirExists(".git") && !ttlib::dirExists(".git"))
+            UseParent = true;
     }
 
-    if (bUseParent)
+    if (UseParent)
     {
-        if (!bx64Set)
+        if (!is_x64)
             SetControlText(IDEDIT_DIR64, m_pOpts->IsExeTypeLib() ? "../lib_x64" : "../bin_x64");
 
-        if (!bx86Set)
+        if (!is_x86)
             SetControlText(IDEDIT_DIR32, m_pOpts->IsExeTypeLib() ? "../lib_x86" : "../bin_x86");
         return;
     }
     else
     {
-        if (!bx64Set)
+        if (!is_x64)
             SetControlText(IDEDIT_DIR64, m_pOpts->IsExeTypeLib() ? "lib_x64" : "bin_x64");
 
-        if (!bx86Set)
+        if (!is_x86)
             SetControlText(IDEDIT_DIR32, m_pOpts->IsExeTypeLib() ? "lib_x86" : "bin_x86");
         return;
     }

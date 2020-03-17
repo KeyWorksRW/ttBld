@@ -2,7 +2,7 @@
 // Name:      CTabGeneral
 // Purpose:   IDTAB_GENERAL dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -12,17 +12,14 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttwindlg.h>  // Class for displaying a dialog
 
 class CTabOptions;
 
-class CTabGeneral : public ttCDlg
+class CTabGeneral : public ttlib::dlg
 {
 public:
-    CTabGeneral()
-        : ttCDlg(IDTAB_GENERAL)
-    {
-    }
+    CTabGeneral() : ttlib::dlg(IDTAB_GENERAL) {}
 
     // Class functions
 
@@ -46,8 +43,8 @@ protected:
     void OnBtnDir64();
     void OnBtnDir32();
 
-    void OnBegin(void);
-    void OnOK(void);
+    void OnBegin(void) override;
+    void OnOK(void) override;
 
 private:
     // Class members

@@ -2,7 +2,7 @@
 // Name:      CTabCompiler
 // Purpose:   IDTAB_COMPILER dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -12,17 +12,14 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttwindlg.h>  // Class for displaying a dialog
 
 class CTabOptions;
 
-class CTabCompiler : public ttCDlg
+class CTabCompiler : public ttlib::dlg
 {
 public:
-    CTabCompiler()
-        : ttCDlg(IDTAB_COMPILER)
-    {
-    }
+    CTabCompiler() : ttlib::dlg(IDTAB_COMPILER) {}
 
     // Public functions
 
@@ -45,8 +42,8 @@ protected:
     void OnBtnPchCpp();
     void OnBtnChangePch();
 
-    void OnBegin(void);
-    void OnOK(void);
+    void OnBegin(void) override;
+    void OnOK(void) override;
 
 private:
     // Class members

@@ -113,7 +113,7 @@ void Usage()
     // -bwf -- sets break on warning to false
 }
 
-typedef enum
+enum UPDATE_TYPE
 {
     UPDATE_NORMAL,
 
@@ -135,7 +135,8 @@ typedef enum
     UPDATE_GCC,
     UPDATE_GCC32,
 
-} UPDATE_TYPE;
+};
+
 void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 
 enum  // actions that can be run in addition to normal single command actions

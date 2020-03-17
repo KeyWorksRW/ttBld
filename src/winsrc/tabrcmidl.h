@@ -2,7 +2,7 @@
 // Name:      CTabRcMidl
 // Purpose:   IDTAB_RCMIDL dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -12,15 +12,14 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttwindlg.h>  // Class for displaying a dialog
 
-class CTabRcMidl : public ttCDlg
+class CTabOptions;
+
+class CTabRcMidl : public ttlib::dlg
 {
 public:
-    CTabRcMidl()
-        : ttCDlg(IDTAB_RCMIDL)
-    {
-    }
+    CTabRcMidl() : ttlib::dlg(IDTAB_RCMIDL) {}
 
     // Class functions
 
@@ -29,8 +28,8 @@ public:
 protected:
     // Message handlers
 
-    void OnBegin(void);
-    void OnOK(void);
+    void OnBegin(void) override;
+    void OnOK(void) override;
 
 private:
     // Class members

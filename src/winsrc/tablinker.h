@@ -2,7 +2,7 @@
 // Name:      CTabLinker
 // Purpose:   IDTAB_LINKER dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -12,17 +12,14 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttwindlg.h>  // Class for displaying a dialog
 
 class CTabOptions;
 
-class CTabLinker : public ttCDlg
+class CTabLinker : public ttlib::dlg
 {
 public:
-    CTabLinker()
-        : ttCDlg(IDTAB_LINKER)
-    {
-    }
+    CTabLinker() : ttlib::dlg(IDTAB_LINKER) {}
 
     // Class functions
 
@@ -41,8 +38,8 @@ protected:
     void OnBtnLibDir();
     void OnBtnAddLib();
 
-    void OnBegin(void);
-    void OnOK(void);
+    void OnBegin(void) override;
+    void OnOK(void) override;
 
 private:
     // Class members

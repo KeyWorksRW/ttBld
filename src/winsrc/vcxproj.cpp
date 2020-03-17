@@ -285,12 +285,13 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
             ttCXMLBranch* pChild = pFlags->GetChildAt(0);
             if (pChild->GetData())
             {
-                m_pcSrcFiles->setOptValue(OPT::OPTIMIZE,
-                                          ttlib::issameas(pChild->GetData(), "size" ? "space" : "speed",
-                                          tt::CASE::either));
+                m_pcSrcFiles->setBoolOptValue(
+                    OPT::OPTIMIZE,
+                    ttlib::issameas(pChild->GetData(), "size" ? "space" : "speed", tt::CASE::either));
             }
         }
     }
+
     if (!m_pcSrcFiles->hasOptValue(OPT::INC_DIRS))
     {
         pFlags = pSection->FindFirstElement("AdditionalIncludeDirectories");
@@ -325,6 +326,7 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
             }
         }
     }
+
     if (!m_pcSrcFiles->hasOptValue(OPT::PCH))
     {
         pFlags = pSection->FindFirstElement("PrecompiledHeaderFile");
@@ -335,6 +337,7 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
                 m_pcSrcFiles->setOptValue(OPT::PCH, pChild->GetData());
         }
     }
+
     if (!m_pcSrcFiles->hasOptValue(OPT::WARN))
     {
         pFlags = pSection->FindFirstElement("WarningLevel");
@@ -517,8 +520,7 @@ bool CVcxWrite::CreateBuildFile()
             auto ext = file.extension();
             if (ext.empty() || std::tolower(ext[1] != 'c'))
                 continue;
-            kf.WriteEol(
-                (" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>" + file).c_str());
+            kf.WriteEol((" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>" + file).c_str());
         }
 
         ttCStr cszSrcFile;

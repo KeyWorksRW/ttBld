@@ -12,13 +12,13 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttwindlg.h>  // Class for displaying a dialog
 
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
-#include "tabgeneral.h"   // CTabGeneral
-#include "tabcompiler.h"  // CTabCompiler
 #include "tabclang.h"     // CTabCLang
+#include "tabcompiler.h"  // CTabCompiler
+#include "tabgeneral.h"   // CTabGeneral
 #include "tablibs.h"      // CTabLibs
 #include "tablinker.h"    // CTabLinker
 #include "tabrcmidl.h"    // CTabRcMidl
@@ -27,7 +27,7 @@
     #include ".private/tabprivate.h"  // CTabPrivate
 #endif
 
-class CTabOptions : public ttCDlg, public CWriteSrcFiles
+class CTabOptions : public ttlib::dlg, public CWriteSrcFiles
 {
 public:
     CTabOptions();
@@ -45,14 +45,14 @@ protected:
 
     LRESULT OnNotify(int id, NMHDR* pNmHdr);
 
-    void OnBegin();
-    void OnOK();
-    void OnCancel();
+    void OnBegin() override;
+    void OnOK() override;
+    void OnCancel() override;
 
 private:
     // Class members
 
-    typedef enum
+    enum TAB_ID : size_t
     {
         TAB_GENERAL = 0,
         TAB_COMPILER,
@@ -61,16 +61,14 @@ private:
         TAB_RC_MIDL,
         TAB_CLANG,
         TAB_PRIVATE,
-    } TAB_ID;
+    };
 
-    CTabGeneral  m_tabGeneral;
+    CTabGeneral m_tabGeneral;
     CTabCompiler m_tabCompiler;
-    CTabLibs     m_tabLibs;
-    CTabLinker   m_tabLinker;
-#if defined(_WIN32)
+    CTabLibs m_tabLibs;
+    CTabLinker m_tabLinker;
     CTabRcMidl m_tabRcMidl;
-    CTabCLang  m_tabCLang;
-#endif
+    CTabCLang m_tabCLang;
 
 #ifdef PRIVATE
     CTabPrivate m_tabPrivate;

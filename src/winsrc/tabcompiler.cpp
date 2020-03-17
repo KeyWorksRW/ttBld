@@ -2,104 +2,118 @@
 // Name:      CTabCompiler
 // Purpose:   IDTAB_COMPILER dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
 
-#include <ttfiledlg.h>  // ttCFileDlg -- Wrapper around Windows GetOpenFileName() API
+#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
 #include <ttdirdlg.h>   // ttCDirDlg -- Class for displaying a dialog to select a directory
+#include <ttfiledlg.h>  // ttCFileDlg -- Wrapper around Windows GetOpenFileName() API
 
 #include "dlgoptions.h"
 
 void CTabCompiler::OnBegin(void)
 {
+    CHECK_DLG_ID(IDC_RADIO_SPEED);
+    CHECK_DLG_ID(IDC_RADIO_SPACE);
+    CHECK_DLG_ID(IDEDIT_COMMON);
+    CHECK_DLG_ID(IDEDIT_DEBUG);
+    CHECK_DLG_ID(IDEDIT_INCDIRS);
+    CHECK_DLG_ID(IDEDIT_PCH);
+    CHECK_DLG_ID(IDEDIT_PCH_CPP);
+    CHECK_DLG_ID(IDEDIT_RELEASE);
+    CHECK_DLG_ID(IDRADIO_WARN1);
+    CHECK_DLG_ID(IDRADIO_WARN2);
+    CHECK_DLG_ID(IDRADIO_WARN3);
+    CHECK_DLG_ID(IDRADIO_WARN4);
+
     EnableShadeBtns();
-    SetCheck(DLG_ID(m_pOpts->IsOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
+    SetCheck(m_pOpts->IsOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE);
 
     auto warnLevel = ttlib::atoi(m_pOpts->getOptValue(OPT::WARN));
 
     switch (warnLevel)
     {
         case 1:
-            SetCheck(DLG_ID(IDRADIO_WARN1));
+            SetCheck(IDRADIO_WARN1);
             break;
         case 2:
-            SetCheck(DLG_ID(IDRADIO_WARN2));
+            SetCheck(IDRADIO_WARN2);
             break;
         case 3:
-            SetCheck(DLG_ID(IDRADIO_WARN3));
+            SetCheck(IDRADIO_WARN3);
             break;
         case 4:
         default:
-            SetCheck(DLG_ID(IDRADIO_WARN4));
+            SetCheck(IDRADIO_WARN4);
             break;
     }
 
     if (m_pOpts->hasOptValue(OPT::PCH))
-        setControlText(DLG_ID(IDEDIT_PCH), m_pOpts->getOptValue(OPT::PCH));
+        SetControlText(IDEDIT_PCH, m_pOpts->getOptValue(OPT::PCH));
     if (m_pOpts->hasOptValue(OPT::PCH_CPP))
-        setControlText(DLG_ID(IDEDIT_PCH_CPP), m_pOpts->getOptValue(OPT::PCH_CPP));
+        SetControlText(IDEDIT_PCH_CPP, m_pOpts->getOptValue(OPT::PCH_CPP));
     if (m_pOpts->hasOptValue(OPT::INC_DIRS))
-        setControlText(DLG_ID(IDEDIT_INCDIRS), m_pOpts->getOptValue(OPT::INC_DIRS));
+        SetControlText(IDEDIT_INCDIRS, m_pOpts->getOptValue(OPT::INC_DIRS));
 
     if (m_pOpts->hasOptValue(OPT::CFLAGS_CMN))
     {
-        setControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->getOptValue(OPT::CFLAGS_CMN));
+        SetControlText(IDEDIT_COMMON, m_pOpts->getOptValue(OPT::CFLAGS_CMN));
         if (m_pOpts->getOptValue(OPT::CFLAGS_CMN).contains("-Zc:__cplusplus"))
             DisableControl(IDBTN_CPLUSPLUS);
         if (m_pOpts->getOptValue(OPT::CFLAGS_CMN).contains("-std:c"))
             DisableControl(IDBTN_STD);
     }
     if (m_pOpts->hasOptValue(OPT::CFLAGS_REL))
-        setControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->getOptValue(OPT::CFLAGS_REL));
+        SetControlText(IDEDIT_RELEASE, m_pOpts->getOptValue(OPT::CFLAGS_REL));
     if (m_pOpts->hasOptValue(OPT::CFLAGS_DBG))
-        setControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->getOptValue(OPT::CFLAGS_DBG));
+        SetControlText(IDEDIT_DEBUG, m_pOpts->getOptValue(OPT::CFLAGS_DBG));
 }
 
 void CTabCompiler::OnOK(void)
 {
-    ttCStr csz;
+    ttlib::cstr csz;
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
-    m_pOpts->setOptValue(OPT::CFLAGS_CMN, csz.IsEmpty() ? nullptr : (char*) csz);
+    csz.GetWndText(gethwnd(IDEDIT_COMMON));
+    m_pOpts->setOptValue(OPT::CFLAGS_CMN, csz);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
-    m_pOpts->setOptValue(OPT::CFLAGS_REL, csz.IsEmpty() ? nullptr : (char*) csz);
+    csz.GetWndText(gethwnd(IDEDIT_RELEASE));
+    m_pOpts->setOptValue(OPT::CFLAGS_REL, csz);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
-    m_pOpts->setOptValue(OPT::CFLAGS_DBG, csz.IsEmpty() ? nullptr : (char*) csz);
+    csz.GetWndText(gethwnd(IDEDIT_DEBUG));
+    m_pOpts->setOptValue(OPT::CFLAGS_DBG, csz);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
-    m_pOpts->setOptValue(OPT::INC_DIRS, csz.IsEmpty() ? nullptr : (char*) csz);
+    csz.GetWndText(gethwnd(IDEDIT_INCDIRS));
+    m_pOpts->setOptValue(OPT::INC_DIRS, csz);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
-    if (csz.IsEmpty())
+    csz.GetWndText(gethwnd(IDEDIT_PCH));
+    if (csz.empty())
         m_pOpts->setOptValue(OPT::PCH, "none");
     else
-        m_pOpts->setOptValue(OPT::PCH, (char*) csz);
+        m_pOpts->setOptValue(OPT::PCH, csz);
 
     // We let WriteSrcFiles handle the case where the base names of PCH and PCH_CPP are identical
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH_CPP)));
-    if (csz.IsEmpty())
+    csz.GetWndText(gethwnd(IDEDIT_PCH_CPP));
+    if (csz.empty())
         m_pOpts->setOptValue(OPT::PCH_CPP, "none");
     else
-        m_pOpts->setOptValue(OPT::PCH_CPP, (char*) csz);
+        m_pOpts->setOptValue(OPT::PCH_CPP, csz);
 
-    if (GetCheck(DLG_ID(IDC_RADIO_SPEED)))
+    if (GetCheck(IDC_RADIO_SPEED))
         m_pOpts->setOptValue(OPT::OPTIMIZE, "speed");
     else
         m_pOpts->setOptValue(OPT::OPTIMIZE, "space");
 
-    if (GetCheck(DLG_ID(IDRADIO_WARN1)))
+    if (GetCheck(IDRADIO_WARN1))
         m_pOpts->setOptValue(OPT::WARN, "1");
-    else if (GetCheck(DLG_ID(IDRADIO_WARN2)))
+    else if (GetCheck(IDRADIO_WARN2))
         m_pOpts->setOptValue(OPT::WARN, "2");
-    else if (GetCheck(DLG_ID(IDRADIO_WARN3)))
+    else if (GetCheck(IDRADIO_WARN3))
         m_pOpts->setOptValue(OPT::WARN, "3");
-    else if (GetCheck(DLG_ID(IDRADIO_WARN4)))
+    else if (GetCheck(IDRADIO_WARN4))
         m_pOpts->setOptValue(OPT::WARN, "4");
 }
 
@@ -107,57 +121,55 @@ void CTabCompiler::OnBtnChangePch()
 {
     ttCFileDlg fdlg(*this);
     fdlg.SetFilter("Header Files|*.h;*.hh;*.hpp;*.hxx||");
-    ttCStr cszCWD;
-    cszCWD.GetCWD();
+    ttlib::cwd cwd;
+
     fdlg.UseCurrentDirectory();
     fdlg.RestoreDirectory();
     if (fdlg.GetOpenName())
     {
-        ttCStr cszOrg, cszCpp;
-        cszOrg.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
-        cszCpp.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH_CPP)));
+        ttlib::cstr cszOrg, cszCpp;
+        cszOrg.GetWndText(gethwnd(IDEDIT_PCH));
+        cszCpp.GetWndText(gethwnd(IDEDIT_PCH_CPP));
 
-        ttCStr cszRelPath;
-        ttConvertToRelative(cszCWD, fdlg.GetFileName(), cszRelPath);
-        SetControlText(DLG_ID(IDEDIT_PCH), cszRelPath);
+        ttlib::cstr cszRelPath(fdlg.GetFileName());
+        cszRelPath.make_relative(cwd);
+        SetControlText(IDEDIT_PCH, cszRelPath);
 
-        if (ttFileExists(cszCpp))  // if the current source file exists, assume that's what the user wants
+        if (cszCpp.fileExists())  // if the current source file exists, assume that's what the user wants
             return;
 
         // The default behaviour is to use the same base name for the C++ source file as the precompiled header
         // file. So, if they are the same, then change the source file name to match (provided the file actually
         // exists).
 
-        cszOrg.RemoveExtension();
-        cszCpp.RemoveExtension();
+        cszOrg.remove_extension();
+        cszCpp.remove_extension();
 
-        if (ttIsSameStrI(cszOrg, cszCpp))
+        if (cszOrg.issameprefix(cszCpp, tt::CASE::either))
         {
             cszCpp = cszRelPath;
-            cszCpp.ChangeExtension(".cpp");
-            if (ttFileExists(cszCpp))
+            cszCpp.replace_extension(".cpp");
+            if (cszCpp.fileExists())
             {
-                SetControlText(DLG_ID(IDEDIT_PCH_CPP), cszCpp);
+                SetControlText(IDEDIT_PCH_CPP, cszCpp);
                 return;
             }
-            cszCpp.ChangeExtension(".cxx");
-            if (ttFileExists(cszCpp))
+            cszCpp.replace_extension(".cxx");
+            if (cszCpp.fileExists())
             {
-                SetControlText(DLG_ID(IDEDIT_PCH_CPP), cszCpp);
+                SetControlText(IDEDIT_PCH_CPP, cszCpp);
                 return;
             }
-            cszCpp.ChangeExtension(".cc");
-            if (ttFileExists(cszCpp))
+            cszCpp.replace_extension(".cc");
+            if (cszCpp.fileExists())
             {
-                SetControlText(DLG_ID(IDEDIT_PCH_CPP), cszCpp);
+                SetControlText(IDEDIT_PCH_CPP, cszCpp);
                 return;
             }
 
-            cszCpp.Delete();
-            cszCpp.printf(
-                "%s does not have a matching C++ source file -- precompiled header will fail without it!",
-                (char*) cszRelPath);
-            ttMsgBox(cszCpp);
+            ttlib::MsgBox(
+                cszRelPath +
+                _tt(" does not have a matching C++ source file -- precompiled header will fail without it!"));
         }
     }
 }
@@ -170,40 +182,39 @@ void CTabCompiler::OnBtnPchCpp()
     fdlg.RestoreDirectory();
     if (fdlg.GetOpenName())
     {
-        ttCStr cszCWD;
-        cszCWD.GetCWD();
-        ttCStr cszRelPath;
-        ttConvertToRelative(cszCWD, fdlg.GetFileName(), cszRelPath);
-        SetControlText(DLG_ID(IDEDIT_PCH_CPP), cszRelPath);
+        ttlib::cwd cwd;
+        ttlib::cstr cszRelPath(fdlg.GetFileName());
+        cszRelPath.make_relative(cwd);
+        SetControlText(IDEDIT_PCH_CPP, cszRelPath);
     }
 }
 
 void CTabCompiler::OnBtnCplusplus()
 {
-    ttCStr csz;
+    ttlib::cstr csz;
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
-    if (!ttStrStrI(csz, "-Zc:__cplusplus"))
+    csz.GetWndText(gethwnd(IDEDIT_COMMON));
+    if (!csz.contains("-Zc:__cplusplus", tt::CASE::either))
     {
-        if (csz.IsNonEmpty())
+        if (!csz.empty())
             csz += " ";
         csz += "-Zc:__cplusplus";
-        SetControlText(DLG_ID(IDEDIT_COMMON), csz);
+        SetControlText(IDEDIT_COMMON, csz);
         DisableControl(IDBTN_CPLUSPLUS);
     }
 }
 
 void CTabCompiler::OnBtnStd()
 {
-    ttCStr csz;
+    ttlib::cstr csz;
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
-    if (!ttStrStrI(csz, "-std:c"))
+    csz.GetWndText(gethwnd(IDEDIT_COMMON));
+    if (!csz.contains("-std:c", tt::CASE::either))
     {
-        if (csz.IsNonEmpty())
+        if (!csz.empty())
             csz += " ";
         csz += "-std:c++17";
-        SetControlText(DLG_ID(IDEDIT_COMMON), csz);
+        SetControlText(IDEDIT_COMMON, csz);
         DisableControl(IDBTN_STD);
     }
 }
@@ -225,10 +236,10 @@ void CTabCompiler::OnBtnAddInclude()
     if (dlg.GetFolderName((HWND) *m_pOpts))
     {
         ttCStr csz;
-        csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
+        csz.GetWndText(gethwnd(IDEDIT_INCDIRS));
         csz += ";";
         csz += (char*) dlg.GetFolderName();
-        SetControlText(DLG_ID(IDEDIT_INCDIRS), csz);
+        SetControlText(IDEDIT_INCDIRS, csz);
     }
 }
 

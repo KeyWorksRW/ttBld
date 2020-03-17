@@ -44,9 +44,7 @@ bool ChangeOptions(std::string& ProjectFile)
         return false;
 }
 
-CTabOptions::CTabOptions()
-    : ttCDlg(IDDLG_OPTIONS)
-    , CWriteSrcFiles()
+CTabOptions::CTabOptions() : ttlib::dlg(IDDLG_OPTIONS), CWriteSrcFiles()
 {
     m_tabGeneral.SetParentClass(this);
     m_tabCompiler.SetParentClass(this);
@@ -83,9 +81,12 @@ CTabOptions::CTabOptions()
 
 void CTabOptions::OnBegin(void)
 {
+    CHECK_DLG_ID(IDCANCEL);
+    CHECK_DLG_ID(IDOK);
+
     EnableShadeBtns();
-    SetBtnIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
-    SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
+    SetBtnIcon(IDOK, IDICON_TTLIB_OK);
+    SetBtnIcon(IDCANCEL, IDICON_TTLIB_CANCEL);
 
     TC_ITEMA ti;
     ZeroMemory(&ti, sizeof(TC_ITEMA));
