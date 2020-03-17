@@ -70,7 +70,7 @@ public:
     }
 
     void setOptValue(size_t index, std::string_view value);
-    void setOptValue(size_t index, bool value = true);
+    void setBoolOptValue(size_t index, bool value = true);
 
     const std::string& getOptComment(size_t index) const noexcept
     {

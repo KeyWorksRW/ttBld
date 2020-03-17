@@ -180,7 +180,7 @@ void CSrcFiles::setOptValue(size_t index, std::string_view value)
     }
 }
 
-void CSrcFiles::setOptValue(size_t index, bool value)
+void CSrcFiles::setBoolOptValue(size_t index, bool value)
 {
     assert(index < OPT::LAST);
     assert(m_Options[index].isBooleanValue);
