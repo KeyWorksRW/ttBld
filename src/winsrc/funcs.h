@@ -10,9 +10,8 @@
 
 class ttCList;  // forward definition
 class ttCStr;
-class ttString;
+class ttlib::cstr;
 class CSrcFiles;
-class ttlib::cstrVector;
 
 bool gitIgnoreAll(ttCStr& cszGitExclude);
 bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile);
@@ -20,17 +19,15 @@ bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile);
 bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile);
 bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile);
 
-void AddFiles(const ttlib::cstrVector& lstFiles);
-
 // Successful return will have filled in ProjectFile with the path to the projectfile that
 // was located.
-bool ChangeOptions(std::string& ProjectFile, bool bDryRun = false);
+bool ChangeOptions(std::string& ProjectFile);
 
 bool ConvertBuildScript(const char* pszBldFile);
 
 // Search PATH, LIB, or INCLUDE (or variants)
 bool FindFileEnv(const char* pexEnv, const char* pszFile, ttCStr* pcszPath = nullptr);
-int  MakeNinja(int argc, char* argv[]);
+int MakeNinja(int argc, char* argv[]);
 void ParseDefines(ttCList& lst, const char* pszDefines);
 bool isSystemHeaderFile(const char* pszHeaderFile);
 
@@ -38,16 +35,13 @@ bool isSystemHeaderFile(const char* pszHeaderFile);
 const char* LocateSrcFiles(ttCStr* pcszStartDir = nullptr);
 
 // Attempts to locate .srcfiles.yaml
-// std::unique_ptr<ttString> locateProjectFile(std::string_view StartDir = ttEmptyString);
+// std::unique_ptr<ttlib::cstr> locateProjectFile(std::string_view StartDir = ttEmptyString);
 
 // Try to locate .srcfiles.yaml and return a pointer to it's location if found.
 //
 // If pPath is specified, it will be assigned the path (including the .srcfiles.yaml
 // filename)
-const char* FindProjectFile(ttString* pPath = nullptr);
-
-// Returns 0 - no errors, 1 - file already exists, 2 - other error
-size_t CreateCodeLiteProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
+const char* FindProjectFile(ttlib::cstr* pPath = nullptr);
 
 // Creates .json files for Visual Studio
 bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results);

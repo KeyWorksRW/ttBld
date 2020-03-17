@@ -163,7 +163,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         {
             ttlib::cstr tmp;
             // If the directory name contains a space, then place it in quotes
-            if (dir.find(' ') != ttlib::npos)
+            if (dir.find(' ') != tt::npos)
                 line += tmp.Format(" -I%ks", dir.c_str());
             else
                 line += tmp.Format(" -I%s", dir.c_str());
@@ -468,7 +468,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
             continue;
         ttlib::cstr objFile(file.filename());
         objFile.replace_extension(".obj");
-        if (!bPchSeen && objFile.issameas(m_pchHdrNameObj, ttlib::CASE::utf8))
+        if (!bPchSeen && objFile.issameas(m_pchHdrNameObj, tt::CASE::utf8))
             bPchSeen = true;
         lastline() += " $";
         m_ninjafile.emplace_back("  $outdir/" + objFile);

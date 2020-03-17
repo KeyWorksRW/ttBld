@@ -15,7 +15,7 @@
 #include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 #include <ttxml.h>  // ttCXMLBranch, ttCParseXML
 
-#include "writesrcfiles.h"  // CWriteSrcFiles
+#include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
 class CConvertDlg : public ttCDlg
 {

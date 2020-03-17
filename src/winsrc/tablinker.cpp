@@ -11,7 +11,7 @@
 #include <ttTR.h>  // Function for translating strings
 
 #include <ttfiledlg.h>  // ttCFileDlg
-#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <ttdirdlg.h>   // ttCDirDlg
 
 #include "dlgoptions.h"
@@ -22,22 +22,22 @@ void CTabLinker::OnBegin(void)
     SetCheck(DLG_ID(IDCHECK_STATIC_CRT_REL), m_pOpts->IsStaticCrtRel());
     SetCheck(DLG_ID(IDCHECK_STATIC_CRT_DBG), m_pOpts->IsStaticCrtDbg());
 
-    //    if (m_pOpts->GetOption(OPT_LIBS))
-    //        SetControlText(DLG_ID(IDEDIT_LIBS_LINK), m_pOpts->GetOption(OPT_LIBS));
-    //    if (m_pOpts->GetOption(OPT_BUILD_LIBS))
-    //        SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), m_pOpts->GetOption(OPT_BUILD_LIBS));
-    //    if (m_pOpts->GetOption(OPT_LIB_DIRS))
-    //        SetControlText(DLG_ID(IDEDIT_LIBDIRS), m_pOpts->GetOption(OPT_LIB_DIRS));
+    //    if (m_pOpts->getOptValue(OPT_LIBS))
+    //        SetControlText(DLG_ID(IDEDIT_LIBS_LINK), m_pOpts->getOptValue(OPT_LIBS));
+    //    if (m_pOpts->getOptValue(OPT::BUILD_LIBS))
+    //        SetControlText(DLG_ID(IDEDIT_LIBS_BUILD), m_pOpts->getOptValue(OPT::BUILD_LIBS));
+    //    if (m_pOpts->getOptValue(OPT::LIB_DIRS))
+    //        SetControlText(DLG_ID(IDEDIT_LIBDIRS), m_pOpts->getOptValue(OPT::LIB_DIRS));
 
-    if (m_pOpts->GetOption(OPT_LINK_CMN))
-        SetControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->GetOption(OPT_LINK_CMN));
-    if (m_pOpts->GetOption(OPT_LINK_REL))
-        SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_LINK_REL));
-    if (m_pOpts->GetOption(OPT_LINK_DBG))
-        SetControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->GetOption(OPT_LINK_DBG));
+    if (m_pOpts->hasOptValue(OPT::LINK_CMN))
+        setControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->getOptValue(OPT::LINK_CMN));
+    if (m_pOpts->hasOptValue(OPT::LINK_REL))
+        setControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->getOptValue(OPT::LINK_REL));
+    if (m_pOpts->hasOptValue(OPT::LINK_DBG))
+        setControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->getOptValue(OPT::LINK_DBG));
 
-    if (m_pOpts->GetOption(OPT_NATVIS))
-        SetControlText(DLG_ID(IDEDIT_NATVIS), m_pOpts->GetOption(OPT_NATVIS));
+    if (m_pOpts->hasOptValue(OPT::NATVIS))
+        setControlText(DLG_ID(IDEDIT_NATVIS), m_pOpts->getOptValue(OPT::NATVIS));
 }
 
 void CTabLinker::OnOK(void)
@@ -45,28 +45,28 @@ void CTabLinker::OnOK(void)
     ttCStr csz;
 
     csz.GetWndText(GetDlgItem(IDEDIT_COMMON));
-    m_pOpts->UpdateOption(OPT_LINK_CMN, (char*) csz);
+    m_pOpts->setOptValue(OPT::LINK_CMN, (char*) csz);
 
     csz.GetWndText(GetDlgItem(IDEDIT_RELEASE));
-    m_pOpts->UpdateOption(OPT_LINK_REL, (char*) csz);
+    m_pOpts->setOptValue(OPT::LINK_REL, (char*) csz);
 
     csz.GetWndText(GetDlgItem(IDEDIT_DEBUG));
-    m_pOpts->UpdateOption(OPT_LINK_DBG, (char*) csz);
+    m_pOpts->setOptValue(OPT::LINK_DBG, (char*) csz);
 
     //    csz.GetWndText(GetDlgItem(IDEDIT_LIBDIRS));
-    //    m_pOpts->UpdateOption(OPT_LIB_DIRS, (char*) csz);
+    //    m_pOpts->setOptValue(OPT::LIB_DIRS, (char*) csz);
 
     //    csz.GetWndText(GetDlgItem(IDEDIT_LIBS_LINK));
-    //    m_pOpts->UpdateOption(OPT_LIBS, (char*) csz);
+    //    m_pOpts->setOptValue(OPT_LIBS, (char*) csz);
 
     //    csz.GetWndText(GetDlgItem(IDEDIT_LIBS_BUILD));
-    //    m_pOpts->UpdateOption(OPT_BUILD_LIBS, (char*) csz);
+    //    m_pOpts->setOptValue(OPT::BUILD_LIBS, (char*) csz);
 
-    m_pOpts->UpdateOption(OPT_STATIC_CRT_REL, GetCheck(IDCHECK_STATIC_CRT_REL) ? "static" : "dll");
-    m_pOpts->UpdateOption(OPT_STATIC_CRT_DBG, GetCheck(IDCHECK_STATIC_CRT_DBG) ? "static" : "dll");
+    m_pOpts->setOptValue(OPT::CRT_REL, GetCheck(IDCHECK_STATIC_CRT_REL) ? "static" : "dll");
+    m_pOpts->setOptValue(OPT::CRT_DBG, GetCheck(IDCHECK_STATIC_CRT_DBG) ? "static" : "dll");
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_NATVIS)));
-    m_pOpts->UpdateOption(OPT_NATVIS, (char*) csz);
+    m_pOpts->setOptValue(OPT::NATVIS, (char*) csz);
 }
 
 void CTabLinker::OnBtnChange()
@@ -97,7 +97,7 @@ void CTabLinker::OnBtnLibDir()
 
         if (cszCurLibDirs.IsNonEmpty())
         {
-            ttEnumStr enumPaths(cszCurLibDirs.c_str());
+            ttlib::enumstr enumPaths(cszCurLibDirs.c_str());
             for (auto iter : enumPaths)
             {
                 if (ttIsSamePath(iter.c_str(), cszLibDir))

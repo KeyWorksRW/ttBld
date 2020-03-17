@@ -70,7 +70,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
 
     file.ReadStrFile(txtTasks);
 
-    file.ReplaceStr("%tgtDir%", cSrcFiles.GetTargetDir());
+    file.ReplaceStr("%tgtDir%", cSrcFiles.GetTargetDir().c_str());
 
 #if defined(_WIN32)
     file.ReplaceStr("%command%", "nmake.exe -nologo debug");
@@ -94,14 +94,14 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     file.Delete();
     file.ReadStrFile(txtLaunch);
 
-    file.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug());
+    file.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug().c_str());
 
-    if (cSrcFiles.GetProjectName())
-        file.ReplaceStr("%projgect%", cSrcFiles.GetProjectName());
+    if (!cSrcFiles.GetProjectName().empty())
+        file.ReplaceStr("%projgect%", cSrcFiles.GetProjectName().c_str());
     else
     {
         std::ostringstream str;
-        str << _tt("No project name specified in ") << cSrcFiles.GetSrcFiles();
+        str << _tt("No project name specified in ") << cSrcFiles.GetSrcFilesName();
         results.push_back(str.str());
         return false;
     }

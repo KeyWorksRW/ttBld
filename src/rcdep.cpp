@@ -127,7 +127,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
             for (auto keyword: RcKeywords)
             {
                 auto posKeyword = ttlib::findstr_pos(line, keyword);
-                if (posKeyword != ttlib::npos)
+                if (posKeyword != tt::npos)
                 {
                     // Make certain the keyword starts with whitespace. The RcKeywords list includes the trailing
                     // space so we don't need to check for that.

@@ -2,7 +2,7 @@
 // Name:      CTabOptions
 // Purpose:   IDDLG_OPTIONS dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 
 #include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
 
-#include "writesrcfiles.h"  // CWriteSrcFiles
+#include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
 #include "tabgeneral.h"   // CTabGeneral
 #include "tabcompiler.h"  // CTabCompiler
@@ -30,7 +30,7 @@
 class CTabOptions : public ttCDlg, public CWriteSrcFiles
 {
 public:
-    CTabOptions(const char* pszNinjaDir = nullptr);
+    CTabOptions();
 
     // Class functions
 

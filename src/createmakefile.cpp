@@ -9,7 +9,7 @@
 #include "pch.h"
 
 #include <ttcstr.h>     // Classes for handling zero-terminated char strings.
-#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 
 #include "ninja.h"     // CNinja
 #include "resource.h"  // IDR_MAKEFILE
@@ -56,20 +56,20 @@ bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
 
     size_t pos;
 
-    while (pos = file.FindLineContaining("%build%"), pos != ttlib::npos)
+    while (pos = file.FindLineContaining("%build%"), pos != tt::npos)
     {
         file[pos].Replace("%build%", BuildDir, true);
     }
 
     if (!isAllVersion)
     {
-        while (pos = file.FindLineContaining("%srcfiles%"), pos != ttlib::npos)
+        while (pos = file.FindLineContaining("%srcfiles%"), pos != tt::npos)
         {
             file[pos].Replace("%srcfiles%", ProjectFile, true);
         }
     }
 
-    while (pos = file.FindLineContaining("%project%"), pos != ttlib::npos)
+    while (pos = file.FindLineContaining("%project%"), pos != tt::npos)
     {
         file[pos].Replace("%project%", GetProjectName(), true);
     }

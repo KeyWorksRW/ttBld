@@ -9,9 +9,9 @@
 #pragma once
 
 #include <ttlibwin.h>
-#include <ttnamespace.h>
-#include <ttstr.h>   // ttCStr -- SBCS string class
 #include <ttlist.h>  // ttCList, ttCDblList, ttCStrIntList
+#include <ttnamespace.h>
+#include <ttstr.h>  // ttCStr -- SBCS string class
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
@@ -20,21 +20,26 @@
 class CWriteSrcFiles : public CSrcFiles
 {
 public:
-    CWriteSrcFiles(const char* pszNinjaDir = nullptr)
-        : CSrcFiles(pszNinjaDir)
+    CWriteSrcFiles() : CSrcFiles()
     {
         m_posOptions = -1;
         m_posInsert = 0;
     }
 
-    typedef enum
+    CWriteSrcFiles(std::string_view NinjaDir) : CSrcFiles(NinjaDir)
+    {
+        m_posOptions = -1;
+        m_posInsert = 0;
+    }
+
+    enum CWRT_RESULT : size_t
     {
         RSLT_SUCCESS,
         RSLT_NOCHANGES,
         RSLT_DRYRUN,
         RSLT_WRITE_FAILED,
         RSLT_READ_FAILED,
-    } CWRT_RESULT;
+    };
 
     // Public functions
 
@@ -66,7 +71,7 @@ protected:
 private:
     // Class members
 
-    ttCStr  m_cszOptComment;
+    ttCStr m_cszOptComment;
     ttCList m_lstOriginal;
     CDryRun m_dryrun;
 

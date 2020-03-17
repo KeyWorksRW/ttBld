@@ -13,40 +13,40 @@
 
 void CTabRcMidl::OnBegin(void)
 {
-    if (m_pOpts->GetOption(OPT_RC_CMN))
-        SetControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->GetOption(OPT_RC_CMN));
-    if (m_pOpts->GetOption(OPT_RC_REL))
-        SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_RC_REL));
-    if (m_pOpts->GetOption(OPT_RC_DBG))
-        SetControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->GetOption(OPT_RC_DBG));
+    if (m_pOpts->hasOptValue(OPT::RC_CMN))
+        setControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->getOptValue(OPT::RC_CMN));
+    if (m_pOpts->hasOptValue(OPT::RC_REL))
+        setControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->getOptValue(OPT::RC_REL));
+    if (m_pOpts->hasOptValue(OPT::RC_DBG))
+        setControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->getOptValue(OPT::RC_DBG));
 
-    if (m_pOpts->GetOption(OPT_MDL_CMN))
-        SetControlText(DLG_ID(IDEDIT_COMMON_MIDL), m_pOpts->GetOption(OPT_MDL_CMN));
-    if (m_pOpts->GetOption(OPT_MDL_REL))
-        SetControlText(DLG_ID(IDEDIT_RELEASE_MIDL), m_pOpts->GetOption(OPT_MDL_REL));
-    if (m_pOpts->GetOption(OPT_MDL_DBG))
-        SetControlText(DLG_ID(IDEDIT_DEBUG_MIDL), m_pOpts->GetOption(OPT_MDL_DBG));
+    if (m_pOpts->hasOptValue(OPT::MIDL_CMN))
+        setControlText(DLG_ID(IDEDIT_COMMON_MIDL), m_pOpts->getOptValue(OPT::MIDL_CMN));
+    if (m_pOpts->hasOptValue(OPT::MIDL_REL))
+        setControlText(DLG_ID(IDEDIT_RELEASE_MIDL), m_pOpts->getOptValue(OPT::MIDL_REL));
+    if (m_pOpts->hasOptValue(OPT::MIDL_DBG))
+        setControlText(DLG_ID(IDEDIT_DEBUG_MIDL), m_pOpts->getOptValue(OPT::MIDL_DBG));
 }
 
 void CTabRcMidl::OnOK(void)
 {
-    ttCStr csz;
+    ttlib::cstr text;
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
-    m_pOpts->UpdateOption(OPT_RC_CMN, (char*) csz);
+    ttlib::GetWndText(GetDlgItem(IDEDIT_COMMON), text);
+    m_pOpts->setOptValue(OPT::RC_CMN, text);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
-    m_pOpts->UpdateOption(OPT_RC_REL, (char*) csz);
+    ttlib::GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
+    m_pOpts->setOptValue(OPT::RC_REL, text);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
-    m_pOpts->UpdateOption(OPT_RC_DBG, (char*) csz);
+    ttlib::GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
+    m_pOpts->setOptValue(OPT::RC_DBG, text);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON_MIDL)));
-    m_pOpts->UpdateOption(OPT_MDL_CMN, (char*) csz);
+    ttlib::GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON_MIDL)));
+    m_pOpts->setOptValue(OPT::MIDL_CMN, text);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE_MIDL)));
-    m_pOpts->UpdateOption(OPT_MDL_REL, (char*) csz);
+    ttlib::GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE_MIDL)));
+    m_pOpts->setOptValue(OPT::MIDL_REL, text);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG_MIDL)));
-    m_pOpts->UpdateOption(OPT_MDL_DBG, (char*) csz);
+    ttlib::GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG_MIDL)));
+    m_pOpts->setOptValue(OPT::MIDL_DBG, text);
 }

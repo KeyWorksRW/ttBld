@@ -10,15 +10,13 @@
 
 #include <stdio.h>  // for sprintf
 
+#include <ttfile.h>  // ttCFile
 #include <ttlibwin.h>
 #include <ttnamespace.h>
-#include <ttfile.h>  // ttCFile
 
-#include "writesrcfiles.h"
-#include "verninja.h"  // CVerMakeNinja
 #include "options.h"   // CSrcOptions
-
-extern sfopt::OPT_VERSION aoptVersions[];
+#include "verninja.h"  // CVerMakeNinja
+#include "writesrcfiles.h"
 
 // At the very least, we preserve any comments the user may have added, as well as any non-blank lines that we
 // don't process (such as '------' used to delimit sections). We do prevent multiple blank lines, trailing spaces,
@@ -27,7 +25,7 @@ extern sfopt::OPT_VERSION aoptVersions[];
 
 // Put another way, we may change spacing and formating, but we will preserve any custom data like comments
 
-const char* sfopt::txtNinjaVerFormat = "# Requires ttBld.exe version %d.%d.%d or higher to process";
+const char* txtNinjaVerFormat = "# Requires ttBld.exe version %d.%d.%d or higher to process";
 
 CWriteSrcFiles::CWRT_RESULT CWriteSrcFiles::WriteUpdates(const char* pszFile)
 {
@@ -43,7 +41,7 @@ CWriteSrcFiles::CWRT_RESULT CWriteSrcFiles::WriteUpdates(const char* pszFile)
         int major = 1;  // these three get filled in to the minum ttBld version required to process
         int minor = 0;
         int sub = 0;
-
+    #if 0
         for (size_t pos = 0; aoptVersions[pos].opt != OPT_OVERFLOW; ++pos)
         {
             if (aoptVersions[pos].major > major)
@@ -63,6 +61,7 @@ CWriteSrcFiles::CWRT_RESULT CWriteSrcFiles::WriteUpdates(const char* pszFile)
             "An OPT_ in aoptVersions has a higher version number then txtOptVersion."
             " If you write to .srcfiles.yaml without fixing the code first, this version of ttBld will no "
             "longer be able to use it.");
+    #endif
     }
 #endif
 
@@ -294,9 +293,9 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
         {
             switch (aOptions[pos].opt)
             {
-                case OPT_CFLAGS_CMN:
-                case OPT_CFLAGS_REL:
-                case OPT_CFLAGS_DBG:
+                case OPT::CFLAGS_CMN:
+                case OPT::CFLAGS_REL:
+                case OPT::CFLAGS_DBG:
                     if (!bSeenFlags)
                     {
                         bSeenFlags = true;
@@ -304,8 +303,8 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
                     }
                     break;
 
-                case OPT_64BIT:
-                case OPT_32BIT:
+                case OPT::BIT64:
+                case OPT::BIT32:
                     if (!bSeenBits)
                     {
                         bSeenBits = true;
@@ -313,13 +312,13 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
                     }
                     break;
 
-                case OPT_INC_DIRS:
-                case OPT_BUILD_LIBS:
-                case OPT_LIB_DIRS32:
-                case OPT_LIB_DIRS:
-                case OPT_LIBS_CMN:
-                case OPT_LIBS_REL:
-                case OPT_LIBS_DBG:
+                case OPT::INC_DIRS:
+                case OPT::BUILD_LIBS:
+                case OPT::LIB_DIRS32:
+                case OPT::LIB_DIRS:
+                case OPT::LIBS_CMN:
+                case OPT::LIBS_REL:
+                case OPT::LIBS_DBG:
                     if (!bSeenDirs)
                     {
                         bSeenDirs = true;
@@ -327,7 +326,7 @@ void CWriteSrcFiles::UpdateOptionsSection(bool bAddSpacing)
                     }
                     break;
 
-                case OPT_OPTIMIZE:
+                case OPT::OPTIMIZE:
                     m_lstOriginal.InsertAt(m_posInsert++, "");  // insert a blank line
                     break;
 
@@ -353,10 +352,10 @@ static const char* pszNoCmtOptionFmt = "    %-12s %s";  // used when there isn't
 void CWriteSrcFiles::UpdateWriteOption(size_t pos)
 {
     const sfopt::OPT_SETTING* aOptions = GetOrgOptions();
-    ttCStr                    cszName(aOptions[pos].pszName);
+    ttCStr cszName(aOptions[pos].pszName);
     cszName += ":";  // add the colon that separates a YAML key/value pair
 
-    char      szLine[4096];
+    char szLine[4096];
     ptrdiff_t posOption = GetOptionLine(aOptions[pos].pszName);  // this will set m_cszOptComment
     if (posOption >= 0)
     {
@@ -425,24 +424,24 @@ ptrdiff_t CWriteSrcFiles::GetOptionLine(const char* pszOption)
 
 void CWriteSrcFiles::PreProcessOptions()
 {
-    if (GetBoolOption(OPT_64BIT))
+    if (GetBoolOption(OPT::BIT64))
     {
-        SetRequired(OPT_64BIT, true);
-        SetRequired(OPT_TARGET_DIR64, true);
+        SetRequired(OPT::BIT64, true);
+        SetRequired(OPT::TARGET_DIR64, true);
     }
-    if (GetBoolOption(OPT_32BIT))
+    if (GetBoolOption(OPT::BIT32))
     {
-        SetRequired(OPT_32BIT, true);
-        SetRequired(OPT_TARGET_DIR32, true);
+        SetRequired(OPT::BIT32, true);
+        SetRequired(OPT::TARGET_DIR32, true);
     }
 
-    if (GetPchHeader())
+    if (getOptValue(OPT::PCH))
     {
-        ttCStr cszHdr(GetPchHeader());
+        ttCStr cszHdr(getOptValue(OPT::PCH));
         ttCStr cszSrc(GetPchCpp());  // GetPchCpp() will always return a string if GetPchHeader returns a string
         cszHdr.RemoveExtension();
         cszSrc.RemoveExtension();
         if (ttIsSameStrI(cszHdr, cszSrc))
-            UpdateOption(OPT_PCH_CPP, "none");  // set it back to it's default value so it won't be written
+            setOptValue(OPT::PCH_CPP, "none");  // set it back to it's default value so it won't be written
     }
 }

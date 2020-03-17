@@ -8,14 +8,14 @@
 
 #include "pch.h"
 
-#include <ttstring.h>
+#include <ttcstr.h>
 
 #if defined(_WIN32)
 
     #include <ttreg.h>       // ttCRegistry
     #include <ttstr.h>       // ttCStr
     #include <ttfindfile.h>  // ttCFindFile
-    #include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+    #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that
@@ -104,7 +104,7 @@ bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
         cszEnv.ReSize(cbEnv + 1);
         if (getenv_s(&cbEnv, cszEnv.GetPtr(), cbEnv, pszEnv) == 0)
         {
-            ttEnumStr enumPaths(cszEnv.c_str());
+            ttlib::enumstr enumPaths(cszEnv.c_str());
             for (auto iter : enumPaths)
             {
                 *pcszPath = iter.c_str();
@@ -173,11 +173,11 @@ const char* LocateSrcFiles(ttCStr* pcszStartDir)
     return nullptr;
 }
 
-const char* FindProjectFile(ttString* pStartDir)
+const char* FindProjectFile(ttlib::cstr* pStartDir)
 {
     if (pStartDir)
     {
-        ttString path;
+        ttlib::cstr path;
         for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
         {
             path = *pStartDir;

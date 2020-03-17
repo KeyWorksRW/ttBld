@@ -8,46 +8,39 @@
 
 #include "pch.h"
 
-#ifdef _MSC_VER
+#if defined(wxWIDGETS)
     #define wxMSVC_VERSION_ABI_COMPAT
     #include <msvc/wx/setup.h>  // This will add #pragmas for the wxWidgets libraries
 
-    #if defined(_WIN32)
-
-        #pragma comment(lib, "kernel32.lib")
-        #pragma comment(lib, "user32.lib")
-        #pragma comment(lib, "gdi32.lib")
-        #pragma comment(lib, "comctl32.lib")
-        #pragma comment(lib, "comdlg32.lib")
-        #pragma comment(lib, "shell32.lib")
-
-        #pragma comment(lib, "rpcrt4.lib")
-        #pragma comment(lib, "advapi32.lib")
-
-        #if wxUSE_URL_NATIVE
-            #pragma comment(lib, "wininet.lib")
-        #endif
-    #endif
+    #include <wx/cmdline.h>
+    #include <wx/config.h>
+    #include <wx/init.h>
+    #include <wx/wxcrtvararg.h>
 #endif
 
-#include <wx/init.h>
-#include <wx/cmdline.h>
-#include <wx/init.h>
-#include <wx/wxcrtvararg.h>
-#include <wx/config.h>
+#pragma comment(lib, "advapi32.lib")
+#pragma comment(lib, "comctl32.lib")
+#pragma comment(lib, "comdlg32.lib")
+#pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "kernel32.lib")
+#pragma comment(lib, "rpcrt4.lib")
+#pragma comment(lib, "shell32.lib")
+#pragma comment(lib, "user32.lib")
 
 #include "mainapp.h"  // CMainApp -- Main application class
 
-#include <iostream>
 #include <direct.h>  // Functions for directory handling and creation
+#include <iostream>
+
+#include <ttlist.h>
 
 #include <ttconsole.h>  // ttConsoleColor
 #include <ttcvector.h>  // Vector of ttlib::cstr strings
 
 #include "convertdlg.h"  // CConvertDlg
+#include "funcs.h"       // List of function declarations
 #include "ninja.h"       // CNinja
 #include "vcxproj.h"     // CVcxWrite
-#include "funcs.h"       // List of function declarations
 
 #if defined(TESTING)
     #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
@@ -56,6 +49,7 @@
 wxIMPLEMENT_APP_CONSOLE(CMainApp);
 
 int oldMain(int argc, char** argv);
+void AddFiles(const ttlib::cstrVector& lstFiles);
 
 bool CMainApp::OnInit()
 {
@@ -167,10 +161,10 @@ enum  // actions that can be run in addition to normal single command actions
 int oldMain(int argc, char* argv[])
 {
     UPDATE_TYPE upType = UPDATE_NORMAL;
-    size_t      Action = 0;
+    size_t Action = 0;
 
-    ttString RootDir;      // this will be set if (Action & ACT_DIR) is set
-    ttString SrcFilePath;  // location of srcfiles.yaml
+    ttlib::cstr RootDir;      // this will be set if (Action & ACT_DIR) is set
+    ttlib::cstr SrcFilePath;  // location of srcfiles.yaml
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && !defined(NDEBUG) && defined(_WIN32)
@@ -279,7 +273,7 @@ int oldMain(int argc, char* argv[])
         }
 #endif
 
-#if !defined(NDEBUG)  // Starts debug section.
+#if !defined(NDEBUG) && defined(wxWidgets)  // Starts debug section.
         else if (ttIsSameSubStrI(argv[argpos] + 1, "bwt"))
         {
             wxConfig config("ttBld");
@@ -438,8 +432,8 @@ int oldMain(int argc, char* argv[])
 
     if (!SrcFilePath.empty())
     {
-        auto pPath = locateProjectFile(RootDir);
-        if (pPath->empty())
+        SrcFilePath.assign(locateProjectFile(RootDir));
+        if (SrcFilePath.empty())
         {
             ttConsoleColor clr(ttConsoleColor::LIGHTRED);
             std::cout << _tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, "
@@ -447,7 +441,6 @@ int oldMain(int argc, char* argv[])
                       << '\n';
             return 1;
         }
-        SrcFilePath = *pPath;
     }
 
     // We now have the location of the .srcfiles.yaml file to use. If -opt was specified, then we need to let the
@@ -455,7 +448,7 @@ int oldMain(int argc, char* argv[])
 
     if (Action & ACT_OPTIONS && !(Action & ACT_NEW))
     {
-        if (!ChangeOptions(SrcFilePath, Action & ACT_DRYRUN))
+        if (!ChangeOptions(SrcFilePath))
             return 1;
     }
 
@@ -479,7 +472,7 @@ int oldMain(int argc, char* argv[])
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         std::vector<std::string> results;
         CreateVsJson(SrcFilePath.c_str(), results);
-        for (auto msg : results)
+        for (auto msg: results)
             std::cout << msg << '\n';
     }
 
@@ -522,17 +515,19 @@ int oldMain(int argc, char* argv[])
         if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
             countNinjas++;
 
+#if 0
         if (ttIsNonEmpty(cNinja.GetHHPName()))
             cNinja.CreateHelpFile();
+#endif
 
         // Display any errors that occurred during processing
 
-        if (cNinja.GetErrorCount())
+        if (cNinja.getErrorMsgs().size())
         {
             ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-            for (size_t pos = 0; pos < cNinja.GetErrorCount(); pos++)
+            for (auto iter: cNinja.getErrorMsgs())
             {
-                std::cout << cNinja.GetError(pos) << '\n';
+                std::cout << iter << '\n';
             }
             std::cout << "\n\n";
         }

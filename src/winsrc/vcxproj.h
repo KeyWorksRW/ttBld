@@ -11,7 +11,7 @@
 #include <ttxml.h>  // ttCXMLBranch, ttCParseXML
 
 #include "ninja.h"          // CNinja
-#include "writesrcfiles.h"  // CWriteSrcFiles
+#include "writesrc.h"  // CWriteSrcFiles
 
 // Class for reading a vcxproj file and converting it into a .srcfiles.yaml file.
 class CVcxRead
@@ -28,7 +28,7 @@ protected:
     void ProcessMidl(ttCXMLBranch* pSection, bool bDebug);
     void ProcessRC(ttCXMLBranch* pSection, bool bDebug);
 
-    void  ConvertScriptDir(const char* pszDir, ttCStr& cszResult);
+    void  ConvertScriptDir(const char* pszDir, ttlib::cstr& cszResult);
     char* MakeSrcRelative(const char* pszFile);
 
 private:

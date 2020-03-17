@@ -12,7 +12,7 @@
 
 #include <ttTR.h>  // Function for translating strings
 
-#include <ttenumstr.h>  // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfile.h>     // ttCFile -- class for reading and writing files, strings, data, etc.
 #include <ttxml.h>      // ttCXMLBranch
 
@@ -42,12 +42,12 @@ bool CConvertDlg::ConvertCodeBlocks()
         if (ttIsSameStrI(pItem->GetName(), "Option"))
         {
             if (pItem->GetAttribute("title"))
-                m_cSrcFiles.UpdateOption(OPT_PROJECT, pItem->GetAttribute("title"));
+                m_cSrcFiles.setOptValue(OPT::PROJECT, pItem->GetAttribute("title"));
         }
         else if (ttIsSameStrI(pItem->GetName(), "Unit"))
         {
             if (isValidSrcFile(pItem->GetAttribute("filename")))
-                m_cSrcFiles.GetSrcFilesList().addfilename(MakeSrcRelative(pItem->GetAttribute("filename")));
+                m_cSrcFiles.GetSrcFileList().addfilename(MakeSrcRelative(pItem->GetAttribute("filename")));
         }
     }
 
@@ -66,7 +66,7 @@ bool CConvertDlg::ConvertCodeLite()
 
     const char* pszProject = pProject->GetAttribute("Name");
     if (pszProject && *pszProject)
-        m_cSrcFiles.UpdateOption(OPT_PROJECT, pszProject);
+        m_cSrcFiles.setOptValue(OPT::PROJECT, pszProject);
 
     for (size_t item = 0; item < pProject->GetChildrenCount(); item++)
     {
@@ -77,9 +77,9 @@ bool CConvertDlg::ConvertCodeLite()
         {
             const char* pszType = pItem->GetAttribute("Type");
             if (ttIsSameStrI(pszType, "Dynamic Library"))
-                m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
+                m_cSrcFiles.setOptValue(OPT::EXE_TYPE, "dll");
             else if (ttIsSameStrI(pszType, "Static Library"))
-                m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "lib");
+                m_cSrcFiles.setOptValue(OPT::EXE_TYPE, "lib");
         }
     }
     return true;
@@ -96,7 +96,7 @@ bool CConvertDlg::ConvertVcProj()
     }
 
     if (pProject->GetAttribute("Name"))
-        m_cSrcFiles.UpdateOption(OPT_PROJECT, pProject->GetAttribute("Name"));
+        m_cSrcFiles.setOptValue(OPT::PROJECT, pProject->GetAttribute("Name"));
 
     ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
     if (!pFiles)
@@ -115,7 +115,7 @@ bool CConvertDlg::ConvertVcProj()
                 if (ttIsSameStrI(pItem->GetName(), "File"))
                 {
                     if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
-                        m_cSrcFiles.GetSrcFilesList().addfilename(
+                        m_cSrcFiles.GetSrcFileList().addfilename(
                             MakeSrcRelative(pItem->GetAttribute("RelativePath")));
                 }
             }
@@ -131,8 +131,7 @@ bool CConvertDlg::ConvertVcProj()
             if (ttIsSameStrI(pItem->GetName(), "File"))
             {
                 if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
-                    m_cSrcFiles.GetSrcFilesList().addfilename(
-                        MakeSrcRelative(pItem->GetAttribute("RelativePath")));
+                    m_cSrcFiles.GetSrcFileList().addfilename(MakeSrcRelative(pItem->GetAttribute("RelativePath")));
             }
         }
     }
@@ -149,10 +148,10 @@ bool CConvertDlg::ConvertVcProj()
         {
             ttCStr cszOutDir(pOption->GetAttribute(
                 "OutputFile"));  // will typically be something like: "../bin/$(ProjectName).exe"
-            char*  pszFile = ttFindFilePortion(cszOutDir);
+            char* pszFile = ttFindFilePortion(cszOutDir);
             if (pszFile)
                 *pszFile = 0;
-            m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszOutDir);
+            m_cSrcFiles.setOptValue(OPT::TARGET_DIR32, (char*) cszOutDir);
         }
         do
         {
@@ -167,61 +166,65 @@ bool CConvertDlg::ConvertVcProj()
         {
             const char* pszOption = pRelease->GetAttribute("FavorSizeOrSpeed");
             if (pszOption && ttIsSameSubStrI(pszOption, "1"))
-                m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, "speed");
+                m_cSrcFiles.setOptValue(OPT::OPTIMIZE, "speed");
 
             pszOption = pRelease->GetAttribute("WarningLevel");
             if (pszOption && !ttIsSameSubStrI(pszOption, "4"))
-                m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, pszOption);
+                m_cSrcFiles.setOptValue(OPT::WARN, pszOption);
 
             pszOption = pRelease->GetAttribute("AdditionalIncludeDirectories");
             if (pszOption)
             {
-                ttCStr cszOrgInc(m_cSrcFiles.GetOption(OPT_INC_DIRS));
+                ttlib::cstr cszOrgInc(m_cSrcFiles.getOptValue(OPT::INC_DIRS));
 
                 // Paths will be relative to the location of the script file. We need to make them
                 // relative to .srcfiles.yaml.
 
-                ttEnumStr enumPaths(pszOption);
-                ttCStr    cszInc, cszTmp;
-                for (auto iter : enumPaths)
+                ttlib::enumstr enumPaths(pszOption);
+                ttlib::cstr Include;
+                ttCStr cszInc, cszTmp;
+                for (auto& iter: enumPaths)
                 {
                     ConvertScriptDir(m_cszConvertScript, iter.c_str(), cszTmp);
-                    if (cszInc.IsNonEmpty())
-                        cszInc += ";";
-                    cszInc += cszTmp;
+                    if (!Include.empty())
+                        Include += ";";
+                    Include += cszTmp.c_str();
                 }
-                if (cszOrgInc.IsNonEmpty())
-                    cszOrgInc += ";";
-                cszOrgInc += cszInc;
+                if (!Include.empty())
+                {
+                    if (!cszOrgInc.empty())
+                        cszOrgInc += ";";
+                    cszOrgInc += Include;
+                }
 
-                m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszOrgInc);
+                m_cSrcFiles.setOptValue(OPT::INC_DIRS, cszOrgInc);
             }
 
             pszOption = pRelease->GetAttribute("PreprocessorDefinitions");
             if (pszOption)
             {
-                ttEnumStr enumFlags(pszOption);
-                ttCStr    cszCFlags;
-                for (auto iter : enumFlags)
+                ttlib::enumstr enumFlags(pszOption);
+                ttCStr cszCFlags;
+                for (auto iter: enumFlags)
                 {
-                    if (tt::issamestr(iter, "NDEBUG"))
+                    if (ttlib::issameas(iter, "NDEBUG"))
                         continue;  // we already added this
 
                     // the define is already in use, but make certain exeType matches
-                    if (tt::issamestr(iter, "_CONSOLE"))
+                    if (ttlib::issameas(iter, "_CONSOLE"))
                     {
-                        m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "console");
+                        m_cSrcFiles.setOptValue(OPT::EXE_TYPE, "console");
                         continue;
                     }
 
                     // the define is already in use, but make certain exeType matches
-                    if (tt::issamestr(iter, "_USRDLL"))
+                    if (ttlib::issameas(iter, "_USRDLL"))
                     {
-                        m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, "dll");
+                        m_cSrcFiles.setOptValue(OPT::EXE_TYPE, "dll");
                         continue;  // do we need to add this?
                     }
 
-                      // Visual Studio specific, ignore it
+                    // Visual Studio specific, ignore it
                     if (tt::issamesubstr(iter, "$("))
                         continue;
 
@@ -230,7 +233,7 @@ bool CConvertDlg::ConvertVcProj()
                     cszCFlags += "-D";
                     cszCFlags += iter.c_str();
                 }
-                m_cSrcFiles.UpdateOption(OPT_CFLAGS_CMN, (char*) cszCFlags);
+                m_cSrcFiles.setOptValue(OPT::CFLAGS_CMN, (char*) cszCFlags);
             }
         }
     }
@@ -278,8 +281,8 @@ bool CConvertDlg::ConvertDsp()
             char* pszEndProject = ttFindSpace(pszProject);
             if (pszEndProject)
                 *pszEndProject = 0;
-            if (ttIsEmpty(m_cSrcFiles.GetProjectName()))
-                m_cSrcFiles.UpdateOption(OPT_PROJECT, pszProject);
+            if (m_cSrcFiles.GetProjectName().empty())
+                m_cSrcFiles.setOptValue(OPT::PROJECT, pszProject);
         }
 
         else if (ttIsSameSubStrI(pszBegin, "!IF") && ttStrStrI(pszBegin, "$(CFG)"))
@@ -304,20 +307,21 @@ bool CConvertDlg::ConvertDsp()
             // Since this is a really old project, we ignore any compiler flags -- we just grab the defines
 
             ttCStr cszCurFlags, cszNewFlags;
-            if (m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_CMN))
-                cszCurFlags = m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_CMN);
-            if (bReleaseSection && m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_REL))
+            ttlib::cstr CurFlags;
+            if (m_cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
+                CurFlags = m_cSrcFiles.getOptValue(OPT::CFLAGS_CMN);
+            if (bReleaseSection && m_cSrcFiles.hasOptValue(OPT::CFLAGS_REL))
             {
                 if (ttIsNonEmpty(cszCurFlags))
-                    cszCurFlags += " ";
-                cszCurFlags += m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_REL);
+                    CurFlags += " ";
+                CurFlags += m_cSrcFiles.getOptValue(OPT::CFLAGS_REL);
             }
-            else if (!bReleaseSection && m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_DBG))
+            else if (!bReleaseSection && m_cSrcFiles.hasOptValue(OPT::CFLAGS_DBG))
             {
-                if (ttIsNonEmpty(cszCurFlags))
+                if (!CurFlags.empty())
                 {
-                    cszCurFlags += " ";
-                    cszCurFlags += m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_DBG);
+                    CurFlags += " ";
+                    CurFlags += m_cSrcFiles.getOptValue(OPT::CFLAGS_DBG);
                 }
             }
 
@@ -326,22 +330,21 @@ bool CConvertDlg::ConvertDsp()
             {
                 do
                 {
-                    pszDef = ttStrChr(pszDef, CH_QUOTE);
+                    pszDef = ttStrChr(pszDef, '\"');
                     if (pszDef)
                     {
-                        ttCStr csz;
-                        csz.GetQuotedString(pszDef);
-                        if (!ttIsSameSubStr(csz, "NDEBUG") && !ttIsSameSubStr(csz, "_DEBUG") &&
-                            !ttIsSameSubStr(csz, "_WIN32"))
+                        ttlib::cstr def;
+                        def.ExtractSubString(pszDef);
+                        if (!def.issameprefix("NDEBUG") && !def.issameprefix("_DEBUG") &&
+                            !def.issameprefix("_WIN32"))
                         {
-                            ttCStr cszFlag("-D");
-                            cszFlag += csz;
+                            ttlib::cstr Flag("-D" + def);
                             // If we don't already have the flag, then add it
-                            if (!ttStrStrI(cszCurFlags, cszFlag))
+                            if (!Flag.contains(CurFlags))
                             {
                                 if (ttIsNonEmpty(cszNewFlags))
                                     cszNewFlags += " ";
-                                cszNewFlags += (char*) cszFlag;
+                                cszNewFlags += Flag.c_str();
                             }
                         }
                         pszDef = ttStrStr(pszDef, "/D");  // look for the next define
@@ -349,16 +352,16 @@ bool CConvertDlg::ConvertDsp()
                 } while (pszDef);
             }
 
-            cszCurFlags.Delete();
+            CurFlags.clear();
             if (cszNewFlags.IsNonEmpty())
             {
-                if (bReleaseSection && m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_REL))
+                if (bReleaseSection && m_cSrcFiles.hasOptValue(OPT::CFLAGS_REL))
                 {
-                    cszCurFlags = m_cSrcFiles.GetOption(sfopt::OPT_CFLAGS_REL);
-                    cszCurFlags += " ";
+                    CurFlags = m_cSrcFiles.getOptValue(OPT::CFLAGS_REL);
+                    CurFlags += " ";
                 }
-                cszCurFlags += (char*) cszNewFlags;
-                m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, (char*) cszCurFlags);
+                CurFlags += cszNewFlags.c_str();
+                m_cSrcFiles.setOptValue(OPT::CFLAGS_REL, CurFlags);
             }
         }
 
@@ -372,7 +375,7 @@ bool CConvertDlg::ConvertDsp()
                 pszFile = ttFindNonSpace(pszFile + 1);
                 if (ttIsSameSubStr(pszFile, ".\\"))
                     pszFile += 2;
-                m_cSrcFiles.GetSrcFilesList().append(pszFile);
+                m_cSrcFiles.GetSrcFileList().append(pszFile);
             }
         }
     }
@@ -390,188 +393,170 @@ bool CConvertDlg::ConvertSrcfiles()
 
     // First we copy all the options. Then we tweak those that will need to be changed to use a different path.
 
-    m_cSrcFiles.UpdateOption(OPT_PROJECT, srcOrg.GetOption(OPT_PROJECT));
-    m_cSrcFiles.UpdateOption(OPT_EXE_TYPE, srcOrg.GetOption(OPT_EXE_TYPE));
-    m_cSrcFiles.UpdateOption(OPT_PCH, srcOrg.GetOption(OPT_PCH));
+    m_cSrcFiles.setOptValue(OPT::PROJECT, srcOrg.getOptValue(OPT::PROJECT));
+    m_cSrcFiles.setOptValue(OPT::EXE_TYPE, srcOrg.getOptValue(OPT::EXE_TYPE));
+    m_cSrcFiles.setOptValue(OPT::PCH, srcOrg.getOptValue(OPT::PCH));
 
-    m_cSrcFiles.UpdateOption(OPT_OPTIMIZE, srcOrg.GetOption(OPT_OPTIMIZE));
-    m_cSrcFiles.SetRequired(OPT_OPTIMIZE);
-    m_cSrcFiles.UpdateOption(OPT_WARN_LEVEL, srcOrg.GetOption(OPT_WARN_LEVEL));
-    m_cSrcFiles.SetRequired(OPT_WARN_LEVEL);
+    m_cSrcFiles.setOptValue(OPT::OPTIMIZE, srcOrg.getOptValue(OPT::OPTIMIZE));
+    m_cSrcFiles.SetRequired(OPT::OPTIMIZE);
+    m_cSrcFiles.setOptValue(OPT::WARN, srcOrg.getOptValue(OPT::WARN));
+    m_cSrcFiles.SetRequired(OPT::WARN);
 
-    m_cSrcFiles.UpdateOption(OPT_PERMISSIVE, srcOrg.GetOption(OPT_PERMISSIVE));
-    m_cSrcFiles.UpdateOption(OPT_STDCALL, srcOrg.GetOption(OPT_STDCALL));
+    m_cSrcFiles.setOptValue(OPT::CFLAGS_CMN, srcOrg.getOptValue(OPT::CFLAGS_CMN));
+    m_cSrcFiles.setOptValue(OPT::CFLAGS_REL, srcOrg.getOptValue(OPT::CFLAGS_REL));
+    m_cSrcFiles.setOptValue(OPT::CFLAGS_DBG, srcOrg.getOptValue(OPT::CFLAGS_DBG));
 
-    m_cSrcFiles.UpdateOption(OPT_CFLAGS_CMN, srcOrg.GetOption(OPT_CFLAGS_CMN));
-    m_cSrcFiles.UpdateOption(OPT_CFLAGS_REL, srcOrg.GetOption(OPT_CFLAGS_REL));
-    m_cSrcFiles.UpdateOption(OPT_CFLAGS_DBG, srcOrg.GetOption(OPT_CFLAGS_DBG));
+    m_cSrcFiles.setOptValue(OPT::CLANG_CMN, srcOrg.getOptValue(OPT::CLANG_CMN));
+    m_cSrcFiles.setOptValue(OPT::CLANG_REL, srcOrg.getOptValue(OPT::CLANG_REL));
+    m_cSrcFiles.setOptValue(OPT::CLANG_DBG, srcOrg.getOptValue(OPT::CLANG_DBG));
 
-    m_cSrcFiles.UpdateOption(OPT_CLANG_CMN, srcOrg.GetOption(OPT_CLANG_CMN));
-    m_cSrcFiles.UpdateOption(OPT_CLANG_REL, srcOrg.GetOption(OPT_CLANG_REL));
-    m_cSrcFiles.UpdateOption(OPT_CLANG_DBG, srcOrg.GetOption(OPT_CLANG_DBG));
-
-    m_cSrcFiles.UpdateOption(OPT_LINK_CMN, srcOrg.GetOption(OPT_LINK_CMN));
-    m_cSrcFiles.UpdateOption(OPT_LINK_REL, srcOrg.GetOption(OPT_LINK_REL));
-    m_cSrcFiles.UpdateOption(OPT_LINK_DBG, srcOrg.GetOption(OPT_LINK_DBG));
+    m_cSrcFiles.setOptValue(OPT::LINK_CMN, srcOrg.getOptValue(OPT::LINK_CMN));
+    m_cSrcFiles.setOptValue(OPT::LINK_REL, srcOrg.getOptValue(OPT::LINK_REL));
+    m_cSrcFiles.setOptValue(OPT::LINK_DBG, srcOrg.getOptValue(OPT::LINK_DBG));
 
 #if defined(_WIN32)
-    m_cSrcFiles.UpdateOption(OPT_NATVIS, srcOrg.GetOption(OPT_NATVIS));
+    m_cSrcFiles.setOptValue(OPT::NATVIS, srcOrg.getOptValue(OPT::NATVIS));
 
-    m_cSrcFiles.UpdateOption(OPT_RC_CMN, srcOrg.GetOption(OPT_RC_CMN));
-    m_cSrcFiles.UpdateOption(OPT_RC_REL, srcOrg.GetOption(OPT_RC_REL));
-    m_cSrcFiles.UpdateOption(OPT_RC_DBG, srcOrg.GetOption(OPT_RC_DBG));
+    m_cSrcFiles.setOptValue(OPT::RC_CMN, srcOrg.getOptValue(OPT::RC_CMN));
+    m_cSrcFiles.setOptValue(OPT::RC_REL, srcOrg.getOptValue(OPT::RC_REL));
+    m_cSrcFiles.setOptValue(OPT::RC_DBG, srcOrg.getOptValue(OPT::RC_DBG));
 
-    m_cSrcFiles.UpdateOption(OPT_MDL_CMN, srcOrg.GetOption(OPT_MDL_CMN));
-    m_cSrcFiles.UpdateOption(OPT_MDL_REL, srcOrg.GetOption(OPT_MDL_REL));
-    m_cSrcFiles.UpdateOption(OPT_MDL_DBG, srcOrg.GetOption(OPT_MDL_DBG));
+    m_cSrcFiles.setOptValue(OPT::MIDL_CMN, srcOrg.getOptValue(OPT::MIDL_CMN));
+    m_cSrcFiles.setOptValue(OPT::MIDL_REL, srcOrg.getOptValue(OPT::MIDL_REL));
+    m_cSrcFiles.setOptValue(OPT::MIDL_DBG, srcOrg.getOptValue(OPT::MIDL_DBG));
 
-    m_cSrcFiles.UpdateOption(OPT_DEBUG_RC, srcOrg.GetOption(OPT_DEBUG_RC));
+    m_cSrcFiles.setOptValue(OPT::MS_LINKER, srcOrg.getOptValue(OPT::MS_LINKER));
 
-    m_cSrcFiles.UpdateOption(OPT_MS_LINKER, srcOrg.GetOption(OPT_MS_LINKER));
-    m_cSrcFiles.UpdateOption(OPT_MS_RC, srcOrg.GetOption(OPT_MS_RC));
 #endif  // defined(_WIN32)
 
-    m_cSrcFiles.UpdateOption(OPT_STATIC_CRT_REL, srcOrg.GetOption(OPT_STATIC_CRT_REL));
-    m_cSrcFiles.UpdateOption(OPT_STATIC_CRT_DBG, srcOrg.GetOption(OPT_STATIC_CRT_DBG));
+    m_cSrcFiles.setOptValue(OPT::CRT_REL, srcOrg.getOptValue(OPT::CRT_REL));
+    m_cSrcFiles.setOptValue(OPT::CRT_DBG, srcOrg.getOptValue(OPT::CRT_DBG));
 
-    m_cSrcFiles.UpdateOption(OPT_64BIT, srcOrg.GetOption(OPT_64BIT));
-    m_cSrcFiles.UpdateOption(OPT_TARGET_DIR64, srcOrg.GetOption(OPT_TARGET_DIR64));
-    m_cSrcFiles.UpdateOption(OPT_32BIT, srcOrg.GetOption(OPT_32BIT));
-    m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, srcOrg.GetOption(OPT_TARGET_DIR32));
+    m_cSrcFiles.setOptValue(OPT::BIT64, srcOrg.getOptValue(OPT::BIT64));
+    m_cSrcFiles.setOptValue(OPT::TARGET_DIR64, srcOrg.getOptValue(OPT::TARGET_DIR64));
+    m_cSrcFiles.setOptValue(OPT::BIT32, srcOrg.getOptValue(OPT::BIT32));
+    m_cSrcFiles.setOptValue(OPT::TARGET_DIR32, srcOrg.getOptValue(OPT::TARGET_DIR32));
 
-    m_cSrcFiles.UpdateOption(OPT_LIBS_CMN, srcOrg.GetOption(OPT_LIBS_CMN));
-    m_cSrcFiles.UpdateOption(OPT_LIBS_REL, srcOrg.GetOption(OPT_LIBS_REL));
-    m_cSrcFiles.UpdateOption(OPT_LIBS_DBG, srcOrg.GetOption(OPT_LIBS_DBG));
+    m_cSrcFiles.setOptValue(OPT::LIBS_CMN, srcOrg.getOptValue(OPT::LIBS_CMN));
+    m_cSrcFiles.setOptValue(OPT::LIBS_REL, srcOrg.getOptValue(OPT::LIBS_REL));
+    m_cSrcFiles.setOptValue(OPT::LIBS_DBG, srcOrg.getOptValue(OPT::LIBS_DBG));
 
-    m_cSrcFiles.UpdateOption(OPT_XGET_FLAGS, srcOrg.GetOption(OPT_XGET_FLAGS));
+    m_cSrcFiles.setOptValue(OPT::XGET_FLAGS, srcOrg.getOptValue(OPT::XGET_FLAGS));
 
     ttCStr cszRoot(m_cszConvertScript);
-    char*  pszTmp = ttFindFilePortion(cszRoot);
+    char* pszTmp = ttFindFilePortion(cszRoot);
     if (pszTmp)
         *pszTmp = 0;
     // pszTmp = ttFindLastSlash(cszRoot);
     // if (pszTmp)
     // *pszTmp = 0;
 
-    ttCStr cszRelative;
+    ttlib::cstr cszRelative;
     ttCStr cszCurCwd;
     cszCurCwd.GetCWD();
     ttChDir(cszRoot);
 
-    if (srcOrg.GetOption(OPT_PCH))
+    if (srcOrg.hasOptValue(OPT::PCH))
     {
-        ttCStr cszPch(srcOrg.GetOption(OPT_PCH_CPP));
-        if (cszPch.IsEmpty() || ttIsSameStrI(cszPch, "none"))
+        ttlib::cstr cszPch(srcOrg.getOptValue(OPT::PCH_CPP));
+        if (cszPch.empty() || cszPch.issameas("none"))
         {
-            cszPch = srcOrg.GetOption(OPT_PCH);
-            cszPch.ChangeExtension(".cpp");
-            if (!ttFileExists(cszPch))
+            cszPch = srcOrg.getOptValue(OPT::PCH);
+            cszPch.replace_extension(".cpp");
+            if (!cszPch.fileExists())
             {
-                cszPch.ChangeExtension(".cc");
-                if (!ttFileExists(cszPch))
+                cszPch.replace_extension(".cc");
+                if (!cszPch.fileExists())
                 {
-                    cszPch.ChangeExtension(".cxx");
-                    if (!ttFileExists(cszPch))
-                        cszPch.ChangeExtension(".cpp");  // File can't be found, switch back to original
+                    cszPch.replace_extension(".cxx");
+                    if (!cszPch.fileExists())
+                        cszPch.replace_extension(".cpp");  // File can't be found, switch back to original
                 }
             }
-            cszPch.FullPathName();
+            cszPch.make_absolute();
         }
         else
         {
             cszPch = (char*) cszRoot;
-            cszPch.AppendFileName(srcOrg.GetOption(OPT_PCH_CPP));
+            cszPch.append(srcOrg.getOptValue(OPT::PCH_CPP));
         }
 
-        ttConvertToRelative(cszCurCwd, cszPch, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_PCH_CPP, (char*) cszRelative);
+        cszPch.make_relative(cszCurCwd);
+        cszPch.backslashestoforward();
+        m_cSrcFiles.setOptValue(OPT::PCH_CPP, cszPch);
     }
 
-    ttConvertToRelative(cszCurCwd, m_cszConvertScript, cszRelative);
+    m_cszConvertScript = m_cszConvertScript;
+    cszRelative.make_relative(cszCurCwd);
 
-    ttCStr cszTmp(".include ");
-    cszTmp += (char*) cszRelative;
+    m_cSrcFiles.GetSrcFileList().addfilename(".include " + cszRelative);
 
-    m_cSrcFiles.GetSrcFilesList() += cszTmp.c_str();
+    ttlib::cstr IncDirs(cszRelative);
+    IncDirs.remove_filename();
 
-    pszTmp = ttFindFilePortion(cszRelative);
-    if (pszTmp)
-        *pszTmp = 0;
-    pszTmp = ttFindLastSlash(cszRelative);
-    if (pszTmp)
-        *pszTmp = 0;
-
-    ttCStr cszIncDirs(cszRelative);
-    if (srcOrg.GetOption(OPT_INC_DIRS))
+    if (srcOrg.hasOptValue(OPT::INC_DIRS))
     {
-        ttEnumStr enumPaths(srcOrg.getOptValue(Opt::INC_DIRS));
-        ttChDir(cszRoot);
-        for (auto iter : enumPaths)
+        ttlib::enumstr enumPaths(srcOrg.getOptValue(OPT::INC_DIRS));
+        fs::current_path(cszRoot.c_str());
+        for (auto& iter: enumPaths)
         {
-            cszTmp = iter.c_str();
-            cszTmp.FullPathName();
-            ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-            cszIncDirs += ";";
-            cszIncDirs += (char*) cszRelative;
+            cszRelative.assign(iter);
+            cszRelative.make_absolute();
+            cszRelative.make_relative(cszCurCwd);
+            IncDirs += (";" + cszRelative);
         }
 
-        cszRelative += srcOrg.GetOption(OPT_INC_DIRS);
+        cszRelative += srcOrg.getOptValue(OPT::INC_DIRS);
     }
-    m_cSrcFiles.UpdateOption(OPT_INC_DIRS, (char*) cszIncDirs);
+    m_cSrcFiles.setOptValue(OPT::INC_DIRS, IncDirs);
 
 #if defined(_WIN32)
-    if (srcOrg.GetOption(OPT_NATVIS))
+    if (srcOrg.hasOptValue(OPT::NATVIS))
     {
-        cszTmp = srcOrg.GetOption(OPT_NATVIS);
-        cszTmp.FullPathName();
-
-        ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_NATVIS, (char*) cszRelative);
+        cszRelative = srcOrg.getOptValue(OPT::NATVIS);
+        cszRelative.make_absolute();
+        cszRelative.make_relative(cszCurCwd);
+        m_cSrcFiles.setOptValue(OPT::NATVIS, cszRelative);
     }
 #endif  // _WIN32
 
-    if (srcOrg.GetOption(OPT_TARGET_DIR))
+    if (srcOrg.hasOptValue(OPT::TARGET_DIR))
     {
-        cszTmp = srcOrg.GetOption(OPT_TARGET_DIR);
-        cszTmp.FullPathName();
-
-        ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_TARGET_DIR, (char*) cszRelative);
+        cszRelative = srcOrg.getOptValue(OPT::TARGET_DIR);
+        cszRelative.make_absolute();
+        cszRelative.make_relative(cszCurCwd);
+        m_cSrcFiles.setOptValue(OPT::TARGET_DIR, cszRelative);
     }
 
-    if (srcOrg.GetOption(OPT_TARGET_DIR32))
+    if (srcOrg.hasOptValue(OPT::TARGET_DIR32))
     {
-        cszTmp = srcOrg.GetOption(OPT_TARGET_DIR32);
-        cszTmp.FullPathName();
-
-        ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_TARGET_DIR32, (char*) cszRelative);
+        cszRelative = srcOrg.getOptValue(OPT::TARGET_DIR32);
+        cszRelative.make_absolute();
+        cszRelative.make_relative(cszCurCwd);
+        m_cSrcFiles.setOptValue(OPT::TARGET_DIR32, cszRelative);
     }
 
-    if (srcOrg.GetOption(OPT_LIB_DIRS))
+    if (srcOrg.hasOptValue(OPT::LIB_DIRS))
     {
-        cszTmp = srcOrg.GetOption(OPT_LIB_DIRS);
-        cszTmp.FullPathName();
-
-        ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_LIB_DIRS, (char*) cszRelative);
+        cszRelative = srcOrg.getOptValue(OPT::LIB_DIRS);
+        cszRelative.make_absolute();
+        cszRelative.make_relative(cszCurCwd);
+        m_cSrcFiles.setOptValue(OPT::LIB_DIRS, cszRelative);
     }
-    if (srcOrg.GetOption(OPT_LIB_DIRS32))
+    if (srcOrg.hasOptValue(OPT::LIB_DIRS32))
     {
-        cszTmp = srcOrg.GetOption(OPT_LIB_DIRS32);
-        cszTmp.FullPathName();
-
-        ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_LIB_DIRS32, (char*) cszRelative);
+        cszRelative = srcOrg.getOptValue(OPT::LIB_DIRS32);
+        cszRelative.make_absolute();
+        cszRelative.make_relative(cszCurCwd);
+        m_cSrcFiles.setOptValue(OPT::LIB_DIRS32, cszRelative);
     }
 
-    if (srcOrg.GetOption(OPT_BUILD_LIBS))
+    if (srcOrg.hasOptValue(OPT::BUILD_LIBS))
     {
-        cszTmp = srcOrg.GetOption(OPT_BUILD_LIBS);
-        cszTmp.FullPathName();
-
-        ttConvertToRelative(cszCurCwd, cszTmp, cszRelative);
-        m_cSrcFiles.UpdateOption(OPT_BUILD_LIBS, (char*) cszRelative);
+        cszRelative = srcOrg.getOptValue(OPT::BUILD_LIBS);
+        cszRelative.make_absolute();
+        cszRelative.make_relative(cszCurCwd);
+        m_cSrcFiles.setOptValue(OPT::BUILD_LIBS, cszRelative);
     }
 
     ttChDir(cszCurCwd);  // Restore our current directory
@@ -589,7 +574,7 @@ void ConvertScriptDir(const char* pszScript, const char* pszDir, ttCStr& cszResu
     }
 
     ttCStr cszScript(pszScript);
-    char*  pszFilePortion = ttFindFilePortion(cszScript);
+    char* pszFilePortion = ttFindFilePortion(cszScript);
     assert(pszFilePortion);
     *pszFilePortion = 0;
     cszScript.AppendFileName(pszDir);

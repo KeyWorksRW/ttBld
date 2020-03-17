@@ -15,7 +15,7 @@
 
 #include <ttTR.h>  // Function for translating strings
 
-#include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
 
@@ -54,7 +54,7 @@ bool CVcxRead::ConvertVcxProj()
                 {
                     const char* pszFile = pCmd->GetAttribute("Include");
                     if (pszFile && *pszFile)
-                        m_pcSrcFiles->GetSrcFilesList().addfilename(MakeSrcRelative(pszFile));
+                        m_pcSrcFiles->GetSrcFileList().addfilename(MakeSrcRelative(pszFile));
                 }
             }
         }
@@ -70,9 +70,9 @@ bool CVcxRead::ConvertVcxProj()
                     {
                         bTypeSeen = true;
                         if (ttIsSameStrI(pChild->GetData(), "DynamicLibrary"))
-                            m_pcSrcFiles->UpdateOption(OPT_EXE_TYPE, "dll");
+                            m_pcSrcFiles->setOptValue(OPT::EXE_TYPE, "dll");
                         else if (ttIsSameStrI(pChild->GetData(), "StaticLibrary"))
-                            m_pcSrcFiles->UpdateOption(OPT_EXE_TYPE, "lib");
+                            m_pcSrcFiles->setOptValue(OPT::EXE_TYPE, "lib");
                         // TODO: [randalphwa - 5/9/2019] What are the options for console and gui?
                         continue;  // We don't care about any other settings in this group
                     }
@@ -90,10 +90,10 @@ bool CVcxRead::ConvertVcxProj()
                     ttCXMLBranch* pChild = pItem->GetChildAt(child);
                     if (ttIsSameSubStrI(pChild->GetName(), "OutDir"))
                     {
-                        if (!m_pcSrcFiles->GetOption(OPT_TARGET_DIR64) && pChild->cChildren > 0)
+                        if (!m_pcSrcFiles->hasOptValue(OPT::TARGET_DIR64) && pChild->cChildren > 0)
                         {
-                            m_pcSrcFiles->UpdateOption(OPT_TARGET_DIR64, pChild->GetChildAt(0)->GetData());
-                            m_pcSrcFiles->UpdateOption(OPT_TARGET_DIR32, pChild->GetChildAt(0)->GetData());
+                            m_pcSrcFiles->setOptValue(OPT::TARGET_DIR64, pChild->GetChildAt(0)->GetData());
+                            m_pcSrcFiles->setOptValue(OPT::TARGET_DIR32, pChild->GetChildAt(0)->GetData());
                         }
                     }
                     else if (ttIsSameSubStrI(pChild->GetName(), "TargetName"))
@@ -101,9 +101,9 @@ bool CVcxRead::ConvertVcxProj()
                         if (pChild->GetAttributeAt(0)->pszValue &&
                             ttStrStrI(pChild->GetAttributeAt(0)->pszValue, "Release"))
                         {
-                            if (!m_pcSrcFiles->GetOption(OPT_PROJECT) && pChild->cChildren > 0)
+                            if (!m_pcSrcFiles->hasOptValue(OPT::PROJECT) && pChild->cChildren > 0)
                             {
-                                m_pcSrcFiles->UpdateOption(OPT_PROJECT, pChild->GetChildAt(0)->GetData());
+                                m_pcSrcFiles->setOptValue(OPT::PROJECT, pChild->GetChildAt(0)->GetData());
                             }
                         }
                     }
@@ -172,36 +172,36 @@ bool CVcxRead::ConvertVcxProj()
 
     if (m_pcSrcFiles->getRcName().empty())
     {
-        if (m_pcSrcFiles->GetOption(OPT_RC_CMN))
-            m_pcSrcFiles->UpdateOption(OPT_RC_CMN, "");
-        if (m_pcSrcFiles->GetOption(OPT_RC_REL))
-            m_pcSrcFiles->UpdateOption(OPT_RC_REL, "");
-        if (m_pcSrcFiles->GetOption(OPT_RC_DBG))
-            m_pcSrcFiles->UpdateOption(OPT_RC_DBG, "");
+        if (m_pcSrcFiles->hasOptValue(OPT::RC_CMN))
+            m_pcSrcFiles->setOptValue(OPT::RC_CMN, "");
+        if (m_pcSrcFiles->hasOptValue(OPT::RC_REL))
+            m_pcSrcFiles->setOptValue(OPT::RC_REL, "");
+        if (m_pcSrcFiles->hasOptValue(OPT::RC_DBG))
+            m_pcSrcFiles->setOptValue(OPT::RC_DBG, "");
     }
 
     // If Debug and Release flags are the same, then remove them and just use the common flag setting
 
-    if (m_pcSrcFiles->GetOption(OPT_CFLAGS_REL) && m_pcSrcFiles->GetOption(OPT_CFLAGS_DBG) &&
-        ttIsSameStrI(m_pcSrcFiles->GetOption(OPT_CFLAGS_REL), m_pcSrcFiles->GetOption(OPT_CFLAGS_DBG)))
+    if (m_pcSrcFiles->hasOptValue(OPT::CFLAGS_REL) && m_pcSrcFiles->hasOptValue(OPT::CFLAGS_DBG) &&
+        m_pcSrcFiles->getOptValue(OPT::CFLAGS_REL).issameas(m_pcSrcFiles->getOptValue(OPT::CFLAGS_DBG)))
     {
-        m_pcSrcFiles->UpdateOption(OPT_CFLAGS_CMN, m_pcSrcFiles->GetOption(OPT_CFLAGS_REL));
-        m_pcSrcFiles->UpdateOption(OPT_CFLAGS_REL, "");
-        m_pcSrcFiles->UpdateOption(OPT_CFLAGS_DBG, "");
+        m_pcSrcFiles->setOptValue(OPT::CFLAGS_CMN, m_pcSrcFiles->getOptValue(OPT::CFLAGS_REL));
+        m_pcSrcFiles->setOptValue(OPT::CFLAGS_REL, "");
+        m_pcSrcFiles->setOptValue(OPT::CFLAGS_DBG, "");
     }
-    if (m_pcSrcFiles->GetOption(OPT_MDL_REL) && m_pcSrcFiles->GetOption(OPT_MDL_DBG) &&
-        ttIsSameStrI(m_pcSrcFiles->GetOption(OPT_MDL_REL), m_pcSrcFiles->GetOption(OPT_MDL_DBG)))
+    if (m_pcSrcFiles->hasOptValue(OPT::MIDL_REL) && m_pcSrcFiles->hasOptValue(OPT::MIDL_DBG) &&
+        m_pcSrcFiles->getOptValue(OPT::MIDL_REL).issameas(m_pcSrcFiles->getOptValue(OPT::MIDL_DBG)))
     {
-        m_pcSrcFiles->UpdateOption(OPT_MDL_CMN, m_pcSrcFiles->GetOption(OPT_MDL_REL));
-        m_pcSrcFiles->UpdateOption(OPT_MDL_REL, "");
-        m_pcSrcFiles->UpdateOption(OPT_MDL_DBG, "");
+        m_pcSrcFiles->setOptValue(OPT::MIDL_CMN, m_pcSrcFiles->getOptValue(OPT::MIDL_REL));
+        m_pcSrcFiles->setOptValue(OPT::MIDL_REL, "");
+        m_pcSrcFiles->setOptValue(OPT::MIDL_DBG, "");
     }
-    if (m_pcSrcFiles->GetOption(OPT_RC_REL) && m_pcSrcFiles->GetOption(OPT_RC_DBG) &&
-        ttIsSameStrI(m_pcSrcFiles->GetOption(OPT_RC_REL), m_pcSrcFiles->GetOption(OPT_RC_DBG)))
+    if (m_pcSrcFiles->hasOptValue(OPT::RC_REL) && m_pcSrcFiles->hasOptValue(OPT::RC_DBG) &&
+        m_pcSrcFiles->getOptValue(OPT::RC_REL).issameas(m_pcSrcFiles->getOptValue(OPT::RC_DBG)))
     {
-        m_pcSrcFiles->UpdateOption(OPT_RC_CMN, m_pcSrcFiles->GetOption(OPT_RC_REL));
-        m_pcSrcFiles->UpdateOption(OPT_RC_REL, "");
-        m_pcSrcFiles->UpdateOption(OPT_RC_DBG, "");
+        m_pcSrcFiles->setOptValue(OPT::RC_CMN, m_pcSrcFiles->getOptValue(OPT::RC_REL));
+        m_pcSrcFiles->setOptValue(OPT::RC_REL, "");
+        m_pcSrcFiles->setOptValue(OPT::RC_DBG, "");
     }
 
     return true;
@@ -222,7 +222,7 @@ void CVcxRead::ProcessMidl(ttCXMLBranch* pSection, bool bDebug)
             cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
             while (cszFlags.ReplaceStr(";", " -D"))
                 ;
-            m_pcSrcFiles->UpdateOption(bDebug ? OPT_MDL_DBG : OPT_MDL_REL, (char*) cszFlags);
+            m_pcSrcFiles->setOptValue(bDebug ? OPT::MIDL_DBG : OPT::MIDL_REL, (char*) cszFlags);
         }
     }
 }
@@ -242,7 +242,7 @@ void CVcxRead::ProcessRC(ttCXMLBranch* pSection, bool bDebug)
             cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
             while (cszFlags.ReplaceStr(";", " -D"))
                 ;
-            m_pcSrcFiles->UpdateOption(bDebug ? OPT_RC_DBG : OPT_RC_REL, (char*) cszFlags);
+            m_pcSrcFiles->setOptValue(bDebug ? OPT::RC_DBG : OPT::RC_REL, (char*) cszFlags);
         }
     }
 }
@@ -257,24 +257,24 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData())
         {
-            ttEnumStr enumFlags(pChild->GetData(), CH_SPACE);
-            ttCStr     cszCFlags;
-            if (m_pcSrcFiles->GetOption(OPT_CFLAGS_CMN))
-                cszCFlags = m_pcSrcFiles->GetOption(OPT_CFLAGS_CMN);
-            for (auto iter : enumFlags)
+            ttlib::enumstr enumFlags(pChild->GetData(), ' ');
+            ttlib::cstr CFlags;
+            if (m_pcSrcFiles->hasOptValue(OPT::CFLAGS_CMN))
+                CFlags = m_pcSrcFiles->getOptValue(OPT::CFLAGS_CMN);
+            for (auto iter: enumFlags)
             {
                 if (ttIsSameSubStrI(iter.c_str() + 1, "std:"))
                 {
-                    if (cszCFlags.IsEmpty() || !tt::contains(cszCFlags.c_str(), iter, false))
+                    if (!CFlags.contains(iter, tt::CASE::either))
                     {
-                        if (cszCFlags.IsNonEmpty())
-                            cszCFlags += " ";
-                        cszCFlags += iter.c_str();
+                        if (!CFlags.empty())
+                            CFlags += " ";
+                        CFlags += iter;
                     }
                 }
             }
-            if (cszCFlags.IsNonEmpty())
-                m_pcSrcFiles->UpdateOption(OPT_CFLAGS_CMN, (char*) cszCFlags);
+            if (!CFlags.empty())
+                m_pcSrcFiles->setOptValue(OPT::CFLAGS_CMN, CFlags);
         }
     }
     if (!bDebug)
@@ -284,11 +284,14 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
         {
             ttCXMLBranch* pChild = pFlags->GetChildAt(0);
             if (pChild->GetData())
-                m_pcSrcFiles->UpdateOption(OPT_OPTIMIZE,
-                                           ttIsSameSubStrI(pChild->GetData(), "size") ? "space" : "speed");
+            {
+                m_pcSrcFiles->setOptValue(OPT::OPTIMIZE,
+                                          ttlib::issameas(pChild->GetData(), "size" ? "space" : "speed",
+                                          tt::CASE::either));
+            }
         }
     }
-    if (!m_pcSrcFiles->GetOption(OPT_INC_DIRS))
+    if (!m_pcSrcFiles->hasOptValue(OPT::INC_DIRS))
     {
         pFlags = pSection->FindFirstElement("AdditionalIncludeDirectories");
         if (pFlags && pFlags->GetChildrenCount() > 0)
@@ -307,31 +310,32 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
                 // Paths will be relative to the location of the script file. We need to make them
                 // relative to .srcfiles.yaml.
 
-                ttEnumStr enumPaths(cszFlags.c_str());
-                ttCStr     cszInc, cszTmp;
-                for (auto iter : enumPaths)
+                ttlib::enumstr enumPaths(cszFlags.c_str());
+                ttlib::cstr Include;
+                for (auto& iter: enumPaths)
                 {
+                    ttlib::cstr cszTmp;
                     ConvertScriptDir(iter.c_str(), cszTmp);
-                    if (cszInc.IsNonEmpty())
-                        cszInc += ";";
-                    cszInc += cszTmp;
+                    if (!Include.empty())
+                        Include += ";";
+                    Include += cszTmp;
                 }
 
-                m_pcSrcFiles->UpdateOption(OPT_INC_DIRS, (char*) cszInc);
+                m_pcSrcFiles->setOptValue(OPT::INC_DIRS, Include);
             }
         }
     }
-    if (!m_pcSrcFiles->GetOption(OPT_PCH))
+    if (!m_pcSrcFiles->hasOptValue(OPT::PCH))
     {
         pFlags = pSection->FindFirstElement("PrecompiledHeaderFile");
         if (pFlags && pFlags->GetChildrenCount() > 0)
         {
             ttCXMLBranch* pChild = pFlags->GetChildAt(0);
             if (pChild->GetData())
-                m_pcSrcFiles->UpdateOption(OPT_PCH, pChild->GetData());
+                m_pcSrcFiles->setOptValue(OPT::PCH, pChild->GetData());
         }
     }
-    if (!m_pcSrcFiles->GetOption(OPT_WARN_LEVEL))
+    if (!m_pcSrcFiles->hasOptValue(OPT::WARN))
     {
         pFlags = pSection->FindFirstElement("WarningLevel");
         if (pFlags && pFlags->GetChildrenCount() > 0)
@@ -342,19 +346,24 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
                 const char* pszTmp = pChild->GetData();
                 while (*pszTmp && !ttIsDigit(*pszTmp))
                     ++pszTmp;
-                m_pcSrcFiles->UpdateOption(OPT_WARN_LEVEL, pszTmp);
+                m_pcSrcFiles->setOptValue(OPT::WARN, pszTmp);
             }
         }
     }
+
+#if 0
+// REVIEW: [KeyWorks - 03-06-2020] Calling convention is only useful for 32-bit apps.
     pFlags = pSection->FindFirstElement("CallingConvention");
     if (pFlags && pFlags->GetChildrenCount() > 0)
     {
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData() && ttStrStrI(pChild->GetData(), "stdcall"))
         {
-            m_pcSrcFiles->UpdateOption(OPT_STDCALL, true);
+            m_pcSrcFiles->setOptValue(OPT_STDCALL, true);
         }
     }
+#endif
+
     pFlags = pSection->FindFirstElement("PreprocessorDefinitions");
     if (pFlags && pFlags->GetChildrenCount() > 0)
     {
@@ -368,7 +377,7 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
             cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
             while (cszFlags.ReplaceStr(";", " -D"))
                 ;
-            m_pcSrcFiles->UpdateOption(bDebug ? OPT_CFLAGS_DBG : OPT_CFLAGS_REL, (char*) cszFlags);
+            m_pcSrcFiles->setOptValue(bDebug ? OPT::CFLAGS_DBG : OPT::CFLAGS_REL, (char*) cszFlags);
         }
     }
 }
@@ -381,9 +390,9 @@ void CVcxRead::ProcessLink(ttCXMLBranch* pSection, bool bDebug)
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData())
         {
-            ttEnumStr enumLibs(pChild->GetData());
-            ttCStr     cszCurLibs;
-            for (auto iter : enumLibs)
+            ttlib::enumstr enumLibs(pChild->GetData());
+            ttCStr cszCurLibs;
+            for (auto iter: enumLibs)
             {
                 // We only add libraries that are relative to our project
                 if (tt::issamesubstr(iter, ".."))
@@ -394,12 +403,12 @@ void CVcxRead::ProcessLink(ttCXMLBranch* pSection, bool bDebug)
                 }
             }
             if (cszCurLibs.IsNonEmpty())
-                m_pcSrcFiles->UpdateOption(bDebug ? OPT_LIBS_DBG : OPT_LIBS_REL, (char*) cszCurLibs);
+                m_pcSrcFiles->setOptValue(bDebug ? OPT::LIBS_DBG : OPT::LIBS_REL, (char*) cszCurLibs);
         }
     }
 }
 
-void CVcxRead::ConvertScriptDir(const char* pszDir, ttCStr& cszResult)
+void CVcxRead::ConvertScriptDir(const char* pszDir, ttlib::cstr& cszResult)
 {
     if (pszDir[1] == ':')
     {
@@ -408,28 +417,14 @@ void CVcxRead::ConvertScriptDir(const char* pszDir, ttCStr& cszResult)
         return;
     }
 
-    ttCStr cszScript(*m_pcszConvertScript);
-    char*  pszFilePortion = ttFindFilePortion(cszScript);
-    assert(pszFilePortion);
-    *pszFilePortion = 0;
-    cszScript.AppendFileName(pszDir);
+    cszResult.assign(m_pcszConvertScript->c_str());
+    cszResult.remove_filename();
+    cszResult.append_filename(pszDir);
 
-    cszScript.FullPathName();
+    cszResult.make_absolute();
 
-    ttCStr cszCWD;
-    cszCWD.GetCWD();
-
-    // ttConvertToRelative is expecting a filename, so let's make one up.
-
-    cszScript.AppendFileName("pch.h");
-    ttConvertToRelative(cszCWD, cszScript, cszResult);
-    pszFilePortion = ttFindFilePortion(cszResult);
-    if (pszFilePortion)
-    {
-        if (pszFilePortion > cszResult.GetPtr() && pszFilePortion[-1] == '/')
-            --pszFilePortion;  // backup so that we remove the trailing slash
-        *pszFilePortion = 0;
-    }
+    ttlib::cstr cwd;
+    cszResult.make_relative(cwd.assignCwd());
 }
 
 // This function first converts the file relative to the location of the build script, and then relative to the
@@ -467,7 +462,7 @@ char* CVcxRead::MakeSrcRelative(const char* pszFile)
 
 static bool CreateGuid(ttCStr& cszGuid)
 {
-    UUID       uuid;
+    UUID uuid;
     RPC_STATUS ret_val = ::UuidCreate(&uuid);
 
     if (ret_val == RPC_S_OK)
@@ -500,7 +495,7 @@ bool CVcxWrite::CreateBuildFile()
         return false;
     }
 
-    ttCStr cszProjVC(GetProjectName());
+    ttCStr cszProjVC(GetProjectName().c_str());
     cszProjVC.ChangeExtension(".vcxproj");
     if (!ttFileExists(cszProjVC))
     {
@@ -508,22 +503,22 @@ bool CVcxWrite::CreateBuildFile()
         kf.ReadResource(IDR_VCXPROJ_MASTER);
         while (kf.ReplaceStr("%guid%", cszGuid))
             ;
-        while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug()))
+        while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug().c_str()))
             ;
-        while (kf.ReplaceStr("%%ReleaseExe%", GetTargetRelease()))
+        while (kf.ReplaceStr("%%ReleaseExe%", GetTargetRelease().c_str()))
             ;
-        while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug()))
+        while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug().c_str()))
             ;
-        while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease()))
+        while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease().c_str()))
             ;
 
-        for (auto file : m_lstSrcFiles)
+        for (auto& file: m_lstSrcFiles)
         {
             auto ext = file.extension();
             if (ext.empty() || std::tolower(ext[1] != 'c'))
                 continue;
             kf.WriteEol(
-                wxString::Format(" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>", file.c_str()));
+                (" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>" + file).c_str());
         }
 
         ttCStr cszSrcFile;

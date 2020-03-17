@@ -82,7 +82,7 @@ void CParseHHP::ParseHhpFile(std::string_view filename)
 
         ttlib::cstr incName;
 
-        if (ttlib::issameprefix(line, "#include", ttlib::CASE::either))
+        if (ttlib::issameprefix(line, "#include", tt::CASE::either))
         {
             line = ttlib::stepover(line);
             if (line.empty())
@@ -109,11 +109,11 @@ void CParseHHP::ParseHhpFile(std::string_view filename)
         if (line[0] == '[')  // sections are placed in brackets
         {
             m_section = SECTION_UNKNOWN;
-            if (ttlib::issameprefix(line, "[ALIAS", ttlib::CASE::either))
+            if (ttlib::issameprefix(line, "[ALIAS", tt::CASE::either))
                 m_section = SECTION_ALIAS;
-            else if (ttlib::issameprefix(line, "[FILE", ttlib::CASE::either))
+            else if (ttlib::issameprefix(line, "[FILE", tt::CASE::either))
                 m_section = SECTION_FILES;
-            else if (ttlib::issameprefix(line, "[CURRENT", ttlib::CASE::either))
+            else if (ttlib::issameprefix(line, "[CURRENT", tt::CASE::either))
                 m_section = SECTION_OPTIONS;
             continue;
         }
@@ -135,7 +135,7 @@ void CParseHHP::ParseHhpFile(std::string_view filename)
                 if (aOptions[pos])
                 {
                     auto posFile = line.find('=');
-                    if (posFile != ttlib::npos)
+                    if (posFile != tt::npos)
                     {
                         incName = ttlib::findnonspace(line.substr(posFile + 1));
                         if (!incName.empty())
@@ -145,14 +145,14 @@ void CParseHHP::ParseHhpFile(std::string_view filename)
                             // authoring systems don't use them -- so remove any comment just to be sure.
 
                             incName.eraseFrom(';');
-                            AddDependency(filename.c_str(), incName.c_str());
+                            AddDependency(filename, incName);
                         }
                     }
                 }
                 else if (ttlib::issameprefix(line, "Compiled file"))
                 {
                     auto posFile = line.find('=');
-                    if (posFile != ttlib::npos)
+                    if (posFile != tt::npos)
                     {
                         m_chmFilename = ttlib::findnonspace(line.substr(posFile + 1));
                         m_chmFilename.eraseFrom(';');
@@ -164,7 +164,7 @@ void CParseHHP::ParseHhpFile(std::string_view filename)
             case SECTION_ALIAS:
             {
                 auto posFile = line.find('=');
-                if (posFile != ttlib::npos)
+                if (posFile != tt::npos)
                 {
                     incName = ttlib::findnonspace(line.substr(posFile + 1));
                     if (!incName.empty())

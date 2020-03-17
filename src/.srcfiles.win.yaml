@@ -32,7 +32,7 @@ Files:
     winsrc/vcxproj.cpp         # Creates a Visual Studio project file
     winsrc/vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
     winsrc/vscode.cpp          # Creates/updates .vscode files
-    winsrc/writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
+    # winsrc/writesrcfiles.cpp   # CWriteSrcFiles class for writing .srcfiles
     winsrc/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
 
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
@@ -59,6 +59,7 @@ Files:
     dryrun.cpp          # CDryRun class for testing
     ninja.cpp           # CNinja for creating .ninja scripts
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
-    parsehhp.cpp        # CParseHHP class for parsing a .hhp file
+    # parsehhp.cpp        # CParseHHP class for parsing a .hhp file
     rcdep.cpp           # Contains functions for parsing RC dependencies
     verninja.cpp        # CVerMakeNinja class
+    writesrc.cpp        # Writes a new or update srcfiles.yaml file

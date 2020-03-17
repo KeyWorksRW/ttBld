@@ -46,7 +46,7 @@ void AddFiles(const ttlib::cstrVector& lstFiles)
     }
 
     auto pos = file.FindLineContaining("Files:");
-    if (pos == ttlib::npos)
+    if (pos == tt::npos)
     {
         file.emplace_back("Files:");
         for (auto& iter: lstFiles)

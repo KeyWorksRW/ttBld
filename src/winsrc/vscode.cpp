@@ -11,14 +11,14 @@
 #include <ttTR.h>        // Function for translating strings
 #include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 
-#include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
 #include <ttlist.h>      // ttCList
 
 #include "csrcfiles.h"  // CSrcFiles
+#include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 #include "funcs.h"      // List of function declarations
 #include "resource.h"
-#include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 
 #if 0
 static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
@@ -254,10 +254,10 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         {
             kfOut.WriteEol(kf);
             ttCList lstDefines;
-            if (cSrcFiles.GetOption(OPT_CFLAGS_CMN))
-                ParseDefines(lstDefines, cSrcFiles.GetOption(OPT_CFLAGS_CMN));
-            if (cSrcFiles.GetOption(OPT_CFLAGS_DBG))
-                ParseDefines(lstDefines, cSrcFiles.GetOption(OPT_CFLAGS_DBG));
+            if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
+                ParseDefines(lstDefines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN).c_str());
+            if (cSrcFiles.hasOptValue(OPT::CFLAGS_DBG))
+                ParseDefines(lstDefines, cSrcFiles.getOptValue(OPT::CFLAGS_DBG).c_str());
             lstDefines.Sort();
             for (size_t pos = 0; lstDefines.InRange(pos); ++pos)
                 kfOut.printf("                %kq,\n", lstDefines[pos]);
@@ -282,10 +282,10 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     break;
             }
 
-            if (cSrcFiles.GetOption(OPT_INC_DIRS))
+            if (cSrcFiles.hasOptValue(OPT::INC_DIRS))
             {
-                ttEnumStr enumInc(cSrcFiles.getOptValue(Opt::INC_DIRS));
-                for (auto iter : enumInc)
+                ttlib::enumstr enumInc(cSrcFiles.getOptValue(OPT::INC_DIRS));
+                for (auto iter: enumInc)
                 {
                     ttCStr cszInclude(iter.c_str());
                     cszInclude.FullPathName();
@@ -336,7 +336,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     kf.ReadStrFile(txtLaunch);
 
-    kf.ReplaceStr("%proj%", cSrcFiles.GetProjectName());
+    kf.ReplaceStr("%proj%", cSrcFiles.GetProjectName().c_str());
 
     ttCStr cszTarget;
 
@@ -360,11 +360,11 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
         kf.ReplaceStr("%bld%", "");
 #endif  // defined(_WIN32)
 
-    kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug());
+    kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug().c_str());
 
     // REVIEW: [randalphwa - 7/19/2019] Will it work to have a non-existant default.natvis file or will VS Code
     // complain? An alternative would be to insert/remove the entire line
-    ttCStr cszPath(cSrcFiles.GetOption(OPT_NATVIS) ? cSrcFiles.GetOption(OPT_NATVIS) : "default.natvis");
+    ttCStr cszPath(cSrcFiles.hasOptValue(OPT::NATVIS) ? cSrcFiles.hasOptValue(OPT::NATVIS) : "default.natvis");
     ttBackslashToForwardslash(cszPath);
     kf.ReplaceStr("%natvis%", cszPath);
 
@@ -390,12 +390,15 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     ttCStr cszMakeFileOption("");
     {
-        char* pszFilePortion = ttFindFilePortion(cSrcFiles.GetSrcFiles());
-        if (pszFilePortion != cSrcFiles.GetSrcFiles())
+        auto filename = cSrcFiles.GetSrcFilesName().filename();
+
+        if (!cSrcFiles.GetSrcFilesName().issameas(filename))
         {
+            ttlib::cstr dir(cSrcFiles.GetSrcFilesName());
+            dir.remove_filename();
             cszMakeFileOption += "-f ";
-            cszMakeFileOption += cSrcFiles.GetSrcFiles();
-            pszFilePortion = ttFindFilePortion(cszMakeFileOption);
+            cszMakeFileOption += dir.c_str();
+            auto pszFilePortion = ttFindFilePortion(cszMakeFileOption);
             *pszFilePortion = 0;
             cszMakeFileOption.AppendFileName("makefile");
         }
@@ -437,7 +440,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
                 // Build MSVC release
 
-                cszLabel.printf("Build %s (release) using MSVC", ttFindFilePortion(cSrcFiles.GetTargetRelease()));
+                cszLabel.printf("Build %s (release) using MSVC",
+                                ttFindFilePortion(cSrcFiles.GetTargetRelease().c_str()));
 
                 cszMakeCommand.printf("nmake.exe -nologo release %s", (char*) cszMakeFileOption);
                 AddMsvcTask(kfOut, "Build Release MSVC", txtNormalGroup, cszMakeCommand);
@@ -531,7 +535,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 {
-    ttTextFile file;
+    ttlib::textfile file;
     if (!file.ReadFile(".vscode/c_cpp_properties.json"))
     {
         std::stringstream msg;
@@ -542,12 +546,12 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // Gather all of our include directories into a list
 
-    ttStrVector Includes;
+    ttlib::cstrVector Includes;
 
-    if (!cSrcFiles.getOptValue(Opt::INC_DIRS).empty())
+    if (!cSrcFiles.getOptValue(OPT::INC_DIRS).empty())
     {
-        ttEnumStr IncludeDirs(cSrcFiles.getOptValue(Opt::INC_DIRS));
-        for (auto iter : IncludeDirs)
+        ttlib::enumstr IncludeDirs(cSrcFiles.getOptValue(OPT::INC_DIRS));
+        for (auto& iter: IncludeDirs)
         {
             // If it's not already a relative path, make it relative
             if (iter.at(0) != '.')
@@ -581,13 +585,13 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // Gather all the common and debug defines specified in CFlags: and CFlagsD:
 
-    ttStrVector Defines;
+    ttlib::cstrVector Defines;
 
     ttCList lstDefines;
-    if (cSrcFiles.GetOption(OPT_CFLAGS_CMN))
-        ParseDefines(lstDefines, cSrcFiles.GetOption(OPT_CFLAGS_CMN));
-    if (cSrcFiles.GetOption(OPT_CFLAGS_DBG))
-        ParseDefines(lstDefines, cSrcFiles.GetOption(OPT_CFLAGS_DBG));
+    if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
+        ParseDefines(lstDefines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN).c_str());
+    if (cSrcFiles.hasOptValue(OPT::CFLAGS_DBG))
+        ParseDefines(lstDefines, cSrcFiles.getOptValue(OPT::CFLAGS_DBG).c_str());
 
     // Also add environment flags
 
@@ -630,7 +634,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 auto start = file[line].findnonspace();
                 if (start == tt::npos)
                     continue;
-                ttString tmp;
+                ttlib::cstr tmp;
                 tmp.ExtractSubString(file[line], start);
                 Defines.append(tmp);  // Only gets added if it doesn't already exist
                 file.erase(file.begin() + line, file.begin() + line + 1);
@@ -669,7 +673,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                 auto start = file[line].findnonspace();
                 if (start == tt::npos)
                     continue;
-                ttString path;
+                ttlib::cstr path;
                 path.ExtractSubString(file[line], start);
                 if (!tt::contains(path, "${workspaceRoot}") && !tt::contains(path, "${default}"))
                 {
@@ -708,7 +712,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
                     if (!tt::contains(Includes[defpos], "${workspaceRoot}") &&
                         !tt::contains(Includes[defpos], "${default}") && !tt::contains(Includes[defpos], ":"))
                     {
-                        ttString tmp(Includes[defpos]);
+                        ttlib::cstr tmp(Includes[defpos]);
                         Includes[defpos] = "${workspaceRoot}/";
                         Includes[defpos] += tmp;
                     }
@@ -729,7 +733,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
             continue;
         }
     }
-    ttViewFile orgfile;
+    ttlib::viewfile orgfile;
     if (!orgfile.ReadFile(".vscode/c_cpp_properties.json"))
     {
         std::stringstream msg;
@@ -745,7 +749,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     {
         for (line = 0; line < file.size(); ++line)
         {
-            if (!file[line].issamestr(orgfile[line]))
+            if (!file[line].issameas(orgfile[line]))
             {
                 Modified = true;
                 break;

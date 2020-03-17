@@ -79,12 +79,12 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         // name
         if (ttlib::isalpha(line[0]))
         {
-            if (ttlib::issameprefix(line, "Files:", ttlib::CASE::either) ||
-                ttlib::issameprefix(line, "[FILES]", ttlib::CASE::either))
+            if (ttlib::issameprefix(line, "Files:", tt::CASE::either) ||
+                ttlib::issameprefix(line, "[FILES]", tt::CASE::either))
             {
                 section = SECTION_FILES;
             }
-            else if (ttlib::issameprefix(line, "Options:", ttlib::CASE::either) ||
+            else if (ttlib::issameprefix(line, "Options:", tt::CASE::either) ||
                      ttlib::issameprefix(line, "[OPTIONS]"))
             {
                 section = SECTION_OPTIONS;
@@ -122,7 +122,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
     {
         ttlib::cstr projectname;
         projectname.assignCwd();
-        if (ttlib::issameprefix(projectname.filename(), "src", ttlib::CASE::either))
+        if (ttlib::issameprefix(projectname.filename(), "src", tt::CASE::either))
         {
             projectname.replace_filename("");
             // remove trailing slash
@@ -240,7 +240,7 @@ void CSrcFiles::AddCompilerFlag(std::string_view flag)
 
 void CSrcFiles::ProcessFile(std::string_view line)
 {
-    if (ttlib::issameprefix(line, ".include", ttlib::CASE::either))
+    if (ttlib::issameprefix(line, ".include", tt::CASE::either))
     {
         ttlib::cstr filename = ttlib::stepover(line);
         if (filename[0] == '\"')
@@ -258,7 +258,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
     ttlib::cstr filename = line;
     filename.eraseFrom('#');
 
-    if (filename.find('*') != ttlib::npos || filename.find('?') != ttlib::npos)
+    if (filename.find('*') != tt::npos || filename.find('?') != tt::npos)
     {
         AddSourcePattern(filename);
         return;
@@ -454,7 +454,7 @@ const std::string& CSrcFiles::GetTargetDir()
 
         ttlib::cstr cwd;
         cwd.assignCwd();
-        bool isSrcDir = ttlib::issameas(cwd.filename(), "src", ttlib::CASE::either) ? true : false;
+        bool isSrcDir = ttlib::issameas(cwd.filename(), "src", tt::CASE::either) ? true : false;
         if (!isSrcDir)
         {
             cwd.append_filename(IsExeTypeLib() ? "../lib" : "../bin");
@@ -488,7 +488,7 @@ const std::string& CSrcFiles::GetTargetDir()
 
         ttlib::cstr cwd;
         cwd.assignCwd();
-        bool isSrcDir = ttlib::issameas(cwd.filename(), "src", ttlib::CASE::either) ? true : false;
+        bool isSrcDir = ttlib::issameas(cwd.filename(), "src", tt::CASE::either) ? true : false;
         if (!isSrcDir)
         {
             cwd.append_filename(IsExeTypeLib() ? "../lib" : "../bin");
@@ -536,7 +536,7 @@ const ttlib::cstr& CSrcFiles::GetTargetRelease()
     if (IsExeTypeLib())
         m_relTarget += ".lib";
     else if (IsExeTypeDll())
-        m_relTarget += (getOptValue(OPT::EXE_TYPE).contains("ocx", ttlib::CASE::either) ? ".ocx" : ".dll");
+        m_relTarget += (getOptValue(OPT::EXE_TYPE).contains("ocx", tt::CASE::either) ? ".ocx" : ".dll");
     else
         m_relTarget += ".exe";
     return m_relTarget;
@@ -557,7 +557,7 @@ const ttlib::cstr& CSrcFiles::GetTargetDebug()
     if (IsExeTypeLib())
         m_dbgTarget += ".lib";
     else if (IsExeTypeDll())
-        m_dbgTarget += (getOptValue(OPT::EXE_TYPE).contains("ocx", ttlib::CASE::either) ? ".ocx" : ".dll");
+        m_dbgTarget += (getOptValue(OPT::EXE_TYPE).contains("ocx", tt::CASE::either) ? ".ocx" : ".dll");
     else
         m_dbgTarget += ".exe";
     return m_dbgTarget;

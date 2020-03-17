@@ -19,6 +19,21 @@
 
 #include "options.h"  // OPT -- Structures and enum for storing/retrieving options in a .srcfiles.yaml file
 
+namespace bld
+{
+    enum RESULT : size_t
+    {
+        success,
+
+        nochanges,     // nothing changed, so not written
+        write_failed,  // unable to write to the file
+        read_failed,   // unable to read the original file (but it does exist)
+
+        failure,        // internal failure
+
+    };
+} // namespace bld
+
 constexpr const char* txtSrcFilesFileName { ".srcfiles.yaml" };
 constexpr const char* txtDefBuildDir { "bld" };
 
@@ -37,13 +52,13 @@ public:
 
     bool isOptValue(size_t option, std::string_view value) const
     {
-        return (getOptValue(option).issameas(value, ttlib::CASE::either));
+        return (getOptValue(option).issameas(value, tt::CASE::either));
     }
 
     bool isOptTrue(size_t index) const
     {
         assert(index < OPT::LAST);
-        return ttlib::issameas(m_Options[index].value, "true", ttlib::CASE::either);
+        return ttlib::issameas(m_Options[index].value, "true", tt::CASE::either);
     }
 
     bool hasOptValue(size_t option) const noexcept { return (!getOptValue(option).empty()); }

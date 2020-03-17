@@ -14,16 +14,13 @@
 
 #include "dlgoptions.h"
 
-bool ChangeOptions(std::string& ProjectFile, bool bDryRun)
+bool ChangeOptions(std::string& ProjectFile)
 {
     CTabOptions dlg;
-    if (bDryRun)
-        dlg.EnableDryRun();
-
 
     HWND hwndDlg = dlg.DoModeless(NULL);
 
-    // We aren't a window app, so we need to run a message loop here to handle the modeless dialog box
+    // ttBld isn't a window app, so run a message loop here to handle the modeless dialog box
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
@@ -40,16 +37,16 @@ bool ChangeOptions(std::string& ProjectFile, bool bDryRun)
     if (result == IDOK)
     {
         dlg.SaveChanges();
-        ProjectFile = dlg.GetSrcFiles();
+        ProjectFile = dlg.GetSrcFilesName();
         return true;
     }
     else
         return false;
 }
 
-CTabOptions::CTabOptions(const char* pszNinjaDir)
+CTabOptions::CTabOptions()
     : ttCDlg(IDDLG_OPTIONS)
-    , CWriteSrcFiles(pszNinjaDir)
+    , CWriteSrcFiles()
 {
     m_tabGeneral.SetParentClass(this);
     m_tabCompiler.SetParentClass(this);
@@ -66,21 +63,21 @@ CTabOptions::CTabOptions(const char* pszNinjaDir)
 
     ReadFile();  // read in any existing .srcfiles
 
-    if (ttIsEmpty(GetPchHeader()))
+    if (!hasOptValue(OPT::PCH))
     {
         if (ttFileExists("stdafx.h"))
-            UpdateOption(OPT_PCH, "stdafx.h");
+            setOptValue(OPT::PCH, "stdafx.h");
         else if (ttFileExists("pch.h"))
-            UpdateOption(OPT_PCH, "pch.h");
+            setOptValue(OPT::PCH, "pch.h");
         else if (ttFileExists("precomp.h"))
-            UpdateOption(OPT_PCH, "precomp.h");
+            setOptValue(OPT::PCH, "precomp.h");
 
         else if (ttFileExists("pch.hh"))
-            UpdateOption(OPT_PCH, "pch.hh");
+            setOptValue(OPT::PCH, "pch.hh");
         else if (ttFileExists("pch.hpp"))
-            UpdateOption(OPT_PCH, "pch.hpp");
+            setOptValue(OPT::PCH, "pch.hpp");
         else if (ttFileExists("pch.hxx"))
-            UpdateOption(OPT_PCH, "pch.hxx");
+            setOptValue(OPT::PCH, "pch.hxx");
     }
 }
 
@@ -154,15 +151,15 @@ void CTabOptions::OnCancel(void)
 
 void CTabOptions::SaveChanges()
 {
-    if (ttFileExists(GetSrcFiles()))
+    if (GetSrcFilesName().fileExists())
     {
-        if (WriteUpdates(GetSrcFiles()) == CWriteSrcFiles::RSLT_SUCCESS)
-            printf(_tt("%s Options: section updated.\n"), GetSrcFiles());
+        if (UpdateOptions(GetSrcFilesName()) == bld::success)
+            std::cout << GetSrcFilesName() + _tt("%s Options: section updated.") << '\n';
     }
     else
     {
-        if (WriteUpdates() == CWriteSrcFiles::RSLT_SUCCESS)
-            printf(_tt("%s created.\n"), GetSrcFiles());
+        if (UpdateOptions() == bld::success)
+            std::cout << GetSrcFilesName() + _tt("%s created.") << '\n';
     }
 }
 

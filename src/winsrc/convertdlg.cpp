@@ -21,7 +21,7 @@
 #include <direct.h>  // Functions for directory handling and creation
 
 #include <ttdirdlg.h>    // ttCDirDlg
-#include <ttenumstr.h>   // ttEnumStr, ttEnumView -- Enumerate through substrings in a string
+#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfiledlg.h>   // ttCFileDlg
 #include <ttfindfile.h>  // ttCFindFile
 
@@ -255,7 +255,7 @@ void CConvertDlg::AddCodeLiteFiles(ttCXMLBranch* pParent)
         if (ttIsSameStrI(pFile->GetName(), "File"))
         {
             if (isValidSrcFile(pFile->GetAttribute("Name")))
-                m_cSrcFiles.GetSrcFilesList().addfilename(MakeSrcRelative(pFile->GetAttribute("Name")));
+                m_cSrcFiles.GetSrcFileList().addfilename(MakeSrcRelative(pFile->GetAttribute("Name")));
         }
         // CodeLite nests resources in a sub <VirtualDirectory> tag
         else if (ttIsSameStrI(pFile->GetName(), "VirtualDirectory"))
@@ -329,13 +329,13 @@ bool CConvertDlg::doConversion(const char* pszInFile)
     // If there is no conversion script file, then convert using files in the current directory.
     if (m_cszConvertScript.IsEmpty())
     {
-        if (ttIsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT)))
+        if (!m_cSrcFiles.hasOptValue(OPT::PROJECT))
         {
             ttCStr cszProject(m_cszOutSrcFiles);
             char*  pszFilePortion = ttFindFilePortion(cszProject);
             if (pszFilePortion)
                 *pszFilePortion = 0;
-            m_cSrcFiles.UpdateOption(OPT_PROJECT, ttFindFilePortion(cszProject));
+            m_cSrcFiles.setOptValue(OPT::PROJECT, ttFindFilePortion(cszProject));
         }
 
 #if defined(_WIN32)
@@ -344,7 +344,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
         m_cSrcFiles.AddSourcePattern("*.cpp;*.cc;*.cxx");
 #endif
 
-        if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles))
+        if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles.c_str()) != bld::success)
         {
             ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
             CancelEnd();
@@ -390,16 +390,16 @@ bool CConvertDlg::doConversion(const char* pszInFile)
 
             cszHdr.printf("# Converted from %s", (char*) cszRelative);
 
-            if (ttIsEmpty(m_cSrcFiles.GetOption(OPT_PROJECT)))
+            if (!m_cSrcFiles.hasOptValue(OPT::PROJECT))
             {
                 ttCStr cszProject(m_cszOutSrcFiles);
                 char*  pszFilePortion = ttFindFilePortion(cszProject);
                 if (pszFilePortion)
                     *pszFilePortion = 0;
-                m_cSrcFiles.UpdateOption(OPT_PROJECT, ttFindFilePortion(cszProject));
+                m_cSrcFiles.setOptValue(OPT::PROJECT, ttFindFilePortion(cszProject));
             }
 
-            if (!m_cSrcFiles.WriteNew(m_cszOutSrcFiles, cszHdr))
+            if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles.c_str(), cszHdr.c_str()) != bld::success)
             {
                 ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING,
                             (char*) m_cszOutSrcFiles);

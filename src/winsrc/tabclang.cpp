@@ -12,31 +12,36 @@
 
 void CTabCLang::OnBegin(void)
 {
-    if (m_pOpts->GetOption(OPT_CLANG_CMN))
-        SetControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->GetOption(OPT_CLANG_CMN));
-    if (m_pOpts->GetOption(OPT_CLANG_REL))
-        SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_CLANG_REL));
-    if (m_pOpts->GetOption(OPT_CLANG_DBG))
-        SetControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->GetOption(OPT_CLANG_DBG));
-    if (m_pOpts->GetBoolOption(OPT_MS_LINKER))
-        SetCheck(DLG_ID(IDCHECK_MSLINKER));
-    if (m_pOpts->GetBoolOption(OPT_MS_RC))
-        SetCheck(DLG_ID(IDCHECK_MSRC));
+    CHECK_DLG_ID(IDCHECK_MSLINKER);
+    CHECK_DLG_ID(IDCHECK_MSRC);
+    CHECK_DLG_ID(IDEDIT_COMMON);
+    CHECK_DLG_ID(IDEDIT_DEBUG);
+    CHECK_DLG_ID(IDEDIT_RELEASE);
+
+    if (m_pOpts->hasOptValue(OPT::CLANG_CMN))
+        setControlText(IDEDIT_COMMON, m_pOpts->getOptValue(OPT::CLANG_CMN));
+    if (m_pOpts->hasOptValue(OPT::CLANG_REL))
+        setControlText(IDEDIT_RELEASE, m_pOpts->getOptValue(OPT::CLANG_REL));
+    if (m_pOpts->hasOptValue(OPT::CLANG_DBG))
+        setControlText(IDEDIT_DEBUG, m_pOpts->getOptValue(OPT::CLANG_DBG));
+    if (m_pOpts->isOptTrue(OPT::MS_LINKER))
+        SetCheck(IDCHECK_MSLINKER);
+    if (m_pOpts->isOptTrue(OPT::MS_RC))
+        SetCheck(IDCHECK_MSRC);
 }
 
 void CTabCLang::OnOK(void)
 {
-    ttCStr csz;
+    ttlib::cstr csz;
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
-    m_pOpts->UpdateOption(OPT_CLANG_CMN, (char*) csz);
+    csz.GetWndText(GetDlgItem(IDEDIT_COMMON));
+    m_pOpts->setOptValue(OPT::CLANG_CMN, csz);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
-    m_pOpts->UpdateOption(OPT_CLANG_REL, (char*) csz);
+    csz.GetWndText(GetDlgItem(IDEDIT_RELEASE));
+    m_pOpts->setOptValue(OPT::CLANG_REL, csz);
 
-    csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
-    m_pOpts->UpdateOption(OPT_CLANG_DBG, (char*) csz);
+    csz.GetWndText(GetDlgItem(IDEDIT_DEBUG));
+    m_pOpts->setOptValue(OPT::CLANG_DBG, csz);
 
-    m_pOpts->UpdateOption(OPT_MS_LINKER, GetCheck(IDCHECK_MSLINKER));
-    m_pOpts->UpdateOption(OPT_MS_RC, GetCheck(IDCHECK_MSRC));
+    m_pOpts->setOptValue(OPT::MS_LINKER, GetCheck(IDCHECK_MSLINKER));
 }

@@ -18,7 +18,7 @@ void CTabCompiler::OnBegin(void)
     EnableShadeBtns();
     SetCheck(DLG_ID(m_pOpts->IsOptimizeSpeed() ? IDC_RADIO_SPEED : IDC_RADIO_SPACE));
 
-    ptrdiff_t warnLevel = m_pOpts->GetOption(OPT_WARN_LEVEL) ? ttAtoi(m_pOpts->GetOption(OPT_WARN_LEVEL)) : 4;
+    auto warnLevel = ttlib::atoi(m_pOpts->getOptValue(OPT::WARN));
 
     switch (warnLevel)
     {
@@ -37,25 +37,25 @@ void CTabCompiler::OnBegin(void)
             break;
     }
 
-    if (m_pOpts->GetPchHeader())
-        SetControlText(DLG_ID(IDEDIT_PCH), m_pOpts->GetPchHeader());
-    if (m_pOpts->GetPchCpp())
-        SetControlText(DLG_ID(IDEDIT_PCH_CPP), m_pOpts->GetPchCpp());
-    if (m_pOpts->GetOption(OPT_INC_DIRS))
-        SetControlText(DLG_ID(IDEDIT_INCDIRS), m_pOpts->GetOption(OPT_INC_DIRS));
+    if (m_pOpts->hasOptValue(OPT::PCH))
+        setControlText(DLG_ID(IDEDIT_PCH), m_pOpts->getOptValue(OPT::PCH));
+    if (m_pOpts->hasOptValue(OPT::PCH_CPP))
+        setControlText(DLG_ID(IDEDIT_PCH_CPP), m_pOpts->getOptValue(OPT::PCH_CPP));
+    if (m_pOpts->hasOptValue(OPT::INC_DIRS))
+        setControlText(DLG_ID(IDEDIT_INCDIRS), m_pOpts->getOptValue(OPT::INC_DIRS));
 
-    if (m_pOpts->GetOption(OPT_CFLAGS_CMN))
+    if (m_pOpts->hasOptValue(OPT::CFLAGS_CMN))
     {
-        SetControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->GetOption(OPT_CFLAGS_CMN));
-        if (ttStrStrI(m_pOpts->GetOption(OPT_CFLAGS_CMN), "-Zc:__cplusplus"))
+        setControlText(DLG_ID(IDEDIT_COMMON), m_pOpts->getOptValue(OPT::CFLAGS_CMN));
+        if (m_pOpts->getOptValue(OPT::CFLAGS_CMN).contains("-Zc:__cplusplus"))
             DisableControl(IDBTN_CPLUSPLUS);
-        if (ttStrStrI(m_pOpts->GetOption(OPT_CFLAGS_CMN), "-std:c"))
+        if (m_pOpts->getOptValue(OPT::CFLAGS_CMN).contains("-std:c"))
             DisableControl(IDBTN_STD);
     }
-    if (m_pOpts->GetOption(OPT_CFLAGS_REL))
-        SetControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->GetOption(OPT_CFLAGS_REL));
-    if (m_pOpts->GetOption(OPT_CFLAGS_DBG))
-        SetControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->GetOption(OPT_CFLAGS_DBG));
+    if (m_pOpts->hasOptValue(OPT::CFLAGS_REL))
+        setControlText(DLG_ID(IDEDIT_RELEASE), m_pOpts->getOptValue(OPT::CFLAGS_REL));
+    if (m_pOpts->hasOptValue(OPT::CFLAGS_DBG))
+        setControlText(DLG_ID(IDEDIT_DEBUG), m_pOpts->getOptValue(OPT::CFLAGS_DBG));
 }
 
 void CTabCompiler::OnOK(void)
@@ -63,44 +63,44 @@ void CTabCompiler::OnOK(void)
     ttCStr csz;
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_COMMON)));
-    m_pOpts->UpdateOption(OPT_CFLAGS_CMN, csz.IsEmpty() ? nullptr : (char*) csz);
+    m_pOpts->setOptValue(OPT::CFLAGS_CMN, csz.IsEmpty() ? nullptr : (char*) csz);
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_RELEASE)));
-    m_pOpts->UpdateOption(OPT_CFLAGS_REL, csz.IsEmpty() ? nullptr : (char*) csz);
+    m_pOpts->setOptValue(OPT::CFLAGS_REL, csz.IsEmpty() ? nullptr : (char*) csz);
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_DEBUG)));
-    m_pOpts->UpdateOption(OPT_CFLAGS_DBG, csz.IsEmpty() ? nullptr : (char*) csz);
+    m_pOpts->setOptValue(OPT::CFLAGS_DBG, csz.IsEmpty() ? nullptr : (char*) csz);
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_INCDIRS)));
-    m_pOpts->UpdateOption(OPT_INC_DIRS, csz.IsEmpty() ? nullptr : (char*) csz);
+    m_pOpts->setOptValue(OPT::INC_DIRS, csz.IsEmpty() ? nullptr : (char*) csz);
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH)));
     if (csz.IsEmpty())
-        m_pOpts->UpdateOption(OPT_PCH, "none");
+        m_pOpts->setOptValue(OPT::PCH, "none");
     else
-        m_pOpts->UpdateOption(OPT_PCH, (char*) csz);
+        m_pOpts->setOptValue(OPT::PCH, (char*) csz);
 
     // We let WriteSrcFiles handle the case where the base names of PCH and PCH_CPP are identical
 
     csz.GetWndText(GetDlgItem(DLG_ID(IDEDIT_PCH_CPP)));
     if (csz.IsEmpty())
-        m_pOpts->UpdateOption(OPT_PCH_CPP, "none");
+        m_pOpts->setOptValue(OPT::PCH_CPP, "none");
     else
-        m_pOpts->UpdateOption(OPT_PCH_CPP, (char*) csz);
+        m_pOpts->setOptValue(OPT::PCH_CPP, (char*) csz);
 
     if (GetCheck(DLG_ID(IDC_RADIO_SPEED)))
-        m_pOpts->UpdateOption(OPT_OPTIMIZE, "speed");
+        m_pOpts->setOptValue(OPT::OPTIMIZE, "speed");
     else
-        m_pOpts->UpdateOption(OPT_OPTIMIZE, "space");
+        m_pOpts->setOptValue(OPT::OPTIMIZE, "space");
 
     if (GetCheck(DLG_ID(IDRADIO_WARN1)))
-        m_pOpts->UpdateOption(OPT_WARN_LEVEL, "1");
+        m_pOpts->setOptValue(OPT::WARN, "1");
     else if (GetCheck(DLG_ID(IDRADIO_WARN2)))
-        m_pOpts->UpdateOption(OPT_WARN_LEVEL, "2");
+        m_pOpts->setOptValue(OPT::WARN, "2");
     else if (GetCheck(DLG_ID(IDRADIO_WARN3)))
-        m_pOpts->UpdateOption(OPT_WARN_LEVEL, "3");
+        m_pOpts->setOptValue(OPT::WARN, "3");
     else if (GetCheck(DLG_ID(IDRADIO_WARN4)))
-        m_pOpts->UpdateOption(OPT_WARN_LEVEL, "4");
+        m_pOpts->setOptValue(OPT::WARN, "4");
 }
 
 void CTabCompiler::OnBtnChangePch()

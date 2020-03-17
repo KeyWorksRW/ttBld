@@ -9,8 +9,9 @@
 #include "pch.h"
 
 #include <ttTR.h>  // Function for translating strings
+#include <ttcvector.h>
 
-#include "writesrcfiles.h"  // CWriteSrcFiles
+#include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
 // This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode
 // directory does not exist, it will be created. The srcfiles.yaml is not designed to be tracked, so it's fine to
@@ -18,88 +19,87 @@
 // the default options which would not be normally displayed are listed to make them easy to modify in VS Code or
 // any editor that understands YAML format
 
-using namespace sfopt;
-
 bool Yamalize()
 {
     CSrcFiles cOrgSrcFiles;
     cOrgSrcFiles.ReadFile(".srcfiles.yaml");
 
     CWriteSrcFiles cNewSrcFiles;
-    ttStrVector&   lstSrcFiles = cNewSrcFiles.GetSrcFilesList();
+    auto& lstSrcFiles = cNewSrcFiles.GetSrcFileList();
 
-    if (ttFileExists(".srcfiles.yaml"))
-        lstSrcFiles += ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml";
+    if (ttlib::fileExists(".srcfiles.yaml"))
+        lstSrcFiles.emplace_back(
+            ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml");
     else
-        lstSrcFiles += "*.c*";  // TODO: this is a placeholder, need to be smarter about what wildcards to use
+    {
+        // TODO: this is a placeholder, need to be smarter about what wildcards to use
+        lstSrcFiles.emplace_back("*.c*");
+    }
 
-    cNewSrcFiles.UpdateOption(OPT_PROJECT, cOrgSrcFiles.GetOption(OPT_PROJECT));
-    cNewSrcFiles.UpdateOption(OPT_EXE_TYPE, cOrgSrcFiles.GetOption(OPT_EXE_TYPE));
-    cNewSrcFiles.UpdateOption(OPT_PCH, cOrgSrcFiles.GetOption(OPT_PCH));
-    cNewSrcFiles.UpdateOption(OPT_PCH_CPP, cOrgSrcFiles.GetPchCpp());
+    cNewSrcFiles.setOptValue(OPT::PROJECT, cOrgSrcFiles.getOptValue(OPT::PROJECT));
+    cNewSrcFiles.setOptValue(OPT::EXE_TYPE, cOrgSrcFiles.getOptValue(OPT::EXE_TYPE));
+    cNewSrcFiles.setOptValue(OPT::PCH, cOrgSrcFiles.getOptValue(OPT::PCH));
+    cNewSrcFiles.setOptValue(OPT::PCH_CPP, cOrgSrcFiles.GetPchCpp());
 
-    cNewSrcFiles.UpdateOption(OPT_OPTIMIZE, cOrgSrcFiles.GetOption(OPT_OPTIMIZE));
-    cNewSrcFiles.SetRequired(OPT_OPTIMIZE);
-    cNewSrcFiles.UpdateOption(OPT_WARN_LEVEL, cOrgSrcFiles.GetOption(OPT_WARN_LEVEL));
-    cNewSrcFiles.SetRequired(OPT_WARN_LEVEL);
+    cNewSrcFiles.setOptValue(OPT::OPTIMIZE, cOrgSrcFiles.getOptValue(OPT::OPTIMIZE));
+    cNewSrcFiles.SetRequired(OPT::OPTIMIZE);
+    cNewSrcFiles.setOptValue(OPT::WARN, cOrgSrcFiles.getOptValue(OPT::WARN));
+    cNewSrcFiles.SetRequired(OPT::WARN);
 
-    cNewSrcFiles.UpdateOption(OPT_PERMISSIVE, cOrgSrcFiles.GetOption(OPT_PERMISSIVE));
-    cNewSrcFiles.UpdateOption(OPT_STDCALL, cOrgSrcFiles.GetOption(OPT_STDCALL));
+    cNewSrcFiles.setOptValue(OPT::CFLAGS_CMN, cOrgSrcFiles.getOptValue(OPT::CFLAGS_CMN));
+    cNewSrcFiles.setOptValue(OPT::CFLAGS_REL, cOrgSrcFiles.getOptValue(OPT::CFLAGS_REL));
+    cNewSrcFiles.setOptValue(OPT::CFLAGS_DBG, cOrgSrcFiles.getOptValue(OPT::CFLAGS_DBG));
 
-    cNewSrcFiles.UpdateOption(OPT_CFLAGS_CMN, cOrgSrcFiles.GetOption(OPT_CFLAGS_CMN));
-    cNewSrcFiles.UpdateOption(OPT_CFLAGS_REL, cOrgSrcFiles.GetOption(OPT_CFLAGS_REL));
-    cNewSrcFiles.UpdateOption(OPT_CFLAGS_DBG, cOrgSrcFiles.GetOption(OPT_CFLAGS_DBG));
+    cNewSrcFiles.setOptValue(OPT::CLANG_CMN, cOrgSrcFiles.getOptValue(OPT::CLANG_CMN));
+    cNewSrcFiles.setOptValue(OPT::CLANG_REL, cOrgSrcFiles.getOptValue(OPT::CLANG_REL));
+    cNewSrcFiles.setOptValue(OPT::CLANG_DBG, cOrgSrcFiles.getOptValue(OPT::CLANG_DBG));
 
-    cNewSrcFiles.UpdateOption(OPT_CLANG_CMN, cOrgSrcFiles.GetOption(OPT_CLANG_CMN));
-    cNewSrcFiles.UpdateOption(OPT_CLANG_REL, cOrgSrcFiles.GetOption(OPT_CLANG_REL));
-    cNewSrcFiles.UpdateOption(OPT_CLANG_DBG, cOrgSrcFiles.GetOption(OPT_CLANG_DBG));
-
-    cNewSrcFiles.UpdateOption(OPT_LINK_CMN, cOrgSrcFiles.GetOption(OPT_LINK_CMN));
-    cNewSrcFiles.UpdateOption(OPT_LINK_REL, cOrgSrcFiles.GetOption(OPT_LINK_REL));
-    cNewSrcFiles.UpdateOption(OPT_LINK_DBG, cOrgSrcFiles.GetOption(OPT_LINK_DBG));
+    cNewSrcFiles.setOptValue(OPT::LINK_CMN, cOrgSrcFiles.getOptValue(OPT::LINK_CMN));
+    cNewSrcFiles.setOptValue(OPT::LINK_REL, cOrgSrcFiles.getOptValue(OPT::LINK_REL));
+    cNewSrcFiles.setOptValue(OPT::LINK_DBG, cOrgSrcFiles.getOptValue(OPT::LINK_DBG));
 
 #ifdef _WIN32
-    cNewSrcFiles.UpdateOption(OPT_NATVIS, cOrgSrcFiles.GetOption(OPT_NATVIS));
+    cNewSrcFiles.setOptValue(OPT::NATVIS, cOrgSrcFiles.getOptValue(OPT::NATVIS));
 
-    cNewSrcFiles.UpdateOption(OPT_RC_CMN, cOrgSrcFiles.GetOption(OPT_RC_CMN));
-    cNewSrcFiles.UpdateOption(OPT_RC_REL, cOrgSrcFiles.GetOption(OPT_RC_REL));
-    cNewSrcFiles.UpdateOption(OPT_RC_DBG, cOrgSrcFiles.GetOption(OPT_RC_DBG));
+    cNewSrcFiles.setOptValue(OPT::RC_CMN, cOrgSrcFiles.getOptValue(OPT::RC_CMN));
+    cNewSrcFiles.setOptValue(OPT::RC_REL, cOrgSrcFiles.getOptValue(OPT::RC_REL));
+    cNewSrcFiles.setOptValue(OPT::RC_DBG, cOrgSrcFiles.getOptValue(OPT::RC_DBG));
 
-    cNewSrcFiles.UpdateOption(OPT_MDL_CMN, cOrgSrcFiles.GetOption(OPT_MDL_CMN));
-    cNewSrcFiles.UpdateOption(OPT_MDL_REL, cOrgSrcFiles.GetOption(OPT_MDL_REL));
-    cNewSrcFiles.UpdateOption(OPT_MDL_DBG, cOrgSrcFiles.GetOption(OPT_MDL_DBG));
+    cNewSrcFiles.setOptValue(OPT::MIDL_CMN, cOrgSrcFiles.getOptValue(OPT::MIDL_CMN));
+    cNewSrcFiles.setOptValue(OPT::MIDL_REL, cOrgSrcFiles.getOptValue(OPT::MIDL_REL));
+    cNewSrcFiles.setOptValue(OPT::MIDL_DBG, cOrgSrcFiles.getOptValue(OPT::MIDL_DBG));
 
-    cNewSrcFiles.UpdateOption(OPT_DEBUG_RC, cOrgSrcFiles.GetOption(OPT_DEBUG_RC));
+    cNewSrcFiles.setOptValue(OPT::RC_DBG, cOrgSrcFiles.getOptValue(OPT::RC_DBG));
 
-    cNewSrcFiles.UpdateOption(OPT_MS_LINKER, cOrgSrcFiles.GetOption(OPT_MS_LINKER));
-    cNewSrcFiles.UpdateOption(OPT_MS_RC, cOrgSrcFiles.GetOption(OPT_MS_RC));
+    cNewSrcFiles.setOptValue(OPT::MS_LINKER, cOrgSrcFiles.getOptValue(OPT::MS_LINKER));
+    cNewSrcFiles.setOptValue(OPT::MS_RC, cOrgSrcFiles.getOptValue(OPT::MS_RC));
 #endif
 
     // TODO: [KeyWorks - 7/24/2019] Hook up Crt once it gets changed
 
-    cNewSrcFiles.UpdateOption(OPT_64BIT, cOrgSrcFiles.GetOption(OPT_64BIT));
-    cNewSrcFiles.UpdateOption(OPT_TARGET_DIR, cOrgSrcFiles.GetOption(OPT_TARGET_DIR));
-    cNewSrcFiles.UpdateOption(OPT_32BIT, cOrgSrcFiles.GetOption(OPT_32BIT));
-    cNewSrcFiles.UpdateOption(OPT_TARGET_DIR32, cOrgSrcFiles.GetOption(OPT_TARGET_DIR32));
+    cNewSrcFiles.setOptValue(OPT::BIT64, cOrgSrcFiles.getOptValue(OPT::BIT64));
+    cNewSrcFiles.setOptValue(OPT::TARGET_DIR, cOrgSrcFiles.getOptValue(OPT::TARGET_DIR));
+    cNewSrcFiles.setOptValue(OPT::BIT32, cOrgSrcFiles.getOptValue(OPT::BIT32));
+    cNewSrcFiles.setOptValue(OPT::TARGET_DIR32, cOrgSrcFiles.getOptValue(OPT::TARGET_DIR32));
 
-    cNewSrcFiles.UpdateOption(OPT_INC_DIRS, cOrgSrcFiles.GetOption(OPT_INC_DIRS));
-    cNewSrcFiles.UpdateOption(OPT_BUILD_LIBS, cOrgSrcFiles.GetOption(OPT_BUILD_LIBS));
-    cNewSrcFiles.UpdateOption(OPT_LIB_DIRS32, cOrgSrcFiles.GetOption(OPT_LIB_DIRS32));
-    cNewSrcFiles.UpdateOption(OPT_LIB_DIRS, cOrgSrcFiles.GetOption(OPT_LIB_DIRS));
+    cNewSrcFiles.setOptValue(OPT::INC_DIRS, cOrgSrcFiles.getOptValue(OPT::INC_DIRS));
+    cNewSrcFiles.setOptValue(OPT::BUILD_LIBS, cOrgSrcFiles.getOptValue(OPT::BUILD_LIBS));
+    cNewSrcFiles.setOptValue(OPT::LIB_DIRS32, cOrgSrcFiles.getOptValue(OPT::LIB_DIRS32));
+    cNewSrcFiles.setOptValue(OPT::LIB_DIRS, cOrgSrcFiles.getOptValue(OPT::LIB_DIRS));
 
-    cNewSrcFiles.UpdateOption(OPT_LIBS_CMN, cOrgSrcFiles.GetOption(OPT_LIBS_CMN));
-    cNewSrcFiles.UpdateOption(OPT_LIBS_REL, cOrgSrcFiles.GetOption(OPT_LIBS_REL));
-    cNewSrcFiles.UpdateOption(OPT_LIBS_DBG, cOrgSrcFiles.GetOption(OPT_LIBS_DBG));
+    cNewSrcFiles.setOptValue(OPT::LIBS_CMN, cOrgSrcFiles.getOptValue(OPT::LIBS_CMN));
+    cNewSrcFiles.setOptValue(OPT::LIBS_REL, cOrgSrcFiles.getOptValue(OPT::LIBS_REL));
+    cNewSrcFiles.setOptValue(OPT::LIBS_DBG, cOrgSrcFiles.getOptValue(OPT::LIBS_DBG));
 
-    cNewSrcFiles.UpdateOption(OPT_XGET_FLAGS, cOrgSrcFiles.GetOption(OPT_XGET_FLAGS));
+    cNewSrcFiles.setOptValue(OPT::XGET_FLAGS, cOrgSrcFiles.getOptValue(OPT::XGET_FLAGS));
 
-    ttCStr cszVersion;
-    cszVersion.printf(txtNinjaVerFormat, cNewSrcFiles.GetMajorRequired(), cNewSrcFiles.GetMinorRequired(),
+    ttlib::cstr cszVersion;
+    cszVersion.Format(txtNinjaVerFormat, cNewSrcFiles.GetMajorRequired(), cNewSrcFiles.GetMinorRequired(),
                       cNewSrcFiles.GetSubRequired());
 
-    if (!cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion))
+    if (cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion) != bld::success)
     {
-        ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, ".vscode/srcfiles.yaml");
+        ttlib::MsgBox(_tt("Unable to create or write to .vscode/srcfiles.yaml"));
         return false;
     }
 
