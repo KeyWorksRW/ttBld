@@ -29,6 +29,7 @@ namespace bld
         write_failed,  // unable to write to the file
         read_failed,   // unable to read the original file (but it does exist)
 
+        invalid_file,
         failure,        // internal failure
 
     };
