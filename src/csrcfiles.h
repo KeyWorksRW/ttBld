@@ -137,11 +137,7 @@ public:
     void SetReportingFile(std::string_view filename) { m_ReportPath = filename; }
 
     void AddError(const std::stringstream& msg) { AddError(msg.str()); };
-#if !defined(NDEBUG)  // Starts debug section.
     void AddError(std::string_view err);
-#else
-    void AddError(std::string_view err) { m_lstErrMessages.append(err); }
-#endif
 
 protected:
     // Protected functions

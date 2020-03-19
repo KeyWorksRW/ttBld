@@ -563,14 +563,13 @@ const ttlib::cstr& CSrcFiles::GetTargetDebug()
     return m_dbgTarget;
 }
 
-#if !defined(NDEBUG)  // Starts debug section.
-
 void CSrcFiles::AddError(std::string_view err)
 {
     m_lstErrMessages.append(err);
-}
-
+#if !defined(NDEBUG)  // Starts debug section.
+    ttlib::MsgBox(err, "AddError");
 #endif
+}
 
 static const char* aProjectLocations[] {
     // clang-format off
