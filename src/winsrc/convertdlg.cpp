@@ -24,6 +24,7 @@
 #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfiledlg.h>   // ttCFileDlg
 #include <ttfindfile.h>  // ttCFindFile
+#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
 
 #include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
 #include "funcs.h"       // List of function declarations
@@ -173,35 +174,32 @@ void CConvertDlg::OnBtnLocateScript()
 
 void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles to
 {
-    ttCDirDlg dlg;
-    ttCStr    cszCWD;
-    cszCWD.GetCWD();
-    dlg.SetStartingDir(cszCWD);
+    ttlib::DirDlg dlg;
+    ttlib::cwd cwd;
+    dlg.SetStartingDir(cwd);
     if (dlg.GetFolderName(*this))
     {
-        ttCStr cszSrcFiles(dlg);
-        cszSrcFiles.AppendFileName(".srcfiles.yaml");
-        if (ttFileExists(cszSrcFiles))
+        dlg.append_filename(".srcfiles.yaml");
+        if (dlg.fileExists())
         {
             if (ttMsgBox(
                     _tt(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"),
                     MB_YESNO) != IDYES)
                 return;
         }
-        SetControlText(DLG_ID(IDEDIT_OUT_DIR), dlg);
+        SetControlText(DLG_ID(IDEDIT_OUT_DIR), dlg.c_str());
     }
 }
 
 void CConvertDlg::OnBtnChangeIn()
 {
-    ttCDirDlg dlg;
-    ttCStr    cszCWD;
-    cszCWD.GetCWD();
-    dlg.SetStartingDir(cszCWD);
+    ttlib::DirDlg dlg;
+    ttlib::cwd cwd;
+    dlg.SetStartingDir(cwd);
     if (dlg.GetFolderName(*this))
     {
-        SetControlText(DLG_ID(IDEDIT_IN_DIR), dlg);
-        ttChDir(dlg);
+        SetControlText(DLG_ID(IDEDIT_IN_DIR), dlg.c_str());
+        ttlib::ChangeDir(dlg);
         ttCFindFile ff("*.cpp");
         size_t      cFilesFound = 0;
         for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
@@ -214,7 +212,7 @@ void CConvertDlg::OnBtnChangeIn()
                 } while (ff.NextFile());
             }
         }
-        ttChDir(cszCWD);  // restore our directory
+        ttlib::ChangeDir(cwd);  // restore our directory
         ttCStr csz;
         csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
         SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);

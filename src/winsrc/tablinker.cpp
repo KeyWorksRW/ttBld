@@ -88,12 +88,12 @@ void CTabLinker::OnBtnChange()
 
 void CTabLinker::OnBtnLibDir()
 {
-    ttCDirDlg dlg;
+    ttlib::DirDlg dlg;
     dlg.SetTitle(_tt("Library directory"));  // we're repurposing an existing dialog, so change the title
     if (dlg.GetFolderName(*this))
     {
         ttlib::cwd cwd;
-        ttlib::cstr LibDir(dlg.c_str());
+        ttlib::cstr LibDir(dlg);
         LibDir.make_relative(cwd);
         LibDir.backslashestoforward();
 

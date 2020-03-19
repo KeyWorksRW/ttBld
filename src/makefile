@@ -41,7 +41,7 @@ BldScriptD=$(bdir)/$(cmplr)_dbg.ninja
 release: ttLibwin $(BldScript) ttBld
 
 ttLibwin:
-	cd ../../ttLib/winsrc & ninja -f $(BldScript)
+	cd ../../ttLib/src & ninja -f $(BldScript)
 
 ttBld:
 	ninja -f $(BldScript)
@@ -51,7 +51,7 @@ ttBld:
 debug: ttLibwinD $(BldScriptD) ttBldD
 
 ttLibwinD:
-	cd ../../ttLib/winsrc & ninja -f $(BldScriptD)
+	cd ../../ttLib/src & ninja -f $(BldScriptD)
 
 ttBldD:
 	ninja -f $(BldScriptD)
