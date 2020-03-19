@@ -350,6 +350,10 @@ void CNinja::ProcessBuildLibs()
                 ttlib::ChangeDir(dir);
                 BuildDirectory.assignCwd();
             }
+            else
+            {
+                BuildDirectory = ttlib::emptystring;
+            }
 
             BuildFile = BuildDirectory;
             BuildFile.append_filename(path.filename());
