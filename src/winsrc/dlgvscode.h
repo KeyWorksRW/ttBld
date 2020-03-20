@@ -12,6 +12,8 @@
     #include "resource.h"
 #endif
 
+#include <vector>
+
 #include <ttwindlg.h>  // Class for displaying a dialog
 
 // forward definitions
@@ -44,8 +46,8 @@ public:
 
     // Public functions
 
-    bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults);
-    bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults);
+    bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
+    bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
 
 protected:
     // Message handlers

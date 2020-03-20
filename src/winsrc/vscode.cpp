@@ -163,12 +163,11 @@ static const char* txtDefaultTask =
     "            \"problemMatcher\": [ %problem% ]\n"
     "        },\n";
 
-bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
-
-bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
+bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
+bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
 
 // Returns true unless unable to write to a file
-bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
+bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>& Results)
 {
     if (!ttlib::dirExists(".vscode"))
     {
@@ -189,35 +188,33 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
 
             if (!gitIgnore.empty() &&
                 ttlib::MsgBox(
-                    _tt("The directory .vscode is not being ignored by git. Would you like it to be added to ") + gitIgnore + " ?",
+                    _tt("The directory .vscode is not being ignored by git. Would you like it to be added to ") +
+                        gitIgnore + " ?",
                     MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING) == IDYES)
             {
-                if (gitAddtoIgnore(gitIgnore, ".vscode/") && plstResults)
+                if (gitAddtoIgnore(gitIgnore, ".vscode/"))
                 {
-                    std::stringstream msg;
-                    msg << _tt(".vscode/ added to ") << gitIgnore << '\n';
-                    *plstResults += msg.str().c_str();
+                    Results.emplace_back(_tt(".vscode/ added to ") + gitIgnore);
                 }
             }
         }
     }
 
     CSrcFiles cSrcFiles;
-    if (!cSrcFiles.ReadFile(pszSrcFiles))
+    if (!cSrcFiles.ReadFile(SrcFilename))
     {
-        if (plstResults)
-            *plstResults += _tt("Cannot locate a .srcfiles.yaml file need to configure .vscode/*.json files.");
+        Results.emplace_back(_tt("Cannot locate a .srcfiles.yaml file need to configure .vscode/*.json files."));
         return false;
     }
 
     if (ttlib::fileExists(".vscode/c_cpp_properties.json"))
     {
-        if (!UpdateVsCodeProps(cSrcFiles, plstResults))
+        if (!UpdateVsCodeProps(cSrcFiles, Results))
             return false;
     }
     else
     {
-        if (!CreateVsCodeProps(cSrcFiles, plstResults))
+        if (!CreateVsCodeProps(cSrcFiles, Results))
             return false;
     }
 
@@ -229,13 +226,13 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
 
         if (!ttlib::fileExists(".vscode/launch.json"))
         {
-            if (!dlg.CreateVsCodeLaunch(cSrcFiles, plstResults))
+            if (!dlg.CreateVsCodeLaunch(cSrcFiles, Results))
                 return false;
         }
 
         if (!ttlib::fileExists(".vscode/tasks.json"))
         {
-            if (!dlg.CreateVsCodeTasks(cSrcFiles, plstResults))
+            if (!dlg.CreateVsCodeTasks(cSrcFiles, Results))
                 return false;
         }
     }
@@ -243,7 +240,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
     return true;
 }
 
-bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
+bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 {
     ttCFile kf, kfOut;
 
@@ -253,14 +250,14 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
         if (ttIsSameSubStrI(ttFindNonSpace(kf), "\042defines"))
         {
             kfOut.WriteEol(kf);
-            ttCList lstDefines;
+            std::vector<std::string> Defines;
             if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
-                ParseDefines(lstDefines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN).c_str());
+                ParseDefines(Defines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN));
             if (cSrcFiles.hasOptValue(OPT::CFLAGS_DBG))
-                ParseDefines(lstDefines, cSrcFiles.getOptValue(OPT::CFLAGS_DBG).c_str());
-            lstDefines.Sort();
-            for (size_t pos = 0; lstDefines.InRange(pos); ++pos)
-                kfOut.printf("                %kq,\n", lstDefines[pos]);
+                ParseDefines(Defines, cSrcFiles.getOptValue(OPT::CFLAGS_DBG));
+            std::sort(Defines.begin(), Defines.end());
+            for (auto iter: Defines)
+                kfOut.printf("                %kq,\n", iter.c_str());
 
                 // we always define _DEBUG. Under Windows, we always define _WIN32.
 
@@ -318,14 +315,13 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     }
     else
     {
-        if (plstResults)
-            *plstResults += _tt("Created .vscode/c_cpp_properties.json");
+        Results.emplace_back(_tt("Created .vscode/c_cpp_properties.json"));
     }
 
     return true;
 }
 
-bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
+bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 {
     if (cSrcFiles.IsExeTypeLib() || cSrcFiles.IsExeTypeDll())
         return true;  // nothing that we know how to launch if this is a library or dynamic link library
@@ -357,8 +353,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // REVIEW: [randalphwa - 7/19/2019] Will it work to have a non-existant default.natvis file or will VS Code
     // complain? An alternative would be to insert/remove the entire line
-    ttlib::cstr Path(cSrcFiles.hasOptValue(OPT::NATVIS) ? cSrcFiles.getOptValue(OPT::NATVIS) :
-                                                        "default.natvis");
+    ttlib::cstr Path(cSrcFiles.hasOptValue(OPT::NATVIS) ? cSrcFiles.getOptValue(OPT::NATVIS) : "default.natvis");
     Path.backslashestoforward();
     Launch.Replace("%natvis%", Path);
 
@@ -373,14 +368,13 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     }
     else
     {
-        if (plstResults)
-            *plstResults += _tt("Created .vscode/launch.json");
+        Results.emplace_back(_tt("Created .vscode/launch.json"));
     }
 
     return true;
 }
 
-bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
+bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 {
     ttCFile kfTask, kfSubTask, kfOut;
 
@@ -512,31 +506,23 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!kfOut.WriteFile(".vscode/tasks.json"))
     {
-        if (plstResults)
-        {
-            ttCStr cszMsg;
-            cszMsg.printf(_tt("Unable to create or write to %s"), ".vscode/tasks.json");
-            *plstResults += (char*) cszMsg;
-        }
+        Results.emplace_back(_tt("Unable to create or write to .vscode/tasks.json"));
         return false;
     }
     else
     {
-        if (plstResults)
-            *plstResults += _tt("Created .vscode/tasks.json");
+        Results.emplace_back(_tt("Created .vscode/tasks.json"));
     }
 
     return true;
 }
 
-bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
+bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 {
     ttlib::textfile file;
     if (!file.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        std::stringstream msg;
-        msg << _tt("Cannot open ") << ".vscode/c_cpp_properties.json";
-        *plstResults += msg.str().c_str();
+        Results.emplace_back(_tt("Cannot open .vscode/c_cpp_properties.json"));
         return false;
     }
 
@@ -732,9 +718,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     ttlib::viewfile orgfile;
     if (!orgfile.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        std::stringstream msg;
-        msg << _tt("Cannot open ") << ".vscode/c_cpp_properties.json";
-        *plstResults += msg.str().c_str();
+        Results.emplace_back(_tt("Cannot open .vscode/c_cpp_properties.json"));
         return false;
     }
 
@@ -755,19 +739,17 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     if (!Modified)
     {
-        *plstResults += "c_cpp_properties.json is up to date";
+        Results.emplace_back(_tt("c_cpp_properties.json is up to date"));
         return false;
     }
 
     if (!file.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        std::stringstream msg;
-        msg << _tt("Unable to create or write to ") << ".vscode/c_cpp_properties.json";
-        *plstResults += msg.str().c_str();
+        Results.emplace_back("Unable to create or write to .vscode/c_cpp_properties.json");
         return false;
     }
 
-    *plstResults += _tt("Updated .vscode/c_cpp_properties.json");
+    Results.emplace_back(_tt("Updated .vscode/c_cpp_properties.json"));
 
     return true;
 }
@@ -795,6 +777,26 @@ void ParseDefines(ttCList& lst, const char* pszDefines)
         else
         {
             pszStart = ttStepOver(pszStart);
+        }
+    }
+}
+
+// Given a string, finds any definitions and stores them in the provided list. Primarily used
+// to parse a CFlags: option string
+void ParseDefines(std::vector<std::string>& Results, std::string_view Defines)
+{
+    for (size_t pos = 0; pos < Defines.size(); pos = ttlib::stepover_pos(Defines.substr(pos)))
+    {
+        if (Defines[pos] == '-' || Defines[pos] == '/')
+        {
+            ++pos;
+            if (Defines[pos])
+            {
+                auto end = ttlib::findspace_pos(Defines.substr(pos));
+                if (end == tt::npos)
+                    return;
+                Results.emplace_back(Defines.substr(pos, end - pos));
+            }
         }
     }
 }

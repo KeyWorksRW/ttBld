@@ -379,12 +379,10 @@ int oldMain(int argc, char* argv[])
         if (dlg.isCreateVsCode())
         {
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            ttCList lstResults;
-            CreateVsCodeProject(SrcFilePath.c_str(), &lstResults);
-            for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-            {
-                std::cout << lstResults[pos] << '\n';
-            }
+            std::vector<std::string> Results;
+            CreateVsCodeProject(SrcFilePath, Results);
+            for (auto iter: Results)
+                std::cout << iter << '\n';
         }
         if (dlg.isGitIgnoreAll())
         {
@@ -414,12 +412,10 @@ int oldMain(int argc, char* argv[])
         if (dlg.isCreateVsCode())
         {
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            ttCList lstResults;
-            CreateVsCodeProject(SrcFilePath.c_str(), &lstResults);
-            for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-            {
-                std::cout << lstResults[pos] << '\n';
-            }
+            std::vector<std::string> Results;
+            CreateVsCodeProject(SrcFilePath, Results);
+            for (auto iter: Results)
+                std::cout << iter << '\n';
         }
         if (dlg.isGitIgnoreAll())
         {
@@ -461,12 +457,10 @@ int oldMain(int argc, char* argv[])
         if (Action & ACT_ALLD)
             std::filesystem::remove(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-        ttCList lstResults;
-        CreateVsCodeProject(SrcFilePath.c_str(), &lstResults);
-        for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-        {
-            std::cout << lstResults[pos] << '\n';
-        }
+        std::vector<std::string> Results;
+        CreateVsCodeProject(SrcFilePath, Results);
+        for (auto msg: Results)
+            std::cout << msg << '\n';
     }
 
     if (Action & ACT_VS)

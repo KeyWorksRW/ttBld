@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <vector>
+
 class ttCList;  // forward definition
 class ttCStr;
 class cstr;
@@ -36,6 +38,7 @@ bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathR
 
 int MakeNinja(int argc, char* argv[]);
 void ParseDefines(ttCList& lst, const char* pszDefines);
+void ParseDefines(std::vector<std::string>& Results, std::string_view Defines);
 bool isSystemHeaderFile(const char* pszHeaderFile);
 
 // If pcszStartDir is used, it will be set to the path to the file or dir/file where .srcfiles.yaml was found
@@ -56,7 +59,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results);
 // Following functions are for use in setting up a build system for VS Code
 
 // Returns true unless unable to write to a file
-bool CreateVsCodeProject(const char* pszSrcFiles = nullptr, ttCList* plstResults = nullptr);
+bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>& Results);
 bool Yamalize();
 
 #if defined(_WIN32)
