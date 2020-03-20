@@ -29,6 +29,7 @@
 
 #include "mainapp.h"  // CMainApp -- Main application class
 
+#include <cstdlib>
 #include <direct.h>  // Functions for directory handling and creation
 #include <iostream>
 
@@ -261,8 +262,8 @@ int oldMain(int argc, char* argv[])
             if (dlg.DoModal(NULL) != IDOK)
                 return 1;
 
-            DeleteFileA(".vscode/launch.json");
-            DeleteFileA(".vscode/tasks.json");
+            fs::remove(".vscode/launch.json");
+            fs::remove(".vscode/tasks.json");
 
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
             ttCList lstResults;
@@ -387,10 +388,10 @@ int oldMain(int argc, char* argv[])
         }
         if (dlg.isGitIgnoreAll())
         {
-            ttCStr cszGitExclude;
-            if (gitIgnoreAll(cszGitExclude))
+            ttlib::cstr GitExclude;
+            if (gitIgnoreAll(GitExclude))
             {
-                std::cout << _tt("Added directories and filenames to ignore to ") << cszGitExclude.c_str() << '\n';
+                std::cout << _tt("Added directories and filenames to ignore to ") << GitExclude << '\n';
             }
         }
     }
@@ -422,9 +423,9 @@ int oldMain(int argc, char* argv[])
         }
         if (dlg.isGitIgnoreAll())
         {
-            ttCStr cszGitExclude;
-            if (gitIgnoreAll(cszGitExclude))
-                printf("Added directories and filenames to ignore to %s\n", (char*) cszGitExclude);
+            ttlib::cstr GitExclude;
+            if (gitIgnoreAll(GitExclude))
+                std::cout << _tt("Added directories and filenames to ignore to ") << GitExclude << '\n';
         }
     }
 

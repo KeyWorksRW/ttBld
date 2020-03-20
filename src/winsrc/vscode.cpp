@@ -170,32 +170,32 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults);
 // Returns true unless unable to write to a file
 bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
 {
-    if (!tt::dirExists(".vscode"))
+    if (!ttlib::dirExists(".vscode"))
     {
-        if (!ttCreateDir(".vscode"))
+        if (!fs::create_directory(".vscode"))
         {
-            tt::MsgBox(_tt("Unable to create the required .vscode directory."));
+            ttlib::MsgBox(_tt("Unable to create the required .vscode directory."));
             return false;
         }
-        ttCStr cszIgnore;
-        if (!gitIsFileIgnored(cszIgnore, ".vscode/") && !gitIsExcluded(cszIgnore, ".vscode/"))
+        ttlib::cstr gitIgnore;
+        if (!gitIsFileIgnored(gitIgnore, ".vscode/") && !gitIsExcluded(gitIgnore, ".vscode/"))
         {
-            if (tt::dirExists(".git"))
-                cszIgnore = ".git/info/exclude";
-            else if (tt::dirExists("../.git"))
-                cszIgnore = "../.git/info/exclude";
-            else if (tt::dirExists("../../.git"))
-                cszIgnore = "../../.git/info/exclude";
+            if (ttlib::dirExists(".git"))
+                gitIgnore = ".git/info/exclude";
+            else if (ttlib::dirExists("../.git"))
+                gitIgnore = "../.git/info/exclude";
+            else if (ttlib::dirExists("../../.git"))
+                gitIgnore = "../../.git/info/exclude";
 
-            if (cszIgnore.IsNonEmpty() &&
-                ttMsgBoxFmt(
-                    _tt("The directory .vscode is not being ignored by git. Would you like it to be added to %s?"),
-                    MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING, (char*) cszIgnore) == IDYES)
+            if (!gitIgnore.empty() &&
+                ttlib::MsgBox(
+                    _tt("The directory .vscode is not being ignored by git. Would you like it to be added to ") + gitIgnore + " ?",
+                    MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING) == IDYES)
             {
-                if (gitAddtoIgnore(cszIgnore, ".vscode/") && plstResults)
+                if (gitAddtoIgnore(gitIgnore, ".vscode/") && plstResults)
                 {
                     std::stringstream msg;
-                    msg << _tt(".vscode/ added to ") << cszIgnore.c_str() << '\n';
+                    msg << _tt(".vscode/ added to ") << gitIgnore << '\n';
                     *plstResults += msg.str().c_str();
                 }
             }
@@ -210,7 +210,7 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
         return false;
     }
 
-    if (tt::fileExists(".vscode/c_cpp_properties.json"))
+    if (ttlib::fileExists(".vscode/c_cpp_properties.json"))
     {
         if (!UpdateVsCodeProps(cSrcFiles, plstResults))
             return false;
@@ -221,19 +221,19 @@ bool CreateVsCodeProject(const char* pszSrcFiles, ttCList* plstResults)
             return false;
     }
 
-    if (!tt::fileExists(".vscode/launch.json") || !tt::fileExists(".vscode/tasks.json"))
+    if (!ttlib::fileExists(".vscode/launch.json") || !ttlib::fileExists(".vscode/tasks.json"))
     {
         CDlgVsCode dlg;
         if (dlg.DoModal(NULL) != IDOK)
             return false;
 
-        if (!tt::fileExists(".vscode/launch.json"))
+        if (!ttlib::fileExists(".vscode/launch.json"))
         {
             if (!dlg.CreateVsCodeLaunch(cSrcFiles, plstResults))
                 return false;
         }
 
-        if (!tt::fileExists(".vscode/tasks.json"))
+        if (!ttlib::fileExists(".vscode/tasks.json"))
         {
             if (!dlg.CreateVsCodeTasks(cSrcFiles, plstResults))
                 return false;
@@ -313,7 +313,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttCList* plstResults)
     {
         std::string msg(_tt("Unable to create or write to "));
         msg += ".vscode/c_cpp_properties.json";
-        tt::MsgBox(msg);
+        ttlib::MsgBox(msg);
         return false;
     }
     else
@@ -330,50 +330,45 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
     if (cSrcFiles.IsExeTypeLib() || cSrcFiles.IsExeTypeDll())
         return true;  // nothing that we know how to launch if this is a library or dynamic link library
 
-    ttCFile kf;
+    ttlib::cstr Launch = { txtLaunch };
 
-    // Read the array of lines, write them into kf so it looks like it was read from a file
-
-    kf.ReadStrFile(txtLaunch);
-
-    kf.ReplaceStr("%proj%", cSrcFiles.GetProjectName().c_str());
-
-    ttCStr cszTarget;
-
+    Launch.Replace("%proj%", cSrcFiles.GetProjectName());
 #if defined(_WIN32)
     if (m_PreLaunch == PRELAUNCH_MAIN)
-        kf.ReplaceStr("%bld%", "Build Debug MSVC");
+        Launch.Replace("%bld%", "Build Debug MSVC");
     else if (m_PreLaunch == PRELAUNCH_CLANG)
-        kf.ReplaceStr("%bld%", "Build Debug CLANG");
+        Launch.Replace("%bld%", "Build Debug CLANG");
     else if (m_PreLaunch == PRELAUNCH_NINJA)
-        kf.ReplaceStr("%bld%", "Ninja Debug Build");
+        Launch.Replace("%bld%", "Ninja Debug Build");
     else
-        kf.ReplaceStr("%bld%", "");
+        Launch.Replace("%bld%", "");
 #else   // not defined(_WIN32)
     if (m_PreLaunch == PRELAUNCH_MAIN)
-        kf.ReplaceStr("%bld%", "Build Debug GCC");
+        Launch.Replace("%bld%", "Build Debug GCC");
     else if (m_PreLaunch == PRELAUNCH_CLANG)
-        kf.ReplaceStr("%bld%", "Build Debug CLANG");
+        Launch.Replace("%bld%", "Build Debug CLANG");
     else if (m_PreLaunch == PRELAUNCH_NINJA)
-        kf.ReplaceStr("%bld%", "Ninja Debug Build");
+        Launch.Replace("%bld%", "Ninja Debug Build");
     else
-        kf.ReplaceStr("%bld%", "");
+        Launch.Replace("%bld%", "");
 #endif  // defined(_WIN32)
 
-    kf.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug().c_str());
+    Launch.Replace("%targetD%", cSrcFiles.GetTargetDebug());
 
     // REVIEW: [randalphwa - 7/19/2019] Will it work to have a non-existant default.natvis file or will VS Code
     // complain? An alternative would be to insert/remove the entire line
-    ttCStr cszPath(cSrcFiles.hasOptValue(OPT::NATVIS) ? cSrcFiles.getOptValue(OPT::NATVIS).c_str() :
+    ttlib::cstr Path(cSrcFiles.hasOptValue(OPT::NATVIS) ? cSrcFiles.getOptValue(OPT::NATVIS) :
                                                         "default.natvis");
-    ttBackslashToForwardslash(cszPath);
-    kf.ReplaceStr("%natvis%", cszPath);
+    Path.backslashestoforward();
+    Launch.Replace("%natvis%", Path);
 
-    if (!kf.WriteFile(".vscode/launch.json"))
+    ttCFile kf;
+    ttlib::textfile file;
+    file.ReadString(Launch);
+
+    if (!file.WriteFile(".vscode/launch.json"))
     {
-        std::string msg(_tt("Unable to create or write to "));
-        msg += ".vscode/launch.json";
-        tt::MsgBox(msg);
+        ttlib::MsgBox(_tt("Unable to create or write to .vscode/launch.json"));
         return false;
     }
     else

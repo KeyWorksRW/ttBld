@@ -8,11 +8,13 @@
 
 #include "pch.h"
 
+#include <iostream>
+
 #include <ttTR.h>  // Function for translating strings
 
+#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfile.h>     // ttCFile
 #include <ttlist.h>     // ttCList
-#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 
 #include "funcs.h"  // List of function declarations
 
@@ -67,19 +69,14 @@ void CreateCodeCmd(const char* pszFile)
         // the registry will still be pointing to the old location, but code.cmd may be located in the PATH, so we
         // can look for that and use that directory if the registry location is wrong.
 
-        ttCStr cszNewPath;
-        if (FindFileEnv("PATH", "code.cmd", &cszNewPath))
+        ttlib::cstr NewPath;
+        if (FindFileEnv("PATH", "code.cmd", NewPath))
         {
-            char* pszFilePortion = ttFindFilePortion(cszNewPath);
-            if (pszFilePortion)
+            NewPath.replace_filename(pszFile);
+            if (file.WriteFile(NewPath.c_str()))
             {
-                *pszFilePortion = 0;
-                cszNewPath.AppendFileName(pszFile);
-                if (file.WriteFile(cszPath))
-                {
-                    printf(_tt("%s created.\n"), (char*) cszPath);
-                    return;
-                }
+                std::cout << NewPath << _tt(" created") << '\n';
+                return;
             }
         }
 
@@ -100,7 +97,7 @@ static void AddToList(const char* pszEnv, ttCList& lstPaths)
         if (getenv_s(&cbEnv, cszEnv.GetPtr(), cbEnv, pszEnv) == 0)
         {
             ttlib::enumstr enumLib(cszEnv.c_str());
-            for (auto iter : enumLib)
+            for (auto iter: enumLib)
             {
                 cszPath = iter.c_str();
                 ttForwardslashToBackslash(cszPath);  // just to be certain that they are consistent

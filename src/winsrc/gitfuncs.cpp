@@ -11,15 +11,84 @@
 #include <ttfile.h>      // ttCFile -- class for reading and writing files, strings, data, etc.
 #include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
 #include <ttstr.h>       // ttCStr -- SBCS string class.
+#include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
-// If .gitignore is found, cszGitIgnore will be updated to point to it
+// If .gitignore is found, gitIgnorePath will be updated to point to it
+bool gitIsFileIgnored(ttlib::cstr& gitIgnorePath, std::string_view filename)
+{
+    if (gitIgnorePath.empty())
+        gitIgnorePath = ".gitignore";
+    if (!gitIgnorePath.fileExists())
+    {
+        gitIgnorePath = "../.gitignore";
+        if (!gitIgnorePath.fileExists())
+        {
+            gitIgnorePath = "../../.gitignore";
+            if (!gitIgnorePath.fileExists())
+            {
+                gitIgnorePath.clear();
+                return false;
+            }
+        }
+    }
+
+    ttlib::viewfile file;
+    if (file.ReadFile(gitIgnorePath))
+    {
+        return (file.FindLineContaining(filename) != tt::npos);
+    }
+    return false;
+}
+
+// If .git/info/exclude is found, GitExclude will be updated to point to it
+bool gitIsExcluded(ttlib::cstr& GitExclude, std::string_view filename)
+{
+    if (GitExclude.empty())
+    {
+        if (ttlib::dirExists(".git"))
+            GitExclude = ".git/info/exclude";
+        else if (ttlib::dirExists("../.git"))
+            GitExclude = "../.git/info/exclude";
+        else if (ttlib::dirExists("../../.git"))
+            GitExclude = "../../.git/info/exclude";
+        else
+            return false;
+    }
+
+    if (!GitExclude.fileExists())
+    {
+        return false;
+    }
+
+    ttlib::viewfile file;
+    if (file.ReadFile(GitExclude))
+    {
+        return (file.FindLineContaining(filename) != tt::npos);
+    }
+    return false;
+}
+
+// This will work with either .gitignore or exclude
+bool gitAddtoIgnore(ttlib::cstr& GitIgnore, std::string_view filename)
+{
+    ttlib::textfile file;
+    if (!file.ReadFile(GitIgnore))
+        return false;
+
+    for (size_t line = 0; line < file.size(); ++line)
+    {
+        if (file[line][0] == '#')
+            continue;
+        file.insertLine(line, filename);
+        return file.WriteFile(GitIgnore);
+    }
+
+    file.emplace_back(filename);
+    return file.WriteFile(GitIgnore);
+}
 
 bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile)
 {
-    ttASSERT_MSG(pszFile, "NULL pointer!");
-    if (!pszFile)
-        return false;
-
     if (cszGitIgnore.IsEmpty())
         cszGitIgnore = ".gitignore";
     if (!ttFileExists(cszGitIgnore))
@@ -59,11 +128,11 @@ bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile)
 
     if (cszGitExclude.IsEmpty())
     {
-        if (ttDirExists(".git"))
+        if (ttlib::dirExists(".git"))
             cszGitExclude = ".git/info/exclude";
-        else if (ttDirExists("../.git"))
+        else if (ttlib::dirExists("../.git"))
             cszGitExclude = "../.git/info/exclude";
-        else if (ttDirExists("../../.git"))
+        else if (ttlib::dirExists("../../.git"))
             cszGitExclude = "../../.git/info/exclude";
         else
             return false;
@@ -110,63 +179,52 @@ bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile)
 }
 
 // clang-format off
-static const char* atxtIgnoreList[] =
+static const char* atxtIgnoreList[]
 {
     "makefile",
     ".srcfiles.yaml",
     "bld/",
     ".vscode/",
-
-    nullptr
 };
 // clang-format on
 
-bool gitIgnoreAll(ttCStr& cszGitExclude)
+bool gitIgnoreAll(ttlib::cstr& GitExclude)
 {
-    if (ttDirExists(".git"))
-        cszGitExclude = ".git/info/exclude";
-    else if (ttDirExists("../.git"))
-        cszGitExclude = "../.git/info/exclude";
-    else if (ttDirExists("../../.git"))
-        cszGitExclude = "../../.git/info/exclude";
+    if (ttlib::dirExists(".git"))
+        GitExclude = ".git/info/exclude";
+    else if (ttlib::dirExists("../.git"))
+        GitExclude = "../.git/info/exclude";
+    else if (ttlib::dirExists("../../.git"))
+        GitExclude = "../../.git/info/exclude";
     else
         return false;
 
-    ttCLineFile file;
-    if (!file.ReadFile(cszGitExclude))
+    ttlib::textfile file;
+    if (!file.ReadFile(GitExclude))
         return false;
 
-    for (size_t pos = 0; atxtIgnoreList[pos]; ++pos)
+    for (auto name: atxtIgnoreList)
     {
-        int  line;
-        bool bInsert = true;
-
         // If makefile or bld/ already exist, then assume they are already part of the project, so don't
         // ignore them.
 
-        if (ttIsSameStr(atxtIgnoreList[pos], "makefile") && ttFileExists("makefile"))
+        if (ttlib::issameas(name, "makefile") && ttlib::fileExists("makefile"))
             continue;
-        if (ttIsSameStr(atxtIgnoreList[pos], "bld/") && ttDirExists("bld"))
+        if (ttlib::issameas(name, "bld/") && ttlib::dirExists("bld"))
             continue;
 
-        for (line = 0; line <= file.GetMaxLine(); ++line)
+        bool doInsert = true;
+        for (auto& line: file)
         {
-            if (file[line][0] == '#')
-                continue;
-            do
+            if (line.issameas(name))
             {
-                if (ttIsSameStrI(file[line], atxtIgnoreList[pos]))
-                {
-                    bInsert = false;
-                    break;
-                }
-                ++line;
-            } while (line <= file.GetMaxLine());
-            break;
+                doInsert = false;
+                break;
+            }
         }
-        if (bInsert)
-            file.AddLine(atxtIgnoreList[pos]);
+        if (doInsert)
+            file.emplace_back(name);
     }
 
-    return file.WriteFile();
+    return file.WriteFile(GitExclude);
 }

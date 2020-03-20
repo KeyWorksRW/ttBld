@@ -127,7 +127,7 @@ void CTabGeneral::OnBtnDir64()
     ttCStr cszDir;
     cszDir.GetWndText(gethwnd(IDEDIT_DIR64));
     cszDir.FullPathName();
-    if (!ttDirExists(cszDir))  // SHCreateItemFromParsingName will fail if the folder doesn't already exist
+    if (!ttlib::dirExists(cszDir))  // SHCreateItemFromParsingName will fail if the folder doesn't already exist
         cszDir.GetCWD();
 
     dlg.SetStartingDir(cszDir);

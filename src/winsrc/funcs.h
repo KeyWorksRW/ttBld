@@ -13,11 +13,14 @@ class ttCStr;
 class cstr;
 class CSrcFiles;
 
-bool gitIgnoreAll(ttCStr& cszGitExclude);
-bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile);
+bool gitIgnoreAll(ttlib::cstr& GitExclude);
+bool gitIsFileIgnored(ttlib::cstr& gitIgnorePath, std::string_view filename);
+bool gitIsExcluded(ttlib::cstr& GitExclude, std::string_view filename);
+bool gitAddtoIgnore(ttlib::cstr& GitIgnore, std::string_view filename);
 
-bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile);
-bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile);
+[[deprecated]] bool gitAddtoIgnore(ttCStr& cszGitIgnore, const char* pszFile);
+[[deprecated]] bool gitIsExcluded(ttCStr& cszGitExclude, const char* pszFile);
+[[deprecated]] bool gitIsFileIgnored(ttCStr& cszGitIgnore, const char* pszFile);
 
 // Successful return will have filled in ProjectFile with the path to the projectfile that
 // was located.
@@ -26,7 +29,11 @@ bool ChangeOptions(std::string& ProjectFile);
 bool ConvertBuildScript(const char* pszBldFile);
 
 // Search PATH, LIB, or INCLUDE (or variants)
-bool FindFileEnv(const char* pexEnv, const char* pszFile, ttCStr* pcszPath = nullptr);
+[[deprecated]] bool FindFileEnv(const char* pexEnv, const char* pszFile, ttCStr* pcszPath = nullptr);
+
+// Search PATH, LIB, or INCLUDE (or variants)
+bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathResult);
+
 int MakeNinja(int argc, char* argv[]);
 void ParseDefines(ttCList& lst, const char* pszDefines);
 bool isSystemHeaderFile(const char* pszHeaderFile);

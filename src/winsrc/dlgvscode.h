@@ -2,7 +2,7 @@
 // Name:      CDlgVsCode
 // Purpose:   IDDLG_VSCODE dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -12,18 +12,18 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttwindlg.h>  // Class for displaying a dialog
 
 // forward definitions
 
 class ttCList;
 class CSrcFiles;
 
-class CDlgVsCode : public ttCDlg
+class CDlgVsCode : public ttlib::dlg
 {
 public:
     CDlgVsCode()
-        : ttCDlg(IDDLG_VSCODE)
+        : ttlib::dlg(IDDLG_VSCODE)
     {
     }
 
@@ -55,8 +55,8 @@ protected:
     END_TTMSG_MAP()
 
     void OnCheckNinjaDebug();
-    void OnBegin(void);
-    void OnOK(void);
+    void OnBegin(void) override;
+    void OnOK(void) override;
 
     // Protected functions
 

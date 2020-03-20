@@ -8,14 +8,14 @@
 
 #include "pch.h"
 
-#include <ttcstr.h>
+#include <ttcstr.h>     // cstr -- Classes for handling zero-terminated char strings.
+#include <ttenumstr.h>  // enumstr -- Enumerate through substrings in a string
 
 #if defined(_WIN32)
 
+    #include <ttfindfile.h>  // ttCFindFile
     #include <ttreg.h>       // ttCRegistry
     #include <ttstr.h>       // ttCStr
-    #include <ttfindfile.h>  // ttCFindFile
-    #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that
@@ -105,12 +105,32 @@ bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
         if (getenv_s(&cbEnv, cszEnv.GetPtr(), cbEnv, pszEnv) == 0)
         {
             ttlib::enumstr enumPaths(cszEnv.c_str());
-            for (auto iter : enumPaths)
+            for (auto iter: enumPaths)
             {
                 *pcszPath = iter.c_str();
                 pcszPath->AppendFileName(pszFile);
                 if (ttFileExists(*pcszPath))
                     return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathResult)
+{
+    auto pszEnv = std::getenv(Env);
+    if (pszEnv)
+    {
+        ttlib::enumstr enumstr(pszEnv);
+        for (auto& str: enumstr)
+        {
+            str.append_filename(filename);
+            if (str.fileExists())
+            {
+                pathResult = str;
+                pathResult.backslashestoforward();
+                return true;
             }
         }
     }

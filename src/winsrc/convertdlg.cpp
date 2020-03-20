@@ -68,9 +68,9 @@ void CConvertDlg::OnBegin(void)
     SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
 
     ttCStr csz;
-    if (!ttDirExists(".vscode") && FindVsCode(csz))
+    if (!ttlib::dirExists(".vscode") && FindVsCode(csz))
         SetCheck(DLG_ID(IDCHECK_VSCODE));
-    if (ttDirExists(".git") || ttDirExists("../.git") || ttDirExists("../../.git"))
+    if (ttlib::dirExists(".git") || ttlib::dirExists("../.git") || ttlib::dirExists("../../.git"))
         SetCheck(DLG_ID(IDCHECK_IGNORE_ALL));
 
     csz.GetCWD();

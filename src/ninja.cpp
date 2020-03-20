@@ -278,7 +278,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     if (!GetBldDir().dirExists())
     {
-        if (!ttCreateDir(GetBldDir().c_str()))
+        if (!fs::create_directory(GetBldDir().c_str()))
         {
             AddError(_tt("Unable to create or write to ") + GetBldDir());
             return false;
