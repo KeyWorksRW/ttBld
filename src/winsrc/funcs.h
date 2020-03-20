@@ -10,7 +10,7 @@
 
 class ttCList;  // forward definition
 class ttCStr;
-class ttlib::cstr;
+class cstr;
 class CSrcFiles;
 
 bool gitIgnoreAll(ttCStr& cszGitExclude);

@@ -364,7 +364,8 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttCList* plstResults)
 
     // REVIEW: [randalphwa - 7/19/2019] Will it work to have a non-existant default.natvis file or will VS Code
     // complain? An alternative would be to insert/remove the entire line
-    ttCStr cszPath(cSrcFiles.hasOptValue(OPT::NATVIS) ? cSrcFiles.hasOptValue(OPT::NATVIS) : "default.natvis");
+    ttCStr cszPath(cSrcFiles.hasOptValue(OPT::NATVIS) ? cSrcFiles.getOptValue(OPT::NATVIS).c_str() :
+                                                        "default.natvis");
     ttBackslashToForwardslash(cszPath);
     kf.ReplaceStr("%natvis%", cszPath);
 
