@@ -10,7 +10,7 @@ Options:
     Crt_dbg:     dll          # [static | dll] type of CRT to link to in debug builds
     Ms_linker:   false        # true means use link.exe even when compiling with clang
 
-    CFlags_cmn: -std:c++17 /Zc:__cplusplus -DwxWIDGETS -DWXUSINGDLL -DTTLIB_INTERNAL_BUILD
+    CFlags_cmn: -std:c++17 /Zc:__cplusplus -DTTLIB_INTERNAL_BUILD
 
     TargetDir: ../bin         # 64-bit target directory
 

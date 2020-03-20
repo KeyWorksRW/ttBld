@@ -45,24 +45,29 @@
     #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 #endif
 
-wxIMPLEMENT_APP_CONSOLE(CMainApp);
-
-int oldMain(int argc, char** argv);
 void AddFiles(const ttlib::cstrVector& lstFiles);
 
-bool CMainApp::OnInit()
-{
-    SetAppDisplayName(txtAppname);
-    SetVendorName("KeyWorks");
-    SetVendorDisplayName("KeyWorks Software");
+// clang-format off
+#if defined(wxWIDGETS)
+    wxIMPLEMENT_APP_CONSOLE(CMainApp);
 
-    return true;
-}
+    int oldMain(int argc, char** argv);
 
-int CMainApp::OnRun()
-{
-    return oldMain(argc, argv);
-}
+    bool CMainApp::OnInit()
+    {
+        SetAppDisplayName(txtAppname);
+        SetVendorName("KeyWorks");
+        SetVendorDisplayName("KeyWorks Software");
+
+        return true;
+    }
+
+    int CMainApp::OnRun()
+    {
+        return oldMain(argc, argv);
+    }
+#endif
+// clang-format on
 
 void Usage()
 {
@@ -158,7 +163,15 @@ enum  // actions that can be run in addition to normal single command actions
     // clang-format on
 };
 
+#if defined(wxWIDGETS)
+
 int oldMain(int argc, char* argv[])
+
+#else
+
+int main(int argc, char* argv[])
+
+#endif
 {
     UPDATE_TYPE upType = UPDATE_NORMAL;
     size_t Action = 0;
@@ -476,7 +489,7 @@ int oldMain(int argc, char* argv[])
         if (!cNinja.IsValidVersion())
         {
             if (ttlib::MsgBox(_tt("This version of ttBld is too old -- create ninja scripts anyway?"),
-                         MB_YESNO | MB_ICONWARNING) != IDYES)
+                              MB_YESNO | MB_ICONWARNING) != IDYES)
                 return 1;
         }
 
