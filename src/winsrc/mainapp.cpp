@@ -2,7 +2,7 @@
 // Name:      mainapp.cpp
 // Purpose:   entry point, global strings, library pragmas
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -32,8 +32,6 @@
 #include <cstdlib>
 #include <direct.h>  // Functions for directory handling and creation
 #include <iostream>
-
-#include <ttlist.h>
 
 #include <ttconsole.h>  // ttConsoleColor
 #include <ttcvector.h>  // Vector of ttlib::cstr strings
@@ -201,7 +199,7 @@ int oldMain(int argc, char* argv[])
 
                 // Only a few or our standard arguments will actually make sense as an environment variable
 
-                if (ttIsSameSubStrI(pszArg, "vscode"))
+                if (ttlib::issameprefix(pszArg, "vscode", tt::CASE::either))
                     Action |= ACT_VSCODE;
             }
             pszArg = ttStepOver(pszArg);
@@ -211,12 +209,12 @@ int oldMain(int argc, char* argv[])
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
         // Only one of these commands can be used -- after it is processes, ttBld will exit
-        if (argv[argpos][1] == '?' || ttIsSameSubStrI(argv[argpos] + 1, "help"))
+        if (argv[argpos][1] == '?' || ttlib::issameprefix(argv[argpos] + 1, "help", tt::CASE::either))
         {
             Usage();
             return 1;
         }
-        else if (ttIsSameStrI(argv[argpos] + 1, "add"))
+        else if (ttlib::issameas(argv[argpos] + 1, "add", tt::CASE::either))
         {
             ttlib::cstrVector lstFiles;
             for (++argpos; argpos < argc; ++argpos)
@@ -224,7 +222,7 @@ int oldMain(int argc, char* argv[])
             AddFiles(lstFiles);
             return 1;
         }
-        else if (ttIsSameStrI(argv[argpos] + 1, "convert"))
+        else if (ttlib::issameas(argv[argpos] + 1, "convert", tt::CASE::either))
         {
             if (++argpos < argc)
                 SrcFilePath = argv[argpos++];
@@ -236,8 +234,9 @@ int oldMain(int argc, char* argv[])
             CreateCodeCmd("code64.cmd");
             return 1;
         }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "msvcenv64"))  // used in case it was set in environment
+        else if (ttlib::issameprefix(argv[argpos] + 1, "msvcenv64", tt::CASE::either))
         {
+            // used in case it was set in environment
             if (argpos + 1 < argc)
             {
                 CreateMSVCEnvCmd(argv[argpos + 1], true);
@@ -245,8 +244,9 @@ int oldMain(int argc, char* argv[])
             }
             return 0;
         }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "msvcenv32"))  // used in case it was set in environment
+        else if (ttlib::issameprefix(argv[argpos] + 1, "msvcenv32", tt::CASE::either))
         {
+            // used in case it was set in environment
             if (argpos + 1 < argc)
             {
                 CreateMSVCEnvCmd(argv[argpos + 1], false);
@@ -256,8 +256,9 @@ int oldMain(int argc, char* argv[])
         }
 #if defined(TESTING) && defined(_DEBUG)
 
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "tvdlg"))  // used in case it was set in environment
+        else if (ttlib::issameprefix(argv[argpos] + 1, "tvdlg", tt::CASE::either))
         {
+            // used in case it was set in environment
             CDlgVsCode dlg;
             if (dlg.DoModal(NULL) != IDOK)
                 return 1;
@@ -266,17 +267,15 @@ int oldMain(int argc, char* argv[])
             fs::remove(".vscode/tasks.json");
 
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            ttCList lstResults;
-            CreateVsCodeProject(SrcFilePath, &lstResults);
-            for (size_t pos = 0; lstResults.InRange(pos); ++pos)
-            {
-                std::cout << lstResults[pos] << '\n';
-            }
+            std::vector<std::string> Results;
+            CreateVsCodeProject(SrcFilePath, &Results);
+            for (auto& iter: Results)
+                std::cout << iter << '\n';
         }
 #endif
 
 #if !defined(NDEBUG) && defined(wxWidgets)  // Starts debug section.
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "bwt"))
+        else if (ttlib::issameprefix(argv[argpos] + 1, "bwt", tt::CASE::either))
         {
             wxConfig config("ttBld");
             config.SetPath("/Settings");
@@ -292,27 +291,27 @@ int oldMain(int argc, char* argv[])
 
         // The following commands can be combined
 
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "allninja"))  // -allninja
+        else if (ttlib::issameprefix(argv[argpos] + 1, "allninja", tt::CASE::either))
             Action |= ACT_ALLNINJA;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "alld"))  // -alld
+        else if (ttlib::issameprefix(argv[argpos] + 1, "alld", tt::CASE::either))
             Action |= ACT_ALLD;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "all"))  // -all
+        else if (ttlib::issameprefix(argv[argpos] + 1, "all", tt::CASE::either))
             Action |= ACT_ALL;
 
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "dry"))  // -dryryn
+        else if (ttlib::issameprefix(argv[argpos] + 1, "dry", tt::CASE::either))
             Action |= ACT_DRYRUN;
-        else if (ttIsSameStrI(argv[argpos] + 1, "new"))
+        else if (ttlib::issameas(argv[argpos] + 1, "new", tt::CASE::either))
             Action |= ACT_NEW;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "opt"))  // -options
+        else if (ttlib::issameprefix(argv[argpos] + 1, "opt", tt::CASE::either))
             Action |= ACT_OPTIONS;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "vscode"))  // check this before "vs"
+        else if (ttlib::issameprefix(argv[argpos] + 1, "vscode", tt::CASE::either))  // check this before "vs"
             Action |= ACT_VSCODE;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "vs"))
+        else if (ttlib::issameprefix(argv[argpos] + 1, "vs", tt::CASE::either))
             Action |= ACT_VS;
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "force"))  // write ninja file even if it hasn't changed
+        else if (ttlib::issameprefix(argv[argpos] + 1, "force", tt::CASE::either))
             Action |= ACT_FORCE;
         // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "dir"))
+        else if (ttlib::issameprefix(argv[argpos] + 1, "dir", tt::CASE::either))
         {
             ++argpos;
             if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
@@ -330,21 +329,21 @@ int oldMain(int argc, char* argv[])
 
         // The following commands are called from a makefile to update one .ninja script and immediately exit
 
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc"))
+        else if (ttlib::issameas(argv[argpos] + 1, "umsvc", tt::CASE::either))
             upType = UPDATE_MSVC;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x86"))
+        else if (ttlib::issameas(argv[argpos] + 1, "umsvc_x86", tt::CASE::either))
             upType = UPDATE_MSVC32;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang"))
+        else if (ttlib::issameas(argv[argpos] + 1, "uclang", tt::CASE::either))
             upType = UPDATE_CLANG_CL;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x86"))
+        else if (ttlib::issameas(argv[argpos] + 1, "uclang_x86", tt::CASE::either))
             upType = UPDATE_CLANG_CL32;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvcD"))
+        else if (ttlib::issameas(argv[argpos] + 1, "umsvcD", tt::CASE::either))
             upType = UPDATE_MSVCD;
-        else if (ttIsSameStrI(argv[argpos] + 1, "umsvc_x86D"))
+        else if (ttlib::issameas(argv[argpos] + 1, "umsvc_x86D", tt::CASE::either))
             upType = UPDATE_MSVC32D;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclangD"))
+        else if (ttlib::issameas(argv[argpos] + 1, "uclangD", tt::CASE::either))
             upType = UPDATE_CLANG_CLD;
-        else if (ttIsSameStrI(argv[argpos] + 1, "uclang_x86D"))
+        else if (ttlib::issameas(argv[argpos] + 1, "uclang_x86D", tt::CASE::either))
             upType = UPDATE_CLANG_CL32D;
     }
 
@@ -476,7 +475,7 @@ int oldMain(int argc, char* argv[])
         CNinja cNinja;
         if (!cNinja.IsValidVersion())
         {
-            if (ttMsgBox(_tt("This version of ttBld is too old -- create ninja scripts anyway?"),
+            if (ttlib::MsgBox(_tt("This version of ttBld is too old -- create ninja scripts anyway?"),
                          MB_YESNO | MB_ICONWARNING) != IDYES)
                 return 1;
         }
@@ -487,7 +486,7 @@ int oldMain(int argc, char* argv[])
             cNinja.EnableDryRun();
 
         if (Action & ACT_ALLD)
-            wxRemoveFile("makefile");
+            fs::remove("makefile");
 
         if (Action & ACT_ALL || Action & ACT_ALLD)
         {

@@ -2,48 +2,45 @@
 // Name:      vscode.cpp
 // Purpose:   Creates/updates .vscode files
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
 
 #include <ttTR.h>        // Function for translating strings
-#include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
-
 #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
-#include <ttlist.h>      // ttCList
+#include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 #include "funcs.h"      // List of function declarations
 #include "resource.h"
 
-#if 0
-static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
-                    const char* pszProblem);
-#endif
+// If the text is read as an array, then it's stored as char*[], has a trailing nullptr, and no \n characters.
 
-static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
-static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand);
+// By contrast, if the text is to be read as a string, then each "line" must end with a \n character. These string
+// typically have %...% portions which are placeholders that get replaced with strings determined durint runtime.
 
-static const char* txtProperties =
+static const char* txtProperties[] {
 
-    "{\n"
-    "    \"configurations\": [\n"
-    "        {\n"
-    "            \"name\": \"Default\",\n"
-    "             \"cStandard\": \"c11\",\n"
-    "             \"cppStandard\": \"c++17\",\n"
-    "             \"defines\": [\n"
-    "             ],\n"
-    "             \"includePath\": [\n"
-    "             ]\n"
-    "         }\n"
-    "     ],\n"
-    "     \"version\": 4\n"
-    "}\n";
+    "{",
+    "    \"configurations\": [",
+    "        {",
+    "            \"name\": \"Default\",",
+    "             \"cStandard\": \"c11\",",
+    "             \"cppStandard\": \"c++17\",",
+    "             \"defines\": [",
+    "             ],",
+    "             \"includePath\": [",
+    "             ]",
+    "         }",
+    "     ],",
+    "     \"version\": 4",
+    "}",
+    nullptr
+
+};
 
 static const char* txtLaunch =
 
@@ -71,15 +68,18 @@ static const char* txtLaunch =
     "   ]\n"
     "}\n";
 
-static const char* txtTasks =
+static const char* txtTasks[] {
 
-    "{\n"
-    "    // See https://go.microsoft.com/fwlink/?LinkId=733558\n"
-    "    // for the documentation about the tasks.json format\n"
-    "    \"version\": \"2.0.0\",\n"
-    "    \"tasks\": [\n"
-    "    ]\n"
-    "}\n";
+    "{",
+    "    // See https://go.microsoft.com/fwlink/?LinkId=733558",
+    "    // for the documentation about the tasks.json format",
+    "    \"version\": \"2.0.0\",",
+    "    \"tasks\": [",
+    "    ]",
+    "}",
+    nullptr
+
+};
 
 #if 0
 static const char* txtSubTasks =
@@ -166,6 +166,16 @@ static const char* txtDefaultTask =
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
 
+#if 0
+static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
+                    const char* pszProblem);
+#endif
+
+static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group,
+                        std::string_view Command);
+static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group,
+                         std::string_view Command);
+
 // Returns true unless unable to write to a file
 bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>& Results)
 {
@@ -242,39 +252,42 @@ bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>&
 
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 {
-    ttCFile kf, kfOut;
+    ttlib::textfile out;
+    ttlib::textfile propFile;
+    propFile.ReadArray(txtProperties);
 
-    kf.ReadStrFile(txtProperties);
-    while (kf.ReadLine())
+    for (auto propLine = propFile.begin(); propLine != propFile.end(); ++propLine)
     {
-        if (ttIsSameSubStrI(ttFindNonSpace(kf), "\042defines"))
+        if (propLine->viewnonspace().issameprefix("\"defines", tt::CASE::either))
         {
-            kfOut.WriteEol(kf);
-            std::vector<std::string> Defines;
+            out.emplace_back(*propLine);
+            ttlib::cstrVector Defines;
             if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
                 ParseDefines(Defines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN));
             if (cSrcFiles.hasOptValue(OPT::CFLAGS_DBG))
                 ParseDefines(Defines, cSrcFiles.getOptValue(OPT::CFLAGS_DBG));
             std::sort(Defines.begin(), Defines.end());
             for (auto iter: Defines)
-                kfOut.printf("                %kq,\n", iter.c_str());
-
-                // we always define _DEBUG. Under Windows, we always define _WIN32.
+            {
+                auto& line = out.addEmptyLine();
+                line.Format("                %ks,", iter.c_str());
+            }
+            // we always define _DEBUG. Under Windows, we always define _WIN32.
 
 #if defined(_WIN32)
-            kfOut.WriteEol("                \042_WIN32\042,");
+            out.emplace_back("                \042_WIN32\042,");
 #endif
-            kfOut.WriteEol("                \042_DEBUG\042");
+            out.emplace_back("                \042_DEBUG\042");
             continue;
         }
 
-        else if (ttIsSameSubStrI(ttFindNonSpace(kf), "\042includePath"))
+        else if (propLine->viewnonspace().issameprefix("\"includePath", tt::CASE::either))
         {
-            kfOut.WriteEol(kf);
-            while (kf.ReadLine())  // find the end of the current list of includes
+            out.emplace_back(*propLine);
+            while (++propLine != propFile.end())  // find the end of the current list of includes
             {
-                if (!ttIsSameSubStr(ttFindNonSpace(kf), "]"))
-                    kfOut.WriteEol(kf);
+                if (propLine->find(']') == tt::npos)
+                    out.emplace_back(*propLine);
                 else
                     break;
             }
@@ -282,35 +295,34 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
             if (cSrcFiles.hasOptValue(OPT::INC_DIRS))
             {
                 ttlib::enumstr enumInc(cSrcFiles.getOptValue(OPT::INC_DIRS));
-                for (auto iter: enumInc)
+                for (auto& iter: enumInc)
                 {
-                    ttCStr cszInclude(iter.c_str());
-                    cszInclude.FullPathName();
+                    ttlib::cstr IncName(iter);
+                    IncName.make_absolute();
 #if defined(_WIN32)
-                    ttCStr cszIncDir;
-                    JunctionToReal(cszInclude, cszIncDir);
-                    ttBackslashToForwardslash(cszIncDir);
-                    kfOut.printf("                %kq,\n", (const char*) cszIncDir);
+                    ttlib::cstr IncDir;
+                    JunctionToReal(IncName, IncDir);
+                    IncDir.backslashestoforward();
+                    auto& line = out.addEmptyLine();
+                    line.Format("                %ks,", IncDir.c_str());
 #else
-                    ttBackslashToForwardslash(cszInclude);
-                    kfOut.printf("                %kq,\n", (const char*) cszInclude);
+                    auto& line = out.addEmptyLine();
+                    line.Format("                %ks,", IncName.c_str());
 #endif
                 }
             }
             // we always add the default include path
-            kfOut.WriteEol("                \042${default}\042");
-            kfOut.WriteEol(kf);
+            out.emplace_back("                \042${default}\042");
+            out.emplace_back(*propLine);
             continue;
         }
         else
-            kfOut.WriteEol(kf);
+            out.emplace_back(*propLine);
     }
 
-    if (!kfOut.WriteFile(".vscode/c_cpp_properties.json"))
+    if (!out.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        std::string msg(_tt("Unable to create or write to "));
-        msg += ".vscode/c_cpp_properties.json";
-        ttlib::MsgBox(msg);
+        ttlib::MsgBox(_tt("Unable to create or write to .vscode/c_cpp_properties.json"));
         return false;
     }
     else
@@ -357,7 +369,6 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<std::strin
     Path.backslashestoforward();
     Launch.Replace("%natvis%", Path);
 
-    ttCFile kf;
     ttlib::textfile file;
     file.ReadString(Launch);
 
@@ -376,76 +387,68 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<std::strin
 
 bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 {
-    ttCFile kfTask, kfSubTask, kfOut;
+    ttlib::textfile out;
 
-    ttCStr cszMakeFileOption("");
-    {
-        auto filename = cSrcFiles.GetSrcFilesName().filename();
+    ttlib::textfile tasks;
+    tasks.ReadArray(txtTasks);
 
-        if (!cSrcFiles.GetSrcFilesName().issameas(filename))
-        {
-            ttlib::cstr dir(cSrcFiles.GetSrcFilesName());
-            dir.remove_filename();
-            cszMakeFileOption += "-f ";
-            cszMakeFileOption += dir.c_str();
-            auto pszFilePortion = ttFindFilePortion(cszMakeFileOption);
-            *pszFilePortion = 0;
-            cszMakeFileOption.AppendFileName("makefile");
-        }
-    }
+    ttlib::cstr MakeFileOption(cSrcFiles.GetSrcFilesName());
+    MakeFileOption.replace_filename("makefile");
+    MakeFileOption.insert(0, "-f ");
 
     // Read the array of lines, write them into kf so it looks like it was read from a file
 
-    kfTask.ReadStrFile(txtTasks);
-
-    while (kfTask.ReadLine())
+    for (auto& taskLine: tasks)
     {
-        if (ttIsSameSubStrI(ttFindNonSpace(kfTask), "\042tasks"))
+        if (taskLine.find("\042tasks") == tt::npos)
         {
-            kfOut.WriteEol(kfTask);
+            out.emplace_back(taskLine);
+            continue;
+        }
 
-            // First set the default task. This is the only one where the property "isDefault" is set
+        out.emplace_back(taskLine);
 
-            kfSubTask.ReadStrFile(txtDefaultTask);
-            ttCStr cszLabel, cszMakeCommand;
-            if (m_bMainTasks)
-            {
+        // First set the default task. This is the only one where the property "isDefault" is set
+
+        ttlib::textfile SubTask;
+        SubTask.ReadString(txtDefaultTask);
+        ttlib::cstr MakeCommand;
+        if (m_bMainTasks)
+        {
 #if defined(_WIN32)
+            // Build MSVC debug
 
-                // Build MSVC debug
-
-                cszMakeCommand.printf("nmake.exe -nologo debug %s", (char*) cszMakeFileOption);
-                AddMsvcTask(kfOut, "Build Debug MSVC",
-                            (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup, cszMakeCommand);
-
+            MakeCommand = "nmake.exe -nologo debug " + MakeFileOption;
+            AddMsvcTask(out, "Build Debug MSVC", (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup,
+                        MakeCommand);
 #else
-                cszMakeCommand.printf("make debug cmplr=gcc %s", (char*) cszMakeFileOption);
-                AddClangTask(kfOut, "Build Debug GCC",
-                             (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup, cszMakeCommand);
+            MakeCommand = "make debug cmplr=gcc " + MakeFileOption;
+            AddClangTask(out, "Build Debug GCC", (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup,
+                         MakeCommand);
 #endif
 
-                // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC
-                // compiler. If we're not on Windows, then before we write the file, we replace nmake.exe with
-                // make.exe, and MSVC with either CLANG or GCC.
+            // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC
+            // compiler. If we're not on Windows, then before we write the file, we replace nmake.exe with
+            // make.exe, and MSVC with either CLANG or GCC.
 
-                // Build MSVC release
+            // Build MSVC release
 
-                cszLabel.printf("Build %s (release) using MSVC",
-                                ttFindFilePortion(cSrcFiles.GetTargetRelease().c_str()));
+            ttlib::cstr Label;
+            Label.Format("Build %s (release) using MSVC", cSrcFiles.GetTargetRelease().filename().c_str());
 
-                cszMakeCommand.printf("nmake.exe -nologo release %s", (char*) cszMakeFileOption);
-                AddMsvcTask(kfOut, "Build Release MSVC", txtNormalGroup, cszMakeCommand);
+            MakeCommand = "nmake.exe -nologo release %s" + MakeFileOption;
+            AddMsvcTask(out, "Build Release MSVC", txtNormalGroup, MakeCommand);
 
-                // Rebuild MSVC release
+            // Rebuild MSVC release
 
-                cszMakeCommand.printf("nmake.exe -nologo clean release %s", (char*) cszMakeFileOption);
-                AddMsvcTask(kfOut, "Rebuild Release MSVC", txtNormalGroup, cszMakeCommand);
-                if (m_bNinjaTask)
-                    AddMsvcTask(kfOut, "Ninja Debug Build", txtNormalGroup, "ninja -f bld/msvc_dbg.ninja");
-            }
+            MakeCommand = "nmake.exe -nologo clean release " + MakeFileOption;
+            AddMsvcTask(out, "Rebuild Release MSVC", txtNormalGroup, MakeCommand);
+            if (m_bNinjaTask)
+                AddMsvcTask(out, "Ninja Debug Build", txtNormalGroup, "ninja -f bld/msvc_dbg.ninja");
+        }
 
-            // REVIEW: [KeyWorks - 10-05-2019] Disabled until we have a method to determine if this task actually
-            // applies to the current project.
+        // REVIEW: [KeyWorks - 10-05-2019] Disabled until we have a method to determine if this task actually
+        // applies to the current project.
 
 #if 0
             if (FindFileEnv("PATH", "xgettext.exe"))
@@ -456,55 +459,49 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string
 #endif
 
 #if defined(_WIN32)
-            // If we're on Windows, then we also look to see if either the clang-cl compiler is available. If so,
-            // we add build targets for it
+        // If we're on Windows, then we also look to see if either the clang-cl compiler is available. If so,
+        // we add build targets for it
 
-            if (m_bClangTasks)
-            {
-                cszMakeCommand.printf(m_bMake ? "mingw32-make.exe debug %s" : "nmake debug cmplr=clang %s",
-                                      (char*) cszMakeFileOption);
-                AddClangTask(kfOut, "Build Debug CLANG",
-                             (m_DefTask == DEFTASK_CLANG) ? txtDefaultGroup : txtNormalGroup, cszMakeCommand);
+        if (m_bClangTasks)
+        {
+            MakeCommand = (m_bMake ? "mingw32-make.exe debug " : "nmake debug cmplr=clang ") + MakeFileOption;
+            AddClangTask(out, "Build Debug CLANG", (m_DefTask == DEFTASK_CLANG) ? txtDefaultGroup : txtNormalGroup,
+                         MakeCommand);
 
-                cszMakeCommand.printf(m_bMake ? "mingw32-make.exe release %s" : "nmake release cmplr=clang %s",
-                                      (char*) cszMakeFileOption);
-                AddClangTask(kfOut, "Build Release CLANG", txtNormalGroup, cszMakeCommand);
+            MakeCommand = (m_bMake ? "mingw32-make.exe release " : "nmake release cmplr=clang ") + MakeFileOption;
+            AddClangTask(out, "Build Release CLANG", txtNormalGroup, MakeCommand);
 
-                cszMakeCommand.printf(m_bMake ? "mingw32-make.exe clean release %s" :
-                                                "nmake clean release cmplr=clang %s",
-                                      (char*) cszMakeFileOption);
-                AddClangTask(kfOut, "Rebuild Release CLANG", txtNormalGroup, cszMakeCommand);
-                if (m_bNinjaTask && !m_bMainTasks)
-                    AddClangTask(kfOut, "Ninja Debug Build",
-                                 (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
-                                 "ninja -f bld/clang_dbg.ninja");
-            }
+            MakeCommand = (m_bMake ? "mingw32-make.exe clean release " : "nmake clean release cmplr=clang ") +
+                          MakeFileOption;
+            AddClangTask(out, "Rebuild Release CLANG", txtNormalGroup, MakeCommand);
+            if (m_bNinjaTask && !m_bMainTasks)
+                AddClangTask(out, "Ninja Debug Build",
+                             (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
+                             "ninja -f bld/clang_dbg.ninja");
+        }
 #endif
 
 #if !defined(_WIN32)
-            {
-                while (kfOut.ReplaceStr("msvcBuild", "gccBuild"))
-                    ;
-                while (kfOut.ReplaceStr("clangBuild", "llvmBuild"))
-                    ;
-                while (kfOut.ReplaceStr("nmake.exe -nologo", "make cmplr=gcc"))
-                    ;
-                while (kfOut.ReplaceStr("mingw32-make.exe", "make"))
-                    ;
-                while (kfOut.ReplaceStr("MSVC", "GCC"))
-                    ;
-                while (kfOut.ReplaceStr("CLANG", "LLVM"))
-                    ;
-            }
-            while (kfOut.ReplaceStr("$msCompile", "$gcc"))
+        {
+            while (kfOut.ReplaceStr("msvcBuild", "gccBuild"))
                 ;
-#endif
+            while (kfOut.ReplaceStr("clangBuild", "llvmBuild"))
+                ;
+            while (kfOut.ReplaceStr("nmake.exe -nologo", "make cmplr=gcc"))
+                ;
+            while (kfOut.ReplaceStr("mingw32-make.exe", "make"))
+                ;
+            while (kfOut.ReplaceStr("MSVC", "GCC"))
+                ;
+            while (kfOut.ReplaceStr("CLANG", "LLVM"))
+                ;
         }
-        else
-            kfOut.WriteEol(kfTask);
+        while (kfOut.ReplaceStr("$msCompile", "$gcc"))
+            ;
+#endif
     }
 
-    if (!kfOut.WriteFile(".vscode/tasks.json"))
+    if (!out.WriteFile(".vscode/tasks.json"))
     {
         Results.emplace_back(_tt("Unable to create or write to .vscode/tasks.json"));
         return false;
@@ -569,25 +566,18 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 
     ttlib::cstrVector Defines;
 
-    ttCList lstDefines;
     if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
-        ParseDefines(lstDefines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN).c_str());
+        ParseDefines(Defines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN));
     if (cSrcFiles.hasOptValue(OPT::CFLAGS_DBG))
-        ParseDefines(lstDefines, cSrcFiles.getOptValue(OPT::CFLAGS_DBG).c_str());
+        ParseDefines(Defines, cSrcFiles.getOptValue(OPT::CFLAGS_DBG));
 
     // Also add environment flags
 
-    ttCStr cszEnv;
-    if (cszEnv.GetEnv("CFLAGS"))
-        ParseDefines(lstDefines, cszEnv);
-    if (cszEnv.GetEnv("CFLAGSD"))
-        ParseDefines(lstDefines, cszEnv);
-
-    // REVIEW: [KeyWorks - 02-02-2020] Hack Alert!!! This only exists until lstDefines gets replaced, which
-    // requires an updated version of ParseDefines().
-
-    for (size_t hack = 0; hack < lstDefines.GetCount(); ++hack)
-        Defines.append(lstDefines[hack]);
+    ttlib::cstr Env;
+    if (Env.assignEnvVar("CFLAGS"))
+        ParseDefines(Defines, Env);
+    if (Env.assignEnvVar("CFLAGSD"))
+        ParseDefines(Defines, Env);
 
     // BUGBUG: [KeyWorks - 7/27/2019] This is a short-term hack until we have hooked up proper routines for
     // reading/writing .json files. While .json files are typically written out as line-oriented files, there's no
@@ -756,36 +746,9 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 
 // Given a string, finds any definitions and stores them in the provided list. Primarily used
 // to parse a CFlags: option string
-void ParseDefines(ttCList& lst, const char* pszDefines)
+void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
 {
-    const char* pszStart = pszDefines;
-    while (*pszStart)
-    {
-        if (*pszStart == '-' || *pszStart == '/')
-        {
-            ++pszStart;
-            if (*pszStart != 'D')
-            {  // note that this option is case sensitive
-                pszStart = ttStepOver(pszStart);
-                continue;  // it's not a define
-            }
-            ttCStr cszTmp;
-            cszTmp.GetString(pszStart, *pszStart, ' ');
-            lst += cszTmp;
-            pszStart += ttStrLen(cszTmp);
-        }
-        else
-        {
-            pszStart = ttStepOver(pszStart);
-        }
-    }
-}
-
-// Given a string, finds any definitions and stores them in the provided list. Primarily used
-// to parse a CFlags: option string
-void ParseDefines(std::vector<std::string>& Results, std::string_view Defines)
-{
-    for (size_t pos = 0; pos < Defines.size(); pos = ttlib::stepover_pos(Defines.substr(pos)))
+    for (size_t pos = 0; pos < Defines.size(); pos = ttlib::stepover_pos(Defines.substr(pos)) + pos)
     {
         if (Defines[pos] == '-' || Defines[pos] == '/')
         {
@@ -794,8 +757,11 @@ void ParseDefines(std::vector<std::string>& Results, std::string_view Defines)
             {
                 auto end = ttlib::findspace_pos(Defines.substr(pos));
                 if (end == tt::npos)
+                {
+                    Results.append(Defines.substr(pos + 1));
                     return;
-                Results.emplace_back(Defines.substr(pos, end - pos));
+                }
+                Results.append(Defines.substr(pos + 1, end - pos));
             }
         }
     }
@@ -824,45 +790,43 @@ static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup
 
 // AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path
 // instead of the default absolute path
-static void AddMsvcTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand)
+static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group,
+                        std::string_view Command)
 {
-    ttCFile fileTask;
-    fileTask.Delete();
-    fileTask.ReadStrFile(txtMsvcSubTasks);
+    ttlib::cstr SubTask(txtMsvcSubTasks);
+    SubTask.Replace("%label%", Label);
+    SubTask.Replace("%group%", Group);
+    SubTask.Replace("%command%", Command);
 
-    fileTask.ReplaceStr("%label%", pszLabel);
-    fileTask.ReplaceStr("%group%", pszGroup);
-    fileTask.ReplaceStr("%command%", pszCommand);
-
-    while (fileTask.ReadLine())
-        fileOut.WriteEol(fileTask);
+    ttlib::textfile fileTask;
+    fileTask.ReadString(SubTask);
+    for (auto& iter: fileTask)
+        fileOut.emplace_back(iter);
 }
 
 // AddClangTask provides it's own problemMatcher -- because $gcc didn't work
-static void AddClangTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand)
+static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group,
+                         std::string_view Command)
 {
-    ttCFile fileTask;
-    fileTask.Delete();
-    fileTask.ReadStrFile(txtClangSubTasks);
+    ttlib::cstr SubTask(txtClangSubTasks);
+    SubTask.Replace("%label%", Label);
+    SubTask.Replace("%group%", Group);
+    SubTask.Replace("%command%", Command);
 
-    fileTask.ReplaceStr("%label%", pszLabel);
-    fileTask.ReplaceStr("%group%", pszGroup);
-    fileTask.ReplaceStr("%command%", pszCommand);
-
-    while (fileTask.ReadLine())
-        fileOut.WriteEol(fileTask);
+    ttlib::textfile fileTask;
+    fileTask.ReadString(SubTask);
+    for (auto& iter: fileTask)
+        fileOut.emplace_back(iter);
 }
 
 #if defined(_WIN32)
 // This will get the full path to the directory, using the target path if it is a junction
-bool JunctionToReal(const char* pszDir, ttCStr& cszDir)
+bool JunctionToReal(const std::string& Dir, ttlib::cstr& Result)
 {
-    ttASSERT_MSG(pszDir, "NULL pointer!");
-
-    auto hFile = CreateFileA(pszDir, 0, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+    auto hFile = CreateFileA(Dir.c_str(), 0, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
     if (hFile == INVALID_HANDLE_VALUE)
     {
-        cszDir = pszDir;
+        Result = Dir;
         return false;
     }
     char szPath[MAX_PATH];
@@ -870,10 +834,10 @@ bool JunctionToReal(const char* pszDir, ttCStr& cszDir)
     if (dwRet < sizeof(szPath))
     {
         char* pszStart;
-        for (pszStart = szPath; *pszStart && !ttIsAlpha(*pszStart); ++pszStart)
+        for (pszStart = szPath; *pszStart && !ttlib::isalpha(*pszStart); ++pszStart)
             ;
 
-        cszDir = pszStart;
+        Result = pszStart;
     }
 
     CloseHandle(hFile);

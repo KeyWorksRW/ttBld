@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <vector>
+#include <ttcvector.h>  // cstrVector -- Vector of ttlib::cstr strings
 
 class ttCList;  // forward definition
 class ttCStr;
@@ -37,8 +37,7 @@ bool ConvertBuildScript(const char* pszBldFile);
 bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathResult);
 
 int MakeNinja(int argc, char* argv[]);
-void ParseDefines(ttCList& lst, const char* pszDefines);
-void ParseDefines(std::vector<std::string>& Results, std::string_view Defines);
+void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines);
 bool isSystemHeaderFile(const char* pszHeaderFile);
 
 // If pcszStartDir is used, it will be set to the path to the file or dir/file where .srcfiles.yaml was found
@@ -73,6 +72,6 @@ bool FindCurMsvcPath(ttCStr& cszPath);
 bool FindVsCode(ttCStr& cszPath);
 // Returns true if we are running on an x64 processor
 bool IsHost64();
-bool JunctionToReal(const char* pszDir, ttCStr& cszDir);
+bool JunctionToReal(const std::string& Dir, ttlib::cstr& Result);
 
 #endif
