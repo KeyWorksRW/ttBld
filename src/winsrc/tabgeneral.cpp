@@ -108,9 +108,9 @@ void CTabGeneral::OnBtnDir32()
     dlg.SetStartingDir(cszDir);
     if (dlg.GetFolderName(*this))
     {
-        ttCStr cszCWD;
-        cszCWD.GetCWD();
-        ttConvertToRelative(cszCWD, dlg, cszDir);
+        ttlib::cwd cwd;
+        cszDir = dlg;
+        cszDir.make_relatice(cwd);
         SetControlText(IDEDIT_DIR32, cszDir);
     }
 #endif
@@ -124,18 +124,18 @@ void CTabGeneral::OnBtnDir64()
     ttCDirDlg dlg;
     dlg.SetTitle(_tt("Select 64-bit target directory"));
 
-    ttCStr cszDir;
+    ttlib::cstr cszDir;
     cszDir.GetWndText(gethwnd(IDEDIT_DIR64));
-    cszDir.FullPathName();
+    cszDir.make_absolute();
     if (!ttlib::dirExists(cszDir))  // SHCreateItemFromParsingName will fail if the folder doesn't already exist
         cszDir.GetCWD();
 
     dlg.SetStartingDir(cszDir);
     if (dlg.GetFolderName(*this))
     {
-        ttCStr cszCWD;
-        cszCWD.GetCWD();
-        ttConvertToRelative(cszCWD, dlg, cszDir);
+        ttlib::cwd cwd;
+        cszDir = dlg;
+        cszDir.make_relative(cwd);
         SetControlText(IDEDIT_DIR64, cszDir);
     }
 #endif

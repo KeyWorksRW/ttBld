@@ -8,9 +8,6 @@
 
 #include "pch.h"
 
-#include <ttfile.h>      // ttCFile -- class for reading and writing files, strings, data, etc.
-#include <ttlinefile.h>  // ttCLineFile -- Line-oriented file class
-#include <ttstr.h>       // ttCStr -- SBCS string class.
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
 // If .gitignore is found, gitIgnorePath will be updated to point to it

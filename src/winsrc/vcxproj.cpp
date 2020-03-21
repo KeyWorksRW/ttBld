@@ -16,8 +16,8 @@
 #include <ttTR.h>  // Function for translating strings
 
 #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
+#include <ttwinff.h>     // winff -- Wrapper around Windows FindFile
 
 #include "resource.h"
 #include "vcxproj.h"  // CVcxRead, CVcxWrite
@@ -215,14 +215,13 @@ void CVcxRead::ProcessMidl(ttCXMLBranch* pSection, bool bDebug)
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData())
         {
-            ttCStr cszFlags("-D");
+            ttlib::cstr cszFlags("-D");
             cszFlags += pChild->GetData();
-            cszFlags.ReplaceStr("_DEBUG;", "");
-            cszFlags.ReplaceStr("NDEBUG;", "");
-            cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-            while (cszFlags.ReplaceStr(";", " -D"))
-                ;
-            m_pcSrcFiles->setOptValue(bDebug ? OPT::MIDL_DBG : OPT::MIDL_REL, (char*) cszFlags);
+            cszFlags.Replace("_DEBUG;", "");
+            cszFlags.Replace("NDEBUG;", "");
+            cszFlags.Replace(";%(PreprocessorDefinitions)", "");
+            cszFlags.Replace(";", " -D", true);
+            m_pcSrcFiles->setOptValue(bDebug ? OPT::MIDL_DBG : OPT::MIDL_REL, cszFlags);
         }
     }
 }
@@ -235,14 +234,13 @@ void CVcxRead::ProcessRC(ttCXMLBranch* pSection, bool bDebug)
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData())
         {
-            ttCStr cszFlags("-D");
+            ttlib::cstr cszFlags("-D");
             cszFlags += pChild->GetData();
-            cszFlags.ReplaceStr("_DEBUG;", "");
-            cszFlags.ReplaceStr("NDEBUG;", "");
-            cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-            while (cszFlags.ReplaceStr(";", " -D"))
-                ;
-            m_pcSrcFiles->setOptValue(bDebug ? OPT::RC_DBG : OPT::RC_REL, (char*) cszFlags);
+            cszFlags.Replace("_DEBUG;", "");
+            cszFlags.Replace("NDEBUG;", "");
+            cszFlags.Replace(";%(PreprocessorDefinitions)", "");
+            cszFlags.Replace(";", " -D", true);
+            m_pcSrcFiles->setOptValue(bDebug ? OPT::RC_DBG : OPT::RC_REL, cszFlags);
         }
     }
 }
@@ -303,10 +301,11 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
                 const char* pszFirstSemi = ttStrChr(pChild->GetData(), ';');
                 if (pszFirstSemi)
                     ++pszFirstSemi;
-                ttCStr cszFlags(ttIsSameSubStrI(pChild->GetData(), "$(OutDir") && pszFirstSemi ?
-                                    pszFirstSemi :
-                                    pChild->GetData());
-                cszFlags.ReplaceStr(";%(AdditionalIncludeDirectories)", "");
+                ttlib::cstr cszFlags(ttlib::issameprefix(pChild->GetData(), "$(OutDir", tt::CASE::either) &&
+                                             pszFirstSemi ?
+                                         pszFirstSemi :
+                                         pChild->GetData());
+                cszFlags.Replace(";%(AdditionalIncludeDirectories)", "");
 
                 // Paths will be relative to the location of the script file. We need to make them
                 // relative to .srcfiles.yaml.
@@ -373,14 +372,13 @@ void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
         ttCXMLBranch* pChild = pFlags->GetChildAt(0);
         if (pChild->GetData())
         {
-            ttCStr cszFlags("-D");
+            ttlib::cstr cszFlags("-D");
             cszFlags += pChild->GetData();
-            cszFlags.ReplaceStr("_DEBUG;", "");
-            cszFlags.ReplaceStr("NDEBUG;", "");
-            cszFlags.ReplaceStr(";%(PreprocessorDefinitions)", "");
-            while (cszFlags.ReplaceStr(";", " -D"))
-                ;
-            m_pcSrcFiles->setOptValue(bDebug ? OPT::CFLAGS_DBG : OPT::CFLAGS_REL, (char*) cszFlags);
+            cszFlags.Replace("_DEBUG;", "");
+            cszFlags.Replace("NDEBUG;", "");
+            cszFlags.Replace(";%(PreprocessorDefinitions)", "");
+            cszFlags.Replace(";", " -D", true);
+            m_pcSrcFiles->setOptValue(bDebug ? OPT::CFLAGS_DBG : OPT::CFLAGS_REL, cszFlags);
         }
     }
 }
@@ -394,19 +392,19 @@ void CVcxRead::ProcessLink(ttCXMLBranch* pSection, bool bDebug)
         if (pChild->GetData())
         {
             ttlib::enumstr enumLibs(pChild->GetData());
-            ttCStr cszCurLibs;
+            ttlib::cstr cszCurLibs;
             for (auto iter: enumLibs)
             {
                 // We only add libraries that are relative to our project
                 if (tt::issamesubstr(iter, ".."))
                 {
-                    if (cszCurLibs.IsNonEmpty())
+                    if (!cszCurLibs.empty())
                         cszCurLibs += ";";
                     cszCurLibs += iter.c_str();
                 }
             }
-            if (cszCurLibs.IsNonEmpty())
-                m_pcSrcFiles->setOptValue(bDebug ? OPT::LIBS_DBG : OPT::LIBS_REL, (char*) cszCurLibs);
+            if (!cszCurLibs.empty())
+                m_pcSrcFiles->setOptValue(bDebug ? OPT::LIBS_DBG : OPT::LIBS_REL, cszCurLibs);
         }
     }
 }
@@ -459,7 +457,7 @@ const ttlib::cstr& CVcxRead::MakeSrcRelative(const char* pszFile)
     return m_cszRelative;
 }
 
-static bool CreateGuid(ttCStr& cszGuid)
+static bool CreateGuid(ttlib::cstr& Result)
 {
     UUID uuid;
     RPC_STATUS ret_val = ::UuidCreate(&uuid);
@@ -469,11 +467,11 @@ static bool CreateGuid(ttCStr& cszGuid)
         RPC_CSTR pszUuid = nullptr;
         if (::UuidToStringA(&uuid, &pszUuid) == RPC_S_OK && pszUuid)
         {
-            cszGuid = (char*) pszUuid;
+            Result = (char*) pszUuid;
             ::RpcStringFreeA(&pszUuid);
         }
     }
-    return cszGuid.IsNonEmpty();
+    return !Result.empty();
 }
 
 bool CVcxWrite::CreateBuildFile()
@@ -487,62 +485,63 @@ bool CVcxWrite::CreateBuildFile()
     return false;
 #endif  // _WINDOWS_
 
-    ttCStr cszGuid;
+    ttlib::cstr cszGuid;
     if (!CreateGuid(cszGuid))
     {
         AddError(_tt("Unable to create a UUID -- cannot create .vcxproj without it."));
         return false;
     }
 
-    ttCStr cszProjVC(GetProjectName().c_str());
-    cszProjVC.ChangeExtension(".vcxproj");
-    if (!ttFileExists(cszProjVC))
+    ttlib::cstr cszProjVC(GetProjectName());
+    cszProjVC.replace_extension(".vcxproj");
+    if (!cszProjVC.fileExists())
     {
-        ttCFile kf;
-        kf.ReadResource(IDR_VCXPROJ_MASTER);
-        while (kf.ReplaceStr("%guid%", cszGuid))
-            ;
-        while (kf.ReplaceStr("%%DebugExe%", GetTargetDebug().c_str()))
-            ;
-        while (kf.ReplaceStr("%%ReleaseExe%", GetTargetRelease().c_str()))
-            ;
-        while (kf.ReplaceStr("%%DebugExe64%", GetTargetDebug().c_str()))
-            ;
-        while (kf.ReplaceStr("%%ReleaseExe64%", GetTargetRelease().c_str()))
-            ;
+        ttlib::cstr master = std::move(ttlib::LoadTextResource(IDR_VCXPROJ_MASTER));
+
+        master.Replace("%guid%", cszGuid, true);
+        master.Replace("%%DebugExe%", GetTargetDebug(), true);
+        master.Replace("%%ReleaseExe%", GetTargetRelease(), true);
+        master.Replace("%%DebugExe64%", GetTargetDebug(), true);
+        master.Replace("%%ReleaseExe64%", GetTargetRelease(), true);
+
+        ttlib::textfile out;
+        out.ReadString(master);
 
         for (auto& file: m_lstSrcFiles)
         {
             auto ext = file.extension();
             if (ext.empty() || std::tolower(ext[1] != 'c'))
                 continue;
-            kf.WriteEol((" <ItemGroup>\n    <ClCompile Include=%kq />\n  </ItemGroup>" + file).c_str());
+            out.emplace_back(" <ItemGroup>");
+            out.addEmptyLine().Format("    <ClCompile Include=%ks />", file.c_str());
+            out.emplace_back(" </ItemGroup>");
         }
 
-        ttCStr cszSrcFile;
+        ttlib::cstr cszSrcFile;
         if (!m_RCname.empty())
         {
-            cszSrcFile.printf(" <ItemGroup>\n    <ResourceCompile Include=%kq />\n  </ItemGroup>",
-                              m_RCname.c_str());
-            kf.WriteEol(cszSrcFile);
+            out.emplace_back(" <ItemGroup>");
+            out.addEmptyLine().Format("    <ResourceCompile Include=%ks />", m_RCname.c_str());
+            out.emplace_back(" </ItemGroup>");
         }
 
-        ttCFindFile ff("*.h");  // add all header files in current directory
-        if (ff.IsValid())
+        ttlib::winff ff("*.h");  // add all header files in current directory
+        if (ff.isvalid())
         {
             do
             {
-                cszSrcFile.printf(" <ItemGroup>\n    <ClInclude Include=%kq />\n  </ItemGroup>", (const char*) ff);
-                kf.WriteEol(cszSrcFile);
-            } while (ff.NextFile());
+                out.emplace_back(" <ItemGroup>");
+                out.addEmptyLine().Format("    <ClInclude Include=%ks />", ff.c_str());
+                out.emplace_back(" </ItemGroup>");
+            } while (ff.next());
         }
 
-        kf.WriteEol("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />");
-        kf.WriteEol("  <ImportGroup Label=\"ExtensionTargets\">");
-        kf.WriteEol("  </ImportGroup>");
-        kf.WriteEol("</Project>");
+        out.emplace_back("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />");
+        out.emplace_back("  <ImportGroup Label=\"ExtensionTargets\">");
+        out.emplace_back("  </ImportGroup>");
+        out.emplace_back("</Project>");
 
-        if (!kf.WriteFile(cszProjVC))
+        if (!out.WriteFile(cszProjVC))
         {
             std::string msg = _tt("Unable to write to ");
             msg += cszProjVC.c_str();
@@ -550,36 +549,36 @@ bool CVcxWrite::CreateBuildFile()
             return false;
         }
         else
-            printf("Created %s\n", (char*) cszProjVC);
+            std::cout << _tt("Created ") << cszProjVC << '\n';
 
-        kf.Delete();
-        kf.ReadResource(IDR_VCXPROJ_FILTERS);
+        master = ttlib::LoadTextResource(IDR_VCXPROJ_FILTERS);
+
         CreateGuid(cszGuid);  // it already succeeded once if we got here, so we don't check for error again
-        while (kf.ReplaceStr("%guidSrc%", cszGuid))
-            ;
+        master.Replace("%guidSrc%", cszGuid, true);
         CreateGuid(cszGuid);
-        while (kf.ReplaceStr("%guidHdr%", cszGuid))
-            ;
+        master.Replace("%guidHdr%", cszGuid, true);
         CreateGuid(cszGuid);
-        while (kf.ReplaceStr("%guidResource%", cszGuid))
-            ;
+        master.Replace("%guidResource%", cszGuid, true);
 
-        kf.WriteEol("  <ItemGroup>");
+        out.clear();
+        out.ReadString(master);
+
+        out.emplace_back("  <ItemGroup>");
 
         for (size_t pos = 0; pos < m_lstSrcFiles.size(); ++pos)
         {
-            if (ttStrStrI(m_lstSrcFiles[pos].c_str(), ".c"))  // only add C/C++ files
+            if (m_lstSrcFiles[pos].contains(".c"))  // only add C/C++ files
             {
-                cszSrcFile.printf(
-                    "    <ClCompile Include=%kq>\n      <Filter>Source Files</Filter>\n    </ClCompile>",
-                    m_lstSrcFiles[pos].c_str());
-                kf.WriteEol(cszSrcFile);
+                out.addEmptyLine().Format("    <ClCompile Include=%ks>", m_lstSrcFiles[pos].c_str());
+                out.emplace_back("      <Filter>Source Files</Filter>");
+                out.emplace_back("    </ClCompile>");
+                out.emplace_back(cszSrcFile);
             }
         }
-        kf.WriteEol("  </ItemGroup>");
-        kf.WriteEol("</Project>");
+        out.emplace_back("  </ItemGroup>");
+        out.emplace_back("</Project>");
         cszProjVC += ".filters";
-        if (!kf.WriteFile(cszProjVC))
+        if (!out.WriteFile(cszProjVC))
         {
             std::string msg = _tt("Unable to write to ");
             msg += cszProjVC.c_str();
@@ -587,7 +586,7 @@ bool CVcxWrite::CreateBuildFile()
             return false;
         }
         else
-            printf("Created %s\n", (char*) cszProjVC);
+            std::cout << _tt("Created ") << cszProjVC << '\n';
     }
     return true;
 }

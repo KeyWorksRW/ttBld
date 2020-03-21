@@ -229,13 +229,12 @@ void CTabCompiler::OnBtnStd()
 void CTabCompiler::OnBtnAddInclude()
 {
     ttCDirDlg dlg;
-    ttCStr    cszCWD;
-    cszCWD.GetCWD();
+    ttlib::cwd cwd;
 
     dlg.SetStartingDir(cszCWD);
     if (dlg.GetFolderName((HWND) *m_pOpts))
     {
-        ttCStr csz;
+        ttlib::cstr csz;
         csz.GetWndText(gethwnd(IDEDIT_INCDIRS));
         csz += ";";
         csz += (char*) dlg.GetFolderName();

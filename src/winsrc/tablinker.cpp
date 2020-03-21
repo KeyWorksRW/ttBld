@@ -44,16 +44,16 @@ void CTabLinker::OnBegin(void)
 
 void CTabLinker::OnOK(void)
 {
-    ttCStr csz;
+    ttlib::cstr csz;
 
     csz.GetWndText(gethwnd(IDEDIT_COMMON));
-    m_pOpts->setOptValue(OPT::LINK_CMN, (char*) csz);
+    m_pOpts->setOptValue(OPT::LINK_CMN, csz);
 
     csz.GetWndText(gethwnd(IDEDIT_RELEASE));
-    m_pOpts->setOptValue(OPT::LINK_REL, (char*) csz);
+    m_pOpts->setOptValue(OPT::LINK_REL, csz);
 
     csz.GetWndText(gethwnd(IDEDIT_DEBUG));
-    m_pOpts->setOptValue(OPT::LINK_DBG, (char*) csz);
+    m_pOpts->setOptValue(OPT::LINK_DBG, csz);
 
     //    csz.GetWndText(gethwnd(IDEDIT_LIBDIRS));
     //    m_pOpts->setOptValue(OPT::LIB_DIRS, (char*) csz);
@@ -68,7 +68,7 @@ void CTabLinker::OnOK(void)
     m_pOpts->setOptValue(OPT::CRT_DBG, GetCheck(IDCHECK_STATIC_CRT_DBG) ? "static" : "dll");
 
     csz.GetWndText(gethwnd(IDEDIT_NATVIS));
-    m_pOpts->setOptValue(OPT::NATVIS, (char*) csz);
+    m_pOpts->setOptValue(OPT::NATVIS, csz);
 }
 
 void CTabLinker::OnBtnChange()

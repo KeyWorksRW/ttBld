@@ -9,10 +9,11 @@
 #include "pch.h"
 
 #include <ttTR.h>  // Function for translating strings
+#include "funcs.h"
 
 bool LaunchVsCode()
 {
-    ttCStr cszCodePath, cszMSVCPath;
+    ttlib::cstr cszCodePath, cszMSVCPath;
     if (!FindVsCode(cszCodePath))
     {
         puts(_tt("Visual Studio Code does not appear to be installed."));

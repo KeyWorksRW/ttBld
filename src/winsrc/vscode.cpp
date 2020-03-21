@@ -552,12 +552,12 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
     // adding this ensures that VS Code has access to the current header files. That works great for a local
     // copy of c_cpp_properties but wreaks havoc if it's under Source control management (e.g., git).
     #if defined(_WIN32)
-    ttCStr cszMSVC;
+    ttlib::cstr cszMSVC;
     if (FindCurMsvcPath(cszMSVC))
     {
-        cszMSVC.AppendFileName("include");
-        ttBackslashToForwardslash(cszMSVC);  // so we don't have to escape all the backslashes
-        Includes.append(cszMSVC.c_str());
+        cszMSVC.append_filename("include");
+        cszMSVC.backslashtoforwardslash();  // so we don't have to escape all the backslashes
+        Includes.append(cszMSVC);
     }
     #endif
 #endif

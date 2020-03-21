@@ -200,7 +200,7 @@ bool CConvertDlg::ConvertVcProj()
             if (pszOption)
             {
                 ttlib::enumstr enumFlags(pszOption);
-                ttCStr cszCFlags;
+                ttlib::cstr cszCFlags;
                 for (auto iter: enumFlags)
                 {
                     if (ttlib::issameas(iter, "NDEBUG"))
@@ -224,12 +224,12 @@ bool CConvertDlg::ConvertVcProj()
                     if (tt::issamesubstr(iter, "$("))
                         continue;
 
-                    if (cszCFlags.IsNonEmpty())
+                    if (!cszCFlags.empty())
                         cszCFlags += " ";
                     cszCFlags += "-D";
                     cszCFlags += iter.c_str();
                 }
-                m_cSrcFiles.setOptValue(OPT::CFLAGS_CMN, (char*) cszCFlags);
+                m_cSrcFiles.setOptValue(OPT::CFLAGS_CMN, cszCFlags);
             }
         }
     }
@@ -302,13 +302,13 @@ bool CConvertDlg::ConvertDsp()
         {
             // Since this is a really old project, we ignore any compiler flags -- we just grab the defines
 
-            ttCStr cszCurFlags, cszNewFlags;
+            ttlib::cstr cszCurFlags, cszNewFlags;
             ttlib::cstr CurFlags;
             if (m_cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
                 CurFlags = m_cSrcFiles.getOptValue(OPT::CFLAGS_CMN);
             if (bReleaseSection && m_cSrcFiles.hasOptValue(OPT::CFLAGS_REL))
             {
-                if (ttIsNonEmpty(cszCurFlags))
+                if (!cszCurFlags.empty())
                     CurFlags += " ";
                 CurFlags += m_cSrcFiles.getOptValue(OPT::CFLAGS_REL);
             }
@@ -338,7 +338,7 @@ bool CConvertDlg::ConvertDsp()
                             // If we don't already have the flag, then add it
                             if (!Flag.contains(CurFlags))
                             {
-                                if (ttIsNonEmpty(cszNewFlags))
+                                if (!cszNewFlags.empty())
                                     cszNewFlags += " ";
                                 cszNewFlags += Flag.c_str();
                             }
@@ -349,7 +349,7 @@ bool CConvertDlg::ConvertDsp()
             }
 
             CurFlags.clear();
-            if (cszNewFlags.IsNonEmpty())
+            if (!cszNewFlags.empty())
             {
                 if (bReleaseSection && m_cSrcFiles.hasOptValue(OPT::CFLAGS_REL))
                 {

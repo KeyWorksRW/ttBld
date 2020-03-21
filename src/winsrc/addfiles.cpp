@@ -2,14 +2,13 @@
 // Name:      addfiles.cpp
 // Purpose:   Adds files to .srcfiles Files: section
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2018-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
 
 #include <ttcvector.h>   // Vector of ttlib::cstr strings
-#include <ttfile.h>      // ttCFile
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
