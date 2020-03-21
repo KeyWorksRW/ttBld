@@ -42,6 +42,8 @@ CNinja::CNinja(std::string_view NinjaDir) : CSrcFiles(NinjaDir)
         if (projname.hasFilename("src"))
         {
             projname.remove_filename();
+            if (projname.back() == '/')
+                projname.erase(projname.size() - 1);
         }
         setOptValue(OPT::PROJECT, projname.filename());
     }
