@@ -41,6 +41,8 @@ constexpr const char* txtDefBuildDir { "bld" };
 // Attempts to locate .srcfiles.yaml
 ttlib::cstr locateProjectFile(std::string_view StartDir = std::string_view {});
 
+class CWriteSrcFiles;  // forward definition
+
 // Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 class CSrcFiles : public OPT
 {
@@ -171,6 +173,8 @@ protected:
     size_t FindOption(const std::string_view name) const;
 
 private:
+    friend CWriteSrcFiles;
+
     // Class members
 
     ttlib::cstrVector m_lstErrMessages;  // List of any errors that occurred during processing
@@ -187,7 +191,7 @@ private:
     std::string m_strTargetDir;
 
     int m_RequiredMajor { 1 };  // These three get filled in to the minimum ttBld version required to process.
-    int m_RequiredMinor { 0 };
+    int m_RequiredMinor { 4 };
     int m_RequiredSub { 0 };
 
     bool m_bRead { false };  // File has been read and processed.

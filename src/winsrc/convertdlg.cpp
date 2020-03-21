@@ -159,8 +159,8 @@ void CConvertDlg::OnBegin(void)
             } while (ff.NextFile());
         }
     }
-    tmp.Format("%kn file%ks located", cFilesFound, cFilesFound);
-    SetControlText(IDTXT_FILES_FOUND, tmp.c_str());
+    tmp.Format("%kzd %s located", cFilesFound, _ttp("file", "files", cFilesFound));
+    SetControlText(IDTXT_FILES_FOUND, tmp);
 
     if (m_comboScripts.GetCount() > 0)
     {
@@ -340,9 +340,19 @@ bool CConvertDlg::doConversion(const char* pszInFile)
     {
         if (!m_cSrcFiles.hasOptValue(OPT::PROJECT))
         {
-            ttlib::cstr cszProject(m_cszOutSrcFiles);
-            cszProject.remove_filename();
-            m_cSrcFiles.setOptValue(OPT::PROJECT, cszProject.filename());
+            ttlib::cstr projname(m_cszOutSrcFiles);
+            projname.remove_filename();
+            projname.backslashestoforward();
+            if (projname.back() == '/')
+                projname.erase(projname.size() - 1);
+            if (projname.hasFilename("src"))
+            {
+                projname.remove_filename();
+                if (projname.back() == '/')
+                    projname.erase(projname.size() - 1);
+            }
+
+            m_cSrcFiles.setOptValue(OPT::PROJECT, projname.filename());
         }
 
 #if defined(_WIN32)
@@ -351,7 +361,7 @@ bool CConvertDlg::doConversion(const char* pszInFile)
         m_cSrcFiles.AddSourcePattern("*.cpp;*.cc;*.cxx");
 #endif
 
-        if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles.c_str()) != bld::success)
+        if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles) != bld::success)
         {
             ttlib::MsgBox(_tt("Unable to create or write to ") + m_cszOutSrcFiles);
             CancelEnd();
@@ -414,4 +424,14 @@ bool CConvertDlg::doConversion(const char* pszInFile)
         }
     }
     return false;
+}
+
+void CConvertDlg::OnCheckConvert()
+{
+    UnCheck(IDRADIO_FILES);
+}
+
+void CConvertDlg::OnCheckFiles()
+{
+    UnCheck(IDRADIO_CONVERT);
 }

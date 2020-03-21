@@ -42,7 +42,7 @@ static OPT::VERSION aoptVersions[]
 };
 
 // These are in the order they should be written in a new .srcfiles.yaml file.
-static const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
+const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
 {{
 
     { OPT::PROJECT,  "Project",  nullptr,   "project name", false, true },
@@ -115,7 +115,7 @@ static const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
 
 void CSrcFiles::InitOptions()
 {
-    for (auto original: DefaultOptions)
+    for (const auto& original: DefaultOptions)
     {
         auto& option = m_Options[original.optionID];
         if (original.optionID == OPT::LAST)
@@ -134,7 +134,9 @@ void CSrcFiles::InitOptions()
     }
 
     // We special-case PCH and PCH_CPP to replace the default "none" with an empty string
-    m_Options[OPT::PCH].value.clear();
+    // BUGBUG: [KeyWorks - 03-21-2020] OPT::PCH is a required option, so clearing it means it gets written
+    // out as an empty string instead of "none"
+    // m_Options[OPT::PCH].value.clear();
     m_Options[OPT::PCH_CPP].value.clear();
 
 #if !defined(NDEBUG)

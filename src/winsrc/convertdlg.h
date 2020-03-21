@@ -38,8 +38,12 @@ protected:
         TTCASE_CMD(IDBTN_CHANGE_IN, OnBtnChangeIn)
         TTCASE_CMD(IDBTN_CHANGE_OUT, OnBtnChangeOut)
         TTCASE_CMD(IDBTN_LOCATE_SCRIPT, OnBtnLocateScript)
+        TTCASE_CMD(IDRADIO_CONVERT, OnCheckConvert)
+        TTCASE_CMD(IDRADIO_FILES, OnCheckFiles)
     END_TTMSG_MAP()
 
+    void OnCheckFiles();
+    void OnCheckConvert();
     // Message handlers
 
     void OnBtnChangeIn();

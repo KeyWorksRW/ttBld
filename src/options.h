@@ -100,3 +100,5 @@ public:
         size_t sub;
     };
 };
+
+extern const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions;
