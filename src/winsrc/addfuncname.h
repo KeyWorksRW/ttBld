@@ -2,7 +2,7 @@
 // Name:      CAddFuncName
 // Purpose:   IDDLG_FUNC_NAME dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -12,19 +12,19 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
+#include <ttwindlg.h>  // dlg -- Class for displaying a dialog
 
-class CAddFuncName : public ttCDlg
+class CAddFuncName : public ttlib::dlg
 {
 public:
     CAddFuncName()
-        : ttCDlg(IDDLG_FUNC_NAME)
+        : ttlib::dlg(IDDLG_FUNC_NAME)
     {
     }
 
     // Public functions
 
-    const char* GetFuncName() { return m_cszFunctionName; }
+    const ttlib::cstr& GetFuncName() { return m_FunctionName; }
 
 protected:
     BEGIN_TTCMD_MAP()
@@ -34,11 +34,11 @@ protected:
     // Message handlers
 
     void OnEditFunctionName(int NotifyCode);
-    void OnBegin(void);
-    void OnOK(void);
+    void OnBegin(void) override;
+    void OnOK(void) override;
 
 private:
     // Class members
 
-    ttCStr m_cszFunctionName;
+    ttlib::cstr m_FunctionName;
 };

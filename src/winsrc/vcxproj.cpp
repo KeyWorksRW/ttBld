@@ -22,11 +22,11 @@
 #include "resource.h"
 #include "vcxproj.h"  // CVcxRead, CVcxWrite
 
-CVcxRead::CVcxRead(ttCParseXML* pxml, CWriteSrcFiles* pcSrcFiles, ttCStr* pcszConvertScript)
+CVcxRead::CVcxRead(ttCParseXML* pxml, CWriteSrcFiles* pcSrcFiles, std::string_view ConvertScript)
 {
     m_pxml = pxml;
     m_pcSrcFiles = pcSrcFiles;
-    m_pcszConvertScript = pcszConvertScript;
+    m_ConvertScript = ConvertScript;
 }
 
 bool CVcxRead::ConvertVcxProj()
@@ -34,7 +34,7 @@ bool CVcxRead::ConvertVcxProj()
     ttCXMLBranch* pProject = m_pxml->GetRootBranch()->FindFirstElement("Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(_tt("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) *m_pcszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <Project> in ") + m_ConvertScript);
         return false;
     }
 
@@ -420,7 +420,7 @@ void CVcxRead::ConvertScriptDir(const char* pszDir, ttlib::cstr& cszResult)
         return;
     }
 
-    cszResult.assign(m_pcszConvertScript->c_str());
+    cszResult.assign(m_ConvertScript);
     cszResult.remove_filename();
     cszResult.append_filename(pszDir);
 
@@ -433,33 +433,29 @@ void CVcxRead::ConvertScriptDir(const char* pszDir, ttlib::cstr& cszResult)
 // This function first converts the file relative to the location of the build script, and then relative to the
 // location of .srcfiles
 
-char* CVcxRead::MakeSrcRelative(const char* pszFile)
+const ttlib::cstr& CVcxRead::MakeSrcRelative(const char* pszFile)
 {
-    if (m_cszScriptRoot.IsEmpty())
+    if (m_cszScriptRoot.empty())
     {
-        m_cszScriptRoot = (char*) *m_pcszConvertScript;
-        m_cszScriptRoot.FullPathName();
-        char* pszFilePortion = ttFindFilePortion(m_cszScriptRoot);
-        ttASSERT_MSG(pszFilePortion, "No filename in m_cszScriptRoot--things will go badly without it.");
-        if (pszFilePortion)
-            *pszFilePortion = 0;
+        m_cszScriptRoot = m_ConvertScript;
+        m_cszScriptRoot.make_absolute();
+        m_cszScriptRoot.remove_filename();
 
         // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory
         // as the script file
 
-        ttChDir(m_cszScriptRoot);
+        ttlib::ChangeDir(m_cszScriptRoot);
     }
 
-    if (m_cszOutRoot.IsEmpty())
+    if (m_cszOutRoot.empty())
     {
-        m_cszOutRoot.GetCWD();
-        m_cszOutRoot.FullPathName();
+        m_cszOutRoot.assignCwd();
+        m_cszOutRoot.make_absolute();
     }
 
-    ttCStr cszFile(pszFile);
-    cszFile.FullPathName();
-
-    ttConvertToRelative(m_cszOutRoot, cszFile, m_cszRelative);
+    m_cszRelative = pszFile;
+    m_cszRelative.make_absolute();
+    m_cszRelative.make_relative(m_cszRelative);
     return m_cszRelative;
 }
 

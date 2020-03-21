@@ -2,7 +2,7 @@
 // Name:      convert.cpp
 // Purpose:   Various conversion methods
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -19,32 +19,32 @@
 #include "convertdlg.h"  // CConvertDlg
 #include "vcxproj.h"     // CVcxRead
 
-void ConvertScriptDir(const char* pszScript, const char* pszDir, ttCStr& cszResult);
+void ConvertScriptDir(std::string_view pszScript, std::string_view pszDir, ttlib::cstr& Result);
 
 bool CConvertDlg::ConvertCodeBlocks()
 {
-    if (!ttFileExists(m_cszConvertScript))
+    if (!m_cszConvertScript.fileExists())
     {
-        ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot open ") + m_cszConvertScript);
         return false;
     }
 
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(_tt("Cannot locate <Project> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <Project> in ") + m_cszConvertScript);
         return false;
     }
 
     for (size_t item = 0; item < pProject->GetChildrenCount(); item++)
     {
         ttCXMLBranch* pItem = pProject->GetChildAt(item);
-        if (ttIsSameStrI(pItem->GetName(), "Option"))
+        if (ttlib::issameas(pItem->GetName(), "Option", tt::CASE::either))
         {
             if (pItem->GetAttribute("title"))
                 m_cSrcFiles.setOptValue(OPT::PROJECT, pItem->GetAttribute("title"));
         }
-        else if (ttIsSameStrI(pItem->GetName(), "Unit"))
+        else if (ttlib::issameas(pItem->GetName(), "Unit", tt::CASE::either))
         {
             if (isValidSrcFile(pItem->GetAttribute("filename")))
                 m_cSrcFiles.GetSrcFileList().addfilename(MakeSrcRelative(pItem->GetAttribute("filename")));
@@ -59,8 +59,7 @@ bool CConvertDlg::ConvertCodeLite()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
     if (!pProject)
     {
-        ttMsgBoxFmt(_tt("Cannot locate <CodeLite_Project> in %s"), MB_OK | MB_ICONWARNING,
-                    (char*) m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <CodeLite_Project> in ") + m_cszConvertScript);
         return false;
     }
 
@@ -71,14 +70,14 @@ bool CConvertDlg::ConvertCodeLite()
     for (size_t item = 0; item < pProject->GetChildrenCount(); item++)
     {
         ttCXMLBranch* pItem = pProject->GetChildAt(item);
-        if (ttIsSameStrI(pItem->GetName(), "VirtualDirectory"))
+        if (ttlib::issameas(pItem->GetName(), "VirtualDirectory", tt::CASE::either))
             AddCodeLiteFiles(pItem);
-        else if (ttIsSameStrI(pItem->GetName(), "Settings"))
+        else if (ttlib::issameas(pItem->GetName(), "Settings", tt::CASE::either))
         {
             const char* pszType = pItem->GetAttribute("Type");
-            if (ttIsSameStrI(pszType, "Dynamic Library"))
+            if (ttlib::issameas(pszType, "Dynamic Library", tt::CASE::either))
                 m_cSrcFiles.setOptValue(OPT::EXE_TYPE, "dll");
-            else if (ttIsSameStrI(pszType, "Static Library"))
+            else if (ttlib::issameas(pszType, "Static Library", tt::CASE::either))
                 m_cSrcFiles.setOptValue(OPT::EXE_TYPE, "lib");
         }
     }
@@ -90,8 +89,7 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
     if (!pProject)
     {
-        ttMsgBoxFmt(_tt("Cannot locate <VisualStudioProject> in %s"), MB_OK | MB_ICONWARNING,
-                    (char*) m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <VisualStudioProject> in ") + m_cszConvertScript);
         return false;
     }
 
@@ -101,18 +99,18 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
     if (!pFiles)
     {
-        ttMsgBoxFmt(_tt("Cannot locate <Files> in %s"), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <Files> in ") + m_cszConvertScript);
         return false;
     }
     for (size_t iFilter = 0; iFilter < pFiles->GetChildrenCount(); ++iFilter)
     {
         ttCXMLBranch* pFilter = pFiles->GetChildAt(iFilter);
-        if (ttIsSameStrI(pFilter->GetName(), "Filter"))
+        if (ttlib::issameas(pFilter->GetName(), "Filter", tt::CASE::either))
         {
             for (size_t item = 0; item < pFilter->GetChildrenCount(); item++)
             {
                 ttCXMLBranch* pItem = pFilter->GetChildAt(item);
-                if (ttIsSameStrI(pItem->GetName(), "File"))
+                if (ttlib::issameas(pItem->GetName(), "File", tt::CASE::either))
                 {
                     if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
                         m_cSrcFiles.GetSrcFileList().addfilename(
@@ -128,7 +126,7 @@ bool CConvertDlg::ConvertVcProj()
         for (size_t item = 0; item < pFilter->GetChildrenCount(); item++)
         {
             ttCXMLBranch* pItem = pFilter->GetChildAt(item);
-            if (ttIsSameStrI(pItem->GetName(), "File"))
+            if (ttlib::issameas(pItem->GetName(), "File", tt::CASE::either))
             {
                 if (isValidSrcFile(pItem->GetAttribute("RelativePath")))
                     m_cSrcFiles.GetSrcFileList().addfilename(MakeSrcRelative(pItem->GetAttribute("RelativePath")));
@@ -146,16 +144,14 @@ bool CConvertDlg::ConvertVcProj()
         ttCXMLBranch* pOption = pConfiguration->FindFirstAttribute("OutputFile");
         if (pOption)
         {
-            ttCStr cszOutDir(pOption->GetAttribute(
+            ttlib::cstr OutDir(pOption->GetAttribute(
                 "OutputFile"));  // will typically be something like: "../bin/$(ProjectName).exe"
-            char* pszFile = ttFindFilePortion(cszOutDir);
-            if (pszFile)
-                *pszFile = 0;
-            m_cSrcFiles.setOptValue(OPT::TARGET_DIR32, (char*) cszOutDir);
+            OutDir.remove_filename();
+            m_cSrcFiles.setOptValue(OPT::TARGET_DIR32, OutDir);
         }
         do
         {
-            if (ttStrStrI(pConfiguration->GetAttribute("Name"), "Release"))
+            if (ttlib::contains(pConfiguration->GetAttribute("Name"), "Release", tt::CASE::either))
                 break;
             pConfiguration = pConfigurations->FindNextElement("Configuration");
         } while (pConfiguration);
@@ -182,10 +178,10 @@ bool CConvertDlg::ConvertVcProj()
 
                 ttlib::enumstr enumPaths(pszOption);
                 ttlib::cstr Include;
-                ttCStr cszInc, cszTmp;
+                ttlib::cstr cszInc, cszTmp;
                 for (auto& iter: enumPaths)
                 {
-                    ConvertScriptDir(m_cszConvertScript, iter.c_str(), cszTmp);
+                    ConvertScriptDir(m_cszConvertScript, iter, cszTmp);
                     if (!Include.empty())
                         Include += ";";
                     Include += cszTmp.c_str();
@@ -242,7 +238,7 @@ bool CConvertDlg::ConvertVcProj()
 
 bool CConvertDlg::ConvertVcxProj()
 {
-    CVcxRead vcx(&m_xml, &m_cSrcFiles, &m_cszConvertScript);
+    CVcxRead vcx(&m_xml, &m_cSrcFiles, m_cszConvertScript);
     return vcx.ConvertVcxProj();
 }
 
@@ -257,9 +253,9 @@ enum
 bool CConvertDlg::ConvertDsp()
 {
     ttCFile file;
-    if (!file.ReadFile(m_cszConvertScript))
+    if (!file.ReadFile(m_cszConvertScript.c_str()))
     {
-        ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot open ") + m_cszConvertScript);
         return false;
     }
 
@@ -272,7 +268,7 @@ bool CConvertDlg::ConvertDsp()
         if (!*pszBegin)
             continue;
 
-        if (ttIsSameSubStrI(pszBegin, "CFG"))
+        if (ttlib::issameprefix(pszBegin, "CFG", tt::CASE::either))
         {
             char* pszProject = ttStrChr(pszBegin, '=');
             if (!pszProject)
@@ -285,7 +281,7 @@ bool CConvertDlg::ConvertDsp()
                 m_cSrcFiles.setOptValue(OPT::PROJECT, pszProject);
         }
 
-        else if (ttIsSameSubStrI(pszBegin, "!IF") && ttStrStrI(pszBegin, "$(CFG)"))
+        else if (ttlib::issameprefix(pszBegin, "!IF", tt::CASE::either) && ttStrStrI(pszBegin, "$(CFG)"))
         {
             bReleaseSection = ttStrStrI(pszBegin, " Release") ? true : false;
         }
@@ -387,7 +383,7 @@ bool CConvertDlg::ConvertSrcfiles()
     CSrcFiles srcOrg;
     if (!srcOrg.ReadFile(m_cszConvertScript.c_str()))
     {
-        ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot open ") + m_cszConvertScript);
         return false;
     }
 
@@ -443,18 +439,13 @@ bool CConvertDlg::ConvertSrcfiles()
 
     m_cSrcFiles.setOptValue(OPT::XGET_FLAGS, srcOrg.getOptValue(OPT::XGET_FLAGS));
 
-    ttCStr cszRoot(m_cszConvertScript);
-    char* pszTmp = ttFindFilePortion(cszRoot);
-    if (pszTmp)
-        *pszTmp = 0;
-    // pszTmp = ttFindLastSlash(cszRoot);
-    // if (pszTmp)
-    // *pszTmp = 0;
+    ttlib::cstr Root(m_cszConvertScript);
+    Root.remove_filename();
 
     ttlib::cstr cszRelative;
-    ttCStr cszCurCwd;
-    cszCurCwd.GetCWD();
-    ttChDir(cszRoot);
+    ttlib::cstr cszCurCwd;
+    cszCurCwd.assignCwd();
+    ttlib::ChangeDir(Root);
 
     if (srcOrg.hasOptValue(OPT::PCH))
     {
@@ -477,7 +468,7 @@ bool CConvertDlg::ConvertSrcfiles()
         }
         else
         {
-            cszPch = (char*) cszRoot;
+            cszPch = Root;
             cszPch.append(srcOrg.getOptValue(OPT::PCH_CPP));
         }
 
@@ -486,7 +477,7 @@ bool CConvertDlg::ConvertSrcfiles()
         m_cSrcFiles.setOptValue(OPT::PCH_CPP, cszPch);
     }
 
-    m_cszConvertScript = m_cszConvertScript;
+    cszRelative = m_cszConvertScript.c_str();
     cszRelative.make_relative(cszCurCwd);
 
     m_cSrcFiles.GetSrcFileList().addfilename(".include " + cszRelative);
@@ -497,7 +488,7 @@ bool CConvertDlg::ConvertSrcfiles()
     if (srcOrg.hasOptValue(OPT::INC_DIRS))
     {
         ttlib::enumstr enumPaths(srcOrg.getOptValue(OPT::INC_DIRS));
-        fs::current_path(cszRoot.c_str());
+        fs::current_path(Root.c_str());
         for (auto& iter: enumPaths)
         {
             cszRelative.assign(iter);
@@ -559,40 +550,27 @@ bool CConvertDlg::ConvertSrcfiles()
         m_cSrcFiles.setOptValue(OPT::BUILD_LIBS, cszRelative);
     }
 
-    ttChDir(cszCurCwd);  // Restore our current directory
+    ttlib::ChangeDir(cszCurCwd.c_str());  // Restore our current directory
 
     return true;
 }
 
-void ConvertScriptDir(const char* pszScript, const char* pszDir, ttCStr& cszResult)
+void ConvertScriptDir(std::string_view Script, std::string_view Dir, ttlib::cstr& Result)
 {
-    if (pszDir[1] == ':')
+    if (Dir.length() > 1 && Dir.at(1) == ':')
     {
         // If the path starts with a drive letter, then we can't make it relative
-        cszResult = pszDir;
+        Result = Dir;
         return;
     }
 
-    ttCStr cszScript(pszScript);
-    char* pszFilePortion = ttFindFilePortion(cszScript);
-    assert(pszFilePortion);
-    *pszFilePortion = 0;
-    cszScript.AppendFileName(pszDir);
+    Result = Script;
+    Result.remove_filename();
+    Result.append(Dir);
 
-    cszScript.FullPathName();
+    Result.make_absolute();
 
-    ttCStr cszCWD;
-    cszCWD.GetCWD();
+    ttlib::cwd cwd;
 
-    // ttConvertToRelative is expecting a filename, so let's make one up.
-
-    cszScript.AppendFileName("pch.h");
-    ttConvertToRelative(cszCWD, cszScript, cszResult);
-    pszFilePortion = ttFindFilePortion(cszResult);
-    if (pszFilePortion)
-    {
-        if (pszFilePortion > cszResult.GetPtr() && pszFilePortion[-1] == '/')
-            --pszFilePortion;  // backup so that we remove the trailing slash
-        *pszFilePortion = 0;
-    }
+    Result.make_relative(cwd);
 }

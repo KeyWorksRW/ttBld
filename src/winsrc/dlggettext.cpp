@@ -2,7 +2,7 @@
 // Name:      CDlgGetText
 // Purpose:   IDDLG_XGETTEXT dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,11 +17,15 @@
 
 void CDlgGetText::OnBegin(void)
 {
+    CHECK_DLG_ID(IDCANCEL);
+    CHECK_DLG_ID(IDLIST_FUNC_NAMES);
+    CHECK_DLG_ID(IDOK);
+
     EnableShadeBtns();
     CenterWindow();
-    SetBtnIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
-    SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
-    m_lbKeywords.Initialize(DLG_ID(IDLIST_FUNC_NAMES));
+    SetBtnIcon(IDOK, IDICON_TTLIB_OK);
+    SetBtnIcon(IDCANCEL, IDICON_TTLIB_CANCEL);
+    m_lbKeywords.Initialize(IDLIST_FUNC_NAMES);
     DisplayFunctionList();
 }
 
@@ -33,12 +37,12 @@ void CDlgGetText::ProcessCurOptions(const char* pszOptions)
     {
         // No current options, so set some defaults
 
-        m_lstKeywords += "_";
-        m_lstKeywords += "kwxGetTranslation";
-        m_lstKeywords += "kwxPLURAL";
+        m_lstKeywords.emplace_back("_");
+        m_lstKeywords.emplace_back("kwxGetTranslation");
+        m_lstKeywords.emplace_back("kwxPLURAL");
 
-        m_bIndents = true;
-        m_bNoHeaders = true;
+        m_Indents = true;
+        m_NoHeaders = true;
         return;
     }
 }
@@ -48,12 +52,13 @@ void CDlgGetText::OnBtnAdd()
     CAddFuncName dlg;
     if (dlg.DoModal(*this) == IDOK)
     {
-        if (m_lbKeywords.FindString(dlg.GetFuncName()))
+        if (m_lbKeywords.find(dlg.GetFuncName()))
         {
-            ttMsgBoxFmt(_tt("The name %kq has already been added."), MB_OK | MB_ICONWARNING, dlg.GetFuncName());
+            ttlib::cstr msg;
+            ttlib::MsgBox(msg.Format(_tt("The name %kq has already been added."), dlg.GetFuncName().c_str()));
             return;
         }
-        m_lbKeywords += dlg.GetFuncName();
+        m_lbKeywords.append(dlg.GetFuncName());
         DisplayFunctionList();
     }
 }
@@ -61,6 +66,6 @@ void CDlgGetText::OnBtnAdd()
 void CDlgGetText::DisplayFunctionList()
 {
     m_lbKeywords.Reset();
-    for (size_t pos = 0; m_lstKeywords.InRange(pos); ++pos)
-        m_lbKeywords.Add(m_lstKeywords[pos]);
+    for (auto& iter: m_lstKeywords)
+        m_lbKeywords.append(iter);
 }

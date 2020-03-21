@@ -2,7 +2,7 @@
 // Name:      CDlgGetText
 // Purpose:   IDDLG_XGETTEXT dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -12,18 +12,15 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>   // ttCDlg, ttCComboBox, ttCListBox, ttCListView
-#include <ttlist.h>  // ttCList
-#include <ttstr.h>   // ttCStr
+#include <ttwindlg.h>  // Class for displaying a dialog
 
-class CDlgGetText : public ttCDlg
+class CDlgGetText : public ttlib::dlg
 {
 public:
-    CDlgGetText()
-        : ttCDlg(IDDLG_XGETTEXT)
+    CDlgGetText() : ttlib::dlg(IDDLG_XGETTEXT)
     {
-        m_bIndents = false;
-        m_bNoHeaders = false;
+        m_Indents = false;
+        m_NoHeaders = false;
     }
 
     // Public functions
@@ -38,8 +35,8 @@ protected:
     // Message handlers
 
     void OnBtnAdd();
-    void OnBegin(void);
-    void OnOK(void);
+    void OnBegin(void) override;
+    void OnOK(void) override;
 
     // Protected functions
 
@@ -48,10 +45,10 @@ protected:
 private:
     // Class members
 
-    ttCListBox m_lbKeywords;
-    ttCStr     m_cszInputFile;
-    ttCList    m_lstKeywords;
+    ttlib::dlgListBox m_lbKeywords;
+    ttlib::cstr m_cszInputFile;
+    std::vector<std::string> m_lstKeywords;
 
-    bool m_bIndents;
-    bool m_bNoHeaders;
+    bool m_Indents;
+    bool m_NoHeaders;
 };

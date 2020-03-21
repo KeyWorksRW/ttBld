@@ -2,7 +2,7 @@
 // Name:      finder.cpp
 // Purpose:   Functions for finding executables
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -10,24 +10,20 @@
 
 #include <ttcstr.h>     // cstr -- Classes for handling zero-terminated char strings.
 #include <ttenumstr.h>  // enumstr -- Enumerate through substrings in a string
-
-#if defined(_WIN32)
-
-    #include <ttfindfile.h>  // ttCFindFile
-    #include <ttreg.h>       // ttCRegistry
-    #include <ttstr.h>       // ttCStr
+#include <ttreg.h>      // ttCRegistry
+#include <ttwinff.h>    // winff -- Wrapper around Windows FindFile
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that
     version may be. At the time this code is being written, those updates occur as often as once a week. That
-   forces you to either hand-edit your PATH every week or so, or to run one of the MS batch files (which stopped
-   working on Windows 7 with the 16.2.0 release).
+    forces you to either hand-edit your PATH every week or so, or to run one of the MS batch files (which stopped
+    working on Windows 7 with the 16.2.0 release).
 
     Unlike the compiler and related tools, the path to devenv.exe is stored in the registry, so using that path we
-   can deduce the current path to the compiler, linker, along with the library and include files.
+    can deduce the current path to the compiler, linker, along with the library and include files.
 */
 
-bool FindCurMsvcPath(ttCStr& cszPath)
+bool FindCurMsvcPath(ttlib::cstr& Result)
 {
     ttCRegistry reg;
     if (reg.Open(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\devenv.exe", false))
@@ -35,26 +31,24 @@ bool FindCurMsvcPath(ttCStr& cszPath)
         char szPath[MAX_PATH];
         if (reg.ReadString("", szPath, sizeof(szPath)))
         {
-            cszPath.GetQuotedString(szPath);
-            char* psz = ttStrStrI(cszPath, "Common");
-            if (psz)
+            Result.ExtractSubString(szPath);
+            auto pos = Result.locate("Common", 0, tt::CASE::either);
+            if (pos != tt::npos)
             {
-                *psz = 0;
-                cszPath += "VC\\Tools\\MSVC\\*.*";
+                Result.erase(pos);
+                Result += "VC\\Tools\\MSVC\\*.*";
 
-                ttCFindFile ff(cszPath);
-                if (ff.IsValid())
+                ttlib::winff ff(Result);
+                if (ff.isvalid())
                 {
                     do
                     {
-                        if (ff.IsDir() && ttIsValidFileChar(ff, 0))
+                        if (ff.isdir())
                         {
-                            psz = ttStrChr(cszPath, '*');
-                            *psz = 0;
-                            cszPath += (const char*) ff;
+                            Result.replace_filename(ff.getcstr());
                             return true;
                         }
-                    } while (ff.NextFile());
+                    } while (ff.next());
                 }
             }
         }
@@ -63,7 +57,7 @@ bool FindCurMsvcPath(ttCStr& cszPath)
     return false;
 }
 
-bool FindVsCode(ttCStr& cszPath)
+bool FindVsCode(ttlib::cstr& Result)
 {
     ttCRegistry reg;
     if (reg.Open(HKEY_CLASSES_ROOT, "Applications\\Code.exe\\shell\\open\\command", false))
@@ -71,10 +65,8 @@ bool FindVsCode(ttCStr& cszPath)
         char szPath[MAX_PATH];
         if (reg.ReadString("", szPath, sizeof(szPath)))
         {
-            cszPath.GetQuotedString(szPath);
-            char* pszExe = ttFindFilePortion(cszPath);
-            if (pszExe)
-                *pszExe = 0;  // remove the filename
+            Result.ExtractSubString(szPath);
+            Result.remove_filename();
             return true;
         }
     }
@@ -86,35 +78,6 @@ bool IsHost64()
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     return (si.dwProcessorType == PROCESSOR_AMD_X8664 || si.dwProcessorType == PROCESSOR_INTEL_IA64);
-}
-
-#endif
-
-bool FindFileEnv(const char* pszEnv, const char* pszFile, ttCStr* pcszPath)
-{
-    assert(pszEnv);
-    assert(pszFile);
-
-    ttCStr cszEnv, cszPath;
-    if (!pcszPath)
-        pcszPath = &cszPath;
-    size_t cbEnv = 0;
-    if (getenv_s(&cbEnv, nullptr, 0, pszEnv) == 0 && cbEnv > 0)
-    {
-        cszEnv.ReSize(cbEnv + 1);
-        if (getenv_s(&cbEnv, cszEnv.GetPtr(), cbEnv, pszEnv) == 0)
-        {
-            ttlib::enumstr enumPaths(cszEnv.c_str());
-            for (auto iter: enumPaths)
-            {
-                *pcszPath = iter.c_str();
-                pcszPath->AppendFileName(pszFile);
-                if (ttFileExists(*pcszPath))
-                    return true;
-            }
-        }
-    }
-    return false;
 }
 
 bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathResult)
@@ -165,34 +128,6 @@ static const char* aProjectLocations[] = {
     // clang-format on
 };
 
-const char* LocateSrcFiles(ttCStr* pcszStartDir)
-{
-    if (pcszStartDir)
-    {
-        ttCStr cszPath;
-        for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
-        {
-            cszPath = *pcszStartDir;
-            cszPath.AppendFileName(aSrcFilesLocations[pos]);
-            if (ttFileExists(cszPath))
-            {
-                *pcszStartDir = (const char*) cszPath;
-                return *pcszStartDir;
-            }
-        }
-    }
-    else
-    {
-        for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
-        {
-            if (ttFileExists(aSrcFilesLocations[pos]))
-                return aSrcFilesLocations[pos];
-        }
-    }
-
-    return nullptr;
-}
-
 const char* FindProjectFile(ttlib::cstr* pStartDir)
 {
     if (pStartDir)
@@ -213,7 +148,7 @@ const char* FindProjectFile(ttlib::cstr* pStartDir)
     {
         for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
         {
-            if (ttFileExists(aSrcFilesLocations[pos]))
+            if (ttlib::fileExists(aSrcFilesLocations[pos]))
                 return aSrcFilesLocations[pos];
         }
     }

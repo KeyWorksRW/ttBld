@@ -12,22 +12,23 @@
     #include "resource.h"
 #endif
 
-#include <ttdlg.h>  // ttCDlg, ttCComboBox, ttCListBox, ttCListView
-#include <ttxml.h>  // ttCXMLBranch, ttCParseXML
+#include <ttcwd.h>     // cwd -- Class for storing and optionally restoring the current directory
+#include <ttwindlg.h>  // Class for displaying a dialog
+#include <ttxml.h>     // ttCXMLBranch, ttCParseXML
 
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
-class CConvertDlg : public ttCDlg
+class CConvertDlg : public ttlib::dlg
 {
 public:
     CConvertDlg(const char* pszDstSrcFiles = nullptr);
 
     // Public functions
 
-    char* GetOutSrcFiles() { return m_cszOutSrcFiles; }
-    char* GetDirSrcFiles() { return m_cszDirSrcFiles; }
-    char* GetConvertScript() { return m_cszConvertScript; }
-    void  SetConvertScritpt(const char* pszFile) { m_cszConvertScript = pszFile; }
+    const ttlib::cstr& GetOutSrcFiles() { return m_cszOutSrcFiles; }
+    const ttlib::cstr& GetDirSrcFiles() { return m_cszDirSrcFiles; }
+    const ttlib::cstr& GetConvertScript() { return m_cszConvertScript; }
+    void SetConvertScritpt(std::string_view filename) { m_cszConvertScript = filename; }
 
     bool isCreateVsCode() { return m_bCreateVsCode; }
     bool isGitIgnoreAll() { return m_bGitIgnore; }
@@ -44,8 +45,8 @@ protected:
     void OnBtnChangeIn();
     void OnBtnChangeOut();
     void OnBtnLocateScript();
-    void OnBegin(void);
-    void OnOK(void);
+    void OnBegin(void) override;
+    void OnOK(void) override;
 
     // Protected functions
 
@@ -59,26 +60,26 @@ protected:
     bool doConversion(const char* pszInFile = nullptr);
 
     char* MakeSrcRelative(const char* pszFile);
-    void  AddCodeLiteFiles(ttCXMLBranch* pParent);
-    bool  isValidSrcFile(const char* pszFile) const;
+    void AddCodeLiteFiles(ttCXMLBranch* pParent);
+    bool isValidSrcFile(const char* pszFile) const;
 
 private:
     // Class members
 
-    ttCComboBox    m_comboScripts;
-    ttCParseXML    m_xml;
+    ttlib::dlgCombo m_comboScripts;
+    ttCParseXML m_xml;
     CWriteSrcFiles m_cSrcFiles;
 
-    ttCStr m_cszOutSrcFiles;  // Where .srcfiles should be created
+    ttlib::cstr m_cszOutSrcFiles;  // Where .srcfiles should be created
 
-    ttCStr m_cszDirSrcFiles;
-    ttCStr m_cszConvertScript;
+    ttlib::cstr m_cszDirSrcFiles;
+    ttlib::cstr m_cszConvertScript;
 
-    ttCStr m_cszScriptRoot;
-    ttCStr m_cszOutRoot;
-    ttCStr m_cszRelative;  // Used to create a relative location for a source file
+    ttlib::cstr m_cszScriptRoot;
+    ttlib::cstr m_cszOutRoot;
+    ttlib::cstr m_cszRelative;  // Used to create a relative location for a source file
 
-    ttCStr m_cszCWD;
+    ttlib::cwd m_cszCWD { true };
 
     bool m_bCreateVsCode;
     bool m_bGitIgnore;

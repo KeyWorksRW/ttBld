@@ -2,7 +2,7 @@
 // Name:      CConvertDlg
 // Purpose:   IDDDLG_CONVERT dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -20,19 +20,29 @@
 
 #include <direct.h>  // Functions for directory handling and creation
 
-#include <ttdirdlg.h>    // ttCDirDlg
-#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttfiledlg.h>   // ttCFileDlg
-#include <ttfindfile.h>  // ttCFindFile
 #include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
+#include <ttdirdlg.h>    // DirDlg -- Class for displaying a dialog to select a directory
+#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttfiledlg.h>   // ttCFileDlg -- Wrapper around Windows GetOpenFileName() API
+#include <ttfindfile.h>  // ttCFindFile
+#include <ttwinff.h>     // winff -- Wrapper around Windows FindFile
 
-#include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
 #include "funcs.h"       // List of function declarations
+#include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
 
-static const char* atxtSrcTypes[] = { "*.cpp", "*.cc", "*.cxx", "*.c", nullptr };
+// clang-format off
+static const char* atxtSrcTypes[]
+{
+    "*.cpp",
+    "*.cc",
+    "*.cxx",
+    "*.c",
+     nullptr
+};
+// clang-format on
 
 // Array of project extensions (*.vcxproj, *.project, etc.).
-static const char* atxtProjects[] = {
+static const char* atxtProjects[] {
     // clang-format off
     "*.vcxproj",       // Visual Studio
     "*.vcproj",        // Old Visual Studio
@@ -45,8 +55,7 @@ static const char* atxtProjects[] = {
     // clang-format on
 };
 
-CConvertDlg::CConvertDlg(const char* pszDstSrcFiles)
-    : ttCDlg(IDDDLG_CONVERT)
+CConvertDlg::CConvertDlg(const char* pszDstSrcFiles) : ttlib::dlg(IDDDLG_CONVERT)
 {
     if (pszDstSrcFiles)
         m_cszOutSrcFiles = pszDstSrcFiles;
@@ -57,48 +66,57 @@ CConvertDlg::CConvertDlg(const char* pszDstSrcFiles)
     m_bGitIgnore = false;
 
     // Process of conversion may change directories, so save the directory we should change back to
-    m_cszCWD.GetCWD();
+    m_cszCWD.assignCwd();
 }
 
 void CConvertDlg::OnBegin(void)
 {
+    CHECK_DLG_ID(IDCANCEL);
+    CHECK_DLG_ID(IDCHECK_IGNORE_ALL);
+    CHECK_DLG_ID(IDCHECK_VSCODE);
+    CHECK_DLG_ID(IDCOMBO_SCRIPTS);
+    CHECK_DLG_ID(IDEDIT_IN_DIR);
+    CHECK_DLG_ID(IDEDIT_OUT_DIR);
+    CHECK_DLG_ID(IDOK);
+    CHECK_DLG_ID(IDRADIO_CONVERT);
+    CHECK_DLG_ID(IDRADIO_FILES);
+    CHECK_DLG_ID(IDTXT_FILES_FOUND);
+
     CenterWindow(true);
     EnableShadeBtns();
-    SetBtnIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
-    SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
+    SetBtnIcon(IDOK, IDICON_TTLIB_OK);
+    SetBtnIcon(IDCANCEL, IDICON_TTLIB_CANCEL);
 
-    ttCStr csz;
-    if (!ttlib::dirExists(".vscode") && FindVsCode(csz))
-        SetCheck(DLG_ID(IDCHECK_VSCODE));
+    ttlib::cstr tmp;
+    if (!ttlib::dirExists(".vscode") && FindVsCode(tmp))
+        SetCheck(IDCHECK_VSCODE);
     if (ttlib::dirExists(".git") || ttlib::dirExists("../.git") || ttlib::dirExists("../../.git"))
-        SetCheck(DLG_ID(IDCHECK_IGNORE_ALL));
+        SetCheck(IDCHECK_IGNORE_ALL);
 
-    csz.GetCWD();
-    SetControlText(DLG_ID(IDEDIT_IN_DIR), csz);
+    tmp.assignCwd();
+    SetControlText(IDEDIT_IN_DIR, tmp.c_str());
 
-    if (m_cszOutSrcFiles.IsNonEmpty())
+    if (!m_cszOutSrcFiles.empty())
     {
-        csz = m_cszOutSrcFiles;
-        csz.FullPathName();
-        char* pszFilePortion = ttFindFilePortion(csz);
-        if (pszFilePortion)
-            *pszFilePortion = 0;
+        tmp = m_cszOutSrcFiles.c_str();
+        tmp.make_absolute();
+        tmp.remove_filename();
     }
-    SetControlText(DLG_ID(IDEDIT_OUT_DIR), csz);
+    SetControlText(IDEDIT_OUT_DIR, tmp);
 
-    m_comboScripts.Initialize(*this, DLG_ID(IDCOMBO_SCRIPTS));
+    m_comboScripts.Initialize(*this, IDCOMBO_SCRIPTS);
     ttCFindFile ff(atxtProjects[0]);
 
     // If we converted once before, then default to that script
 
-    if (m_cszConvertScript.IsNonEmpty())
-        m_comboScripts.Add(m_cszConvertScript);
+    if (!m_cszConvertScript.empty())
+        m_comboScripts.append(m_cszConvertScript);
     else
     {
         for (size_t pos = 1; !ff.IsValid() && atxtProjects[pos]; ++pos)
             ff.NewPattern(atxtProjects[pos]);
         if (ff.IsValid())
-            m_comboScripts.Add((char*) ff);
+            m_comboScripts.append((char*) ff);
 
         if (m_comboScripts.GetCount() < 1)  // no scripts found, let's check sub directories
         {
@@ -109,21 +127,21 @@ void CConvertDlg::OnBegin(void)
                 {
                     if (!ttIsValidFileChar(ff, 0))  // this will skip over . and ..
                         continue;
-                    ttCStr cszDir((char*) ff);
-                    cszDir.AppendFileName(atxtProjects[0]);
-                    ttCFindFile ffFilter(cszDir);
+                    ttlib::cstr cszDir((char*) ff);
+                    cszDir.append(atxtProjects[0]);
+                    ttCFindFile ffFilter(cszDir.c_str());
                     for (size_t pos = 1; !ffFilter.IsValid() && atxtProjects[pos]; ++pos)
                     {
-                        cszDir = ff;
-                        cszDir.AppendFileName(atxtProjects[pos]);
-                        ffFilter.NewPattern(cszDir);
+                        cszDir = ff.GetFileName();
+                        cszDir.append(atxtProjects[pos]);
+                        ffFilter.NewPattern(cszDir.c_str());
                     }
 
                     if (ffFilter.IsValid())
                     {
-                        cszDir = ff;
-                        cszDir.AppendFileName(ffFilter);
-                        m_comboScripts.Add(cszDir);
+                        cszDir = ff.GetFileName();
+                        cszDir.append(ffFilter);
+                        m_comboScripts.append(cszDir);
                     }
                 }
             } while (ff.NextFile());
@@ -141,17 +159,17 @@ void CConvertDlg::OnBegin(void)
             } while (ff.NextFile());
         }
     }
-    csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
-    SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);
+    tmp.Format("%kn file%ks located", cFilesFound, cFilesFound);
+    SetControlText(IDTXT_FILES_FOUND, tmp.c_str());
 
     if (m_comboScripts.GetCount() > 0)
     {
         m_comboScripts.SetCurSel();
-        SetCheck(DLG_ID(IDRADIO_CONVERT));
+        SetCheck(IDRADIO_CONVERT);
     }
     else if (cFilesFound)
     {
-        SetCheck(DLG_ID(IDRADIO_FILES));
+        SetCheck(IDRADIO_FILES);
     }
 }
 
@@ -163,10 +181,10 @@ void CConvertDlg::OnBtnLocateScript()
     dlg.RestoreDirectory();
     if (dlg.GetOpenName())
     {
-        auto item = m_comboScripts.Add(dlg.GetFileName());
+        auto item = m_comboScripts.append(dlg.GetFileName());
         m_comboScripts.SetCurSel(item);
-        UnCheck(DLG_ID(IDRADIO_FILES));
-        SetCheck(DLG_ID(IDRADIO_CONVERT));
+        UnCheck(IDRADIO_FILES);
+        SetCheck(IDRADIO_CONVERT);
         // TODO: [randalphwa - 4/2/2019] Need to decide how to handle IDEDIT_IN_DIR since this may no longer be
         // correct
     }
@@ -187,7 +205,7 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
                     MB_YESNO) != IDYES)
                 return;
         }
-        SetControlText(DLG_ID(IDEDIT_OUT_DIR), dlg.c_str());
+        SetControlText(IDEDIT_OUT_DIR, dlg.c_str());
     }
 }
 
@@ -198,10 +216,10 @@ void CConvertDlg::OnBtnChangeIn()
     dlg.SetStartingDir(cwd);
     if (dlg.GetFolderName(*this))
     {
-        SetControlText(DLG_ID(IDEDIT_IN_DIR), dlg.c_str());
+        SetControlText(IDEDIT_IN_DIR, dlg.c_str());
         ttlib::ChangeDir(dlg);
         ttCFindFile ff("*.cpp");
-        size_t      cFilesFound = 0;
+        size_t cFilesFound = 0;
         for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
         {
             if (ff.NewPattern(atxtSrcTypes[pos]))
@@ -213,30 +231,29 @@ void CConvertDlg::OnBtnChangeIn()
             }
         }
         ttlib::ChangeDir(cwd);  // restore our directory
-        ttCStr csz;
-        csz.printf("%kn file%ks located", cFilesFound, cFilesFound);
-        SetControlText(DLG_ID(IDTXT_FILES_FOUND), csz);
-        UnCheck(DLG_ID(IDRADIO_CONVERT));
-        SetCheck(DLG_ID(IDRADIO_FILES));
+        ttlib::cstr tmp;
+        SetControlText(IDTXT_FILES_FOUND, tmp.Format("%kn file located", cFilesFound));
+        UnCheck(IDRADIO_CONVERT);
+        SetCheck(IDRADIO_FILES);
     }
 }
 
 void CConvertDlg::OnOK(void)
 {
-    m_cszOutSrcFiles.GetWndText(GetDlgItem(DLG_ID(IDEDIT_OUT_DIR)));
-    m_cszOutSrcFiles.AppendFileName(".srcfiles.yaml");
-    m_cszDirSrcFiles.GetWndText(GetDlgItem(DLG_ID(IDEDIT_IN_DIR)));
-    if (GetCheck(DLG_ID(IDRADIO_CONVERT)))
-        m_cszConvertScript.GetWndText(GetDlgItem(DLG_ID(IDCOMBO_SCRIPTS)));
+    m_cszOutSrcFiles.GetWndText(gethwnd(IDEDIT_OUT_DIR));
+    m_cszOutSrcFiles.append_filename(".srcfiles.yaml");
+    m_cszDirSrcFiles.GetWndText(gethwnd(IDEDIT_IN_DIR));
+    if (GetCheck(IDRADIO_CONVERT))
+        m_cszConvertScript.GetWndText(gethwnd(IDCOMBO_SCRIPTS));
     else
-        m_cszConvertScript.Delete();
+        m_cszConvertScript.clear();
 
-    m_bCreateVsCode = GetCheck(DLG_ID(IDCHECK_VSCODE));
-    m_bGitIgnore = GetCheck(DLG_ID(IDCHECK_IGNORE_ALL));
+    m_bCreateVsCode = GetCheck(IDCHECK_VSCODE);
+    m_bGitIgnore = GetCheck(IDCHECK_IGNORE_ALL);
 
-    if (m_cszConvertScript.IsNonEmpty() && !ttFileExists(m_cszConvertScript))
+    if (!m_cszConvertScript.empty() && !m_cszConvertScript.fileExists())
     {
-        ttMsgBoxFmt(_tt("Cannot open \"%s\"."), MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot open ") + m_cszConvertScript);
         CancelEnd();
         return;
     }
@@ -283,57 +300,49 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 
 char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 {
-    assert(m_cszConvertScript.IsNonEmpty());
+    ttASSERT(!m_cszConvertScript.empty());
 
-    if (m_cszScriptRoot.IsEmpty())
+    if (m_cszScriptRoot.empty())
     {
-        m_cszScriptRoot = (char*) m_cszConvertScript;
-        m_cszScriptRoot.FullPathName();
-        char* pszFilePortion = ttFindFilePortion(m_cszScriptRoot);
-        ttASSERT_MSG(pszFilePortion, "No filename in m_cszScriptRoot--things will go badly without it.");
-        if (pszFilePortion)
-            *pszFilePortion = 0;
+        m_cszScriptRoot = m_cszConvertScript;
+        m_cszScriptRoot.make_absolute();
+        m_cszScriptRoot.remove_filename();
 
         // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory
         // as the script file
 
-        ttChDir(m_cszScriptRoot);
+        ttlib::ChangeDir(m_cszScriptRoot);
     }
 
-    if (m_cszOutRoot.IsEmpty())
+    if (m_cszOutRoot.empty())
     {
-        m_cszOutRoot = (char*) m_cszOutSrcFiles;
-        m_cszOutRoot.FullPathName();
-        char* pszFilePortion = m_cszOutRoot.FindStrI(".srcfiles.yaml");
-        if (pszFilePortion)
-            *pszFilePortion = 0;
+        m_cszOutRoot = m_cszOutSrcFiles;
+        m_cszOutRoot.make_absolute();
+        if (m_cszOutRoot.hasFilename(".srcfiles.yaml"))
+            m_cszOutRoot.remove_filename();
     }
 
-    ttCStr cszFile(pszFile);
-    cszFile.FullPathName();
-
-    ttConvertToRelative(m_cszOutRoot, cszFile, m_cszRelative);
-    return m_cszRelative;
+    m_cszRelative = pszFile;
+    m_cszRelative.make_absolute();
+    m_cszRelative.make_relative(m_cszOutRoot);
+    return (char*) m_cszRelative.c_str();
 }
 
 bool CConvertDlg::doConversion(const char* pszInFile)
 {
-    ttASSERT_MSG(m_cszOutSrcFiles.IsNonEmpty(),
-                 "Need to set path to .srcfiles.yaml before calling doConversion()");
+    ttASSERT_MSG(!m_cszOutSrcFiles.empty(), "Need to set path to .srcfiles.yaml before calling doConversion()");
 
     if (pszInFile)
         m_cszConvertScript = pszInFile;
 
     // If there is no conversion script file, then convert using files in the current directory.
-    if (m_cszConvertScript.IsEmpty())
+    if (m_cszConvertScript.empty())
     {
         if (!m_cSrcFiles.hasOptValue(OPT::PROJECT))
         {
-            ttCStr cszProject(m_cszOutSrcFiles);
-            char*  pszFilePortion = ttFindFilePortion(cszProject);
-            if (pszFilePortion)
-                *pszFilePortion = 0;
-            m_cSrcFiles.setOptValue(OPT::PROJECT, ttFindFilePortion(cszProject));
+            ttlib::cstr cszProject(m_cszOutSrcFiles);
+            cszProject.remove_filename();
+            m_cSrcFiles.setOptValue(OPT::PROJECT, cszProject.filename());
         }
 
 #if defined(_WIN32)
@@ -344,28 +353,28 @@ bool CConvertDlg::doConversion(const char* pszInFile)
 
         if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles.c_str()) != bld::success)
         {
-            ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING, (char*) m_cszOutSrcFiles);
+            ttlib::MsgBox(_tt("Unable to create or write to ") + m_cszOutSrcFiles);
             CancelEnd();
             return false;
         }
         return true;
     }
 
-    const char* pszExt = ttStrChrR(m_cszConvertScript, '.');
+    const char* pszExt = ttStrChrR(m_cszConvertScript.c_str(), '.');
     if (pszExt)
     {
         bool bResult = false;
         if (ttIsSameStrI(pszExt, ".dsp"))
             bResult = ConvertDsp();
-        else if (ttStrStrI(m_cszConvertScript, ".srcfiles"))
+        else if (ttStrStrI(m_cszConvertScript.c_str(), ".srcfiles"))
             bResult = ConvertSrcfiles();
         else
         {
-            HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript);
+            HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript.c_str());
             if (hr != S_OK)
             {
-                ttMsgBoxFmt(_tt("An internal error occurred attempting to parse the file %s"),
-                            MB_OK | MB_ICONWARNING, (char*) m_cszConvertScript);
+                ttlib::MsgBox(_tt("An internal error occurred attempting to parse the file ") +
+                              m_cszConvertScript);
                 return false;
             }
 
@@ -379,28 +388,26 @@ bool CConvertDlg::doConversion(const char* pszInFile)
                 bResult = ConvertVcProj();
         }
 
-        ttChDir(m_cszCWD);  // we may have changed directories during the conversion
+        ttlib::ChangeDir(m_cszCWD);  // we may have changed directories during the conversion
 
         if (bResult)
         {
-            ttCStr cszHdr, cszRelative;
-            ttConvertToRelative(m_cszOutSrcFiles, m_cszConvertScript, cszRelative);
+            ttlib::cstr cszHdr, cszRelative;
+            cszRelative = m_cszConvertScript;
+            cszRelative.make_relative(m_cszOutSrcFiles);
 
-            cszHdr.printf("# Converted from %s", (char*) cszRelative);
+            cszHdr = "# Converted from " + cszRelative;
 
             if (!m_cSrcFiles.hasOptValue(OPT::PROJECT))
             {
-                ttCStr cszProject(m_cszOutSrcFiles);
-                char*  pszFilePortion = ttFindFilePortion(cszProject);
-                if (pszFilePortion)
-                    *pszFilePortion = 0;
-                m_cSrcFiles.setOptValue(OPT::PROJECT, ttFindFilePortion(cszProject));
+                ttlib::cstr cszProject(m_cszOutSrcFiles);
+                cszProject.remove_filename();
+                m_cSrcFiles.setOptValue(OPT::PROJECT, cszProject.filename());
             }
 
             if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles.c_str(), cszHdr.c_str()) != bld::success)
             {
-                ttMsgBoxFmt(_tt("Unable to create or write to %s"), MB_OK | MB_ICONWARNING,
-                            (char*) m_cszOutSrcFiles);
+                ttlib::MsgBox(_tt("Unable to create or write to ") + m_cszOutSrcFiles);
                 return false;
             }
             return true;

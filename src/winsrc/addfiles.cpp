@@ -10,7 +10,6 @@
 
 #include <ttcvector.h>   // Vector of ttlib::cstr strings
 #include <ttfile.h>      // ttCFile
-#include <ttlist.h>      // ttCList, ttCDblList, ttCStrIntList
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles

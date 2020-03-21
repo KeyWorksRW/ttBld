@@ -18,7 +18,6 @@
 
 // forward definitions
 
-class ttCList;
 class CSrcFiles;
 
 class CDlgVsCode : public ttlib::dlg

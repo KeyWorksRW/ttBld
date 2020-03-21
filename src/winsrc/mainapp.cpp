@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && !defined(NDEBUG) && defined(_WIN32)
     {
-        ttCStr cszTest;
+        ttlib::cstr cszTest;
         if (FindCurMsvcPath(cszTest))
             puts((char*) cszTest);
         else

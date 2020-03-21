@@ -2,7 +2,7 @@
 // Name:      CAddFuncName
 // Purpose:   IDDLG_FUNC_NAME dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -13,19 +13,23 @@
 
 void CAddFuncName::OnBegin(void)
 {
+    CHECK_DLG_ID(IDCANCEL);
+    CHECK_DLG_ID(IDEDIT_FUNCTION_NAME);
+    CHECK_DLG_ID(IDOK);
+
     EnableShadeBtns();
     CenterWindow();
-    SetBtnIcon(DLG_ID(IDOK), IDICON_TTLIB_OK);
-    SetBtnIcon(DLG_ID(IDCANCEL), IDICON_TTLIB_CANCEL);
+    SetBtnIcon(IDOK, IDICON_TTLIB_OK);
+    SetBtnIcon(IDCANCEL, IDICON_TTLIB_CANCEL);
     DisableControl(IDOK);  // don't enable until we have some text in it
 }
 
 void CAddFuncName::OnOK(void)
 {
-    m_cszFunctionName.GetWndText(GetDlgItem(DLG_ID(IDEDIT_FUNCTION_NAME)));
+    m_FunctionName.GetWndText(gethwnd(IDEDIT_FUNCTION_NAME));
 }
 
 void CAddFuncName::OnEditFunctionName(int /* NotifyCode */)
 {
-    EnableControl(IDOK, GetControlTextLength(DLG_ID(IDEDIT_FUNCTION_NAME)) > 0);
+    EnableControl(IDOK, GetControlTextLength(IDEDIT_FUNCTION_NAME) > 0);
 }
