@@ -8,8 +8,6 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
-
 #include "ttlibicons.h"
 
 #include "dlgoptions.h"

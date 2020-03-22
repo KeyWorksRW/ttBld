@@ -8,8 +8,6 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
-
 #include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
 #include <ttdirdlg.h>   // ttCDirDlg
 #include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string

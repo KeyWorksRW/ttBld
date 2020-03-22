@@ -11,7 +11,6 @@
 #include <exception>
 #include <sstream>
 
-#include <ttTR.h>        // Function for translating strings
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
 #include "ninja.h"  // CNinja

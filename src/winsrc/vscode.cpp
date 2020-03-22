@@ -8,7 +8,6 @@
 
 #include "pch.h"
 
-#include <ttTR.h>        // Function for translating strings
 #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 

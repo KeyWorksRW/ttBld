@@ -8,7 +8,6 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
 #include <ttcvector.h>
 
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file

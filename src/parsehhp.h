@@ -10,7 +10,6 @@
 
 #include <ttcstr.h>
 
-#include <ttlibwin.h>  // ttlib::cstr;, ttCStr;, ttCEnumStr -- Master header file for ttLibwin
 #include <ttlist.h>    // ttCList, ttCDblList, ttCStrIntList
 
 // Parse an HHP file to collect dependencies

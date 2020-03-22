@@ -8,7 +8,6 @@
 
 #include "pch.h"
 
-#include <ttTR.h>       // Function for translating strings
 #include <ttcwd.h>      // Class for storing and optionally restoring the current directory
 #include <ttenumstr.h>  // ttCEnumStr
 

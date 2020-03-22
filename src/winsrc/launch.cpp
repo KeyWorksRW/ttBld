@@ -8,7 +8,6 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
 #include "funcs.h"
 
 bool LaunchVsCode()

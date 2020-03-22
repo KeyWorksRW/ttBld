@@ -12,8 +12,6 @@
 
 #include <filesystem>
 
-#include <ttTR.h>  // Function for translating strings
-
 #include <ttfile.h>     // ttCFile
 #include "csrcfiles.h"  // CSrcFiles
 

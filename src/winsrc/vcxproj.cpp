@@ -13,10 +13,7 @@
     #pragma comment(lib, "Rpcrt4.lib")
 #endif
 
-#include <ttTR.h>  // Function for translating strings
-
 #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttfindfile.h>  // ttCFindFile
 #include <ttwinff.h>     // winff -- Wrapper around Windows FindFile
 
 #include "resource.h"

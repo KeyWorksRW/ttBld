@@ -10,7 +10,6 @@
 
 #include <sstream>
 
-#include <ttTR.h>        // Function for translating strings
 #include <ttcwd.h>       // Class for storing and optionally restoring the current directory
 #include <ttenumstr.h>   // ttCEnumStr
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
@@ -153,7 +152,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
     ttlib::cstr value;
     ttlib::cstr comment;
 
-    ttlib::cstr line = tt::findnonspace(yamlLine);
+    ttlib::cstr line = ttlib::findnonspace(yamlLine);
     auto pos = line.findoneof(":=");
     if (pos == ttlib::cstr::npos)
     {

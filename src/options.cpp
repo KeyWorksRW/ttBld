@@ -16,8 +16,6 @@
 
 #include <array>
 
-#include <ttTR.h>  // Function for translating strings
-
 #include "csrcfiles.h"
 
 // Any time you add an option below, you need to increment this version number and then add it to the aoptVersions

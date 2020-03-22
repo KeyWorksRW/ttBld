@@ -10,8 +10,6 @@
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
-
 #include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <ttfile.h>     // ttCFile -- class for reading and writing files, strings, data, etc.
 #include <ttxml.h>      // ttCXMLBranch

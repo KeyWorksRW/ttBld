@@ -74,6 +74,10 @@ namespace fs = std::filesystem;
 #include <ttcstr.h>
 #include <ttlibspace.h>
 
+#if defined(_WIN32)
+    #include <ttdebug.h>
+#endif
+
 constexpr const char* txtVersion = "ttBld 1.5.0";
 constexpr const char* txtCopyright = "Copyright (c) 2002-2020 KeyWorks Software";
 constexpr const char* txtAppname = "ttBld";

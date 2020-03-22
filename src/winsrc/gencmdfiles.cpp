@@ -10,8 +10,6 @@
 
 #include <iostream>
 
-#include <ttTR.h>        // Function for translating strings
-#include <ttdebug.h>     // ttASSERT macros
 #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
