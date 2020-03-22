@@ -8,27 +8,22 @@
 
 /*
     Source files specified in a build script are relative to the location of that build script. The .srcfiles file
-   we are creating may be in an entirely different directory. So before we add a file to .srcfiles, we must first
-   make it relative to the location of the build script, and then make it relative to the location of .srcfiles.
+    we are creating may be in an entirely different directory. So before we add a file to .srcfiles, we must first
+    make it relative to the location of the build script, and then make it relative to the location of .srcfiles.
 */
 
 #include "pch.h"
 
-#include <ttTR.h>  // Function for translating strings
-
-#include "convertdlg.h"  // CConvertDlg
-
-#include <direct.h>  // Functions for directory handling and creation
-
-#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
-#include <ttdirdlg.h>    // DirDlg -- Class for displaying a dialog to select a directory
-#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttfiledlg.h>   // ttCFileDlg -- Wrapper around Windows GetOpenFileName() API
-#include <ttfindfile.h>  // ttCFindFile
-#include <ttwinff.h>     // winff -- Wrapper around Windows FindFile
+#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
+#include <ttdirdlg.h>   // DirDlg -- Class for displaying a dialog to select a directory
+#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttfiledlg.h>  // ttCFileDlg -- Wrapper around Windows GetOpenFileName() API
+#include <ttwinff.h>    // winff -- Wrapper around Windows FindFile
 
 #include "funcs.h"       // List of function declarations
 #include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
+
+#include "convertdlg.h"  // CConvertDlg
 
 // clang-format off
 static const char* atxtSrcTypes[]
@@ -105,7 +100,7 @@ void CConvertDlg::OnBegin(void)
     SetControlText(IDEDIT_OUT_DIR, tmp);
 
     m_comboScripts.Initialize(*this, IDCOMBO_SCRIPTS);
-    ttCFindFile ff(atxtProjects[0]);
+    ttlib::winff ff(atxtProjects[0]);
 
     // If we converted once before, then default to that script
 
@@ -113,50 +108,50 @@ void CConvertDlg::OnBegin(void)
         m_comboScripts.append(m_cszConvertScript);
     else
     {
-        for (size_t pos = 1; !ff.IsValid() && atxtProjects[pos]; ++pos)
-            ff.NewPattern(atxtProjects[pos]);
-        if (ff.IsValid())
-            m_comboScripts.append((char*) ff);
+        for (size_t pos = 1; !ff.isvalid() && atxtProjects[pos]; ++pos)
+            ff.newpattern(atxtProjects[pos]);
+        if (ff.isvalid())
+            m_comboScripts.append(ff.getcstr());
 
         if (m_comboScripts.GetCount() < 1)  // no scripts found, let's check sub directories
         {
-            ff.NewPattern("*.*");
+            ff.newpattern("*.*");
             do
             {
-                if (ff.IsDir())
+                if (ff.isdir())
                 {
                     if (!ttIsValidFileChar(ff, 0))  // this will skip over . and ..
                         continue;
-                    ttlib::cstr cszDir((char*) ff);
+                    ttlib::cstr cszDir(ff.getcstr());
                     cszDir.append(atxtProjects[0]);
-                    ttCFindFile ffFilter(cszDir.c_str());
-                    for (size_t pos = 1; !ffFilter.IsValid() && atxtProjects[pos]; ++pos)
+                    ttlib::winff ffFilter(cszDir.c_str());
+                    for (size_t pos = 1; !ffFilter.isvalid() && atxtProjects[pos]; ++pos)
                     {
-                        cszDir = ff.GetFileName();
+                        cszDir = ff.getcstr();
                         cszDir.append(atxtProjects[pos]);
-                        ffFilter.NewPattern(cszDir.c_str());
+                        ffFilter.newpattern(cszDir.c_str());
                     }
 
-                    if (ffFilter.IsValid())
+                    if (ffFilter.isvalid())
                     {
-                        cszDir = ff.GetFileName();
+                        cszDir = ff.getcstr();
                         cszDir.append(ffFilter);
                         m_comboScripts.append(cszDir);
                     }
                 }
-            } while (ff.NextFile());
+            } while (ff.next());
         }
     }
 
     size_t cFilesFound = 0;
     for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
     {
-        if (ff.NewPattern(atxtSrcTypes[pos]))
+        if (ff.newpattern(atxtSrcTypes[pos]))
         {
             do
             {
                 ++cFilesFound;
-            } while (ff.NextFile());
+            } while (ff.next());
         }
     }
     tmp.Format("%kzd %s located", cFilesFound, _ttp("file", "files", cFilesFound));
@@ -200,7 +195,7 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
         dlg.append_filename(".srcfiles.yaml");
         if (dlg.fileExists())
         {
-            if (ttMsgBox(
+            if (ttlib::MsgBox(
                     _tt(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"),
                     MB_YESNO) != IDYES)
                 return;
@@ -218,16 +213,16 @@ void CConvertDlg::OnBtnChangeIn()
     {
         SetControlText(IDEDIT_IN_DIR, dlg.c_str());
         ttlib::ChangeDir(dlg);
-        ttCFindFile ff("*.cpp");
+        ttlib::winff ff("*.cpp");
         size_t cFilesFound = 0;
         for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
         {
-            if (ff.NewPattern(atxtSrcTypes[pos]))
+            if (ff.newpattern(atxtSrcTypes[pos]))
             {
                 do
                 {
                     ++cFilesFound;
-                } while (ff.NextFile());
+                } while (ff.next());
             }
         }
         ttlib::ChangeDir(cwd);  // restore our directory
