@@ -592,7 +592,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
         // that way. They could all be on a single line, or they could be on multiple lines interspersed with
         // comment lines, blank lines, etc. For now, we'll assume it wasn't hand-edited...
 
-        if (tt::contains(file[line], "\"defines\""))
+        if (ttlib::contains(file[line], "\"defines\""))
         {
             if (file[line].find(']') != tt::npos)
                 continue;  // all on one line, we don't process it
@@ -631,7 +631,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
             continue;
         }
 
-        if (tt::contains(file[line], "\"includePath\""))
+        if (ttlib::contains(file[line], "\"includePath\""))
         {
             if (file[line].find(']') != tt::npos)
                 continue;  // all on one line, we don't process it
@@ -646,7 +646,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
                     continue;
                 ttlib::cstr path;
                 path.ExtractSubString(file[line], start);
-                if (!tt::contains(path, "${workspaceRoot}") && !tt::contains(path, "${default}"))
+                if (!ttlib::contains(path, "${workspaceRoot}") && !ttlib::contains(path, "${default}"))
                 {
                     // If it's not already a relative path, make it relative
                     if (path.at(0) != '.')
@@ -656,7 +656,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 #if defined(_WIN32)
                     path.backslashestoforward();
 #endif
-                    if (!tt::contains(path, ":"))
+                    if (!ttlib::contains(path, ":"))
                     {
                         std::string workspace("${workspaceRoot}/");
                         workspace += path;
@@ -680,8 +680,8 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
                 for (; defpos < Includes.size() - 1; ++defpos)
                 {
                     // ':' is checked in case a drive letter is specified
-                    if (!tt::contains(Includes[defpos], "${workspaceRoot}") &&
-                        !tt::contains(Includes[defpos], "${default}") && !tt::contains(Includes[defpos], ":"))
+                    if (!ttlib::contains(Includes[defpos], "${workspaceRoot}") &&
+                        !ttlib::contains(Includes[defpos], "${default}") && !ttlib::contains(Includes[defpos], ":"))
                     {
                         ttlib::cstr tmp(Includes[defpos]);
                         Includes[defpos] = "${workspaceRoot}/";

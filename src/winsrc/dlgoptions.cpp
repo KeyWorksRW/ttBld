@@ -59,20 +59,20 @@ CTabOptions::CTabOptions() : ttlib::dlg(IDDLG_OPTIONS), CWriteSrcFiles()
 
     ReadFile();  // read in any existing .srcfiles
 
-    if (!hasOptValue(OPT::PCH))
+    if (!hasOptValue(OPT::PCH) || getOptValue(OPT::PCH).issameas("none"))
     {
-        if (ttFileExists("stdafx.h"))
+        if (ttlib::fileExists("stdafx.h"))
             setOptValue(OPT::PCH, "stdafx.h");
-        else if (ttFileExists("pch.h"))
+        else if (ttlib::fileExists("pch.h"))
             setOptValue(OPT::PCH, "pch.h");
-        else if (ttFileExists("precomp.h"))
+        else if (ttlib::fileExists("precomp.h"))
             setOptValue(OPT::PCH, "precomp.h");
 
-        else if (ttFileExists("pch.hh"))
+        else if (ttlib::fileExists("pch.hh"))
             setOptValue(OPT::PCH, "pch.hh");
-        else if (ttFileExists("pch.hpp"))
+        else if (ttlib::fileExists("pch.hpp"))
             setOptValue(OPT::PCH, "pch.hpp");
-        else if (ttFileExists("pch.hxx"))
+        else if (ttlib::fileExists("pch.hxx"))
             setOptValue(OPT::PCH, "pch.hxx");
     }
 }

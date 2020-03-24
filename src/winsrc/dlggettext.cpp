@@ -31,7 +31,7 @@ void CDlgGetText::OnOK(void) {}
 
 void CDlgGetText::ProcessCurOptions(const char* pszOptions)
 {
-    if (ttIsEmpty(pszOptions))
+    if (!pszOptions || !*pszOptions)
     {
         // No current options, so set some defaults
 

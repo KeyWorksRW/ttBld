@@ -115,27 +115,27 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Create new .srcfiles.yaml file"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "C&reate .srcfiles.yaml in:",IDC_STATIC,6,6,72,8
+    LTEXT           "C&reate .srcfiles.yaml in:",IDC_STATIC,6,6,114,8
     EDITTEXT        IDEDIT_OUT_DIR,6,23,157,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Change...",IDBTN_CHANGE_OUT,177,22,50,16
+    PUSHBUTTON      "&Change...",IDBTN_CHANGE_OUT,170,22,57,16
     CONTROL         "Create using &file list:",IDRADIO_FILES,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,6,56,78,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,6,56,115,10
     EDITTEXT        IDEDIT_IN_DIR,19,76,144,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "C&hange...",IDBTN_CHANGE_IN,177,75,50,16
+    PUSHBUTTON      "C&hange...",IDBTN_CHANGE_IN,170,75,57,16
     LTEXT           "",IDTXT_FILES_FOUND,19,96,129,8
     CONTROL         "Create using &project file:",IDRADIO_CONVERT,"Button",
-                    BS_AUTORADIOBUTTON,6,121,91,10
+                    BS_AUTORADIOBUTTON,6,121,126,10
     COMBOBOX        IDCOMBO_SCRIPTS,19,137,146,45,CBS_DROPDOWN | CBS_SORT |
                     WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "&Locate...",IDBTN_LOCATE_SCRIPT,177,135,50,16
+    PUSHBUTTON      "&Locate...",IDBTN_LOCATE_SCRIPT,170,135,57,16
     CONTROL         "&Add .vscode/ directory and files (tasks.json, launch.json, etc.)",
                     IDCHECK_VSCODE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,
                     161,221,10
     CONTROL         "Have &git ignore all generated files and directories",
                     IDCHECK_IGNORE_ALL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     6,178,221,10
-    DEFPUSHBUTTON   "Create",IDOK,115,208,50,16
-    PUSHBUTTON      "Cancel",IDCANCEL,177,208,50,16
+    DEFPUSHBUTTON   "Create",IDOK,106,208,57,16
+    PUSHBUTTON      "Cancel",IDCANCEL,170,208,57,16
 END
 
 IDDLG_OPTIONS DIALOG  0, 0, 232, 281
@@ -416,3 +416,4 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
