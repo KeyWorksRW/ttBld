@@ -241,7 +241,9 @@ void CConvertDlg::OnOK(void)
     if (GetCheck(IDRADIO_CONVERT))
         m_cszConvertScript.GetWndText(gethwnd(IDCOMBO_SCRIPTS));
     else
+    {
         m_cszConvertScript.clear();
+    }
 
     m_bCreateVsCode = GetCheck(IDCHECK_VSCODE);
     m_bGitIgnore = GetCheck(IDCHECK_IGNORE_ALL);
@@ -333,6 +335,8 @@ bool CConvertDlg::doConversion(const char* pszInFile)
     // If there is no conversion script file, then convert using files in the current directory.
     if (m_cszConvertScript.empty())
     {
+        m_cSrcFiles.InitOptions();
+
         if (!m_cSrcFiles.hasOptValue(OPT::PROJECT))
         {
             ttlib::cstr projname(m_cszOutSrcFiles);
@@ -346,8 +350,24 @@ bool CConvertDlg::doConversion(const char* pszInFile)
                 if (projname.back() == '/')
                     projname.erase(projname.size() - 1);
             }
-
             m_cSrcFiles.setOptValue(OPT::PROJECT, projname.filename());
+
+            if (!m_cSrcFiles.hasOptValue(OPT::PCH) || m_cSrcFiles.getOptValue(OPT::PCH).issameas("none"))
+            {
+                if (ttlib::fileExists("stdafx.h"))
+                    m_cSrcFiles.setOptValue(OPT::PCH, "stdafx.h");
+                else if (ttlib::fileExists("pch.h"))
+                    m_cSrcFiles.setOptValue(OPT::PCH, "pch.h");
+                else if (ttlib::fileExists("precomp.h"))
+                    m_cSrcFiles.setOptValue(OPT::PCH, "precomp.h");
+
+                else if (ttlib::fileExists("pch.hh"))
+                    m_cSrcFiles.setOptValue(OPT::PCH, "pch.hh");
+                else if (ttlib::fileExists("pch.hpp"))
+                    m_cSrcFiles.setOptValue(OPT::PCH, "pch.hpp");
+                else if (ttlib::fileExists("pch.hxx"))
+                    m_cSrcFiles.setOptValue(OPT::PCH, "pch.hxx");
+            }
         }
 
 #if defined(_WIN32)

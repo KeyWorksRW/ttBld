@@ -140,6 +140,8 @@ public:
     void AddError(const std::stringstream& msg) { AddError(msg.str()); };
     void AddError(std::string_view err);
 
+    void InitOptions();
+
 protected:
     // Protected functions
 
@@ -153,8 +155,6 @@ protected:
     void AddCompilerFlag(std::string_view flag);
 
     const ttlib::cstr& GetReportFilename() { return m_ReportPath; }
-
-    void InitOptions();
 
 protected:
     ttlib::cstr m_LIBname;  // Name and location of any additional library to build (used by Lib: section)
@@ -194,4 +194,5 @@ private:
     int m_RequiredSub { 0 };
 
     bool m_bRead { false };  // File has been read and processed.
+    bool m_Initialized { false }; // true if InitOptions has been called
 };

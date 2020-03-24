@@ -131,7 +131,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Figure out the filenames to use for the source and output for a precompiled header
 
-    if (hasOptValue(OPT::PCH))
+    if (hasOptValue(OPT::PCH) && !GetPchCpp().issameas("none"))
     {
         m_pchHdrName = GetProjectName();
         m_pchHdrName.replace_extension(".pch");
@@ -173,7 +173,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     // source file will get rebuilt whether or not a particular source file actually uses the generated header
     // m_ninjafile.
 
-    if (hasOptValue(OPT::PCH))
+    if (hasOptValue(OPT::PCH) && !getOptValue(OPT::PCH).issameas("none"))
     {
         m_ninjafile.addEmptyLine();
         lastline().Format("build $outdir/%s: compilePCH %s", m_pchHdrNameObj.c_str(), m_pchCppName.c_str());

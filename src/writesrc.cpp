@@ -80,7 +80,8 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
 
 bld::RESULT CWriteSrcFiles::WriteNew(std::string_view filename, std::string_view comment)
 {
-    InitOptions();
+    if (!m_Initialized)
+        InitOptions();
 
     if (!filename.empty())
         m_outFilename = filename;
