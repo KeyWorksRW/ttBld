@@ -440,6 +440,8 @@ void CNinja::ProcessBuildLibs()
 
         bldLib.srcDir = BuildFile;
         bldLib.srcDir.remove_filename();
+        bldLib.srcDir.make_relative(cwd);
+        bldLib.srcDir.backslashestoforward();
 
         bldLib.libPathDbg.assignCwd();
         bldLib.libPathRel = bldLib.libPathDbg;
