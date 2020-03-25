@@ -128,7 +128,7 @@ bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
             {
                 file.insertEmptyLine(pos++);
                 file.insertEmptyLine(pos++) = bldLib.shortname + "D:";
-                file.insertEmptyLine(pos++) = "\tcd " + bldLib.srcDir + " & ninja -f $(BldScript)";
+                file.insertEmptyLine(pos++) = "\tcd " + bldLib.srcDir + " & ninja -f $(BldScriptD)";
             }
         }
     }
