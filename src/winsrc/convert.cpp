@@ -21,16 +21,16 @@ void ConvertScriptDir(std::string_view pszScript, std::string_view pszDir, ttlib
 
 bool CConvertDlg::ConvertCodeBlocks()
 {
-    if (!m_cszConvertScript.fileExists())
+    if (!m_ConvertFile.fileExists())
     {
-        ttlib::MsgBox(_tt("Cannot open ") + m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot open ") + m_ConvertFile);
         return false;
     }
 
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("Project");
     if (!pProject)
     {
-        ttlib::MsgBox(_tt("Cannot locate <Project> in ") + m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <Project> in ") + m_ConvertFile);
         return false;
     }
 
@@ -57,7 +57,7 @@ bool CConvertDlg::ConvertCodeLite()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("CodeLite_Project");
     if (!pProject)
     {
-        ttlib::MsgBox(_tt("Cannot locate <CodeLite_Project> in ") + m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <CodeLite_Project> in ") + m_ConvertFile);
         return false;
     }
 
@@ -87,7 +87,7 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pProject = m_xml.GetRootBranch()->FindFirstElement("VisualStudioProject");
     if (!pProject)
     {
-        ttlib::MsgBox(_tt("Cannot locate <VisualStudioProject> in ") + m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <VisualStudioProject> in ") + m_ConvertFile);
         return false;
     }
 
@@ -97,7 +97,7 @@ bool CConvertDlg::ConvertVcProj()
     ttCXMLBranch* pFiles = pProject->FindFirstElement("Files");
     if (!pFiles)
     {
-        ttlib::MsgBox(_tt("Cannot locate <Files> in ") + m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot locate <Files> in ") + m_ConvertFile);
         return false;
     }
     for (size_t iFilter = 0; iFilter < pFiles->GetChildrenCount(); ++iFilter)
@@ -179,7 +179,7 @@ bool CConvertDlg::ConvertVcProj()
                 ttlib::cstr cszInc, cszTmp;
                 for (auto& iter: enumPaths)
                 {
-                    ConvertScriptDir(m_cszConvertScript, iter, cszTmp);
+                    ConvertScriptDir(m_ConvertFile, iter, cszTmp);
                     if (!Include.empty())
                         Include += ";";
                     Include += cszTmp.c_str();
@@ -234,12 +234,6 @@ bool CConvertDlg::ConvertVcProj()
     return true;
 }
 
-bool CConvertDlg::ConvertVcxProj()
-{
-    CVcxRead vcx(&m_xml, &m_cSrcFiles, m_cszConvertScript);
-    return vcx.ConvertVcxProj();
-}
-
 enum
 {
     GROUP_UNKNOWN,
@@ -251,9 +245,9 @@ enum
 bool CConvertDlg::ConvertDsp()
 {
     ttCFile file;
-    if (!file.ReadFile(m_cszConvertScript.c_str()))
+    if (!file.ReadFile(m_ConvertFile.c_str()))
     {
-        ttlib::MsgBox(_tt("Cannot open ") + m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot open ") + m_ConvertFile);
         return false;
     }
 
@@ -379,9 +373,9 @@ bool CConvertDlg::ConvertDsp()
 bool CConvertDlg::ConvertSrcfiles()
 {
     CSrcFiles srcOrg;
-    if (!srcOrg.ReadFile(m_cszConvertScript.c_str()))
+    if (!srcOrg.ReadFile(m_ConvertFile.c_str()))
     {
-        ttlib::MsgBox(_tt("Cannot open ") + m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot open ") + m_ConvertFile);
         return false;
     }
 
@@ -437,7 +431,7 @@ bool CConvertDlg::ConvertSrcfiles()
 
     m_cSrcFiles.setOptValue(OPT::XGET_FLAGS, srcOrg.getOptValue(OPT::XGET_FLAGS));
 
-    ttlib::cstr Root(m_cszConvertScript);
+    ttlib::cstr Root(m_ConvertFile);
     Root.remove_filename();
 
     ttlib::cstr cszRelative;
@@ -475,7 +469,7 @@ bool CConvertDlg::ConvertSrcfiles()
         m_cSrcFiles.setOptValue(OPT::PCH_CPP, cszPch);
     }
 
-    cszRelative = m_cszConvertScript.c_str();
+    cszRelative = m_ConvertFile.c_str();
     cszRelative.make_relative(cszCurCwd);
 
     m_cSrcFiles.GetSrcFileList().addfilename(".include " + cszRelative);

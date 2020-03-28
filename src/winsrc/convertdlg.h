@@ -27,8 +27,8 @@ public:
 
     const ttlib::cstr& GetOutSrcFiles() { return m_cszOutSrcFiles; }
     const ttlib::cstr& GetDirSrcFiles() { return m_cszDirSrcFiles; }
-    const ttlib::cstr& GetConvertScript() { return m_cszConvertScript; }
-    void SetConvertScritpt(std::string_view filename) { m_cszConvertScript = filename; }
+    const ttlib::cstr& GetConvertScript() { return m_ConvertFile; }
+    void SetConvertScritpt(std::string_view filename);
 
     bool isCreateVsCode() { return m_bCreateVsCode; }
     bool isGitIgnoreAll() { return m_bGitIgnore; }
@@ -58,10 +58,10 @@ protected:
     bool ConvertCodeLite();
     bool ConvertCodeBlocks();
     bool ConvertSrcfiles();
-    bool ConvertVcxProj();
     bool ConvertVcProj();
 
-    bool doConversion(const char* pszInFile = nullptr);
+    // BUGBUG: [KeyWorks - 03-28-2020] This should return bld:RESULT
+    bool doConversion();
 
     char* MakeSrcRelative(const char* pszFile);
     void AddCodeLiteFiles(ttCXMLBranch* pParent);
@@ -77,13 +77,13 @@ private:
     ttlib::cstr m_cszOutSrcFiles;  // Where .srcfiles should be created
 
     ttlib::cstr m_cszDirSrcFiles;
-    ttlib::cstr m_cszConvertScript;
+    ttlib::cstr m_ConvertFile;
 
     ttlib::cstr m_cszScriptRoot;
     ttlib::cstr m_cszOutRoot;
     ttlib::cstr m_cszRelative;  // Used to create a relative location for a source file
 
-    ttlib::cwd m_cszCWD { true };
+    ttlib::cwd m_cwd { true };
 
     bool m_bCreateVsCode;
     bool m_bGitIgnore;

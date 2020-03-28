@@ -24,6 +24,7 @@
 #include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
 
 #include "convertdlg.h"  // CConvertDlg
+#include "vcxproj.h"     // CVcxRead
 
 // clang-format off
 static const char* atxtSrcTypes[]
@@ -61,7 +62,7 @@ CConvertDlg::CConvertDlg(const char* pszDstSrcFiles) : ttlib::dlg(IDDDLG_CONVERT
     m_bGitIgnore = false;
 
     // Process of conversion may change directories, so save the directory we should change back to
-    m_cszCWD.assignCwd();
+    m_cwd.assignCwd();
 }
 
 void CConvertDlg::OnBegin(void)
@@ -88,24 +89,26 @@ void CConvertDlg::OnBegin(void)
     if (ttlib::dirExists(".git") || ttlib::dirExists("../.git") || ttlib::dirExists("../../.git"))
         SetCheck(IDCHECK_IGNORE_ALL);
 
-    tmp.assignCwd();
-    SetControlText(IDEDIT_IN_DIR, tmp.c_str());
+    SetControlText(IDEDIT_IN_DIR, m_cwd.c_str());
 
     if (!m_cszOutSrcFiles.empty())
     {
-        tmp = m_cszOutSrcFiles.c_str();
-        tmp.make_absolute();
+        tmp = m_cszOutSrcFiles;
+        tmp.make_relative(m_cwd);
         tmp.remove_filename();
     }
-    SetControlText(IDEDIT_OUT_DIR, tmp);
+    if (!tmp.empty())
+        SetControlText(IDEDIT_OUT_DIR, tmp);
+    else
+        SetControlText(IDEDIT_OUT_DIR, m_cwd);
 
     m_comboScripts.Initialize(*this, IDCOMBO_SCRIPTS);
     ttlib::winff ff(atxtProjects[0]);
 
     // If we converted once before, then default to that script
 
-    if (!m_cszConvertScript.empty())
-        m_comboScripts.append(m_cszConvertScript);
+    if (!m_ConvertFile.empty())
+        m_comboScripts.append(m_ConvertFile);
     else
     {
         for (size_t pos = 1; !ff.isvalid() && atxtProjects[pos]; ++pos)
@@ -239,18 +242,18 @@ void CConvertDlg::OnOK(void)
     m_cszOutSrcFiles.append_filename(".srcfiles.yaml");
     m_cszDirSrcFiles.GetWndText(gethwnd(IDEDIT_IN_DIR));
     if (GetCheck(IDRADIO_CONVERT))
-        m_cszConvertScript.GetWndText(gethwnd(IDCOMBO_SCRIPTS));
+        m_ConvertFile.GetWndText(gethwnd(IDCOMBO_SCRIPTS));
     else
     {
-        m_cszConvertScript.clear();
+        m_ConvertFile.clear();
     }
 
     m_bCreateVsCode = GetCheck(IDCHECK_VSCODE);
     m_bGitIgnore = GetCheck(IDCHECK_IGNORE_ALL);
 
-    if (!m_cszConvertScript.empty() && !m_cszConvertScript.fileExists())
+    if (!m_ConvertFile.empty() && !m_ConvertFile.fileExists())
     {
-        ttlib::MsgBox(_tt("Cannot open ") + m_cszConvertScript);
+        ttlib::MsgBox(_tt("Cannot open ") + m_ConvertFile);
         CancelEnd();
         return;
     }
@@ -297,11 +300,11 @@ bool CConvertDlg::isValidSrcFile(const char* pszFile) const
 
 char* CConvertDlg::MakeSrcRelative(const char* pszFile)
 {
-    ttASSERT(!m_cszConvertScript.empty());
+    ttASSERT(!m_ConvertFile.empty());
 
     if (m_cszScriptRoot.empty())
     {
-        m_cszScriptRoot = m_cszConvertScript;
+        m_cszScriptRoot = m_ConvertFile;
         m_cszScriptRoot.make_absolute();
         m_cszScriptRoot.remove_filename();
 
@@ -325,15 +328,12 @@ char* CConvertDlg::MakeSrcRelative(const char* pszFile)
     return (char*) m_cszRelative.c_str();
 }
 
-bool CConvertDlg::doConversion(const char* pszInFile)
+bool CConvertDlg::doConversion()
 {
     ttASSERT_MSG(!m_cszOutSrcFiles.empty(), "Need to set path to .srcfiles.yaml before calling doConversion()");
 
-    if (pszInFile)
-        m_cszConvertScript = pszInFile;
-
     // If there is no conversion script file, then convert using files in the current directory.
-    if (m_cszConvertScript.empty())
+    if (m_ConvertFile.empty())
     {
         m_cSrcFiles.InitOptions();
 
@@ -385,40 +385,44 @@ bool CConvertDlg::doConversion(const char* pszInFile)
         return true;
     }
 
-    const char* pszExt = ttStrChrR(m_cszConvertScript.c_str(), '.');
-    if (pszExt)
+    auto extension = m_ConvertFile.extension();
+    if (!extension.empty())
     {
         bool bResult = false;
-        if (ttIsSameStrI(pszExt, ".dsp"))
+        if (extension.issameas(".vcxproj", tt::CASE::either))
+        {
+            CVcxRead vcx;
+            auto result = vcx.Convert(m_ConvertFile, m_cszOutSrcFiles);
+            return (result == bld::success);
+        }
+
+        else if (extension.issameas(".dsp", tt::CASE::either))
             bResult = ConvertDsp();
-        else if (ttStrStrI(m_cszConvertScript.c_str(), ".srcfiles"))
+        else if (m_ConvertFile.issameprefix(".srcfiles", tt::CASE::either))
             bResult = ConvertSrcfiles();
         else
         {
-            HRESULT hr = m_xml.ParseXmlFile(m_cszConvertScript.c_str());
+            HRESULT hr = m_xml.ParseXmlFile(m_ConvertFile.c_str());
             if (hr != S_OK)
             {
-                ttlib::MsgBox(_tt("An internal error occurred attempting to parse the file ") +
-                              m_cszConvertScript);
+                ttlib::MsgBox(_tt("An internal error occurred attempting to parse the file ") + m_ConvertFile);
                 return false;
             }
 
-            if (ttIsSameStrI(pszExt, ".project"))
+            if (extension.issameas(".project", tt::CASE::either))
                 bResult = ConvertCodeLite();
-            else if (ttIsSameStrI(pszExt, ".cdb"))
+            else if (extension.issameas(".cdb", tt::CASE::either))
                 bResult = ConvertCodeBlocks();
-            else if (ttIsSameStrI(pszExt, ".vcxproj"))
-                bResult = ConvertVcxProj();
-            else if (ttIsSameStrI(pszExt, ".vcproj"))
+            else if (extension.issameas(".vcproj", tt::CASE::either))
                 bResult = ConvertVcProj();
         }
 
-        ttlib::ChangeDir(m_cszCWD);  // we may have changed directories during the conversion
+        ttlib::ChangeDir(m_cwd);  // we may have changed directories during the conversion
 
         if (bResult)
         {
             ttlib::cstr cszHdr, cszRelative;
-            cszRelative = m_cszConvertScript;
+            cszRelative = m_ConvertFile;
             cszRelative.make_relative(m_cszOutSrcFiles);
 
             cszHdr = "# Converted from " + cszRelative;
@@ -449,4 +453,11 @@ void CConvertDlg::OnCheckConvert()
 void CConvertDlg::OnCheckFiles()
 {
     UnCheck(IDRADIO_CONVERT);
+}
+
+void CConvertDlg::SetConvertScritpt(std::string_view filename)
+{
+    m_ConvertFile = filename;
+    m_ConvertFile.make_relative(m_cwd);
+    m_ConvertFile.backslashestoforward();
 }

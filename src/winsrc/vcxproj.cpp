@@ -2,456 +2,112 @@
 // Name:      CVcxWrite
 // Purpose:   Class for creating/maintaining .vcxproj file for use by the msbuild build tool (or VS IDE)
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
 
-#ifdef _WINDOWS_
+#if defined(_WIN32)
     #include <Rpc.h>
     #pragma comment(lib, "Rpcrt4.lib")
 #endif
 
-#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttwinff.h>     // winff -- Wrapper around Windows FindFile
+#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
+#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttwinff.h>    // winff -- Wrapper around Windows FindFile
 
 #include "resource.h"
 #include "vcxproj.h"  // CVcxRead, CVcxWrite
 
-CVcxRead::CVcxRead(ttCParseXML* pxml, CWriteSrcFiles* pcSrcFiles, std::string_view ConvertScript)
+bld::RESULT CVcxRead::Convert(const std::string& srcFile, std::string_view dstFile)
 {
-    m_pxml = pxml;
-    m_pcSrcFiles = pcSrcFiles;
-    m_ConvertScript = ConvertScript;
-}
+    ttlib::cwd cwd;
+    m_srcFile.assign(srcFile);
+    m_dstFile.assign(dstFile);
+    m_srcFile.make_relative(cwd);
+    m_dstFile.make_relative(cwd);
 
-bool CVcxRead::ConvertVcxProj()
-{
-    ttCXMLBranch* pProject = m_pxml->GetRootBranch()->FindFirstElement("Project");
-    if (!pProject)
+#if defined(_WIN32)
+    m_srcFile.backslashestoforward();
+    m_dstFile.backslashestoforward();
+#endif  // _WIN32
+
+    m_srcDir = srcFile;
+    m_srcDir.make_absolute();
+    m_srcDir.remove_filename();
+
+    m_dstDir = dstFile;
+    m_dstDir.make_absolute();
+    m_dstDir.remove_filename();
+
+    std::wstring str16;
+    ttlib::utf8to16(srcFile, str16);
+    // auto result = m_xmldoc.load_file(str16.c_str());
+    auto result = m_xmldoc.load_file(srcFile.c_str());
+
+    m_writefile.InitOptions();
+
+    if (!result)
     {
-        ttlib::MsgBox(_tt("Cannot locate <Project> in ") + m_ConvertScript);
-        return false;
+        ttlib::cstr msg;
+        ttlib::MsgBox(msg.Format(_tt("Unable to read %s.\n\n%s"), m_srcFile.c_str(), result.description()));
+        return bld::RESULT::read_failed;
     }
 
-    bool bDebugFlagsSeen = false;
-    bool bRelFlagsSeen = false;
-    bool bTypeSeen = false;
+    auto files = m_xmldoc.select_nodes("/Project/ItemGroup/ClCompile[@Include]");
 
-    for (size_t item = 0; item < pProject->GetChildrenCount(); item++)
+    for (size_t pos = 0; pos < files.size(); ++pos)
     {
-        ttCXMLBranch* pItem = pProject->GetChildAt(item);
-        if (ttIsSameStrI(pItem->GetName(), "ItemGroup"))
+        auto name = files[pos].node().first_attribute().value();
+        if (name)
         {
-            for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++)
-            {
-                ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
-                if (ttIsSameStrI(pCmd->GetName(), "ClCompile") || ttIsSameStrI(pCmd->GetName(), "ResourceCompile"))
-                {
-                    const char* pszFile = pCmd->GetAttribute("Include");
-                    if (pszFile && *pszFile)
-                        m_pcSrcFiles->GetSrcFileList().addfilename(MakeSrcRelative(pszFile));
-                }
-            }
-        }
-        else if (ttIsSameStrI(pItem->GetName(), "PropertyGroup"))
-        {
-            if (!bTypeSeen)
-            {
-                ttCXMLBranch* pFlags = pItem->FindFirstElement("ConfigurationType");
-                if (pFlags && pFlags->GetChildrenCount() > 0)
-                {
-                    ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-                    if (pChild->GetData())
-                    {
-                        bTypeSeen = true;
-                        if (ttIsSameStrI(pChild->GetData(), "DynamicLibrary"))
-                            m_pcSrcFiles->setOptValue(OPT::EXE_TYPE, "dll");
-                        else if (ttIsSameStrI(pChild->GetData(), "StaticLibrary"))
-                            m_pcSrcFiles->setOptValue(OPT::EXE_TYPE, "lib");
-                        // TODO: [randalphwa - 5/9/2019] What are the options for console and gui?
-                        continue;  // We don't care about any other settings in this group
-                    }
-                }
-            }
-            if (pItem->cAttributes == 0 && pItem->cChildren > 0)
-            {
-                for (size_t child = 0; child < pItem->cChildren; ++child)
-                {
-                    // Visual Studio lets you specify different directories and target names for debug and release
-                    // builds. ttBld only supports a single target name and directory and then modifies that based
-                    // on Debug versus Release builds. Since the two methods aren't really compatible, we only use
-                    // the release target name, and whichever output directory we encounter first.
+            // The filename will be relative to the location of the xml file, so first we need to make it relative
+            // to that. Since the .srcfiles may be in a different location, we then need to make the file relative
+            // to that.
 
-                    ttCXMLBranch* pChild = pItem->GetChildAt(child);
-                    if (ttIsSameSubStrI(pChild->GetName(), "OutDir"))
-                    {
-                        if (!m_pcSrcFiles->hasOptValue(OPT::TARGET_DIR64) && pChild->cChildren > 0)
-                        {
-                            m_pcSrcFiles->setOptValue(OPT::TARGET_DIR64, pChild->GetChildAt(0)->GetData());
-                            m_pcSrcFiles->setOptValue(OPT::TARGET_DIR32, pChild->GetChildAt(0)->GetData());
-                        }
-                    }
-                    else if (ttIsSameSubStrI(pChild->GetName(), "TargetName"))
-                    {
-                        if (pChild->GetAttributeAt(0)->pszValue &&
-                            ttStrStrI(pChild->GetAttributeAt(0)->pszValue, "Release"))
-                        {
-                            if (!m_pcSrcFiles->hasOptValue(OPT::PROJECT) && pChild->cChildren > 0)
-                            {
-                                m_pcSrcFiles->setOptValue(OPT::PROJECT, pChild->GetChildAt(0)->GetData());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else if (ttIsSameStrI(pItem->GetName(), "ItemDefinitionGroup"))
-        {
-            const char* pszCondition = pItem->GetAttribute("Condition");
-            if (!bDebugFlagsSeen && pszCondition &&
-                (ttStrStrI(pszCondition, "Debug|Win32") || ttStrStrI(pszCondition, "Debug|x64")))
-            {
-                bDebugFlagsSeen = true;
-                for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++)
-                {
-                    ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
-                    if (ttIsSameStrI(pCmd->GetName(), "Midl"))
-                    {
-                        ProcessMidl(pCmd, true);
-                    }
-                    else if (ttIsSameStrI(pCmd->GetName(), "ResourceCompile"))
-                    {
-                        ProcessRC(pCmd, true);
-                    }
-                    else if (ttIsSameStrI(pCmd->GetName(), "Link"))
-                    {
-                        ProcessLink(pCmd, true);
-                    }
-                    else if (ttIsSameStrI(pCmd->GetName(), "ClCompile"))
-                    {
-                        ProcessCompiler(pCmd, true);
-                    }
-                }
-            }
-
-            else if (!bRelFlagsSeen && pszCondition &&
-                     (ttStrStrI(pszCondition, "Release|Win32") || ttStrStrI(pszCondition, "Release|x64")))
-            {
-                bRelFlagsSeen = true;
-                for (size_t cmd = 0; cmd < pItem->GetChildrenCount(); cmd++)
-                {
-                    ttCXMLBranch* pCmd = pItem->GetChildAt(cmd);
-                    if (ttIsSameStrI(pCmd->GetName(), "Midl"))
-                    {
-                        ProcessMidl(pCmd, false);
-                    }
-                    else if (ttIsSameStrI(pCmd->GetName(), "ResourceCompile"))
-                    {
-                        ProcessRC(pCmd, false);
-                    }
-                    else if (ttIsSameStrI(pCmd->GetName(), "Link"))
-                    {
-                        ProcessLink(pCmd, false);
-                    }
-                    else if (ttIsSameStrI(pCmd->GetName(), "ClCompile"))
-                    {
-                        ProcessCompiler(pCmd, false);
-                    }
-                }
-            }
+            ttlib::cstr filename(name);
+            MakeNameRelative(filename);
+            m_writefile.GetSrcFileList().addfilename(filename);
         }
     }
 
-    // The project file will have specified resouce compiler flags even if there isn't a resource file. If there is
-    // no resource file, then we remove those flags here.
+    // All Debug| sections are shared, so only need to process one of them.
+    bool DebugProcessed = false;  // Same as Debug|, only one gets processed
+    bool ReleaseProcessed = false;
 
-    if (m_pcSrcFiles->getRcName().empty())
+    auto configs = m_xmldoc.select_nodes("/Project/ItemDefinitionGroup[@Condition]");
+    for (size_t pos = 0; pos < configs.size(); ++pos)
     {
-        if (m_pcSrcFiles->hasOptValue(OPT::RC_CMN))
-            m_pcSrcFiles->setOptValue(OPT::RC_CMN, "");
-        if (m_pcSrcFiles->hasOptValue(OPT::RC_REL))
-            m_pcSrcFiles->setOptValue(OPT::RC_REL, "");
-        if (m_pcSrcFiles->hasOptValue(OPT::RC_DBG))
-            m_pcSrcFiles->setOptValue(OPT::RC_DBG, "");
-    }
-
-    // If Debug and Release flags are the same, then remove them and just use the common flag setting
-
-    if (m_pcSrcFiles->hasOptValue(OPT::CFLAGS_REL) && m_pcSrcFiles->hasOptValue(OPT::CFLAGS_DBG) &&
-        m_pcSrcFiles->getOptValue(OPT::CFLAGS_REL).issameas(m_pcSrcFiles->getOptValue(OPT::CFLAGS_DBG)))
-    {
-        m_pcSrcFiles->setOptValue(OPT::CFLAGS_CMN, m_pcSrcFiles->getOptValue(OPT::CFLAGS_REL));
-        m_pcSrcFiles->setOptValue(OPT::CFLAGS_REL, "");
-        m_pcSrcFiles->setOptValue(OPT::CFLAGS_DBG, "");
-    }
-    if (m_pcSrcFiles->hasOptValue(OPT::MIDL_REL) && m_pcSrcFiles->hasOptValue(OPT::MIDL_DBG) &&
-        m_pcSrcFiles->getOptValue(OPT::MIDL_REL).issameas(m_pcSrcFiles->getOptValue(OPT::MIDL_DBG)))
-    {
-        m_pcSrcFiles->setOptValue(OPT::MIDL_CMN, m_pcSrcFiles->getOptValue(OPT::MIDL_REL));
-        m_pcSrcFiles->setOptValue(OPT::MIDL_REL, "");
-        m_pcSrcFiles->setOptValue(OPT::MIDL_DBG, "");
-    }
-    if (m_pcSrcFiles->hasOptValue(OPT::RC_REL) && m_pcSrcFiles->hasOptValue(OPT::RC_DBG) &&
-        m_pcSrcFiles->getOptValue(OPT::RC_REL).issameas(m_pcSrcFiles->getOptValue(OPT::RC_DBG)))
-    {
-        m_pcSrcFiles->setOptValue(OPT::RC_CMN, m_pcSrcFiles->getOptValue(OPT::RC_REL));
-        m_pcSrcFiles->setOptValue(OPT::RC_REL, "");
-        m_pcSrcFiles->setOptValue(OPT::RC_DBG, "");
-    }
-
-    return true;
-}
-
-void CVcxRead::ProcessMidl(ttCXMLBranch* pSection, bool bDebug)
-{
-    ttCXMLBranch* pFlags = pSection->FindFirstElement("PreprocessorDefinitions");
-    if (pFlags && pFlags->GetChildrenCount() > 0)
-    {
-        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-        if (pChild->GetData())
+        auto condition = configs[pos].node().first_attribute().value();
+        if (!condition)
+            continue;  // theoretically impossible
+        if (ttlib::contains(condition, "Debug|"))
         {
-            ttlib::cstr cszFlags("-D");
-            cszFlags += pChild->GetData();
-            cszFlags.Replace("_DEBUG;", "");
-            cszFlags.Replace("NDEBUG;", "");
-            cszFlags.Replace(";%(PreprocessorDefinitions)", "");
-            cszFlags.Replace(";", " -D", true);
-            m_pcSrcFiles->setOptValue(bDebug ? OPT::MIDL_DBG : OPT::MIDL_REL, cszFlags);
+            if (DebugProcessed)
+                continue;
+            ProcessDebug(configs[pos].node());
+            DebugProcessed = true;
         }
-    }
-}
-
-void CVcxRead::ProcessRC(ttCXMLBranch* pSection, bool bDebug)
-{
-    ttCXMLBranch* pFlags = pSection->FindFirstElement("PreprocessorDefinitions");
-    if (pFlags && pFlags->GetChildrenCount() > 0)
-    {
-        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-        if (pChild->GetData())
+        else if (ttlib::contains(condition, "Release|"))
         {
-            ttlib::cstr cszFlags("-D");
-            cszFlags += pChild->GetData();
-            cszFlags.Replace("_DEBUG;", "");
-            cszFlags.Replace("NDEBUG;", "");
-            cszFlags.Replace(";%(PreprocessorDefinitions)", "");
-            cszFlags.Replace(";", " -D", true);
-            m_pcSrcFiles->setOptValue(bDebug ? OPT::RC_DBG : OPT::RC_REL, cszFlags);
-        }
-    }
-}
-
-void CVcxRead::ProcessCompiler(ttCXMLBranch* pSection, bool bDebug)
-{
-    ttCXMLBranch* pFlags;
-
-    pFlags = pSection->FindFirstElement("AdditionalOptions");
-    if (pFlags && pFlags->GetChildrenCount() > 0)
-    {
-        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-        if (pChild->GetData())
-        {
-            ttlib::enumstr enumFlags(pChild->GetData(), ' ');
-            ttlib::cstr CFlags;
-            if (m_pcSrcFiles->hasOptValue(OPT::CFLAGS_CMN))
-                CFlags = m_pcSrcFiles->getOptValue(OPT::CFLAGS_CMN);
-            for (auto iter: enumFlags)
-            {
-                if (ttIsSameSubStrI(iter.c_str() + 1, "std:"))
-                {
-                    if (!CFlags.contains(iter, tt::CASE::either))
-                    {
-                        if (!CFlags.empty())
-                            CFlags += " ";
-                        CFlags += iter;
-                    }
-                }
-            }
-            if (!CFlags.empty())
-                m_pcSrcFiles->setOptValue(OPT::CFLAGS_CMN, CFlags);
-        }
-    }
-    if (!bDebug)
-    {
-        pFlags = pSection->FindFirstElement("FavorSizeOrSpeed");
-        if (pFlags && pFlags->GetChildrenCount() > 0)
-        {
-            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-            if (pChild->GetData())
-            {
-                m_pcSrcFiles->setBoolOptValue(
-                    OPT::OPTIMIZE,
-                    ttlib::issameas(pChild->GetData(), "size" ? "space" : "speed", tt::CASE::either));
-            }
+            if (ReleaseProcessed)
+                continue;
+            ProcessRelease(configs[pos].node());
+            ReleaseProcessed = true;
         }
     }
 
-    if (!m_pcSrcFiles->hasOptValue(OPT::INC_DIRS))
+    // If debug and release libraries are identical, switch them to shared libraries
+    if (m_writefile.hasOptValue(OPT::LIBS_DBG) && m_writefile.hasOptValue(OPT::LIBS_REL) &&
+        m_writefile.getOptValue(OPT::LIBS_DBG) == m_writefile.getOptValue(OPT::LIBS_REL))
     {
-        pFlags = pSection->FindFirstElement("AdditionalIncludeDirectories");
-        if (pFlags && pFlags->GetChildrenCount() > 0)
-        {
-            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-            if (pChild->GetData())
-            {
-                const char* pszFirstSemi = ttStrChr(pChild->GetData(), ';');
-                if (pszFirstSemi)
-                    ++pszFirstSemi;
-                ttlib::cstr cszFlags(ttlib::issameprefix(pChild->GetData(), "$(OutDir", tt::CASE::either) &&
-                                             pszFirstSemi ?
-                                         pszFirstSemi :
-                                         pChild->GetData());
-                cszFlags.Replace(";%(AdditionalIncludeDirectories)", "");
-
-                // Paths will be relative to the location of the script file. We need to make them
-                // relative to .srcfiles.yaml.
-
-                ttlib::enumstr enumPaths(cszFlags.c_str());
-                ttlib::cstr Include;
-                for (auto& iter: enumPaths)
-                {
-                    ttlib::cstr cszTmp;
-                    ConvertScriptDir(iter.c_str(), cszTmp);
-                    if (!Include.empty())
-                        Include += ";";
-                    Include += cszTmp;
-                }
-
-                m_pcSrcFiles->setOptValue(OPT::INC_DIRS, Include);
-            }
-        }
+        m_writefile.setOptValue(OPT::LIBS_CMN, m_writefile.getOptValue(OPT::LIBS_DBG));
+        m_writefile.setOptValue(OPT::LIBS_DBG, {});
+        m_writefile.setOptValue(OPT::LIBS_REL, {});
     }
 
-    if (!m_pcSrcFiles->hasOptValue(OPT::PCH))
-    {
-        pFlags = pSection->FindFirstElement("PrecompiledHeaderFile");
-        if (pFlags && pFlags->GetChildrenCount() > 0)
-        {
-            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-            if (pChild->GetData())
-                m_pcSrcFiles->setOptValue(OPT::PCH, pChild->GetData());
-        }
-    }
-
-    if (!m_pcSrcFiles->hasOptValue(OPT::WARN))
-    {
-        pFlags = pSection->FindFirstElement("WarningLevel");
-        if (pFlags && pFlags->GetChildrenCount() > 0)
-        {
-            ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-            if (pChild->GetData())
-            {
-                const char* pszTmp = pChild->GetData();
-                while (*pszTmp && !ttIsDigit(*pszTmp))
-                    ++pszTmp;
-                m_pcSrcFiles->setOptValue(OPT::WARN, pszTmp);
-            }
-        }
-    }
-
-#if 0
-// REVIEW: [KeyWorks - 03-06-2020] Calling convention is only useful for 32-bit apps.
-    pFlags = pSection->FindFirstElement("CallingConvention");
-    if (pFlags && pFlags->GetChildrenCount() > 0)
-    {
-        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-        if (pChild->GetData() && ttStrStrI(pChild->GetData(), "stdcall"))
-        {
-            m_pcSrcFiles->setOptValue(OPT_STDCALL, true);
-        }
-    }
-#endif
-
-    pFlags = pSection->FindFirstElement("PreprocessorDefinitions");
-    if (pFlags && pFlags->GetChildrenCount() > 0)
-    {
-        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-        if (pChild->GetData())
-        {
-            ttlib::cstr cszFlags("-D");
-            cszFlags += pChild->GetData();
-            cszFlags.Replace("_DEBUG;", "");
-            cszFlags.Replace("NDEBUG;", "");
-            cszFlags.Replace(";%(PreprocessorDefinitions)", "");
-            cszFlags.Replace(";", " -D", true);
-            m_pcSrcFiles->setOptValue(bDebug ? OPT::CFLAGS_DBG : OPT::CFLAGS_REL, cszFlags);
-        }
-    }
-}
-
-void CVcxRead::ProcessLink(ttCXMLBranch* pSection, bool bDebug)
-{
-    ttCXMLBranch* pFlags = pSection->FindFirstElement("AdditionalDependencies");
-    if (pFlags && pFlags->GetChildrenCount() > 0)
-    {
-        ttCXMLBranch* pChild = pFlags->GetChildAt(0);
-        if (pChild->GetData())
-        {
-            ttlib::enumstr enumLibs(pChild->GetData());
-            ttlib::cstr cszCurLibs;
-            for (auto iter: enumLibs)
-            {
-                // We only add libraries that are relative to our project
-                if (tt::issamesubstr(iter, ".."))
-                {
-                    if (!cszCurLibs.empty())
-                        cszCurLibs += ";";
-                    cszCurLibs += iter.c_str();
-                }
-            }
-            if (!cszCurLibs.empty())
-                m_pcSrcFiles->setOptValue(bDebug ? OPT::LIBS_DBG : OPT::LIBS_REL, cszCurLibs);
-        }
-    }
-}
-
-void CVcxRead::ConvertScriptDir(const char* pszDir, ttlib::cstr& cszResult)
-{
-    if (pszDir[1] == ':')
-    {
-        // If the path starts with a drive letter, then we can't make it relative
-        cszResult = pszDir;
-        return;
-    }
-
-    cszResult.assign(m_ConvertScript);
-    cszResult.remove_filename();
-    cszResult.append_filename(pszDir);
-
-    cszResult.make_absolute();
-
-    ttlib::cstr cwd;
-    cszResult.make_relative(cwd.assignCwd());
-}
-
-// This function first converts the file relative to the location of the build script, and then relative to the
-// location of .srcfiles
-
-const ttlib::cstr& CVcxRead::MakeSrcRelative(const char* pszFile)
-{
-    if (m_cszScriptRoot.empty())
-    {
-        m_cszScriptRoot = m_ConvertScript;
-        m_cszScriptRoot.make_absolute();
-        m_cszScriptRoot.remove_filename();
-
-        // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory
-        // as the script file
-
-        ttlib::ChangeDir(m_cszScriptRoot);
-    }
-
-    if (m_cszOutRoot.empty())
-    {
-        m_cszOutRoot.assignCwd();
-        m_cszOutRoot.make_absolute();
-    }
-
-    m_cszRelative = pszFile;
-    m_cszRelative.make_absolute();
-    m_cszRelative.make_relative(m_cszRelative);
-    return m_cszRelative;
+    return m_writefile.WriteNew(dstFile);
 }
 
 static bool CreateGuid(ttlib::cstr& Result)
@@ -586,4 +242,148 @@ bool CVcxWrite::CreateBuildFile()
             std::cout << _tt("Created ") << cszProjVC << '\n';
     }
     return true;
+}
+
+void CVcxRead::MakeNameRelative(ttlib::cstr& filename)
+{
+    filename.make_absolute();
+    filename.make_relative(m_srcDir);
+    filename.make_absolute();
+    filename.make_relative(m_dstDir);
+    filename.backslashestoforward();
+}
+
+void CVcxRead::ProcessDebug(pugi::xml_node node)
+{
+    auto compile = node.child("ClCompile");
+    if (compile)
+    {
+        auto val = compile.child("PrecompiledHeader").first_child().value();
+        if (val && !ttlib::issameprefix(val, "NotUsing", tt::CASE::either))
+            m_writefile.setOptValue(OPT::PCH, val);
+
+        val = compile.child("WarningLevel").first_child().value();
+        if (val)
+        {
+            while (*val && !ttlib::isdigit(*val))
+                ++val;
+            m_writefile.setOptValue(OPT::WARN, val);
+        }
+
+        val = compile.child("AdditionalIncludeDirectories").first_child().value();
+        if (val)
+        {
+            ttlib::cstr incs(val);
+            incs.Replace(";%(AdditionalIncludeDirectories)", "");
+
+            ttlib::enumstr enumPaths(incs);
+            ttlib::cstr Includes;
+            for (auto& filename: enumPaths)
+            {
+                MakeNameRelative(filename);
+                if (!Includes.empty())
+                    Includes += ";";
+                Includes += filename;
+            }
+            if (!Includes.empty())
+                m_writefile.setOptValue(OPT::INC_DIRS, Includes);
+        }
+
+        val = compile.child("PreprocessorDefinitions").first_child().value();
+        if (val)
+        {
+            ttlib::cstr Flags("-D");
+            Flags += val;
+            Flags.Replace("_DEBUG;", "");
+            Flags.Replace("WIN32;", "");
+            Flags.Replace("WINDOWS;", "");
+            Flags.Replace(";%(PreprocessorDefinitions)", "");
+            Flags.Replace(";", " -D", true);
+            m_writefile.setOptValue(OPT::CFLAGS_DBG, Flags);
+        }
+    }
+
+    auto link = node.child("Link");
+    if (link)
+    {
+        auto val = link.child("SubSystem").first_child().value();
+        if (val)
+        {
+            if (ttlib::issameprefix(val, "Console", tt::CASE::either))
+                m_writefile.setOptValue(OPT::EXE_TYPE, "console");
+        }
+
+        val = link.child("AdditionalDependencies").first_child().value();
+        if (val)
+        {
+            ttlib::cstr libs(val);
+            libs.Replace(";%(AdditionalDependencies)", "");
+
+            if (!libs.empty())
+                m_writefile.setOptValue(OPT::LIBS_DBG, libs);
+        }
+
+        val = link.child("AdditionalOptions").first_child().value();
+        if (val)
+        {
+            ttlib::cstr options(val);
+            options.Replace("%(AdditionalOptions)", "");
+            if (!options.empty())
+                m_writefile.setOptValue(OPT::LINK_DBG, options);
+        }
+    }
+}
+
+void CVcxRead::ProcessRelease(pugi::xml_node node)
+{
+    auto compile = node.child("ClCompile");
+    if (compile)
+    {
+        auto val = compile.child("FavorSizeOrSpeed").first_child().value();
+        if (val && ttlib::issameprefix(val, "Speed", tt::CASE::either))
+            m_writefile.setOptValue(OPT::OPTIMIZE, "speed");
+
+        val = compile.child("PreprocessorDefinitions").first_child().value();
+        if (val)
+        {
+            ttlib::cstr Flags("-D");
+            Flags += val;
+            Flags.Replace("NDEBUG;", "");
+            Flags.Replace("WIN32;", "");
+            Flags.Replace("WINDOWS;", "");
+            Flags.Replace(";%(PreprocessorDefinitions)", "");
+            Flags.Replace(";", " -D", true);
+            m_writefile.setOptValue(OPT::CFLAGS_DBG, Flags);
+        }
+    }
+
+    auto link = node.child("Link");
+    if (link)
+    {
+        auto val = link.child("SubSystem").first_child().value();
+        if (val)
+        {
+            if (ttlib::issameprefix(val, "Console", tt::CASE::either))
+                m_writefile.setOptValue(OPT::EXE_TYPE, "console");
+        }
+
+        val = link.child("AdditionalDependencies").first_child().value();
+        if (val)
+        {
+            ttlib::cstr libs(val);
+            libs.Replace(";%(AdditionalDependencies)", "");
+
+            if (!libs.empty())
+                m_writefile.setOptValue(OPT::LIBS_REL, libs);
+        }
+
+        val = link.child("AdditionalOptions").first_child().value();
+        if (val)
+        {
+            ttlib::cstr options(val);
+            options.Replace("%(AdditionalOptions)", "");
+            if (!options.empty())
+                m_writefile.setOptValue(OPT::LINK_DBG, options);
+        }
+    }
 }
