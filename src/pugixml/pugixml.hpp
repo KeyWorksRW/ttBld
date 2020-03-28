@@ -4,6 +4,8 @@
  * Copyright (C) 2006-2019, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at https://pugixml.org/
  *
+ * Github location: https://github.com/zeux/pugixml
+ *
  * This library is distributed under the MIT License. See notice at the end
  * of this file.
  *
