@@ -16,7 +16,7 @@ Options:
 
     Natvis:      ../../ttlib/ttlibwin.natvis # MSVC Debug visualizer
 
-    IncDirs:     precompile;./;../../ttlib/include;pugixml  # temporary location, change before Public release
+    IncDirs:     precompile;./;convert;../../ttlib/include;pugixml  # temporary location, change before Public release
     BuildLibs:   ../../ttLib              # temporary location, change before Public release
 
 Files:
@@ -32,7 +32,7 @@ Files:
     winsrc/vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
     winsrc/vscode.cpp          # Creates/updates .vscode files
     winsrc/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
-    winsrc/writevcxproj.cpp    # Create a Visual Studio project file
+    convert/writevcx.cpp       # Create a Visual Studio project file
 
 # Modules for creating the Options UI
 
@@ -62,6 +62,7 @@ Files:
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     # parsehhp.cpp        # CParseHHP class for parsing a .hhp file
     rcdep.cpp           # Contains functions for parsing RC dependencies
-    vcxproj.cpp         # Creates a Visual Studio project file
     verninja.cpp        # CVerMakeNinja class
     writesrc.cpp        # Writes a new or update srcfiles.yaml file
+
+    convert/readvcx.cpp  # Converts a Visual Studio project file into .srcfiles.yaml

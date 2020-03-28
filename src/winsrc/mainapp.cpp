@@ -39,7 +39,7 @@
 #include "convertdlg.h"  // CConvertDlg
 #include "funcs.h"       // List of function declarations
 #include "ninja.h"       // CNinja
-#include "vcxproj.h"     // CVcxWrite
+#include "convert.h"     // CConvert
 
 #if defined(TESTING)
     #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler

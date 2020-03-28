@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CVcxRead
+// Name:      CConvert
 // Purpose:   Class for converting a Visual Studio Build file to .srcfiles.yaml
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
@@ -11,9 +11,9 @@
 #include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
 #include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 
-#include "vcxproj.h"  // CVcxRead, CVcxWrite
+#include "convert.h"  // CConvert, CVcxWrite
 
-bld::RESULT CVcxRead::Convert(const std::string& srcFile, std::string_view dstFile)
+bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view dstFile)
 {
     ttlib::cwd cwd;
     m_srcFile.assign(srcFile);
@@ -79,14 +79,14 @@ bld::RESULT CVcxRead::Convert(const std::string& srcFile, std::string_view dstFi
         {
             if (DebugProcessed)
                 continue;
-            ProcessDebug(configs[pos].node());
+            ProcessVcxDebug(configs[pos].node());
             DebugProcessed = true;
         }
         else if (ttlib::contains(condition, "Release|"))
         {
             if (ReleaseProcessed)
                 continue;
-            ProcessRelease(configs[pos].node());
+            ProcessVcxRelease(configs[pos].node());
             ReleaseProcessed = true;
         }
     }
@@ -103,7 +103,7 @@ bld::RESULT CVcxRead::Convert(const std::string& srcFile, std::string_view dstFi
     return m_writefile.WriteNew(dstFile);
 }
 
-void CVcxRead::MakeNameRelative(ttlib::cstr& filename)
+void CConvert::MakeNameRelative(ttlib::cstr& filename)
 {
     filename.make_absolute();
     filename.make_relative(m_srcDir);
@@ -112,7 +112,7 @@ void CVcxRead::MakeNameRelative(ttlib::cstr& filename)
     filename.backslashestoforward();
 }
 
-void CVcxRead::ProcessDebug(pugi::xml_node node)
+void CConvert::ProcessVcxDebug(pugi::xml_node node)
 {
     auto compile = node.child("ClCompile");
     if (compile)
@@ -193,7 +193,7 @@ void CVcxRead::ProcessDebug(pugi::xml_node node)
     }
 }
 
-void CVcxRead::ProcessRelease(pugi::xml_node node)
+void CConvert::ProcessVcxRelease(pugi::xml_node node)
 {
     auto compile = node.child("ClCompile");
     if (compile)

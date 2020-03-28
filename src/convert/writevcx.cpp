@@ -17,8 +17,8 @@
 
 #include <ttwinff.h>    // winff -- Wrapper around Windows FindFile
 
-#include "resource.h"
-#include "writevcxproj.h"  // CVcxWrite
+#include "../winsrc/resource.h"
+#include "writevcx.h"  // CVcxWrite
 
 static bool CreateGuid(ttlib::cstr& Result)
 {

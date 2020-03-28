@@ -12,19 +12,19 @@
 #include "writesrc.h"   // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
 // Class for reading a vcxproj file and converting it into a .srcfiles.yaml file.
-class CVcxRead
+class CConvert
 {
 public:
-    CVcxRead() {}
+    CConvert() {}
 
-    bld::RESULT Convert(const std::string& srcFile, std::string_view dstFile);
+    bld::RESULT ConvertVcx(const std::string& srcFile, std::string_view dstFile);
 
 protected:
     void MakeNameRelative(ttlib::cstr& filename);
 
     // Process the Debug section of ItemDefinitionGroup
-    void ProcessDebug(pugi::xml_node node);
-    void ProcessRelease(pugi::xml_node node);
+    void ProcessVcxDebug(pugi::xml_node node);
+    void ProcessVcxRelease(pugi::xml_node node);
 
 private:
     pugi::xml_document m_xmldoc;

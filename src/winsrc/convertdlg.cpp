@@ -24,7 +24,7 @@
 #include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
 
 #include "convertdlg.h"  // CConvertDlg
-#include "vcxproj.h"     // CVcxRead
+#include "convert.h"     // CConvert
 
 // clang-format off
 static const char* atxtSrcTypes[]
@@ -391,8 +391,8 @@ bool CConvertDlg::doConversion()
         bool bResult = false;
         if (extension.issameas(".vcxproj", tt::CASE::either))
         {
-            CVcxRead vcx;
-            auto result = vcx.Convert(m_ConvertFile, m_cszOutSrcFiles);
+            CConvert convert;
+            auto result = convert.ConvertVcx(m_ConvertFile, m_cszOutSrcFiles);
             return (result == bld::success);
         }
 

@@ -15,7 +15,7 @@
 #include <ttxml.h>      // ttCXMLBranch
 
 #include "convertdlg.h"  // CConvertDlg
-#include "vcxproj.h"     // CVcxRead
+#include "convert.h"     // CVcxRead
 
 void ConvertScriptDir(std::string_view pszScript, std::string_view pszDir, ttlib::cstr& Result);
 
