@@ -29,13 +29,10 @@ Files:
     winsrc/finder.cpp          # Routines for finding executables such as the MSVC compiler
     winsrc/gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
     winsrc/gitfuncs.cpp        # Functions for working with .git
-    winsrc/vcxproj.cpp         # Creates a Visual Studio project file
     winsrc/vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
     winsrc/vscode.cpp          # Creates/updates .vscode files
     winsrc/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
-
-    # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
-    pugixml/pugixml.cpp # Built directly rather than building a library
+    winsrc/writevcxproj.cpp    # Create a Visual Studio project file
 
 # Modules for creating the Options UI
 
@@ -52,6 +49,11 @@ Files:
     winsrc/dlggettext.cpp      # CDlgGetText dialog
     winsrc/dlgvscode.cpp       # CDlgVsCode dialog
 
+# The following modules do not require Windows
+
+    # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
+    pugixml/pugixml.cpp # Built directly rather than building a library
+
     cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
     createmakefile.cpp  # CreateMakeFile method for creating a makefile
     csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
@@ -60,5 +62,6 @@ Files:
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     # parsehhp.cpp        # CParseHHP class for parsing a .hhp file
     rcdep.cpp           # Contains functions for parsing RC dependencies
+    vcxproj.cpp         # Creates a Visual Studio project file
     verninja.cpp        # CVerMakeNinja class
     writesrc.cpp        # Writes a new or update srcfiles.yaml file

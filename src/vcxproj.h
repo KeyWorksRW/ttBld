@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CVcxRead, CVcxWrite
-// Purpose:   Classes for converting/from a Visual Studio build script
+// Name:      CVcxRead
+// Purpose:   Class for converting a Visual Studio Build file to .srcfiles.yaml
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "ninja.h"      // CNinja
 #include "pugixml.hpp"  // pugixml parser
 #include "writesrc.h"   // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
@@ -35,15 +34,4 @@ private:
     ttlib::cstr m_dstFile;
     ttlib::cstr m_srcDir;
     ttlib::cstr m_dstDir;
-};
-
-// Class creating a Visual Studio build script
-class CVcxWrite : public CNinja
-{
-public:
-    CVcxWrite(const char* pszNinjaDir = nullptr) : CNinja(pszNinjaDir) {}
-
-    bool CreateBuildFile();
-
-private:
 };
