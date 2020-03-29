@@ -14,7 +14,6 @@
 
 #include <ttcwd.h>     // cwd -- Class for storing and optionally restoring the current directory
 #include <ttwindlg.h>  // Class for displaying a dialog
-#include <ttxml.h>     // ttCXMLBranch, ttCParseXML
 
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
@@ -54,22 +53,15 @@ protected:
 
     // Protected functions
 
-    bool ConvertCodeLite();
-    bool ConvertCodeBlocks();
     bool ConvertSrcfiles();
 
     // BUGBUG: [KeyWorks - 03-28-2020] This should return bld:RESULT
     bool doConversion();
 
-    char* MakeSrcRelative(const char* pszFile);
-    void AddCodeLiteFiles(ttCXMLBranch* pParent);
-    bool isValidSrcFile(const char* pszFile) const;
-
 private:
     // Class members
 
     ttlib::dlgCombo m_comboScripts;
-    ttCParseXML m_xml;
     CWriteSrcFiles m_cSrcFiles;
 
     ttlib::cstr m_cszOutSrcFiles;  // Where .srcfiles should be created

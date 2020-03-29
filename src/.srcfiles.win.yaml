@@ -24,7 +24,6 @@ Files:
     winsrc/mainapp.cpp         # entry point, global strings, library pragmas
 
     winsrc/addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
-    winsrc/convert.cpp         # Various conversion methods
     winsrc/convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
     winsrc/finder.cpp          # Routines for finding executables such as the MSVC compiler
     winsrc/gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
@@ -65,6 +64,8 @@ Files:
     verninja.cpp        # CVerMakeNinja class
     writesrc.cpp        # Writes a new or update srcfiles.yaml file
 
-    convert/readvcx.cpp  # Converts a Visual Studio project file into .srcfiles.yaml
-    convert/readdsp.cpp  # Class for converting a Visual Studio .DSP file to .srcfiles.yaml
-    convert/readvc.cpp   # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml
+    convert/readvcx.cpp       # Converts a Visual Studio project file into .srcfiles.yaml
+    convert/readdsp.cpp       # Class for converting a Visual Studio .DSP file to .srcfiles.yaml
+    convert/readvc.cpp        # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml
+    convert/readcodelite.cpp  # Class for converting a CodeLite .project file to .srcfiles.yaml
+    convert/convert.cpp       # Various conversion methods

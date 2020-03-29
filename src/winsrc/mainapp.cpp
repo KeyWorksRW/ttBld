@@ -200,10 +200,11 @@ int main(int argc, char* argv[])
     }
 #endif
 
+#if 0
     auto pszEnv = std::getenv("TTBLD");
     if (pszEnv)
     {
-        auto pszArg = ttFindNonSpace(pszEnv);
+        auto pszArg = ttlib::findnonspace(pszEnv);
         while (*pszArg)
         {
             if (*pszArg == '-' || *pszArg == '/')
@@ -218,6 +219,7 @@ int main(int argc, char* argv[])
             pszArg = ttStepOver(pszArg);
         }
     }
+#endif
 
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
@@ -241,7 +243,7 @@ int main(int argc, char* argv[])
                 SrcFilePath = argv[argpos++];
             Action |= ACT_CONVERT;
         }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
+        else if (ttlib::issameprefix(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
         {
             CreateCodeCmd("code32.cmd");
             CreateCodeCmd("code64.cmd");
@@ -409,7 +411,7 @@ int main(int argc, char* argv[])
     {
         // -dir option will have set SrcFilePath, if option not specified, default to current directory
         CConvertDlg dlg;
-        dlg.SetConvertScritpt(SrcFilePath.c_str());
+        dlg.SetConvertScritpt(SrcFilePath);
         if (dlg.DoModal(NULL) != IDOK)
             return 1;
         SrcFilePath = dlg.GetOutSrcFiles();

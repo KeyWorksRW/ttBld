@@ -262,72 +262,6 @@ void CConvertDlg::OnOK(void)
         CancelEnd();
 }
 
-void CConvertDlg::AddCodeLiteFiles(ttCXMLBranch* pParent)
-{
-    for (size_t child = 0; child < pParent->GetChildrenCount(); child++)
-    {
-        ttCXMLBranch* pFile = pParent->GetChildAt(child);
-        if (ttIsSameStrI(pFile->GetName(), "File"))
-        {
-            if (isValidSrcFile(pFile->GetAttribute("Name")))
-                m_cSrcFiles.GetSrcFileList().addfilename(MakeSrcRelative(pFile->GetAttribute("Name")));
-        }
-        // CodeLite nests resources in a sub <VirtualDirectory> tag
-        else if (ttIsSameStrI(pFile->GetName(), "VirtualDirectory"))
-        {
-            AddCodeLiteFiles(pFile);
-        }
-    }
-}
-
-bool CConvertDlg::isValidSrcFile(const char* pszFile) const
-{
-    if (!pszFile)
-        return false;
-
-    char* psz = ttStrChrR(pszFile, '.');
-    if (psz)
-    {
-        if (ttIsSameStrI(psz, ".cpp") || ttIsSameStrI(psz, ".cc") || ttIsSameStrI(psz, ".cxx") ||
-            ttIsSameStrI(psz, ".c") || ttIsSameSubStrI(psz, ".rc"))
-            return true;
-    }
-    return false;
-}
-
-// This function first converts the file relative to the location of the build script, and then relative to the
-// location of .srcfiles
-
-char* CConvertDlg::MakeSrcRelative(const char* pszFile)
-{
-    ttASSERT(!m_ConvertFile.empty());
-
-    if (m_cszScriptRoot.empty())
-    {
-        m_cszScriptRoot = m_ConvertFile;
-        m_cszScriptRoot.make_absolute();
-        m_cszScriptRoot.remove_filename();
-
-        // For GetFullPathName() to work properly on a file inside the script, we need to be in the same directory
-        // as the script file
-
-        ttlib::ChangeDir(m_cszScriptRoot);
-    }
-
-    if (m_cszOutRoot.empty())
-    {
-        m_cszOutRoot = m_cszOutSrcFiles;
-        m_cszOutRoot.make_absolute();
-        if (m_cszOutRoot.hasFilename(".srcfiles.yaml"))
-            m_cszOutRoot.remove_filename();
-    }
-
-    m_cszRelative = pszFile;
-    m_cszRelative.make_absolute();
-    m_cszRelative.make_relative(m_cszOutRoot);
-    return (char*) m_cszRelative.c_str();
-}
-
 bool CConvertDlg::doConversion()
 {
     ttASSERT_MSG(!m_cszOutSrcFiles.empty(), "Need to set path to .srcfiles.yaml before calling doConversion()");
@@ -407,22 +341,17 @@ bool CConvertDlg::doConversion()
             auto result = convert.ConvertDsp(m_ConvertFile, m_cszOutSrcFiles);
             return (result == bld::success);
         }
-
-        else if (m_ConvertFile.issameprefix(".srcfiles", tt::CASE::either))
-            bResult = ConvertSrcfiles();
-        else
+        else if (extension.issameas(".project", tt::CASE::either))
         {
-            HRESULT hr = m_xml.ParseXmlFile(m_ConvertFile.c_str());
-            if (hr != S_OK)
-            {
-                ttlib::MsgBox(_tt("An internal error occurred attempting to parse the file ") + m_ConvertFile);
-                return false;
-            }
-
-            if (extension.issameas(".project", tt::CASE::either))
-                bResult = ConvertCodeLite();
-            else if (extension.issameas(".cdb", tt::CASE::either))
-                bResult = ConvertCodeBlocks();
+            CConvert convert;
+            auto result = convert.ConvertCodeLite(m_ConvertFile, m_cszOutSrcFiles);
+            return (result == bld::success);
+        }
+        else if (m_ConvertFile.issameprefix(".srcfiles", tt::CASE::either))
+        {
+            CConvert convert;
+            auto result = convert.ConvertSrcfiles(m_ConvertFile, m_cszOutSrcFiles);
+            return (result == bld::success);
         }
 
         ttlib::ChangeDir(m_cwd);  // we may have changed directories during the conversion

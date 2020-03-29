@@ -25,6 +25,8 @@ public:
     bld::RESULT ConvertVc(const std::string& srcFile, std::string_view dstFile);
     bld::RESULT ConvertVcx(const std::string& srcFile, std::string_view dstFile);
     bld::RESULT ConvertDsp(const std::string& srcFile, std::string_view dstFile);
+    bld::RESULT ConvertCodeLite(const std::string& srcFile, std::string_view dstFile);
+    bld::RESULT ConvertSrcfiles(const std::string& srcFile, std::string_view dstFile);
 
 protected:
     void MakeNameRelative(ttlib::cstr& filename);
