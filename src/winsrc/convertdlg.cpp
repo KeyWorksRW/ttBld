@@ -395,6 +395,12 @@ bool CConvertDlg::doConversion()
             auto result = convert.ConvertVcx(m_ConvertFile, m_cszOutSrcFiles);
             return (result == bld::success);
         }
+        else if (extension.issameas(".vcproj", tt::CASE::either))
+        {
+            CConvert convert;
+            auto result = convert.ConvertVc(m_ConvertFile, m_cszOutSrcFiles);
+            return (result == bld::success);
+        }
         else if (extension.issameas(".dsp", tt::CASE::either))
         {
             CConvert convert;
@@ -417,8 +423,6 @@ bool CConvertDlg::doConversion()
                 bResult = ConvertCodeLite();
             else if (extension.issameas(".cdb", tt::CASE::either))
                 bResult = ConvertCodeBlocks();
-            else if (extension.issameas(".vcproj", tt::CASE::either))
-                bResult = ConvertVcProj();
         }
 
         ttlib::ChangeDir(m_cwd);  // we may have changed directories during the conversion

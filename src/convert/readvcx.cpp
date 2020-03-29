@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CConvert
-// Purpose:   Class for converting a Visual Studio Build file to .srcfiles.yaml
+// Name:      ConvertVcx
+// Purpose:   Class for converting a Visual Studio .vcxproj file to .srcfiles.yaml
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -39,8 +39,6 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
     // auto result = m_xmldoc.load_file(str16.c_str());
     auto result = m_xmldoc.load_file(srcFile.c_str());
 
-    m_writefile.InitOptions();
-
     if (!result)
     {
         ttlib::cstr msg;
@@ -52,28 +50,27 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
 
     for (size_t pos = 0; pos < files.size(); ++pos)
     {
-        auto name = files[pos].node().first_attribute().value();
-        if (name)
+        auto filename = files[pos].node().first_attribute().as_cstr();
+        if (!filename.empty())
         {
             // The filename will be relative to the location of the xml file, so first we need to make it relative
             // to that. Since the .srcfiles may be in a different location, we then need to make the file relative
             // to that.
 
-            ttlib::cstr filename(name);
             MakeNameRelative(filename);
             m_writefile.GetSrcFileList().addfilename(filename);
         }
     }
 
     // All Debug| sections are shared, so only need to process one of them.
-    bool DebugProcessed = false;  // Same as Debug|, only one gets processed
-    bool ReleaseProcessed = false;
+    bool DebugProcessed = false;
+    bool ReleaseProcessed = false;  // Same as Debug|, only one gets processed
 
     auto configs = m_xmldoc.select_nodes("/Project/ItemDefinitionGroup[@Condition]");
     for (size_t pos = 0; pos < configs.size(); ++pos)
     {
-        auto condition = configs[pos].node().first_attribute().value();
-        if (!condition)
+        auto condition = configs[pos].node().first_attribute().cvalue();
+        if (!condition.empty())
             continue;  // theoretically impossible
         if (ttlib::contains(condition, "Debug|"))
         {
@@ -117,20 +114,20 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
     auto compile = node.child("ClCompile");
     if (compile)
     {
-        auto val = compile.child("PrecompiledHeader").first_child().value();
-        if (val && !ttlib::issameprefix(val, "NotUsing", tt::CASE::either))
+        auto val = compile.child("PrecompiledHeader").first_child().cvalue();
+        if (!val.empty() && !ttlib::issameprefix(val, "NotUsing", tt::CASE::either))
             m_writefile.setOptValue(OPT::PCH, val);
 
-        val = compile.child("WarningLevel").first_child().value();
-        if (val)
+        val = compile.child("WarningLevel").first_child().cvalue();
+        if (val.empty())
         {
-            while (*val && !ttlib::isdigit(*val))
-                ++val;
+            while (val.size() && !ttlib::isdigit(val[0]))
+                val.remove_prefix(1);
             m_writefile.setOptValue(OPT::WARN, val);
         }
 
-        val = compile.child("AdditionalIncludeDirectories").first_child().value();
-        if (val)
+        val = compile.child("AdditionalIncludeDirectories").first_child().cvalue();
+        if (!val.empty())
         {
             ttlib::cstr incs(val);
             incs.Replace(";%(AdditionalIncludeDirectories)", "");
@@ -148,8 +145,8 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
                 m_writefile.setOptValue(OPT::INC_DIRS, Includes);
         }
 
-        val = compile.child("PreprocessorDefinitions").first_child().value();
-        if (val)
+        val = compile.child("PreprocessorDefinitions").first_child().cvalue();
+        if (val.empty())
         {
             ttlib::cstr Flags("-D");
             Flags += val;
@@ -165,15 +162,15 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
     auto link = node.child("Link");
     if (link)
     {
-        auto val = link.child("SubSystem").first_child().value();
-        if (val)
+        auto val = link.child("SubSystem").first_child().cvalue();
+        if (!val.empty())
         {
             if (ttlib::issameprefix(val, "Console", tt::CASE::either))
                 m_writefile.setOptValue(OPT::EXE_TYPE, "console");
         }
 
-        val = link.child("AdditionalDependencies").first_child().value();
-        if (val)
+        val = link.child("AdditionalDependencies").first_child().cvalue();
+        if (!val.empty())
         {
             ttlib::cstr libs(val);
             libs.Replace(";%(AdditionalDependencies)", "");
@@ -182,8 +179,8 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
                 m_writefile.setOptValue(OPT::LIBS_DBG, libs);
         }
 
-        val = link.child("AdditionalOptions").first_child().value();
-        if (val)
+        val = link.child("AdditionalOptions").first_child().cvalue();
+        if (!val.empty())
         {
             ttlib::cstr options(val);
             options.Replace("%(AdditionalOptions)", "");
@@ -198,12 +195,12 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
     auto compile = node.child("ClCompile");
     if (compile)
     {
-        auto val = compile.child("FavorSizeOrSpeed").first_child().value();
-        if (val && ttlib::issameprefix(val, "Speed", tt::CASE::either))
+        auto val = compile.child("FavorSizeOrSpeed").first_child().cvalue();
+        if (ttlib::issameprefix(val, "Speed", tt::CASE::either))
             m_writefile.setOptValue(OPT::OPTIMIZE, "speed");
 
-        val = compile.child("PreprocessorDefinitions").first_child().value();
-        if (val)
+        val = compile.child("PreprocessorDefinitions").first_child().cvalue();
+        if (!val.empty())
         {
             ttlib::cstr Flags("-D");
             Flags += val;
@@ -219,15 +216,16 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
     auto link = node.child("Link");
     if (link)
     {
-        auto val = link.child("SubSystem").first_child().value();
-        if (val)
+        auto val = link.child("SubSystem").first_child().cvalue();
+        if (!val.empty())
         {
             if (ttlib::issameprefix(val, "Console", tt::CASE::either))
                 m_writefile.setOptValue(OPT::EXE_TYPE, "console");
+            // TODO: [KeyWorks - 03-29-2020] Need to add other types here
         }
 
-        val = link.child("AdditionalDependencies").first_child().value();
-        if (val)
+        val = link.child("AdditionalDependencies").first_child().cvalue();
+        if (!val.empty())
         {
             ttlib::cstr libs(val);
             libs.Replace(";%(AdditionalDependencies)", "");
@@ -236,8 +234,8 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
                 m_writefile.setOptValue(OPT::LIBS_REL, libs);
         }
 
-        val = link.child("AdditionalOptions").first_child().value();
-        if (val)
+        val = link.child("AdditionalOptions").first_child().cvalue();
+        if (!val.empty())
         {
             ttlib::cstr options(val);
             options.Replace("%(AdditionalOptions)", "");

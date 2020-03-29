@@ -66,4 +66,5 @@ Files:
     writesrc.cpp        # Writes a new or update srcfiles.yaml file
 
     convert/readvcx.cpp  # Converts a Visual Studio project file into .srcfiles.yaml
-    convert/readdsp.cpp
+    convert/readdsp.cpp  # Class for converting a Visual Studio .DSP file to .srcfiles.yaml
+    convert/readvc.cpp   # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml

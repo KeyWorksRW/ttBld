@@ -57,7 +57,6 @@ protected:
     bool ConvertCodeLite();
     bool ConvertCodeBlocks();
     bool ConvertSrcfiles();
-    bool ConvertVcProj();
 
     // BUGBUG: [KeyWorks - 03-28-2020] This should return bld:RESULT
     bool doConversion();
