@@ -395,9 +395,13 @@ bool CConvertDlg::doConversion()
             auto result = convert.ConvertVcx(m_ConvertFile, m_cszOutSrcFiles);
             return (result == bld::success);
         }
-
         else if (extension.issameas(".dsp", tt::CASE::either))
-            bResult = ConvertDsp();
+        {
+            CConvert convert;
+            auto result = convert.ConvertDsp(m_ConvertFile, m_cszOutSrcFiles);
+            return (result == bld::success);
+        }
+
         else if (m_ConvertFile.issameprefix(".srcfiles", tt::CASE::either))
             bResult = ConvertSrcfiles();
         else

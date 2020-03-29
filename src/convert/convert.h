@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CVcxRead
-// Purpose:   Class for converting a Visual Studio Build file to .srcfiles.yaml
+// Name:      CConvert
+// Purpose:   Class for converting project build files to .srcfiles.yaml
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
@@ -8,21 +8,22 @@
 
 #pragma once
 
-#include "pugixml.hpp"  // pugixml parser
+#include <ttcstr.h>  // cstr -- Classes for handling zero-terminated char strings.
+
+#include "../pugixml/pugixml.hpp"  // pugixml parser
 #include "writesrc.h"   // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
-// Class for reading a vcxproj file and converting it into a .srcfiles.yaml file.
 class CConvert
 {
 public:
-    CConvert() {}
+    CConvert() { m_writefile.InitOptions(); }
 
     bld::RESULT ConvertVcx(const std::string& srcFile, std::string_view dstFile);
+    bld::RESULT ConvertDsp(const std::string& srcFile, std::string_view dstFile);
 
 protected:
     void MakeNameRelative(ttlib::cstr& filename);
 
-    // Process the Debug section of ItemDefinitionGroup
     void ProcessVcxDebug(pugi::xml_node node);
     void ProcessVcxRelease(pugi::xml_node node);
 

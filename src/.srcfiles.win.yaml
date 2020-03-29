@@ -16,7 +16,7 @@ Options:
 
     Natvis:      ../../ttlib/ttlibwin.natvis # MSVC Debug visualizer
 
-    IncDirs:     precompile;./;convert;../../ttlib/include;pugixml  # temporary location, change before Public release
+    IncDirs:     precompile;./;convert;../../ttlib/include  # temporary location, change before Public release
     BuildLibs:   ../../ttLib              # temporary location, change before Public release
 
 Files:
@@ -66,3 +66,4 @@ Files:
     writesrc.cpp        # Writes a new or update srcfiles.yaml file
 
     convert/readvcx.cpp  # Converts a Visual Studio project file into .srcfiles.yaml
+    convert/readdsp.cpp

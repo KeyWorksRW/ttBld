@@ -54,7 +54,6 @@ protected:
 
     // Protected functions
 
-    bool ConvertDsp();
     bool ConvertCodeLite();
     bool ConvertCodeBlocks();
     bool ConvertSrcfiles();
