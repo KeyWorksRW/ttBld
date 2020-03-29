@@ -397,10 +397,10 @@ namespace pugi
 #if defined(_TTLIB_CVIEW_AVAILABLE_)
         ttlib::cview cname() const { return { name() }; }
         ttlib::cview cvalue() const { return { value() }; }
-        ttlib::cview cvalue(const char_t* default) const { return { as_string(default) }; }
-        ttlib::cstr as_cstr(const char_t* default = "") const
+        ttlib::cview cvalue(const char_t* defvalue) const { return { as_string(defvalue) }; }
+        ttlib::cstr as_cstr(const char_t* defvalue = "") const
         {
-            ttlib::cstr str(as_string(default));
+            ttlib::cstr str(as_string(defvalue));
             return str;
         }
 #endif
@@ -780,9 +780,9 @@ namespace pugi
 
 #if defined(_TTLIB_CVIEW_AVAILABLE_)
         ttlib::cview cget() const { return { get() }; }
-        ttlib::cstr as_cstr(const char_t* default = "") const
+        ttlib::cstr as_cstr(const char_t* defvalue = "") const
         {
-            ttlib::cstr str(as_string(default));
+            ttlib::cstr str(as_string(defvalue));
             return str;
         }
 #endif
