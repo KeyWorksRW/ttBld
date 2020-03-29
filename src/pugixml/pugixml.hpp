@@ -13,6 +13,9 @@
  * Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
  */
 
+// [KeyWorks - 03-291-2020] Added cvalue(), cname(), as_cstr(), child_cvalue and child_as_cstr() when compiled with
+// _TTLIB_CVIEW_AVAILABLE_ defined. These functions return a ttlib::cview (string_view to a zero-terminated string)
+
 #ifndef PUGIXML_VERSION
 // Define version macro; evaluates to major * 1000 + minor * 10 + patch so that it's safe to use in less-than comparisons
 // Note: pugixml used major * 100 + minor * 10 + patch format up until 1.9 (which had version identifier 190); starting from pugixml 1.10, the minor version number is two digits
@@ -388,8 +391,19 @@ namespace pugi
 		const char_t* name() const;
 		const char_t* value() const;
 
-		// Get attribute value, or the default value if attribute is empty
+        // Get attribute value, or the default value if attribute is empty
 		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
+
+#if defined(_TTLIB_CVIEW_AVAILABLE_)
+        ttlib::cview cname() const { return { name() }; }
+        ttlib::cview cvalue() const { return { value() }; }
+        ttlib::cview cvalue(const char_t* default) const { return { as_string(default) }; }
+        ttlib::cstr as_cstr(const char_t* default = "") const
+        {
+            ttlib::cstr str(as_string(default));
+            return str;
+        }
+#endif
 
 		// Get attribute value as a number, or the default value if conversion did not succeed or attribute is empty
 		int as_int(int def = 0) const;
@@ -503,6 +517,20 @@ namespace pugi
 		// Note: For <node>text</node> node.value() does not return "text"! Use child_value() or text() methods to access text inside nodes.
 		const char_t* value() const;
 
+#if defined(_TTLIB_CVIEW_AVAILABLE_)
+        ttlib::cview cname() const { return { name() }; }
+        ttlib::cview cvalue() const { return { value() }; }
+        ttlib::cstr  as_cstr() const { ttlib::cstr str(value()); return str; }
+
+		ttlib::cview child_cvalue() const { return { child_value() }; }
+        ttlib::cstr  child_as_cstr() const { ttlib::cstr str(child_value()); return str; }
+
+        // Get child value of child with specified name. Equivalent to child(name).child_cvalue().
+		ttlib::cview child_cvalue(const char_t* name) const { return { child_value(name) }; }
+        // Get child value of child with specified name. Equivalent to child(name).child_as_cstr().
+        ttlib::cstr  child_as_cstr(const char_t* name) const { ttlib::cstr str(child_value(name)); return str; }
+#endif
+
 		// Get attribute list
 		xml_attribute first_attribute() const;
 		xml_attribute last_attribute() const;
@@ -535,7 +563,6 @@ namespace pugi
 
 		// Get child value of current node; that is, value of the first child node of type PCDATA/CDATA
 		const char_t* child_value() const;
-
 		// Get child value of child with specified name. Equivalent to child(name).child_value().
 		const char_t* child_value(const char_t* name) const;
 
@@ -751,6 +778,14 @@ namespace pugi
 		// Get text, or the default value if object is empty
 		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
 
+#if defined(_TTLIB_CVIEW_AVAILABLE_)
+        ttlib::cview cget() const { return { get() }; }
+        ttlib::cstr as_cstr(const char_t* default = "") const
+        {
+            ttlib::cstr str(as_string(default));
+            return str;
+        }
+#endif
 		// Get text as a number, or the default value if conversion did not succeed or object is empty
 		int as_int(int def = 0) const;
 		unsigned int as_uint(unsigned int def = 0) const;
