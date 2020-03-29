@@ -113,7 +113,6 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 {
                     do
                     {
-                        auto space = line.viewspace(pos);
                         ttlib::cstr def;
                         pos = def.ExtractSubString(line, line.findspace(pos));
                         if (!def.issameprefix("NDEBUG") && !def.issameprefix("_DEBUG") &&
