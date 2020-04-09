@@ -11,7 +11,6 @@
 #include "pch.h"
 
 #include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttfile.h>     // ttCFile -- class for reading and writing files, strings, data, etc.
 
 #include "convert.h"
 

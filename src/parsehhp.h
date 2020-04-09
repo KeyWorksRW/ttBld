@@ -2,15 +2,14 @@
 // Name:      CParseHHP
 // Purpose:   Parse an HHP file to collect dependencies
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2018-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include <ttcstr.h>
-
-#include <ttlist.h>    // ttCList, ttCDblList, ttCStrIntList
+#include <ttcstr.h>     // cstr -- Classes for handling zero-terminated char strings.
+#include <ttcvector.h>  // cstrVector -- Vector of ttlib::cstr strings
 
 // Parse an HHP file to collect dependencies
 class CParseHHP
@@ -31,7 +30,7 @@ public:
 
     void ParseHhpFile(std::string_view filename);
 
-    ttCList m_lstDependencies;
+    ttlib::cstrVector m_lstDependencies;
     ttlib::cstr m_chmFilename;
 
 protected:

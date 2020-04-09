@@ -166,7 +166,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
 
 #if 0
-static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
+static void AddTask(ttlib::textfile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
                     const char* pszProblem);
 #endif
 
@@ -770,10 +770,10 @@ void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
 // generation for messages.po
 
 #if 0
-static void AddTask(ttCFile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
+static void AddTask(ttlib::textfile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
                     const char* pszProblem)
 {
-    ttCFile fileTask;
+    ttlib::textfile fileTask;
     fileTask.Delete();
     fileTask.ReadStrFile(txtSubTasks);
 

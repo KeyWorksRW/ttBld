@@ -123,8 +123,6 @@ void CConvertDlg::OnBegin(void)
             {
                 if (ff.isdir())
                 {
-                    if (!ttIsValidFileChar(ff, 0))  // this will skip over . and ..
-                        continue;
                     ttlib::cstr cszDir(ff.getcstr());
                     cszDir.append(atxtProjects[0]);
                     ttlib::winff ffFilter(cszDir.c_str());

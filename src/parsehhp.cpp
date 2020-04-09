@@ -10,7 +10,6 @@
 
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
-#include <ttfile.h>      // ttCFile
 #include <ttfindfile.h>  // ttCFindFile
 
 #include "ninja.h"     // CNinja

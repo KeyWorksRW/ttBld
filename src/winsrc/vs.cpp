@@ -12,7 +12,8 @@
 
 #include <filesystem>
 
-#include <ttfile.h>     // ttCFile
+#include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
+
 #include "csrcfiles.h"  // CSrcFiles
 
 static const char* txtTasks =
@@ -64,17 +65,17 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
         }
     }
 
-    ttCFile file;
+    ttlib::textfile file;
 
-    file.ReadStrFile(txtTasks);
+    file.ReadString(txtTasks);
 
-    file.ReplaceStr("%tgtDir%", cSrcFiles.GetTargetDir().c_str());
+    file.at(file.FindLineContaining("%tgtDir%")).Replace("%tgtDir%", cSrcFiles.GetTargetDir());
 
 #if defined(_WIN32)
-    file.ReplaceStr("%command%", "nmake.exe -nologo debug");
+    file.at(file.FindLineContaining("%command%")).Replace("%command%", "nmake.exe -nologo debug");
 #else
     // REVIEW: [KeyWorks - 8/1/2019] Visual Studio is available for MAC, will make.exe work?
-    file.ReplaceStr("%command%", "make.exe debug");
+    file.at(file.FindLineContaining("%command%")).Replace("%command%", "nmake.exe -nologo debug");
 #endif
 
     if (!file.WriteFile(".vs/tasks.vs.json"))
@@ -89,13 +90,13 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
         results.push_back(_tt("Created .vs/tasks.vs.json"));
     }
 
-    file.Delete();
-    file.ReadStrFile(txtLaunch);
+    file.clear();
+    file.ReadString(txtLaunch);
 
-    file.ReplaceStr("%targetD%", cSrcFiles.GetTargetDebug().c_str());
+    file.at(file.FindLineContaining("%targetD%")).Replace("%targetD%", cSrcFiles.GetTargetDebug());
 
     if (!cSrcFiles.GetProjectName().empty())
-        file.ReplaceStr("%projgect%", cSrcFiles.GetProjectName().c_str());
+        file.at(file.FindLineContaining("%project%")).Replace("%project%", cSrcFiles.GetProjectName());
     else
     {
         std::ostringstream str;
