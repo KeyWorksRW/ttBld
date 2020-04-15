@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
             ++argpos;
             if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
             {
-                ttConsoleColor clr(ttConsoleColor::LIGHTRED);
+                ttlib::concolor clr(ttlib::concolor::LIGHTRED);
                 std::cout << _tt("-dir must be followed by the directory to use.") << '\n';
                 return 1;
             }
@@ -447,7 +447,7 @@ int main(int argc, char* argv[])
         SrcFilePath.assign(locateProjectFile(RootDir));
         if (SrcFilePath.empty())
         {
-            ttConsoleColor clr(ttConsoleColor::LIGHTRED);
+            ttlib::concolor clr(ttlib::concolor::LIGHTRED);
             std::cout << _tt("ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, "
                              "or set the location with -dir.")
                       << '\n';
@@ -534,7 +534,7 @@ int main(int argc, char* argv[])
 
         if (cNinja.getErrorMsgs().size())
         {
-            ttConsoleColor clr(ttConsoleColor::LIGHTRED);
+            ttlib::concolor clr(ttlib::concolor::LIGHTRED);
             for (auto iter: cNinja.getErrorMsgs())
             {
                 std::cout << iter << '\n';
@@ -609,7 +609,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
 
     else
     {
-        ttConsoleColor clr(ttConsoleColor::LIGHTRED);
+        ttlib::concolor clr(ttlib::concolor::LIGHTRED);
         std::cout << _tt(
             "This version of ttBld is too old to properly create ninja scripts from your current srcfiles.");
     }
