@@ -10,8 +10,8 @@
 
 #include <ttcstr.h>     // cstr -- Classes for handling zero-terminated char strings.
 #include <ttenumstr.h>  // enumstr -- Enumerate through substrings in a string
-#include <ttreg.h>      // ttCRegistry
-#include <ttwinff.h>    // winff -- Wrapper around Windows FindFile
+#include <ttregistry.h>
+#include <ttwinff.h>  // winff -- Wrapper around Windows FindFile
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that
@@ -25,13 +25,13 @@
 
 bool FindCurMsvcPath(ttlib::cstr& Result)
 {
-    ttCRegistry reg;
-    if (reg.Open(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\devenv.exe", false))
+    ttlib::registry reg;
+    if (reg.OpenLocal("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\devenv.exe", KEY_READ))
     {
-        char szPath[MAX_PATH];
-        if (reg.ReadString("", szPath, sizeof(szPath)))
+        auto path = reg.ReadString("");
+        if (!path.empty())
         {
-            Result.ExtractSubString(szPath);
+            Result.ExtractSubString(path);
             auto pos = Result.locate("Common", 0, tt::CASE::either);
             if (pos != tt::npos)
             {
@@ -59,13 +59,13 @@ bool FindCurMsvcPath(ttlib::cstr& Result)
 
 bool FindVsCode(ttlib::cstr& Result)
 {
-    ttCRegistry reg;
-    if (reg.Open(HKEY_CLASSES_ROOT, "Applications\\Code.exe\\shell\\open\\command", false))
+    ttlib::registry reg;
+    if (reg.OpenClasses("Applications\\Code.exe\\shell\\open\\command"))
     {
-        char szPath[MAX_PATH];
-        if (reg.ReadString("", szPath, sizeof(szPath)))
+        auto path = reg.ReadString("");
+        if (!path.empty())
         {
-            Result.ExtractSubString(szPath);
+            Result.ExtractSubString(path);
             Result.remove_filename();
             return true;
         }
