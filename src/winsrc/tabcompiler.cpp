@@ -8,9 +8,9 @@
 
 #include "pch.h"
 
-#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
-#include <ttdirdlg.h>   // ttCDirDlg -- Class for displaying a dialog to select a directory
-#include <ttfiledlg.h>  // ttCFileDlg -- Wrapper around Windows GetOpenFileName() API
+#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
+#include <ttdirdlg.h>    // DirDlg -- Class for displaying a dialog to select a directory
+#include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
 
 #include "dlgoptions.h"
 
@@ -119,11 +119,10 @@ void CTabCompiler::OnOK(void)
 
 void CTabCompiler::OnBtnChangePch()
 {
-    ttCFileDlg fdlg(*this);
+    ttlib::openfile fdlg(*this);
     fdlg.SetFilter("Header Files|*.h;*.hh;*.hpp;*.hxx||");
     ttlib::cwd cwd;
 
-    fdlg.UseCurrentDirectory();
     fdlg.RestoreDirectory();
     if (fdlg.GetOpenName())
     {
@@ -131,7 +130,7 @@ void CTabCompiler::OnBtnChangePch()
         cszOrg.GetWndText(gethwnd(IDEDIT_PCH));
         cszCpp.GetWndText(gethwnd(IDEDIT_PCH_CPP));
 
-        ttlib::cstr cszRelPath(fdlg.GetFileName());
+        ttlib::cstr cszRelPath(fdlg.filename());
         cszRelPath.make_relative(cwd);
         SetControlText(IDEDIT_PCH, cszRelPath);
 
@@ -176,14 +175,13 @@ void CTabCompiler::OnBtnChangePch()
 
 void CTabCompiler::OnBtnPchCpp()
 {
-    ttCFileDlg fdlg(*this);
+    ttlib::openfile fdlg(*this);
     fdlg.SetFilter("C++ Files|*.cpp;*.cc;*.cxx||");
-    fdlg.UseCurrentDirectory();
     fdlg.RestoreDirectory();
     if (fdlg.GetOpenName())
     {
         ttlib::cwd cwd;
-        ttlib::cstr cszRelPath(fdlg.GetFileName());
+        ttlib::cstr cszRelPath(fdlg.filename());
         cszRelPath.make_relative(cwd);
         SetControlText(IDEDIT_PCH_CPP, cszRelPath);
     }

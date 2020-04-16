@@ -8,10 +8,10 @@
 
 #include "pch.h"
 
-#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
-#include <ttdirdlg.h>   // ttCDirDlg
-#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttfiledlg.h>  // ttCFileDlg
+#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
+#include <ttdirdlg.h>    // ttCDirDlg
+#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
 
 #include "dlgoptions.h"
 
@@ -71,13 +71,12 @@ void CTabLinker::OnOK(void)
 
 void CTabLinker::OnBtnChange()
 {
-    ttCFileDlg fdlg(*this);
+    ttlib::openfile fdlg(*this);
     fdlg.SetFilter("Natvis Files|*.natvis");
-    fdlg.UseCurrentDirectory();
     fdlg.RestoreDirectory();
     if (fdlg.GetOpenName())
     {
-        ttlib::cstr name(fdlg.GetFileName());
+        ttlib::cstr name(fdlg.filename());
         ttlib::cwd cwd;
         name.make_relative(cwd);
         SetControlText(IDEDIT_NATVIS, name);
@@ -121,7 +120,7 @@ void CTabLinker::OnBtnLibDir()
 
 void CTabLinker::OnBtnAddLib()
 {
-    ttCFileDlg fdlg(*this);
+    ttlib::openfile fdlg(*this);
     fdlg.SetFilter("Library Files|*.lib");
 
     ttlib::cstr cszCurLibDirs;
@@ -134,7 +133,7 @@ void CTabLinker::OnBtnAddLib()
     if (fdlg.GetOpenName())
     {
         ttlib::cwd cwd;
-        ttlib::cstr name(fdlg.GetFileName());
+        ttlib::cstr name(fdlg.filename());
         name.make_relative(cwd);
 
         ttlib::cstr CurLibs;

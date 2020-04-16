@@ -14,17 +14,17 @@
 
 #include "pch.h"
 
-#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
-#include <ttdirdlg.h>   // DirDlg -- Class for displaying a dialog to select a directory
-#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
-#include <ttfiledlg.h>  // ttCFileDlg -- Wrapper around Windows GetOpenFileName() API
-#include <ttwinff.h>    // winff -- Wrapper around Windows FindFile
+#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
+#include <ttdirdlg.h>    // DirDlg -- Class for displaying a dialog to select a directory
+#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
+#include <ttwinff.h>     // winff -- Wrapper around Windows FindFile
 
 #include "funcs.h"       // List of function declarations
 #include "ttlibicons.h"  // Icons for use on 3D shaded buttons (ttShadeBtn)
 
-#include "convertdlg.h"  // CConvertDlg
 #include "convert.h"     // CConvert
+#include "convertdlg.h"  // CConvertDlg
 
 // clang-format off
 static const char* atxtSrcTypes[]
@@ -171,13 +171,13 @@ void CConvertDlg::OnBegin(void)
 
 void CConvertDlg::OnBtnLocateScript()
 {
-    ttCFileDlg dlg(*this);
+    ttlib::openfile dlg(*this);
     dlg.SetFilter("Project Files|*.vcxproj;*.vcproj;*.dsp;*.project;*.cbp;.srcfiles.yaml||");
-    dlg.UseCurrentDirectory();
+    // dlg.UseCurrentDirectory();
     dlg.RestoreDirectory();
     if (dlg.GetOpenName())
     {
-        auto item = m_comboScripts.append(dlg.GetFileName());
+        auto item = m_comboScripts.append(dlg.filename());
         m_comboScripts.SetCurSel(item);
         UnCheck(IDRADIO_FILES);
         SetCheck(IDRADIO_CONVERT);
