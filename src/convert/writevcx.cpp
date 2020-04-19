@@ -15,7 +15,7 @@
 #include <Rpc.h>
 #pragma comment(lib, "Rpcrt4.lib")
 
-#include <ttwinff.h>    // winff -- Wrapper around Windows FindFile
+#include <ttwinff.h>  // winff -- Wrapper around Windows FindFile
 
 #include "../winsrc/resource.h"
 #include "writevcx.h"  // CVcxWrite
@@ -23,14 +23,14 @@
 static bool CreateGuid(ttlib::cstr& Result)
 {
     UUID uuid;
-    RPC_STATUS ret_val = ::UuidCreate(&uuid);
+    auto ret_val = ::UuidCreate(&uuid);
 
     if (ret_val == RPC_S_OK)
     {
         RPC_CSTR pszUuid = nullptr;
         if (::UuidToStringA(&uuid, &pszUuid) == RPC_S_OK && pszUuid)
         {
-            Result = (char*) pszUuid;
+            Result = reinterpret_cast<const char*>(pszUuid);
             ::RpcStringFreeA(&pszUuid);
         }
     }
@@ -39,15 +39,6 @@ static bool CreateGuid(ttlib::cstr& Result)
 
 bool CVcxWrite::CreateBuildFile()
 {
-#ifndef _WINDOWS_
-    // Currently we only support creating VisualStudio projects on Windows. To get this to work on another
-    // platform, a replacement would be needed for creating a GUID, and the templates we store in the .rc file
-    // would need to be added in a different way (perhaps including them directly into the source code instead of
-    // the resource).
-
-    return false;
-#endif  // _WINDOWS_
-
     ttlib::cstr cszGuid;
     if (!CreateGuid(cszGuid))
     {
@@ -150,6 +141,12 @@ bool CVcxWrite::CreateBuildFile()
         }
         else
             std::cout << _tt("Created ") << cszProjVC << '\n';
+    }
+    else
+    {
+        // TODO: [KeyWorks - 04-19-2020] Need to support changing the files to compile to match what's in
+        // .srcfiles.
+        return false;
     }
     return true;
 }

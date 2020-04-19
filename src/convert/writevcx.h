@@ -13,7 +13,7 @@
 class CVcxWrite : public CNinja
 {
 public:
-    CVcxWrite(const char* pszNinjaDir = nullptr) : CNinja(pszNinjaDir) {}
+    CVcxWrite(std::string_view NinjaDir = ttlib::emptystring) : CNinja(NinjaDir) {}
 
     bool CreateBuildFile();
 };

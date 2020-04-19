@@ -36,10 +36,11 @@
 #include <ttconsole.h>  // ttConsoleColor
 #include <ttcvector.h>  // Vector of ttlib::cstr strings
 
+#include "convert.h"     // CConvert
 #include "convertdlg.h"  // CConvertDlg
 #include "funcs.h"       // List of function declarations
 #include "ninja.h"       // CNinja
-#include "convert.h"     // CConvert
+#include "writevcx.h"    // CVcxWrite -- Create a Visual Studio project file
 
 #if defined(TESTING)
     #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
@@ -82,7 +83,12 @@ void Usage()
         << _tt("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd\n")
         << _tt("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file\n")
         << _tt("    -vs        -- creates files used to build and debug a project using Visual Studio\n")
-        << _tt("    -vscode    -- creates or updates files used to build and debug a project using VS Code\n");
+        << _tt("    -vscode    -- creates or updates files used to build and debug a project using VS Code\n")
+#if defined(_WIN32)
+        << _tt("    -vcxproj   -- creates or updates files needed to build project using MS Visual Studio\n")
+#endif  // _WIN32
+
+        ;
 
     // Currently non-finished commands
     std::cout
@@ -106,7 +112,6 @@ void Usage()
     // Following commands are no longer supported:
 
     // puts("\nIDE workspace options:");
-    // puts(_tt("    -vcxproj    -- creates or updates files needed to build project using MS Visual Studio"));
     // puts(_tt("    -codelite   -- creates or updates files needed to build project using CodeLite"));
     // puts(_tt("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
 
@@ -143,22 +148,23 @@ enum UPDATE_TYPE
 
 void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 
-enum  // actions that can be run in addition to normal single command actions
+enum : size_t  // actions that can be run in addition to normal single command actions
 {
     // clang-format off
 
-    ACT_DRYRUN   = 1 << 0,  // This is a dry run -- don't actually output anything.
-    ACT_VS       = 1 << 1,
-    ACT_VSCODE   = 1 << 2,  // Generate .vscode directory and .json files.
-    ACT_DIR      = 1 << 3,
-    ACT_MAKEFILE = 1 << 4,
-    ACT_ALLNINJA = 1 << 5,  // Creates/updates all .ninja scripts, creeates makefile (if missing).
-    ACT_NEW      = 1 << 6,  // Displays a dialog for creating a new .srcfiles.yaml file.
-    ACT_FORCE    = 1 << 7,  // Creates .ninja file even if it hasn't changed.
-    ACT_OPTIONS  = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
-    ACT_CONVERT  = 1 << 9,  // Converts the specified build script file to .srcfiles.yaml
-    ACT_ALL      = 1 << 10,  // Mostly equivalent to ACT_ALLNINJA + ACT_VSCODE
-    ACT_ALLD     = 1 << 11,  // Same as ACT_ALL but forces output.
+    ACT_DRYRUN    = 1 << 0,  // This is a dry run -- don't actually output anything.
+    ACT_VS        = 1 << 1,
+    ACT_VSCODE    = 1 << 2,  // Generate .vscode directory and .json files.
+    ACT_DIR       = 1 << 3,
+    ACT_MAKEFILE  = 1 << 4,
+    ACT_ALLNINJA  = 1 << 5,  // Creates/updates all .ninja scripts, creeates makefile (if missing).
+    ACT_NEW       = 1 << 6,  // Displays a dialog for creating a new .srcfiles.yaml file.
+    ACT_FORCE     = 1 << 7,  // Creates .ninja file even if it hasn't changed.
+    ACT_OPTIONS   = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
+    ACT_CONVERT   = 1 << 9,  // Converts the specified build script file to .srcfiles.yaml
+    ACT_ALL       = 1 << 10,  // Mostly equivalent to ACT_ALLNINJA + ACT_VSCODE
+    ACT_ALLD      = 1 << 11,  // Same as ACT_ALL but forces output.
+    ACT_WRITE_VCX = 1 << 12,  // conver .srcfiles to .vcxproj
 
     // clang-format on
 };
@@ -325,6 +331,10 @@ int main(int argc, char* argv[])
             Action |= ACT_VS;
         else if (ttlib::issameprefix(argv[argpos] + 1, "force", tt::CASE::either))
             Action |= ACT_FORCE;
+#if defined(_WIN32)
+        else if (ttlib::issameprefix(argv[argpos] + 1, "vcxproj", tt::CASE::either))
+            Action |= ACT_WRITE_VCX;
+#endif  // _WIN32
         // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
         else if (ttlib::issameprefix(argv[argpos] + 1, "dir", tt::CASE::either))
         {
@@ -438,6 +448,13 @@ int main(int argc, char* argv[])
                 std::cout << _tt("Added directories and filenames to ignore to ") << GitExclude << '\n';
         }
     }
+#if defined(_WIN32)
+    else if (Action & ACT_WRITE_VCX)
+    {
+        CVcxWrite vcx;
+        return (vcx.CreateBuildFile() ? 0 : 1);
+    }
+#endif  // _WIN32
 
     // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not,
     // we need to locate it.
