@@ -439,8 +439,8 @@ void CNinja::ProcessBuildLibs()
         bldLib.shortname = cSrcFiles.GetProjectName();
 
         bldLib.srcDir = BuildFile;
-        bldLib.srcDir.remove_filename();
         bldLib.srcDir.make_relative(cwd);
+        bldLib.srcDir.remove_filename();
         bldLib.srcDir.backslashestoforward();
 
         bldLib.libPathDbg.assignCwd();
