@@ -61,6 +61,7 @@ public:
         XGET_FLAGS,
         XGET_KEYWORDS,
         XGET_OUT,
+        MAKE_DIR,
 
         // Last enumeration used to determine size of containers
         LAST

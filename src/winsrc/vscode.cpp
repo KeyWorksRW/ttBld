@@ -111,32 +111,31 @@ static const char* txtMsvcSubTasks =
     "            }\n"
     "        },\n";
 
-static const char* txtClangSubTasks =
-    "        {\n"
-    "            \"label\": \"%label%\",\n"
-    "            \"type\": \"shell\",\n"
-    "            \"options\": {\n"
-    "                \"cwd\": \"${workspaceFolder}\"\n"
-    "            },\n"
-    "            \"command\": \"%command%\",\n"
-    "%group%"
-    "            \"problemMatcher\": {\n"
-    "                \"owner\": \"cpp\",\n"
-    "                \"fileLocation\": [\n"
-    "                    \"autoDetect\",\n"
-    "                    \"${workspaceFolder}\"\n"
-    "                ],\n"
-    "                \"pattern\": {\n"
-    "                    \"regexp\": "
-    "\"^(.*)\\\\((\\\\d+),(\\\\d+)\\\\):\\\\s+(note|warning|error):\\\\s+(.*)$\",\n"
-    "                    \"file\": 1,\n"
-    "                    \"line\": 2,\n"
-    "                    \"column\": 3,\n"
-    "                    \"severity\": 4,\n"
-    "                    \"message\": 5\n"
-    "                }\n"
-    "            }\n"
-    "        },\n";
+static const char* txtClangSubTasks = "        {\n"
+                                      "            \"label\": \"%label%\",\n"
+                                      "            \"type\": \"shell\",\n"
+                                      "            \"options\": {\n"
+                                      "                \"cwd\": \"${workspaceFolder}\"\n"
+                                      "            },\n"
+                                      "            \"command\": \"%command%\",\n"
+                                      "%group%"
+                                      "            \"problemMatcher\": {\n"
+                                      "                \"owner\": \"cpp\",\n"
+                                      "                \"fileLocation\": [\n"
+                                      "                    \"autoDetect\",\n"
+                                      "                    \"${workspaceFolder}\"\n"
+                                      "                ],\n"
+                                      "                \"pattern\": {\n"
+                                      "                    \"regexp\": "
+                                      "\"^(.*)\\\\((\\\\d+),(\\\\d+)\\\\):\\\\s+(note|warning|error):\\\\s+(.*)$\",\n"
+                                      "                    \"file\": 1,\n"
+                                      "                    \"line\": 2,\n"
+                                      "                    \"column\": 3,\n"
+                                      "                    \"severity\": 4,\n"
+                                      "                    \"message\": 5\n"
+                                      "                }\n"
+                                      "            }\n"
+                                      "        },\n";
 
 static const char* txtNormalGroup =
 
@@ -170,10 +169,8 @@ static void AddTask(ttlib::textfile& fileOut, const char* pszLabel, const char* 
                     const char* pszProblem);
 #endif
 
-static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group,
-                        std::string_view Command);
-static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group,
-                         std::string_view Command);
+static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
+static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
 
 // Returns true unless unable to write to a file
 bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>& Results)
@@ -196,10 +193,9 @@ bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>&
                 gitIgnore = "../../.git/info/exclude";
 
             if (!gitIgnore.empty() &&
-                ttlib::MsgBox(
-                    _tt("The directory .vscode is not being ignored by git. Would you like it to be added to ") +
-                        gitIgnore + " ?",
-                    MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING) == IDYES)
+                ttlib::MsgBox(_tt("The directory .vscode is not being ignored by git. Would you like it to be added to ") + gitIgnore +
+                                  " ?",
+                              MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING) == IDYES)
             {
                 if (gitAddtoIgnore(gitIgnore, ".vscode/"))
                 {
@@ -391,8 +387,20 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string
     ttlib::textfile tasks;
     tasks.ReadArray(txtTasks);
 
-    ttlib::cstr MakeFileOption(cSrcFiles.GetSrcFilesName());
-    MakeFileOption.replace_filename("makefile");
+    ttlib::cstr MakeFileOption;
+    if (cSrcFiles.hasOptValue(OPT::MAKE_DIR))
+    {
+        MakeFileOption = cSrcFiles.getOptValue(OPT::MAKE_DIR);
+        if (MakeFileOption.issameas("."))
+            MakeFileOption = "makefile";
+        else
+            MakeFileOption.append_filename("makefile");
+    }
+    else
+    {
+        MakeFileOption = cSrcFiles.GetSrcFilesName();
+        MakeFileOption.replace_filename("makefile");
+    }
     MakeFileOption.insert(0, "-f ");
 
     // Read the array of lines, write them into kf so it looks like it was read from a file
@@ -418,12 +426,10 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string
             // Build MSVC debug
 
             MakeCommand = "nmake.exe -nologo debug " + MakeFileOption;
-            AddMsvcTask(out, "Build Debug MSVC", (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup,
-                        MakeCommand);
+            AddMsvcTask(out, "Build Debug MSVC", (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup, MakeCommand);
 #else
             MakeCommand = "make debug cmplr=gcc " + MakeFileOption;
-            AddClangTask(out, "Build Debug GCC", (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup,
-                         MakeCommand);
+            AddClangTask(out, "Build Debug GCC", (m_DefTask == DEFTASK_MAIN) ? txtDefaultGroup : txtNormalGroup, MakeCommand);
 #endif
 
             // To prevent writing the same code multiple times, we write it once assuming nmake and MSVC
@@ -464,18 +470,15 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string
         if (m_bClangTasks)
         {
             MakeCommand = (m_bMake ? "mingw32-make.exe debug " : "nmake debug cmplr=clang ") + MakeFileOption;
-            AddClangTask(out, "Build Debug CLANG", (m_DefTask == DEFTASK_CLANG) ? txtDefaultGroup : txtNormalGroup,
-                         MakeCommand);
+            AddClangTask(out, "Build Debug CLANG", (m_DefTask == DEFTASK_CLANG) ? txtDefaultGroup : txtNormalGroup, MakeCommand);
 
             MakeCommand = (m_bMake ? "mingw32-make.exe release " : "nmake release cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Build Release CLANG", txtNormalGroup, MakeCommand);
 
-            MakeCommand = (m_bMake ? "mingw32-make.exe clean release " : "nmake clean release cmplr=clang ") +
-                          MakeFileOption;
+            MakeCommand = (m_bMake ? "mingw32-make.exe clean release " : "nmake clean release cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Rebuild Release CLANG", txtNormalGroup, MakeCommand);
             if (m_bNinjaTask && !m_bMainTasks)
-                AddClangTask(out, "Ninja Debug Build",
-                             (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
+                AddClangTask(out, "Ninja Debug Build", (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
                              "ninja -f bld/clang_dbg.ninja");
         }
 #endif
@@ -680,8 +683,8 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
                 for (; defpos < Includes.size() - 1; ++defpos)
                 {
                     // ':' is checked in case a drive letter is specified
-                    if (!ttlib::contains(Includes[defpos], "${workspaceRoot}") &&
-                        !ttlib::contains(Includes[defpos], "${default}") && !ttlib::contains(Includes[defpos], ":"))
+                    if (!ttlib::contains(Includes[defpos], "${workspaceRoot}") && !ttlib::contains(Includes[defpos], "${default}") &&
+                        !ttlib::contains(Includes[defpos], ":"))
                     {
                         ttlib::cstr tmp(Includes[defpos]);
                         Includes[defpos] = "${workspaceRoot}/";
@@ -789,8 +792,7 @@ static void AddTask(ttlib::textfile& fileOut, const char* pszLabel, const char* 
 
 // AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path
 // instead of the default absolute path
-static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group,
-                        std::string_view Command)
+static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command)
 {
     ttlib::cstr SubTask(txtMsvcSubTasks);
     SubTask.Replace("%label%", Label);
@@ -804,8 +806,7 @@ static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::s
 }
 
 // AddClangTask provides it's own problemMatcher -- because $gcc didn't work
-static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group,
-                         std::string_view Command)
+static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command)
 {
     ttlib::cstr SubTask(txtClangSubTasks);
     SubTask.Replace("%label%", Label);

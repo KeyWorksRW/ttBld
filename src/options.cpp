@@ -34,6 +34,8 @@ static OPT::VERSION aoptVersions[]
     { OPT::TARGET_DIR32, 1, 4, 0 },
     { OPT::TARGET_DIR64, 1, 4, 0 },
 
+    { OPT::MAKE_DIR, 1, 5, 0 },
+
     // All options default to 1.0.0, so only add options above that require a newer version of ttBld
 
     { OPT::LAST, 1, 0, 0  }
@@ -97,6 +99,8 @@ const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
     { OPT::LIBS_CMN, "Libs_cmn", nullptr, "additional libraries to link to in all builds", false, false },
     { OPT::LIBS_REL, "Libs_rel", nullptr, "additional libraries to link to in release builds", false, false },
     { OPT::LIBS_DBG, "Libs_dbg", nullptr, "additional libraries to link to in debug builds", false, false },
+
+    { OPT::MAKE_DIR, "MakeDir", nullptr, "auto-generate makefile in specified directory", false, false },
 
     // The following options are for xgettext/msgfmt support
 
