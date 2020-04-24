@@ -20,6 +20,8 @@ Options:
     IncDirs:     precompile;./;convert;../../ttlib/include  # temporary location, change before Public release
     BuildLibs:   ../../ttLib              # temporary location, change before Public release
 
+    MakeDir:     bld/         # auto-generate makefile in specified directory
+
 Files:
     winsrc/ttBld.rc            # Windows resource files
     winsrc/mainapp.cpp         # entry point, global strings, library pragmas

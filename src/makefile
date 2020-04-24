@@ -56,11 +56,6 @@ ttLibD:
 ttBldD:
 	ninja -f $(BldScriptD)
 
-########## localization ##########
-
-locale:
-	xgettext -k_ -kwxPLURAL -kwxTRANSLATE -i -c --omit-header -fxgen.lst
-
 ########## clean release section ##########
 
 clean: $(BldScript)
@@ -87,11 +82,3 @@ targetsR: $(BldScript)
 
 deps: $(BldScript)
 	ninja -f $(BldScript) -t deps
-
-########## Creates or updates ninja file any time .srcfiles.yaml changes ##########
-
-$(BldScript): .srcfiles.win.yaml
-	ttBld.exe -u$(cmplr)
-
-$(BldScriptD): .srcfiles.win.yaml
-	ttBld.exe -u$(cmplr)D
