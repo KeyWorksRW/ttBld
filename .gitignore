@@ -14,7 +14,6 @@ backup/
 tests/
 
 # Generated files to ignore
-wxLibs.h
 messages.po
 
 # File extensions to ignore
@@ -44,6 +43,10 @@ messages.po
 *.tmp
 *.txt
 *.zip
+
+# cmake
+CMakeFiles/
+build/
 
 # CodeBlock files
 *.cbp
@@ -77,6 +80,10 @@ messages.po
 *.userosscache
 *.sln.docstates
 *.sln
+
+*.filters
+*.vcproj
+*.vcxproj
 
 # Build results
 [Dd]ebug/
