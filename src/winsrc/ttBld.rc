@@ -9,6 +9,8 @@
 //
 #include "winres.h"
 
+#pragma code_page(65001) // UTF-8
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -35,12 +37,15 @@ END
 2 TEXTINCLUDE
 BEGIN
     "#include ""winres.h""\r\n"
+    "\r\n"
+    "#pragma code_page(65001) // UTF-8\r\n"
     "\0"
 END
 
 3 TEXTINCLUDE
 BEGIN
-    "#include ""ttlibicons.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""ttlibicons.rc""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""strtable.rc""    // non-Microsoft Visual C++ edited resources\r\n"
     "\0"
 END
 
@@ -412,8 +417,8 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "ttlibicons.rc2"  // non-Microsoft Visual C++ edited resources
+#include "ttlibicons.rc"  // non-Microsoft Visual C++ edited resources
+#include "strtable.rc"     // non-Microsoft Visual C++ edited resources
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-
