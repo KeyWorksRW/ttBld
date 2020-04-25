@@ -48,7 +48,6 @@ Files:
     winsrc/tabrcmidl.cpp
 
     winsrc/addfuncname.cpp     # CAddFuncName dialog
-    winsrc/dlggettext.cpp      # CDlgGetText dialog
     winsrc/dlgvscode.cpp       # CDlgVsCode dialog
 
 # The following modules do not require Windows
