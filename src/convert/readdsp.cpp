@@ -12,7 +12,8 @@
 #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
-#include "convert.h"  // CConvert, CVcxWrite
+#include "convert.h"   // CConvert, CVcxWrite
+#include "strtable.h"  // String resource IDs
 
 enum
 {
@@ -46,7 +47,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
     ttlib::textfile fileIn;
     if (!fileIn.ReadFile(srcFile))
     {
-        ttlib::MsgBox(_tt("Cannot open ") + srcFile);
+        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + srcFile);
         return bld::RESULT::read_failed;
     }
 
@@ -115,8 +116,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                     {
                         ttlib::cstr def;
                         pos = def.ExtractSubString(line, line.findspace(pos));
-                        if (!def.issameprefix("NDEBUG") && !def.issameprefix("_DEBUG") &&
-                            !def.issameprefix("_WIN32"))
+                        if (!def.issameprefix("NDEBUG") && !def.issameprefix("_DEBUG") && !def.issameprefix("_WIN32"))
                         {
                             ttlib::cstr Flag("-D" + def);
                             // If we don't already have the flag, then add it

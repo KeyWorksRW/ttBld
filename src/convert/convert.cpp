@@ -13,13 +13,14 @@
 #include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 
 #include "convert.h"
+#include "strtable.h"  // String resource IDs
 
 bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_view dstFile)
 {
     CSrcFiles srcOrg;
     if (!srcOrg.ReadFile(srcFile.c_str()))
     {
-        ttlib::MsgBox(_tt("Cannot open ") + srcFile);
+        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + srcFile);
         return bld::RESULT::read_failed;
     }
 

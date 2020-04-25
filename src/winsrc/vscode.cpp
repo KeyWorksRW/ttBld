@@ -15,6 +15,7 @@
 #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 #include "funcs.h"      // List of function declarations
 #include "resource.h"
+#include "strtable.h"  // String resource IDs
 
 // If the text is read as an array, then it's stored as char*[], has a trailing nullptr, and no \n characters.
 
@@ -179,7 +180,7 @@ bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>&
     {
         if (!fs::create_directory(".vscode"))
         {
-            ttlib::MsgBox(_tt("Unable to create the required .vscode directory."));
+            ttlib::MsgBox(_tt(IDS_CANT_CREATE_VSCODE_DIR));
             return false;
         }
         ttlib::cstr gitIgnore;
@@ -193,13 +194,11 @@ bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>&
                 gitIgnore = "../../.git/info/exclude";
 
             if (!gitIgnore.empty() &&
-                ttlib::MsgBox(_tt("The directory .vscode is not being ignored by git. Would you like it to be added to ") + gitIgnore +
-                                  " ?",
-                              MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING) == IDYES)
+                ttlib::MsgBox(_tt(IDS_ASK_IGNORE_VSCODE) + gitIgnore + " ?", MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING) == IDYES)
             {
                 if (gitAddtoIgnore(gitIgnore, ".vscode/"))
                 {
-                    Results.emplace_back(_tt(".vscode/ added to ") + gitIgnore);
+                    Results.emplace_back(_tt(IDS_VSCODE_IGNORED) + gitIgnore);
                 }
             }
         }
@@ -208,7 +207,7 @@ bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>&
     CSrcFiles cSrcFiles;
     if (!cSrcFiles.ReadFile(SrcFilename))
     {
-        Results.emplace_back(_tt("Cannot locate a .srcfiles.yaml file need to configure .vscode/*.json files."));
+        Results.emplace_back(_tt(IDS_CANT_CONFIGURE_JSON));
         return false;
     }
 
@@ -317,12 +316,12 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 
     if (!out.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        ttlib::MsgBox(_tt("Unable to create or write to .vscode/c_cpp_properties.json"));
+        ttlib::MsgBox(_tt(IDS_CANT_CREATE) + ".vscode/c_cpp_properties.json");
         return false;
     }
     else
     {
-        Results.emplace_back(_tt("Created .vscode/c_cpp_properties.json"));
+        Results.emplace_back(_tt(IDS_CREATED) + ".vscode/c_cpp_properties.json");
     }
 
     return true;
@@ -369,12 +368,12 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<std::strin
 
     if (!file.WriteFile(".vscode/launch.json"))
     {
-        ttlib::MsgBox(_tt("Unable to create or write to .vscode/launch.json"));
+        ttlib::MsgBox(_tt(IDS_CANT_CREATE) + ".vscode/launch.json");
         return false;
     }
     else
     {
-        Results.emplace_back(_tt("Created .vscode/launch.json"));
+        Results.emplace_back(_tt(IDS_CREATED) + ".vscode/launch.json");
     }
 
     return true;
@@ -505,12 +504,12 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string
 
     if (!out.WriteFile(".vscode/tasks.json"))
     {
-        Results.emplace_back(_tt("Unable to create or write to .vscode/tasks.json"));
+        Results.emplace_back(_tt(IDS_CANT_CREATE) + ".vscode/tasks.json");
         return false;
     }
     else
     {
-        Results.emplace_back(_tt("Created .vscode/tasks.json"));
+        Results.emplace_back(_tt(IDS_CREATED) + ".vscode/tasks.json");
     }
 
     return true;
@@ -521,7 +520,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
     ttlib::textfile file;
     if (!file.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        Results.emplace_back(_tt("Cannot open .vscode/c_cpp_properties.json"));
+        Results.emplace_back(_tt(IDS_CANNOT_OPEN) + ".vscode/c_cpp_properties.json");
         return false;
     }
 
@@ -710,7 +709,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
     ttlib::viewfile orgfile;
     if (!orgfile.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        Results.emplace_back(_tt("Cannot open .vscode/c_cpp_properties.json"));
+        Results.emplace_back(_tt(IDS_CANNOT_OPEN) + ".vscode/c_cpp_properties.json");
         return false;
     }
 
@@ -731,17 +730,17 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 
     if (!Modified)
     {
-        Results.emplace_back(_tt("c_cpp_properties.json is up to date"));
+        Results.emplace_back("c_cpp_properties.json" + _tt(IDS_UPTODATE_SUFFIX));
         return false;
     }
 
     if (!file.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        Results.emplace_back("Unable to create or write to .vscode/c_cpp_properties.json");
+        Results.emplace_back(_tt(IDS_CANT_CREATE) + ".vscode/c_cpp_properties.json");
         return false;
     }
 
-    Results.emplace_back(_tt("Updated .vscode/c_cpp_properties.json"));
+    Results.emplace_back(".vscode/c_cpp_properties.json" + _tt(IDS_UPDATED));
 
     return true;
 }

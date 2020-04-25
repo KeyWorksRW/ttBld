@@ -2,7 +2,7 @@
 // Name:      yamalize.cpp
 // Purpose:   Used to convert .srcfiles.yaml to .vscode/srcfiles.yaml
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -10,6 +10,7 @@
 
 #include <ttcvector.h>
 
+#include "strtable.h"  // String resource IDs
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
 // This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode
@@ -27,8 +28,7 @@ bool Yamalize()
     auto& lstSrcFiles = cNewSrcFiles.GetSrcFileList();
 
     if (ttlib::fileExists(".srcfiles.yaml"))
-        lstSrcFiles.emplace_back(
-            ".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml");
+        lstSrcFiles.emplace_back(".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml");
     else
     {
         // TODO: this is a placeholder, need to be smarter about what wildcards to use
@@ -93,12 +93,11 @@ bool Yamalize()
     cNewSrcFiles.setOptValue(OPT::XGET_FLAGS, cOrgSrcFiles.getOptValue(OPT::XGET_FLAGS));
 
     ttlib::cstr cszVersion;
-    cszVersion.Format(txtNinjaVerFormat, cNewSrcFiles.GetMajorRequired(), cNewSrcFiles.GetMinorRequired(),
-                      cNewSrcFiles.GetSubRequired());
+    cszVersion.Format(txtNinjaVerFormat, cNewSrcFiles.GetMajorRequired(), cNewSrcFiles.GetMinorRequired(), cNewSrcFiles.GetSubRequired());
 
     if (cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion) != bld::success)
     {
-        ttlib::MsgBox(_tt("Unable to create or write to .vscode/srcfiles.yaml"));
+        ttlib::MsgBox(_tt(IDS_CANT_CREATE) + ".vscode/srcfiles.yaml");
         return false;
     }
 

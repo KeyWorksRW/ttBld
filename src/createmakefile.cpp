@@ -2,7 +2,7 @@
 // Name:      CreateMakeFile()
 // Purpose:   Creates an MS nmake and GNU-make compatible makefile
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -13,6 +13,7 @@
 
 #include "ninja.h"     // CNinja
 #include "resource.h"  // IDR_MAKEFILE
+#include "strtable.h"  // String resource IDs
 
 extern const char* txtHelpNinja;
 
@@ -45,7 +46,7 @@ bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
     auto ProjectFile = locateProjectFile(Dir);
     if (ProjectFile.empty())
     {
-        AddError(_tt("Cannot locate .srcfiles.yaml. Makefile not created."));
+        AddError(_tt(IDS_CANT_LOCATE_SRCFILES) + " " + _tt(IDS_MAKEFILE_NOT_CREATED));
         return false;
     }
 
@@ -55,9 +56,7 @@ bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
         auto resText = ttlib::LoadTextResource(isAllVersion ? IDR_MAKEFILE_ALL : IDR_MAKEFILE_SINGLE);
         if (resText.empty())
         {
-            // TRANSLATORS: Don't change the filename "makefile"
-            AddError(
-                _tt("ttBld.exe is corrupted -- unable to read the required resource for creating a makefile,"));
+            AddError(_tt(IDS_APP_CORRUPTED) + " " + _tt(IDS_MAKEFILE_NOT_CREATED));
             return false;
         }
 
@@ -183,13 +182,12 @@ bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
             }
             else if (file.WriteFile(MakeFile))
             {
-                std::cout << MakeFile << _tt(" updated") << '\n';
+                std::cout << MakeFile << _tt(IDS_UPDATED) << '\n';
                 return true;
             }
             else
             {
-                // TRANSLATORS: Don't change the filename "makefile"
-                std::cout << _tt("Unable to write to") << MakeFile << '\n';
+                std::cout << _tt(IDS_CANT_CREATE) << MakeFile << '\n';
                 return false;
             }
         }
@@ -198,13 +196,12 @@ bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
     {
         if (file.WriteFile(MakeFile))
         {
-            std::cout << MakeFile << _tt(" updated") << '\n';
+            std::cout << MakeFile << _tt(IDS_UPDATED) << '\n';
             return true;
         }
         else
         {
-            // TRANSLATORS: Don't change the filename "makefile"
-            std::cout << _tt("Unable to write to") << MakeFile << '\n';
+            std::cout << _tt(IDS_CANT_CREATE) << MakeFile << '\n';
             return false;
         }
     }

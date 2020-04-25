@@ -13,6 +13,7 @@
 #include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
 
 #include "dlgoptions.h"
+#include "strtable.h"  // String resource IDs
 
 void CTabCompiler::OnBegin(void)
 {
@@ -166,9 +167,7 @@ void CTabCompiler::OnBtnChangePch()
                 return;
             }
 
-            ttlib::MsgBox(
-                cszRelPath +
-                _tt(" does not have a matching C++ source file -- precompiled header will fail without it!"));
+            ttlib::MsgBox(cszRelPath + _tt(IDS_MISSING_PCH_CPP));
         }
     }
 }

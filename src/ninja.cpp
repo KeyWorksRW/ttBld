@@ -2,7 +2,7 @@
 // Name:      CNinja
 // Purpose:   Class for creating/maintaining *.ninja files for use by ninja.exe
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -13,6 +13,7 @@
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
+#include "strtable.h"  // String resource IDs
 #include "verninja.h"  // CVerMakeNinja
 
 const char* aCppExt[] { ".cpp", ".cxx", ".cc", nullptr };
@@ -142,11 +143,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
         if (!m_pchCppName.fileExists())
         {
-            ttlib::cstr msg;
-            msg.Format(
-                _tt("No C++ source file found that matches %s -- precompiled header will not build correctly."),
-                getOptValue(OPT::PCH).c_str());
-            AddError(msg);
+            AddError(getOptValue(OPT::PCH) + _tt(IDS_MISSING_PCH_CPP));
         }
     }
 
@@ -211,8 +208,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         if (!m_pchHdrNameObj.empty())
         {
             // we add m_pchHdrNameObj so it appears as a dependency and gets compiled, but not linked to
-            m_ninjafile.addEmptyLine().Format("build $outdir/%s: compile %s | $outdir/%s", objFile.c_str(),
-                                              srcFile.c_str(), m_pchHdrNameObj.c_str());
+            m_ninjafile.addEmptyLine().Format("build $outdir/%s: compile %s | $outdir/%s", objFile.c_str(), srcFile.c_str(),
+                                              m_pchHdrNameObj.c_str());
             m_ninjafile.addEmptyLine();
         }
         else
@@ -281,7 +278,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     {
         if (!fs::create_directory(GetBldDir().c_str()))
         {
-            AddError(_tt("Unable to create or write to ") + GetBldDir());
+            AddError(_tt(IDS_CANT_CREATE) + GetBldDir());
             return false;
         }
     }
@@ -308,7 +305,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     if (!m_ninjafile.WriteFile(m_scriptFilename))
     {
         m_ninjafile.clear();
-        std::string str(_tt("Unable to create or write to") + m_scriptFilename + '\n');
+        std::string str(_tt(IDS_ADDED_IGNORE_FILES) + m_scriptFilename + '\n');
         AddError(str);
         return false;
     }
@@ -330,8 +327,7 @@ void CNinja::ProcessBuildLibs()
 
         if (!ttlib::ChangeDir(libPath))
         {
-            AddError(_tt("The library source directory ") + libPath +
-                     _tt(" specified in BuildLibs: does not exist."));
+            AddError(_tt(IDS_LIB_SOURCE_DIR) + libPath + _tt(IDS_INVALID_BUILDLIB_SUFFIX));
             continue;
         }
 
@@ -413,7 +409,7 @@ void CNinja::ProcessBuildLibs()
         // At this point, we should be in the same directory as .srcfiles.yaml
         if (!cSrcFiles.ReadFile(BuildFile))
         {
-            AddError(_tt("Cannot read .srcfiles.yaml in ") + BuildFile);
+            AddError(_tt(IDS_MISSING_SRCFILES_IN) + BuildFile);
             continue;
         }
 

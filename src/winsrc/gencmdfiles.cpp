@@ -13,7 +13,8 @@
 #include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
-#include "funcs.h"  // List of function declarations
+#include "funcs.h"     // List of function declarations
+#include "strtable.h"  // String resource IDs
 
 #if defined(_WIN32)  // no reason to use the batch files on non-Windows platforms
 
@@ -60,7 +61,7 @@ void CreateCodeCmd(const char* pszFile)
 
     if (file.WriteFile(Path))
     {
-        std::cout << Path << _tt(" created") << '\n';
+        std::cout << Path << _tt(IDS_CREATED_SUFFIX) << '\n';
     }
     else
     {
@@ -74,12 +75,12 @@ void CreateCodeCmd(const char* pszFile)
             NewPath.replace_filename(pszFile);
             if (file.WriteFile(NewPath))
             {
-                std::cout << NewPath << _tt(" created") << '\n';
+                std::cout << NewPath << _tt(IDS_CREATED_SUFFIX) << '\n';
                 return;
             }
         }
 
-        std::cerr << _tt("Unable to create or write to ") << Path << '\n';
+        std::cerr << _tt(IDS_CANT_CREATE) << Path << '\n';
     }
 }
 
@@ -190,9 +191,8 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
 
     ttlib::textfile file;
     file.emplace_back("@echo off");
-    file.emplace_back(
-        "@REM This file is automatically created by ttBld. Any changes you make will be lost if ttBld "
-        "creates it again.");
+    file.emplace_back("@REM This file is automatically created by ttBld. Any changes you make will be lost if ttBld "
+                      "creates it again.");
 
     Path.clear();
     for (auto& iter: lstPath)

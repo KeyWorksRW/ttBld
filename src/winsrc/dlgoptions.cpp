@@ -2,7 +2,7 @@
 // Name:      CTabOptions
 // Purpose:   IDDLG_OPTIONS dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -11,6 +11,7 @@
 #include "ttlibicons.h"
 
 #include "dlgoptions.h"
+#include "strtable.h"  // String resource IDs
 
 bool ChangeOptions(std::string& ProjectFile)
 {
@@ -91,7 +92,7 @@ void CTabOptions::OnBegin(void)
     ti.iImage = -1;
 
     ti.mask = TCIF_TEXT;
-    ti.pszText = (char*) (const char*) _tt("General");
+    ti.pszText = const_cast<char*>(_tt("General").c_str());
 
 #if !defined(NDEBUG)  // Starts debug section.
     auto result =
@@ -99,13 +100,13 @@ void CTabOptions::OnBegin(void)
         SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_GENERAL, (LPARAM) &ti);
     assert(result == 0);
 
-    ti.pszText = (char*) ((const char*) _tt("Compiler"));
+    ti.pszText = const_cast<char*>(_tt("Compiler").c_str());
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_COMPILER, (LPARAM) &ti);
 
-    ti.pszText = (char*) ((const char*) _tt("Libs"));
+    ti.pszText = const_cast<char*>(_tt("Libs").c_str());
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LIBS, (LPARAM) &ti);
 
-    ti.pszText = (char*) ((const char*) _tt("Linker"));
+    ti.pszText = const_cast<char*>(_tt("Linker").c_str());
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LINKER, (LPARAM) &ti);
 
 #if defined(_WIN32)
@@ -153,12 +154,12 @@ void CTabOptions::SaveChanges()
     if (GetSrcFilesName().fileExists())
     {
         if (UpdateOptions(GetSrcFilesName()) == bld::success)
-            std::cout << GetSrcFilesName() + _tt("%s Options: section updated.") << '\n';
+            std::cout << GetSrcFilesName() + _tt(IDS_OPTIONS_UPDATED) << '\n';
     }
     else
     {
         if (UpdateOptions() == bld::success)
-            std::cout << GetSrcFilesName() + _tt("%s created.") << '\n';
+            std::cout << GetSrcFilesName() + _tt(IDS_CREATED_SUFFIX) << '\n';
     }
 }
 

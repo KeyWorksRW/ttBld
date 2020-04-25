@@ -25,6 +25,7 @@
 
 #include "convert.h"     // CConvert
 #include "convertdlg.h"  // CConvertDlg
+#include "strtable.h"    // String resource IDs
 
 // clang-format off
 static const char* atxtSrcTypes[]
@@ -155,7 +156,7 @@ void CConvertDlg::OnBegin(void)
             } while (ff.next());
         }
     }
-    tmp.Format("%kzd %s located", cFilesFound, _ttp("file", "files", cFilesFound));
+    tmp.Format(_tt(IDS_FMT_FILES_LOCATED), cFilesFound);
     SetControlText(IDTXT_FILES_FOUND, tmp);
 
     if (m_comboScripts.GetCount() > 0)
@@ -172,7 +173,7 @@ void CConvertDlg::OnBegin(void)
 void CConvertDlg::OnBtnLocateScript()
 {
     ttlib::openfile dlg(*this);
-    dlg.SetFilter("Project Files|*.vcxproj;*.vcproj;*.dsp;*.project;*.cbp;.srcfiles.yaml||");
+    dlg.SetFilter(_tt(IDS_PROJECT_FILES) + "|*.vcxproj;*.vcproj;*.dsp;*.project;*.cbp;.srcfiles.yaml||");
     // dlg.UseCurrentDirectory();
     dlg.RestoreDirectory();
     if (dlg.GetOpenName())
@@ -196,9 +197,7 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
         dlg.append_filename(".srcfiles.yaml");
         if (dlg.fileExists())
         {
-            if (ttlib::MsgBox(
-                    _tt(".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"),
-                    MB_YESNO) != IDYES)
+            if (ttlib::MsgBox(_tt(IDS_CONFIRM_REPLACE_SRCFILES), MB_YESNO) != IDYES)
                 return;
         }
         SetControlText(IDEDIT_OUT_DIR, dlg.c_str());
@@ -251,7 +250,7 @@ void CConvertDlg::OnOK(void)
 
     if (!m_ConvertFile.empty() && !m_ConvertFile.fileExists())
     {
-        ttlib::MsgBox(_tt("Cannot open ") + m_ConvertFile);
+        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + m_ConvertFile);
         CancelEnd();
         return;
     }
@@ -310,7 +309,7 @@ bool CConvertDlg::doConversion()
 
         if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles) != bld::success)
         {
-            ttlib::MsgBox(_tt("Unable to create or write to ") + m_cszOutSrcFiles);
+            ttlib::MsgBox(_tt(IDS_CANT_CREATE) + m_cszOutSrcFiles);
             CancelEnd();
             return false;
         }
@@ -371,7 +370,7 @@ bool CConvertDlg::doConversion()
 
             if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles.c_str(), cszHdr.c_str()) != bld::success)
             {
-                ttlib::MsgBox(_tt("Unable to create or write to ") + m_cszOutSrcFiles);
+                ttlib::MsgBox(_tt(IDS_CANT_CREATE) + m_cszOutSrcFiles);
                 return false;
             }
             return true;

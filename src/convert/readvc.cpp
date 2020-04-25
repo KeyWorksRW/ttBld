@@ -11,7 +11,8 @@
 #include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
 #include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 
-#include "convert.h"  // CConvert, CVcxWrite
+#include "convert.h"   // CConvert, CVcxWrite
+#include "strtable.h"  // String resource IDs
 
 bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dstFile)
 {
@@ -41,8 +42,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
 
     if (!result)
     {
-        ttlib::cstr msg;
-        ttlib::MsgBox(msg.Format(_tt("Unable to read %s.\n\n%s"), m_srcFile.c_str(), result.description()));
+        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + m_srcFile + "\n\n" + result.description());
         return bld::RESULT::read_failed;
     }
 

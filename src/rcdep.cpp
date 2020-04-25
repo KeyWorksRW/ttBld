@@ -13,7 +13,8 @@
 
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
-#include "ninja.h"  // CNinja
+#include "ninja.h"     // CNinja
+#include "strtable.h"  // String resource IDs
 
 // clang-format off
 
@@ -57,13 +58,13 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
     {
         if (!file.ReadFile(inFilename))
         {
-            AddError(_tt("Cannot open ") + inFilename);
+            AddError(_tt(IDS_CANNOT_OPEN) + inFilename);
             return false;
         }
     }
     catch (const std::exception& e)
     {
-        AddError(_tt("An exception occurred while reading ") + inFilename + ": " + e.what());
+        AddError(_tt(IDS_EXCEPTION_READING) + inFilename + ": " + e.what());
         return false;
     }
 

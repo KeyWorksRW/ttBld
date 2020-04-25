@@ -11,7 +11,8 @@
 #include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
 #include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
 
-#include "convert.h"  // CConvert, CVcxWrite
+#include "convert.h"   // CConvert, CVcxWrite
+#include "strtable.h"  // String resource IDs
 
 bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_view dstFile)
 {
@@ -41,8 +42,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
 
     if (!result)
     {
-        ttlib::cstr msg;
-        ttlib::MsgBox(msg.Format(_tt("Unable to read %s.\n\n%s"), m_srcFile.c_str(), result.description()));
+        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + m_srcFile + "\n\n" + result.description());
         return bld::RESULT::read_failed;
     }
 
@@ -72,8 +72,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
         else if (settings.attribute("Type").cvalue().issameas("Static Library"))
             m_writefile.setOptValue(OPT::EXE_TYPE, "lib");
 
-        auto Definitions =
-            m_xmldoc.select_nodes("/CodeLite_Project/Settings/GlobalSettings/Compiler/Preprocessor[@Value]");
+        auto Definitions = m_xmldoc.select_nodes("/CodeLite_Project/Settings/GlobalSettings/Compiler/Preprocessor[@Value]");
         ttlib::cstr defs;
         for (size_t pos = 0; pos < Definitions.size(); ++pos)
         {
@@ -82,8 +81,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
         defs.trim();
         m_writefile.setOptValue(OPT::CFLAGS_CMN, defs);
 
-        auto Includes =
-            m_xmldoc.select_nodes("/CodeLite_Project/Settings/Configuration/Compiler/IncludePath[@Value]");
+        auto Includes = m_xmldoc.select_nodes("/CodeLite_Project/Settings/Configuration/Compiler/IncludePath[@Value]");
 
         ttlib::cstr incs;
         for (size_t pos = 0; pos < Includes.size(); ++pos)

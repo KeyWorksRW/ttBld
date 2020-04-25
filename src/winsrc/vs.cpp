@@ -2,7 +2,7 @@
 // Name:      vs.cpp
 // Purpose:   Creates .vs/tasks.vs.json and .vs/launch.vs.json (for devenv.exe)
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -15,6 +15,7 @@
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
+#include "strtable.h"   // String resource IDs
 
 static const char* txtTasks =
 
@@ -60,7 +61,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     {
         if (!std::filesystem::create_directory(".vs"))
         {
-            results.push_back(_tt("Unable to create the required .vs directory."));
+            results.push_back(_tt(IDS_CANT_CREATE_VS_DIR));
             return false;
         }
     }
@@ -81,13 +82,13 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     if (!file.WriteFile(".vs/tasks.vs.json"))
     {
         std::ostringstream str;
-        str << _tt("Unable to create or write to ") << ".vs/tasks.vs.json";
+        str << _tt(IDS_CANT_CREATE) << ".vs/tasks.vs.json";
         results.push_back(str.str());
         return false;
     }
     else
     {
-        results.push_back(_tt("Created .vs/tasks.vs.json"));
+        results.push_back(_tt(IDS_CREATED) + ".vs/tasks.vs.json");
     }
 
     file.clear();
@@ -100,7 +101,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     else
     {
         std::ostringstream str;
-        str << _tt("No project name specified in ") << cSrcFiles.GetSrcFilesName();
+        str << _tt(IDS_MISSING_PROJ_NAME) << cSrcFiles.GetSrcFilesName();
         results.push_back(str.str());
         return false;
     }
@@ -108,13 +109,13 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     if (!file.WriteFile(".vs/launch.vs.json"))
     {
         std::ostringstream str;
-        str << _tt("Unable to create or write to ") << ".vs/launch.vs.json";
+        str << _tt(IDS_CANT_CREATE) << ".vs/launch.vs.json";
         results.push_back(str.str());
         return false;
     }
     else
     {
-        std::string str(_tt("Created .vs/launch.vs.json"));
+        std::string str(_tt(IDS_CREATED));
         results.push_back(str);
     }
 
