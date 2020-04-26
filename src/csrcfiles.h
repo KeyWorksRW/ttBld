@@ -110,7 +110,7 @@ public:
     bool IsStaticCrtDbg() const { return (isOptValue(OPT::CRT_DBG, "static")); }
     bool IsOptimizeSpeed() const { return (isOptValue(OPT::OPTIMIZE, "speed")); }
 
-    bool AddFile(std::string_view filename) { return m_lstSrcFiles.addfilename(filename); }
+    ttlib::cstr& AddFile(std::string_view filename) { return m_lstSrcFiles.addfilename(filename); }
     void AddSourcePattern(std::string_view FilePattern);
 
     // These are just for convenience--it's fine to call getOptValue directly

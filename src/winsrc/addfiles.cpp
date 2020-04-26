@@ -32,8 +32,11 @@ void AddFiles(const ttlib::cstrVector& lstFiles)
     size_t cFilesAdded = 0;
     for (auto& iter: lstFiles)
     {
-        if (cSrcFiles.GetSrcFileList().addfilename(iter))
+        if (!cSrcFiles.GetSrcFileList().hasFilename(iter))
+        {
+            cSrcFiles.GetSrcFileList() += iter;
             ++cFilesAdded;
+        }
     }
 
     ttlib::textfile file;
