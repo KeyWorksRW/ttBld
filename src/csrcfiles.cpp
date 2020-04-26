@@ -78,13 +78,11 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         // name
         if (ttlib::isalpha(line[0]))
         {
-            if (ttlib::issameprefix(line, "Files:", tt::CASE::either) ||
-                ttlib::issameprefix(line, "[FILES]", tt::CASE::either))
+            if (ttlib::issameprefix(line, "Files:", tt::CASE::either) || ttlib::issameprefix(line, "[FILES]", tt::CASE::either))
             {
                 section = SECTION_FILES;
             }
-            else if (ttlib::issameprefix(line, "Options:", tt::CASE::either) ||
-                     ttlib::issameprefix(line, "[OPTIONS]"))
+            else if (ttlib::issameprefix(line, "Options:", tt::CASE::either) || ttlib::issameprefix(line, "[OPTIONS]"))
             {
                 section = SECTION_OPTIONS;
             }
@@ -263,12 +261,9 @@ void CSrcFiles::ProcessFile(std::string_view line)
         return;
     }
 
-    if (m_lstSrcFiles.addfilename(filename))
+    if (auto name = m_lstSrcFiles.addfilename(filename); !name.fileExists())
     {
-        if (!m_lstSrcFiles.back().fileExists())
-        {
-            AddError(_tt("Unable to locate the file ") + filename);
-        }
+        AddError(_tt("Unable to locate the file ") + name);
     }
 
     if (filename.hasExtension(".idl"))
