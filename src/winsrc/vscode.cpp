@@ -174,14 +174,16 @@ static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::s
 static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
 
 // Returns true unless unable to write to a file
-bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>& Results)
+std::vector<std::string> CreateVsCodeProject(std::string_view SrcFilename)
 {
+    std::vector<std::string> results;
+
     if (!ttlib::dirExists(".vscode"))
     {
         if (!fs::create_directory(".vscode"))
         {
             ttlib::MsgBox(_tt(IDS_CANT_CREATE_VSCODE_DIR));
-            return false;
+            return results;
         }
         ttlib::cstr gitIgnore;
         if (!gitIsFileIgnored(gitIgnore, ".vscode/") && !gitIsExcluded(gitIgnore, ".vscode/"))
@@ -198,7 +200,7 @@ bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>&
             {
                 if (gitAddtoIgnore(gitIgnore, ".vscode/"))
                 {
-                    Results.emplace_back(_tt(IDS_VSCODE_IGNORED) + gitIgnore);
+                    results.emplace_back(_tt(IDS_VSCODE_IGNORED) + gitIgnore);
                 }
             }
         }
@@ -207,41 +209,41 @@ bool CreateVsCodeProject(std::string_view SrcFilename, std::vector<std::string>&
     CSrcFiles cSrcFiles;
     if (!cSrcFiles.ReadFile(SrcFilename))
     {
-        Results.emplace_back(_tt(IDS_CANT_CONFIGURE_JSON));
-        return false;
+        results.emplace_back(_tt(IDS_CANT_CONFIGURE_JSON));
+        return results;
     }
 
     if (ttlib::fileExists(".vscode/c_cpp_properties.json"))
     {
-        if (!UpdateVsCodeProps(cSrcFiles, Results))
-            return false;
+        if (!UpdateVsCodeProps(cSrcFiles, results))
+            return results;
     }
     else
     {
-        if (!CreateVsCodeProps(cSrcFiles, Results))
-            return false;
+        if (!CreateVsCodeProps(cSrcFiles, results))
+            return results;
     }
 
     if (!ttlib::fileExists(".vscode/launch.json") || !ttlib::fileExists(".vscode/tasks.json"))
     {
         CDlgVsCode dlg;
         if (dlg.DoModal(NULL) != IDOK)
-            return false;
+            return results;
 
         if (!ttlib::fileExists(".vscode/launch.json"))
         {
-            if (!dlg.CreateVsCodeLaunch(cSrcFiles, Results))
-                return false;
+            if (!dlg.CreateVsCodeLaunch(cSrcFiles, results))
+                return results;
         }
 
         if (!ttlib::fileExists(".vscode/tasks.json"))
         {
-            if (!dlg.CreateVsCodeTasks(cSrcFiles, Results))
-                return false;
+            if (!dlg.CreateVsCodeTasks(cSrcFiles, results))
+                return results;
         }
     }
 
-    return true;
+    return results;
 }
 
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)

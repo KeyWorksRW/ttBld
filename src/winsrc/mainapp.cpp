@@ -269,9 +269,8 @@ int main(int argc, char* argv[])
             fs::remove(".vscode/tasks.json");
 
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            std::vector<std::string> Results;
-            CreateVsCodeProject(SrcFilePath, &Results);
-            for (auto& iter: Results)
+            auto results = CreateVsCodeProject(SrcFilePath);
+            for (auto& iter: results)
                 std::cout << iter << '\n';
         }
 #endif
@@ -384,9 +383,8 @@ int main(int argc, char* argv[])
         if (dlg.isCreateVsCode())
         {
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            std::vector<std::string> Results;
-            CreateVsCodeProject(SrcFilePath, Results);
-            for (auto iter: Results)
+            auto results = CreateVsCodeProject(SrcFilePath);
+            for (auto& iter: results)
                 std::cout << iter << '\n';
         }
         if (dlg.isGitIgnoreAll())
@@ -417,9 +415,8 @@ int main(int argc, char* argv[])
         if (dlg.isCreateVsCode())
         {
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            std::vector<std::string> Results;
-            CreateVsCodeProject(SrcFilePath, Results);
-            for (auto iter: Results)
+            auto results = CreateVsCodeProject(SrcFilePath);
+            for (auto& iter: results)
                 std::cout << iter << '\n';
         }
         if (dlg.isGitIgnoreAll())
@@ -467,10 +464,9 @@ int main(int argc, char* argv[])
         if (Action & ACT_ALLD)
             std::filesystem::remove(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-        std::vector<std::string> Results;
-        CreateVsCodeProject(SrcFilePath, Results);
-        for (auto msg: Results)
-            std::cout << msg << '\n';
+        auto results = CreateVsCodeProject(SrcFilePath);
+        for (auto& iter: results)
+            std::cout << iter << '\n';
     }
 
     if (Action & ACT_VS)
