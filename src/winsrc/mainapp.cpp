@@ -35,6 +35,7 @@
 
 #include <ttconsole.h>  // ttConsoleColor
 #include <ttcvector.h>  // Vector of ttlib::cstr strings
+#include <ttparser.h>   // cmd -- Command line parser
 
 #include "convert.h"     // CConvert
 #include "convertdlg.h"  // CConvertDlg
@@ -48,59 +49,6 @@
 #endif
 
 void AddFiles(const ttlib::cstrVector& lstFiles);
-
-void Usage()
-{
-    std::cout << '\n' << txtVersion << '\n' << txtCopyright << '\n';
-
-    // REVIEW: [KeyWorks - 04-24-2020] Don't convert these _tt() macros just yet. All of this will get replaced once the new ttLib command
-    // line parser gets checked in.
-
-    std::cout << _tt("\nttBld [options] -- parses .srcfiles.yaml and produces ninja build scripts\n")
-              << _tt("    -dir [directory] -- uses specified directory to create/maintain .srcfiles.yaml and "
-                     "build/*.ninja\n")
-              << _tt("    -add [file(s)] -- Adds file(s) to .srcfiles")
-              << _tt("    -options   -- displays a dialog allowing you to change options in .srcfiles.yaml\n")
-              << _tt("    -codecmd   -- creates code32.cmd and code64.cmd in same directory as code.cmd\n")
-              << _tt("    -new       -- displays a dialog allowing you to create a new .srcfiles.yaml file\n")
-              << _tt("    -vs        -- creates files used to build and debug a project using Visual Studio\n")
-              << _tt("    -vscode    -- creates or updates files used to build and debug a project using VS Code\n")
-#if defined(_WIN32)
-              << _tt("    -vcxproj   -- creates or updates files needed to build project using MS Visual Studio\n")
-#endif  // _WIN32
-
-        ;
-
-    // Currently non-finished commands
-    std::cout << "\n  Unfinished commands:\n"
-              << _tt("    -all          -- equivalent to -allninja and -vscode\n")
-              << _tt("    -alld         -- deletes makefile and .vscode/c_cpp_preferences.json before running -all\n")
-              << _tt("    -allninja     -- creates/updates all .ninja scripts, creeates makefile (if missing)\n")
-              << _tt("    -convert file -- Converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml\n");
-
-    // Currently hidden or non-finished commands
-
-    // puts("\t-add [file(s)] -- Adds file(s) to .srcfiles");
-    // puts(_tt("    -dryrun     -- displays what would have happened, but doesn't change anything"));
-    // puts(_tt("    -force      -- create .ninja file even if it hasn't changed"));
-    // puts(_tt("    -msvcenv32  -- creates MSVCenv.cmd file in same location as code.cmd"));
-    // puts(_tt("    -msvcenv64  -- create .ninja file even if it hasn't changed"));
-
-    // puts(_tt("    -help       -- displays usage information"));
-    // puts(_tt("    -?          -- displays usage information"));
-
-    // Following commands are no longer supported:
-
-    // puts("\nIDE workspace options:");
-    // puts(_tt("    -codelite   -- creates or updates files needed to build project using CodeLite"));
-    // puts(_tt("    -codeblocks -- creates or updates files needed to build project using CodeBlocks"));
-
-#if defined(TESTING)
-    std::cout << "    -tvdlg    -- tests the CDlgVsCode dialog\n";
-#endif
-    // -bwt -- sets break on warning to true
-    // -bwf -- sets break on warning to false
-}
 
 enum UPDATE_TYPE
 {
@@ -149,18 +97,61 @@ enum : size_t  // actions that can be run in addition to normal single command a
     // clang-format on
 };
 
-#if defined(wxWIDGETS)
-
-int oldMain(int argc, char* argv[])
-
-#else
-
-int main(int argc, char* argv[])
-
-#endif
+int main(int /* argc */, char** /* argv */)
 {
+    ttlib::cmd cmd;
+
+    cmd.addHelpOption("h|help", _tt(IDS_DISPLAY_HELP_MSG));
+
+    cmd.addOption("add", _tt(IDS_ADD_HELP_MSG));
+    cmd.addOption("codecmd", _tt(IDS_CODECMD_HELP_MSG));
+
+    cmd.addOption("dir", _tt(IDS_DIR_HELP_MSG), ttlib::cmd::shared_val | ttlib::cmd::needsarg, ACT_DIR);
+
+    cmd.addOption("convert", _tt(IDS_CONVERT_HELP_MSG), ttlib::cmd::shared_val, ACT_CONVERT);
+    cmd.addOption("dryrun", _tt(IDS_DRYRUN_HELP_MSG), ttlib::cmd::shared_val, ACT_DRYRUN);
+    cmd.addOption("new", _tt(IDS_NEW_HELP_MSG), ttlib::cmd::shared_val, ACT_NEW);
+    cmd.addOption("options", _tt(IDS_OPTIONS_HELP_MSG), ttlib::cmd::shared_val, ACT_OPTIONS);
+    cmd.addOption("vscode", _tt(IDS_VSCODE_HELP_MSG), ttlib::cmd::shared_val, ACT_VSCODE);
+    cmd.addOption("force", _tt(IDS_FORCE_HELP_MSG), ttlib::cmd::shared_val, ACT_FORCE);
+
+#if defined(_WIN32)
+    // REVIEW: [KeyWorks - 04-30-2020] What's the difference between these two?
+    cmd.addOption("vs", _tt("creates files used to build and debug a project using Visual Studio"), ttlib::cmd::shared_val, ACT_VS);
+    cmd.addOption("vcxproj", _tt(IDS_VCXPROJ_HELP_MSG), ttlib::cmd::shared_val, ACT_WRITE_VCX);
+#endif
+    cmd.addHiddenOption("msvcenv64", ttlib::cmd::needsarg);
+    cmd.addHiddenOption("msvcenv32", ttlib::cmd::needsarg);
+
+    cmd.addHiddenOption("umsvc");
+    cmd.addHiddenOption("umsvc_x86");
+    cmd.addHiddenOption("uclang");
+    cmd.addHiddenOption("uclang_x86");
+    cmd.addHiddenOption("umsvcD");
+    cmd.addHiddenOption("umsvc_x86D");
+    cmd.addHiddenOption("uclangD");
+    cmd.addHiddenOption("uclang_x86D");
+
+#if defined(TESTING) && !defined(NDEBUG)
+    cmd.addHiddenOption("tvdlg", ttlib::cmd::needsarg);
+#endif
+
+    cmd.parse();
+
+    if (cmd.isHelpRequested())
+    {
+        std::cout << txtVersion << '\n' << txtCopyRight << "\n\n";
+        std::cout << _tt("ttBld.exe [options] [path]") << '\n';
+
+        for (auto& iter: cmd.getUsage())
+        {
+            std::cout << iter << '\n';
+        }
+        return 0;
+    }
+
+    size_t Action = cmd.getSharedValue();
     UPDATE_TYPE upType = UPDATE_NORMAL;
-    size_t Action = 0;
 
     ttlib::cstr RootDir;      // this will be set if (Action & ACT_DIR) is set
     ttlib::cstr SrcFilePath;  // location of srcfiles.yaml
@@ -208,149 +199,71 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
+    if (cmd.isOption("add"))
     {
-        // Only one of these commands can be used -- after it is processes, ttBld will exit
-        if (argv[argpos][1] == '?' || ttlib::issameprefix(argv[argpos] + 1, "help", tt::CASE::either))
-        {
-            Usage();
-            return 1;
-        }
-        else if (ttlib::issameas(argv[argpos] + 1, "add", tt::CASE::either))
-        {
-            ttlib::cstrVector lstFiles;
-            for (++argpos; argpos < argc; ++argpos)
-                lstFiles += argv[argpos];
-            AddFiles(lstFiles);
-            return 1;
-        }
-        else if (ttlib::issameas(argv[argpos] + 1, "convert", tt::CASE::either))
-        {
-            if (++argpos < argc)
-                SrcFilePath = argv[argpos++];
-            Action |= ACT_CONVERT;
-        }
-        else if (ttlib::issameprefix(argv[argpos] + 1, "codecmd"))  // used in case it was set in environment
-        {
-            CreateCodeCmd("code32.cmd");
-            CreateCodeCmd("code64.cmd");
-            return 1;
-        }
-        else if (ttlib::issameprefix(argv[argpos] + 1, "msvcenv64", tt::CASE::either))
-        {
-            // used in case it was set in environment
-            if (argpos + 1 < argc)
-            {
-                CreateMSVCEnvCmd(argv[argpos + 1], true);
-                return 1;
-            }
-            return 0;
-        }
-        else if (ttlib::issameprefix(argv[argpos] + 1, "msvcenv32", tt::CASE::either))
-        {
-            // used in case it was set in environment
-            if (argpos + 1 < argc)
-            {
-                CreateMSVCEnvCmd(argv[argpos + 1], false);
-                return 1;
-            }
-            return 0;
-        }
-#if defined(TESTING) && defined(_DEBUG)
-
-        else if (ttlib::issameprefix(argv[argpos] + 1, "tvdlg", tt::CASE::either))
-        {
-            // used in case it was set in environment
-            CDlgVsCode dlg;
-            if (dlg.DoModal(NULL) != IDOK)
-                return 1;
-
-            fs::remove(".vscode/launch.json");
-            fs::remove(".vscode/tasks.json");
-
-            // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            auto results = CreateVsCodeProject(SrcFilePath);
-            for (auto& iter: results)
-                std::cout << iter << '\n';
-        }
-#endif
-
-#if !defined(NDEBUG) && defined(wxWidgets)  // Starts debug section.
-        else if (ttlib::issameprefix(argv[argpos] + 1, "bwt", tt::CASE::either))
-        {
-            wxConfig config("ttBld");
-            config.SetPath("/Settings");
-            config.Write("BreakOnWarning", true);
-        }
-        else if (ttIsSameSubStrI(argv[argpos] + 1, "bwf"))
-        {
-            wxConfig config("ttBld");
-            config.SetPath("/Settings");
-            config.Write("BreakOnWarning", false);
-        }
-#endif
-
-        // The following commands can be combined
-
-        else if (ttlib::issameprefix(argv[argpos] + 1, "allninja", tt::CASE::either))
-            Action |= ACT_ALLNINJA;
-        else if (ttlib::issameprefix(argv[argpos] + 1, "alld", tt::CASE::either))
-            Action |= ACT_ALLD;
-        else if (ttlib::issameprefix(argv[argpos] + 1, "all", tt::CASE::either))
-            Action |= ACT_ALL;
-
-        else if (ttlib::issameprefix(argv[argpos] + 1, "dry", tt::CASE::either))
-            Action |= ACT_DRYRUN;
-        else if (ttlib::issameas(argv[argpos] + 1, "new", tt::CASE::either))
-            Action |= ACT_NEW;
-        else if (ttlib::issameprefix(argv[argpos] + 1, "opt", tt::CASE::either))
-            Action |= ACT_OPTIONS;
-        else if (ttlib::issameprefix(argv[argpos] + 1, "vscode", tt::CASE::either))  // check this before "vs"
-            Action |= ACT_VSCODE;
-        else if (ttlib::issameprefix(argv[argpos] + 1, "vs", tt::CASE::either))
-            Action |= ACT_VS;
-        else if (ttlib::issameprefix(argv[argpos] + 1, "force", tt::CASE::either))
-            Action |= ACT_FORCE;
-#if defined(_WIN32)
-        else if (ttlib::issameprefix(argv[argpos] + 1, "vcxproj", tt::CASE::either))
-            Action |= ACT_WRITE_VCX;
-#endif  // _WIN32
-        // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
-        else if (ttlib::issameprefix(argv[argpos] + 1, "dir", tt::CASE::either))
-        {
-            ++argpos;
-            if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
-            {
-                ttlib::concolor clr(ttlib::concolor::LIGHTRED);
-                std::cout << _tt("-dir must be followed by the directory to use.") << '\n';
-                return 1;
-            }
-            RootDir = argv[argpos];
-            Action |= ACT_DIR;
-            SrcFilePath = RootDir;
-            SrcFilePath.append_filename("srcfiles.yaml");
-            continue;
-        }
-
-        // The following commands are called from a makefile to update one .ninja script and immediately exit
-
-        else if (ttlib::issameas(argv[argpos] + 1, "umsvc", tt::CASE::either))
-            upType = UPDATE_MSVC;
-        else if (ttlib::issameas(argv[argpos] + 1, "umsvc_x86", tt::CASE::either))
-            upType = UPDATE_MSVC32;
-        else if (ttlib::issameas(argv[argpos] + 1, "uclang", tt::CASE::either))
-            upType = UPDATE_CLANG_CL;
-        else if (ttlib::issameas(argv[argpos] + 1, "uclang_x86", tt::CASE::either))
-            upType = UPDATE_CLANG_CL32;
-        else if (ttlib::issameas(argv[argpos] + 1, "umsvcD", tt::CASE::either))
-            upType = UPDATE_MSVCD;
-        else if (ttlib::issameas(argv[argpos] + 1, "umsvc_x86D", tt::CASE::either))
-            upType = UPDATE_MSVC32D;
-        else if (ttlib::issameas(argv[argpos] + 1, "uclangD", tt::CASE::either))
-            upType = UPDATE_CLANG_CLD;
-        else if (ttlib::issameas(argv[argpos] + 1, "uclang_x86D", tt::CASE::either))
-            upType = UPDATE_CLANG_CL32D;
+        AddFiles(cmd.getExtras());
+        return 1;
     }
+
+    if (cmd.isOption("codecmd"))
+    {
+        CreateCodeCmd("code32.cmd");
+        CreateCodeCmd("code64.cmd");
+        return 1;
+    }
+
+    if (cmd.isOption("msvcenv64"))
+    {
+        CreateMSVCEnvCmd(cmd.getOption("msvcenv64").value_or("msvcenv64.cmd").c_str(), true);
+        return 1;
+    }
+
+    if (cmd.isOption("msvcenv32"))
+    {
+        CreateMSVCEnvCmd(cmd.getOption("msvcenv32").value_or("msvcenv32.cmd").c_str(), false);
+        return 1;
+    }
+
+#if defined(TESTING) && !defined(NDEBUG)
+    if (cmd.isOption("msvcenv32"))
+    {
+        CDlgVsCode dlg;
+        if (dlg.DoModal(NULL) != IDOK)
+            return 1;
+
+        fs::remove(".vscode/launch.json");
+        fs::remove(".vscode/tasks.json");
+
+        // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
+        auto results = CreateVsCodeProject(SrcFilePath);
+        for (auto& iter: results)
+            std::cout << iter << '\n';
+    }
+#endif
+
+    if (cmd.isOption("dir"))
+    {
+        RootDir.assign(cmd.getOption("dir").value_or("bld"));
+    }
+
+    // The following commands are called from a makefile to update one .ninja script and immediately exit
+
+    if (cmd.isOption("umsvc"))
+        upType = UPDATE_MSVC;
+    else if (cmd.isOption("umsvc_x86"))
+        upType = UPDATE_MSVC32;
+    else if (cmd.isOption("uclang"))
+        upType = UPDATE_CLANG_CL;
+    else if (cmd.isOption("uclang_x86"))
+        upType = UPDATE_CLANG_CL32;
+    else if (cmd.isOption("umsvcD"))
+        upType = UPDATE_MSVCD;
+    else if (cmd.isOption("umumsvc_x86Dsvc"))
+        upType = UPDATE_MSVC32D;
+    else if (cmd.isOption("uclangD"))
+        upType = UPDATE_CLANG_CLD;
+    else if (cmd.isOption("uclang_x86D"))
+        upType = UPDATE_CLANG_CL32D;
 
     // If we are being called from a makefile then this is the only option we will now process. Note that we ignore
     // -dryrun even though we are generating a .ninja script. We do process the -dir option.
@@ -459,9 +372,9 @@ int main(int argc, char* argv[])
 
     // At this point we have the location of .srcfiles.yaml, and we're ready to use it.
 
-    if (Action & ACT_VSCODE || Action & ACT_ALL || Action & ACT_ALLD)
+    if (Action & ACT_VSCODE)
     {
-        if (Action & ACT_ALLD)
+        if (Action & ACT_FORCE)
             std::filesystem::remove(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         auto results = CreateVsCodeProject(SrcFilePath);
@@ -471,7 +384,7 @@ int main(int argc, char* argv[])
 
     if (Action & ACT_VS)
     {
-        // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
+        // Create .vs/ and any of the three .json files that are missing, and update c_cpp_properties.json
         std::vector<std::string> results;
         CreateVsJson(SrcFilePath.c_str(), results);
         for (auto msg: results)
