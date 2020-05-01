@@ -14,7 +14,8 @@
 
 #include <vector>
 
-#include <ttwindlg.h>  // Class for displaying a dialog
+#include <ttcvector.h>  // cstrVector -- Vector of ttlib::cstr strings
+#include <ttwindlg.h>   // Class for displaying a dialog
 
 // forward definitions
 
@@ -23,10 +24,7 @@ class CSrcFiles;
 class CDlgVsCode : public ttlib::dlg
 {
 public:
-    CDlgVsCode()
-        : ttlib::dlg(IDDLG_VSCODE)
-    {
-    }
+    CDlgVsCode() : ttlib::dlg(IDDLG_VSCODE) {}
 
     enum
     {
@@ -45,8 +43,8 @@ public:
 
     // Public functions
 
-    bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
-    bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
+    bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
+    bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
 
 protected:
     // Message handlers

@@ -22,14 +22,14 @@
 // By contrast, if the text is to be read as a string, then each "line" must end with a \n character. These string
 // typically have %...% portions which are placeholders that get replaced with strings determined durint runtime.
 
-static const char* txtProperties[] {
+static const auto txtProperties = {
 
     "{",
     "    \"configurations\": [",
     "        {",
     "            \"name\": \"Default\",",
     "             \"cStandard\": \"c11\",",
-    "             \"cppStandard\": \"c++17\",",
+    "             \"cppStandard\": \"c++11\",",
     "             \"defines\": [",
     "             ],",
     "             \"includePath\": [",
@@ -38,7 +38,6 @@ static const char* txtProperties[] {
     "     ],",
     "     \"version\": 4",
     "}",
-    nullptr
 
 };
 
@@ -68,7 +67,7 @@ static const char* txtLaunch =
     "   ]\n"
     "}\n";
 
-static const char* txtTasks[] {
+static const auto txtTasks = {
 
     "{",
     "    // See https://go.microsoft.com/fwlink/?LinkId=733558",
@@ -77,7 +76,6 @@ static const char* txtTasks[] {
     "    \"tasks\": [",
     "    ]",
     "}",
-    nullptr
 
 };
 
@@ -162,8 +160,8 @@ static const char* txtDefaultTask =
     "            \"problemMatcher\": [ %problem% ]\n"
     "        },\n";
 
-bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
-bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results);
+bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
+bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
 
 #if 0
 static void AddTask(ttlib::textfile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
@@ -173,20 +171,22 @@ static void AddTask(ttlib::textfile& fileOut, const char* pszLabel, const char* 
 static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
 static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
 
-// Returns true unless unable to write to a file
-std::vector<std::string> CreateVsCodeProject(std::string_view SrcFilename)
+ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
 {
-    std::vector<std::string> results;
+    ttlib::cstrVector results;
 
     if (!ttlib::dirExists(".vscode"))
     {
         if (!fs::create_directory(".vscode"))
         {
-            ttlib::MsgBox(_tt(IDS_CANT_CREATE_VSCODE_DIR));
+            results += _tt(IDS_CANT_CREATE_VSCODE_DIR);
             return results;
         }
-        ttlib::cstr gitIgnore;
-        if (!gitIsFileIgnored(gitIgnore, ".vscode/") && !gitIsExcluded(gitIgnore, ".vscode/"))
+
+        // In most cases, the .vscode/ directory should be ignored since it can contain settings that are specific to
+        // the user. If it's not currently being ignored, then ask the user if they want to add the directory
+
+        if (ttlib::cstr gitIgnore; !gitIsFileIgnored(gitIgnore, ".vscode/") && !gitIsExcluded(gitIgnore, ".vscode/"))
         {
             if (ttlib::dirExists(".git"))
                 gitIgnore = ".git/info/exclude";
@@ -207,9 +207,9 @@ std::vector<std::string> CreateVsCodeProject(std::string_view SrcFilename)
     }
 
     CSrcFiles cSrcFiles;
-    if (!cSrcFiles.ReadFile(SrcFilename))
+    if (!cSrcFiles.ReadFile(projectFile))
     {
-        results.emplace_back(_tt(IDS_CANT_CONFIGURE_JSON));
+        results += _tt(IDS_CANT_CONFIGURE_JSON);
         return results;
     }
 
@@ -246,11 +246,11 @@ std::vector<std::string> CreateVsCodeProject(std::string_view SrcFilename)
     return results;
 }
 
-bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
+bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 {
     ttlib::textfile out;
     ttlib::textfile propFile;
-    propFile.ReadArray(txtProperties);
+    propFile.Read(txtProperties);
 
     for (auto propLine = propFile.begin(); propLine != propFile.end(); ++propLine)
     {
@@ -290,21 +290,20 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 
             if (cSrcFiles.hasOptValue(OPT::INC_DIRS))
             {
+                ttlib::cstr projectDir = cSrcFiles.GetSrcFilesName();
+                projectDir.make_absolute();
+                projectDir.remove_filename();
+
                 ttlib::enumstr enumInc(cSrcFiles.getOptValue(OPT::INC_DIRS));
                 for (auto& iter: enumInc)
                 {
                     ttlib::cstr IncName(iter);
                     IncName.make_absolute();
-#if defined(_WIN32)
-                    ttlib::cstr IncDir;
-                    JunctionToReal(IncName, IncDir);
-                    IncDir.backslashestoforward();
+                    IncName.make_relative(projectDir);
+                    IncName.backslashestoforward();
+
                     auto& line = out.addEmptyLine();
-                    line.Format("                %ks,", IncDir.c_str());
-#else
-                    auto& line = out.addEmptyLine();
-                    line.Format("                %ks,", IncName.c_str());
-#endif
+                    line.Format("                \"${workspaceRoot}/%s\",", IncName.c_str());
                 }
             }
             // we always add the default include path
@@ -312,8 +311,23 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
             out.emplace_back(*propLine);
             continue;
         }
-        else
+        else if (propLine->viewnonspace().issameprefix("\"cppStandard", tt::CASE::either))
+        {
+            // The default is c++11, but check to see if a specific version was specified in Cflags
+            if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN) && cSrcFiles.getOptValue(OPT::CFLAGS_CMN).contains("std:c++"))
+            {
+                auto option = cSrcFiles.getOptValue(OPT::CFLAGS_CMN).subview();
+                option.remove_prefix(option.locate("std:c++") + 3);
+                ttlib::cstr cppstandard;
+                cppstandard.AssignSubString(option, ':', ' ');
+                auto& line = out.emplace_back(*propLine);
+                line.Replace("c++11", cppstandard);
+            }
+
+        }
+        else {
             out.emplace_back(*propLine);
+        }
     }
 
     if (!out.WriteFile(".vscode/c_cpp_properties.json"))
@@ -323,13 +337,13 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
     }
     else
     {
-        Results.emplace_back(_tt(IDS_CREATED) + ".vscode/c_cpp_properties.json");
+        Results += (_tt(IDS_CREATED) + ".vscode/c_cpp_properties.json");
     }
 
     return true;
 }
 
-bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
+bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 {
     if (cSrcFiles.IsExeTypeLib() || cSrcFiles.IsExeTypeDll())
         return true;  // nothing that we know how to launch if this is a library or dynamic link library
@@ -381,12 +395,12 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<std::strin
     return true;
 }
 
-bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
+bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 {
     ttlib::textfile out;
 
     ttlib::textfile tasks;
-    tasks.ReadArray(txtTasks);
+    tasks.Read(txtTasks);
 
     ttlib::cstr MakeFileOption;
     if (cSrcFiles.hasOptValue(OPT::MAKE_DIR))
@@ -517,7 +531,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<std::string
     return true;
 }
 
-bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
+bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 {
     ttlib::textfile file;
     if (!file.ReadFile(".vscode/c_cpp_properties.json"))
@@ -751,21 +765,35 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<std::string>& Results)
 // to parse a CFlags: option string
 void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
 {
-    for (size_t pos = 0; pos < Defines.size(); pos = ttlib::stepover_pos(Defines.substr(pos)) + pos)
+    if (Defines.empty())
+        return;
+
+    if (ttlib::issameprefix(Defines, "-D") || ttlib::issameprefix(Defines, "-D"))
     {
-        if (Defines[pos] == '-' || Defines[pos] == '/')
+        Defines.remove_prefix(1);
+        auto& def = Results.emplace_back();
+        def.AssignSubString(Defines, 'D', ' ');
+    }
+
+    for (auto pos = Defines.find(" -"); pos != tt::npos; pos = Defines.find(" -"))
+    {
+        Defines.remove_prefix(pos + 2);
+        if (std::toupper(Defines[0]) == 'D')
         {
-            ++pos;
-            if (Defines[pos])
-            {
-                auto end = ttlib::findspace_pos(Defines.substr(pos));
-                if (end == tt::npos)
-                {
-                    Results.append(Defines.substr(pos + 1));
-                    return;
-                }
-                Results.append(Defines.substr(pos + 1, end - pos));
-            }
+            auto& def = Results.emplace_back();
+            def.AssignSubString(Defines, 'D', ' ');
+        }
+    }
+
+    // Windows command lines often use / instead of - for switches, so we check for those as well.
+
+    for (auto pos = Defines.find(" /D"); pos != tt::npos; pos = Defines.find(" /D"))
+    {
+        Defines.remove_prefix(pos + 2);
+        if (std::toupper(Defines[0]) == 'D')
+        {
+            auto& def = Results.emplace_back();
+            def.AssignSubString(Defines, 'D', ' ');
         }
     }
 }

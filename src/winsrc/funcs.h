@@ -41,7 +41,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results);
 // Following functions are for use in setting up a build system for VS Code
 
 // Returns true unless unable to write to a file
-std::vector<std::string> CreateVsCodeProject(std::string_view SrcFilename);
+ttlib::cstrVector CreateVsCodeProject(std::string_view SrcFilename);
 bool Yamalize();
 
 #if defined(_WIN32)
