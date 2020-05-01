@@ -52,18 +52,17 @@ static const char* atxtProjects[] {
     // clang-format on
 };
 
-CConvertDlg::CConvertDlg(const char* pszDstSrcFiles) : ttlib::dlg(IDDDLG_CONVERT)
+CConvertDlg::CConvertDlg() : ttlib::dlg(IDDDLG_CONVERT)
 {
-    if (pszDstSrcFiles)
-        m_cszOutSrcFiles = pszDstSrcFiles;
+    m_cszOutSrcFiles = ".srcfiles.yaml";
+}
+
+CConvertDlg::CConvertDlg(std::string_view projectFile) : ttlib::dlg(IDDDLG_CONVERT)
+{
+    if (projectFile.size())
+        m_cszOutSrcFiles.assign(projectFile);
     else
         m_cszOutSrcFiles = ".srcfiles.yaml";
-
-    m_bCreateVsCode = false;
-    m_bGitIgnore = false;
-
-    // Process of conversion may change directories, so save the directory we should change back to
-    m_cwd.assignCwd();
 }
 
 void CConvertDlg::OnBegin(void)

@@ -20,7 +20,8 @@
 class CConvertDlg : public ttlib::dlg
 {
 public:
-    CConvertDlg(const char* pszDstSrcFiles = nullptr);
+    CConvertDlg();
+    CConvertDlg(std::string_view projectFile);
 
     // Public functions
 
@@ -75,6 +76,6 @@ private:
 
     ttlib::cwd m_cwd { true };
 
-    bool m_bCreateVsCode;
-    bool m_bGitIgnore;
+    bool m_bCreateVsCode { false };
+    bool m_bGitIgnore { false };
 };

@@ -154,7 +154,7 @@ int main(int /* argc */, char** /* argv */)
     UPDATE_TYPE upType = UPDATE_NORMAL;
 
     ttlib::cstr RootDir;      // this will be set if (Action & ACT_DIR) is set
-    ttlib::cstr SrcFilePath;  // location of srcfiles.yaml
+    ttlib::cstr projectFile;  // location of srcfiles.yaml
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && !defined(NDEBUG) && defined(_WIN32)
@@ -235,7 +235,7 @@ int main(int /* argc */, char** /* argv */)
         fs::remove(".vscode/tasks.json");
 
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-        auto results = CreateVsCodeProject(SrcFilePath);
+        auto results = CreateVsCodeProject(projectFile);
         for (auto& iter: results)
             std::cout << iter << '\n';
     }
@@ -245,6 +245,9 @@ int main(int /* argc */, char** /* argv */)
     {
         RootDir.assign(cmd.getOption("dir").value_or("bld"));
     }
+
+    if (cmd.getExtras().size())
+        projectFile = cmd.getExtras().at(0);
 
     // The following commands are called from a makefile to update one .ninja script and immediately exit
 
@@ -279,11 +282,11 @@ int main(int /* argc */, char** /* argv */)
 
     if (Action & ACT_NEW)
     {
-        // -dir option will have set SrcFilePath, if option not specified, default to current directory
-        CConvertDlg dlg(!SrcFilePath.empty() ? SrcFilePath.c_str() : ".srcfiles.yaml");
+        // -dir option will have set projectFile, if option not specified, default to current directory
+        CConvertDlg dlg(projectFile);
         if (dlg.DoModal(NULL) != IDOK)
             return 1;
-        SrcFilePath = dlg.GetOutSrcFiles();
+        projectFile = dlg.GetOutSrcFiles();
 
         // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has
         // been created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the
@@ -291,12 +294,12 @@ int main(int /* argc */, char** /* argv */)
         // want to cancel running any other commands, such as makefile creation (which doesn't need to know what
         // options are set in .srcfiles.yaml).
 
-        ChangeOptions(SrcFilePath);
+        ChangeOptions(projectFile);
 
         if (dlg.isCreateVsCode())
         {
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            auto results = CreateVsCodeProject(SrcFilePath);
+            auto results = CreateVsCodeProject(projectFile);
             for (auto& iter: results)
                 std::cout << iter << '\n';
         }
@@ -311,12 +314,12 @@ int main(int /* argc */, char** /* argv */)
     }
     else if (Action & ACT_CONVERT)
     {
-        // -dir option will have set SrcFilePath, if option not specified, default to current directory
+        // -dir option will have set projectFile, if option not specified, default to current directory
         CConvertDlg dlg;
-        dlg.SetConvertScritpt(SrcFilePath);
+        dlg.SetConvertScritpt(projectFile);
         if (dlg.DoModal(NULL) != IDOK)
             return 1;
-        SrcFilePath = dlg.GetOutSrcFiles();
+        projectFile = dlg.GetOutSrcFiles();
 
         // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has
         // been created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the
@@ -324,11 +327,11 @@ int main(int /* argc */, char** /* argv */)
         // want to cancel running any other commands, such as makefile creation (which doesn't need to know what
         // options are set in .srcfiles.yaml).
 
-        ChangeOptions(SrcFilePath);
+        ChangeOptions(projectFile);
         if (dlg.isCreateVsCode())
         {
             // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            auto results = CreateVsCodeProject(SrcFilePath);
+            auto results = CreateVsCodeProject(projectFile);
             for (auto& iter: results)
                 std::cout << iter << '\n';
         }
@@ -350,10 +353,10 @@ int main(int /* argc */, char** /* argv */)
     // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not,
     // we need to locate it.
 
-    if (!SrcFilePath.empty())
+    if (projectFile.empty())
     {
-        SrcFilePath.assign(locateProjectFile(RootDir));
-        if (SrcFilePath.empty())
+        projectFile.assign(locateProjectFile(RootDir));
+        if (projectFile.empty())
         {
             ttlib::concolor clr(ttlib::concolor::LIGHTRED);
             std::cout << _tt(IDS_CANT_FIND_SRCFILES) << '\n';
@@ -366,7 +369,7 @@ int main(int /* argc */, char** /* argv */)
 
     if (Action & ACT_OPTIONS && !(Action & ACT_NEW))
     {
-        if (!ChangeOptions(SrcFilePath))
+        if (!ChangeOptions(projectFile))
             return 1;
     }
 
@@ -377,7 +380,7 @@ int main(int /* argc */, char** /* argv */)
         if (Action & ACT_FORCE)
             std::filesystem::remove(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-        auto results = CreateVsCodeProject(SrcFilePath);
+        auto results = CreateVsCodeProject(projectFile);
         for (auto& iter: results)
             std::cout << iter << '\n';
     }
@@ -386,7 +389,7 @@ int main(int /* argc */, char** /* argv */)
     {
         // Create .vs/ and any of the three .json files that are missing, and update c_cpp_properties.json
         std::vector<std::string> results;
-        CreateVsJson(SrcFilePath.c_str(), results);
+        CreateVsJson(projectFile.c_str(), results);
         for (auto msg: results)
             std::cout << msg << '\n';
     }
