@@ -61,7 +61,6 @@
     #endif
 #endif
 
-#include <cassert>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -76,8 +75,10 @@ namespace fs = std::filesystem;
 
 #if defined(_WIN32)
     #include <ttdebug.h>
+#else
+    #include <cassert>
 #endif
 
-constexpr const char* txtVersion = "ttBld 1.5.0";
-constexpr const char* txtCopyright = "Copyright (c) 2002-2020 KeyWorks Software";
-constexpr const char* txtAppname = "ttBld";
+constexpr const auto txtVersion = "ttBld 1.5.0";
+constexpr const auto txtCopyRight = "Copyright (c) 2002-2020 KeyWorks Software";
+constexpr const auto txtAppname = "ttBld";
