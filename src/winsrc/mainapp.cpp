@@ -151,6 +151,8 @@ int main(int /* argc */, char** /* argv */)
     }
 
     size_t Action = cmd.getSharedValue();
+    if (!ttlib::isFound(Action))
+        Action = 0;
     UPDATE_TYPE upType = UPDATE_NORMAL;
 
     ttlib::cstr RootDir;      // this will be set if (Action & ACT_DIR) is set
