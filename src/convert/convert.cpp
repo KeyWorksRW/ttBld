@@ -10,7 +10,7 @@
 
 #include "pch.h"
 
-#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"
 #include "strtable.h"  // String resource IDs
@@ -124,7 +124,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
 
     if (srcOrg.hasOptValue(OPT::INC_DIRS))
     {
-        ttlib::enumstr enumPaths(srcOrg.getOptValue(OPT::INC_DIRS));
+        ttlib::multistr enumPaths(srcOrg.getOptValue(OPT::INC_DIRS));
         fs::current_path(Root.c_str());
         for (auto& iter: enumPaths)
         {

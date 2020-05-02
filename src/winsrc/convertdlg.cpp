@@ -16,7 +16,7 @@
 
 #include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
 #include <ttdirdlg.h>    // DirDlg -- Class for displaying a dialog to select a directory
-#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
 #include <ttwinff.h>     // winff -- Wrapper around Windows FindFile
 

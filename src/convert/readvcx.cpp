@@ -9,7 +9,7 @@
 #include "pch.h"
 
 #include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
-#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"   // CConvert, CVcxWrite
 #include "strtable.h"  // String resource IDs
@@ -132,7 +132,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
             ttlib::cstr incs(val);
             incs.Replace(";%(AdditionalIncludeDirectories)", "");
 
-            ttlib::enumstr enumPaths(incs);
+            ttlib::multistr enumPaths(incs);
             ttlib::cstr Includes;
             for (auto& filename: enumPaths)
             {

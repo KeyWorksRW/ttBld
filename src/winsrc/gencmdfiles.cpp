@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "funcs.h"     // List of function declarations
@@ -93,7 +93,7 @@ static void AddToList(const char* pszEnv, ttlib::cstrVector& lstPaths)
 
     if (Env.length())
     {
-        ttlib::enumstr enumLib(Env);
+        ttlib::multistr enumLib(Env);
         for (auto& iter: enumLib)
         {
             iter.backslashestoforward();

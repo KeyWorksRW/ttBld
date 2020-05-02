@@ -8,8 +8,8 @@
 
 #include "pch.h"
 
-#include <ttcwd.h>      // Class for storing and optionally restoring the current directory
-#include <ttenumstr.h>  // ttCEnumStr
+#include <ttcwd.h>       // Class for storing and optionally restoring the current directory
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"     // CNinja
 #include "parsehhp.h"  // CParseHHP
@@ -318,7 +318,7 @@ void CNinja::ProcessBuildLibs()
     if (!hasOptValue(OPT::BUILD_LIBS))
         return;
 
-    ttlib::enumstr enumLib(ttlib::findnonspace(getOptValue(OPT::BUILD_LIBS)), ';');
+    ttlib::multistr enumLib(ttlib::findnonspace(getOptValue(OPT::BUILD_LIBS)), ';');
     for (auto& libPath: enumLib)
     {
         ttlib::cwd cwd(true);

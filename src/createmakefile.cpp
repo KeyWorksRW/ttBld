@@ -9,7 +9,7 @@
 #include "pch.h"
 
 #include <ttcstr.h>     // Classes for handling zero-terminated char strings.
-#include <ttenumstr.h>  // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"     // CNinja
 #include "resource.h"  // IDR_MAKEFILE

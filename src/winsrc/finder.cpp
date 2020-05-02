@@ -9,7 +9,7 @@
 #include "pch.h"
 
 #include <ttcstr.h>     // cstr -- Classes for handling zero-terminated char strings.
-#include <ttenumstr.h>  // enumstr -- Enumerate through substrings in a string
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <ttregistry.h>
 #include <ttwinff.h>  // winff -- Wrapper around Windows FindFile
 
@@ -85,7 +85,7 @@ bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathR
     auto pszEnv = std::getenv(Env);
     if (pszEnv)
     {
-        ttlib::enumstr enumstr(pszEnv);
+        ttlib::multistr enumstr(pszEnv);
         for (auto& str: enumstr)
         {
             str.append_filename(filename);

@@ -10,7 +10,7 @@
 
 #include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
 #include <ttdirdlg.h>    // ttCDirDlg
-#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
 
 #include "dlgoptions.h"
@@ -101,7 +101,7 @@ void CTabLinker::OnBtnLibDir()
         if (!CurLibDirs.empty())
         {
             CurLibDirs.backslashestoforward();
-            ttlib::enumstr enumPaths(CurLibDirs);
+            ttlib::multistr enumPaths(CurLibDirs);
             for (auto iter: enumPaths)
             {
                 if (iter.issameas(LibDir))

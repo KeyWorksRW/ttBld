@@ -11,7 +11,7 @@
 #include <sstream>
 
 #include <ttcwd.h>       // Class for storing and optionally restoring the current directory
-#include <ttenumstr.h>   // ttCEnumStr
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 #include <ttwinff.h>     // Wrapper around Windows FindFile
 
@@ -342,7 +342,7 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
     if (FilePattern.empty())
         return;
 
-    ttlib::enumstr enumPattern(FilePattern, ';');
+    ttlib::multistr enumPattern(FilePattern, ';');
     for (auto& pattern: enumPattern)
     {
         ttlib::winff ff(pattern);

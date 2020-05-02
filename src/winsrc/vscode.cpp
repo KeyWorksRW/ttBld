@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-#include <ttenumstr.h>   // ttlib::enumstr, ttEnumView -- Enumerate through substrings in a string
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 
 #include "csrcfiles.h"  // CSrcFiles
@@ -294,7 +294,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
                 projectDir.make_absolute();
                 projectDir.remove_filename();
 
-                ttlib::enumstr enumInc(cSrcFiles.getOptValue(OPT::INC_DIRS));
+                ttlib::multistr enumInc(cSrcFiles.getOptValue(OPT::INC_DIRS));
                 for (auto& iter: enumInc)
                 {
                     ttlib::cstr IncName(iter);
@@ -546,7 +546,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 
     if (!cSrcFiles.getOptValue(OPT::INC_DIRS).empty())
     {
-        ttlib::enumstr IncludeDirs(cSrcFiles.getOptValue(OPT::INC_DIRS));
+        ttlib::multistr IncludeDirs(cSrcFiles.getOptValue(OPT::INC_DIRS));
         for (auto& iter: IncludeDirs)
         {
             // If it's not already a relative path, make it relative
