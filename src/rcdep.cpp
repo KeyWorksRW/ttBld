@@ -11,6 +11,7 @@
 #include <exception>
 #include <sstream>
 
+#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
 #include "ninja.h"     // CNinja
@@ -50,9 +51,24 @@ static const char* aRemovals[]
 //
 // Note that we only add header files in quotes -- we don't add system files (inside angle brackets) as a
 // dependency.
-bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header, std::string_view relpath)
+bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header)
 {
-    std::string inFilename { !header.empty() ? header : rcfile };
+    // Save the current working directory and restore it when we're done
+    ttlib::cwd SavedCWD(true);
+
+    ttlib::cstr inFilename { !header.empty() ? header : rcfile };
+    ttlib::cstr workingDir;
+
+    if (ttlib::isFound(inFilename.find('/')))
+    {
+        workingDir = inFilename;
+        workingDir.remove_filename();
+        ttlib::ChangeDir(workingDir);
+
+        // Now that we've changed to the actual directory, remove it from the filename
+        inFilename.Replace(workingDir, "");
+    }
+
     ttlib::viewfile file;
     try
     {
@@ -66,15 +82,6 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
     {
         AddError(_tt(IDS_EXCEPTION_READING) + inFilename + ": " + e.what());
         return false;
-    }
-
-    ttlib::cstr reldir;
-    if (!relpath.empty())
-        reldir = relpath;
-    else
-    {
-        reldir = inFilename;
-        reldir.remove_filename();
     }
 
     for (auto line: file)
@@ -116,8 +123,21 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
 
                 if (!m_RcDependencies.hasFilename(incName))
                 {
-                    m_RcDependencies.push_back(incName);
-                    FindRcDependencies(rcfile, incName, relpath);
+                    if (workingDir.size())
+                    {
+                        auto saveLength = workingDir.size();
+                        workingDir.append_filename(incName);
+                        m_RcDependencies.addfilename(workingDir);
+                        ttlib::cwd CurrentCWD(true);
+                        SavedCWD.ChangeDir();
+                        FindRcDependencies(rcfile, workingDir);
+                        workingDir.erase(saveLength, workingDir.size() - saveLength);
+                    }
+                    else
+                    {
+                        m_RcDependencies.addfilename(incName);
+                        FindRcDependencies(rcfile, incName);
+                    }
                 }
             }
         }
@@ -159,7 +179,17 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                             parseName.make_relative(root);
                             parseName.backslashestoforward();
 
-                            m_RcDependencies.addfilename(parseName);
+                            if (workingDir.size())
+                            {
+                                auto saveLength = workingDir.size();
+                                workingDir.append_filename(parseName);
+                                m_RcDependencies.addfilename(workingDir);
+                                workingDir.erase(saveLength, workingDir.size() - saveLength);
+                            }
+                            else
+                            {
+                                m_RcDependencies.addfilename(parseName);
+                            }
                         }
                     }
                 }

@@ -78,7 +78,7 @@ protected:
     void msvcWriteMidlTargets(CMPLR_TYPE cmplr);
 #endif
 
-    bool FindRcDependencies(std::string_view rcfile, std::string_view header = {}, std::string_view relpath = {});
+    bool FindRcDependencies(std::string_view rcfile, std::string_view header = {});
 
     // Retrieve a reference to the last line in the current ninja script file.
     ttlib::cstr& lastline() noexcept { return m_ninjafile.back(); }
