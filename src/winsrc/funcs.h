@@ -29,12 +29,6 @@ bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathR
 
 void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines);
 
-// Try to locate .srcfiles.yaml and return a pointer to it's location if found.
-//
-// If pPath is specified, it will be assigned the path (including the .srcfiles.yaml
-// filename)
-const char* FindProjectFile(ttlib::cstr* pPath = nullptr);
-
 // Creates .json files for Visual Studio
 bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results);
 

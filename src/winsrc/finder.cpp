@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-#include <ttcstr.h>     // cstr -- Classes for handling zero-terminated char strings.
+#include <ttcstr.h>      // cstr -- Classes for handling zero-terminated char strings.
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <ttregistry.h>
 #include <ttwinff.h>  // winff -- Wrapper around Windows FindFile
@@ -73,6 +73,16 @@ bool FindVsCode(ttlib::cstr& Result)
     return false;
 }
 
+bool IsVsCodeAvail()
+{
+    ttlib::registry reg;
+    if (reg.OpenClasses("Applications\\Code.exe\\shell\\open\\command"))
+    {
+        return true;
+    }
+    return false;
+}
+
 bool IsHost64()
 {
     SYSTEM_INFO si;
@@ -98,60 +108,4 @@ bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathR
         }
     }
     return false;
-}
-
-// Specifies various locations to look for a .srcfiles.yaml
-static const char* aSrcFilesLocations[] = {
-    // clang-format off
-    ".srcfiles.yaml",  // this MUST be the first file
-    "src/.srcfiles.yaml",
-    "source/.srcfiles.yaml",
-    ".private/.srcfiles.yaml",
-    "bld/.srcfiles.yaml",
-    "build/.srcfiles.yaml",
-
-    // the following is here for backwards compatability
-    ".srcfiles",
-
-    nullptr
-    // clang-format on
-};
-
-static const char* aProjectLocations[] = {
-    // clang-format off
-    ".srcfiles.yaml",  // this MUST be the first file
-    "src/.srcfiles.yaml",
-    "source/.srcfiles.yaml",
-    ".private/.srcfiles.yaml",
-    "bld/.srcfiles.yaml",
-    "build/.srcfiles.yaml",
-    // clang-format on
-};
-
-const char* FindProjectFile(ttlib::cstr* pStartDir)
-{
-    if (pStartDir)
-    {
-        ttlib::cstr path;
-        for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
-        {
-            path = *pStartDir;
-            path.append_filename(aSrcFilesLocations[pos]);
-            if (path.fileExists())
-            {
-                *pStartDir = path;
-                return pStartDir->c_str();
-            }
-        }
-    }
-    else
-    {
-        for (size_t pos = 0; aSrcFilesLocations[pos]; ++pos)
-        {
-            if (ttlib::fileExists(aSrcFilesLocations[pos]))
-                return aSrcFilesLocations[pos];
-        }
-    }
-
-    return nullptr;
 }
