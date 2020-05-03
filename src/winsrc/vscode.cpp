@@ -436,7 +436,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
         ttlib::textfile SubTask;
         SubTask.ReadString(txtDefaultTask);
         ttlib::cstr MakeCommand;
-        if (m_bMainTasks)
+        if (m_hasMakefileTask)
         {
 #if defined(_WIN32)
             // Build MSVC debug
@@ -464,7 +464,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
 
             MakeCommand = "nmake.exe -nologo clean release " + MakeFileOption;
             AddMsvcTask(out, "Rebuild Release MSVC", txtNormalGroup, MakeCommand);
-            if (m_bNinjaTask)
+            if (m_hasNinjaTask)
                 AddMsvcTask(out, "Ninja Debug Build", txtNormalGroup, "ninja -f bld/msvc_dbg.ninja");
         }
 
@@ -472,17 +472,18 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
         // If we're on Windows, then we also look to see if either the clang-cl compiler is available. If so,
         // we add build targets for it
 
-        if (m_bClangTasks)
+        if (m_hasClangTask)
         {
-            MakeCommand = (m_bMake ? "mingw32-make.exe debug " : "nmake -nologo debug cmplr=clang ") + MakeFileOption;
+            MakeCommand = (m_hasMingwMake ? "mingw32-make.exe debug " : "nmake -nologo debug cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Build Debug CLANG", (m_DefTask == DEFTASK_CLANG) ? txtDefaultGroup : txtNormalGroup, MakeCommand);
 
-            MakeCommand = (m_bMake ? "mingw32-make.exe release " : "nmake -nologo release cmplr=clang ") + MakeFileOption;
+            MakeCommand = (m_hasMingwMake ? "mingw32-make.exe release " : "nmake -nologo release cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Build Release CLANG", txtNormalGroup, MakeCommand);
 
-            MakeCommand = (m_bMake ? "mingw32-make.exe clean release " : "nmake -nologo clean release cmplr=clang ") + MakeFileOption;
+            MakeCommand =
+                (m_hasMingwMake ? "mingw32-make.exe clean release " : "nmake -nologo clean release cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Rebuild Release CLANG", txtNormalGroup, MakeCommand);
-            if (m_bNinjaTask && !m_bMainTasks)
+            if (m_hasNinjaTask && !m_hasMakefileTask)
                 AddClangTask(out, "Ninja Debug Build", (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
                              "ninja -f bld/clang_dbg.ninja");
         }

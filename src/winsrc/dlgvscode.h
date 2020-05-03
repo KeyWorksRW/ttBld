@@ -65,8 +65,8 @@ private:
     int m_PreLaunch;
     int m_DefTask;
 
-    bool m_bMainTasks;  // MSVC on Windows, GCC otherwise
-    bool m_bClangTasks;
-    bool m_bNinjaTask;
-    bool m_bMake;  // true if mingw32-make.exe has been located
+    bool m_hasMakefileTask;  // MSVC on Windows, GCC otherwise
+    bool m_hasClangTask;
+    bool m_hasNinjaTask;
+    bool m_hasMingwMake;  // true if mingw32-make.exe has been located
 };

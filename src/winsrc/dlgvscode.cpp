@@ -2,7 +2,7 @@
 // Name:      CDlgVsCode
 // Purpose:   IDDLG_VSCODE dialog handler
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -32,18 +32,18 @@ void CDlgVsCode::OnBegin(void)
     SetBtnIcon(IDOK, IDICON_TTLIB_OK);
     SetBtnIcon(IDCANCEL, IDICON_TTLIB_CANCEL);
 
-    m_bMainTasks = true;
-    m_bNinjaTask = true;
-    SetCheck(IDCHECK_MAIN_COMPILER, m_bMainTasks);
-    SetCheck(IDCHECK_NINJA_DEBUG, m_bNinjaTask);
+    m_hasMakefileTask = true;
+    m_hasNinjaTask = true;
+    SetCheck(IDCHECK_MAIN_COMPILER, m_hasMakefileTask);
+    SetCheck(IDCHECK_NINJA_DEBUG, m_hasNinjaTask);
 
     ttlib::cstr tmp;
 #if defined(_WIN32)
-    m_bMake = FindFileEnv("PATH", "mingw32-make.exe", tmp);
+    m_hasMingwMake = FindFileEnv("PATH", "mingw32-make.exe", tmp);
     if (FindFileEnv("PATH", "clang-cl.exe", tmp))
         SetCheck(IDCHECK_CLANG_COMPILER);
 #else
-    m_bMake = false;
+    m_hasMingwMake = false;
     if (FindFileEnv("PATH", "clang.exe", tmp))
         SetCheck(IDCHECK_CLANG_COMPILER)
 #endif  // _WIN32
@@ -56,9 +56,9 @@ void CDlgVsCode::OnBegin(void)
 
 void CDlgVsCode::OnOK(void)
 {
-    m_bMainTasks = GetCheck(IDCHECK_MAIN_COMPILER);
-    m_bClangTasks = GetCheck(IDCHECK_CLANG_COMPILER);
-    m_bNinjaTask = GetCheck(IDCHECK_NINJA_DEBUG);
+    m_hasMakefileTask = GetCheck(IDCHECK_MAIN_COMPILER);
+    m_hasClangTask = GetCheck(IDCHECK_CLANG_COMPILER);
+    m_hasNinjaTask = GetCheck(IDCHECK_NINJA_DEBUG);
 
     if (GetCheck(IDRADIO_PRE_NONE))
         m_PreLaunch = PRELAUNCH_NONE;
@@ -68,7 +68,7 @@ void CDlgVsCode::OnOK(void)
         m_PreLaunch = PRELAUNCH_CLANG;
     else
     {
-        if (!m_bNinjaTask)  // Can't prelaunch Ninja task if it's not in the list of Tasks
+        if (!m_hasNinjaTask)  // Can't prelaunch Ninja task if it's not in the list of Tasks
             m_PreLaunch = PRELAUNCH_MAIN;
         else
             m_PreLaunch = PRELAUNCH_NINJA;
@@ -80,7 +80,7 @@ void CDlgVsCode::OnOK(void)
         m_DefTask = DEFTASK_CLANG;
     else
     {
-        if (!m_bNinjaTask)  // Can't default to Ninja task if it's not in the list of Tasks
+        if (!m_hasNinjaTask)  // Can't default to Ninja task if it's not in the list of Tasks
             m_DefTask = DEFTASK_MAIN;
         else
             m_DefTask = DEFTASK_NINJA;
