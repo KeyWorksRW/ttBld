@@ -23,15 +23,13 @@ public:
     CConvertDlg();
     CConvertDlg(std::string_view projectFile);
 
-    // Public functions
-
     const ttlib::cstr& GetOutSrcFiles() { return m_cszOutSrcFiles; }
     const ttlib::cstr& GetDirSrcFiles() { return m_cszDirSrcFiles; }
     const ttlib::cstr& GetConvertScript() { return m_ConvertFile; }
     void SetConvertScritpt(std::string_view filename);
 
-    bool isCreateVsCode() { return m_bCreateVsCode; }
-    bool isGitIgnoreAll() { return m_bGitIgnore; }
+    bool isCreateVsCode() { return m_CreateVscode; }
+    bool isAddToGitExclude() { return m_AddToGitExclude; }
 
 protected:
     BEGIN_TTCMD_MAP()
@@ -44,15 +42,12 @@ protected:
 
     void OnCheckFiles();
     void OnCheckConvert();
-    // Message handlers
-
     void OnBtnChangeIn();
     void OnBtnChangeOut();
     void OnBtnLocateScript();
+
     void OnBegin(void) override;
     void OnOK(void) override;
-
-    // Protected functions
 
     bool ConvertSrcfiles();
 
@@ -60,9 +55,8 @@ protected:
     bool doConversion();
 
 private:
-    // Class members
-
     ttlib::dlgCombo m_comboScripts;
+
     CWriteSrcFiles m_cSrcFiles;
 
     ttlib::cstr m_cszOutSrcFiles;  // Where .srcfiles should be created
@@ -76,6 +70,6 @@ private:
 
     ttlib::cwd m_cwd { true };
 
-    bool m_bCreateVsCode { false };
-    bool m_bGitIgnore { false };
+    bool m_CreateVscode { false };
+    bool m_AddToGitExclude { false };
 };

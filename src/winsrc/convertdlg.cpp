@@ -28,19 +28,17 @@
 #include "strtable.h"    // String resource IDs
 
 // clang-format off
-static const char* atxtSrcTypes[]
+static const char* listSrcTypes[]
 {
     "*.cpp",
     "*.cc",
     "*.cxx",
     "*.c",
-     nullptr
 };
-// clang-format on
 
 // Array of project extensions (*.vcxproj, *.project, etc.).
-static const char* atxtProjects[] {
-    // clang-format off
+static const char* atxtProjects[]
+{
     "*.vcxproj",       // Visual Studio
     "*.vcproj",        // Old Visual Studio
     "*.project",       // CodeLite
@@ -49,8 +47,9 @@ static const char* atxtProjects[] {
     ".srcfiles.yaml",  // ttBld project files
 
      nullptr
-    // clang-format on
 };
+
+// clang-format on
 
 bool MakeNewProject(ttlib::cstr& projectFile)
 {
@@ -70,7 +69,7 @@ bool MakeNewProject(ttlib::cstr& projectFile)
             std::cout << iter << '\n';
     }
 
-    if (dlg.isGitIgnoreAll())
+    if (dlg.isAddToGitExclude())
     {
         ttlib::cstr GitExclude;
         if (gitIgnoreAll(GitExclude))
@@ -114,18 +113,25 @@ void CConvertDlg::OnBegin(void)
     SetBtnIcon(IDCANCEL, IDICON_TTLIB_CANCEL);
 
     ttlib::cstr tmp;
-    if (!ttlib::dirExists(".vscode") && FindVsCode(tmp))
+    if (!ttlib::dirExists(".vscode") && IsVsCodeAvail())
         SetCheck(IDCHECK_VSCODE);
+
+    // These three directories are the only locations that gitIgnoreAll() will use, so if they don't exist, then there
+    // isn't any way to add to the excludes list -- so just hide the control if that's the case.
     if (ttlib::dirExists(".git") || ttlib::dirExists("../.git") || ttlib::dirExists("../../.git"))
         SetCheck(IDCHECK_IGNORE_ALL);
+    else
+        HideControl(IDCHECK_IGNORE_ALL);
 
-    SetControlText(IDEDIT_IN_DIR, m_cwd.c_str());
+    m_cwd.backslashestoforward();
+    SetControlText(IDEDIT_IN_DIR, m_cwd);
 
     if (!m_cszOutSrcFiles.empty())
     {
         tmp = m_cszOutSrcFiles;
         tmp.make_relative(m_cwd);
         tmp.remove_filename();
+        tmp.backslashestoforward();
     }
     if (!tmp.empty())
         SetControlText(IDEDIT_OUT_DIR, tmp);
@@ -153,21 +159,21 @@ void CConvertDlg::OnBegin(void)
             {
                 if (ff.isdir())
                 {
-                    ttlib::cstr cszDir(ff.getcstr());
-                    cszDir.append(atxtProjects[0]);
-                    ttlib::winff ffFilter(cszDir.c_str());
+                    ttlib::cstr dir(ff.getcstr());
+                    dir.append(atxtProjects[0]);
+                    ttlib::winff ffFilter(dir);
                     for (size_t pos = 1; !ffFilter.isvalid() && atxtProjects[pos]; ++pos)
                     {
-                        cszDir = ff.getcstr();
-                        cszDir.append(atxtProjects[pos]);
-                        ffFilter.newpattern(cszDir.c_str());
+                        dir = ff.getcstr();
+                        dir.append(atxtProjects[pos]);
+                        ffFilter.newpattern(dir);
                     }
 
                     if (ffFilter.isvalid())
                     {
-                        cszDir = ff.getcstr();
-                        cszDir.append(ffFilter);
-                        m_comboScripts.append(cszDir);
+                        dir = ff.getcstr();
+                        dir.append(ffFilter);
+                        m_comboScripts.append(dir);
                     }
                 }
             } while (ff.next());
@@ -175,9 +181,9 @@ void CConvertDlg::OnBegin(void)
     }
 
     size_t cFilesFound = 0;
-    for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
+    for (size_t pos = 0; listSrcTypes[pos]; ++pos)
     {
-        if (ff.newpattern(atxtSrcTypes[pos]))
+        if (ff.newpattern(listSrcTypes[pos]))
         {
             do
             {
@@ -203,7 +209,6 @@ void CConvertDlg::OnBtnLocateScript()
 {
     ttlib::openfile dlg(*this);
     dlg.SetFilter(_tt(IDS_PROJECT_FILES) + "|*.vcxproj;*.vcproj;*.dsp;*.project;*.cbp;.srcfiles.yaml||");
-    // dlg.UseCurrentDirectory();
     dlg.RestoreDirectory();
     if (dlg.GetOpenName())
     {
@@ -229,7 +234,8 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
             if (ttlib::MsgBox(_tt(IDS_CONFIRM_REPLACE_SRCFILES), MB_YESNO) != IDYES)
                 return;
         }
-        SetControlText(IDEDIT_OUT_DIR, dlg.c_str());
+        dlg.backslashestoforward();
+        SetControlText(IDEDIT_OUT_DIR, dlg);
     }
 }
 
@@ -244,9 +250,9 @@ void CConvertDlg::OnBtnChangeIn()
         ttlib::ChangeDir(dlg);
         ttlib::winff ff("*.cpp");
         size_t cFilesFound = 0;
-        for (size_t pos = 0; atxtSrcTypes[pos]; ++pos)
+        for (auto type: listSrcTypes)
         {
-            if (ff.newpattern(atxtSrcTypes[pos]))
+            if (ff.newpattern(type))
             {
                 do
                 {
@@ -274,8 +280,8 @@ void CConvertDlg::OnOK(void)
         m_ConvertFile.clear();
     }
 
-    m_bCreateVsCode = GetCheck(IDCHECK_VSCODE);
-    m_bGitIgnore = GetCheck(IDCHECK_IGNORE_ALL);
+    m_CreateVscode = GetCheck(IDCHECK_VSCODE);
+    m_AddToGitExclude = GetCheck(IDCHECK_IGNORE_ALL);
 
     if (!m_ConvertFile.empty() && !m_ConvertFile.fileExists())
     {
