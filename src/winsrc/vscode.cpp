@@ -266,14 +266,15 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
             for (auto iter: Defines)
             {
                 auto& line = out.addEmptyLine();
+                // add the defines in quotes, one per line (%ks puts the string in quotes)
                 line.Format("                %ks,", iter.c_str());
             }
             // we always define _DEBUG. Under Windows, we always define _WIN32.
 
 #if defined(_WIN32)
-            out.emplace_back("                \042_WIN32\042,");
+            out.emplace_back("                \"_WIN32\",");
 #endif
-            out.emplace_back("                \042_DEBUG\042");
+            out.emplace_back("                \"_DEBUG\"");
             continue;
         }
 
@@ -323,9 +324,9 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
                 auto& line = out.emplace_back(*propLine);
                 line.Replace("c++11", cppstandard);
             }
-
         }
-        else {
+        else
+        {
             out.emplace_back(*propLine);
         }
     }
@@ -456,7 +457,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
             ttlib::cstr Label;
             Label.Format("Build %s (release) using MSVC", cSrcFiles.GetTargetRelease().filename().c_str());
 
-            MakeCommand = "nmake.exe -nologo release %s" + MakeFileOption;
+            MakeCommand = "nmake.exe -nologo release " + MakeFileOption;
             AddMsvcTask(out, "Build Release MSVC", txtNormalGroup, MakeCommand);
 
             // Rebuild MSVC release
@@ -467,30 +468,19 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
                 AddMsvcTask(out, "Ninja Debug Build", txtNormalGroup, "ninja -f bld/msvc_dbg.ninja");
         }
 
-        // REVIEW: [KeyWorks - 10-05-2019] Disabled until we have a method to determine if this task actually
-        // applies to the current project.
-
-#if 0
-            if (FindFileEnv("PATH", "xgettext.exe"))
-            {
-                cszMakeCommand.printf("nmake.exe -nologo locale %s", (char*) cszMakeFileOption);
-                AddTask(kfOut, "Build messages.pos", "test", cszMakeCommand, "");
-            }
-#endif
-
 #if defined(_WIN32)
         // If we're on Windows, then we also look to see if either the clang-cl compiler is available. If so,
         // we add build targets for it
 
         if (m_bClangTasks)
         {
-            MakeCommand = (m_bMake ? "mingw32-make.exe debug " : "nmake debug cmplr=clang ") + MakeFileOption;
+            MakeCommand = (m_bMake ? "mingw32-make.exe debug " : "nmake -nologo debug cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Build Debug CLANG", (m_DefTask == DEFTASK_CLANG) ? txtDefaultGroup : txtNormalGroup, MakeCommand);
 
-            MakeCommand = (m_bMake ? "mingw32-make.exe release " : "nmake release cmplr=clang ") + MakeFileOption;
+            MakeCommand = (m_bMake ? "mingw32-make.exe release " : "nmake -nologo release cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Build Release CLANG", txtNormalGroup, MakeCommand);
 
-            MakeCommand = (m_bMake ? "mingw32-make.exe clean release " : "nmake clean release cmplr=clang ") + MakeFileOption;
+            MakeCommand = (m_bMake ? "mingw32-make.exe clean release " : "nmake -nologo clean release cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Rebuild Release CLANG", txtNormalGroup, MakeCommand);
             if (m_bNinjaTask && !m_bMainTasks)
                 AddClangTask(out, "Ninja Debug Build", (m_DefTask == DEFTASK_NINJA) ? txtDefaultGroup : txtNormalGroup,
@@ -558,9 +548,10 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 
             iter.backslashestoforward();
 #endif
-            std::string workspace("${workspaceRoot}/");
-            workspace += iter;
-            Includes.addfilename(workspace);
+            // Remove trailing backslash just to make all paths look the same
+            if (iter.back() == '/')
+                iter.erase(iter.size() - 1, 1);
+            Includes.addfilename("${workspaceRoot}/" + iter);
         }
     }
 
@@ -649,22 +640,22 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
             continue;
         }
 
-        if (ttlib::contains(file[line], "\"includePath\""))
+        if (file[line].contains("\"includePath\""))
         {
-            if (file[line].find(']') != tt::npos)
+            if (file[line].contains("]"))
                 continue;  // all on one line, we don't process it
             auto insertpos = line + 1;
 
             for (++line; line < file.size();)
             {
-                if (file[line].find(']') != tt::npos)
+                if (file[line].contains("]"))
                     break;
                 auto start = file[line].findnonspace();
                 if (start == tt::npos)
                     continue;
                 ttlib::cstr path;
                 path.ExtractSubString(file[line], start);
-                if (!ttlib::contains(path, "${workspaceRoot}") && !ttlib::contains(path, "${default}"))
+                if (!path.contains("${workspaceRoot}") && !path.contains("${default}"))
                 {
                     // If it's not already a relative path, make it relative
                     if (path.at(0) != '.')
@@ -674,11 +665,9 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 #if defined(_WIN32)
                     path.backslashestoforward();
 #endif
-                    if (!ttlib::contains(path, ":"))
+                    if (!path.contains(":"))
                     {
-                        std::string workspace("${workspaceRoot}/");
-                        workspace += path;
-                        Includes.addfilename(workspace);
+                        Includes.addfilename("${workspaceRoot}/" + path);
                     }
                     else
                     {
@@ -698,24 +687,18 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
                 for (; defpos < Includes.size() - 1; ++defpos)
                 {
                     // ':' is checked in case a drive letter is specified
-                    if (!ttlib::contains(Includes[defpos], "${workspaceRoot}") && !ttlib::contains(Includes[defpos], "${default}") &&
-                        !ttlib::contains(Includes[defpos], ":"))
+                    if (!Includes[defpos].contains("${workspaceRoot}") && !Includes[defpos].contains("${default}") &&
+                        !Includes[defpos].contains(":"))
                     {
-                        ttlib::cstr tmp(Includes[defpos]);
-                        Includes[defpos] = "${workspaceRoot}/";
-                        Includes[defpos] += tmp;
+                        Includes[defpos].insert(0, "${workspaceRoot}/");
                     }
 
-                    std::stringstream str;
-                    str << "                \"" << Includes[defpos] << "\",";
-                    file.insert(file.begin() + insertpos, str.str().c_str());
+                    file.insert(file.begin() + insertpos, "                \"" + Includes[defpos] + "\",");
                     ++insertpos;
                 }
 
                 // Write the last one without a trailing comma
-                std::stringstream str;
-                str << "                \"" << Includes[defpos] << "\"";
-                file.insert(file.begin() + insertpos, str.str().c_str());
+                file.insert(file.begin() + insertpos, "                \"" + Includes[defpos] + "\"");
                 ++insertpos;
             }
             line = insertpos;
@@ -768,14 +751,14 @@ void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
     if (Defines.empty())
         return;
 
-    if (ttlib::issameprefix(Defines, "-D") || ttlib::issameprefix(Defines, "-D"))
+    if (ttlib::issameprefix(Defines, "-D") || ttlib::issameprefix(Defines, "/D"))
     {
         Defines.remove_prefix(1);
         auto& def = Results.emplace_back();
         def.AssignSubString(Defines, 'D', ' ');
     }
 
-    for (auto pos = Defines.find(" -"); pos != tt::npos; pos = Defines.find(" -"))
+    for (auto pos = Defines.find(" -"); ttlib::isFound(pos); pos = Defines.find(" -"))
     {
         Defines.remove_prefix(pos + 2);
         if (std::toupper(Defines[0]) == 'D')
@@ -787,7 +770,7 @@ void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
 
     // Windows command lines often use / instead of - for switches, so we check for those as well.
 
-    for (auto pos = Defines.find(" /D"); pos != tt::npos; pos = Defines.find(" /D"))
+    for (auto pos = Defines.find(" /"); ttlib::isFound(pos); pos = Defines.find(" /"))
     {
         Defines.remove_prefix(pos + 2);
         if (std::toupper(Defines[0]) == 'D')
@@ -847,29 +830,3 @@ static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::
     for (auto& iter: fileTask)
         fileOut.emplace_back(iter);
 }
-
-#if defined(_WIN32)
-// This will get the full path to the directory, using the target path if it is a junction
-bool JunctionToReal(const std::string& Dir, ttlib::cstr& Result)
-{
-    auto hFile = CreateFileA(Dir.c_str(), 0, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
-    if (hFile == INVALID_HANDLE_VALUE)
-    {
-        Result = Dir;
-        return false;
-    }
-    char szPath[MAX_PATH];
-    auto dwRet = GetFinalPathNameByHandleA(hFile, szPath, sizeof(szPath), VOLUME_NAME_DOS);
-    if (dwRet < sizeof(szPath))
-    {
-        char* pszStart;
-        for (pszStart = szPath; *pszStart && !ttlib::isalpha(*pszStart); ++pszStart)
-            ;
-
-        Result = pszStart;
-    }
-
-    CloseHandle(hFile);
-    return true;
-}
-#endif  // _WIN32

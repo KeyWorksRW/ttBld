@@ -55,6 +55,5 @@ bool FindCurMsvcPath(ttlib::cstr& Result);
 bool FindVsCode(ttlib::cstr& Result);
 // Returns true if we are running on an x64 processor
 bool IsHost64();
-bool JunctionToReal(const std::string& Dir, ttlib::cstr& Result);
 
 #endif
