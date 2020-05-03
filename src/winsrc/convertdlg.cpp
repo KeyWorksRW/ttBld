@@ -52,6 +52,36 @@ static const char* atxtProjects[] {
     // clang-format on
 };
 
+bool MakeNewProject(ttlib::cstr& projectFile)
+{
+    CConvertDlg dlg(projectFile);
+    if (dlg.DoModal(NULL) != IDOK)
+        return false;
+
+    projectFile = dlg.GetOutSrcFiles();
+
+    ChangeOptions(projectFile);
+
+    if (dlg.isCreateVsCode())
+    {
+        // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
+        auto results = CreateVsCodeProject(projectFile);
+        for (auto& iter: results)
+            std::cout << iter << '\n';
+    }
+
+    if (dlg.isGitIgnoreAll())
+    {
+        ttlib::cstr GitExclude;
+        if (gitIgnoreAll(GitExclude))
+        {
+            std::cout << _tt(IDS_ADDED_IGNORE_FILES) << GitExclude << '\n';
+        }
+    }
+
+    return true;
+}
+
 CConvertDlg::CConvertDlg() : ttlib::dlg(IDDDLG_CONVERT)
 {
     m_cszOutSrcFiles = ".srcfiles.yaml";

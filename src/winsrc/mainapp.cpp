@@ -86,12 +86,10 @@ enum : size_t  // actions that can be run in addition to normal single command a
     ACT_DIR       = 1 << 3,
     ACT_MAKEFILE  = 1 << 4,
     ACT_ALLNINJA  = 1 << 5,  // Creates/updates all .ninja scripts, creeates makefile (if missing).
-    ACT_NEW       = 1 << 6,  // Displays a dialog for creating a new .srcfiles.yaml file.
+
     ACT_FORCE     = 1 << 7,  // Creates .ninja file even if it hasn't changed.
     ACT_OPTIONS   = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
-    ACT_CONVERT   = 1 << 9,  // Converts the specified build script file to .srcfiles.yaml
-    ACT_ALL       = 1 << 10,  // Mostly equivalent to ACT_ALLNINJA + ACT_VSCODE
-    ACT_ALLD      = 1 << 11,  // Same as ACT_ALL but forces output.
+
     ACT_WRITE_VCX = 1 << 12,  // conver .srcfiles to .vcxproj
 
     // clang-format on
@@ -103,25 +101,24 @@ int main(int /* argc */, char** /* argv */)
 
     cmd.addHelpOption("h|help", _tt(IDS_DISPLAY_HELP_MSG));
 
-    cmd.addOption("add", _tt(IDS_ADD_HELP_MSG));
     cmd.addOption("codecmd", _tt(IDS_CODECMD_HELP_MSG));
 
     cmd.addOption("dir", _tt(IDS_DIR_HELP_MSG), ttlib::cmd::shared_val | ttlib::cmd::needsarg, ACT_DIR);
 
-    cmd.addOption("convert", _tt(IDS_CONVERT_HELP_MSG), ttlib::cmd::shared_val, ACT_CONVERT);
-    cmd.addOption("dryrun", _tt(IDS_DRYRUN_HELP_MSG), ttlib::cmd::shared_val, ACT_DRYRUN);
-    cmd.addOption("new", _tt(IDS_NEW_HELP_MSG), ttlib::cmd::shared_val, ACT_NEW);
     cmd.addOption("options", _tt(IDS_OPTIONS_HELP_MSG), ttlib::cmd::shared_val, ACT_OPTIONS);
     cmd.addOption("vscode", _tt(IDS_VSCODE_HELP_MSG), ttlib::cmd::shared_val, ACT_VSCODE);
     cmd.addOption("force", _tt(IDS_FORCE_HELP_MSG), ttlib::cmd::shared_val, ACT_FORCE);
 
 #if defined(_WIN32)
     // REVIEW: [KeyWorks - 04-30-2020] What's the difference between these two?
-    cmd.addOption("vs", _tt("creates files used to build and debug a project using Visual Studio"), ttlib::cmd::shared_val, ACT_VS);
+    cmd.addOption("vs", _tt("adds or updates .json files in the .vs/ directory"), ttlib::cmd::shared_val, ACT_VS);
     cmd.addOption("vcxproj", _tt(IDS_VCXPROJ_HELP_MSG), ttlib::cmd::shared_val, ACT_WRITE_VCX);
 #endif
+    cmd.addHiddenOption("add");
+
     cmd.addHiddenOption("msvcenv64", ttlib::cmd::needsarg);
     cmd.addHiddenOption("msvcenv32", ttlib::cmd::needsarg);
+    cmd.addHiddenOption("dryrun", ttlib::cmd::shared_val, ACT_DRYRUN);
 
     cmd.addHiddenOption("umsvc");
     cmd.addHiddenOption("umsvc_x86");
@@ -178,34 +175,6 @@ int main(int /* argc */, char** /* argv */)
             std::cout << "Cannot locate mingw32-make.exe";
     }
 #endif
-
-#if 0
-    // REVIEW: [KeyWorks - 04-24-2020] Need to decide if we really want to support this...
-    auto pszEnv = std::getenv("TTBLD");
-    if (pszEnv)
-    {
-        auto pszArg = ttlib::findnonspace(pszEnv);
-        while (*pszArg)
-        {
-            if (*pszArg == '-' || *pszArg == '/')
-            {
-                ++pszArg;
-
-                // Only a few or our standard arguments will actually make sense as an environment variable
-
-                if (ttlib::issameprefix(pszArg, "vscode", tt::CASE::either))
-                    Action |= ACT_VSCODE;
-            }
-            pszArg = ttStepOver(pszArg);
-        }
-    }
-#endif
-
-    if (cmd.isOption("add"))
-    {
-        AddFiles(cmd.getExtras());
-        return 1;
-    }
 
     if (cmd.isOption("codecmd"))
     {
@@ -279,105 +248,36 @@ int main(int /* argc */, char** /* argv */)
         return 0;
     }
 
-    // The order that we process switches is important. -new comes first since we can only continue to run
-    // if we have a .srcfiles.yaml file to work with.
-
-    if (Action & ACT_NEW)
-    {
-        // -dir option will have set projectFile, if option not specified, default to current directory
-        CConvertDlg dlg(projectFile);
-        if (dlg.DoModal(NULL) != IDOK)
-            return 1;
-        projectFile = dlg.GetOutSrcFiles();
-
-        // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has
-        // been created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the
-        // user wants to cancel -- that just means they didn't want to change any options. It does NOT mean they
-        // want to cancel running any other commands, such as makefile creation (which doesn't need to know what
-        // options are set in .srcfiles.yaml).
-
-        ChangeOptions(projectFile);
-
-        if (dlg.isCreateVsCode())
-        {
-            // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            auto results = CreateVsCodeProject(projectFile);
-            for (auto& iter: results)
-                std::cout << iter << '\n';
-        }
-        if (dlg.isGitIgnoreAll())
-        {
-            ttlib::cstr GitExclude;
-            if (gitIgnoreAll(GitExclude))
-            {
-                std::cout << _tt(IDS_ADDED_IGNORE_FILES) << GitExclude << '\n';
-            }
-        }
-    }
-    else if (Action & ACT_CONVERT)
-    {
-        // -dir option will have set projectFile, if option not specified, default to current directory
-        CConvertDlg dlg;
-        dlg.SetConvertScritpt(projectFile);
-        if (dlg.DoModal(NULL) != IDOK)
-            return 1;
-        projectFile = dlg.GetOutSrcFiles();
-
-        // [KeyWorks - 7/30/2019] If the conversion dialog completed successfully, then the new .srcfiles.yaml has
-        // been created. We call ChangeOptions() in case the user wants to tweak anything, but it's fine if the
-        // user wants to cancel -- that just means they didn't want to change any options. It does NOT mean they
-        // want to cancel running any other commands, such as makefile creation (which doesn't need to know what
-        // options are set in .srcfiles.yaml).
-
-        ChangeOptions(projectFile);
-        if (dlg.isCreateVsCode())
-        {
-            // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
-            auto results = CreateVsCodeProject(projectFile);
-            for (auto& iter: results)
-                std::cout << iter << '\n';
-        }
-        if (dlg.isGitIgnoreAll())
-        {
-            ttlib::cstr GitExclude;
-            if (gitIgnoreAll(GitExclude))
-                std::cout << _tt(IDS_ADDED_IGNORE_FILES) << GitExclude << '\n';
-        }
-    }
-#if defined(_WIN32)
-    else if (Action & ACT_WRITE_VCX)
-    {
-        CVcxWrite vcx;
-        return (vcx.CreateBuildFile() ? 0 : 1);
-    }
-#endif  // _WIN32
-
-    // At this point we must locate a .srcfiles.yaml file. This may have been set by either -dir or -new. If not,
-    // we need to locate it.
+    // If a project file gets created, the options and vscode have already been set, and this flag will have been set to true.
+    bool projectCreated = false;
 
     if (projectFile.empty())
     {
         projectFile.assign(locateProjectFile(RootDir));
         if (projectFile.empty())
         {
-            ttlib::concolor clr(ttlib::concolor::LIGHTRED);
-            std::cout << _tt(IDS_CANT_FIND_SRCFILES) << '\n';
-            return 1;
+            if (!MakeNewProject(projectFile))
+            {
+                ttlib::concolor clr(ttlib::concolor::LIGHTRED);
+                std::cout << _tt(IDS_CANT_FIND_SRCFILES) << '\n';
+                return 1;
+            }
+            projectCreated = true;
         }
     }
 
-    // We now have the location of the .srcfiles.yaml file to use. If -opt was specified, then we need to let the
-    // user change options before continuing.
+    if (cmd.isOption("add"))
+    {
+        AddFiles(cmd.getExtras());
+    }
 
-    if (Action & ACT_OPTIONS && !(Action & ACT_NEW))
+    if (!projectCreated && Action & ACT_OPTIONS)
     {
         if (!ChangeOptions(projectFile))
             return 1;
     }
 
-    // At this point we have the location of .srcfiles.yaml, and we're ready to use it.
-
-    if (Action & ACT_VSCODE)
+    if (!projectCreated && Action & ACT_VSCODE)
     {
         if (Action & ACT_FORCE)
             std::filesystem::remove(".vscode/c_cpp_properties.json");
@@ -387,7 +287,13 @@ int main(int /* argc */, char** /* argv */)
             std::cout << iter << '\n';
     }
 
-    if (Action & ACT_VS)
+#if defined(_WIN32)
+    if (Action & ACT_WRITE_VCX)
+    {
+        CVcxWrite vcx;
+        return (vcx.CreateBuildFile() ? 0 : 1);
+    }
+    else if (Action & ACT_VS)
     {
         // Create .vs/ and any of the three .json files that are missing, and update c_cpp_properties.json
         std::vector<std::string> results;
@@ -395,69 +301,57 @@ int main(int /* argc */, char** /* argv */)
         for (auto msg: results)
             std::cout << msg << '\n';
     }
+#endif  // _WIN32
 
+    CNinja cNinja;
+    if (!cNinja.IsValidVersion())
     {
-        CNinja cNinja;
-        if (!cNinja.IsValidVersion())
-        {
-            ttlib::MsgBox(_tt(IDS_OLD_TTBLD));
-            return 1;
-        }
+        std::cerr << _tt(IDS_OLD_TTBLD) << '\n';
+        return 1;
+    }
 
-        if (Action & ACT_FORCE)  // force write ignores any request for dryrun
-            cNinja.ForceWrite();
-        else if (Action & ACT_DRYRUN)
-            cNinja.EnableDryRun();
+    if (Action & ACT_FORCE)  // force write ignores any request for dryrun
+        cNinja.ForceWrite();
+    else if (Action & ACT_DRYRUN)
+        cNinja.EnableDryRun();
 
-        if (Action & ACT_ALLD)
-            fs::remove("makefile");
+    cNinja.CreateMakeFile(Action & ACT_ALLNINJA, RootDir.c_str());
 
-        if (Action & ACT_ALL || Action & ACT_ALLD)
-        {
-            bool bAllVersion = false;
-            if (cNinja.IsExeTypeLib())
-                bAllVersion = true;
-            cNinja.CreateMakeFile(Action & ACT_ALLNINJA, RootDir.c_str());
-        }
-        else
-            cNinja.CreateMakeFile(Action & ACT_ALLNINJA, RootDir.c_str());
-
-        int countNinjas = 0;
+    int countNinjas = 0;
 #if defined(_WIN32)
-        if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-            countNinjas++;
-        if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-            countNinjas++;
+    if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
+        countNinjas++;
+    if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
+        countNinjas++;
 #endif
-        if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-            countNinjas++;
-        if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-            countNinjas++;
+    if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
+        countNinjas++;
+    if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
+        countNinjas++;
 
 #if 0
         if (ttIsNonEmpty(cNinja.GetHHPName()))
             cNinja.CreateHelpFile();
 #endif
 
-        // Display any errors that occurred during processing
+    // Display any errors that occurred during processing
 
-        if (cNinja.getErrorMsgs().size())
+    if (cNinja.getErrorMsgs().size())
+    {
+        ttlib::concolor clr(ttlib::concolor::LIGHTRED);
+        for (auto iter: cNinja.getErrorMsgs())
         {
-            ttlib::concolor clr(ttlib::concolor::LIGHTRED);
-            for (auto iter: cNinja.getErrorMsgs())
-            {
-                std::cout << iter << '\n';
-            }
-            std::cout << "\n\n";
+            std::cout << iter << '\n';
         }
-
-        if (countNinjas > 0)
-        {
-            std::cout << _tt(IDS_CREATED) << countNinjas << " .ninja" << _tt(IDS_FILES) << '\n';
-        }
-        else
-            std::cout << _tt(IDS_UP_TO_DATE) << '\n';
+        std::cout << "\n\n";
     }
+
+    if (countNinjas > 0)
+    {
+        std::cout << _tt(IDS_CREATED) << countNinjas << " .ninja" << _tt(IDS_FILES) << '\n';
+    }
+    else
+        std::cout << _tt(IDS_UP_TO_DATE) << '\n';
 
     return 0;
 }

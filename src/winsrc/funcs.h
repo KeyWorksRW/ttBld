@@ -53,6 +53,10 @@ void CreateCodeCmd(const char* pszFile);
 bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64 = false);
 bool FindCurMsvcPath(ttlib::cstr& Result);
 bool FindVsCode(ttlib::cstr& Result);
+
+// Called when ttBld is run and there is no project, or -new is specified.
+bool MakeNewProject(ttlib::cstr& projectFile);
+
 // Returns true if we are running on an x64 processor
 bool IsHost64();
 
