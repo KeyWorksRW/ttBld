@@ -1,4 +1,10 @@
+// ttlibicons.rc - ttLib standard icons
+
 #include "ttlibicons.h"
 
-IDICON_TTLIB_CANCEL ICON DISCARDABLE "../../ttLib/icons/cancel.ico"
-IDICON_TTLIB_OK     ICON DISCARDABLE "../../ttLib/icons/ok.ico"
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual Studio
+#endif // APSTUDIO_INVOKED
+
+IDICON_TTLIB_CANCEL ICON "../../ttLib/icons/cancel.ico"
+IDICON_TTLIB_OK     ICON "../../ttLib/icons/ok.ico"
