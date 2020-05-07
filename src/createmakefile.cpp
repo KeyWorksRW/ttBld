@@ -43,7 +43,7 @@ bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
         else {
             if (!MakeFile.dirExists())
             {
-                AddError(_tt(IDS_MISSING_MAKEFILE_DIR) + MakeFile());
+                AddError(_tt(IDS_MISSING_MAKEFILE_DIR) + MakeFile);
             }
         }
     }
