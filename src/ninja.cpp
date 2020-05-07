@@ -37,13 +37,13 @@ CNinja::CNinja(std::string_view NinjaDir) : CSrcFiles(NinjaDir)
         projname.assignCwd();
         projname.backslashestoforward();
         if (projname.back() == '/')
-            projname.erase(projname.size() - 1);
+            projname.pop_back();
 
         if (projname.hasFilename("src"))
         {
             projname.remove_filename();
             if (projname.back() == '/')
-                projname.erase(projname.size() - 1);
+                projname.pop_back();
         }
         setOptValue(OPT::PROJECT, projname.filename());
     }
