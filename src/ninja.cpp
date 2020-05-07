@@ -132,9 +132,9 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Figure out the filenames to use for the source and output for a precompiled header
 
-    if (hasOptValue(OPT::PCH) && !GetPchCpp().issameas("none"))
+    if (hasOptValue(OPT::PCH) && !GetPchCpp().issameprefix("none"))
     {
-        m_pchHdrName = GetProjectName();
+        m_pchHdrName = GetPchCpp();
         m_pchHdrName.replace_extension(".pch");
 
         m_pchCppName = GetPchCpp();
