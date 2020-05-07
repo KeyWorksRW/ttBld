@@ -11,6 +11,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 STRINGTABLE
 BEGIN
+    IDS_MISSING_MAKEFILE_DIR "Directory for makefile doesn't exist: "
     IDS_VSCODE_HELP_MSG      "creates or updates files used to build and debug a project using VS Code"
     IDS_OPTIONS_HELP_MSG     "displays a dialog allowing you to change options in .srcfiles.yaml"
     IDS_DIR_HELP_MSG         "(directory) -- uses specified directory to create .ninja files (default is bld/)"

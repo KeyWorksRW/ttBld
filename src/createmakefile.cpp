@@ -8,7 +8,7 @@
 
 #include "pch.h"
 
-#include <ttcstr.h>     // Classes for handling zero-terminated char strings.
+#include <ttcstr.h>      // Classes for handling zero-terminated char strings.
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"     // CNinja
@@ -26,6 +26,26 @@ bool CNinja::CreateMakeFile(bool isAllVersion, std::string_view Dir)
     if (hasOptValue(OPT::MAKE_DIR))
     {
         MakeFile = getOptValue(OPT::MAKE_DIR);
+        MakeFile.backslashestoforward();
+        if (MakeFile.back() == '/')
+            MakeFile.pop_back();
+        if (GetBldDir().issameas(MakeFile, tt::CASE::either))
+        {
+            if (!GetBldDir().dirExists())
+            {
+                if (!fs::create_directory(GetBldDir().c_str()))
+                {
+                    AddError(_tt(IDS_CANT_CREATE) + GetBldDir());
+                    return false;
+                }
+            }
+        }
+        else {
+            if (!MakeFile.dirExists())
+            {
+                AddError(_tt(IDS_MISSING_MAKEFILE_DIR) + MakeFile());
+            }
+        }
     }
     else
     {
