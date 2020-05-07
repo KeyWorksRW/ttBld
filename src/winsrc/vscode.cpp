@@ -551,7 +551,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 #endif
             // Remove trailing backslash just to make all paths look the same
             if (iter.back() == '/')
-                iter.erase(iter.size() - 1, 1);
+                iter.pop_back();
             Includes.addfilename("${workspaceRoot}/" + iter);
         }
     }
