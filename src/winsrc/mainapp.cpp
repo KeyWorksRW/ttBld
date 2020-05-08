@@ -77,25 +77,6 @@ enum UPDATE_TYPE
 
 void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 
-enum : size_t  // actions that can be run in addition to normal single command actions
-{
-    // clang-format off
-
-    ACT_DRYRUN    = 1 << 0,  // This is a dry run -- don't actually output anything.
-    ACT_VS        = 1 << 1,
-    ACT_VSCODE    = 1 << 2,  // Generate .vscode directory and .json files.
-    ACT_DIR       = 1 << 3,
-    ACT_MAKEFILE  = 1 << 4,
-    ACT_ALLNINJA  = 1 << 5,  // Creates/updates all .ninja scripts, creeates makefile (if missing).
-
-    ACT_FORCE     = 1 << 7,  // Creates .ninja file even if it hasn't changed.
-    ACT_OPTIONS   = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
-
-    ACT_WRITE_VCX = 1 << 12,  // conver .srcfiles to .vcxproj
-
-    // clang-format on
-};
-
 int main(int /* argc */, char** /* argv */)
 {
     ttlib::cmd cmd;
@@ -104,22 +85,22 @@ int main(int /* argc */, char** /* argv */)
 
     cmd.addOption("codecmd", _tt(IDS_CODECMD_HELP_MSG));
 
-    cmd.addOption("dir", _tt(IDS_DIR_HELP_MSG), ttlib::cmd::shared_val | ttlib::cmd::needsarg, ACT_DIR);
+    cmd.addOption("dir", _tt(IDS_DIR_HELP_MSG), ttlib::cmd::needsarg);
 
-    cmd.addOption("options", _tt(IDS_OPTIONS_HELP_MSG), ttlib::cmd::shared_val, ACT_OPTIONS);
-    cmd.addOption("vscode", _tt(IDS_VSCODE_HELP_MSG), ttlib::cmd::shared_val, ACT_VSCODE);
-    cmd.addOption("force", _tt(IDS_FORCE_HELP_MSG), ttlib::cmd::shared_val, ACT_FORCE);
+    cmd.addOption("options", _tt(IDS_OPTIONS_HELP_MSG));
+    cmd.addOption("vscode", _tt(IDS_VSCODE_HELP_MSG));
+    cmd.addOption("force", _tt(IDS_FORCE_HELP_MSG));
 
 #if defined(_WIN32)
     // REVIEW: [KeyWorks - 04-30-2020] What's the difference between these two?
-    cmd.addOption("vs", _tt("adds or updates .json files in the .vs/ directory"), ttlib::cmd::shared_val, ACT_VS);
-    cmd.addOption("vcxproj", _tt(IDS_VCXPROJ_HELP_MSG), ttlib::cmd::shared_val, ACT_WRITE_VCX);
+    cmd.addOption("vs", _tt("adds or updates .json files in the .vs/ directory"));
+    cmd.addOption("vcxproj", _tt(IDS_VCXPROJ_HELP_MSG));
 #endif
     cmd.addHiddenOption("add");
 
     cmd.addHiddenOption("msvcenv64", ttlib::cmd::needsarg);
     cmd.addHiddenOption("msvcenv32", ttlib::cmd::needsarg);
-    cmd.addHiddenOption("dryrun", ttlib::cmd::shared_val, ACT_DRYRUN);
+    cmd.addHiddenOption("dryrun");
 
     cmd.addHiddenOption("umsvc");
     cmd.addHiddenOption("umsvc_x86");
@@ -148,9 +129,6 @@ int main(int /* argc */, char** /* argv */)
         return 0;
     }
 
-    size_t Action = cmd.getSharedValue();
-    if (!ttlib::isFound(Action))
-        Action = 0;
     UPDATE_TYPE upType = UPDATE_NORMAL;
 
     // this will only be initialized if the user specifies a -dir option
@@ -286,15 +264,15 @@ int main(int /* argc */, char** /* argv */)
     }
 #endif
 
-    if (!projectCreated && Action & ACT_OPTIONS)
+    if (!projectCreated && cmd.isOption("options"))
     {
         if (!ChangeOptions(projectFile))
             return 1;
     }
 
-    if (!projectCreated && Action & ACT_VSCODE)
+    if (!projectCreated && cmd.isOption("vscode"))
     {
-        if (Action & ACT_FORCE)
+        if (cmd.isOption("force"))
             std::filesystem::remove(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         auto results = CreateVsCodeProject(projectFile);
@@ -303,12 +281,12 @@ int main(int /* argc */, char** /* argv */)
     }
 
 #if defined(_WIN32)
-    if (Action & ACT_WRITE_VCX)
+    if (cmd.isOption("vcxproj"))
     {
         CVcxWrite vcx;
         return (vcx.CreateBuildFile() ? 0 : 1);
     }
-    else if (Action & ACT_VS)
+    else if (cmd.isOption("vs"))
     {
         // Create .vs/ and any of the three .json files that are missing, and update c_cpp_properties.json
         std::vector<std::string> results;
@@ -340,12 +318,10 @@ int main(int /* argc */, char** /* argv */)
         return 1;
     }
 
-    if (Action & ACT_FORCE)  // force write ignores any request for dryrun
+    if (cmd.isOption("force"))  // force write ignores any request for dryrun
         cNinja.ForceWrite();
-    else if (Action & ACT_DRYRUN)
+    else if (cmd.isOption("dryrun"))
         cNinja.EnableDryRun();
-
-    cNinja.CreateMakeFile(Action & ACT_ALLNINJA, RootDir.c_str());
 
     int countNinjas = 0;
 #if defined(_WIN32)
