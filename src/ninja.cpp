@@ -18,12 +18,12 @@
 
 const char* aCppExt[] { ".cpp", ".cxx", ".cc", nullptr };
 
-CNinja::CNinja(std::string_view NinjaDir) : CSrcFiles(NinjaDir)
+CNinja::CNinja(std::string_view projectFile)
 {
 #if !defined(NDEBUG)  // Starts debug section.
-    assert(ReadFile());
+    assert(ReadFile(projectFile));
 #else
-    if (!ReadFile())
+    if (!ReadFile(projectFile))
         return;
 #endif
     m_isWriteIfNoChange = false;

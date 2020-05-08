@@ -19,7 +19,7 @@
 class CNinja : public CSrcFiles
 {
 public:
-    CNinja(std::string_view NinjaDir = ttlib::emptystring);
+    CNinja(std::string_view projectFile);
 
     enum GEN_TYPE : size_t
     {

@@ -35,6 +35,7 @@
 
 #include <ttconsole.h>  // ttConsoleColor
 #include <ttcvector.h>  // Vector of ttlib::cstr strings
+#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
 #include <ttparser.h>   // cmd -- Command line parser
 
 #include "convert.h"     // CConvert
@@ -152,8 +153,13 @@ int main(int /* argc */, char** /* argv */)
         Action = 0;
     UPDATE_TYPE upType = UPDATE_NORMAL;
 
-    ttlib::cstr RootDir;      // this will be set if (Action & ACT_DIR) is set
-    ttlib::cstr projectFile;  // location of srcfiles.yaml
+    // this will only be initialized if the user specifies a -dir option
+    ttlib::cstr RootDir;
+
+    // This will be initialized by the user if they specifies a name.yaml file on the command
+    // line. Otherwise, a search is made to find the most likely .srcfiles.yaml (or it's
+    // platform-variations) to use and this will be initialized to point to it.
+    ttlib::cstr projectFile;
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && !defined(NDEBUG) && defined(_WIN32)
@@ -195,6 +201,18 @@ int main(int /* argc */, char** /* argv */)
         return 1;
     }
 
+    if (cmd.isOption("dir"))
+    {
+        RootDir.assign(cmd.getOption("dir").value_or("bld"));
+    }
+
+    // Allow the user to specify a path to the project file to use.
+    if (cmd.getExtras().size())
+    {
+        if (cmd.getExtras().at(0).hasExtension(".yaml"))
+            projectFile = cmd.getExtras().at(0);
+    }
+
 #if defined(TESTING) && !defined(NDEBUG)
     if (cmd.isOption("msvcenv32"))
     {
@@ -211,14 +229,6 @@ int main(int /* argc */, char** /* argv */)
             std::cout << iter << '\n';
     }
 #endif
-
-    if (cmd.isOption("dir"))
-    {
-        RootDir.assign(cmd.getOption("dir").value_or("bld"));
-    }
-
-    if (cmd.getExtras().size())
-        projectFile = cmd.getExtras().at(0);
 
     // The following commands are called from a makefile to update one .ninja script and immediately exit
 
@@ -251,6 +261,7 @@ int main(int /* argc */, char** /* argv */)
     // If a project file gets created, the options and vscode have already been set, and this flag will have been set to true.
     bool projectCreated = false;
 
+    // Unless the user specified this on the command line, locate a version, or create on if none can be found.
     if (projectFile.empty())
     {
         projectFile.assign(locateProjectFile(RootDir));
@@ -266,10 +277,14 @@ int main(int /* argc */, char** /* argv */)
         }
     }
 
+#if 0
+    // BUGBUG: [KeyWorks - 05-08-2020] Can't add a filename without also specifying the project file to add it to (since
+    // the user might have specified the one they want)
     if (cmd.isOption("add"))
     {
         AddFiles(cmd.getExtras());
     }
+#endif
 
     if (!projectCreated && Action & ACT_OPTIONS)
     {
@@ -303,7 +318,22 @@ int main(int /* argc */, char** /* argv */)
     }
 #endif  // _WIN32
 
-    CNinja cNinja;
+    // It's possible that the user specified a different location and even a different name for the project file to use.
+    // If the project file is in a different directory, then we change to that directory now before continuing. The
+    // destructor will restore the original directory.
+
+    ttlib::cwd cwd(true);
+    {
+        ttlib::cstr path(projectFile);
+        path.remove_filename();
+        if (path.size())
+        {
+            ttlib::ChangeDir(path);
+            projectFile.erase(0, projectFile.find_filename());
+        }
+    }
+
+    CNinja cNinja(projectFile);
     if (!cNinja.IsValidVersion())
     {
         std::cerr << _tt(IDS_OLD_TTBLD) << '\n';
