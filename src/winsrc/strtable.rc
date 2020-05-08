@@ -11,6 +11,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 STRINGTABLE
 BEGIN
+    IDS_MAKEFILE_HELP_MSG    "creates a makefile that doesn't require ttBld.exe"
+    IDS_MAKEFILE_EXISTS      "-makefile cannot be used if the makefile already exists"
     IDS_MISSING_MAKEFILE_DIR "Directory for makefile doesn't exist: "
     IDS_VSCODE_HELP_MSG      "creates or updates files used to build and debug a project using VS Code"
     IDS_OPTIONS_HELP_MSG     "displays a dialog allowing you to change options in .srcfiles.yaml"

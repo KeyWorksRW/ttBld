@@ -90,6 +90,7 @@ int main(int /* argc */, char** /* argv */)
     cmd.addOption("options", _tt(IDS_OPTIONS_HELP_MSG));
     cmd.addOption("vscode", _tt(IDS_VSCODE_HELP_MSG));
     cmd.addOption("force", _tt(IDS_FORCE_HELP_MSG));
+    cmd.addOption("makefile", _tt(IDS_MAKEFILE_HELP_MSG));
 
 #if defined(_WIN32)
     // REVIEW: [KeyWorks - 04-30-2020] What's the difference between these two?
@@ -317,6 +318,13 @@ int main(int /* argc */, char** /* argv */)
         std::cerr << _tt(IDS_OLD_TTBLD) << '\n';
         return 1;
     }
+
+    if (cmd.isOption("makefile"))
+    {
+        cNinja.CreateMakeFile(CNinja::MAKE_TYPE::normal);
+    }
+
+    cNinja.CreateMakeFile(CNinja::MAKE_TYPE::autogen);
 
     if (cmd.isOption("force"))  // force write ignores any request for dryrun
         cNinja.ForceWrite();
