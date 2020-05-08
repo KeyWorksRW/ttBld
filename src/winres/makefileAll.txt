@@ -50,11 +50,6 @@ debug: $(BldScriptD) %project%D
 %project%D:
 	ninja -f $(BldScriptD)
 
-########## localization ##########
-
-locale:
-	xgettext -k_ -kwxPLURAL -kwxTRANSLATE -i -c --omit-header -fxgen.lst
-
 ########## clean release section ##########
 
 clean: $(BldScript)
