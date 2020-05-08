@@ -23,7 +23,6 @@ public:
 
     // Class functions
 
-    void SetTargetDirs();
     void SetParentClass(CTabOptions* pclsOptions) { m_pOpts = pclsOptions; }
 
 protected:
@@ -32,16 +31,14 @@ protected:
         TTCASE_CMD(IDRADIO_DLL, OnCheckExe)
         TTCASE_CMD(IDRADIO_NORMAL, OnCheckExe)
         TTCASE_CMD(IDRADIO_LIB, OnCheckLib)
-        TTCASE_CMD(IDBTN_DIR64, OnBtnDir64)
-        TTCASE_CMD(IDBTN_DIR32, OnBtnDir32)
+        TTCASE_CMD(IDBTN_TARGET_DIR, OnBtnDir)
     END_TTMSG_MAP()
 
     // Message handlers
 
     void OnCheckExe();
     void OnCheckLib();
-    void OnBtnDir64();
-    void OnBtnDir32();
+    void OnBtnDir();
 
     void OnBegin(void) override;
     void OnOK(void) override;

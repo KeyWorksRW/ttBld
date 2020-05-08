@@ -20,7 +20,6 @@
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(1252)
 #endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
@@ -61,8 +60,8 @@ IDR_PRE_PROJECT         RCDATA    "../winres/cdlprojectpre.txt"
 IDR_POST_PROJECT        RCDATA    "../winres/cdlprojectpost.txt"
 IDR_VCXPROJ_MASTER      RCDATA    "../winres/vcxproj.xml"
 IDR_VCXPROJ_FILTERS     RCDATA    "../winres/vcxproj.filters.xml"
-IDR_MAKEFILE_NORMAL        RCDATA    "../winres/makefileAll.txt"
-IDR_MAKEFILE_AUTOGEN     RCDATA    "../winres/makefileSng.txt"
+IDR_MAKEFILE_ALL        RCDATA    "../winres/makefileAll.txt"
+IDR_MAKEFILE_SINGLE     RCDATA    "../winres/makefileSng.txt"
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -169,17 +168,9 @@ BEGIN
                     WS_TABSTOP,19,54,37,10
     CONTROL         "&DLL",IDRADIO_DLL,"Button",BS_AUTORADIOBUTTON |
                     WS_TABSTOP,73,54,29,10
-    GROUPBOX        "Platform",IDC_STATIC,7,83,196,59
-    CONTROL         "64-bit",IDCHECK_64BIT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,16,99,33,10
-    LTEXT           "Dir:",IDC_STATIC,60,101,12,8
-    EDITTEXT        IDEDIT_DIR64,76,96,83,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Dir...",IDBTN_DIR64,166,96,29,16
-    CONTROL         "32-bit",IDCHECK_32BIT,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,16,123,33,10
-    LTEXT           "Dir:",IDC_STATIC,60,124,12,8
-    EDITTEXT        IDEDIT_DIR32,76,120,83,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Dir...",IDBTN_DIR32,166,119,29,16
+    LTEXT           "&Target Directory:",IDC_STATIC,6,82,130,8
+    EDITTEXT        IDEDIT_TARGET,6,94,130,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "L&ocate...",IDBTN_TARGET_DIR,149,92,46,16
 END
 
 IDTAB_COMPILER DIALOG  8, 20, 210, 222
@@ -418,7 +409,8 @@ END
 // Generated from the TEXTINCLUDE 3 resource.
 //
 #include "ttlibicons.rc"  // non-Microsoft Visual C++ edited resources
-#include "strtable.rc"     // non-Microsoft Visual C++ edited resources
+#include "strtable.rc"    // non-Microsoft Visual C++ edited resources
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
