@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <objbase.h>
+
 #include "ttlibicons.h"
 
 #include "dlgoptions.h"
@@ -16,6 +18,8 @@
 bool ChangeOptions(std::string& ProjectFile)
 {
     CTabOptions dlg;
+
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     HWND hwndDlg = dlg.DoModeless(NULL);
 
@@ -32,6 +36,8 @@ bool ChangeOptions(std::string& ProjectFile)
     }
 
     auto result = (msg.message == WM_QUIT) ? msg.wParam : IDCANCEL;
+
+    CoUninitialize();
 
     if (result == IDOK)
     {
