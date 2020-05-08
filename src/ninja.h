@@ -19,7 +19,7 @@
 class CNinja : public CSrcFiles
 {
 public:
-    CNinja(std::string_view NinjaDir = ttlib::emptystring);
+    CNinja(std::string_view projectFile);
 
     enum GEN_TYPE : size_t
     {
@@ -36,6 +36,12 @@ public:
         CMPLR_GCC = 2,
     };
 
+    enum class MAKE_TYPE
+    {
+        normal = false,
+        autogen = true,
+    };
+
     // Public functions
 
     void ProcessBuildLibs();
@@ -43,7 +49,7 @@ public:
     // Warning: this will first clear m_ninjafile.
     bool CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr);
     bool CreateHelpFile();
-    bool CreateMakeFile(bool isAllVersion, std::string_view Dir);
+    bool CreateMakeFile(MAKE_TYPE type = MAKE_TYPE::normal);
 
     size_t getSrcCount() { return m_lstSrcFiles.size(); }
 

@@ -35,6 +35,7 @@
 
 #include <ttconsole.h>  // ttConsoleColor
 #include <ttcvector.h>  // Vector of ttlib::cstr strings
+#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
 #include <ttparser.h>   // cmd -- Command line parser
 
 #include "convert.h"     // CConvert
@@ -76,25 +77,6 @@ enum UPDATE_TYPE
 
 void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir);
 
-enum : size_t  // actions that can be run in addition to normal single command actions
-{
-    // clang-format off
-
-    ACT_DRYRUN    = 1 << 0,  // This is a dry run -- don't actually output anything.
-    ACT_VS        = 1 << 1,
-    ACT_VSCODE    = 1 << 2,  // Generate .vscode directory and .json files.
-    ACT_DIR       = 1 << 3,
-    ACT_MAKEFILE  = 1 << 4,
-    ACT_ALLNINJA  = 1 << 5,  // Creates/updates all .ninja scripts, creeates makefile (if missing).
-
-    ACT_FORCE     = 1 << 7,  // Creates .ninja file even if it hasn't changed.
-    ACT_OPTIONS   = 1 << 8,  // Displays a dialog for changing options in .srcfiles.yaml
-
-    ACT_WRITE_VCX = 1 << 12,  // conver .srcfiles to .vcxproj
-
-    // clang-format on
-};
-
 int main(int /* argc */, char** /* argv */)
 {
     ttlib::cmd cmd;
@@ -103,22 +85,23 @@ int main(int /* argc */, char** /* argv */)
 
     cmd.addOption("codecmd", _tt(IDS_CODECMD_HELP_MSG));
 
-    cmd.addOption("dir", _tt(IDS_DIR_HELP_MSG), ttlib::cmd::shared_val | ttlib::cmd::needsarg, ACT_DIR);
+    cmd.addOption("dir", _tt(IDS_DIR_HELP_MSG), ttlib::cmd::needsarg);
 
-    cmd.addOption("options", _tt(IDS_OPTIONS_HELP_MSG), ttlib::cmd::shared_val, ACT_OPTIONS);
-    cmd.addOption("vscode", _tt(IDS_VSCODE_HELP_MSG), ttlib::cmd::shared_val, ACT_VSCODE);
-    cmd.addOption("force", _tt(IDS_FORCE_HELP_MSG), ttlib::cmd::shared_val, ACT_FORCE);
+    cmd.addOption("options", _tt(IDS_OPTIONS_HELP_MSG));
+    cmd.addOption("vscode", _tt(IDS_VSCODE_HELP_MSG));
+    cmd.addOption("force", _tt(IDS_FORCE_HELP_MSG));
+    cmd.addOption("makefile", _tt(IDS_MAKEFILE_HELP_MSG));
 
 #if defined(_WIN32)
     // REVIEW: [KeyWorks - 04-30-2020] What's the difference between these two?
-    cmd.addOption("vs", _tt("adds or updates .json files in the .vs/ directory"), ttlib::cmd::shared_val, ACT_VS);
-    cmd.addOption("vcxproj", _tt(IDS_VCXPROJ_HELP_MSG), ttlib::cmd::shared_val, ACT_WRITE_VCX);
+    cmd.addOption("vs", _tt("adds or updates .json files in the .vs/ directory"));
+    cmd.addOption("vcxproj", _tt(IDS_VCXPROJ_HELP_MSG));
 #endif
     cmd.addHiddenOption("add");
 
     cmd.addHiddenOption("msvcenv64", ttlib::cmd::needsarg);
     cmd.addHiddenOption("msvcenv32", ttlib::cmd::needsarg);
-    cmd.addHiddenOption("dryrun", ttlib::cmd::shared_val, ACT_DRYRUN);
+    cmd.addHiddenOption("dryrun");
 
     cmd.addHiddenOption("umsvc");
     cmd.addHiddenOption("umsvc_x86");
@@ -147,13 +130,15 @@ int main(int /* argc */, char** /* argv */)
         return 0;
     }
 
-    size_t Action = cmd.getSharedValue();
-    if (!ttlib::isFound(Action))
-        Action = 0;
     UPDATE_TYPE upType = UPDATE_NORMAL;
 
-    ttlib::cstr RootDir;      // this will be set if (Action & ACT_DIR) is set
-    ttlib::cstr projectFile;  // location of srcfiles.yaml
+    // this will only be initialized if the user specifies a -dir option
+    ttlib::cstr RootDir;
+
+    // This will be initialized by the user if they specifies a name.yaml file on the command
+    // line. Otherwise, a search is made to find the most likely .srcfiles.yaml (or it's
+    // platform-variations) to use and this will be initialized to point to it.
+    ttlib::cstr projectFile;
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
 #if 0 && !defined(NDEBUG) && defined(_WIN32)
@@ -195,6 +180,18 @@ int main(int /* argc */, char** /* argv */)
         return 1;
     }
 
+    if (cmd.isOption("dir"))
+    {
+        RootDir.assign(cmd.getOption("dir").value_or("bld"));
+    }
+
+    // Allow the user to specify a path to the project file to use.
+    if (cmd.getExtras().size())
+    {
+        if (cmd.getExtras().at(0).hasExtension(".yaml"))
+            projectFile = cmd.getExtras().at(0);
+    }
+
 #if defined(TESTING) && !defined(NDEBUG)
     if (cmd.isOption("msvcenv32"))
     {
@@ -211,14 +208,6 @@ int main(int /* argc */, char** /* argv */)
             std::cout << iter << '\n';
     }
 #endif
-
-    if (cmd.isOption("dir"))
-    {
-        RootDir.assign(cmd.getOption("dir").value_or("bld"));
-    }
-
-    if (cmd.getExtras().size())
-        projectFile = cmd.getExtras().at(0);
 
     // The following commands are called from a makefile to update one .ninja script and immediately exit
 
@@ -251,6 +240,7 @@ int main(int /* argc */, char** /* argv */)
     // If a project file gets created, the options and vscode have already been set, and this flag will have been set to true.
     bool projectCreated = false;
 
+    // Unless the user specified this on the command line, locate a version, or create on if none can be found.
     if (projectFile.empty())
     {
         projectFile.assign(locateProjectFile(RootDir));
@@ -266,20 +256,24 @@ int main(int /* argc */, char** /* argv */)
         }
     }
 
+#if 0
+    // BUGBUG: [KeyWorks - 05-08-2020] Can't add a filename without also specifying the project file to add it to (since
+    // the user might have specified the one they want)
     if (cmd.isOption("add"))
     {
         AddFiles(cmd.getExtras());
     }
+#endif
 
-    if (!projectCreated && Action & ACT_OPTIONS)
+    if (!projectCreated && cmd.isOption("options"))
     {
         if (!ChangeOptions(projectFile))
             return 1;
     }
 
-    if (!projectCreated && Action & ACT_VSCODE)
+    if (!projectCreated && cmd.isOption("vscode"))
     {
-        if (Action & ACT_FORCE)
+        if (cmd.isOption("force"))
             std::filesystem::remove(".vscode/c_cpp_properties.json");
         // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
         auto results = CreateVsCodeProject(projectFile);
@@ -288,12 +282,12 @@ int main(int /* argc */, char** /* argv */)
     }
 
 #if defined(_WIN32)
-    if (Action & ACT_WRITE_VCX)
+    if (cmd.isOption("vcxproj"))
     {
         CVcxWrite vcx;
         return (vcx.CreateBuildFile() ? 0 : 1);
     }
-    else if (Action & ACT_VS)
+    else if (cmd.isOption("vs"))
     {
         // Create .vs/ and any of the three .json files that are missing, and update c_cpp_properties.json
         std::vector<std::string> results;
@@ -303,19 +297,39 @@ int main(int /* argc */, char** /* argv */)
     }
 #endif  // _WIN32
 
-    CNinja cNinja;
+    // It's possible that the user specified a different location and even a different name for the project file to use.
+    // If the project file is in a different directory, then we change to that directory now before continuing. The
+    // destructor will restore the original directory.
+
+    ttlib::cwd cwd(true);
+    {
+        ttlib::cstr path(projectFile);
+        path.remove_filename();
+        if (path.size())
+        {
+            ttlib::ChangeDir(path);
+            projectFile.erase(0, projectFile.find_filename());
+        }
+    }
+
+    CNinja cNinja(projectFile);
     if (!cNinja.IsValidVersion())
     {
         std::cerr << _tt(IDS_OLD_TTBLD) << '\n';
         return 1;
     }
 
-    if (Action & ACT_FORCE)  // force write ignores any request for dryrun
-        cNinja.ForceWrite();
-    else if (Action & ACT_DRYRUN)
-        cNinja.EnableDryRun();
+    if (cmd.isOption("makefile"))
+    {
+        cNinja.CreateMakeFile(CNinja::MAKE_TYPE::normal);
+    }
 
-    cNinja.CreateMakeFile(Action & ACT_ALLNINJA, RootDir.c_str());
+    cNinja.CreateMakeFile(CNinja::MAKE_TYPE::autogen);
+
+    if (cmd.isOption("force"))  // force write ignores any request for dryrun
+        cNinja.ForceWrite();
+    else if (cmd.isOption("dryrun"))
+        cNinja.EnableDryRun();
 
     int countNinjas = 0;
 #if defined(_WIN32)

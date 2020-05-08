@@ -1,4 +1,4 @@
 #include "resource.h"
 
-IDR_MAKEFILE_ALL        RCDATA    "../winsrc/res/makefileAll.txt"
-IDR_MAKEFILE_SINGLE     RCDATA    "../winsrc/res/makefileSng.txt"
+IDR_MAKEFILE_NORMAL        RCDATA    "../winsrc/res/makefileAll.txt"
+IDR_MAKEFILE_AUTOGEN     RCDATA    "../winsrc/res/makefileSng.txt"

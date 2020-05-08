@@ -123,7 +123,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         {
             projectname.replace_filename("");
             // remove trailing slash
-            projectname.erase(projectname.length() - 1, 1);
+            projectname.pop_back();
         }
         std::string name(projectname.filename());
         setOptValue(OPT::PROJECT, name);

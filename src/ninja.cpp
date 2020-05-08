@@ -18,12 +18,12 @@
 
 const char* aCppExt[] { ".cpp", ".cxx", ".cc", nullptr };
 
-CNinja::CNinja(std::string_view NinjaDir) : CSrcFiles(NinjaDir)
+CNinja::CNinja(std::string_view projectFile)
 {
 #if !defined(NDEBUG)  // Starts debug section.
-    assert(ReadFile());
+    assert(ReadFile(projectFile));
 #else
-    if (!ReadFile())
+    if (!ReadFile(projectFile))
         return;
 #endif
     m_isWriteIfNoChange = false;
@@ -37,13 +37,13 @@ CNinja::CNinja(std::string_view NinjaDir) : CSrcFiles(NinjaDir)
         projname.assignCwd();
         projname.backslashestoforward();
         if (projname.back() == '/')
-            projname.erase(projname.size() - 1);
+            projname.pop_back();
 
         if (projname.hasFilename("src"))
         {
             projname.remove_filename();
             if (projname.back() == '/')
-                projname.erase(projname.size() - 1);
+                projname.pop_back();
         }
         setOptValue(OPT::PROJECT, projname.filename());
     }
@@ -132,9 +132,9 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Figure out the filenames to use for the source and output for a precompiled header
 
-    if (hasOptValue(OPT::PCH) && !GetPchCpp().issameas("none"))
+    if (hasOptValue(OPT::PCH) && !GetPchCpp().issameprefix("none"))
     {
-        m_pchHdrName = GetProjectName();
+        m_pchHdrName = GetPchCpp();
         m_pchHdrName.replace_extension(".pch");
 
         m_pchCppName = GetPchCpp();

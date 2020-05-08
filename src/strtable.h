@@ -42,14 +42,14 @@
     #define IDS_INVALID_BUILDLIB_SUFFIX  1055  // " specified in BuildLibs: does not exist."
     #define IDS_MISSING_SRCFILES_IN      1056  // "Cannot read .srcfiles.yaml in "
     #define IDS_DISPLAY_HELP_MSG         1057  // "display this help message"
-
+    #define IDS_MISSING_MAKEFILE_DIR     1058  // "Directory for makefile doesn't exist: "
     #define IDS_CODECMD_HELP_MSG         1059  // "create code32.cmd and code64.cmd batch files"
     #define IDS_CONVERT_HELP_MSG         1060  // "converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml"
-
+    #define IDS_MAKEFILE_EXISTS          1061  // "-makefile cannot be used if the makefile already exists"
     #define IDS_VCXPROJ_HELP_MSG         1062  // "creates or updates files needed to build project using MS Visual Studio"
     #define IDS_FORCE_HELP_MSG           1063  // "create .ninja file even if nothing has changed"
     #define IDS_DIR_HELP_MSG             1064  // "(directory) -- uses specified directory to create .ninja files (default is bld/)"
-
+    #define IDS_MAKEFILE_HELP_MSG        1065  // "creates a makefile that doesn't require ttBld.exe"
     #define IDS_OPTIONS_HELP_MSG         1066  // "displays a dialog allowing you to change options in .srcfiles.yaml"
     #define IDS_VSCODE_HELP_MSG          1067  // "creates or updates files used to build and debug a project using VS Code"
 
@@ -79,11 +79,14 @@ constexpr auto IDS_LIB_SOURCE_DIR = "The library source directory ";
 constexpr auto IDS_INVALID_BUILDLIB_SUFFIX = " specified in BuildLibs: does not exist.";
 constexpr auto IDS_MISSING_SRCFILES_IN = "Cannot read .srcfiles.yaml in ";
 constexpr auto IDS_DISPLAY_HELP_MSG = "display this help message";
+constexpr auto IDS_MISSING_MAKEFILE_DIR = "Directory for makefile doesn't exist: ";
 constexpr auto IDS_CODECMD_HELP_MSG = "create code32.cmd and code64.cmd batch files";
 constexpr auto IDS_CONVERT_HELP_MSG = "converts build script file (.e.g., file.vcxproj) to .srcfiles.yaml";
+constexpr auto IDS_MAKEFILE_EXISTS = "-makefile cannot be used if the makefile already exists";
 constexpr auto IDS_VCXPROJ_HELP_MSG = "creates or updates files needed to build project using MS Visual Studio";
 constexpr auto IDS_FORCE_HELP_MSG = "create .ninja file even if nothing has changed";
 constexpr auto IDS_DIR_HELP_MSG = "(directory) -- uses specified directory to create .ninja files (default is bld/)";
+constexpr auto IDS_MAKEFILE_HELP_MSG = "creates a makefile that doesn't require ttBld.exe";
 constexpr auto IDS_OPTIONS_HELP_MSG = "displays a dialog allowing you to change options in .srcfiles.yaml";
 constexpr auto IDS_VSCODE_HELP_MSG = "creates or updates files used to build and debug a project using VS Code";
 constexpr auto IDS_CANT_FIND_SRCFILES =

@@ -404,6 +404,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
     tasks.Read(txtTasks);
 
     ttlib::cstr MakeFileOption;
+    // BUGBUG: [KeyWorks - 05-08-2020] Issue #242 means this option is no longer used -- need a different way to determine
+    // whether or not to create a task that uses it.
     if (cSrcFiles.hasOptValue(OPT::MAKE_DIR))
     {
         MakeFileOption = cSrcFiles.getOptValue(OPT::MAKE_DIR);
@@ -551,7 +553,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 #endif
             // Remove trailing backslash just to make all paths look the same
             if (iter.back() == '/')
-                iter.erase(iter.size() - 1, 1);
+                iter.pop_back();
             Includes.addfilename("${workspaceRoot}/" + iter);
         }
     }

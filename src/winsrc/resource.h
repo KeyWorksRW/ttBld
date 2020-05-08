@@ -31,14 +31,14 @@
 #define IDR_POST_PROJECT       1025
 #define IDRADIO_NORMAL         1025
 #define IDRADIO_CONSOLE        1026
-#define IDR_MAKEFILE_ALL       1027
+#define IDR_MAKEFILE_NORMAL       1027
 #define IDRADIO_LIB            1027
 #define IDRADIO_DLL            1028
 #define IDCHECK_CODEBLOCKS     1029
 #define IDR_VCXPROJ_MASTER     1030
 #define IDR_VCXPROJ_FILTERS    1031
 #define IDCHECK_CODELITE       1031
-#define IDR_MAKEFILE_SINGLE    1032
+#define IDR_MAKEFILE_AUTOGEN    1032
 #define IDCHECK_CLANG          1032
 #define IDCHECK_MSVC           1033
 #define IDEDIT_LIBS            1034

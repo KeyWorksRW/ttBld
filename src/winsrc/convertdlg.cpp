@@ -309,12 +309,12 @@ bool CConvertDlg::doConversion()
             projname.remove_filename();
             projname.backslashestoforward();
             if (projname.back() == '/')
-                projname.erase(projname.size() - 1);
+                projname.pop_back();
             if (projname.hasFilename("src"))
             {
                 projname.remove_filename();
                 if (projname.back() == '/')
-                    projname.erase(projname.size() - 1);
+                    projname.pop_back();
             }
             m_cSrcFiles.setOptValue(OPT::PROJECT, projname.filename());
 
