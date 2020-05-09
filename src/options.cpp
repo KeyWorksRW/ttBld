@@ -41,6 +41,8 @@ static OPT::VERSION aoptVersions[]
     { OPT::LAST, 1, 0, 0  }
 };
 
+// ID, name, default value, comment, bool type, required
+
 // These are in the order they should be written in a new .srcfiles.yaml file.
 const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
 {{
@@ -86,7 +88,7 @@ const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
 
     { OPT::NATVIS, "Natvis", nullptr, "Debug visualizer", false, false },
 
-    { OPT::MS_LINKER, "Ms_linker", "false", "true means use link.exe even when compiling with clang", true, false },
+    { OPT::MS_LINKER, "Ms_linker", "true", "true means use link.exe even when compiling with clang", true, false },
     { OPT::MS_RC,     "Ms_rc",     "true",  "true means use rc.exe even when compiling with clang", true, false },
 
     { OPT::INC_DIRS,   "IncDirs",   nullptr, "additional directories for header files", false, false },
