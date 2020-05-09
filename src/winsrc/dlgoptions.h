@@ -23,10 +23,6 @@
 #include "tablinker.h"    // CTabLinker
 #include "tabrcmidl.h"    // CTabRcMidl
 
-#ifdef PRIVATE
-    #include ".private/tabprivate.h"  // CTabPrivate
-#endif
-
 class CTabOptions : public ttlib::dlg, public CWriteSrcFiles
 {
 public:
@@ -69,10 +65,6 @@ private:
     CTabLinker m_tabLinker;
     CTabRcMidl m_tabRcMidl;
     CTabCLang m_tabCLang;
-
-#ifdef PRIVATE
-    CTabPrivate m_tabPrivate;
-#endif
 
     HWND m_hwndTabSub;
 };

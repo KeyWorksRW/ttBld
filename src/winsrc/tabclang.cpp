@@ -14,7 +14,6 @@
 void CTabCLang::OnBegin(void)
 {
     CHECK_DLG_ID(IDCHECK_MSLINKER);
-    CHECK_DLG_ID(IDCHECK_MSRC);
     CHECK_DLG_ID(IDEDIT_COMMON);
     CHECK_DLG_ID(IDEDIT_DEBUG);
     CHECK_DLG_ID(IDEDIT_RELEASE);
@@ -27,8 +26,6 @@ void CTabCLang::OnBegin(void)
         SetControlText(IDEDIT_DEBUG, m_pOpts->getOptValue(OPT::CLANG_DBG));
     if (m_pOpts->isOptTrue(OPT::MS_LINKER))
         SetCheck(IDCHECK_MSLINKER);
-    if (m_pOpts->isOptTrue(OPT::MS_RC))
-        SetCheck(IDCHECK_MSRC);
 }
 
 void CTabCLang::OnOK(void)

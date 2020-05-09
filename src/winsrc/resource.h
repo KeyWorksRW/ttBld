@@ -2,7 +2,6 @@
 // Microsoft Developer Studio generated include file.
 // Used by ttBld.rc
 //
-// clang-format off
 #define IDDDLG_CONVERT         101
 #define IDDLG_OPTIONS          102
 #define IDTAB_GENERAL          103
@@ -31,14 +30,14 @@
 #define IDR_POST_PROJECT       1025
 #define IDRADIO_NORMAL         1025
 #define IDRADIO_CONSOLE        1026
-#define IDR_MAKEFILE_NORMAL       1027
+#define IDR_MAKEFILE_ALL       1027
 #define IDRADIO_LIB            1027
 #define IDRADIO_DLL            1028
 #define IDCHECK_CODEBLOCKS     1029
 #define IDR_VCXPROJ_MASTER     1030
 #define IDR_VCXPROJ_FILTERS    1031
 #define IDCHECK_CODELITE       1031
-#define IDR_MAKEFILE_AUTOGEN    1032
+#define IDR_MAKEFILE_SINGLE    1032
 #define IDCHECK_CLANG          1032
 #define IDCHECK_MSVC           1033
 #define IDEDIT_LIBS            1034
@@ -104,9 +103,13 @@
 #define IDBTN_MORE             1079
 #define IDEDIT_DIR64           1080
 #define IDEDIT_RELEASE         1080
+#define IDEDIT_TARGET          1080
 #define IDBTN_DIR64            1081
 #define IDEDIT_DEBUG           1081
+#define IDBTN_TARGET_DIR       1081
 #define IDCHECK_NO_MSVC        1082
+#define IDEDIT_MAKEFILE_DIR    1082
+#define IDBTN_MAKEFILE_DIR     1083
 #define IDEDIT_COMMON_MIDL     1085
 #define IDEDIT_RELEASE_MIDL    1086
 #define IDEDIT_NATVIS          1086
@@ -131,4 +134,3 @@
         #define _APS_NEXT_SYMED_VALUE    101
     #endif
 #endif
-// clang-format on

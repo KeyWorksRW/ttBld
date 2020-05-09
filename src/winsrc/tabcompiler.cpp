@@ -62,10 +62,6 @@ void CTabCompiler::OnBegin(void)
     if (m_pOpts->hasOptValue(OPT::CFLAGS_CMN))
     {
         SetControlText(IDEDIT_COMMON, m_pOpts->getOptValue(OPT::CFLAGS_CMN));
-        if (m_pOpts->getOptValue(OPT::CFLAGS_CMN).contains("-Zc:__cplusplus"))
-            DisableControl(IDBTN_CPLUSPLUS);
-        if (m_pOpts->getOptValue(OPT::CFLAGS_CMN).contains("-std:c"))
-            DisableControl(IDBTN_STD);
     }
     if (m_pOpts->hasOptValue(OPT::CFLAGS_REL))
         SetControlText(IDEDIT_RELEASE, m_pOpts->getOptValue(OPT::CFLAGS_REL));
@@ -122,53 +118,25 @@ void CTabCompiler::OnBtnChangePch()
 {
     ttlib::openfile fdlg(*this);
     fdlg.SetFilter("Header Files|*.h;*.hh;*.hpp;*.hxx||");
-    ttlib::cwd cwd;
 
     fdlg.RestoreDirectory();
     if (fdlg.GetOpenName())
     {
-        ttlib::cstr cszOrg, cszCpp;
-        cszOrg.GetWndText(gethwnd(IDEDIT_PCH));
-        cszCpp.GetWndText(gethwnd(IDEDIT_PCH_CPP));
+        ttlib::cwd cwd;
+        fdlg.filename().make_relative(cwd);
+        fdlg.filename().backslashestoforward();
+        SetControlText(IDEDIT_PCH, fdlg.filename());
 
-        ttlib::cstr cszRelPath(fdlg.filename());
-        cszRelPath.make_relative(cwd);
-        SetControlText(IDEDIT_PCH, cszRelPath);
-
-        if (cszCpp.fileExists())  // if the current source file exists, assume that's what the user wants
+        auto pch_cpp = GetControlText(IDEDIT_PCH_CPP);
+        if (pch_cpp.size())
             return;
-
-        // The default behaviour is to use the same base name for the C++ source file as the precompiled header
-        // file. So, if they are the same, then change the source file name to match (provided the file actually
-        // exists).
-
-        cszOrg.remove_extension();
-        cszCpp.remove_extension();
-
-        if (cszOrg.issameprefix(cszCpp, tt::CASE::either))
-        {
-            cszCpp = cszRelPath;
-            cszCpp.replace_extension(".cpp");
-            if (cszCpp.fileExists())
-            {
-                SetControlText(IDEDIT_PCH_CPP, cszCpp);
-                return;
-            }
-            cszCpp.replace_extension(".cxx");
-            if (cszCpp.fileExists())
-            {
-                SetControlText(IDEDIT_PCH_CPP, cszCpp);
-                return;
-            }
-            cszCpp.replace_extension(".cc");
-            if (cszCpp.fileExists())
-            {
-                SetControlText(IDEDIT_PCH_CPP, cszCpp);
-                return;
-            }
-
-            ttlib::MsgBox(cszRelPath + _tt(IDS_MISSING_PCH_CPP));
-        }
+        pch_cpp = fdlg.filename();
+        if (pch_cpp.replace_extension(".cpp"); pch_cpp.fileExists())
+            SetControlText(IDEDIT_PCH_CPP, pch_cpp);
+        else if (pch_cpp.replace_extension(".ccc"); pch_cpp.fileExists())
+            SetControlText(IDEDIT_PCH_CPP, pch_cpp);
+        else if (pch_cpp.replace_extension(".cxx"); pch_cpp.fileExists())
+            SetControlText(IDEDIT_PCH_CPP, pch_cpp);
     }
 }
 
@@ -177,66 +145,35 @@ void CTabCompiler::OnBtnPchCpp()
     ttlib::openfile fdlg(*this);
     fdlg.SetFilter("C++ Files|*.cpp;*.cc;*.cxx||");
     fdlg.RestoreDirectory();
+
     if (fdlg.GetOpenName())
     {
         ttlib::cwd cwd;
-        ttlib::cstr cszRelPath(fdlg.filename());
-        cszRelPath.make_relative(cwd);
-        SetControlText(IDEDIT_PCH_CPP, cszRelPath);
+        fdlg.filename().make_relative(cwd);
+        fdlg.filename().backslashestoforward();
+        SetControlText(IDEDIT_PCH_CPP, fdlg.filename());
     }
 }
-
-void CTabCompiler::OnBtnCplusplus()
-{
-    ttlib::cstr csz;
-
-    csz.GetWndText(gethwnd(IDEDIT_COMMON));
-    if (!csz.contains("-Zc:__cplusplus", tt::CASE::either))
-    {
-        if (!csz.empty())
-            csz += " ";
-        csz += "-Zc:__cplusplus";
-        SetControlText(IDEDIT_COMMON, csz);
-        DisableControl(IDBTN_CPLUSPLUS);
-    }
-}
-
-void CTabCompiler::OnBtnStd()
-{
-    ttlib::cstr csz;
-
-    csz.GetWndText(gethwnd(IDEDIT_COMMON));
-    if (!csz.contains("-std:c", tt::CASE::either))
-    {
-        if (!csz.empty())
-            csz += " ";
-        csz += "-std:c++17";
-        SetControlText(IDEDIT_COMMON, csz);
-        DisableControl(IDBTN_STD);
-    }
-}
-
-#if 0
-// REVIEW: [KeyWorks - 09-25-2019] This will lock up the app. The problem is that the parent dialog is being launched
-// from a Modeless dialog with a message loop purely to handle the dialog. Apparently the lack of a standard message
-// loop is causing the problem. What will happen is you will select a directory and click ok, and it will simply show
-// the same dialog box again. This time when you click ok, the application crashes. Note that dlg.GetFolderName() never
-// returns.
 
 void CTabCompiler::OnBtnAddInclude()
 {
-    ttCDirDlg dlg;
-    ttlib::cwd cwd;
+    ttlib::DirDlg dlg;
+    dlg.SetTitle(_tt(IDS_INCLUDE_DIR_TITLE));
 
-    dlg.SetStartingDir(cszCWD);
-    if (dlg.GetFolderName((HWND) *m_pOpts))
+    ttlib::cwd cwd(true);
+    dlg.SetStartingDir(cwd);
+    if (dlg.GetFolderName())
     {
-        ttlib::cstr csz;
-        csz.GetWndText(gethwnd(IDEDIT_INCDIRS));
-        csz += ";";
-        csz += (char*) dlg.GetFolderName();
-        SetControlText(IDEDIT_INCDIRS, csz);
+        dlg.make_absolute();
+        dlg.make_relative(cwd);
+        dlg.backslashestoforward();
+
+        if (auto olddirs = GetControlText(IDEDIT_INCDIRS); !olddirs.contains(dlg))
+        {
+            if (olddirs.size() && olddirs.back() != ';')
+                olddirs += ';';
+            olddirs += dlg;
+            SetControlText(IDEDIT_INCDIRS, olddirs);
+        }
     }
 }
-
-#endif

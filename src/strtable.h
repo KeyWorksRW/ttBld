@@ -52,6 +52,9 @@
     #define IDS_MAKEFILE_HELP_MSG        1065  // "creates a makefile that doesn't require ttBld.exe"
     #define IDS_OPTIONS_HELP_MSG         1066  // "displays a dialog allowing you to change options in .srcfiles.yaml"
     #define IDS_VSCODE_HELP_MSG          1067  // "creates or updates files used to build and debug a project using VS Code"
+    #define IDS_TARGET_DIRECTORY_TITLE   1068  // "Target directory"
+    #define IDS_INCLUDE_DIR_TITLE        1069  // "Include Directory"
+    #define IDS_NO_RECURSIVE_BUILDLIB    1070  // "You cannot create the current project as a Build Library of itself."
 
 #else
 
@@ -89,6 +92,9 @@ constexpr auto IDS_DIR_HELP_MSG = "(directory) -- uses specified directory to cr
 constexpr auto IDS_MAKEFILE_HELP_MSG = "creates a makefile that doesn't require ttBld.exe";
 constexpr auto IDS_OPTIONS_HELP_MSG = "displays a dialog allowing you to change options in .srcfiles.yaml";
 constexpr auto IDS_VSCODE_HELP_MSG = "creates or updates files used to build and debug a project using VS Code";
+constexpr auto IDS_TARGET_DIRECTORY_TITLE = "Target directory";
+constexpr auto IDS_INCLUDE_DIR_TITLE = "Include Directory";
+constexpr auto IDS_NO_RECURSIVE_BUILDLIB = "You cannot create the current project as a Build Library of itself.";
 constexpr auto IDS_CANT_FIND_SRCFILES =
     "ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir.";
 constexpr auto IDS_OLD_TTBLD = "This version of ttBld is too old -- you need a newer version to correctly build the script files.";

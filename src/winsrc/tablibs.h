@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <optional>
+
 #ifndef IDTAB_LIBS
     #include "resource.h"
 #endif
@@ -21,17 +23,25 @@ class CTabLibs : public ttlib::dlg
 public:
     CTabLibs() : ttlib::dlg(IDTAB_LIBS) {}
 
-    // Class functions
-
     void SetParentClass(CTabOptions* pclsOptions) { m_pOpts = pclsOptions; }
 
 protected:
-    // Message handlers
+    std::optional<ttlib::cstr> AddLibrary(std::string_view curLibs);
+
+    BEGIN_TTCMD_MAP()
+        TTCASE_CMD(IDBTN_ADD_LIB_REL, OnBtnAddLibRel)
+        TTCASE_CMD(IDBTN_ADD_LIB_DBG, OnBtnAddLibDbg)
+        TTCASE_CMD(IDBTN_ADD_LIB_CMN, OnBtnAddLibCmn)
+        TTCASE_CMD(IDBTN_ADD_LIB_BLDLIB, OnBtnAddBuildLibrary)
+    END_TTMSG_MAP()
 
     void OnBegin(void) override;
     void OnOK(void) override;
 
-    // Class members
+    void OnBtnAddLibRel();
+    void OnBtnAddLibDbg();
+    void OnBtnAddLibCmn();
+    void OnBtnAddBuildLibrary();
 
     CTabOptions* m_pOpts;
 };
