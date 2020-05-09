@@ -118,53 +118,25 @@ void CTabCompiler::OnBtnChangePch()
 {
     ttlib::openfile fdlg(*this);
     fdlg.SetFilter("Header Files|*.h;*.hh;*.hpp;*.hxx||");
-    ttlib::cwd cwd;
 
     fdlg.RestoreDirectory();
     if (fdlg.GetOpenName())
     {
-        ttlib::cstr cszOrg, cszCpp;
-        cszOrg.GetWndText(gethwnd(IDEDIT_PCH));
-        cszCpp.GetWndText(gethwnd(IDEDIT_PCH_CPP));
+        ttlib::cwd cwd;
+        fdlg.filename().make_relative(cwd);
+        fdlg.filename().backslashestoforward();
+        SetControlText(IDEDIT_PCH, fdlg.filename());
 
-        ttlib::cstr cszRelPath(fdlg.filename());
-        cszRelPath.make_relative(cwd);
-        SetControlText(IDEDIT_PCH, cszRelPath);
-
-        if (cszCpp.fileExists())  // if the current source file exists, assume that's what the user wants
+        auto pch_cpp = GetControlText(IDEDIT_PCH_CPP);
+        if (pch_cpp.size())
             return;
-
-        // The default behaviour is to use the same base name for the C++ source file as the precompiled header
-        // file. So, if they are the same, then change the source file name to match (provided the file actually
-        // exists).
-
-        cszOrg.remove_extension();
-        cszCpp.remove_extension();
-
-        if (cszOrg.issameprefix(cszCpp, tt::CASE::either))
-        {
-            cszCpp = cszRelPath;
-            cszCpp.replace_extension(".cpp");
-            if (cszCpp.fileExists())
-            {
-                SetControlText(IDEDIT_PCH_CPP, cszCpp);
-                return;
-            }
-            cszCpp.replace_extension(".cxx");
-            if (cszCpp.fileExists())
-            {
-                SetControlText(IDEDIT_PCH_CPP, cszCpp);
-                return;
-            }
-            cszCpp.replace_extension(".cc");
-            if (cszCpp.fileExists())
-            {
-                SetControlText(IDEDIT_PCH_CPP, cszCpp);
-                return;
-            }
-
-            ttlib::MsgBox(cszRelPath + _tt(IDS_MISSING_PCH_CPP));
-        }
+        pch_cpp = fdlg.filename();
+        if (pch_cpp.replace_extension(".cpp"); pch_cpp.fileExists())
+            SetControlText(IDEDIT_PCH_CPP, pch_cpp);
+        else if (pch_cpp.replace_extension(".ccc"); pch_cpp.fileExists())
+            SetControlText(IDEDIT_PCH_CPP, pch_cpp);
+        else if (pch_cpp.replace_extension(".cxx"); pch_cpp.fileExists())
+            SetControlText(IDEDIT_PCH_CPP, pch_cpp);
     }
 }
 
@@ -173,12 +145,13 @@ void CTabCompiler::OnBtnPchCpp()
     ttlib::openfile fdlg(*this);
     fdlg.SetFilter("C++ Files|*.cpp;*.cc;*.cxx||");
     fdlg.RestoreDirectory();
+
     if (fdlg.GetOpenName())
     {
         ttlib::cwd cwd;
-        ttlib::cstr cszRelPath(fdlg.filename());
-        cszRelPath.make_relative(cwd);
-        SetControlText(IDEDIT_PCH_CPP, cszRelPath);
+        fdlg.filename().make_relative(cwd);
+        fdlg.filename().backslashestoforward();
+        SetControlText(IDEDIT_PCH_CPP, fdlg.filename());
     }
 }
 
@@ -193,6 +166,14 @@ void CTabCompiler::OnBtnAddInclude()
     {
         dlg.make_absolute();
         dlg.make_relative(cwd);
-        SetControlText(IDEDIT_INCDIRS, dlg);
+        dlg.backslashestoforward();
+
+        if (auto olddirs = GetControlText(IDEDIT_INCDIRS); !olddirs.contains(dlg))
+        {
+            if (olddirs.size() && olddirs.back() != ';')
+                olddirs += ';';
+            olddirs += dlg;
+            SetControlText(IDEDIT_INCDIRS, olddirs);
+        }
     }
 }
