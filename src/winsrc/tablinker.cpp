@@ -39,6 +39,17 @@ void CTabLinker::OnBegin(void)
 
     if (m_pOpts->hasOptValue(OPT::NATVIS))
         SetControlText(IDEDIT_NATVIS, m_pOpts->getOptValue(OPT::NATVIS));
+    else
+    {
+        if (ttlib::fileExists("../ttLib/ttlibwin.natvis"))
+        {
+            SetControlText(IDEDIT_NATVIS, "../ttLib/ttlibwin.natvis");
+        }
+        else if (ttlib::fileExists("../../ttLib/ttlibwin.natvis"))
+        {
+            SetControlText(IDEDIT_NATVIS, "../../ttLib/ttlibwin.natvis");
+        }
+    }
 }
 
 void CTabLinker::OnOK(void)
