@@ -11,6 +11,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 STRINGTABLE
 BEGIN
+    IDS_NO_RECURSIVE_BUILDLIB "You cannot create the current project as a Build Library of itself."
+    IDS_INCLUDE_DIR_TITLE    "Include Directory"
     IDS_TARGET_DIRECTORY_TITLE  "Target directory"
     IDS_MAKEFILE_HELP_MSG       "creates a makefile that doesn't require ttBld.exe"
     IDS_MAKEFILE_EXISTS         "-makefile cannot be used if the makefile already exists"
