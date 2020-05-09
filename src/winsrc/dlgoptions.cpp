@@ -60,10 +60,6 @@ CTabOptions::CTabOptions() : ttlib::dlg(IDDLG_OPTIONS), CWriteSrcFiles()
     m_tabCLang.SetParentClass(this);
 #endif
 
-#ifdef PRIVATE  // used for testing
-    m_tabPrivate.SetParentClass(this);
-#endif
-
     ReadFile();  // read in any existing .srcfiles
 
     if (!hasOptValue(OPT::PCH) || getOptValue(OPT::PCH).issameas("none"))
@@ -125,11 +121,6 @@ void CTabOptions::OnBegin(void)
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_CLANG, (LPARAM) &ti);
 #endif
 
-#if defined(PRIVATE)
-    ti.pszText = (char*) "Private";  // don't translate this
-    SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_PRIVATE, (LPARAM) &ti);
-#endif
-
     SendItemMsg(IDTAB, TCM_SETCURSEL, TAB_GENERAL);
     m_hwndTabSub = m_tabGeneral.DoModeless(*this);
     ::ShowWindow(m_hwndTabSub, SW_SHOW);
@@ -138,10 +129,6 @@ void CTabOptions::OnBegin(void)
 void CTabOptions::OnOK(void)
 {
     ::SendMessage(m_hwndTabSub, WM_COMMAND, IDOK, 0);
-
-#ifdef PRIVATE
-    m_tabPrivate.SaveChanges();
-#endif
 
     ::SendMessage(m_hwndTabSub, WM_CLOSE, 0, 0);
     DestroyWindow(*this);
@@ -205,11 +192,6 @@ LRESULT CTabOptions::OnNotify(int /* id */, NMHDR* pNmHdr)
 
                 case TAB_CLANG:
                     m_hwndTabSub = m_tabCLang.DoModeless(*this);
-                    break;
-#endif
-#ifdef PRIVATE
-                case TAB_PRIVATE:
-                    m_hwndTabSub = m_tabPrivate.DoModeless(*this);
                     break;
 #endif
 
