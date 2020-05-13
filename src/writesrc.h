@@ -10,7 +10,8 @@
 
 #include "csrcfiles.h"
 
-constexpr const char* txtNinjaVerFormat = "# Requires ttBld.exe version %d.%d.%d or higher to process";
+constexpr const char* txtNinjaVerFormat =
+    "# Requires ttBld.exe version %d.%d.%d or higher to process -- see https://github.com/KeyWorksRW/ttBld";
 
 // This class inherits from CSrcFiles and can be used anywhere CSrcFiles is used.
 class CWriteSrcFiles : public CSrcFiles
@@ -28,8 +29,7 @@ public:
     //
     // If specified, comment will be added at he the top of the file after the ttBld
     // requirement line.
-    bld::RESULT WriteNew(std::string_view filename = ttlib::emptystring,
-                         std::string_view comment = ttlib::emptystring);
+    bld::RESULT WriteNew(std::string_view filename = ttlib::emptystring, std::string_view comment = ttlib::emptystring);
 
 protected:
 private:
