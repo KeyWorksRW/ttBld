@@ -59,9 +59,9 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         auto option = FindOption(name);
         if (option == OPT::LAST)
         {
-            // REVIEW: [KeyWorks - 03-17-2020] This option is invalid. We should do something besides write it out
-            // again...
-            out.emplace_back(orgFile[pos]);
+            auto& line = out.addEmptyLine();
+            line.assign("    # invalid option -- ");
+            line += orgFile[pos];
             continue;
         }
         auto& line = out.addEmptyLine();
