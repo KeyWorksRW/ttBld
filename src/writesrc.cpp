@@ -30,9 +30,32 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
     }
 
     ttlib::textfile out;
+
+    // Always write out the version number required and the github URL for ttBld
+
+    {
+        ttlib::cstr str;
+        str.Format(txtNinjaVerFormat, GetMajorRequired(), GetMinorRequired(), GetSubRequired());
+        out.emplace_back(str);
+        out.addEmptyLine();
+    }
+
     size_t pos = 0;
+    bool SeenRequiredComment = false;
     do
     {
+        // Ignore any previous comment about ttBld since we've already written it.
+        if (!SeenRequiredComment)
+        {
+            if (orgFile[pos].size() && ttlib::issameprefix(orgFile[pos], "# Requires ttBld", tt::CASE::either))
+            {
+                ++pos;
+                if (orgFile[pos].empty())
+                    ++pos;
+                SeenRequiredComment = true;
+            }
+        }
+
         auto& line = out.emplace_back(orgFile[pos]);
         if (line.issameprefix("Options:", tt::CASE::either))
             break;
