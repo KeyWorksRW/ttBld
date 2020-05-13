@@ -45,23 +45,37 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
 
     for (++pos; pos < orgFile.size(); ++pos)
     {
-        auto posColon = orgFile[pos].find(':');
-        if (posColon == ttlib::cstr::npos)
-            posColon = orgFile[pos].find('=');
-        if (posColon == ttlib::cstr::npos)
+        auto view = ttlib::findnonspace(orgFile[pos]);
+        if (view.empty() || view[0] == '#')
         {
+            // write blank or comment lines unmodified
             out.emplace_back(orgFile[pos]);
             continue;
         }
 
-        auto posBegin = ttlib::findnonspace_pos(orgFile[pos]);
-        ttlib::cstr name { orgFile[pos].substr(posBegin, posColon - posBegin) };
+        // the Options: section ends if a new section is encountered
+        if (ttlib::isalpha(orgFile[pos][0]) || ttlib::isdigit(orgFile[pos][0]))
+            break;
+
+        auto posColon = view.find(':');
+        if (!ttlib::isFound(posColon))
+        {
+            posColon = view.find('=');
+            if (!ttlib::isFound(posColon))
+            {
+                // not a comment or option, write it unmodified
+                out.emplace_back(orgFile[pos]);
+                continue;
+            }
+        }
+
+        ttlib::cstr name { view.substr(0, posColon) };
         auto option = FindOption(name);
         if (option == OPT::LAST)
         {
-            // REVIEW: [KeyWorks - 03-17-2020] This option is invalid. We should do something besides write it out
-            // again...
-            out.emplace_back(orgFile[pos]);
+            auto& line = out.addEmptyLine();
+            line.assign("    # invalid option -- ");
+            line += orgFile[pos];
             continue;
         }
         auto& line = out.addEmptyLine();
@@ -72,10 +86,50 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         while (line.length() < 30)
             line.push_back(' ');
         line += (" # " + getOptComment(option));
+
+        // Keep track of every option we've written out. We'll use this outside of this loop to determine what
+        // additional options to write.
         orgOptions.emplace_back(option);
     }
 
-    return bld::failure;
+    // At this point, all the original options specified have been written out with possible new values. If there are
+    // other options that are required or have non-default values, they must be written here.
+
+    bool SomethingChanged = false;
+    for (size_t option = 0; option < OPT::LAST; ++option)
+    {
+        // ignore if we've already written out the option
+        if (std::find(orgOptions.begin(), orgOptions.end(), option) != orgOptions.end())
+            continue;
+
+        if (isOptionRequired(option) || hasOptionChanged(option))
+        {
+            SomethingChanged = true;
+            auto& line = out.addEmptyLine();
+            line.assign("    " + getOptionName(option) + ":");
+            while (line.length() < 22)
+                line.push_back(' ');
+            line += getOptValue(option);
+            while (line.length() < 30)
+                line.push_back(' ');
+            line += (" # " + getOptComment(option));
+        }
+    }
+
+    if (SomethingChanged)
+        out.addEmptyLine();
+
+    // Now that the Options: section has been written, write out the rest of the file without further modifications.
+
+    while (pos < orgFile.size())
+    {
+        out.emplace_back(orgFile[pos++]);
+    }
+
+    if (out.WriteFile(filename))
+        return bld::success;
+
+    return bld::write_failed;
 }
 
 bld::RESULT CWriteSrcFiles::WriteNew(std::string_view filename, std::string_view comment)

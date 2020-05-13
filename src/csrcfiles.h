@@ -13,8 +13,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include <ttcstr.h>       // Classes for handling zero-terminated char strings.
-#include <ttcvector.h>    // Vector of ttlib::cstr strings
+#include <ttcstr.h>     // Classes for handling zero-terminated char strings.
+#include <ttcvector.h>  // Vector of ttlib::cstr strings
 
 #include "options.h"  // OPT -- Structures and enum for storing/retrieving options in a .srcfiles.yaml file
 
@@ -29,10 +29,10 @@ namespace bld
         read_failed,   // unable to read the original file (but it does exist)
 
         invalid_file,
-        failure,        // internal failure
+        failure,  // internal failure
 
     };
-} // namespace bld
+}  // namespace bld
 
 constexpr const char* txtSrcFilesFileName { ".srcfiles.yaml" };
 constexpr const char* txtDefBuildDir { "bld" };
@@ -52,10 +52,7 @@ public:
 
     // Public functions
 
-    bool isOptValue(size_t option, std::string_view value) const
-    {
-        return (getOptValue(option).issameas(value, tt::CASE::either));
-    }
+    bool isOptValue(size_t option, std::string_view value) const { return (getOptValue(option).issameas(value, tt::CASE::either)); }
 
     bool isOptTrue(size_t index) const
     {
@@ -142,6 +139,32 @@ public:
 
     void InitOptions();
 
+    bool isOptionRequired(size_t index) const
+    {
+        assert(index < OPT::LAST);
+        return m_Options[index].isRequired;
+    }
+
+    std::string getOptionName(size_t index) const
+    {
+        assert(index < OPT::LAST);
+        std::string name;
+        name.assign(m_Options[index].OriginalName);
+        return name;
+    }
+
+    bool hasOptionChanged(size_t index) const
+    {
+        assert(index < OPT::LAST);
+
+        if (m_Options[index].value.empty() || !m_Options[index].OriginalValue ||
+            m_Options[index].value.issameas(m_Options[index].OriginalValue))
+        {
+            return false;
+        }
+        return true;
+    }
+
 protected:
     // Protected functions
 
@@ -193,6 +216,6 @@ private:
     int m_RequiredMinor { 4 };
     int m_RequiredSub { 0 };
 
-    bool m_bRead { false };  // File has been read and processed.
-    bool m_Initialized { false }; // true if InitOptions has been called
+    bool m_bRead { false };        // File has been read and processed.
+    bool m_Initialized { false };  // true if InitOptions has been called
 };
