@@ -16,8 +16,8 @@ Options:
 
     Natvis:      ../winsrc/ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     precompile;../../ttlib/include  # temporary location, change before Public release
-    BuildLibs:   ../../ttLib/winsrc              # temporary location, change before Public release
+    IncDirs:     precompile;../ttlib/include  # temporary location, change before Public release
+    BuildLibs:   ../ttLib/winsrc              # temporary location, change before Public release
 
 Files:
     ttBld.rc
