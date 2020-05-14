@@ -12,7 +12,6 @@
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"     // CNinja
-#include "parsehhp.h"  // CParseHHP
 #include "strtable.h"  // String resource IDs
 #include "verninja.h"  // CVerMakeNinja
 

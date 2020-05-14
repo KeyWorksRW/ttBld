@@ -337,7 +337,7 @@ bool CConvertDlg::doConversion()
         }
 
 #if defined(_WIN32)
-        m_cSrcFiles.AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl;*.hhp");
+        m_cSrcFiles.AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl");
 #else
         m_cSrcFiles.AddSourcePattern("*.cpp;*.cc;*.cxx");
 #endif
