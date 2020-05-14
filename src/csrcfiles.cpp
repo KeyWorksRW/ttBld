@@ -135,7 +135,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
     if (!m_lstSrcFiles.size())
     {
 #if defined(_WIN32)
-        AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl;*.hhp");
+        AddSourcePattern("*.cpp;*.cc;*.cxx;*.rc;*.idl");
 #else
         AddSourcePattern("*.cpp;*.cc;*.cxx");
 #endif
@@ -360,7 +360,7 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
             }
             else if (name.hasExtension(".hhp"))
             {
-                m_lstSrcFiles += name;
+                // m_lstSrcFiles += name;
                 m_HPPname = name;
             }
             else if (name.hasExtension(".idl"))

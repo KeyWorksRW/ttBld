@@ -204,11 +204,6 @@ int main(int argc, char** argv)
     if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
         countNinjas++;
 
-#if 0
-    if (!cNinja.GetHHPName().empty())
-        cNinja.CreateHelpFile();
-#endif
-
     // Display any errors that occurred during processing
 
     if (cNinja.getErrorMsgs().size())
