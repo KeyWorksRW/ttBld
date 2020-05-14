@@ -45,9 +45,9 @@ void CTabLinker::OnBegin(void)
         {
             SetControlText(IDEDIT_NATVIS, "../ttLib/ttlibwin.natvis");
         }
-        else if (ttlib::fileExists("../../ttLib/ttlibwin.natvis"))
+        else if (ttlib::fileExists("../ttLib/ttlibwin.natvis"))
         {
-            SetControlText(IDEDIT_NATVIS, "../../ttLib/ttlibwin.natvis");
+            SetControlText(IDEDIT_NATVIS, "../ttLib/ttlibwin.natvis");
         }
     }
 }

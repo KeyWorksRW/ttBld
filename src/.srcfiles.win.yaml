@@ -15,10 +15,10 @@ Options:
 
     TargetDir: ../bin         # 64-bit target directory
 
-    Natvis:      ../../ttlib/ttlibwin.natvis # MSVC Debug visualizer
+    Natvis:      ../ttlib/ttlibwin.natvis # MSVC Debug visualizer
 
-    IncDirs:     precompile;./;convert;../../ttlib/include  # temporary location, change before Public release
-    BuildLibs:   ../../ttLib              # temporary location, change before Public release
+    IncDirs:     precompile;./;convert;../ttlib/include  # temporary location, change before Public release
+    BuildLibs:   ../ttLib              # temporary location, change before Public release
 
     MakeDir:     bld/         # auto-generate makefile in specified directory
 
