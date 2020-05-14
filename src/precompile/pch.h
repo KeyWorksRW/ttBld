@@ -79,6 +79,6 @@ namespace fs = std::filesystem;
     #include <cassert>
 #endif
 
-constexpr const auto txtVersion = "ttBld 1.5.0";
+constexpr const auto txtVersion = "ttBld 1.6.0";
 constexpr const auto txtCopyRight = "Copyright (c) 2002-2020 KeyWorks Software";
 constexpr const auto txtAppname = "ttBld";
