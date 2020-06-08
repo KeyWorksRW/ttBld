@@ -62,6 +62,7 @@ Files:
     ninja.cpp           # CNinja for creating .ninja scripts
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     rcdep.cpp           # Contains functions for parsing RC dependencies
+    strings.cpp         # Contains translatable strings
     verninja.cpp        # CVerMakeNinja class
     writesrc.cpp        # Writes a new or update srcfiles.yaml file
 

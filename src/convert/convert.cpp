@@ -13,14 +13,13 @@
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"
-#include "strtable.h"  // String resource IDs
 
 bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_view dstFile)
 {
     CSrcFiles srcOrg;
     if (!srcOrg.ReadFile(srcFile.c_str()))
     {
-        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + srcFile);
+        ttlib::MsgBox(_tt(strIdCantOpen) + srcFile);
         return bld::RESULT::read_failed;
     }
 

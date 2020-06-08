@@ -44,7 +44,6 @@ END
 3 TEXTINCLUDE
 BEGIN
     "#include ""ttlibicons.rc""  // non-Microsoft Visual C++ edited resources\r\n"
-    "#include ""strtable.rc""    // non-Microsoft Visual C++ edited resources\r\n"
     "\0"
 END
 
@@ -399,7 +398,6 @@ END
 // Generated from the TEXTINCLUDE 3 resource.
 //
 #include "ttlibicons.rc"  // non-Microsoft Visual C++ edited resources
-#include "strtable.rc"    // non-Microsoft Visual C++ edited resources
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

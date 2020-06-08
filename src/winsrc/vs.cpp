@@ -15,7 +15,6 @@
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
-#include "strtable.h"   // String resource IDs
 
 static const char* txtTasks =
 
@@ -61,7 +60,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     {
         if (!std::filesystem::create_directory(".vs"))
         {
-            results.push_back(_tt(IDS_CANT_CREATE_VS_DIR));
+            results.push_back(_tt(strIdCantCreateVsDir));
             return false;
         }
     }
@@ -82,13 +81,13 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     if (!file.WriteFile(".vs/tasks.vs.json"))
     {
         std::ostringstream str;
-        str << _tt(IDS_CANT_CREATE) << ".vs/tasks.vs.json";
+        str << _tt(strIdCantWrite) << ".vs/tasks.vs.json";
         results.push_back(str.str());
         return false;
     }
     else
     {
-        results.push_back(_tt(IDS_CREATED) + ".vs/tasks.vs.json");
+        results.push_back(_ttc(strIdCreated) + ".vs/tasks.vs.json");
     }
 
     file.clear();
@@ -100,23 +99,20 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
         file.at(file.FindLineContaining("%project%")).Replace("%project%", cSrcFiles.GetProjectName());
     else
     {
-        std::ostringstream str;
-        str << _tt(IDS_MISSING_PROJ_NAME) << cSrcFiles.GetSrcFilesName();
-        results.push_back(str.str());
+        results.push_back(_tt(strIdMissingProjectName) + cSrcFiles.GetSrcFilesName());
         return false;
     }
 
     if (!file.WriteFile(".vs/launch.vs.json"))
     {
         std::ostringstream str;
-        str << _tt(IDS_CANT_CREATE) << ".vs/launch.vs.json";
+        str << _tt(strIdCantWrite) << ".vs/launch.vs.json";
         results.push_back(str.str());
         return false;
     }
     else
     {
-        std::string str(_tt(IDS_CREATED));
-        results.push_back(str);
+        results.push_back(_tt(strIdCreated));
     }
 
     return true;

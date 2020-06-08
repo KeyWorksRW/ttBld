@@ -10,7 +10,6 @@
 
 #include <ttcvector.h>
 
-#include "strtable.h"  // String resource IDs
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
 // This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode
@@ -97,7 +96,7 @@ bool Yamalize()
 
     if (cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion) != bld::success)
     {
-        ttlib::MsgBox(_tt(IDS_CANT_CREATE) + ".vscode/srcfiles.yaml");
+        ttlib::MsgBox(_ttc(strIdCantWrite) + ".vscode/srcfiles.yaml");
         return false;
     }
 

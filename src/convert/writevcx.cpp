@@ -18,7 +18,6 @@
 #include <ttwinff.h>  // winff -- Wrapper around Windows FindFile
 
 #include "../winsrc/resource.h"
-#include "strtable.h"  // String resource IDs
 #include "writevcx.h"  // CVcxWrite
 
 static bool CreateGuid(ttlib::cstr& Result)
@@ -43,7 +42,7 @@ bool CVcxWrite::CreateBuildFile()
     ttlib::cstr cszGuid;
     if (!CreateGuid(cszGuid))
     {
-        AddError(_tt(IDS_CANT_CREATE_VCX_GUID));
+        AddError(_tt(strIdCantCreateUuid));
         return false;
     }
 
@@ -98,11 +97,11 @@ bool CVcxWrite::CreateBuildFile()
 
         if (!out.WriteFile(cszProjVC))
         {
-            AddError(_tt(IDS_CANT_CREATE) + cszProjVC);
+            AddError(_tt(strIdCantWrite) + cszProjVC);
             return false;
         }
         else
-            std::cout << _tt(IDS_CREATED) << cszProjVC << '\n';
+            std::cout << _tt(strIdCreated) << cszProjVC << '\n';
 
         master = ttlib::LoadTextResource(IDR_VCXPROJ_FILTERS);
 
@@ -133,11 +132,11 @@ bool CVcxWrite::CreateBuildFile()
         cszProjVC += ".filters";
         if (!out.WriteFile(cszProjVC))
         {
-            AddError(_tt(IDS_CANT_CREATE) + cszProjVC);
+            AddError(_tt(strIdCantWrite) + cszProjVC);
             return false;
         }
         else
-            std::cout << _tt(IDS_CREATED) << cszProjVC << '\n';
+            std::cout << _tt(strIdCreated) << cszProjVC << '\n';
     }
     else
     {

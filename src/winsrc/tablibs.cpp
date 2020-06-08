@@ -12,7 +12,6 @@
 #include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
 
 #include "dlgoptions.h"
-#include "strtable.h"  // String resource IDs
 
 void CTabLibs::OnBegin(void)
 {
@@ -59,7 +58,7 @@ void CTabLibs::OnBtnAddBuildLibrary()
             cwd.pop_back();
         if (cwd.issameas(fdlg.filename(), tt::CASE::either))
         {
-            ttlib::MsgBox(_tt(IDS_NO_RECURSIVE_BUILDLIB));
+            ttlib::MsgBox(_tt(strIdRecursiveBld));
         }
         else
         {

@@ -12,7 +12,6 @@
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"     // CNinja
-#include "strtable.h"  // String resource IDs
 #include "verninja.h"  // CVerMakeNinja
 
 const char* aCppExt[] { ".cpp", ".cxx", ".cc", nullptr };
@@ -142,7 +141,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
         if (!m_pchCppName.fileExists())
         {
-            AddError(getOptValue(OPT::PCH) + _tt(IDS_MISSING_PCH_CPP));
+            AddError(getOptValue(OPT::PCH) + _tt(strIdMissingPchCpp));
         }
     }
 
@@ -277,7 +276,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     {
         if (!fs::create_directory(GetBldDir().c_str()))
         {
-            AddError(_tt(IDS_CANT_CREATE) + GetBldDir());
+            AddError(_tt(strIdCantWrite) + GetBldDir());
             return false;
         }
     }
@@ -304,7 +303,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     if (!m_ninjafile.WriteFile(m_scriptFilename))
     {
         m_ninjafile.clear();
-        std::string str(_tt(IDS_ADDED_IGNORE_FILES) + m_scriptFilename + '\n');
+        std::string str(_tt(strIdIgnoredFiles) + m_scriptFilename + '\n');
         AddError(str);
         return false;
     }
@@ -326,7 +325,7 @@ void CNinja::ProcessBuildLibs()
 
         if (!ttlib::ChangeDir(libPath))
         {
-            AddError(_tt(IDS_LIB_SOURCE_DIR) + libPath + _tt(IDS_INVALID_BUILDLIB_SUFFIX));
+            AddError(_tt(strIdLibSrcDir) + libPath + _tt(strIdInvalidBuildlib));
             continue;
         }
 
@@ -408,7 +407,7 @@ void CNinja::ProcessBuildLibs()
         // At this point, we should be in the same directory as .srcfiles.yaml
         if (!cSrcFiles.ReadFile(BuildFile))
         {
-            AddError(_tt(IDS_MISSING_SRCFILES_IN) + BuildFile);
+            AddError(_tt(strIdMissingSrcfilesIn) + BuildFile);
             continue;
         }
 

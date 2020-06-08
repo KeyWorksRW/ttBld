@@ -69,15 +69,17 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-#include <ttTR.h>
 #include <ttcstr.h>
 #include <ttlibspace.h>
+#include <ttstrings.h>
 
 #if defined(_WIN32)
     #include <ttdebug.h>
 #else
     #include <cassert>
 #endif
+
+#include "strings.h"
 
 constexpr const auto txtVersion = "ttBld 1.6.0";
 constexpr const auto txtCopyRight = "Copyright (c) 2002-2020 KeyWorks Software";

@@ -13,7 +13,6 @@
 #include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
 
 #include "dlgoptions.h"
-#include "strtable.h"  // String resource IDs
 
 void CTabCompiler::OnBegin(void)
 {
@@ -158,7 +157,7 @@ void CTabCompiler::OnBtnPchCpp()
 void CTabCompiler::OnBtnAddInclude()
 {
     ttlib::DirDlg dlg;
-    dlg.SetTitle(_tt(IDS_INCLUDE_DIR_TITLE));
+    dlg.SetTitle(_tt(stdIdTitleInclude));
 
     ttlib::cwd cwd(true);
     dlg.SetStartingDir(cwd);

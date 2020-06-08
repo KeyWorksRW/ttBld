@@ -14,7 +14,6 @@
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "funcs.h"     // List of function declarations
-#include "strtable.h"  // String resource IDs
 
 #if defined(_WIN32)  // no reason to use the batch files on non-Windows platforms
 
@@ -61,7 +60,7 @@ void CreateCodeCmd(const char* pszFile)
 
     if (file.WriteFile(Path))
     {
-        std::cout << Path << _tt(IDS_CREATED_SUFFIX) << '\n';
+        std::cout << Path << _tt(strIdCreatedSuffix) << '\n';
     }
     else
     {
@@ -75,12 +74,12 @@ void CreateCodeCmd(const char* pszFile)
             NewPath.replace_filename(pszFile);
             if (file.WriteFile(NewPath))
             {
-                std::cout << NewPath << _tt(IDS_CREATED_SUFFIX) << '\n';
+                std::cout << NewPath << _tt(strIdCreatedSuffix) << '\n';
                 return;
             }
         }
 
-        std::cerr << _tt(IDS_CANT_CREATE) << Path << '\n';
+        std::cerr << _tt(strIdCantWrite) << Path << '\n';
     }
 }
 

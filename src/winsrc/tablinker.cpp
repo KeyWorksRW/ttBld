@@ -14,7 +14,6 @@
 #include <ttopenfile.h>  // openfile -- Wrapper around Windows GetOpenFileName() API
 
 #include "dlgoptions.h"
-#include "strtable.h"  // String resource IDs
 
 void CTabLinker::OnBegin(void)
 {
@@ -98,7 +97,7 @@ void CTabLinker::OnBtnChange()
 void CTabLinker::OnBtnLibDir()
 {
     ttlib::DirDlg dlg;
-    dlg.SetTitle(_tt(IDS_TITLE_LIB_DIR));  // we're repurposing an existing dialog, so change the title
+    dlg.SetTitle(_tt(strIdTitleLibDirectory));  // we're repurposing an existing dialog, so change the title
     if (dlg.GetFolderName(*this))
     {
         ttlib::cwd cwd;
@@ -117,7 +116,7 @@ void CTabLinker::OnBtnLibDir()
             {
                 if (iter.issameas(LibDir))
                 {
-                    ttlib::MsgBox(_tt(IDS_ALREADY_ADDED_DIR) + LibDir);
+                    ttlib::MsgBox(_tt(strIdDirAlreadyAdded) + LibDir);
                     return;
                 }
             }

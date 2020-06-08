@@ -25,7 +25,6 @@
 
 #include "convert.h"     // CConvert
 #include "convertdlg.h"  // CConvertDlg
-#include "strtable.h"    // String resource IDs
 
 // clang-format off
 static const char* listSrcTypes[]
@@ -74,7 +73,7 @@ bool MakeNewProject(ttlib::cstr& projectFile)
         ttlib::cstr GitExclude;
         if (gitIgnoreAll(GitExclude))
         {
-            std::cout << _tt(IDS_ADDED_IGNORE_FILES) << GitExclude << '\n';
+            std::cout << _tt(strIdIgnoredFiles) << GitExclude << '\n';
         }
     }
 
@@ -191,8 +190,7 @@ void CConvertDlg::OnBegin(void)
             } while (ff.next());
         }
     }
-    tmp.Format(_tt(IDS_FMT_FILES_LOCATED), cFilesFound);
-    SetControlText(IDTXT_FILES_FOUND, tmp);
+    SetControlText(IDTXT_FILES_FOUND, ttlib::cstr().Format(_tt(strIdFmtFilesLocated), cFilesFound));
 
     if (m_comboScripts.GetCount() > 0)
     {
@@ -208,7 +206,7 @@ void CConvertDlg::OnBegin(void)
 void CConvertDlg::OnBtnLocateScript()
 {
     ttlib::openfile dlg(*this);
-    dlg.SetFilter(_tt(IDS_PROJECT_FILES) + "|*.vcxproj;*.vcproj;*.dsp;*.project;*.cbp;.srcfiles.yaml||");
+    dlg.SetFilter(_ttc(strIdProjectFiles) + "|*.vcxproj;*.vcproj;*.dsp;*.project;*.cbp;.srcfiles.yaml||");
     dlg.RestoreDirectory();
     if (dlg.GetOpenName())
     {
@@ -231,7 +229,7 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
         dlg.append_filename(".srcfiles.yaml");
         if (dlg.fileExists())
         {
-            if (ttlib::MsgBox(_tt(IDS_CONFIRM_REPLACE_SRCFILES), MB_YESNO) != IDYES)
+            if (ttlib::MsgBox(_tt(strIdConfirmReplace), MB_YESNO) != IDYES)
                 return;
         }
         dlg.backslashestoforward();
@@ -285,7 +283,7 @@ void CConvertDlg::OnOK(void)
 
     if (!m_ConvertFile.empty() && !m_ConvertFile.fileExists())
     {
-        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + m_ConvertFile);
+        ttlib::MsgBox(_tt(strIdCantOpen) + m_ConvertFile);
         CancelEnd();
         return;
     }
@@ -344,7 +342,7 @@ bool CConvertDlg::doConversion()
 
         if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles) != bld::success)
         {
-            ttlib::MsgBox(_tt(IDS_CANT_CREATE) + m_cszOutSrcFiles);
+            ttlib::MsgBox(_tt(strIdCantWrite) + m_cszOutSrcFiles);
             CancelEnd();
             return false;
         }
@@ -405,7 +403,7 @@ bool CConvertDlg::doConversion()
 
             if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles.c_str(), cszHdr.c_str()) != bld::success)
             {
-                ttlib::MsgBox(_tt(IDS_CANT_CREATE) + m_cszOutSrcFiles);
+                ttlib::MsgBox(_tt(strIdCantWrite) + m_cszOutSrcFiles);
                 return false;
             }
             return true;

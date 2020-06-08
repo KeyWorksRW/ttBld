@@ -32,7 +32,6 @@
 #include <ttcstr.h>
 
 #include "ninja.h"     // CNinja
-#include "strtable.h"  // String resource IDs
 
 void Usage()
 {
@@ -164,7 +163,7 @@ int main(int argc, char** argv)
         if (path.empty())
         {
             ttConsoleColor clr(ttConsoleColor::LIGHTRED);
-            std::cout << _tt(IDS_CANT_FIND_SRCFILES) << '\n';
+            std::cout << _tt(strIdMissingSrcfiles) << '\n';
             return 1;
         }
         SrcFilePath = std::move(path);
@@ -174,7 +173,7 @@ int main(int argc, char** argv)
     CNinja cNinja(SrcFilePath);
     if (!cNinja.IsValidVersion())
     {
-        std::cout << _tt(IDS_OLD_TTBLD) << '\n';
+        std::cout << _tt(strIdOldVersion) << '\n';
         return 1;
     }
 
@@ -218,10 +217,10 @@ int main(int argc, char** argv)
 
     if (countNinjas > 0)
     {
-        std::cout << _tt(IDS_CREATED) << countNinjas << " .ninja" << _tt(IDS_FILES) << '\n';
+        std::cout << _tt(strIdCreated) << countNinjas << " .ninja" << _tt(strIdFiles) << '\n';
     }
     else
-        std::cout << _tt(IDS_UP_TO_DATE) << '\n';
+        std::cout << _tt(strIdAllNinjaCurrent) << '\n';
 
     return 0;
 }
@@ -237,42 +236,42 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
         {
             case UPDATE_MSVC:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt(IDS_UPDATED) << '\n';
+                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
                 break;
 
             case UPDATE_MSVC32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt(IDS_UPDATED) << '\n');
+                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n');
                 break;
 
             case UPDATE_CLANG_CL:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt(IDS_UPDATED) << '\n');
+                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n');
                 break;
 
             case UPDATE_CLANG_CL32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt(IDS_UPDATED) << '\n');
+                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n');
                 break;
 
             case UPDATE_MSVCD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt(IDS_UPDATED) << '\n');
+                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n');
                 break;
 
             case UPDATE_MSVC32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt(IDS_UPDATED) << '\n');
+                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n');
                 break;
 
             case UPDATE_CLANG_CLD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt(IDS_UPDATED) << '\n');
+                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n');
                 break;
 
             case UPDATE_CLANG_CL32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt(IDS_UPDATED) << '\n');
+                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n');
                 break;
 
             default:

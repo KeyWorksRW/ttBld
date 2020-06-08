@@ -13,7 +13,6 @@
 #include "ttlibicons.h"
 
 #include "dlgoptions.h"
-#include "strtable.h"  // String resource IDs
 
 bool ChangeOptions(std::string& ProjectFile)
 {
@@ -94,7 +93,7 @@ void CTabOptions::OnBegin(void)
     ti.iImage = -1;
 
     ti.mask = TCIF_TEXT;
-    ti.pszText = const_cast<char*>(_tt("General").c_str());
+    ti.pszText = const_cast<char*>(_tt("General"));
 
 #if !defined(NDEBUG)  // Starts debug section.
     auto result =
@@ -102,13 +101,13 @@ void CTabOptions::OnBegin(void)
         SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_GENERAL, (LPARAM) &ti);
     assert(result == 0);
 
-    ti.pszText = const_cast<char*>(_tt("Compiler").c_str());
+    ti.pszText = const_cast<char*>(_tt("Compiler"));
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_COMPILER, (LPARAM) &ti);
 
-    ti.pszText = const_cast<char*>(_tt("Libs").c_str());
+    ti.pszText = const_cast<char*>(_tt("Libs"));
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LIBS, (LPARAM) &ti);
 
-    ti.pszText = const_cast<char*>(_tt("Linker").c_str());
+    ti.pszText = const_cast<char*>(_tt("Linker"));
     SendItemMsg(IDTAB, TCM_INSERTITEMA, TAB_LINKER, (LPARAM) &ti);
 
 #if defined(_WIN32)
@@ -147,12 +146,12 @@ void CTabOptions::SaveChanges()
     if (GetSrcFilesName().fileExists())
     {
         if (UpdateOptions(GetSrcFilesName()) == bld::success)
-            std::cout << GetSrcFilesName() + _tt(IDS_OPTIONS_UPDATED) << '\n';
+            std::cout << GetSrcFilesName() + _tt(strIdOptionsUpdated) << '\n';
     }
     else
     {
         if (UpdateOptions() == bld::success)
-            std::cout << GetSrcFilesName() + _tt(IDS_CREATED_SUFFIX) << '\n';
+            std::cout << GetSrcFilesName() + _tt(strIdCreatedSuffix) << '\n';
     }
 }
 

@@ -13,7 +13,6 @@
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "convert.h"   // CConvert, CVcxWrite
-#include "strtable.h"  // String resource IDs
 
 enum
 {
@@ -47,7 +46,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
     ttlib::textfile fileIn;
     if (!fileIn.ReadFile(srcFile))
     {
-        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + srcFile);
+        ttlib::MsgBox(_tt(strIdCantOpen) + srcFile);
         return bld::RESULT::read_failed;
     }
 

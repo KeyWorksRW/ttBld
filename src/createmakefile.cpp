@@ -13,7 +13,6 @@
 
 #include "ninja.h"     // CNinja
 #include "resource.h"  // IDR_MAKEFILE
-#include "strtable.h"  // String resource IDs
 
 extern const char* txtHelpNinja;
 
@@ -23,7 +22,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
 
     if (type == MAKE_TYPE::normal && MakeFile.fileExists())
     {
-        AddError(_tt(IDS_MAKEFILE_EXISTS));
+        AddError(_tt(strIdMakefileExists));
         return true;  // Don't overwrite an existing makefile
     }
 
@@ -33,7 +32,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
         auto resText = ttlib::LoadTextResource(type == MAKE_TYPE::normal ? IDR_MAKEFILE_NORMAL : IDR_MAKEFILE_AUTOGEN);
         if (resText.empty())
         {
-            AddError(_tt(IDS_APP_CORRUPTED) + " " + _tt(IDS_MAKEFILE_NOT_CREATED));
+            AddError(_ttc(strIdExeCorrupted) + " " + _tt(strIdMakefileNotCreate));
             return false;
         }
         resText.Replace("%build%", GetBldDir(), tt::REPLACE::all);
@@ -128,12 +127,12 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
             }
             else if (file.WriteFile(MakeFile))
             {
-                std::cout << MakeFile << _tt(IDS_UPDATED) << '\n';
+                std::cout << MakeFile << _tt(strIdUpdated) << '\n';
                 return true;
             }
             else
             {
-                std::cout << _tt(IDS_CANT_CREATE) << MakeFile << '\n';
+                std::cout << _tt(strIdCantWrite) << MakeFile << '\n';
                 return false;
             }
         }
@@ -142,12 +141,12 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
     {
         if (file.WriteFile(MakeFile))
         {
-            std::cout << MakeFile << _tt(IDS_UPDATED) << '\n';
+            std::cout << MakeFile << _tt(strIdUpdated) << '\n';
             return true;
         }
         else
         {
-            std::cout << _tt(IDS_CANT_CREATE) << MakeFile << '\n';
+            std::cout << _tt(strIdCantWrite) << MakeFile << '\n';
             return false;
         }
     }

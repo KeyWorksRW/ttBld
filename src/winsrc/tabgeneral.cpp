@@ -12,7 +12,6 @@
 #include <ttdirdlg.h>  // ttlib::DirDlg
 
 #include "dlgoptions.h"
-#include "strtable.h"  // String resource IDs
 
 void CTabGeneral::OnBegin(void)
 {
@@ -75,7 +74,7 @@ void CTabGeneral::OnOK(void)
 void CTabGeneral::OnBtnDir()
 {
     ttlib::DirDlg dlg;
-    dlg.SetTitle(_tt(IDS_TARGET_DIRECTORY_TITLE));
+    dlg.SetTitle(_tt(strIdTitleTargetDir));
 
     ttlib::cwd cwd(true);
     dlg.SetStartingDir(cwd);

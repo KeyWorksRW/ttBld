@@ -12,7 +12,6 @@
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"   // CConvert, CVcxWrite
-#include "strtable.h"  // String resource IDs
 
 bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dstFile)
 {
@@ -42,7 +41,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
 
     if (!result)
     {
-        ttlib::MsgBox(_tt(IDS_CANNOT_OPEN) + m_srcFile + "\n\n" + result.description());
+        ttlib::MsgBox(_tt(strIdCantOpen) + m_srcFile + "\n\n" + result.description());
         return bld::RESULT::read_failed;
     }
 
