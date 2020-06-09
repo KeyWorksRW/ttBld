@@ -110,8 +110,6 @@ public:
     ttlib::cstr& AddFile(std::string_view filename) { return m_lstSrcFiles.addfilename(filename); }
     void AddSourcePattern(std::string_view FilePattern);
 
-    // These are just for convenience--it's fine to call getOptValue directly
-
     const ttlib::cstr& GetProjectName() { return m_Options[OPT::PROJECT].value; }
     const ttlib::cstr& GetPchCpp();
 
@@ -166,11 +164,10 @@ public:
     }
 
 protected:
-    // Protected functions
-
     void ParseOption(std::string_view yamlLine);
 
     void ProcessFile(std::string_view line);
+    void ProcessDebugFile(std::string_view line);
     void ProcessOption(std::string_view line);
 
     void ProcessIncludeDirective(std::string_view file, ttlib::cstr root = std::string {});
@@ -184,9 +181,10 @@ protected:
     ttlib::cstr m_RCname;   // Resource file to build (if any)
     ttlib::cstr m_HPPname;  // HTML Help project file
 
-    ttlib::cstrVector m_lstSrcFiles;  // List of all source files
-    ttlib::cstrVector m_lstLibFiles;  // List of any files used to build additional library
-    ttlib::cstrVector m_lstIdlFiles;  // List of any idl files to compile with midl compiler
+    ttlib::cstrVector m_lstSrcFiles;    // List of all source files except DEBUG build files
+    ttlib::cstrVector m_lstLibFiles;    // List of any files used to build additional library
+    ttlib::cstrVector m_lstIdlFiles;    // List of any idl files to compile with midl compiler
+    ttlib::cstrVector m_lstDebugFiles;  // List of all source files for DEBUG builds only
 
     ttlib::cstrVector m_lstIncludeSrcFiles;
 
@@ -196,8 +194,6 @@ protected:
 
 private:
     friend CWriteSrcFiles;
-
-    // Class members
 
     ttlib::cstrVector m_lstErrMessages;  // List of any errors that occurred during processing
 
@@ -211,6 +207,15 @@ private:
     ttlib::cstr m_dbgTarget;
 
     std::string m_strTargetDir;
+
+    enum SRC_SECTION : size_t
+    {
+        SECTION_UNKNOWN,
+        SECTION_OPTIONS,
+        SECTION_FILES,
+        SECTION_DEBUG_FILES,
+    };
+    SRC_SECTION m_section { SECTION_UNKNOWN };
 
     int m_RequiredMajor { 1 };  // These three get filled in to the minimum ttBld version required to process.
     int m_RequiredMinor { 4 };

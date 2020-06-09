@@ -192,7 +192,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Write the build rules for all source files
 
-    for (auto srcFile: GetSrcFileList())
+    for (auto& srcFile: m_lstSrcFiles)
     {
         auto ext = srcFile.extension();
         if (ext.empty() || std::tolower(ext[1] != 'c'))
@@ -236,6 +236,34 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
                 m_ninjafile.addEmptyLine().Format("  %s", header.c_str());
             }
             m_ninjafile.addEmptyLine();
+        }
+    }
+
+    if (gentype == GEN_DEBUG && m_lstDebugFiles.size())
+    {
+        for (auto& srcFile: m_lstDebugFiles)
+        {
+            auto ext = srcFile.extension();
+            if (ext.empty() || std::tolower(ext[1] != 'c'))
+                continue;
+            if (srcFile.issameas(m_pchCppName))
+                continue;
+
+            ttlib::cstr objFile(srcFile.filename());
+            objFile.replace_extension(".obj");
+
+            if (!m_pchHdrNameObj.empty())
+            {
+                // we add m_pchHdrNameObj so it appears as a dependency and gets compiled, but not linked to
+                m_ninjafile.addEmptyLine().Format("build $outdir/%s: compile %s | $outdir/%s", objFile.c_str(), srcFile.c_str(),
+                                                  m_pchHdrNameObj.c_str());
+                m_ninjafile.addEmptyLine();
+            }
+            else
+            {
+                m_ninjafile.addEmptyLine().Format("build $outdir/%s: compile %s", objFile.c_str(), srcFile.c_str());
+                m_ninjafile.addEmptyLine();
+            }
         }
     }
 
