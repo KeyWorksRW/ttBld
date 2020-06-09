@@ -10,8 +10,8 @@
 
 #include <ttcstr.h>
 #include <ttcview.h>
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <ttlibspace.h>
+#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"  // CNinja
 
@@ -71,15 +71,13 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         // no serialized writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not
         // recognize -Zf.
 
-        line.Format("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s %s -Od -Z7",
-                    IsExeTypeConsole() ? " -D_CONSOLE" : "", getOptValue(OPT::WARN).c_str(),
-                    IsStaticCrtDbg() ? "-MD" : "-MDd");
+        line.Format("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s %s -Od -Z7", IsExeTypeConsole() ? " -D_CONSOLE" : "",
+                    getOptValue(OPT::WARN).c_str(), IsStaticCrtDbg() ? "-MD" : "-MDd");
     }
     else
     {
-        line.Format("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s %s %s",
-                    IsExeTypeConsole() ? " -D_CONSOLE" : "", getOptValue(OPT::WARN).c_str(),
-                    IsStaticCrtRel() ? "-MT" : "-MD", IsOptimizeSpeed() ? "-O2" : "-O1");
+        line.Format("cflags = -nologo -DNDEBUG -showIncludes -EHsc%s -W%s %s %s", IsExeTypeConsole() ? " -D_CONSOLE" : "",
+                    getOptValue(OPT::WARN).c_str(), IsStaticCrtRel() ? "-MT" : "-MD", IsOptimizeSpeed() ? "-O2" : "-O1");
     }
 
     line += " -FC";
@@ -186,9 +184,8 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
     {
         m_ninjafile.emplace_back("rule compilePCH");
         m_ninjafile.emplace_back("  deps = msvc");
-        m_ninjafile.addEmptyLine().Format("  command = %s -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s",
-                                          compiler.c_str(), GetProjectName().c_str(),
-                                          getOptValue(OPT::PCH).c_str());
+        m_ninjafile.addEmptyLine().Format("  command = %s -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s", compiler.c_str(),
+                                          GetProjectName().c_str(), getOptValue(OPT::PCH).c_str());
         m_ninjafile.emplace_back("  description = compiling $in");
         m_ninjafile.addEmptyLine();
     }
@@ -205,8 +202,7 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 
     if (m_gentype == GEN_DEBUG)
     {
-        line.Format("  command = %s -c $cflags -Fo$out $in -Fd$outdir/%s.pdb", compiler.c_str(),
-                    GetProjectName().c_str());
+        line.Format("  command = %s -c $cflags -Fo$out $in -Fd$outdir/%s.pdb", compiler.c_str(), GetProjectName().c_str());
     }
     else
     {
@@ -315,14 +311,12 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
     auto& line = m_ninjafile.addEmptyLine();
     if (cmplr == CMPLR_MSVC)
     {
-        line.Format("  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in",
-                    (isOptTrue(OPT::BIT32) ? "x86" : "x64"));
+        line.Format("  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in", (isOptTrue(OPT::BIT32) ? "x86" : "x64"));
     }
     else
     {
         // MSVC -LTCG option is not supported by lld
-        line.Format("  command = lld-link.exe /lib /machine:%s /out:$out $in",
-                    (isOptTrue(OPT::BIT32)) ? "x86" : "x64");
+        line.Format("  command = lld-link.exe /lib /machine:%s /out:$out $in", (isOptTrue(OPT::BIT32)) ? "x86" : "x64");
     }
     m_ninjafile.emplace_back("  description = creating library $out");
     m_ninjafile.addEmptyLine();
@@ -443,8 +437,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     m_ninjafile.addEmptyLine();
 
     // "build file : cmd"
-    lastline().Format("build %s : ",
-                      m_gentype == GEN_DEBUG ? GetTargetDebug().c_str() : GetTargetRelease().c_str());
+    lastline().Format("build %s : ", m_gentype == GEN_DEBUG ? GetTargetDebug().c_str() : GetTargetRelease().c_str());
 
     if (IsExeTypeLib())
         lastline() += "lib";
@@ -461,7 +454,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
 
     bool bPchSeen = false;
 
-    for (auto file: GetSrcFileList())
+    for (auto file: m_lstSrcFiles)
     {
         auto ext = file.extension();
         if (ext.empty() || std::tolower(ext[1] != 'c'))
@@ -472,6 +465,22 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
             bPchSeen = true;
         lastline() += " $";
         m_ninjafile.emplace_back("  $outdir/" + objFile);
+    }
+
+    if (m_gentype == GEN_DEBUG)
+    {
+        for (auto file: m_lstDebugFiles)
+        {
+            auto ext = file.extension();
+            if (ext.empty() || std::tolower(ext[1] != 'c'))
+                continue;
+            ttlib::cstr objFile(file.filename());
+            objFile.replace_extension(".obj");
+            if (!bPchSeen && objFile.issameas(m_pchHdrNameObj, tt::CASE::utf8))
+                bPchSeen = true;
+            lastline() += " $";
+            m_ninjafile.emplace_back("  $outdir/" + objFile);
+        }
     }
 
     // The precompiled object file must be linked. It may or may not show up in the list of source files. We check

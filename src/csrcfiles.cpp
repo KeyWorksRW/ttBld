@@ -22,6 +22,7 @@ enum SRC_SECTION : size_t
     SECTION_UNKNOWN,
     SECTION_OPTIONS,
     SECTION_FILES,
+    SECTION_DEBUG_FILES,
 };
 
 CSrcFiles::CSrcFiles() {}
@@ -65,7 +66,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
     InitOptions();
 
-    auto section = SECTION_UNKNOWN;
+    m_section = SECTION_UNKNOWN;
 
     for (auto& line: SrcFile)
     {
@@ -80,15 +81,20 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         {
             if (ttlib::issameprefix(line, "Files:", tt::CASE::either) || ttlib::issameprefix(line, "[FILES]", tt::CASE::either))
             {
-                section = SECTION_FILES;
+                m_section = SECTION_FILES;
+            }
+            else if (ttlib::issameprefix(line, "DebugFiles:", tt::CASE::either) ||
+                     ttlib::issameprefix(line, "[DEBUG FILES]", tt::CASE::either))
+            {
+                m_section = SECTION_DEBUG_FILES;
             }
             else if (ttlib::issameprefix(line, "Options:", tt::CASE::either) || ttlib::issameprefix(line, "[OPTIONS]"))
             {
-                section = SECTION_OPTIONS;
+                m_section = SECTION_OPTIONS;
             }
             else
             {
-                section = SECTION_UNKNOWN;
+                m_section = SECTION_UNKNOWN;
             }
             continue;
         }
@@ -97,10 +103,14 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         if (begin.empty() || begin[0] == '#')
             continue;
 
-        switch (section)
+        switch (m_section)
         {
             case SECTION_FILES:
                 ProcessFile(begin);
+                break;
+
+            case SECTION_DEBUG_FILES:
+                ProcessDebugFile(begin);
                 break;
 
             case SECTION_OPTIONS:
@@ -282,6 +292,25 @@ void CSrcFiles::ProcessFile(std::string_view line)
     }
 }
 
+void CSrcFiles::ProcessDebugFile(std::string_view line)
+{
+    ttlib::cstr filename = line;
+    filename.eraseFrom('#');
+
+    // Unlike the regular Files: section, the DebugFiles: section does not support .include, .idl, .rc, or .hhp files
+
+    if (filename.find('*') != tt::npos || filename.find('?') != tt::npos)
+    {
+        AddSourcePattern(filename);
+        return;
+    }
+
+    if (auto name = m_lstDebugFiles.addfilename(filename); !name.fileExists())
+    {
+        AddError(_tt("Unable to locate the file ") + name);
+    }
+}
+
 // Process a ".include" directive
 void CSrcFiles::ProcessIncludeDirective(std::string_view file, ttlib::cstr root)
 {
@@ -351,22 +380,33 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
             auto& name = ff.getcstr();
             if (name.hasExtension(".c") || name.hasExtension(".cpp") || name.hasExtension(".cxx"))
             {
-                m_lstSrcFiles += name;
+                if (m_section == SECTION_DEBUG_FILES)
+                    m_lstDebugFiles.addfilename(name);
+                else
+                    m_lstSrcFiles.addfilename(name);
             }
             else if (name.hasExtension(".rc"))
             {
-                m_lstSrcFiles += name;
-                m_RCname = name;
+                if (m_section != SECTION_DEBUG_FILES)
+                {
+                    m_lstSrcFiles.addfilename(name);
+                    m_RCname = name;
+                }
             }
             else if (name.hasExtension(".hhp"))
             {
-                // m_lstSrcFiles += name;
-                m_HPPname = name;
+                if (m_section != SECTION_DEBUG_FILES)
+                {
+                    m_HPPname = name;
+                }
             }
             else if (name.hasExtension(".idl"))
             {
-                m_lstSrcFiles += name;
-                m_lstIdlFiles += name;
+                if (m_section != SECTION_DEBUG_FILES)
+                {
+                    m_lstSrcFiles.addfilename(name);
+                    m_lstIdlFiles.addfilename(name);
+                }
             }
 
             if (!ff.next())
