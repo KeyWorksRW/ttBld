@@ -1,3 +1,4 @@
+R"===(
 # Call with nmake.exe (MSVC) or a GNU make variation (mingw32-make.exe, gmake.exe, or make.exe)
 
 # nmake               <-- this will build release target(s)
@@ -76,11 +77,4 @@ targetsR: $(BldScript)
 
 deps: $(BldScript)
 	ninja -f $(BldScript) -t deps
-
-########## Creates or updates ninja file any time %srcfiles% changes ##########
-
-$(BldScript): %srcfiles%
-	ttBld.exe -u$(cmplr)
-
-$(BldScriptD): %srcfiles%
-	ttBld.exe -u$(cmplr)D
+)==="

@@ -11,8 +11,15 @@
 #include <ttcstr.h>      // Classes for handling zero-terminated char strings.
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
-#include "ninja.h"     // CNinja
-#include "resource.h"  // IDR_MAKEFILE
+#include "ninja.h"  // CNinja
+
+const char* res_makefile =
+#include "res/makefile"
+    ;
+
+const char* res_makefile_ttbld =
+#include "res/makefile_ttbld"
+    ;
 
 extern const char* txtHelpNinja;
 
@@ -29,12 +36,12 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
     ttlib::textfile file;
     // Put resText in a block so that it gets deleted after we've read it.
     {
-        auto resText = ttlib::LoadTextResource(type == MAKE_TYPE::normal ? IDR_MAKEFILE_NORMAL : IDR_MAKEFILE_AUTOGEN);
-        if (resText.empty())
-        {
-            AddError(_ttc(strIdExeCorrupted) + " " + _tt(strIdMakefileNotCreate));
-            return false;
-        }
+        ttlib::cstr resText;
+        if (type == MAKE_TYPE::normal)
+            resText = ttlib::findnonspace(res_makefile);
+        else
+            resText = ttlib::findnonspace(res_makefile_ttbld);
+
         resText.Replace("%build%", GetBldDir(), tt::REPLACE::all);
         resText.Replace("%project%", GetProjectName(), tt::REPLACE::all);
 
