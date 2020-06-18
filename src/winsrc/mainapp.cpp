@@ -351,6 +351,9 @@ int main(int /* argc */, char** /* argv */)
         for (auto iter: cNinja.getErrorMsgs())
         {
             std::cout << iter << '\n';
+#if defined(_DEBUG)
+            OutputDebugStringW(iter.to_utf16().c_str());
+#endif  // _DEBUG
         }
         std::cout << "\n\n";
     }
@@ -358,10 +361,18 @@ int main(int /* argc */, char** /* argv */)
     if (countNinjas > 0)
     {
         std::cout << _tt(strIdCreated) << countNinjas << " .ninja" << _tt(strIdFiles) << '\n';
+#if defined(_DEBUG)
+        ttlib::cstr msg(_ttc(strIdCreated) << countNinjas << " .ninja" << _tt(strIdFiles));
+        OutputDebugStringW(msg.to_utf16().c_str());
+#endif  // _DEBUG
     }
     else
-        std::cout << _tt(strIdAllNinjaCurrent) << '\n';
-
+    {
+        std::cout << _ttc(strIdAllNinjaCurrent) << '\n';
+#if defined(_DEBUG)
+        OutputDebugStringW(_ttc(strIdAllNinjaCurrent).to_utf16().c_str());
+#endif  // _DEBUG
+    }
     return 0;
 }
 
