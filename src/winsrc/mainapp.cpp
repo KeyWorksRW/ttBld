@@ -120,7 +120,7 @@ int main(int /* argc */, char** /* argv */)
     if (cmd.isHelpRequested())
     {
         std::cout << txtVersion << '\n' << txtCopyRight << "\n\n";
-        std::cout << _tt("ttBld.exe [options] [path]") << '\n';
+        std::cout << _tt("ttBld.exe [options] [project file]") << '\n';
 
         for (auto& iter: cmd.getUsage())
         {
@@ -187,8 +187,7 @@ int main(int /* argc */, char** /* argv */)
     // Allow the user to specify a path to the project file to use.
     if (cmd.getExtras().size())
     {
-        if (cmd.getExtras().at(0).hasExtension(".yaml"))
-            projectFile = cmd.getExtras().at(0);
+        projectFile = cmd.getExtras().at(0);
     }
 
 #if defined(TESTING) && !defined(NDEBUG)
@@ -307,7 +306,9 @@ int main(int /* argc */, char** /* argv */)
         if (path.size())
         {
             ttlib::ChangeDir(path);
-            projectFile.erase(0, projectFile.find_filename());
+            // Now that we're in the same directory as the project file, remove the path portion and just use the filename.
+            path = projectFile.filename();
+            projectFile = path;
         }
     }
 
