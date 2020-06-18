@@ -20,6 +20,14 @@
 #include "../winsrc/resource.h"
 #include "writevcx.h"  // CVcxWrite
 
+const char* res_vcxproj_xml =
+#include "res/vcxproj.xml"
+    ;
+
+const char* res_vcxproj_filters_xml =
+#include "res/vcxproj.filters.xml"
+    ;
+
 static bool CreateGuid(ttlib::cstr& Result)
 {
     UUID uuid;
@@ -50,7 +58,7 @@ bool CVcxWrite::CreateBuildFile()
     cszProjVC.replace_extension(".vcxproj");
     if (!cszProjVC.fileExists())
     {
-        ttlib::cstr master = std::move(ttlib::LoadTextResource(IDR_VCXPROJ_MASTER));
+        ttlib::cstr master(ttlib::findnonspace(res_vcxproj_xml));
 
         master.Replace("%guid%", cszGuid, true);
         master.Replace("%%DebugExe%", GetTargetDebug(), true);
@@ -103,7 +111,7 @@ bool CVcxWrite::CreateBuildFile()
         else
             std::cout << _tt(strIdCreated) << cszProjVC << '\n';
 
-        master = ttlib::LoadTextResource(IDR_VCXPROJ_FILTERS);
+        master = ttlib::findnonspace(res_vcxproj_filters_xml);
 
         CreateGuid(cszGuid);  // it already succeeded once if we got here, so we don't check for error again
         master.Replace("%guidSrc%", cszGuid, true);
