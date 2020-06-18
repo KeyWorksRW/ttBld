@@ -75,6 +75,6 @@ targetsD: $(BldScriptD)
 targetsR: $(BldScript)
 	ninja -f $(BldScript) -t targets depth 2
 
-deps: $(BldScript)
-	ninja -f $(BldScript) -t deps
+deps: $(BldScriptD)
+	ninja -f $(BldScriptD) -t deps
 )==="
