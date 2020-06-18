@@ -402,23 +402,8 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
     ttlib::textfile tasks;
     tasks.Read(txtTasks);
 
-    ttlib::cstr MakeFileOption;
-    // BUGBUG: [KeyWorks - 05-08-2020] Issue #242 means this option is no longer used -- need a different way to determine
-    // whether or not to create a task that uses it.
-    if (cSrcFiles.hasOptValue(OPT::MAKE_DIR))
-    {
-        MakeFileOption = cSrcFiles.getOptValue(OPT::MAKE_DIR);
-        if (MakeFileOption.issameas("."))
-            MakeFileOption = "makefile";
-        else
-            MakeFileOption.append_filename("makefile");
-    }
-    else
-    {
-        MakeFileOption = cSrcFiles.GetSrcFilesName();
-        MakeFileOption.replace_filename("makefile");
-    }
-    MakeFileOption.insert(0, "-f ");
+    // All of our tasks assumbe a bld/ directory since that's where ttBld will be creating the ninja files and a makefile
+    ttlib::cstr MakeFileOption("-f bld/makefile");
 
     // Read the array of lines, write them into kf so it looks like it was read from a file
 
@@ -509,6 +494,9 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
             ;
 #endif
     }
+
+    // At this point the task assume a bld/ directory -- if that needs to change, then we can simply iterate through the out vector and
+    // replace "-f bld/" with whatever the directory should be.
 
     if (!out.WriteFile(".vscode/tasks.json"))
     {
@@ -732,7 +720,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
     if (!Modified)
     {
         Results.emplace_back("c_cpp_properties.json" + _ttc(strIdCurrent));
-        return false;
+        return true;
     }
 
     if (!file.WriteFile(".vscode/c_cpp_properties.json"))

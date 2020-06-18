@@ -146,9 +146,20 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
     }
     else
     {
+        ttlib::cstr path(MakeFile);
+        path.remove_filename();
+        if (!path.dirExists())
+        {
+            if (!fs::create_directory(path.wx_str()))
+            {
+                std::cout << _tt(strIdCantWrite) << MakeFile << '\n';
+                return false;
+            }
+        }
+
         if (file.WriteFile(MakeFile))
         {
-            std::cout << MakeFile << _tt(strIdUpdated) << '\n';
+            std::cout << _tt(strIdCreated) << MakeFile << '\n';
             return true;
         }
         else

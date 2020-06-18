@@ -362,7 +362,7 @@ int main(int /* argc */, char** /* argv */)
     {
         std::cout << _tt(strIdCreated) << countNinjas << " .ninja" << _tt(strIdFiles) << '\n';
 #if defined(_DEBUG)
-        ttlib::cstr msg(_ttc(strIdCreated) << countNinjas << " .ninja" << _tt(strIdFiles));
+        ttlib::cstr msg(_ttc(strIdCreated) << countNinjas << " .ninja" << _tt(strIdFiles) << '\n');
         OutputDebugStringW(msg.to_utf16().c_str());
 #endif  // _DEBUG
     }
@@ -370,7 +370,7 @@ int main(int /* argc */, char** /* argv */)
     {
         std::cout << _ttc(strIdAllNinjaCurrent) << '\n';
 #if defined(_DEBUG)
-        OutputDebugStringW(_ttc(strIdAllNinjaCurrent).to_utf16().c_str());
+        OutputDebugStringW(_ttc(strIdAllNinjaCurrent).to_utf16().c_str() + L'\n');
 #endif  // _DEBUG
     }
     return 0;
