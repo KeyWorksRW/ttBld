@@ -16,156 +16,8 @@
 #include "funcs.h"      // List of function declarations
 #include "resource.h"
 
-// If the text is read as an array, then it's stored as char*[], has a trailing nullptr, and no \n characters.
-
-// By contrast, if the text is to be read as a string, then each "line" must end with a \n character. These string
-// typically have %...% portions which are placeholders that get replaced with strings determined durint runtime.
-
-static const auto txtProperties = {
-
-    "{",
-    "    \"configurations\": [",
-    "        {",
-    "            \"name\": \"Default\",",
-    "             \"cStandard\": \"c11\",",
-    "             \"cppStandard\": \"c++11\",",
-    "             \"defines\": [",
-    "             ],",
-    "             \"includePath\": [",
-    "             ]",
-    "         }",
-    "     ],",
-    "     \"version\": 4",
-    "}",
-
-};
-
-static const char* txtLaunch =
-
-    "{\n"
-    "   // Use IntelliSense to learn about possible attributes.\n"
-    "   // Hover to view descriptions of existing attributes.\n"
-    "   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387\n"
-    "   \"version\": \"0.2.0\",\n"
-    "   \"configurations\": [\n"
-    "      {\n"
-    "         \"name\": \"Debug %proj%\",\n"
-    "         \"type\": \"cppvsdbg\",\n"
-    "         \"request\": \"launch\",\n"
-    "         \"cwd\" : \"${workspaceRoot}\",\n"
-    "         \"program\": \"${workspaceRoot}/%targetD%\",\n"
-    "         \"args\": [ \"\" ],\n"
-    "         \"externalConsole\": true,\n"
-    "         \"logging\": {\n"
-    "            \"moduleLoad\": false,\n"
-    "         },\n"
-    "         \"visualizerFile\": \"${workspaceRoot}/%natvis%\",\n"
-    "         \"stopAtEntry\": true,    // whether to stop or not at program entry point\n"
-    "         \"preLaunchTask\": \"%bld%\"\n"
-    "      }\n"
-    "   ]\n"
-    "}\n";
-
-static const auto txtTasks = {
-
-    "{",
-    "    // See https://go.microsoft.com/fwlink/?LinkId=733558",
-    "    // for the documentation about the tasks.json format",
-    "    \"version\": \"2.0.0\",",
-    "    \"tasks\": [",
-    "    ]",
-    "}",
-
-};
-
-#if 0
-static const char* txtSubTasks =
-
-    "        {\n"
-    "            \"label\": \"%label%\",\n"
-    "            \"type\": \"shell\",\n"
-    "            \"command\": \"%command%\",\n"
-    "            \"group\": \"%group%\",\n"
-    "            \"problemMatcher\": [ %problem% ]\n"
-    "        },\n";
-#endif
-
-static const char* txtMsvcSubTasks =
-
-    "        {\n"
-    "            \"label\": \"%label%\",\n"
-    "            \"type\": \"shell\",\n"
-    "            \"options\": {\n"
-    "                \"cwd\": \"${workspaceFolder}\"\n"
-    "            },\n"
-    "            \"command\": \"%command%\",\n"
-    "%group%"
-    "            \"problemMatcher\": {\n"
-    "                \"base\": \"$msCompile\",\n"
-    "                \"fileLocation\": [\n"
-    "                    \"autoDetect\",\n"
-    "                    \"${workspaceFolder}\"\n"
-    "                ]\n"
-    "            }\n"
-    "        },\n";
-
-static const char* txtClangSubTasks = "        {\n"
-                                      "            \"label\": \"%label%\",\n"
-                                      "            \"type\": \"shell\",\n"
-                                      "            \"options\": {\n"
-                                      "                \"cwd\": \"${workspaceFolder}\"\n"
-                                      "            },\n"
-                                      "            \"command\": \"%command%\",\n"
-                                      "%group%"
-                                      "            \"problemMatcher\": {\n"
-                                      "                \"owner\": \"cpp\",\n"
-                                      "                \"fileLocation\": [\n"
-                                      "                    \"autoDetect\",\n"
-                                      "                    \"${workspaceFolder}\"\n"
-                                      "                ],\n"
-                                      "                \"pattern\": {\n"
-                                      "                    \"regexp\": "
-                                      "\"^(.*)\\\\((\\\\d+),(\\\\d+)\\\\):\\\\s+(note|warning|error):\\\\s+(.*)$\",\n"
-                                      "                    \"file\": 1,\n"
-                                      "                    \"line\": 2,\n"
-                                      "                    \"column\": 3,\n"
-                                      "                    \"severity\": 4,\n"
-                                      "                    \"message\": 5\n"
-                                      "                }\n"
-                                      "            }\n"
-                                      "        },\n";
-
-static const char* txtNormalGroup =
-
-    "            \"group\": \"build\",\n";
-
-static const char* txtDefaultGroup =
-
-    "            \"group\": {\n"
-    "                \"kind\": \"build\",\n"
-    "                \"isDefault\": true\n"
-    "            },\n";
-
-static const char* txtDefaultTask =
-
-    "        {\n"
-    "            \"label\": \"%label%\",\n"
-    "            \"type\": \"shell\",\n"
-    "            \"command\": \"%command%\",\n"
-    "            \"group\": {\n"
-    "                \"kind\": \"%group%\",\n"
-    "                \"isDefault\": true\n"
-    "            },\n"
-    "            \"problemMatcher\": [ %problem% ]\n"
-    "        },\n";
-
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
 bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
-
-#if 0
-static void AddTask(ttlib::textfile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
-                    const char* pszProblem);
-#endif
 
 static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
 static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
@@ -245,11 +97,28 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
     return results;
 }
 
+constexpr auto txtProperties = R"===(
+{
+    "configurations": [
+        {
+            "name": "Default",
+             "cStandard": "c11",
+             "cppStandard": "c++11",
+             "defines": [
+             ],
+             "includePath": [
+             ]
+         }
+     ],
+     "version": 4
+}
+)===";
+
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 {
     ttlib::textfile out;
     ttlib::textfile propFile;
-    propFile.Read(txtProperties);
+    propFile.ReadString(ttlib::findnonspace(txtProperties));
 
     for (auto propLine = propFile.begin(); propLine != propFile.end(); ++propLine)
     {
@@ -343,12 +212,38 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
     return true;
 }
 
+constexpr auto txtLaunch = R"===(
+{
+   // Use IntelliSense to learn about possible attributes.
+   // Hover to view descriptions of existing attributes.
+   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+   "version": "0.2.0",
+   "configurations": [
+      {
+         "name": "Debug %proj%",
+         "type": "cppvsdbg",
+         "request": "launch",
+         "cwd" : "${workspaceRoot}",
+         "program": "${workspaceRoot}/%targetD%",
+         "args": [ "" ],
+         "externalConsole": true,
+         "logging": {
+            "moduleLoad": false,
+         },
+         "visualizerFile": "${workspaceRoot}/%natvis%",
+         "stopAtEntry": true,    // whether to stop or not at program entry point
+         "preLaunchTask": "%bld%"
+      }
+   ]
+};
+)===";
+
 bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 {
     if (cSrcFiles.IsExeTypeLib() || cSrcFiles.IsExeTypeDll())
         return true;  // nothing that we know how to launch if this is a library or dynamic link library
 
-    ttlib::cstr Launch = { txtLaunch };
+    ttlib::cstr Launch = ttlib::findnonspace(txtLaunch);
 
     Launch.Replace("%proj%", cSrcFiles.GetProjectName());
 #if defined(_WIN32)
@@ -395,12 +290,44 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Res
     return true;
 }
 
+constexpr auto txtTasks = R"===(
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0\
+    "tasks": [
+    ]
+}
+)===";
+
+constexpr auto txtDefaultGroup = R"===(
+"group": {
+    "kind": "build",
+    "isDefault": true
+},
+)===";
+
+constexpr auto txtDefaultTask = R"===(
+{
+    "label": "%label%",
+    "type": "shell",
+    "command": "%command%",
+    "group": {
+        "kind": "%group%",
+        "isDefault": true
+    },
+    "problemMatcher": [ %problem% ]
+},
+)===";
+
+constexpr auto txtNormalGroup = "            \"group\": \"build\",\n";
+
 bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 {
     ttlib::textfile out;
 
     ttlib::textfile tasks;
-    tasks.Read(txtTasks);
+    tasks.ReadString(ttlib::findnonspace(txtTasks));
 
     // All of our tasks assumbe a bld/ directory since that's where ttBld will be creating the ninja files and a makefile
     ttlib::cstr MakeFileOption("-f bld/makefile");
@@ -771,32 +698,30 @@ void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
     }
 }
 
-// REVIEW: [KeyWorks - 10-05-2019] Don't remove this! We'll need it once we support conditional task
-// generation for messages.po
-
-#if 0
-static void AddTask(ttlib::textfile& fileOut, const char* pszLabel, const char* pszGroup, const char* pszCommand,
-                    const char* pszProblem)
+constexpr auto txtMsvcSubTasks = R"===(
 {
-    ttlib::textfile fileTask;
-    fileTask.Delete();
-    fileTask.ReadStrFile(txtSubTasks);
-
-    fileTask.ReplaceStr("%label%", pszLabel);
-    fileTask.ReplaceStr("%group%", pszGroup);
-    fileTask.ReplaceStr("%command%", pszCommand);
-    fileTask.ReplaceStr("%problem%", pszProblem);
-
-    while (fileTask.ReadLine())
-        fileOut.WriteEol(fileTask);
-}
-#endif
+    "label": "%label%",
+    "type": "shell",
+    "options": {
+        "cwd": "${workspaceFolder}"
+    },
+    "command": "%command%",
+%group%"
+    "problemMatcher": {
+        "base": "$msCompile",
+        "fileLocation": [
+            "autoDetect",
+            "${workspaceFolder}"
+        ]
+    }
+},
+)===";
 
 // AddMsvcTask uses $msCompile for the problemMatcher but changes it to use a relative path
 // instead of the default absolute path
 static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command)
 {
-    ttlib::cstr SubTask(txtMsvcSubTasks);
+    ttlib::cstr SubTask = ttlib::findnonspace(txtMsvcSubTasks);
     SubTask.Replace("%label%", Label);
     SubTask.Replace("%group%", Group);
     SubTask.Replace("%command%", Command);
@@ -806,6 +731,33 @@ static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::s
     for (auto& iter: fileTask)
         fileOut.emplace_back(iter);
 }
+
+constexpr auto txtClangSubTasks = R"===(
+{
+    "label": "%label%",
+    "type": "shell",
+    "options": {
+        "cwd": "${workspaceFolder}"
+    },
+    "command": "%command%",
+%group%"
+    "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+            "autoDetect",
+            "${workspaceFolder}"
+        ],
+        "pattern": {
+            "regexp": "^(.*)\\\\((\\\\d+),(\\\\d+)\\\\):\\\\s+(note|warning|error):\\\\s+(.*)$",
+             "file": 1,
+             "line": 2,
+             "column": 3,
+             "severity": 4,
+             "message": 5
+        }
+    }
+},
+)===";
 
 // AddClangTask provides it's own problemMatcher -- because $gcc didn't work
 static void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command)
