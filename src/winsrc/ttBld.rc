@@ -57,8 +57,7 @@ END
 
 IDR_PRE_PROJECT         RCDATA    "../winres/cdlprojectpre.txt"
 IDR_POST_PROJECT        RCDATA    "../winres/cdlprojectpost.txt"
-IDR_VCXPROJ_MASTER      RCDATA    "../winres/vcxproj.xml"
-IDR_VCXPROJ_FILTERS     RCDATA    "../winres/vcxproj.filters.xml"
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
