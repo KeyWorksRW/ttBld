@@ -55,8 +55,6 @@ public:
     const ttlib::cstr& GetRcFile() { return m_RCname; }
     std::string_view GetScriptFile() { return m_scriptFilename; }
 
-    ttlib::cstrVector* GetLibFileList() { return &m_lstLibFiles; }
-
     // Returns false if .srcfiles.yaml requires a newer version
     bool IsValidVersion() { return m_isInvalidVersion != true; }
 

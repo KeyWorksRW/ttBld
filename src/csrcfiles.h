@@ -182,7 +182,6 @@ protected:
     ttlib::cstr m_HPPname;  // HTML Help project file
 
     ttlib::cstrVector m_lstSrcFiles;    // List of all source files except DEBUG build files
-    ttlib::cstrVector m_lstLibFiles;    // List of any files used to build additional library
     ttlib::cstrVector m_lstIdlFiles;    // List of any idl files to compile with midl compiler
     ttlib::cstrVector m_lstDebugFiles;  // List of all source files for DEBUG builds only
 
