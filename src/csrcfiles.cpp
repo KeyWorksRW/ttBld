@@ -627,6 +627,9 @@ static const char* aProjectLocations[] {
 
 ttlib::cstr locateProjectFile(std::string_view StartDir)
 {
+    // A project built with wxWidgets is cross-platform, and as such it takes precedence over all other variations
+    constexpr const char* txtWidgetsName { ".srcfiles.wx.yaml" };
+
 #if defined(_WIN32)
     constexpr const char* txtPlatformName { ".srcfiles.win.yaml" };
 #elif defined(__APPLE__)
@@ -645,9 +648,15 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
     {
         path.assign(StartDir);
         path.addtrailingslash();
-        path.append_filename(txtPlatformName);
+
+        path.append_filename(txtWidgetsName);
         if (path.fileExists())
             return path;
+
+        path.replace_filename(txtPlatformName);
+        if (path.fileExists())
+            return path;
+
         path.replace_filename(".srcfiles.yaml");
         if (path.fileExists())
             return path;
@@ -658,9 +667,15 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
             path.assign(StartDir);
             path.addtrailingslash();
             path.append_filename(iter);
-            path.append_filename(txtPlatformName);
+
+            path.append_filename(txtWidgetsName);
             if (path.fileExists())
                 return path;
+
+            path.replace_filename(txtPlatformName);
+            if (path.fileExists())
+                return path;
+
             path.replace_filename(".srcfiles.yaml");
             if (path.fileExists())
                 return path;
@@ -668,19 +683,33 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
     }
     else
     {
+        // A wxWidgets version takes precedence
+        path.assign(txtWidgetsName);
+        if (path.fileExists())
+            return path;
+
+        // Otherwise look for a platform-specific version
         path.assign(txtPlatformName);
         if (path.fileExists())
             return path;
-        path.replace_filename(".srcfiles.yaml");
+
+        // If all else fails, use a "normal" version.
+        path.assign(".srcfiles.yaml");
         if (path.fileExists())
             return path;
 
         for (auto iter: aProjectLocations)
         {
             path.assign(iter);
-            path.append_filename(txtPlatformName);
+
+            path.append_filename(txtWidgetsName);
             if (path.fileExists())
                 return path;
+
+            path.replace_filename(txtPlatformName);
+            if (path.fileExists())
+                return path;
+
             path.replace_filename(".srcfiles.yaml");
             if (path.fileExists())
                 return path;
