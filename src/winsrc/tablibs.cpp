@@ -56,7 +56,7 @@ void CTabLibs::OnBtnAddBuildLibrary()
         cwd.backslashestoforward();
         if (cwd.back() == '/')
             cwd.pop_back();
-        if (cwd.issameas(fdlg.filename(), tt::CASE::either))
+        if (cwd.is_sameas(fdlg.filename(), tt::CASE::either))
         {
             ttlib::MsgBox(_tt(strIdRecursiveBld));
         }
@@ -65,7 +65,7 @@ void CTabLibs::OnBtnAddBuildLibrary()
             fdlg.filename().make_relative(cwd);
             fdlg.filename().backslashestoforward();
             ttlib::cstr update = GetControlText(IDEDIT_LIBS_BUILD);
-            if (!ttlib::isFound(update.find(fdlg.filename())))
+            if (!ttlib::is_found(update.find(fdlg.filename())))
             {
                 if (update.size() && update.back() != ';')
                     update += ';';

@@ -77,18 +77,18 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
         // If the line doesn't begin with whitespace, then they only thing we look at is whether it is a section
         // name
-        if (ttlib::isalpha(line[0]))
+        if (ttlib::is_alpha(line[0]))
         {
-            if (ttlib::issameprefix(line, "Files:", tt::CASE::either) || ttlib::issameprefix(line, "[FILES]", tt::CASE::either))
+            if (ttlib::is_sameprefix(line, "Files:", tt::CASE::either) || ttlib::is_sameprefix(line, "[FILES]", tt::CASE::either))
             {
                 m_section = SECTION_FILES;
             }
-            else if (ttlib::issameprefix(line, "DebugFiles:", tt::CASE::either) ||
-                     ttlib::issameprefix(line, "[DEBUG FILES]", tt::CASE::either))
+            else if (ttlib::is_sameprefix(line, "DebugFiles:", tt::CASE::either) ||
+                     ttlib::is_sameprefix(line, "[DEBUG FILES]", tt::CASE::either))
             {
                 m_section = SECTION_DEBUG_FILES;
             }
-            else if (ttlib::issameprefix(line, "Options:", tt::CASE::either) || ttlib::issameprefix(line, "[OPTIONS]"))
+            else if (ttlib::is_sameprefix(line, "Options:", tt::CASE::either) || ttlib::is_sameprefix(line, "[OPTIONS]"))
             {
                 m_section = SECTION_OPTIONS;
             }
@@ -99,7 +99,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
             continue;
         }
 
-        auto begin = ttlib::findnonspace(line);
+        auto begin = ttlib::find_nonspace(line);
         if (begin.empty() || begin[0] == '#')
             continue;
 
@@ -129,7 +129,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
     {
         ttlib::cstr projectname;
         projectname.assignCwd();
-        if (ttlib::issameprefix(projectname.filename(), "src", tt::CASE::either))
+        if (ttlib::is_sameprefix(projectname.filename(), "src", tt::CASE::either))
         {
             projectname.replace_filename("");
             // remove trailing slash
@@ -160,8 +160,8 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
     ttlib::cstr value;
     ttlib::cstr comment;
 
-    ttlib::cstr line = ttlib::findnonspace(yamlLine);
-    auto pos = line.findoneof(":=");
+    ttlib::cstr line = ttlib::find_nonspace(yamlLine);
+    auto pos = line.find_oneof(":=");
     if (pos == ttlib::cstr::npos)
     {
         AddError(_tt("Invalid Option -- missing ':' or '=' character"));
@@ -172,7 +172,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
 
     // Ignore or change obsolete options
 
-    if (name.issameprefix("64Bit") || name.issameprefix("b64_suffix") || name.issameprefix("b32_suffix"))
+    if (name.is_sameprefix("64Bit") || name.is_sameprefix("b64_suffix") || name.is_sameprefix("b32_suffix"))
     {
         return;
     }
@@ -202,7 +202,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
         {
             // Technically we should check the preceeeding character and determine if it is a backslash. Shouldn't
             // ever occur in .srcfiles.yanml files, but it is allowed in the YAML spec.
-            comment.assign(line.substr(line.findnonspace(posNext + 1)));
+            comment.assign(line.substr(line.find_nonspace(posNext + 1)));
         }
     }
     else
@@ -212,7 +212,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
         {
             // Technically we should check the preceeeding character and determine if it is a backslash. Shouldn't
             // ever occur in .srcfiles.yanml files, but it is allowed in the YAML spec.
-            comment.assign(line.substr(line.findnonspace(posComment + 1)));
+            comment.assign(line.substr(line.find_nonspace(posComment + 1)));
             value.assign(line.substr(pos, posComment - pos));
             value.trim();
         }
@@ -247,7 +247,7 @@ void CSrcFiles::AddCompilerFlag(std::string_view flag)
 
 void CSrcFiles::ProcessFile(std::string_view line)
 {
-    if (ttlib::issameprefix(line, ".include", tt::CASE::either))
+    if (ttlib::is_sameprefix(line, ".include", tt::CASE::either))
     {
         ttlib::cstr filename = ttlib::stepover(line);
         if (filename[0] == '\"')
@@ -255,7 +255,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
         else
         {
             // Remove any comment
-            filename.eraseFrom('#');
+            filename.erase_from('#');
         }
         if (!filename.empty())
             ProcessIncludeDirective(filename);
@@ -263,7 +263,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
     }
 
     ttlib::cstr filename = line;
-    filename.eraseFrom('#');
+    filename.erase_from('#');
 
     if (filename.find('*') != tt::npos || filename.find('?') != tt::npos)
     {
@@ -271,22 +271,22 @@ void CSrcFiles::ProcessFile(std::string_view line)
         return;
     }
 
-    if (auto name = m_lstSrcFiles.addfilename(filename); !name.fileExists())
+    if (auto name = m_lstSrcFiles.addfilename(filename); !name.file_exists())
     {
         AddError(_tt("Unable to locate the file ") + name);
     }
 
-    if (filename.hasExtension(".idl"))
+    if (filename.has_extension(".idl"))
     {
         m_lstIdlFiles += filename.c_str();
     }
 
     // ignore .rc2, .resources, etc.
-    else if (filename.hasExtension(".rc") && filename.extension().length() < sizeof(".rc"))
+    else if (filename.has_extension(".rc") && filename.extension().length() < sizeof(".rc"))
     {
         m_RCname = filename;
     }
-    else if (filename.hasExtension(".hhp"))
+    else if (filename.has_extension(".hhp"))
     {
         m_HPPname = filename;
     }
@@ -295,7 +295,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
 void CSrcFiles::ProcessDebugFile(std::string_view line)
 {
     ttlib::cstr filename = line;
-    filename.eraseFrom('#');
+    filename.erase_from('#');
 
     // Unlike the regular Files: section, the DebugFiles: section does not support .include, .idl, .rc, or .hhp files
 
@@ -305,7 +305,7 @@ void CSrcFiles::ProcessDebugFile(std::string_view line)
         return;
     }
 
-    if (auto name = m_lstDebugFiles.addfilename(filename); !name.fileExists())
+    if (auto name = m_lstDebugFiles.addfilename(filename); !name.file_exists())
     {
         AddError(_tt("Unable to locate the file ") + name);
     }
@@ -314,10 +314,10 @@ void CSrcFiles::ProcessDebugFile(std::string_view line)
 // Process a ".include" directive
 void CSrcFiles::ProcessIncludeDirective(std::string_view file, ttlib::cstr root)
 {
-    if (ttlib::issameprefix(file, ".include"))
+    if (ttlib::is_sameprefix(file, ".include"))
     {
         ttlib::cstr filename = ttlib::stepover(file);
-        filename.eraseFrom('#');
+        filename.erase_from('#');
         if (!filename.empty())
         {
             ProcessIncludeDirective(filename);
@@ -378,14 +378,14 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
         while (ff.isvalid())
         {
             auto& name = ff.getcstr();
-            if (name.hasExtension(".c") || name.hasExtension(".cpp") || name.hasExtension(".cxx"))
+            if (name.has_extension(".c") || name.has_extension(".cpp") || name.has_extension(".cxx"))
             {
                 if (m_section == SECTION_DEBUG_FILES)
                     m_lstDebugFiles.addfilename(name);
                 else
                     m_lstSrcFiles.addfilename(name);
             }
-            else if (name.hasExtension(".rc"))
+            else if (name.has_extension(".rc"))
             {
                 if (m_section != SECTION_DEBUG_FILES)
                 {
@@ -393,14 +393,14 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
                     m_RCname = name;
                 }
             }
-            else if (name.hasExtension(".hhp"))
+            else if (name.has_extension(".hhp"))
             {
                 if (m_section != SECTION_DEBUG_FILES)
                 {
                     m_HPPname = name;
                 }
             }
-            else if (name.hasExtension(".idl"))
+            else if (name.has_extension(".idl"))
             {
                 if (m_section != SECTION_DEBUG_FILES)
                 {
@@ -428,17 +428,17 @@ const ttlib::cstr& CSrcFiles::GetPchCpp()
 
     m_pchCPPname = getOptValue(OPT::PCH);
     m_pchCPPname.replace_extension(".cpp");
-    if (m_pchCPPname.fileExists())
+    if (m_pchCPPname.file_exists())
         return m_pchCPPname;
 
     // Check for other possible extensions
 
     m_pchCPPname.replace_extension(".cc");
-    if (m_pchCPPname.fileExists())
+    if (m_pchCPPname.file_exists())
         return m_pchCPPname;
 
     m_pchCPPname.replace_extension(".cxx");
-    if (m_pchCPPname.fileExists())
+    if (m_pchCPPname.file_exists())
         return m_pchCPPname;
 
     m_pchCPPname.replace_extension(".cpp");  // file doesn't exist, we'll generate a warning about it later
@@ -488,11 +488,11 @@ const std::string& CSrcFiles::GetTargetDir()
 
         ttlib::cstr cwd;
         cwd.assignCwd();
-        bool isSrcDir = ttlib::issameas(cwd.filename(), "src", tt::CASE::either) ? true : false;
+        bool isSrcDir = ttlib::is_sameas(cwd.filename(), "src", tt::CASE::either) ? true : false;
         if (!isSrcDir)
         {
             cwd.append_filename(IsExeTypeLib() ? "../lib" : "../bin");
-            if (cwd.dirExists())
+            if (cwd.dir_exists())
                 isSrcDir = true;
         }
         if (isSrcDir)
@@ -522,11 +522,11 @@ const std::string& CSrcFiles::GetTargetDir()
 
         ttlib::cstr cwd;
         cwd.assignCwd();
-        bool isSrcDir = ttlib::issameas(cwd.filename(), "src", tt::CASE::either) ? true : false;
+        bool isSrcDir = ttlib::is_sameas(cwd.filename(), "src", tt::CASE::either) ? true : false;
         if (!isSrcDir)
         {
             cwd.append_filename(IsExeTypeLib() ? "../lib" : "../bin");
-            if (cwd.dirExists())
+            if (cwd.dir_exists())
                 isSrcDir = true;
         }
 
@@ -539,17 +539,17 @@ const std::string& CSrcFiles::GetTargetDir()
 
         ttlib::cstr tmp(dir);
         tmp += "32";
-        if (tmp.dirExists())
+        if (tmp.dir_exists())
             dir = tmp;
         else
         {
             tmp = (dir + "x86");
-            if (tmp.dirExists())
+            if (tmp.dir_exists())
                 dir = tmp;
             else
             {
                 tmp = (dir + "_x86");
-                if (tmp.dirExists())
+                if (tmp.dir_exists())
                     dir = tmp;
             }
         }
@@ -650,15 +650,15 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
         path.addtrailingslash();
 
         path.append_filename(txtWidgetsName);
-        if (path.fileExists())
+        if (path.file_exists())
             return path;
 
         path.replace_filename(txtPlatformName);
-        if (path.fileExists())
+        if (path.file_exists())
             return path;
 
         path.replace_filename(".srcfiles.yaml");
-        if (path.fileExists())
+        if (path.file_exists())
             return path;
 
         // Search common sub directories for the file.
@@ -669,15 +669,15 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
             path.append_filename(iter);
 
             path.append_filename(txtWidgetsName);
-            if (path.fileExists())
+            if (path.file_exists())
                 return path;
 
             path.replace_filename(txtPlatformName);
-            if (path.fileExists())
+            if (path.file_exists())
                 return path;
 
             path.replace_filename(".srcfiles.yaml");
-            if (path.fileExists())
+            if (path.file_exists())
                 return path;
         }
     }
@@ -685,17 +685,17 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
     {
         // A wxWidgets version takes precedence
         path.assign(txtWidgetsName);
-        if (path.fileExists())
+        if (path.file_exists())
             return path;
 
         // Otherwise look for a platform-specific version
         path.assign(txtPlatformName);
-        if (path.fileExists())
+        if (path.file_exists())
             return path;
 
         // If all else fails, use a "normal" version.
         path.assign(".srcfiles.yaml");
-        if (path.fileExists())
+        if (path.file_exists())
             return path;
 
         for (auto iter: aProjectLocations)
@@ -703,15 +703,15 @@ ttlib::cstr locateProjectFile(std::string_view StartDir)
             path.assign(iter);
 
             path.append_filename(txtWidgetsName);
-            if (path.fileExists())
+            if (path.file_exists())
                 return path;
 
             path.replace_filename(txtPlatformName);
-            if (path.fileExists())
+            if (path.file_exists())
                 return path;
 
             path.replace_filename(".srcfiles.yaml");
-            if (path.fileExists())
+            if (path.file_exists())
                 return path;
         }
     }

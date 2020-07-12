@@ -31,7 +31,7 @@ void CTabGeneral::OnBegin(void)
         cwd.assignCwd();
 
         // If current directory is src or source, then the project name should be the parent directory name.
-        if (cwd.filename().issameas("src", tt::CASE::either) || cwd.filename().issameas("source", tt::CASE::either))
+        if (cwd.filename().is_sameas("src", tt::CASE::either) || cwd.filename().is_sameas("source", tt::CASE::either))
             cwd.remove_filename();
 
         SetControlText(IDEDIT_PROJ_NAME, cwd.filename());

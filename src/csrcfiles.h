@@ -52,12 +52,12 @@ public:
 
     // Public functions
 
-    bool isOptValue(size_t option, std::string_view value) const { return (getOptValue(option).issameas(value, tt::CASE::either)); }
+    bool isOptValue(size_t option, std::string_view value) const { return (getOptValue(option).is_sameas(value, tt::CASE::either)); }
 
     bool isOptTrue(size_t index) const
     {
         assert(index < OPT::LAST);
-        return ttlib::issameas(m_Options[index].value, "true", tt::CASE::either);
+        return ttlib::is_sameas(m_Options[index].value, "true", tt::CASE::either);
     }
 
     bool hasOptValue(size_t option) const noexcept { return (!getOptValue(option).empty()); }
@@ -156,7 +156,7 @@ public:
         assert(index < OPT::LAST);
 
         if (m_Options[index].value.empty() || !m_Options[index].OriginalValue ||
-            m_Options[index].value.issameas(m_Options[index].OriginalValue))
+            m_Options[index].value.is_sameas(m_Options[index].OriginalValue))
         {
             return false;
         }

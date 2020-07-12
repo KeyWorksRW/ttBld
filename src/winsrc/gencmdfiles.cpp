@@ -241,7 +241,7 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
     ttlib::viewfile fileOrg;
     if (fileOrg.ReadFile(pszDstFile))
     {
-        if (file.issameas(fileOrg))
+        if (file.is_sameas(fileOrg))
             return true;  // nothing changed
     }
 

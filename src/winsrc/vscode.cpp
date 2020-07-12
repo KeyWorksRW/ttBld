@@ -26,7 +26,7 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
 {
     ttlib::cstrVector results;
 
-    if (!ttlib::dirExists(".vscode"))
+    if (!ttlib::dir_exists(".vscode"))
     {
         if (!fs::create_directory(".vscode"))
         {
@@ -39,11 +39,11 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
 
         if (ttlib::cstr gitIgnore; !gitIsFileIgnored(gitIgnore, ".vscode/") && !gitIsExcluded(gitIgnore, ".vscode/"))
         {
-            if (ttlib::dirExists(".git"))
+            if (ttlib::dir_exists(".git"))
                 gitIgnore = ".git/info/exclude";
-            else if (ttlib::dirExists("../.git"))
+            else if (ttlib::dir_exists("../.git"))
                 gitIgnore = "../.git/info/exclude";
-            else if (ttlib::dirExists("../../.git"))
+            else if (ttlib::dir_exists("../../.git"))
                 gitIgnore = "../../.git/info/exclude";
 
             if (!gitIgnore.empty() &&
@@ -64,7 +64,7 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
         return results;
     }
 
-    if (ttlib::fileExists(".vscode/c_cpp_properties.json"))
+    if (ttlib::file_exists(".vscode/c_cpp_properties.json"))
     {
         if (!UpdateVsCodeProps(cSrcFiles, results))
             return results;
@@ -75,19 +75,19 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
             return results;
     }
 
-    if (!ttlib::fileExists(".vscode/launch.json") || !ttlib::fileExists(".vscode/tasks.json"))
+    if (!ttlib::file_exists(".vscode/launch.json") || !ttlib::file_exists(".vscode/tasks.json"))
     {
         CDlgVsCode dlg;
         if (dlg.DoModal(NULL) != IDOK)
             return results;
 
-        if (!ttlib::fileExists(".vscode/launch.json"))
+        if (!ttlib::file_exists(".vscode/launch.json"))
         {
             if (!dlg.CreateVsCodeLaunch(cSrcFiles, results))
                 return results;
         }
 
-        if (!ttlib::fileExists(".vscode/tasks.json"))
+        if (!ttlib::file_exists(".vscode/tasks.json"))
         {
             if (!dlg.CreateVsCodeTasks(cSrcFiles, results))
                 return results;
@@ -118,11 +118,11 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 {
     ttlib::textfile out;
     ttlib::textfile propFile;
-    propFile.ReadString(ttlib::findnonspace(txtProperties));
+    propFile.ReadString(ttlib::find_nonspace(txtProperties));
 
     for (auto propLine = propFile.begin(); propLine != propFile.end(); ++propLine)
     {
-        if (propLine->viewnonspace().issameprefix("\"defines", tt::CASE::either))
+        if (propLine->view_nonspace().is_sameprefix("\"defines", tt::CASE::either))
         {
             out.emplace_back(*propLine);
             ttlib::cstrVector Defines;
@@ -146,7 +146,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
             continue;
         }
 
-        else if (propLine->viewnonspace().issameprefix("\"includePath", tt::CASE::either))
+        else if (propLine->view_nonspace().is_sameprefix("\"includePath", tt::CASE::either))
         {
             out.emplace_back(*propLine);
             while (++propLine != propFile.end())  // find the end of the current list of includes
@@ -180,7 +180,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
             out.emplace_back(*propLine);
             continue;
         }
-        else if (propLine->viewnonspace().issameprefix("\"cppStandard", tt::CASE::either))
+        else if (propLine->view_nonspace().is_sameprefix("\"cppStandard", tt::CASE::either))
         {
             // The default is c++11, but check to see if a specific version was specified in Cflags
             if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN) && cSrcFiles.getOptValue(OPT::CFLAGS_CMN).contains("std:c++"))
@@ -243,7 +243,7 @@ bool CDlgVsCode::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Res
     if (cSrcFiles.IsExeTypeLib() || cSrcFiles.IsExeTypeDll())
         return true;  // nothing that we know how to launch if this is a library or dynamic link library
 
-    ttlib::cstr Launch = ttlib::findnonspace(txtLaunch);
+    ttlib::cstr Launch = ttlib::find_nonspace(txtLaunch);
 
     Launch.Replace("%proj%", cSrcFiles.GetProjectName());
 #if defined(_WIN32)
@@ -327,7 +327,7 @@ bool CDlgVsCode::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
     ttlib::textfile out;
 
     ttlib::textfile tasks;
-    tasks.ReadString(ttlib::findnonspace(txtTasks));
+    tasks.ReadString(ttlib::find_nonspace(txtTasks));
 
     // All of our tasks assumbe a bld/ directory since that's where ttBld will be creating the ninja files and a makefile
     ttlib::cstr MakeFileOption("-f bld/makefile");
@@ -528,7 +528,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
             {
                 if (file[line].find(']') != tt::npos)
                     break;
-                auto start = file[line].findnonspace();
+                auto start = file[line].find_nonspace();
                 if (start == tt::npos)
                     continue;
                 ttlib::cstr tmp;
@@ -567,7 +567,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
             {
                 if (file[line].contains("]"))
                     break;
-                auto start = file[line].findnonspace();
+                auto start = file[line].find_nonspace();
                 if (start == tt::npos)
                     continue;
                 ttlib::cstr path;
@@ -636,7 +636,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
     {
         for (line = 0; line < file.size(); ++line)
         {
-            if (!file[line].issameas(orgfile[line]))
+            if (!file[line].is_sameas(orgfile[line]))
             {
                 Modified = true;
                 break;
@@ -668,14 +668,14 @@ void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
     if (Defines.empty())
         return;
 
-    if (ttlib::issameprefix(Defines, "-D") || ttlib::issameprefix(Defines, "/D"))
+    if (ttlib::is_sameprefix(Defines, "-D") || ttlib::is_sameprefix(Defines, "/D"))
     {
         Defines.remove_prefix(1);
         auto& def = Results.emplace_back();
         def.AssignSubString(Defines, 'D', ' ');
     }
 
-    for (auto pos = Defines.find(" -"); ttlib::isFound(pos); pos = Defines.find(" -"))
+    for (auto pos = Defines.find(" -"); ttlib::is_found(pos); pos = Defines.find(" -"))
     {
         Defines.remove_prefix(pos + 2);
         if (std::toupper(Defines[0]) == 'D')
@@ -687,7 +687,7 @@ void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
 
     // Windows command lines often use / instead of - for switches, so we check for those as well.
 
-    for (auto pos = Defines.find(" /"); ttlib::isFound(pos); pos = Defines.find(" /"))
+    for (auto pos = Defines.find(" /"); ttlib::is_found(pos); pos = Defines.find(" /"))
     {
         Defines.remove_prefix(pos + 2);
         if (std::toupper(Defines[0]) == 'D')
@@ -721,7 +721,7 @@ constexpr auto txtMsvcSubTasks = R"===(
 // instead of the default absolute path
 static void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command)
 {
-    ttlib::cstr SubTask = ttlib::findnonspace(txtMsvcSubTasks);
+    ttlib::cstr SubTask = ttlib::find_nonspace(txtMsvcSubTasks);
     SubTask.Replace("%label%", Label);
     SubTask.Replace("%group%", Group);
     SubTask.Replace("%command%", Command);

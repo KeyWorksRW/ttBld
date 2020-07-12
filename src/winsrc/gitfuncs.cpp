@@ -15,13 +15,13 @@ bool gitIsFileIgnored(ttlib::cstr& gitIgnorePath, std::string_view filename)
 {
     if (gitIgnorePath.empty())
         gitIgnorePath = ".gitignore";
-    if (!gitIgnorePath.fileExists())
+    if (!gitIgnorePath.file_exists())
     {
         gitIgnorePath = "../.gitignore";
-        if (!gitIgnorePath.fileExists())
+        if (!gitIgnorePath.file_exists())
         {
             gitIgnorePath = "../../.gitignore";
-            if (!gitIgnorePath.fileExists())
+            if (!gitIgnorePath.file_exists())
             {
                 gitIgnorePath.clear();
                 return false;
@@ -42,17 +42,17 @@ bool gitIsExcluded(ttlib::cstr& GitExclude, std::string_view filename)
 {
     if (GitExclude.empty())
     {
-        if (ttlib::dirExists(".git"))
+        if (ttlib::dir_exists(".git"))
             GitExclude = ".git/info/exclude";
-        else if (ttlib::dirExists("../.git"))
+        else if (ttlib::dir_exists("../.git"))
             GitExclude = "../.git/info/exclude";
-        else if (ttlib::dirExists("../../.git"))
+        else if (ttlib::dir_exists("../../.git"))
             GitExclude = "../../.git/info/exclude";
         else
             return false;
     }
 
-    if (!GitExclude.fileExists())
+    if (!GitExclude.file_exists())
     {
         return false;
     }
@@ -96,11 +96,11 @@ static const char* atxtIgnoreList[]
 
 bool gitIgnoreAll(ttlib::cstr& GitExclude)
 {
-    if (ttlib::dirExists(".git"))
+    if (ttlib::dir_exists(".git"))
         GitExclude = ".git/info/exclude";
-    else if (ttlib::dirExists("../.git"))
+    else if (ttlib::dir_exists("../.git"))
         GitExclude = "../.git/info/exclude";
-    else if (ttlib::dirExists("../../.git"))
+    else if (ttlib::dir_exists("../../.git"))
         GitExclude = "../../.git/info/exclude";
     else
         return false;
@@ -114,15 +114,15 @@ bool gitIgnoreAll(ttlib::cstr& GitExclude)
         // If makefile or bld/ already exist, then assume they are already part of the project, so don't
         // ignore them.
 
-        if (ttlib::issameas(name, "makefile") && ttlib::fileExists("makefile"))
+        if (ttlib::is_sameas(name, "makefile") && ttlib::file_exists("makefile"))
             continue;
-        if (ttlib::issameas(name, "bld/") && ttlib::dirExists("bld"))
+        if (ttlib::is_sameas(name, "bld/") && ttlib::dir_exists("bld"))
             continue;
 
         bool doInsert = true;
         for (auto& line: file)
         {
-            if (line.issameas(name))
+            if (line.is_sameas(name))
             {
                 doInsert = false;
                 break;

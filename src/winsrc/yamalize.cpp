@@ -26,7 +26,7 @@ bool Yamalize()
     CWriteSrcFiles cNewSrcFiles;
     auto& lstSrcFiles = cNewSrcFiles.GetSrcFileList();
 
-    if (ttlib::fileExists(".srcfiles.yaml"))
+    if (ttlib::file_exists(".srcfiles.yaml"))
         lstSrcFiles.emplace_back(".include .srcfiles.yaml  # import all the filenames from ${workspaceRoot}/.srcfiles.yaml");
     else
     {

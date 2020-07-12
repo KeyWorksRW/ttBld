@@ -32,7 +32,7 @@ void AddFiles(const ttlib::cstrVector& lstFiles)
     size_t cFilesAdded = 0;
     for (auto& iter: lstFiles)
     {
-        if (!cSrcFiles.GetSrcFileList().hasFilename(iter))
+        if (!cSrcFiles.GetSrcFileList().has_filename(iter))
         {
             cSrcFiles.GetSrcFileList() += iter;
             ++cFilesAdded;

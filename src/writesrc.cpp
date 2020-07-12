@@ -47,7 +47,7 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         // Ignore any previous comment about ttBld since we've already written it.
         if (!SeenRequiredComment)
         {
-            if (orgFile[pos].size() && ttlib::issameprefix(orgFile[pos], "# Requires ttBld", tt::CASE::either))
+            if (orgFile[pos].size() && ttlib::is_sameprefix(orgFile[pos], "# Requires ttBld", tt::CASE::either))
             {
                 ++pos;
                 if (orgFile[pos].empty())
@@ -57,7 +57,7 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         }
 
         auto& line = out.emplace_back(orgFile[pos]);
-        if (line.issameprefix("Options:", tt::CASE::either))
+        if (line.is_sameprefix("Options:", tt::CASE::either))
             break;
     } while (++pos < orgFile.size());
 
@@ -68,7 +68,7 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
 
     for (++pos; pos < orgFile.size(); ++pos)
     {
-        auto view = ttlib::findnonspace(orgFile[pos]);
+        auto view = ttlib::find_nonspace(orgFile[pos]);
         if (view.empty() || view[0] == '#')
         {
             // write blank or comment lines unmodified
@@ -77,14 +77,14 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         }
 
         // the Options: section ends if a new section is encountered
-        if (ttlib::isalpha(orgFile[pos][0]) || ttlib::isdigit(orgFile[pos][0]))
+        if (ttlib::is_alpha(orgFile[pos][0]) || ttlib::is_digit(orgFile[pos][0]))
             break;
 
         auto posColon = view.find(':');
-        if (!ttlib::isFound(posColon))
+        if (!ttlib::is_found(posColon))
         {
             posColon = view.find('=');
-            if (!ttlib::isFound(posColon))
+            if (!ttlib::is_found(posColon))
             {
                 // not a comment or option, write it unmodified
                 out.emplace_back(orgFile[pos]);
@@ -174,7 +174,7 @@ bld::RESULT CWriteSrcFiles::WriteNew(std::string_view filename, std::string_view
 
     if (!m_fileComment.empty())
     {
-        auto pos = m_fileComment.findnonspace();
+        auto pos = m_fileComment.find_nonspace();
         if (pos != tt::npos && m_fileComment[pos] != '#')
             m_fileComment.insert(0, "# ");
         out.emplace_back(m_fileComment);
@@ -200,7 +200,7 @@ bld::RESULT CWriteSrcFiles::WriteNew(std::string_view filename, std::string_view
         {
             // If the option isn't required, then we only output it if it has changed from the original default
             // value.
-            if (option.value.empty() || (option.OriginalValue && option.value.issameas(option.OriginalValue)))
+            if (option.value.empty() || (option.OriginalValue && option.value.is_sameas(option.OriginalValue)))
                 continue;
         }
 

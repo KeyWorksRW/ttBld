@@ -96,20 +96,20 @@ int main(int argc, char** argv)
     for (int argpos = 1; argpos < argc && (*argv[argpos] == '-' || *argv[argpos] == '/'); ++argpos)
     {
         // Only one of these commands can be used -- after it is processes, ttBld will exit
-        if (argv[argpos][1] == '?' || ttlib::issameprefix(argv[argpos] + 1, "help", tt::CASE::either))
+        if (argv[argpos][1] == '?' || ttlib::is_sameprefix(argv[argpos] + 1, "help", tt::CASE::either))
         {
             Usage();
             return 1;
         }
-        else if (ttlib::issameprefix(argv[argpos] + 1, "allninja", tt::CASE::either))  // -allninja
+        else if (ttlib::is_sameprefix(argv[argpos] + 1, "allninja", tt::CASE::either))  // -allninja
             Action |= ACT_ALLNINJA;
-        else if (ttlib::issameprefix(argv[argpos] + 1, "alld", tt::CASE::either))  // -alld
+        else if (ttlib::is_sameprefix(argv[argpos] + 1, "alld", tt::CASE::either))  // -alld
             Action |= ACT_ALLD;
-        else if (ttlib::issameprefix(argv[argpos] + 1, "all", tt::CASE::either))  // -all
+        else if (ttlib::is_sameprefix(argv[argpos] + 1, "all", tt::CASE::either))  // -all
             Action |= ACT_ALL;
 
         // -dir base_directory (used to specify directory for .srcfiles.yaml, makefile, and build directory)
-        else if (ttlib::issameprefix(argv[argpos] + 1, "dir", tt::CASE::either))
+        else if (ttlib::is_sameprefix(argv[argpos] + 1, "dir", tt::CASE::either))
         {
             ++argpos;
             if (argpos > argc || (*argv[argpos] == '-' || *argv[argpos] == '/'))
@@ -127,21 +127,21 @@ int main(int argc, char** argv)
 
         // The following commands are called from a makefile to update one .ninja script and immediately exit
 
-        else if (ttlib::issameas(argv[argpos] + 1, "umsvc", tt::CASE::either))
+        else if (ttlib::is_sameas(argv[argpos] + 1, "umsvc", tt::CASE::either))
             upType = UPDATE_MSVC;
-        else if (ttlib::issameas(argv[argpos] + 1, "umsvc_x86", tt::CASE::either))
+        else if (ttlib::is_sameas(argv[argpos] + 1, "umsvc_x86", tt::CASE::either))
             upType = UPDATE_MSVC32;
-        else if (ttlib::issameas(argv[argpos] + 1, "uclang", tt::CASE::either))
+        else if (ttlib::is_sameas(argv[argpos] + 1, "uclang", tt::CASE::either))
             upType = UPDATE_CLANG_CL;
-        else if (ttlib::issameas(argv[argpos] + 1, "uclang_x86", tt::CASE::either))
+        else if (ttlib::is_sameas(argv[argpos] + 1, "uclang_x86", tt::CASE::either))
             upType = UPDATE_CLANG_CL32;
-        else if (ttlib::issameas(argv[argpos] + 1, "umsvcD", tt::CASE::either))
+        else if (ttlib::is_sameas(argv[argpos] + 1, "umsvcD", tt::CASE::either))
             upType = UPDATE_MSVCD;
-        else if (ttlib::issameas(argv[argpos] + 1, "umsvc_x86D", tt::CASE::either))
+        else if (ttlib::is_sameas(argv[argpos] + 1, "umsvc_x86D", tt::CASE::either))
             upType = UPDATE_MSVC32D;
-        else if (ttlib::issameas(argv[argpos] + 1, "uclangD", tt::CASE::either))
+        else if (ttlib::is_sameas(argv[argpos] + 1, "uclangD", tt::CASE::either))
             upType = UPDATE_CLANG_CLD;
-        else if (ttlib::issameas(argv[argpos] + 1, "uclang_x86D", tt::CASE::either))
+        else if (ttlib::is_sameas(argv[argpos] + 1, "uclang_x86D", tt::CASE::either))
             upType = UPDATE_CLANG_CL32D;
     }
 

@@ -37,7 +37,7 @@ CNinja::CNinja(std::string_view projectFile)
         if (projname.back() == '/')
             projname.pop_back();
 
-        if (projname.hasFilename("src"))
+        if (projname.has_filename("src"))
         {
             projname.remove_filename();
             if (projname.back() == '/')
@@ -130,7 +130,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Figure out the filenames to use for the source and output for a precompiled header
 
-    if (hasOptValue(OPT::PCH) && !GetPchCpp().issameprefix("none"))
+    if (hasOptValue(OPT::PCH) && !GetPchCpp().is_sameprefix("none"))
     {
         m_pchHdrName = GetPchCpp();
         m_pchHdrName.replace_extension(".pch");
@@ -139,7 +139,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         m_pchHdrNameObj.assign(m_pchCppName.filename());
         m_pchHdrNameObj.replace_extension(".obj");
 
-        if (!m_pchCppName.fileExists())
+        if (!m_pchCppName.file_exists())
         {
             AddError(getOptValue(OPT::PCH) + _tt(strIdMissingPchCpp));
         }
@@ -168,7 +168,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     // source file will get rebuilt whether or not a particular source file actually uses the generated header
     // m_ninjafile.
 
-    if (hasOptValue(OPT::PCH) && !getOptValue(OPT::PCH).issameas("none"))
+    if (hasOptValue(OPT::PCH) && !getOptValue(OPT::PCH).is_sameas("none"))
     {
         m_ninjafile.addEmptyLine();
         lastline().Format("build $outdir/%s: compilePCH %s", m_pchHdrNameObj.c_str(), m_pchCppName.c_str());
@@ -197,7 +197,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         auto ext = srcFile.extension();
         if (ext.empty() || std::tolower(ext[1] != 'c'))
             continue;
-        if (srcFile.issameas(m_pchCppName))
+        if (srcFile.is_sameas(m_pchCppName))
             continue;
 
         ttlib::cstr objFile(srcFile.filename());
@@ -246,7 +246,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
             auto ext = srcFile.extension();
             if (ext.empty() || std::tolower(ext[1] != 'c'))
                 continue;
-            if (srcFile.issameas(m_pchCppName))
+            if (srcFile.is_sameas(m_pchCppName))
                 continue;
 
             ttlib::cstr objFile(srcFile.filename());
@@ -269,7 +269,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     // Write the build rule for the resource compiler if an .rc file was specified as a source
 
-    if (GetRcFile().fileExists())
+    if (GetRcFile().file_exists())
     {
         ttlib::cstr resource { GetRcFile() };
 
@@ -300,7 +300,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         msvcWriteLinkTargets(cmplr);
     }
 
-    if (!GetBldDir().dirExists())
+    if (!GetBldDir().dir_exists())
     {
         if (!fs::create_directory(GetBldDir().c_str()))
         {
@@ -322,7 +322,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
             return false;  // because we didn't write anything
         }
 
-        if (fileOrg.issameas(m_ninjafile))
+        if (fileOrg.is_sameas(m_ninjafile))
         {
             return false;  // nothing changed
         }
@@ -344,7 +344,7 @@ void CNinja::ProcessBuildLibs()
     if (!hasOptValue(OPT::BUILD_LIBS))
         return;
 
-    ttlib::multistr enumLib(ttlib::findnonspace(getOptValue(OPT::BUILD_LIBS)), ';');
+    ttlib::multistr enumLib(ttlib::find_nonspace(getOptValue(OPT::BUILD_LIBS)), ';');
     for (auto& libPath: enumLib)
     {
         ttlib::cwd cwd(true);
@@ -398,7 +398,7 @@ void CNinja::ProcessBuildLibs()
 
                 */
 
-                if (ttlib::dirExists(libPath.filename()))
+                if (ttlib::dir_exists(libPath.filename()))
                 {
                     ttlib::ChangeDir(libPath.filename());
                     path.assign(locateProjectFile(BuildDirectory));

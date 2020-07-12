@@ -52,7 +52,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
         auto name = files[pos].node().first_attribute().cvalue();
         if (!name.empty())
         {
-            if (ttlib::issameprefix(name, "Source Files", tt::CASE::either))
+            if (ttlib::is_sameprefix(name, "Source Files", tt::CASE::either))
             {
                 auto node = files[pos].node();
                 for (auto filename: node.child("File"))
@@ -66,7 +66,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                     }
                 }
             }
-            else if (ttlib::issameprefix(name, "Resource Files", tt::CASE::either))
+            else if (ttlib::is_sameprefix(name, "Resource Files", tt::CASE::either))
             {
                 auto node = files[pos].node();
                 for (auto filename: node.child("File"))
@@ -75,7 +75,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                     if (!path.empty())
                     {
                         ttlib::cstr relative(path);
-                        if (relative.hasExtension(".rc"))
+                        if (relative.has_extension(".rc"))
                         {
                             MakeNameRelative(relative);
                             m_writefile.GetSrcFileList().addfilename(relative);
@@ -112,11 +112,11 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                 ProcessVcRelease(configs[pos].node());
                 ReleaseProcessed = true;
                 auto type = configs[pos].node().attribute("ConfigurationType").cvalue();
-                if (type.issameas("1"))
+                if (type.is_sameas("1"))
                     m_writefile.setOptValue(OPT::EXE_TYPE, "window");
-                else if (type.issameas("2"))
+                else if (type.is_sameas("2"))
                     m_writefile.setOptValue(OPT::EXE_TYPE, "console");
-                else if (type.issameas("4"))
+                else if (type.is_sameas("4"))
                     m_writefile.setOptValue(OPT::EXE_TYPE, "dll");
             }
         }
@@ -130,7 +130,7 @@ void CConvert::ProcessVcDebug(pugi::xml_node node)
     for (auto tool: node.child("Tool"))
     {
         auto name = tool.attribute("Name").cvalue();
-        if (name.issameas("VCCLCompilerTool", tt::CASE::either))
+        if (name.is_sameas("VCCLCompilerTool", tt::CASE::either))
         {
             auto val = tool.attribute("PreprocessorDefinitions").cvalue();
             if (!val.empty())
@@ -153,7 +153,7 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
     for (auto tool: node.child("Tool"))
     {
         auto name = tool.attribute("Name").cvalue();
-        if (name.issameas("VCCLCompilerTool", tt::CASE::either))
+        if (name.is_sameas("VCCLCompilerTool", tt::CASE::either))
         {
             auto val = tool.attribute("PreprocessorDefinitions").cvalue();
             if (!val.empty())
@@ -196,7 +196,7 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
                     m_writefile.setOptValue(OPT::INC_DIRS, Includes);
             }
         }
-        else if (name.issameas("VCLinkerTool", tt::CASE::either))
+        else if (name.is_sameas("VCLinkerTool", tt::CASE::either))
         {
             auto val = tool.attribute("AdditionalDependencies").cvalue();
             if (!val.empty())

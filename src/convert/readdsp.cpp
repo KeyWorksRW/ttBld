@@ -55,21 +55,21 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
 
     for (auto& line: fileIn)
     {
-        if (line.viewnonspace().empty())
+        if (line.view_nonspace().empty())
             continue;
 
-        if (line.issameprefix("CFG", tt::CASE::either))
+        if (line.is_sameprefix("CFG", tt::CASE::either))
         {
             auto pos = line.find('=');
             if (pos != tt::npos)
             {
-                pos = line.findnonspace(pos + 1);
-                auto end = line.findspace(pos);
+                pos = line.find_nonspace(pos + 1);
+                auto end = line.find_space(pos);
                 std::string project(line.c_str() + pos, end - pos);
                 m_writefile.setOptValue(OPT::PROJECT, project);
             }
         }
-        else if (line.issameprefix("CFG", tt::CASE::either) && line.contains("$(CFG)"))
+        else if (line.is_sameprefix("CFG", tt::CASE::either) && line.contains("$(CFG)"))
         {
             inReleaseSection = line.contains(" Release");
         }
@@ -114,8 +114,8 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                     do
                     {
                         ttlib::cstr def;
-                        pos = def.ExtractSubString(line, line.findspace(pos));
-                        if (!def.issameprefix("NDEBUG") && !def.issameprefix("_DEBUG") && !def.issameprefix("_WIN32"))
+                        pos = def.ExtractSubString(line, line.find_space(pos));
+                        if (!def.is_sameprefix("NDEBUG") && !def.is_sameprefix("_DEBUG") && !def.is_sameprefix("_WIN32"))
                         {
                             ttlib::cstr Flag("-D" + def);
                             // If we don't already have the flag, then add it
@@ -142,12 +142,12 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 }
             }
         }
-        else if (Group == GROUP_SRC && line.issameas("SOURCE"))
+        else if (Group == GROUP_SRC && line.is_sameas("SOURCE"))
         {
             auto pos = line.find('=');
             if (pos != tt::npos)
             {
-                pos = line.findnonspace(pos + 1);
+                pos = line.find_nonspace(pos + 1);
                 ttlib::cstr filename(line.c_str() + pos);
                 MakeNameRelative(filename);
                 m_writefile.GetSrcFileList().append(filename);

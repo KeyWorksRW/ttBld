@@ -86,17 +86,17 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
     if (srcOrg.hasOptValue(OPT::PCH))
     {
         ttlib::cstr cszPch(srcOrg.getOptValue(OPT::PCH_CPP));
-        if (cszPch.empty() || cszPch.issameas("none"))
+        if (cszPch.empty() || cszPch.is_sameas("none"))
         {
             cszPch = srcOrg.getOptValue(OPT::PCH);
             cszPch.replace_extension(".cpp");
-            if (!cszPch.fileExists())
+            if (!cszPch.file_exists())
             {
                 cszPch.replace_extension(".cc");
-                if (!cszPch.fileExists())
+                if (!cszPch.file_exists())
                 {
                     cszPch.replace_extension(".cxx");
-                    if (!cszPch.fileExists())
+                    if (!cszPch.file_exists())
                         cszPch.replace_extension(".cpp");  // File can't be found, switch back to original
                 }
             }

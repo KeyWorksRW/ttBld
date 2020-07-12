@@ -58,7 +58,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
     ttlib::cstr inFilename { !header.empty() ? header : rcfile };
     ttlib::cstr workingDir;
 
-    if (ttlib::isFound(inFilename.find('/')))
+    if (ttlib::is_found(inFilename.find('/')))
     {
         workingDir = inFilename;
         workingDir.remove_filename();
@@ -85,11 +85,11 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
 
     for (auto line: file)
     {
-        line = ttlib::findnonspace(line);
+        line = ttlib::find_nonspace(line);
         if (!line.length())
             continue;
 
-        if (ttlib::issameprefix(line, "#include"))
+        if (ttlib::is_sameprefix(line, "#include"))
         {
             line = ttlib::stepover(line);
             if (line.empty())
@@ -104,7 +104,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                 // header files rarely change, and when they do they are not likely to require rebuilding the .rc
                 // file, we simply ignore them.
 
-                if (incName.issameprefix("afx") || incName.issameprefix("atl") || incName.issameprefix("winres"))
+                if (incName.is_sameprefix("afx") || incName.is_sameprefix("atl") || incName.is_sameprefix("winres"))
                     continue;
 
                 ttlib::cstr root { inFilename };
@@ -112,7 +112,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                 incName.make_relative(root);
                 incName.backslashestoforward();
 
-                if (!incName.fileExists())
+                if (!incName.file_exists())
                 {
                     // We can't really report this as an error unless we first check the INCLUDE environment
                     // variable as well as the IncDirs option in .srcfiles.yaml. The resource compiler is going to
@@ -120,7 +120,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                     continue;
                 }
 
-                if (!m_RcDependencies.hasFilename(incName))
+                if (!m_RcDependencies.has_filename(incName))
                 {
                     if (workingDir.size())
                     {
@@ -150,15 +150,15 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                 {
                     // Make certain the keyword starts with whitespace. The RcKeywords list includes the trailing
                     // space so we don't need to check for that.
-                    if (posKeyword > 0 && !ttlib::iswhitespace(line[posKeyword - 1]))
+                    if (posKeyword > 0 && !ttlib::is_whitespace(line[posKeyword - 1]))
                         continue;
 
-                    auto filename = ttlib::stepover(ttlib::findstr(line, keyword));
+                    auto filename = ttlib::stepover(ttlib::find_str(line, keyword));
 
                     // Old resource files may have some old 16-bit declarations before the filename.
                     for (auto skip: aRemovals)
                     {
-                        if (ttlib::issameprefix(filename, skip))
+                        if (ttlib::is_sameprefix(filename, skip))
                         {
                             filename = ttlib::stepover(filename);
                         }
@@ -171,7 +171,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                     {
                         ttlib::cstr parseName;
                         parseName.ExtractSubString(filename);
-                        if (!parseName.empty() && parseName.fileExists())
+                        if (!parseName.empty() && parseName.file_exists())
                         {
                             ttlib::cstr root { inFilename };
                             root.remove_filename();

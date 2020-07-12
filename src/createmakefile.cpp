@@ -27,7 +27,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
 {
     ttlib::cstr MakeFile(type == MAKE_TYPE::normal ? "makefile" : "bld/makefile");
 
-    if (type == MAKE_TYPE::normal && MakeFile.fileExists())
+    if (type == MAKE_TYPE::normal && MakeFile.file_exists())
     {
         AddError(_tt(strIdMakefileExists));
         return true;  // Don't overwrite an existing makefile
@@ -38,9 +38,9 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
     {
         ttlib::cstr resText;
         if (type == MAKE_TYPE::normal)
-            resText = ttlib::findnonspace(res_makefile);
+            resText = ttlib::find_nonspace(res_makefile);
         else
-            resText = ttlib::findnonspace(res_makefile_ttbld);
+            resText = ttlib::find_nonspace(res_makefile_ttbld);
 
         resText.Replace("%build%", GetBldDir(), tt::REPLACE::all);
         resText.Replace("%project%", GetProjectName(), tt::REPLACE::all);
@@ -60,7 +60,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
     for (size_t pos = 0; pos < file.size(); ++pos)
     {
         auto& line = file[pos];
-        if (line.issameprefix("release:"))
+        if (line.is_sameprefix("release:"))
         {
             if (!GetHHPName().empty())
             {
@@ -91,7 +91,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
                 file.insertEmptyLine(pos++) = "\tcd " + bldLib.srcDir + " & ninja -f $(BldScript)";
             }
         }
-        else if (line.issameprefix("debug:"))
+        else if (line.is_sameprefix("debug:"))
         {
             // add all build libs to the target list
             for (auto& bldLib: m_bldLibs)
@@ -122,10 +122,10 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
 
     // If the makefile already exists, don't write to it unless something has actually changed
 
-    if (MakeFile.fileExists())
+    if (MakeFile.file_exists())
     {
         ttlib::viewfile oldMakefile;
-        if (!oldMakefile.ReadFile(MakeFile) || !file.issameas(oldMakefile))
+        if (!oldMakefile.ReadFile(MakeFile) || !file.is_sameas(oldMakefile))
         {
             if (m_dryrun.IsEnabled())
             {
@@ -148,7 +148,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
     {
         ttlib::cstr path(MakeFile);
         path.remove_filename();
-        if (!path.dirExists())
+        if (!path.dir_exists())
         {
             if (!fs::create_directory(path.wx_str()))
             {

@@ -50,7 +50,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
 
     for (size_t pos = 0; pos < Directories.size(); ++pos)
     {
-        if (Directories[pos].node().cname().issameas("src"))
+        if (Directories[pos].node().cname().is_sameas("src"))
         {
             auto file = Directories[pos].node().first_child();
             do
@@ -67,9 +67,9 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
     auto settings = root.child("Settings");
     if (settings)
     {
-        if (settings.attribute("Type").cvalue().issameas("Dynamic Library"))
+        if (settings.attribute("Type").cvalue().is_sameas("Dynamic Library"))
             m_writefile.setOptValue(OPT::EXE_TYPE, "dll");
-        else if (settings.attribute("Type").cvalue().issameas("Static Library"))
+        else if (settings.attribute("Type").cvalue().is_sameas("Static Library"))
             m_writefile.setOptValue(OPT::EXE_TYPE, "lib");
 
         auto Definitions = m_xmldoc.select_nodes("/CodeLite_Project/Settings/GlobalSettings/Compiler/Preprocessor[@Value]");

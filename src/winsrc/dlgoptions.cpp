@@ -61,20 +61,20 @@ CTabOptions::CTabOptions() : ttlib::dlg(IDDLG_OPTIONS), CWriteSrcFiles()
 
     ReadFile();  // read in any existing .srcfiles
 
-    if (!hasOptValue(OPT::PCH) || getOptValue(OPT::PCH).issameas("none"))
+    if (!hasOptValue(OPT::PCH) || getOptValue(OPT::PCH).is_sameas("none"))
     {
-        if (ttlib::fileExists("stdafx.h"))
+        if (ttlib::file_exists("stdafx.h"))
             setOptValue(OPT::PCH, "stdafx.h");
-        else if (ttlib::fileExists("pch.h"))
+        else if (ttlib::file_exists("pch.h"))
             setOptValue(OPT::PCH, "pch.h");
-        else if (ttlib::fileExists("precomp.h"))
+        else if (ttlib::file_exists("precomp.h"))
             setOptValue(OPT::PCH, "precomp.h");
 
-        else if (ttlib::fileExists("pch.hh"))
+        else if (ttlib::file_exists("pch.hh"))
             setOptValue(OPT::PCH, "pch.hh");
-        else if (ttlib::fileExists("pch.hpp"))
+        else if (ttlib::file_exists("pch.hpp"))
             setOptValue(OPT::PCH, "pch.hpp");
-        else if (ttlib::fileExists("pch.hxx"))
+        else if (ttlib::file_exists("pch.hxx"))
             setOptValue(OPT::PCH, "pch.hxx");
     }
 }
@@ -143,7 +143,7 @@ void CTabOptions::OnCancel(void)
 
 void CTabOptions::SaveChanges()
 {
-    if (GetSrcFilesName().fileExists())
+    if (GetSrcFilesName().file_exists())
     {
         if (UpdateOptions(GetSrcFilesName()) == bld::success)
             std::cout << GetSrcFilesName() + _tt(strIdOptionsUpdated) << '\n';

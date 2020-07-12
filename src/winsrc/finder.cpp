@@ -99,7 +99,7 @@ bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathR
         for (auto& str: enumstr)
         {
             str.append_filename(filename);
-            if (str.fileExists())
+            if (str.file_exists())
             {
                 pathResult = str;
                 pathResult.backslashestoforward();

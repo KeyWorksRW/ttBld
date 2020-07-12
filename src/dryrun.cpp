@@ -33,7 +33,7 @@ void CDryRun::DisplayFileDiff(const ttlib::viewfile& orgfile, const ttlib::textf
 
     for (; posOrg < orgfile.size() && posNew < newfile.size(); ++posOrg, ++posNew)
     {
-        if (!newfile[posOrg].issameas(orgfile[posNew]))
+        if (!newfile[posOrg].is_sameas(orgfile[posNew]))
         {
             auto posSync = newfile.FindLineContaining(orgfile[posOrg]);
             if (posSync != tt::npos)

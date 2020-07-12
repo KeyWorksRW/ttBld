@@ -170,7 +170,7 @@ size_t CSrcFiles::FindOption(const std::string_view name) const
     size_t pos { 0 };
     for (; pos < m_Options.size(); ++pos)
     {
-        if (ttlib::issameas(name, m_Options[pos].OriginalName, tt::CASE::either))
+        if (ttlib::is_sameas(name, m_Options[pos].OriginalName, tt::CASE::either))
             return pos;
     }
     return OPT::LAST;
@@ -184,8 +184,8 @@ void CSrcFiles::setOptValue(size_t index, std::string_view value)
         m_Options[index].value = value;
     else
     {
-        if (ttlib::issameprefix(value, "yes", tt::CASE::either) ||
-            ttlib::issameprefix(value, "true", tt::CASE::either))
+        if (ttlib::is_sameprefix(value, "yes", tt::CASE::either) ||
+            ttlib::is_sameprefix(value, "true", tt::CASE::either))
             m_Options[index].value = "true";
         else
             m_Options[index].value = "false";

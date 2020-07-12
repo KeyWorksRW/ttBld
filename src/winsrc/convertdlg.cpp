@@ -112,12 +112,12 @@ void CConvertDlg::OnBegin(void)
     SetBtnIcon(IDCANCEL, IDICON_TTLIB_CANCEL);
 
     ttlib::cstr tmp;
-    if (!ttlib::dirExists(".vscode") && IsVsCodeAvail())
+    if (!ttlib::dir_exists(".vscode") && IsVsCodeAvail())
         SetCheck(IDCHECK_VSCODE);
 
     // These three directories are the only locations that gitIgnoreAll() will use, so if they don't exist, then there
     // isn't any way to add to the excludes list -- so just hide the control if that's the case.
-    if (ttlib::dirExists(".git") || ttlib::dirExists("../.git") || ttlib::dirExists("../../.git"))
+    if (ttlib::dir_exists(".git") || ttlib::dir_exists("../.git") || ttlib::dir_exists("../../.git"))
         SetCheck(IDCHECK_IGNORE_ALL);
     else
         HideControl(IDCHECK_IGNORE_ALL);
@@ -227,7 +227,7 @@ void CConvertDlg::OnBtnChangeOut()  // change the directory to write .srcfiles t
     if (dlg.GetFolderName(*this))
     {
         dlg.append_filename(".srcfiles.yaml");
-        if (dlg.fileExists())
+        if (dlg.file_exists())
         {
             if (ttlib::MsgBox(_tt(strIdConfirmReplace), MB_YESNO) != IDYES)
                 return;
@@ -281,7 +281,7 @@ void CConvertDlg::OnOK(void)
     m_CreateVscode = GetCheck(IDCHECK_VSCODE);
     m_AddToGitExclude = GetCheck(IDCHECK_IGNORE_ALL);
 
-    if (!m_ConvertFile.empty() && !m_ConvertFile.fileExists())
+    if (!m_ConvertFile.empty() && !m_ConvertFile.file_exists())
     {
         ttlib::MsgBox(_tt(strIdCantOpen) + m_ConvertFile);
         CancelEnd();
@@ -308,7 +308,7 @@ bool CConvertDlg::doConversion()
             projname.backslashestoforward();
             if (projname.back() == '/')
                 projname.pop_back();
-            if (projname.hasFilename("src"))
+            if (projname.has_filename("src"))
             {
                 projname.remove_filename();
                 if (projname.back() == '/')
@@ -316,20 +316,20 @@ bool CConvertDlg::doConversion()
             }
             m_cSrcFiles.setOptValue(OPT::PROJECT, projname.filename());
 
-            if (!m_cSrcFiles.hasOptValue(OPT::PCH) || m_cSrcFiles.getOptValue(OPT::PCH).issameas("none"))
+            if (!m_cSrcFiles.hasOptValue(OPT::PCH) || m_cSrcFiles.getOptValue(OPT::PCH).is_sameas("none"))
             {
-                if (ttlib::fileExists("stdafx.h"))
+                if (ttlib::file_exists("stdafx.h"))
                     m_cSrcFiles.setOptValue(OPT::PCH, "stdafx.h");
-                else if (ttlib::fileExists("pch.h"))
+                else if (ttlib::file_exists("pch.h"))
                     m_cSrcFiles.setOptValue(OPT::PCH, "pch.h");
-                else if (ttlib::fileExists("precomp.h"))
+                else if (ttlib::file_exists("precomp.h"))
                     m_cSrcFiles.setOptValue(OPT::PCH, "precomp.h");
 
-                else if (ttlib::fileExists("pch.hh"))
+                else if (ttlib::file_exists("pch.hh"))
                     m_cSrcFiles.setOptValue(OPT::PCH, "pch.hh");
-                else if (ttlib::fileExists("pch.hpp"))
+                else if (ttlib::file_exists("pch.hpp"))
                     m_cSrcFiles.setOptValue(OPT::PCH, "pch.hpp");
-                else if (ttlib::fileExists("pch.hxx"))
+                else if (ttlib::file_exists("pch.hxx"))
                     m_cSrcFiles.setOptValue(OPT::PCH, "pch.hxx");
             }
         }
@@ -353,31 +353,31 @@ bool CConvertDlg::doConversion()
     if (!extension.empty())
     {
         bool bResult = false;
-        if (extension.issameas(".vcxproj", tt::CASE::either))
+        if (extension.is_sameas(".vcxproj", tt::CASE::either))
         {
             CConvert convert;
             auto result = convert.ConvertVcx(m_ConvertFile, m_cszOutSrcFiles);
             return (result == bld::success);
         }
-        else if (extension.issameas(".vcproj", tt::CASE::either))
+        else if (extension.is_sameas(".vcproj", tt::CASE::either))
         {
             CConvert convert;
             auto result = convert.ConvertVc(m_ConvertFile, m_cszOutSrcFiles);
             return (result == bld::success);
         }
-        else if (extension.issameas(".dsp", tt::CASE::either))
+        else if (extension.is_sameas(".dsp", tt::CASE::either))
         {
             CConvert convert;
             auto result = convert.ConvertDsp(m_ConvertFile, m_cszOutSrcFiles);
             return (result == bld::success);
         }
-        else if (extension.issameas(".project", tt::CASE::either))
+        else if (extension.is_sameas(".project", tt::CASE::either))
         {
             CConvert convert;
             auto result = convert.ConvertCodeLite(m_ConvertFile, m_cszOutSrcFiles);
             return (result == bld::success);
         }
-        else if (m_ConvertFile.issameprefix(".srcfiles", tt::CASE::either))
+        else if (m_ConvertFile.is_sameprefix(".srcfiles", tt::CASE::either))
         {
             CConvert convert;
             auto result = convert.ConvertSrcfiles(m_ConvertFile, m_cszOutSrcFiles);

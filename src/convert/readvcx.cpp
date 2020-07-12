@@ -114,13 +114,13 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
     if (compile)
     {
         auto val = compile.child("PrecompiledHeader").first_child().cvalue();
-        if (!val.empty() && !ttlib::issameprefix(val, "NotUsing", tt::CASE::either))
+        if (!val.empty() && !ttlib::is_sameprefix(val, "NotUsing", tt::CASE::either))
             m_writefile.setOptValue(OPT::PCH, val);
 
         val = compile.child("WarningLevel").first_child().cvalue();
         if (val.empty())
         {
-            while (val.size() && !ttlib::isdigit(val[0]))
+            while (val.size() && !ttlib::is_digit(val[0]))
                 val.remove_prefix(1);
             m_writefile.setOptValue(OPT::WARN, val);
         }
@@ -164,7 +164,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
         auto val = link.child("SubSystem").first_child().cvalue();
         if (!val.empty())
         {
-            if (ttlib::issameprefix(val, "Console", tt::CASE::either))
+            if (ttlib::is_sameprefix(val, "Console", tt::CASE::either))
                 m_writefile.setOptValue(OPT::EXE_TYPE, "console");
         }
 
@@ -195,7 +195,7 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
     if (compile)
     {
         auto val = compile.child("FavorSizeOrSpeed").first_child().cvalue();
-        if (ttlib::issameprefix(val, "Speed", tt::CASE::either))
+        if (ttlib::is_sameprefix(val, "Speed", tt::CASE::either))
             m_writefile.setOptValue(OPT::OPTIMIZE, "speed");
 
         val = compile.child("PreprocessorDefinitions").first_child().cvalue();
@@ -218,7 +218,7 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
         auto val = link.child("SubSystem").first_child().cvalue();
         if (!val.empty())
         {
-            if (ttlib::issameprefix(val, "Console", tt::CASE::either))
+            if (ttlib::is_sameprefix(val, "Console", tt::CASE::either))
                 m_writefile.setOptValue(OPT::EXE_TYPE, "console");
             // TODO: [KeyWorks - 03-29-2020] Need to add other types here
         }

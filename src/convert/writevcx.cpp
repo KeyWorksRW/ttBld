@@ -56,9 +56,9 @@ bool CVcxWrite::CreateBuildFile()
 
     ttlib::cstr cszProjVC(GetProjectName());
     cszProjVC.replace_extension(".vcxproj");
-    if (!cszProjVC.fileExists())
+    if (!cszProjVC.file_exists())
     {
-        ttlib::cstr master(ttlib::findnonspace(res_vcxproj_xml));
+        ttlib::cstr master(ttlib::find_nonspace(res_vcxproj_xml));
 
         master.Replace("%guid%", cszGuid, true);
         master.Replace("%%DebugExe%", GetTargetDebug(), true);
@@ -111,7 +111,7 @@ bool CVcxWrite::CreateBuildFile()
         else
             std::cout << _tt(strIdCreated) << cszProjVC << '\n';
 
-        master = ttlib::findnonspace(res_vcxproj_filters_xml);
+        master = ttlib::find_nonspace(res_vcxproj_filters_xml);
 
         CreateGuid(cszGuid);  // it already succeeded once if we got here, so we don't check for error again
         master.Replace("%guidSrc%", cszGuid, true);

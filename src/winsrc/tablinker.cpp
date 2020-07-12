@@ -40,11 +40,11 @@ void CTabLinker::OnBegin(void)
         SetControlText(IDEDIT_NATVIS, m_pOpts->getOptValue(OPT::NATVIS));
     else
     {
-        if (ttlib::fileExists("../ttLib/ttlibwin.natvis"))
+        if (ttlib::file_exists("../ttLib/ttlibwin.natvis"))
         {
             SetControlText(IDEDIT_NATVIS, "../ttLib/ttlibwin.natvis");
         }
-        else if (ttlib::fileExists("../ttLib/ttlibwin.natvis"))
+        else if (ttlib::file_exists("../ttLib/ttlibwin.natvis"))
         {
             SetControlText(IDEDIT_NATVIS, "../ttLib/ttlibwin.natvis");
         }
@@ -114,7 +114,7 @@ void CTabLinker::OnBtnLibDir()
             ttlib::multistr enumPaths(CurLibDirs);
             for (auto iter: enumPaths)
             {
-                if (iter.issameas(LibDir))
+                if (iter.is_sameas(LibDir))
                 {
                     ttlib::MsgBox(_tt(strIdDirAlreadyAdded) + LibDir);
                     return;

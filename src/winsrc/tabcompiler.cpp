@@ -130,11 +130,11 @@ void CTabCompiler::OnBtnChangePch()
         if (pch_cpp.size())
             return;
         pch_cpp = fdlg.filename();
-        if (pch_cpp.replace_extension(".cpp"); pch_cpp.fileExists())
+        if (pch_cpp.replace_extension(".cpp"); pch_cpp.file_exists())
             SetControlText(IDEDIT_PCH_CPP, pch_cpp);
-        else if (pch_cpp.replace_extension(".ccc"); pch_cpp.fileExists())
+        else if (pch_cpp.replace_extension(".ccc"); pch_cpp.file_exists())
             SetControlText(IDEDIT_PCH_CPP, pch_cpp);
-        else if (pch_cpp.replace_extension(".cxx"); pch_cpp.fileExists())
+        else if (pch_cpp.replace_extension(".cxx"); pch_cpp.file_exists())
             SetControlText(IDEDIT_PCH_CPP, pch_cpp);
     }
 }

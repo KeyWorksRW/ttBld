@@ -324,7 +324,7 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
 
 void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
 {
-    if (!GetRcFile().fileExists())
+    if (!GetRcFile().file_exists())
         return;
 
     m_ninjafile.emplace_back("rule rc");
@@ -444,7 +444,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     else
         lastline() += "link";
 
-    if (GetRcFile().fileExists())
+    if (GetRcFile().file_exists())
     {
         ttlib::cstr name(GetRcFile());
         name.replace_extension("");
@@ -461,7 +461,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
             continue;
         ttlib::cstr objFile(file.filename());
         objFile.replace_extension(".obj");
-        if (!bPchSeen && objFile.issameas(m_pchHdrNameObj, tt::CASE::utf8))
+        if (!bPchSeen && objFile.is_sameas(m_pchHdrNameObj, tt::CASE::utf8))
             bPchSeen = true;
         lastline() += " $";
         m_ninjafile.emplace_back("  $outdir/" + objFile);
@@ -476,7 +476,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
                 continue;
             ttlib::cstr objFile(file.filename());
             objFile.replace_extension(".obj");
-            if (!bPchSeen && objFile.issameas(m_pchHdrNameObj, tt::CASE::utf8))
+            if (!bPchSeen && objFile.is_sameas(m_pchHdrNameObj, tt::CASE::utf8))
                 bPchSeen = true;
             lastline() += " $";
             m_ninjafile.emplace_back("  $outdir/" + objFile);
