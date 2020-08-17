@@ -106,12 +106,12 @@ private:
     #define THROW(msg) throw CExcept(msg)
 #else  // not defined(NDEBUG)
     #if defined(_WIN32) && !defined(NONWIN_TEST)
-        #define ASSERT(cond)                                                                 \
-            {                                                                                \
-                if (!(cond) && ttAssertionMsg(__FILE__, __func__, __LINE__, #cond, nullptr)) \
-                {                                                                            \
-                    wxTrap();                                                                \
-                }                                                                            \
+        #define ASSERT(cond)                                                            \
+            {                                                                           \
+                if (!(cond) && ttAssertionMsg(__FILE__, __func__, __LINE__, #cond, "")) \
+                {                                                                       \
+                    wxTrap();                                                           \
+                }                                                                       \
             }
 
         #define ASSERT_MSG(cond, msg)                                                  \
