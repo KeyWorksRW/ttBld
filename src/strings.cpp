@@ -55,6 +55,7 @@ const std::map<int, const char*> englishStrings = {
     { strIdMissingSrcfiles,
       "ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location with -dir." },
     { strIdIgnoredFiles, "Added directories and filenames to ignore to " },
+    { strIdInternalError, "An internal error has occurred: " },
 
 };
 
