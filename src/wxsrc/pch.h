@@ -32,10 +32,10 @@
 #define wxUSE_UNICODE     1
 #define wxUSE_NO_MANIFEST 1  // This is required for compiling using CLANG 8 and earlier
 
-#include "wx/defs.h"
+#include <wx/defs.h>
 
 #if defined(__WINDOWS__)
-    #include "wx/msw/wrapcctl.h"
+    #include <wx/msw/wrapcctl.h>
 
     #if wxUSE_COMMON_DIALOGS
         #include <commdlg.h>
