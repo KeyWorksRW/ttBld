@@ -52,4 +52,5 @@ enum
     strIdOldVersion,           // "This version of ttBld is too old -- you need a newer version to correctly build the script files."
     strIdMissingSrcfiles,      // "ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location...
     strIdIgnoredFiles,         // "Added directories and filenames to ignore to "
+    strIdInternalError,        // "An internal error has occurred: "
 };
