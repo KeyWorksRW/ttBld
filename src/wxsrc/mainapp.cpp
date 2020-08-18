@@ -45,7 +45,6 @@
 #include <ttparser.h>   // cmd -- Command line parser
 
 #include "convert.h"     // CConvert
-#include "convertdlg.h"  // CConvertDlg
 #include "funcs.h"       // List of function declarations
 #include "ninja.h"       // CNinja
 #include "stackwalk.h"   // Walk the stack filtering out anything unrelated to current app

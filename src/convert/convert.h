@@ -1,5 +1,4 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CConvert
 // Purpose:   Class for converting project build files to .srcfiles.yaml
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)

@@ -1,5 +1,4 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      convert.cpp
 // Purpose:   Various conversion methods
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
@@ -13,6 +12,39 @@
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"
+
+#include "../ui/convertdlg.h"  // ConvertDlg -- Dialog specifying what to convert into a .srcfiles.yaml file
+#include "funcs.h"             // List of function declarations
+
+bool MakeNewProject(ttlib::cstr& projectFile)
+{
+    ConvertDlg dlg(projectFile);
+    if (dlg.ShowModal() != wxID_OK)
+        return false;
+
+    projectFile = dlg.GetOutSrcFiles();
+
+    ChangeOptions(projectFile);
+
+    if (dlg.isCreateVsCode())
+    {
+        // Create .vscode/ and any of the three .json files that are missing, and update c_cpp_properties.json
+        auto results = CreateVsCodeProject(projectFile);
+        for (auto& iter: results)
+            std::cout << iter << '\n';
+    }
+
+    if (dlg.isAddToGitExclude())
+    {
+        ttlib::cstr GitExclude;
+        if (gitIgnoreAll(GitExclude))
+        {
+            std::cout << _tt(strIdIgnoredFiles) << GitExclude << '\n';
+        }
+    }
+
+    return true;
+}
 
 bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_view dstFile)
 {

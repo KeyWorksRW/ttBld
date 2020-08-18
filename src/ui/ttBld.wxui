@@ -128,5 +128,129 @@
 				</object>
 			</object>
 		</object>
+		<object class="Dialog">
+			<property name="base_file">convertdlgBase</property>
+			<property name="derived_file">convertdlg</property>
+			<property name="derived_name">ConvertDlg</property>
+			<property name="name">ConvertDlgBase</property>
+			<property name="persist">true</property>
+			<property name="style">wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</property>
+			<property name="title">Create new .srcfiles.yaml file</property>
+			<event name="OnInitDialog">OnInit</event>
+			<object class="VerticalBoxSizer">
+				<property name="name">parent_sizer</property>
+				<property name="permission">none</property>
+				<object class="sizeritem">
+					<property name="flag">wxALL|wxEXPAND</property>
+					<object class="VerticalBoxSizer">
+						<property name="permission">none</property>
+						<object class="sizeritem">
+							<property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
+							<object class="wxStaticText">
+								<property name="label">C&amp;reate .srcfiles.yaml in:</property>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<property name="flag">wxALL|wxEXPAND</property>
+							<object class="wxDirPickerCtrl">
+								<property name="name">m_dirPickerOut</property>
+							</object>
+						</object>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<property name="flag">wxALL|wxEXPAND</property>
+					<object class="VerticalBoxSizer">
+						<property name="name">box_sizer2</property>
+						<property name="permission">none</property>
+						<object class="sizeritem">
+							<property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
+							<object class="wxRadioButton">
+								<property name="label">Create using all files in:</property>
+								<property name="style">wxRB_GROUP</property>
+								<property name="validator_variable">m_useAllFiles</property>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<property name="flag">wxEXPAND|wxALL</property>
+							<object class="wxDirPickerCtrl">
+								<property name="name">m_dirPickerList</property>
+							</object>
+						</object>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<property name="flag">wxALL|wxEXPAND</property>
+					<object class="VerticalBoxSizer">
+						<property name="name">box_sizer3</property>
+						<property name="permission">none</property>
+						<object class="sizeritem">
+							<property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
+							<object class="wxRadioButton">
+								<property name="label">Create using &amp;project file:</property>
+								<property name="name">m_radioBtn2</property>
+								<property name="validator_variable">m_useProjectFile</property>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<property name="flag">wxEXPAND|wxBOTTOM</property>
+							<object class="wxBoxSizer">
+								<property name="name">box_sizer4</property>
+								<property name="permission">none</property>
+								<object class="sizeritem">
+									<property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
+									<property name="proportion">1</property>
+									<object class="wxChoice">
+										<property name="name">m_choiceProjects</property>
+										<property name="validator_variable">m_Project</property>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxFilePickerCtrl">
+										<property name="name">m_filePickerProject</property>
+										<property name="style">wxFLP_FILE_MUST_EXIST|wxFLP_OPEN</property>
+										<property name="wildcard">Project Files|*.vcxproj;*.vcproj;*.project;*.cbp;*.dsp</property>
+										<event name="OnFileChanged">OnProjectFileLocated</event>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<property name="flag">wxALL|wxEXPAND</property>
+					<object class="VerticalBoxSizer">
+						<property name="name">box_sizer5</property>
+						<property name="permission">none</property>
+						<object class="sizeritem">
+							<object class="wxCheckBox">
+								<property name="label">&amp;Add .vscode/ directory and files (tasks.json, launch.json, etc.)</property>
+								<property name="tooltip">If checked, files are added to a .vscode/ directory so that you can build the project from with Visual Studio Code.</property>
+								<property name="validator_variable">m_AddVscodeDir</property>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<object class="wxCheckBox">
+								<property name="label">Have &amp;git ignore all generated files and directories</property>
+								<property name="name">m_checkGitIgnore</property>
+								<property name="tooltip">If checked, all ttBld generated file types and directories will be added to .git/info/exclude so that they will not be tracked.</property>
+								<property name="validator_variable">m_gitIgnore</property>
+							</object>
+						</object>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<property name="border">8</property>
+					<property name="flag">wxEXPAND|wxALL</property>
+					<object class="wxStaticLine" />
+				</object>
+				<object class="sizeritem">
+					<property name="flag">wxEXPAND|wxALL</property>
+					<object class="wxStdDialogButtonSizer">
+						<event name="OnOKButtonClick">OnOK</event>
+					</object>
+				</object>
+			</object>
+		</object>
 	</object>
 </wxUiEditorData>

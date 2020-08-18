@@ -30,7 +30,6 @@ Files:
     wxsrc/finder.cpp          # Routines for finding executables such as the MSVC compiler
 
     winsrc/addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
-    winsrc/convertdlg.cpp      # CConvertDlg for converting a project into a .srcfiles
     winsrc/gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
     winsrc/gitfuncs.cpp        # Functions for working with .git
     winsrc/vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
@@ -52,6 +51,8 @@ Files:
 
 # wxUiEditor generated classes and their derived version for display wxWidgets UI
 
+    ui/convertdlgBase.cpp      # wxUiEditor generated file
+    ui/convertdlg.cpp          # Dialog specifying what to convert into a .srcfiles.yaml file
     ui/vscodedlgBase.cpp       # wxUiEditor generated file
     ui/vscodedlg.cpp           # Dialog for setting options to create tasks.json and launch.json
 
