@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<wxUiEditorData data_version="10">
+	<object class="Project">
+		<property name="local_pch_file">pch.h</property>
+		<object class="Dialog">
+			<property name="base_file">vscodedlgBase</property>
+			<property name="derived_file">vscodedlg</property>
+			<property name="derived_name">VsCodeDlg</property>
+			<property name="name">VsCodeDlgBase</property>
+			<property name="title">Create .vscode files</property>
+			<event name="OnInitDialog">OnInit</event>
+			<object class="VerticalBoxSizer">
+				<property name="name">parent_sizer</property>
+				<property name="permission">none</property>
+				<object class="sizeritem">
+					<property name="flag">wxALL|wxEXPAND</property>
+					<object class="wxBoxSizer">
+						<property name="permission">none</property>
+						<object class="sizeritem">
+							<property name="flag">wxALL|wxEXPAND</property>
+							<object class="wxStaticBoxSizer">
+								<property name="label">tasks.json</property>
+								<property name="permission">none</property>
+								<object class="sizeritem">
+									<object class="wxCheckBox">
+										<property name="label">MSVC builds</property>
+										<property name="validator_variable">m_taskMSVCBuild</property>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxCheckBox">
+										<property name="label">CLANG builds</property>
+										<property name="name">m_checkBox2</property>
+										<property name="validator_variable">m_taskCLANGBuild</property>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxCheckBox">
+										<property name="checked">true</property>
+										<property name="label">Ninja debug build</property>
+										<property name="name">m_checkBox3</property>
+										<property name="validator_variable">m_taskNinjaBuild</property>
+									</object>
+								</object>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<property name="flag">wxALL|wxEXPAND</property>
+							<object class="wxStaticBoxSizer">
+								<property name="label">Default task</property>
+								<property name="name">static_box_sizer2</property>
+								<property name="permission">none</property>
+								<object class="sizeritem">
+									<object class="wxRadioButton">
+										<property name="label">MSVC debug</property>
+										<property name="style">wxRB_GROUP</property>
+										<property name="validator_variable">m_defTaskMSVC</property>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxRadioButton">
+										<property name="label">CLANG debug</property>
+										<property name="name">m_radioBtn2</property>
+										<property name="validator_variable">m_defTaskCLANG</property>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxRadioButton">
+										<property name="checked">true</property>
+										<property name="label">Ninja debug</property>
+										<property name="name">m_radioBtn3</property>
+										<property name="validator_variable">m_defTaskNinja</property>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<property name="flag">wxALL|wxEXPAND</property>
+					<object class="wxBoxSizer">
+						<property name="name">box_sizer2</property>
+						<property name="permission">none</property>
+						<object class="sizeritem">
+							<property name="flag">wxALL|wxEXPAND</property>
+							<property name="proportion">1</property>
+							<object class="wxStaticBoxSizer">
+								<property name="label">launch.json Pre-launch build</property>
+								<property name="name">static_box_sizer3</property>
+								<property name="permission">none</property>
+								<object class="sizeritem">
+									<object class="wxRadioButton">
+										<property name="label">none</property>
+										<property name="name">m_radioBtn4</property>
+										<property name="style">wxRB_GROUP</property>
+										<property name="validator_variable">m_preLaunchNone</property>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxRadioButton">
+										<property name="label">MSVC debug</property>
+										<property name="name">m_radioBtn5</property>
+										<property name="validator_variable">m_preLaunchMSVC</property>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxRadioButton">
+										<property name="label">CLANG debug</property>
+										<property name="name">m_radioBtn6</property>
+										<property name="validator_variable">m_preLaunchCLANG</property>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<object class="wxRadioButton">
+										<property name="checked">true</property>
+										<property name="label">Ninja debug</property>
+										<property name="name">m_radioBtn7</property>
+										<property name="validator_variable">m_preLaunchNinja</property>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<property name="flag">wxEXPAND|wxALL</property>
+					<object class="wxStdDialogButtonSizer" />
+				</object>
+			</object>
+		</object>
+	</object>
+</wxUiEditorData>

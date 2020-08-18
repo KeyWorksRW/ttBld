@@ -19,7 +19,7 @@ Options:
 
     Natvis:      ../ttlib/ttlibwin.natvis # MSVC Debug visualizer
 
-    IncDirs:     wxsrc;winsrc;./;convert;../ttlib/include  # temporary location, change before Public release
+    IncDirs:     wxsrc;winsrc;ui;./;convert;../ttlib/include  # temporary location, change before Public release
     BuildLibs:   ../ttLib/src/wxsrc              # temporary location, change before Public release
 
 Files:
@@ -34,7 +34,6 @@ Files:
     winsrc/gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
     winsrc/gitfuncs.cpp        # Functions for working with .git
     winsrc/vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
-    winsrc/vscode.cpp          # Creates/updates .vscode files
     winsrc/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
     convert/writevcx.cpp       # Create a Visual Studio project file
 
@@ -50,7 +49,11 @@ Files:
     winsrc/tabrcmidl.cpp
 
     winsrc/addfuncname.cpp     # CAddFuncName dialog
-    winsrc/dlgvscode.cpp       # CDlgVsCode dialog
+
+# wxUiEditor generated classes and their derived version for display wxWidgets UI
+
+    ui/vscodedlgBase.cpp       # wxUiEditor generated file
+    ui/vscodedlg.cpp           # Dialog for setting options to create tasks.json and launch.json
 
 # The following modules do not require Windows
 
@@ -65,6 +68,7 @@ Files:
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     rcdep.cpp           # Contains functions for parsing RC dependencies
     strings.cpp         # Contains translatable strings
+    vscode.cpp          # Creates/updates .vscode files
     verninja.cpp        # CVerMakeNinja class
     writesrc.cpp        # Writes a new or update srcfiles.yaml file
 
