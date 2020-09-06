@@ -6,18 +6,15 @@
 
 #pragma once
 
-#include <wx/string.h>
-#include <wx/stattext.h>
-#include <wx/gdicmn.h>
-#include <wx/valgen.h>
-#include <wx/filepicker.h>
-#include <wx/sizer.h>
-#include <wx/radiobut.h>
-#include <wx/choice.h>
 #include <wx/checkbox.h>
-#include <wx/statline.h>
-#include <wx/button.h>
+#include <wx/choice.h>
 #include <wx/dialog.h>
+#include <wx/event.h>
+#include <wx/filepicker.h>
+#include <wx/gdicmn.h>
+#include <wx/radiobut.h>
+#include <wx/stattext.h>
+#include <wx/string.h>
 
 class ConvertDlgBase : public wxDialog
 {
@@ -42,10 +39,6 @@ protected:
 	wxFilePickerCtrl* m_filePickerProject;
 	wxCheckBox* m_checkBox;
 	wxCheckBox* m_checkGitIgnore;
-	wxStaticLine* m_staticline;
-
-	wxButton* std_button_sizerOK;
-	wxButton* std_button_sizerCancel;
 
 	// Virtual event handlers, overide them in your derived class
 	virtual void OnInit(wxInitDialogEvent& event) { event.Skip(); }

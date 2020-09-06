@@ -9,18 +9,16 @@
 			<property name="name">VsCodeDlgBase</property>
 			<property name="title">Create .vscode files</property>
 			<event name="OnInitDialog">OnInit</event>
-			<object class="VerticalBoxSizer">
+			<object class="wxBoxSizer">
 				<property name="name">parent_sizer</property>
-				<property name="permission">none</property>
+				<property name="orient">wxVERTICAL</property>
 				<object class="sizeritem">
 					<property name="flag">wxALL|wxEXPAND</property>
 					<object class="wxBoxSizer">
-						<property name="permission">none</property>
 						<object class="sizeritem">
 							<property name="flag">wxALL|wxEXPAND</property>
 							<object class="wxStaticBoxSizer">
 								<property name="label">tasks.json</property>
-								<property name="permission">none</property>
 								<object class="sizeritem">
 									<object class="wxCheckBox">
 										<property name="label">MSVC builds</property>
@@ -49,7 +47,6 @@
 							<object class="wxStaticBoxSizer">
 								<property name="label">Default task</property>
 								<property name="name">static_box_sizer2</property>
-								<property name="permission">none</property>
 								<object class="sizeritem">
 									<object class="wxRadioButton">
 										<property name="label">MSVC debug</property>
@@ -80,14 +77,12 @@
 					<property name="flag">wxALL|wxEXPAND</property>
 					<object class="wxBoxSizer">
 						<property name="name">box_sizer2</property>
-						<property name="permission">none</property>
 						<object class="sizeritem">
 							<property name="flag">wxALL|wxEXPAND</property>
 							<property name="proportion">1</property>
 							<object class="wxStaticBoxSizer">
 								<property name="label">launch.json Pre-launch build</property>
 								<property name="name">static_box_sizer3</property>
-								<property name="permission">none</property>
 								<object class="sizeritem">
 									<object class="wxRadioButton">
 										<property name="label">none</property>
@@ -137,13 +132,13 @@
 			<property name="style">wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</property>
 			<property name="title">Create new .srcfiles.yaml file</property>
 			<event name="OnInitDialog">OnInit</event>
-			<object class="VerticalBoxSizer">
+			<object class="wxBoxSizer">
 				<property name="name">parent_sizer</property>
-				<property name="permission">none</property>
+				<property name="orient">wxVERTICAL</property>
 				<object class="sizeritem">
 					<property name="flag">wxALL|wxEXPAND</property>
-					<object class="VerticalBoxSizer">
-						<property name="permission">none</property>
+					<object class="wxBoxSizer">
+						<property name="orient">wxVERTICAL</property>
 						<object class="sizeritem">
 							<property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
 							<object class="wxStaticText">
@@ -160,9 +155,9 @@
 				</object>
 				<object class="sizeritem">
 					<property name="flag">wxALL|wxEXPAND</property>
-					<object class="VerticalBoxSizer">
+					<object class="wxBoxSizer">
 						<property name="name">box_sizer2</property>
-						<property name="permission">none</property>
+						<property name="orient">wxVERTICAL</property>
 						<object class="sizeritem">
 							<property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
 							<object class="wxRadioButton">
@@ -181,9 +176,9 @@
 				</object>
 				<object class="sizeritem">
 					<property name="flag">wxALL|wxEXPAND</property>
-					<object class="VerticalBoxSizer">
+					<object class="wxBoxSizer">
 						<property name="name">box_sizer3</property>
-						<property name="permission">none</property>
+						<property name="orient">wxVERTICAL</property>
 						<object class="sizeritem">
 							<property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
 							<object class="wxRadioButton">
@@ -196,7 +191,6 @@
 							<property name="flag">wxEXPAND|wxBOTTOM</property>
 							<object class="wxBoxSizer">
 								<property name="name">box_sizer4</property>
-								<property name="permission">none</property>
 								<object class="sizeritem">
 									<property name="flag">wxTOP|wxRIGHT|wxLEFT</property>
 									<property name="proportion">1</property>
@@ -219,9 +213,9 @@
 				</object>
 				<object class="sizeritem">
 					<property name="flag">wxALL|wxEXPAND</property>
-					<object class="VerticalBoxSizer">
+					<object class="wxBoxSizer">
 						<property name="name">box_sizer5</property>
-						<property name="permission">none</property>
+						<property name="orient">wxVERTICAL</property>
 						<object class="sizeritem">
 							<object class="wxCheckBox">
 								<property name="label">&amp;Add .vscode/ directory and files (tasks.json, launch.json, etc.)</property>

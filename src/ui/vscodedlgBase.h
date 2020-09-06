@@ -6,16 +6,14 @@
 
 #pragma once
 
-#include <wx/string.h>
 #include <wx/checkbox.h>
-#include <wx/valgen.h>
+#include <wx/dialog.h>
+#include <wx/event.h>
 #include <wx/gdicmn.h>
+#include <wx/radiobut.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
-
-#include <wx/radiobut.h>
-#include <wx/button.h>
-#include <wx/dialog.h>
+#include <wx/string.h>
 
 class VsCodeDlgBase : public wxDialog
 {
@@ -36,19 +34,19 @@ protected:
 	bool m_preLaunchCLANG { false };
 	bool m_preLaunchNinja { true };
 
+	wxStaticBoxSizer* m_static_box;
 	wxCheckBox* m_checkBox;
 	wxCheckBox* m_checkBox2;
 	wxCheckBox* m_checkBox3;
+	wxStaticBoxSizer* static_box_sizer2;
 	wxRadioButton* m_radioBtn;
 	wxRadioButton* m_radioBtn2;
 	wxRadioButton* m_radioBtn3;
+	wxStaticBoxSizer* static_box_sizer3;
 	wxRadioButton* m_radioBtn4;
 	wxRadioButton* m_radioBtn5;
 	wxRadioButton* m_radioBtn6;
 	wxRadioButton* m_radioBtn7;
-
-	wxButton* std_button_sizerOK;
-	wxButton* std_button_sizerCancel;
 
 	// Virtual event handlers, overide them in your derived class
 	virtual void OnInit(wxInitDialogEvent& event) { event.Skip(); }

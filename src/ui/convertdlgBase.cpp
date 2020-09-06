@@ -6,114 +6,100 @@
 
 #include "pch.h"
 
+#include <wx/button.h>
 #include <wx/persist.h>
 #include <wx/persist/toplevel.h>
+#include <wx/sizer.h>
+#include <wx/statline.h>
+#include <wx/valgen.h>
+
 #include "convertdlgBase.h"
 
 ConvertDlgBase::ConvertDlgBase(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) :
 	wxDialog(parent, id, title, pos, size, style)
-
 {
 	SetSizeHints(wxDefaultSize, wxDefaultSize);
 
-	wxBoxSizer* parent_sizer = new wxBoxSizer(wxVERTICAL);
+	auto parent_sizer = new wxBoxSizer(wxVERTICAL);
 
-	wxBoxSizer* box_sizer = new wxBoxSizer(wxVERTICAL);
+	auto box_sizer = new wxBoxSizer(wxVERTICAL);
 
 	m_staticText = new wxStaticText(this, wxID_ANY, "C&reate .srcfiles.yaml in:");
 	m_staticText->Wrap(-1);
-
 	box_sizer->Add(m_staticText, 0, wxTOP|wxRIGHT|wxLEFT, 5);
 
 	m_dirPickerOut = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, "Select a folder", wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
-
 	box_sizer->Add(m_dirPickerOut, 0, wxALL|wxEXPAND, 5);
-
 	parent_sizer->Add(box_sizer, 0, wxALL|wxEXPAND, 5);
 
-	wxBoxSizer* box_sizer2 = new wxBoxSizer(wxVERTICAL);
+	auto box_sizer2 = new wxBoxSizer(wxVERTICAL);
 
 	m_radioBtn = new wxRadioButton(this, wxID_ANY, "Create using all files in:", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_radioBtn->SetValidator(wxGenericValidator(&m_useAllFiles));
-
 	box_sizer2->Add(m_radioBtn, 0, wxTOP|wxRIGHT|wxLEFT, 5);
 
 	m_dirPickerList = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, "Select a folder", wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
-
 	box_sizer2->Add(m_dirPickerList, 0, wxEXPAND|wxALL, 5);
-
 	parent_sizer->Add(box_sizer2, 0, wxALL|wxEXPAND, 5);
 
-	wxBoxSizer* box_sizer3 = new wxBoxSizer(wxVERTICAL);
+	auto box_sizer3 = new wxBoxSizer(wxVERTICAL);
 
 	m_radioBtn2 = new wxRadioButton(this, wxID_ANY, "Create using &project file:");
 	m_radioBtn2->SetValidator(wxGenericValidator(&m_useProjectFile));
-
 	box_sizer3->Add(m_radioBtn2, 0, wxTOP|wxRIGHT|wxLEFT, 5);
 
-	wxBoxSizer* box_sizer4 = new wxBoxSizer(wxHORIZONTAL);
+	auto box_sizer4 = new wxBoxSizer(wxHORIZONTAL);
 
 	wxArrayString m_choiceProjectsChoices;
 	m_choiceProjects = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceProjectsChoices, 0);
 
 	m_choiceProjects->SetSelection(0);
 	m_choiceProjects->SetValidator(wxGenericValidator(&m_Project));
-
 	box_sizer4->Add(m_choiceProjects, 1, wxTOP|wxRIGHT|wxLEFT, 5);
 
 	m_filePickerProject = new wxFilePickerCtrl(this, wxID_ANY, wxEmptyString, "Select a file", "Project Files|*.vcxproj;*.vcproj;*.project;*.cbp;*.dsp", wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN);
-
 	box_sizer4->Add(m_filePickerProject, 0, wxALL, 5);
-
 	box_sizer3->Add(box_sizer4, 0, wxEXPAND|wxBOTTOM, 5);
-
 	parent_sizer->Add(box_sizer3, 0, wxALL|wxEXPAND, 5);
 
-	wxBoxSizer* box_sizer5 = new wxBoxSizer(wxVERTICAL);
+	auto box_sizer5 = new wxBoxSizer(wxVERTICAL);
 
 	m_checkBox = new wxCheckBox(this, wxID_ANY, "&Add .vscode/ directory and files (tasks.json, launch.json, etc.)");
-
 	m_checkBox->SetValidator(wxGenericValidator(&m_AddVscodeDir));
-
 	m_checkBox->SetToolTip("If checked, files are added to a .vscode/ directory so that you can build the project from with Visual Studio Code.");
-
 	box_sizer5->Add(m_checkBox, 0, wxALL, 5);
 
 	m_checkGitIgnore = new wxCheckBox(this, wxID_ANY, "Have &git ignore all generated files and directories");
-
 	m_checkGitIgnore->SetValidator(wxGenericValidator(&m_gitIgnore));
-
 	m_checkGitIgnore->SetToolTip("If checked, all ttBld generated file types and directories will be added to .git/info/exclude so that they will not be tracked.");
-
 	box_sizer5->Add(m_checkGitIgnore, 0, wxALL, 5);
-
 	parent_sizer->Add(box_sizer5, 0, wxALL|wxEXPAND, 5);
 
-	m_staticline = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
-	parent_sizer->Add(m_staticline, 0, wxEXPAND|wxALL, 8);
+	auto static_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+	parent_sizer->Add(static_line, 0, wxEXPAND|wxALL, 8);
 
-	wxStdDialogButtonSizer* std_button_sizer = new wxStdDialogButtonSizer();
+	auto stdBtn = new wxStdDialogButtonSizer();
 
-	std_button_sizerOK = new wxButton(this, wxID_OK);
-	std_button_sizer->AddButton(std_button_sizerOK);
+	auto stdBtnOK = new wxButton(this, wxID_OK);
+	stdBtn->AddButton(stdBtnOK);
 
-	std_button_sizerCancel = new wxButton(this, wxID_CANCEL);
-	std_button_sizer->AddButton(std_button_sizerCancel);
+	auto stdBtnCancel = new wxButton(this, wxID_CANCEL);
+	stdBtn->AddButton(stdBtnCancel);
 
-	std_button_sizerOK->SetDefault();
+	stdBtnOK->SetDefault();
 
-	std_button_sizer->Realize();
-
-	parent_sizer->Add(std_button_sizer, 0, wxEXPAND|wxALL, 5);
+	stdBtn->Realize();
+	parent_sizer->Add(stdBtn, 0, wxEXPAND|wxALL, 5);
 
 	SetSizerAndFit(parent_sizer);
 
 	Centre(wxBOTH);
+
 	SetName("ConvertDlgBase");
 	wxPersistentRegisterAndRestore(this);
 
 	// Event handlers
 	Bind(wxEVT_INIT_DIALOG, &ConvertDlgBase::OnInit, this);
 	m_filePickerProject->Bind(wxEVT_FILEPICKER_CHANGED, &ConvertDlgBase::OnProjectFileLocated, this);
-	std_button_sizerOK->Bind(wxEVT_BUTTON, &ConvertDlgBase::OnOK, this);
+	stdBtnOK->Bind(wxEVT_BUTTON, &ConvertDlgBase::OnOK, this);
 }
