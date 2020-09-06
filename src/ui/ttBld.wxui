@@ -218,6 +218,7 @@
 						<property name="orient">wxVERTICAL</property>
 						<object class="sizeritem">
 							<object class="wxCheckBox">
+								<property name="get_function">isCreateVsCode</property>
 								<property name="label">&amp;Add .vscode/ directory and files (tasks.json, launch.json, etc.)</property>
 								<property name="tooltip">If checked, files are added to a .vscode/ directory so that you can build the project from with Visual Studio Code.</property>
 								<property name="validator_variable">m_AddVscodeDir</property>
@@ -225,6 +226,7 @@
 						</object>
 						<object class="sizeritem">
 							<object class="wxCheckBox">
+								<property name="get_function">isAddToGitExclude</property>
 								<property name="label">Have &amp;git ignore all generated files and directories</property>
 								<property name="name">m_checkGitIgnore</property>
 								<property name="tooltip">If checked, all ttBld generated file types and directories will be added to .git/info/exclude so that they will not be tracked.</property>

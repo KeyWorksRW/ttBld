@@ -15,8 +15,6 @@ public:
     ConvertDlg(std::string_view projectFile);
 
     const ttlib::cstr& GetOutSrcFiles() { return m_cszOutSrcFiles; }
-    bool isCreateVsCode() { return m_AddVscodeDir; }
-    bool isAddToGitExclude() { return m_gitIgnore; }
 
 protected:
     // Handlers for ConvertDlgBase events.

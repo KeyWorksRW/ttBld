@@ -23,6 +23,10 @@ public:
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
 
+	bool isCreateVsCode() const { return m_AddVscodeDir; }
+
+	bool isAddToGitExclude() const { return m_gitIgnore; }
+
 protected:
 	bool m_useAllFiles { false };
 	bool m_useProjectFile { false };
