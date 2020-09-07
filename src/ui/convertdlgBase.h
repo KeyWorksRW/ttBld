@@ -13,7 +13,6 @@
 #include <wx/filepicker.h>
 #include <wx/gdicmn.h>
 #include <wx/radiobut.h>
-#include <wx/stattext.h>
 #include <wx/string.h>
 
 class ConvertDlgBase : public wxDialog
@@ -34,7 +33,6 @@ protected:
 	bool m_AddVscodeDir { false };
 	bool m_gitIgnore { false };
 
-	wxStaticText* m_staticText;
 	wxDirPickerCtrl* m_dirPickerOut;
 	wxRadioButton* m_radioBtn;
 	wxDirPickerCtrl* m_dirPickerList;
