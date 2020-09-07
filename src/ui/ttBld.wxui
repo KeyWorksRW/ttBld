@@ -4,7 +4,6 @@
 		<property name="local_pch_file">pch.h</property>
 		<object class="Dialog">
 			<property name="base_file">vscodedlgBase</property>
-			<property name="derived_file">vscodedlg</property>
 			<property name="derived_name">VsCodeDlg</property>
 			<property name="name">VsCodeDlgBase</property>
 			<property name="title">Create .vscode files</property>
@@ -125,7 +124,6 @@
 		</object>
 		<object class="Dialog">
 			<property name="base_file">convertdlgBase</property>
-			<property name="derived_file">convertdlg</property>
 			<property name="derived_name">ConvertDlg</property>
 			<property name="name">ConvertDlgBase</property>
 			<property name="persist">true</property>
@@ -252,7 +250,6 @@
 		</object>
 		<object class="Dialog">
 			<property name="base_file">optionsdlgBase</property>
-			<property name="derived_file">optionsdlg</property>
 			<property name="derived_name">OptionsDlg</property>
 			<property name="name">OptionsDlgBase</property>
 			<property name="persist">true</property>
