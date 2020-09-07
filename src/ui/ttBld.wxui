@@ -267,6 +267,7 @@
 						<object class="notebookpage">
 							<property name="label">General</property>
 							<object class="wxPanel">
+								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
 								<property name="window_style">wxTAB_TRAVERSAL</property>
 								<object class="wxBoxSizer">
 									<property name="name">parent_sizer2</property>
@@ -361,6 +362,7 @@
 						<object class="notebookpage">
 							<property name="label">Compiler</property>
 							<object class="wxPanel">
+								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
 								<property name="name">panel</property>
 								<property name="window_style">wxTAB_TRAVERSAL</property>
 								<object class="wxBoxSizer">
@@ -571,6 +573,7 @@
 						<object class="notebookpage">
 							<property name="label">Libs</property>
 							<object class="wxPanel">
+								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
 								<property name="name">panel2</property>
 								<property name="window_style">wxTAB_TRAVERSAL</property>
 								<object class="wxBoxSizer">
@@ -734,6 +737,7 @@
 						<object class="notebookpage">
 							<property name="label">RC</property>
 							<object class="wxPanel">
+								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
 								<property name="name">panel3</property>
 								<property name="window_style">wxTAB_TRAVERSAL</property>
 								<object class="wxBoxSizer">
@@ -809,6 +813,7 @@
 							<property name="label">CLang</property>
 							<property name="select">true</property>
 							<object class="wxPanel">
+								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
 								<property name="name">panel5</property>
 								<property name="window_style">wxTAB_TRAVERSAL</property>
 								<object class="wxBoxSizer">
@@ -897,6 +902,7 @@
 						<object class="notebookpage">
 							<property name="label">MIDL</property>
 							<object class="wxPanel">
+								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
 								<property name="name">panel4</property>
 								<property name="window_style">wxTAB_TRAVERSAL</property>
 								<object class="wxBoxSizer">

@@ -8,10 +8,12 @@
 
 #include <wx/button.h>
 #include <wx/checkbox.h>
+#include <wx/colour.h>
 #include <wx/panel.h>
 #include <wx/persist.h>
 #include <wx/persist/toplevel.h>
 #include <wx/radiobut.h>
+#include <wx/settings.h>
 #include <wx/sizer.h>
 #include <wx/spinctrl.h>
 #include <wx/statbox.h>
@@ -32,6 +34,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	m_notebook->SetMinSize(wxSize(400,-1));
 
 	auto m_panel = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	m_panel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
 	auto parent_sizer2 = new wxBoxSizer(wxVERTICAL);
 
@@ -82,6 +85,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	m_notebook->AddPage(m_panel, "General", false);
 
 	auto panel = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	panel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
 	auto parent_sizer3 = new wxBoxSizer(wxVERTICAL);
 
@@ -190,6 +194,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	m_notebook->AddPage(panel, "Compiler", false);
 
 	auto panel2 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	panel2->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
 	auto parent_sizer4 = new wxBoxSizer(wxVERTICAL);
 
@@ -265,6 +270,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	m_notebook->AddPage(panel2, "Libs", false);
 
 	auto panel3 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	panel3->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
 	auto parent_sizer5 = new wxBoxSizer(wxVERTICAL);
 
@@ -306,6 +312,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	m_notebook->AddPage(panel3, "RC", false);
 
 	auto panel5 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	panel5->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
 	auto parent_sizer7 = new wxBoxSizer(wxVERTICAL);
 
@@ -354,6 +361,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	m_notebook->AddPage(panel5, "CLang", true);
 
 	auto panel4 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	panel4->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
 	auto parent_sizer6 = new wxBoxSizer(wxVERTICAL);
 
