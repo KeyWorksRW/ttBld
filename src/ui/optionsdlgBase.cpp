@@ -82,7 +82,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	parent_sizer2->Add(box_sizer2, 0, wxALL|wxEXPAND, 5);
 
 	m_panel->SetSizerAndFit(parent_sizer2);
-	m_notebook->AddPage(m_panel, "General", false);
+	m_notebook->AddPage(m_panel, "General", true);
 
 	auto panel = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	panel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
@@ -100,7 +100,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	radioBtn5->SetValidator(wxGenericValidator(&m_isSpaceOptimization));
 	box_sizer3->Add(radioBtn5, 0, wxALL, 5);
 
-	auto radioBtn6 = new wxRadioButton(panel, wxID_ANY, "My RadioBtn");
+	auto radioBtn6 = new wxRadioButton(panel, wxID_ANY, "Speed");
 	radioBtn6->SetValidator(wxGenericValidator(&m_isSpeedOptimization));
 	box_sizer3->Add(radioBtn6, 0, wxALL, 5);
 	parent_sizer3->Add(box_sizer3, 0, wxALL|wxEXPAND, 5);
@@ -358,7 +358,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	parent_sizer7->Add(static_box5, 0, wxALL|wxEXPAND, 5);
 
 	panel5->SetSizerAndFit(parent_sizer7);
-	m_notebook->AddPage(panel5, "CLang", true);
+	m_notebook->AddPage(panel5, "CLang", false);
 
 	auto panel4 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	panel4->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));

@@ -254,6 +254,7 @@
 			<property name="name">OptionsDlgBase</property>
 			<property name="persist">true</property>
 			<property name="style">wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</property>
+			<property name="title">Options for .srcfiles</property>
 			<object class="wxBoxSizer">
 				<property name="name">parent_sizer</property>
 				<object class="sizeritem">
@@ -263,6 +264,7 @@
 						<property name="minimum_size">400,-1</property>
 						<object class="notebookpage">
 							<property name="label">General</property>
+							<property name="select">true</property>
 							<object class="wxPanel">
 								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
 								<property name="window_style">wxTAB_TRAVERSAL</property>
@@ -389,6 +391,7 @@
 											<object class="sizeritem">
 												<object class="wxRadioButton">
 													<property name="access">none</property>
+													<property name="label">Speed</property>
 													<property name="name">radioBtn6</property>
 													<property name="validator_variable">m_isSpeedOptimization</property>
 												</object>
@@ -808,7 +811,6 @@
 						</object>
 						<object class="notebookpage">
 							<property name="label">CLang</property>
-							<property name="select">true</property>
 							<object class="wxPanel">
 								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
 								<property name="name">panel5</property>
