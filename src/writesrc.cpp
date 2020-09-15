@@ -31,14 +31,11 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
 
     ttlib::textfile out;
 
-    // Always write out the version number required and the github URL for ttBld
+    // Always write the version of ttBld.exe used. That way if an older version is used and an option line gets commented out, the user
+    // might spot that an earlier version of ttBld is being used (if tracked by SCM, it will show up in the diff)
 
-    {
-        ttlib::cstr str;
-        str.Format(txtNinjaVerFormat, GetMajorRequired(), GetMinorRequired(), GetSubRequired());
-        out.emplace_back(str);
-        out.addEmptyLine();
-    }
+    out.emplace_back(txtNinjaVerFormat);
+    out.addEmptyLine();
 
     size_t pos = 0;
     bool SeenRequiredComment = false;
@@ -47,7 +44,8 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         // Ignore any previous comment about ttBld since we've already written it.
         if (!SeenRequiredComment)
         {
-            if (orgFile[pos].size() && ttlib::is_sameprefix(orgFile[pos], "# Requires ttBld", tt::CASE::either))
+            if (orgFile[pos].size() && (ttlib::is_sameprefix(orgFile[pos], "# Requires ttBld", tt::CASE::either) ||
+                                        ttlib::is_sameprefix(orgFile[pos], "# Updated by ttBld", tt::CASE::either)))
             {
                 ++pos;
                 if (orgFile[pos].empty())
@@ -97,7 +95,7 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         if (option == OPT::LAST)
         {
             auto& line = out.addEmptyLine();
-            line.assign("    # invalid option -- ");
+            line.assign("    # unrecognized option -- ");
             line += orgFile[pos];
             continue;
         }

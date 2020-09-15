@@ -66,9 +66,11 @@ namespace fs = std::filesystem;
 
 #include "strings.h"
 
-constexpr const auto txtVersion = "ttBld 1.7.1";
-constexpr const auto txtCopyRight = "Copyright (c) 2002-2020 KeyWorks Software";
-constexpr const auto txtAppname = "ttBld";
+// Version is also set in writesrc.h and ttBld.rc -- if changed, change in all three locations
+
+inline constexpr const auto txtVersion = "ttBld 1.7.1";
+inline constexpr const auto txtCopyRight = "Copyright (c) 2002-2020 KeyWorks Software";
+inline constexpr const auto txtAppname = "ttBld";
 
 // Use THROW to throw this exception class
 class CExcept
