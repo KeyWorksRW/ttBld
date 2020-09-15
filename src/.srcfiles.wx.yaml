@@ -55,6 +55,8 @@ Files:
     ui/convertdlg.cpp          # Dialog specifying what to convert into a .srcfiles.yaml file
     ui/vscodedlgBase.cpp       # wxUiEditor generated file
     ui/vscodedlg.cpp           # Dialog for setting options to create tasks.json and launch.json
+    ui/optionsdlgBase.cpp
+    ui/optionsdlg.cpp
 
 # The following modules do not require Windows
 

@@ -11,6 +11,7 @@
 #include <wx/persist/toplevel.h>
 #include <wx/sizer.h>
 #include <wx/statline.h>
+#include <wx/stattext.h>
 #include <wx/valgen.h>
 
 #include "convertdlgBase.h"
@@ -24,9 +25,9 @@ ConvertDlgBase::ConvertDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 
 	auto box_sizer = new wxBoxSizer(wxVERTICAL);
 
-	m_staticText = new wxStaticText(this, wxID_ANY, "C&reate .srcfiles.yaml in:");
-	m_staticText->Wrap(-1);
-	box_sizer->Add(m_staticText, 0, wxTOP|wxRIGHT|wxLEFT, 5);
+	auto staticText = new wxStaticText(this, wxID_ANY, "C&reate .srcfiles.yaml in:");
+	staticText->Wrap(-1);
+	box_sizer->Add(staticText, 0, wxTOP|wxRIGHT|wxLEFT, 5);
 
 	m_dirPickerOut = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString, "Select a folder", wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE);
 	box_sizer->Add(m_dirPickerOut, 0, wxALL|wxEXPAND, 5);

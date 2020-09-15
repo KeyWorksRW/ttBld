@@ -13,7 +13,6 @@
 #include <wx/filepicker.h>
 #include <wx/gdicmn.h>
 #include <wx/radiobut.h>
-#include <wx/stattext.h>
 #include <wx/string.h>
 
 class ConvertDlgBase : public wxDialog
@@ -28,26 +27,30 @@ public:
 	bool isAddToGitExclude() const { return m_gitIgnore; }
 
 protected:
+	// Validator variables
+
+	bool m_AddVscodeDir { false };
+	bool m_gitIgnore { false };
 	bool m_useAllFiles { false };
 	bool m_useProjectFile { false };
 	wxString m_Project;
-	bool m_AddVscodeDir { false };
-	bool m_gitIgnore { false };
 
-	wxStaticText* m_staticText;
-	wxDirPickerCtrl* m_dirPickerOut;
-	wxRadioButton* m_radioBtn;
-	wxDirPickerCtrl* m_dirPickerList;
-	wxRadioButton* m_radioBtn2;
-	wxChoice* m_choiceProjects;
-	wxFilePickerCtrl* m_filePickerProject;
+	// Class member variables
+
 	wxCheckBox* m_checkBox;
 	wxCheckBox* m_checkGitIgnore;
+	wxChoice* m_choiceProjects;
+	wxDirPickerCtrl* m_dirPickerList;
+	wxDirPickerCtrl* m_dirPickerOut;
+	wxFilePickerCtrl* m_filePickerProject;
+	wxRadioButton* m_radioBtn2;
+	wxRadioButton* m_radioBtn;
 
-	// Virtual event handlers, overide them in your derived class
+	// Virtual event handlers -- overide them in your derived class
+
 	virtual void OnInit(wxInitDialogEvent& event) { event.Skip(); }
-	virtual void OnProjectFileLocated(wxFileDirPickerEvent& event) { event.Skip(); }
 	virtual void OnOK(wxCommandEvent& event) { event.Skip(); }
+	virtual void OnProjectFileLocated(wxFileDirPickerEvent& event) { event.Skip(); }
 
 private:
 };
