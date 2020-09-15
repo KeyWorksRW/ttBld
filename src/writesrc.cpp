@@ -67,9 +67,36 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
     for (++pos; pos < orgFile.size(); ++pos)
     {
         auto view = ttlib::find_nonspace(orgFile[pos]);
-        if (view.empty() || view[0] == '#')
+        if (view.empty())
         {
-            // write blank or comment lines unmodified
+            // write blank unmodified
+            out.emplace_back(orgFile[pos]);
+            continue;
+        }
+
+        if (view[0] == '#')
+        {
+            // If this was marked as an unrecognized option by an older version of ttBld but it is now recognized,
+            // then write out the original option.
+
+            if (ttlib::is_sameprefix(view, "# unrecognized option --"))
+            {
+                ttlib::cstr option_line = ttlib::stepover(view.substr(view.find("--")));
+                auto pos = option_line.find_oneof(":=");
+                if (pos == ttlib::cstr::npos)
+                    continue;
+                ttlib::cstr name(option_line.substr(0, pos));
+                auto option = FindOption(name);
+                if (option != OPT::LAST)
+                {
+                    auto& line = out.addEmptyLine();
+                    line.assign("    " + option_line);
+
+                    // The line has been replaced, so continue the main loop rather than falling through
+                    continue;
+                }
+            }
+
             out.emplace_back(orgFile[pos]);
             continue;
         }
