@@ -14,7 +14,7 @@
 #include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files
 
-#include "ninja.h"     // CNinja
+#include "ninja.h"  // CNinja
 
 // clang-format off
 
@@ -108,6 +108,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                     continue;
 
                 ttlib::cstr root { inFilename };
+                root.make_absolute();
                 root.remove_filename();
                 incName.make_relative(root);
                 incName.backslashestoforward();
@@ -174,6 +175,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                         if (!parseName.empty() && parseName.file_exists())
                         {
                             ttlib::cstr root { inFilename };
+                            root.make_absolute();
                             root.remove_filename();
                             parseName.make_relative(root);
                             parseName.backslashestoforward();
