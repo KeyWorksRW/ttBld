@@ -108,7 +108,8 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         line += getOptValue(option);
         while (line.length() < 30)
             line.push_back(' ');
-        line += (" # " + getOptComment(option));
+        if (getOptComment(option).size())
+            line += (" # " + getOptComment(option));
 
         // Keep track of every option we've written out. We'll use this outside of this loop to determine what
         // additional options to write.
