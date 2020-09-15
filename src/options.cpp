@@ -47,70 +47,71 @@ static OPT::VERSION aoptVersions[]
 const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
 {{
 
-    { OPT::PROJECT,  "Project",  nullptr,   "project name", false, true },
-    { OPT::EXE_TYPE, "Exe_type", "console", "[window | console | lib | dll]", false, true },
-    { OPT::PCH,      "Pch",      "none",    "name of precompiled header file, or \"none\" if not using precompiled"
-                                             "headers", false, true },
-    { OPT::PCH_CPP,  "Pch_cpp",  "none",    "source file used to build precompiled header (default uses same name"                                          "as PCH option)", false, false },
-    { OPT::OPTIMIZE, "Optimize", "space",  "[space | speed] optimization to use in release builds", false, true },
-    { OPT::WARN,     "Warn",     "4",      "[1-4] warning level", false, true },
+    { OPT::PROJECT,  "Project",  nullptr,   "project name", OPT::any, OPT::required },
+    { OPT::EXE_TYPE, "Exe_type", "console", "[window | console | lib | dll]", OPT::any, OPT::required },
+    { OPT::PCH,      "Pch",      "none",    "name of precompiled header file, or \"none\" if not using precompiled headers",
+                                                                OPT::any, OPT::required },
+    { OPT::PCH_CPP,  "Pch_cpp",  "none",    "source file used to build precompiled header (default uses same name as PCH option)",
+                                                                OPT::any, OPT::optional },
+    { OPT::OPTIMIZE, "Optimize", "space",  "[space | speed] optimization to use in release builds", OPT::any, OPT::required },
+    { OPT::WARN,     "Warn",     "4",      "[1-4] warning level", OPT::any, OPT::required },
 
-    { OPT::CRT_REL,  "Crt_rel",  "static", "[static | dll] type of CRT to link to in release builds", false, true },
-    { OPT::CRT_DBG,  "Crt_dbg",  "static", "[static | dll] type of CRT to link to in debug builds", false, true },
+    { OPT::CRT_REL,  "Crt_rel",  "static", "[static | dll] type of CRT to link to in release builds", OPT::any, OPT::required },
+    { OPT::CRT_DBG,  "Crt_dbg",  "static", "[static | dll] type of CRT to link to in debug builds", OPT::any, OPT::required },
 
-    { OPT::TARGET_DIR, "TargetDir", nullptr, "target directory", false, false },
+    { OPT::TARGET_DIR, "TargetDir", nullptr, "target directory", OPT::any, OPT::optional },
 
-    { OPT::BIT64, "64Bit", "true", "[true | false] indicates whether buildable as a 64-bit target", true, false },
-    { OPT::TARGET_DIR64, "TargetDir64",  nullptr, "64-bit target directory", false, false },
+    { OPT::BIT64, "64Bit", "true", "[true | false] indicates whether buildable as a 64-bit target", OPT::boolean, OPT::optional },
+    { OPT::TARGET_DIR64, "TargetDir64",  nullptr, "64-bit target directory", OPT::any, OPT::optional },
 
-    { OPT::BIT32, "32Bit", "false", "[true | false] indicates whether buildable as a 32-bit target", true, false },
-    { OPT::TARGET_DIR32, "TargetDir32", nullptr, "32-bit target directory", false, false },
+    { OPT::BIT32, "32Bit", "false", "[true | false] indicates whether buildable as a 32-bit target", OPT::boolean, OPT::optional },
+    { OPT::TARGET_DIR32, "TargetDir32", nullptr, "32-bit target directory", OPT::any, OPT::optional },
 
-    { OPT::CFLAGS_CMN, "CFlags_cmn", nullptr, "common compiler flags", false, false },
-    { OPT::CFLAGS_REL, "CFlags_rel", nullptr, "release build compiler flags", false, false },
-    { OPT::CFLAGS_DBG, "CFlags_dbg", nullptr, "debug build compiler flags", false, false },
+    { OPT::CFLAGS_CMN, "CFlags_cmn", nullptr, "common compiler flags", OPT::any, OPT::optional },
+    { OPT::CFLAGS_REL, "CFlags_rel", nullptr, "release build compiler flags", OPT::any, OPT::optional },
+    { OPT::CFLAGS_DBG, "CFlags_dbg", nullptr, "debug build compiler flags", OPT::any, OPT::optional },
 
-    { OPT::CLANG_CMN, "Clang_cmn", nullptr, "clang common compiler flags", false, false },
-    { OPT::CLANG_REL, "Clang_rel", nullptr, "clang release build compiler flags", false, false },
-    { OPT::CLANG_DBG, "Clang_dbg", nullptr, "clang debug build compiler flags", false, false },
+    { OPT::CLANG_CMN, "Clang_cmn", nullptr, "clang common compiler flags", OPT::any, OPT::optional },
+    { OPT::CLANG_REL, "Clang_rel", nullptr, "clang release build compiler flags", OPT::any, OPT::optional },
+    { OPT::CLANG_DBG, "Clang_dbg", nullptr, "clang debug build compiler flags", OPT::any, OPT::optional },
 
-    { OPT::LINK_CMN, "LFlags_cmn", nullptr, "common linker flags", false, false },
-    { OPT::LINK_REL, "LFlags_rel", nullptr, "release build linker flags", false, false },
-    { OPT::LINK_DBG, "LFlags_dbg", nullptr, "debug build linker flags", false, false },
+    { OPT::LINK_CMN, "LFlags_cmn", nullptr, "common linker flags", OPT::any, OPT::optional },
+    { OPT::LINK_REL, "LFlags_rel", nullptr, "release build linker flags", OPT::any, OPT::optional },
+    { OPT::LINK_DBG, "LFlags_dbg", nullptr, "debug build linker flags", OPT::any, OPT::optional },
 
-    { OPT::RC_CMN, "Rc_cmn", nullptr, "common compiler flags", false, false },
-    { OPT::RC_REL, "Rc_rel", nullptr, "release build compiler flags", false, false },
-    { OPT::RC_DBG, "Rc_dbg", nullptr, "debug build compiler flags", false, false },
+    { OPT::RC_CMN, "Rc_cmn", nullptr, "common compiler flags", OPT::any, OPT::optional },
+    { OPT::RC_REL, "Rc_rel", nullptr, "release build compiler flags", OPT::any, OPT::optional },
+    { OPT::RC_DBG, "Rc_dbg", nullptr, "debug build compiler flags", OPT::any, OPT::optional },
 
-    { OPT::MIDL_CMN, "Midl_cmn", nullptr, "common compiler flags", false, false },
-    { OPT::MIDL_REL, "Midl_rel", nullptr, "release build compiler flags", false, false },
-    { OPT::MIDL_DBG, "Midl_dbg", nullptr, "debug build compiler flags", false, false },
+    { OPT::MIDL_CMN, "Midl_cmn", nullptr, "common compiler flags", OPT::any, OPT::optional },
+    { OPT::MIDL_REL, "Midl_rel", nullptr, "release build compiler flags", OPT::any, OPT::optional },
+    { OPT::MIDL_DBG, "Midl_dbg", nullptr, "debug build compiler flags", OPT::any, OPT::optional },
 
-    { OPT::NATVIS, "Natvis", nullptr, "Debug visualizer", false, false },
+    { OPT::NATVIS, "Natvis", nullptr, "Debug visualizer", OPT::any, OPT::optional },
 
-    { OPT::MS_LINKER, "Ms_linker", "true", "true means use link.exe even when compiling with clang", true, false },
-    { OPT::MS_RC,     "Ms_rc",     "true",  "true means use rc.exe even when compiling with clang", true, false },
+    { OPT::MS_LINKER, "Ms_linker", "true", "true means use link.exe even when compiling with clang", OPT::boolean, OPT::optional },
+    { OPT::MS_RC,     "Ms_rc",     "true",  "true means use rc.exe even when compiling with clang", OPT::boolean, OPT::optional },
 
-    { OPT::INC_DIRS,   "IncDirs",   nullptr, "additional directories for header files", false, false },
-    { OPT::LIB_DIRS,   "LibDirs",   nullptr, "additional directories for library files", false, false },
-    { OPT::LIB_DIRS64, "LibDirs64", nullptr, "additional directories for 64-bit library files", false, false },
-    { OPT::LIB_DIRS32, "LibDirs32", nullptr, "additional directories for 32-bit library files", false, false },
+    { OPT::INC_DIRS,   "IncDirs",   nullptr, "additional directories for header files", OPT::any, OPT::optional },
+    { OPT::LIB_DIRS,   "LibDirs",   nullptr, "additional directories for library files", OPT::any, OPT::optional },
+    { OPT::LIB_DIRS64, "LibDirs64", nullptr, "additional directories for 64-bit library files", OPT::any, OPT::optional },
+    { OPT::LIB_DIRS32, "LibDirs32", nullptr, "additional directories for 32-bit library files", OPT::any, OPT::optional },
 
-    { OPT::BUILD_LIBS, "BuildLibs", nullptr, "libraries to build (built in makefile)", false, false },
+    { OPT::BUILD_LIBS, "BuildLibs", nullptr, "libraries to build (built in makefile)", OPT::any, OPT::optional },
 
-    { OPT::LIBS_CMN, "Libs_cmn", nullptr, "additional libraries to link to in all builds", false, false },
-    { OPT::LIBS_REL, "Libs_rel", nullptr, "additional libraries to link to in release builds", false, false },
-    { OPT::LIBS_DBG, "Libs_dbg", nullptr, "additional libraries to link to in debug builds", false, false },
+    { OPT::LIBS_CMN, "Libs_cmn", nullptr, "additional libraries to link to in all builds", OPT::any, OPT::optional },
+    { OPT::LIBS_REL, "Libs_rel", nullptr, "additional libraries to link to in release builds", OPT::any, OPT::optional },
+    { OPT::LIBS_DBG, "Libs_dbg", nullptr, "additional libraries to link to in debug builds", OPT::any, OPT::optional },
 
-    { OPT::MAKE_DIR, "MakeDir", nullptr, "auto-generate makefile in specified directory", false, false },
+    { OPT::MAKE_DIR, "MakeDir", nullptr, "auto-generate makefile in specified directory", OPT::any, OPT::optional },
 
     // The following options are for xgettext/msgfmt support
 
-    { OPT::XGET_OUT,      "XGet_out",     nullptr, "output filename for xgettext", false, false },
-    { OPT::XGET_KEYWORDS, "XGet_kwrds",   nullptr, "xgettext keywords (separated by semi-colon)", false, false },
-    { OPT::XGET_FLAGS,    "XGet_flags",   nullptr, "xgettext flags", false, false },
-    { OPT::MSGFMT_FLAGS,  "Msgfmt_flags", nullptr, "msgfmt flags", false, false },
-    { OPT::MSGFMT_XML,    "Msgfmt_xml",   nullptr, "xml template file for msgfmt", false, false },
+    { OPT::XGET_OUT,      "XGet_out",     nullptr, "output filename for xgettext", OPT::any, OPT::optional },
+    { OPT::XGET_KEYWORDS, "XGet_kwrds",   nullptr, "xgettext keywords (separated by semi-colon)", OPT::any, OPT::optional },
+    { OPT::XGET_FLAGS,    "XGet_flags",   nullptr, "xgettext flags", OPT::any, OPT::optional },
+    { OPT::MSGFMT_FLAGS,  "Msgfmt_flags", nullptr, "msgfmt flags", OPT::any, OPT::optional },
+    { OPT::MSGFMT_XML,    "Msgfmt_xml",   nullptr, "xml template file for msgfmt", OPT::any, OPT::optional },
 
     { OPT::LAST, "", nullptr, nullptr, false, false}
 
@@ -155,8 +156,7 @@ void CSrcFiles::InitOptions()
     // DefaultOptions.
     for (size_t id = 0; id < m_Options.size(); ++id)
     {
-        assertm(m_Options[id].OriginalName,
-                "Option is missing a name! It means DefaultOptions is missing an option.");
+        assertm(m_Options[id].OriginalName, "Option is missing a name! It means DefaultOptions is missing an option.");
     }
 #endif
 }
@@ -184,8 +184,7 @@ void CSrcFiles::setOptValue(size_t index, std::string_view value)
         m_Options[index].value = value;
     else
     {
-        if (ttlib::is_sameprefix(value, "yes", tt::CASE::either) ||
-            ttlib::is_sameprefix(value, "true", tt::CASE::either))
+        if (ttlib::is_sameprefix(value, "yes", tt::CASE::either) || ttlib::is_sameprefix(value, "true", tt::CASE::either))
             m_Options[index].value = "true";
         else
             m_Options[index].value = "false";
