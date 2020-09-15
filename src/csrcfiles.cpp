@@ -100,8 +100,32 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         }
 
         auto begin = ttlib::find_nonspace(line);
-        if (begin.empty() || begin[0] == '#')
+        if (begin.empty())
             continue;
+
+        if (begin[0] == '#')
+        {
+            // If an older version of ttBld marked the option as unrecognized, but this current version of ttBld does
+            // recognize it, then go ahead and process it as if it was a normal option. Note that this means that if the
+            // Options dialog is reading this, it will display the option as if it was created normally. If it writes
+            // the file, the comment line will be replaced with the actual option.
+
+            if (m_section == SECTION_OPTIONS && ttlib::is_sameprefix(begin, "# unrecognized option --"))
+            {
+                ttlib::cstr option_line = ttlib::stepover(begin.substr(begin.find("--")));
+                auto pos = option_line.find_oneof(":=");
+                if (pos == ttlib::cstr::npos)
+                    continue;
+                ttlib::cstr name(option_line.substr(0, pos));
+                auto option = FindOption(name);
+                if (option != OPT::LAST)
+                {
+                    ProcessOption(option_line);
+                }
+            }
+
+            continue;
+        }
 
         switch (m_section)
         {

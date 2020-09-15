@@ -31,14 +31,11 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
 
     ttlib::textfile out;
 
-    // Always write out the version number required and the github URL for ttBld
+    // Always write the version of ttBld.exe used. That way if an older version is used and an option line gets commented out, the user
+    // might spot that an earlier version of ttBld is being used (if tracked by SCM, it will show up in the diff)
 
-    {
-        ttlib::cstr str;
-        str.Format(txtNinjaVerFormat, GetMajorRequired(), GetMinorRequired(), GetSubRequired());
-        out.emplace_back(str);
-        out.addEmptyLine();
-    }
+    out.emplace_back(txtNinjaVerFormat);
+    out.addEmptyLine();
 
     size_t pos = 0;
     bool SeenRequiredComment = false;
@@ -47,7 +44,8 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         // Ignore any previous comment about ttBld since we've already written it.
         if (!SeenRequiredComment)
         {
-            if (orgFile[pos].size() && ttlib::is_sameprefix(orgFile[pos], "# Requires ttBld", tt::CASE::either))
+            if (orgFile[pos].size() && (ttlib::is_sameprefix(orgFile[pos], "# Requires ttBld", tt::CASE::either) ||
+                                        ttlib::is_sameprefix(orgFile[pos], "# Updated by ttBld", tt::CASE::either)))
             {
                 ++pos;
                 if (orgFile[pos].empty())
@@ -69,9 +67,36 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
     for (++pos; pos < orgFile.size(); ++pos)
     {
         auto view = ttlib::find_nonspace(orgFile[pos]);
-        if (view.empty() || view[0] == '#')
+        if (view.empty())
         {
-            // write blank or comment lines unmodified
+            // write blank unmodified
+            out.emplace_back(orgFile[pos]);
+            continue;
+        }
+
+        if (view[0] == '#')
+        {
+            // If this was marked as an unrecognized option by an older version of ttBld but it is now recognized,
+            // then write out the original option.
+
+            if (ttlib::is_sameprefix(view, "# unrecognized option --"))
+            {
+                ttlib::cstr option_line = ttlib::stepover(view.substr(view.find("--")));
+                auto pos = option_line.find_oneof(":=");
+                if (pos == ttlib::cstr::npos)
+                    continue;
+                ttlib::cstr name(option_line.substr(0, pos));
+                auto option = FindOption(name);
+                if (option != OPT::LAST)
+                {
+                    auto& line = out.addEmptyLine();
+                    line.assign("    " + option_line);
+
+                    // The line has been replaced, so continue the main loop rather than falling through
+                    continue;
+                }
+            }
+
             out.emplace_back(orgFile[pos]);
             continue;
         }
@@ -97,7 +122,7 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         if (option == OPT::LAST)
         {
             auto& line = out.addEmptyLine();
-            line.assign("    # invalid option -- ");
+            line.assign("    # unrecognized option -- ");
             line += orgFile[pos];
             continue;
         }
