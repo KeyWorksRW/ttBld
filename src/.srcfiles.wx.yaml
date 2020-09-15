@@ -19,64 +19,48 @@ Options:
 
     Natvis:      ../ttlib/ttlibwin.natvis # MSVC Debug visualizer
 
-    IncDirs:     wxsrc;winsrc;ui;./;convert;../ttlib/include  # temporary location, change before Public release
+    IncDirs:     winsrc;ui;./;convert;../ttlib/include  # temporary location, change before Public release
     BuildLibs:   ../ttLib/src/wxsrc              # temporary location, change before Public release
 
 Files:
-    winsrc/ttBld.rc            # Windows resource files
+    ttBld.rc            # Windows resource files
 
-    wxsrc/mainapp.cpp         # entry point, global strings, library pragmas
+    mainapp.cpp         # entry point, global strings, library pragmas
 
-    wxsrc/finder.cpp          # Routines for finding executables such as the MSVC compiler
+    cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
+    createmakefile.cpp  # CreateMakeFile method for creating a makefile
+    csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
+    dryrun.cpp          # CDryRun class for testing
+    finder.cpp          # Routines for finding executables such as the MSVC compiler
+    ninja.cpp           # CNinja for creating .ninja scripts
+    options.cpp         # contains all Options strings and CSrcOptions class for working with them
+    rcdep.cpp           # Contains functions for parsing RC dependencies
+    strings.cpp         # Contains translatable strings
+    verninja.cpp        # CVerMakeNinja class
+    vscode.cpp          # Creates/updates .vscode files
+    writesrc.cpp        # Writes a new or update srcfiles.yaml file
+
+    convert/convert.cpp       # Various conversion methods
+    convert/readcodelite.cpp  # Class for converting a CodeLite .project file to .srcfiles.yaml
+    convert/readdsp.cpp       # Class for converting a Visual Studio .DSP file to .srcfiles.yaml
+    convert/readvc.cpp        # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml
+    convert/readvcx.cpp       # Converts a Visual Studio project file into .srcfiles.yaml
+    convert/writevcx.cpp      # Create a Visual Studio project file
 
     winsrc/addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
     winsrc/gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
     winsrc/gitfuncs.cpp        # Functions for working with .git
     winsrc/vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
     winsrc/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
-    convert/writevcx.cpp       # Create a Visual Studio project file
 
-# Modules for creating the Options UI
-
-    winsrc/dlgoptions.cpp      # CTabOptions dialog
-
-    winsrc/tabgeneral.cpp
-    winsrc/tabcompiler.cpp
-    winsrc/tabclang.cpp
-    winsrc/tablibs.cpp
-    winsrc/tablinker.cpp
-    winsrc/tabrcmidl.cpp
-
-    winsrc/addfuncname.cpp     # CAddFuncName dialog
+    # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
+    pugixml/pugixml.cpp        # Built directly rather than building a library
 
 # wxUiEditor generated classes and their derived version for display wxWidgets UI
 
-    ui/convertdlgBase.cpp      # wxUiEditor generated file
     ui/convertdlg.cpp          # Dialog specifying what to convert into a .srcfiles.yaml file
-    ui/vscodedlgBase.cpp       # wxUiEditor generated file
+    ui/convertdlgBase.cpp      # wxUiEditor generated file
+    ui/optionsdlgBase.cpp      # wxUiEditor generated file
     ui/vscodedlg.cpp           # Dialog for setting options to create tasks.json and launch.json
-    ui/optionsdlgBase.cpp
-    ui/optionsdlg.cpp
-
-# The following modules do not require Windows
-
-    # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
-    pugixml/pugixml.cpp # Built directly rather than building a library
-
-    cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
-    createmakefile.cpp  # CreateMakeFile method for creating a makefile
-    csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
-    dryrun.cpp          # CDryRun class for testing
-    ninja.cpp           # CNinja for creating .ninja scripts
-    options.cpp         # contains all Options strings and CSrcOptions class for working with them
-    rcdep.cpp           # Contains functions for parsing RC dependencies
-    strings.cpp         # Contains translatable strings
-    vscode.cpp          # Creates/updates .vscode files
-    verninja.cpp        # CVerMakeNinja class
-    writesrc.cpp        # Writes a new or update srcfiles.yaml file
-
-    convert/readvcx.cpp       # Converts a Visual Studio project file into .srcfiles.yaml
-    convert/readdsp.cpp       # Class for converting a Visual Studio .DSP file to .srcfiles.yaml
-    convert/readvc.cpp        # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml
-    convert/readcodelite.cpp  # Class for converting a CodeLite .project file to .srcfiles.yaml
-    convert/convert.cpp       # Various conversion methods
+    ui/vscodedlgBase.cpp       # wxUiEditor generated file
+    ui/optionsdlg.cpp          # Dialog for setting all .srcfile options
