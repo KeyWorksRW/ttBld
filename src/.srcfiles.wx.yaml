@@ -1,7 +1,5 @@
 # Requires ttBld.exe version 1.7.0 or higher to process
 
-# This version requires wxWidgets
-
 Options:
     Project:     ttBld        # Target name ('D' will be appended to Debug builds, e.g. ttBldD.exe)
     Exe_type:    console      # [window | console | lib | dll]
@@ -13,32 +11,37 @@ Options:
     Ms_linker:   true         # true means use link.exe even when compiling with clang
 
     CFlags_cmn: -std:c++17 /Zc:__cplusplus /utf-8
-    CFlags_dbg: -DWXUSINGDLL
+    CFlags_dbg: -DWXUSINGDLL  # debug build links to dll version of wxWidgets, release version links statically
 
     TargetDir: ../bin         # 64-bit target directory
 
     Natvis:      ../ttlib/ttlibwin.natvis # MSVC Debug visualizer
 
-    IncDirs:     winsrc;ui;./;convert;../ttlib/include  # temporary location, change before Public release
-    BuildLibs:   ../ttLib/src/wxsrc              # temporary location, change before Public release
+    IncDirs:     ./;ui;convert;../ttlib/include
+    BuildLibs:   ../ttLib/src/wxsrc
 
 Files:
     ttBld.rc            # Windows resource files
 
     mainapp.cpp         # entry point, global strings, library pragmas
 
+    addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
     cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
     createmakefile.cpp  # CreateMakeFile method for creating a makefile
     csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
     dryrun.cpp          # CDryRun class for testing
     finder.cpp          # Routines for finding executables such as the MSVC compiler
+    gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
+    gitfuncs.cpp        # Functions for working with .git
     ninja.cpp           # CNinja for creating .ninja scripts
     options.cpp         # contains all Options strings and CSrcOptions class for working with them
     rcdep.cpp           # Contains functions for parsing RC dependencies
     strings.cpp         # Contains translatable strings
     verninja.cpp        # CVerMakeNinja class
+    vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
     vscode.cpp          # Creates/updates .vscode files
     writesrc.cpp        # Writes a new or update srcfiles.yaml file
+    yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
 
     convert/convert.cpp       # Various conversion methods
     convert/readcodelite.cpp  # Class for converting a CodeLite .project file to .srcfiles.yaml
@@ -47,16 +50,10 @@ Files:
     convert/readvcx.cpp       # Converts a Visual Studio project file into .srcfiles.yaml
     convert/writevcx.cpp      # Create a Visual Studio project file
 
-    winsrc/addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
-    winsrc/gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
-    winsrc/gitfuncs.cpp        # Functions for working with .git
-    winsrc/vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
-    winsrc/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
-
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     pugixml/pugixml.cpp        # Built directly rather than building a library
 
-# wxUiEditor generated classes and their derived version for display wxWidgets UI
+    # wxUiEditor generated classes and their derived version for displaying wxWidgets UI
 
     ui/convertdlg.cpp          # Dialog specifying what to convert into a .srcfiles.yaml file
     ui/convertdlgBase.cpp      # wxUiEditor generated file

@@ -13,7 +13,6 @@
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "funcs.h"      // List of function declarations
-#include "resource.h"
 #include "vscodedlg.h"  // VsCodeDlg -- Dialog for setting options to create tasks.json and launch.json
 
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);

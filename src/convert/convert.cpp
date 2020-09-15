@@ -15,6 +15,7 @@
 
 #include "../ui/convertdlg.h"  // ConvertDlg -- Dialog specifying what to convert into a .srcfiles.yaml file
 #include "funcs.h"             // List of function declarations
+#include "ui/optionsdlg.h"     // OptionsDlg -- Dialog for setting all .srcfile options
 
 bool MakeNewProject(ttlib::cstr& projectFile)
 {
@@ -24,7 +25,9 @@ bool MakeNewProject(ttlib::cstr& projectFile)
 
     projectFile = dlg.GetOutSrcFiles();
 
-    ChangeOptions(projectFile);
+    OptionsDlg dlgOptions(projectFile);
+    if (dlgOptions.ShowModal() == wxID_OK)
+        dlgOptions.SaveChanges();
 
     if (dlg.isCreateVsCode())
     {

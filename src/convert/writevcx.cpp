@@ -17,7 +17,6 @@
 
 #include <ttwinff.h>  // winff -- Wrapper around Windows FindFile
 
-#include "../winsrc/resource.h"
 #include "writevcx.h"  // CVcxWrite
 
 const char* res_vcxproj_xml =
