@@ -38,20 +38,20 @@ BldScriptD=$(bdir)/$(cmplr)_dbg.ninja
 
 ########## release section ##########
 
-release: ttLib $(BldScript) ttBld
+release: ttLibwx $(BldScript) ttBld
 
-ttLib:
-	cd ../ttLib/src & ninja -f $(BldScript)
+ttLibwx:
+	cd ../ttLib/src/wxsrc/ & ninja -f $(BldScript)
 
 ttBld:
 	ninja -f $(BldScript)
 
 ########## debug section ##########
 
-debug: ttLibD $(BldScriptD) ttBldD
+debug: ttLibwxD $(BldScriptD) ttBldD
 
-ttLibD:
-	cd ../ttLib/src & ninja -f $(BldScriptD)
+ttLibwxD:
+	cd ../ttLib/src/wxsrc/ & ninja -f $(BldScriptD)
 
 ttBldD:
 	ninja -f $(BldScriptD)
@@ -80,5 +80,5 @@ targetsD: $(BldScriptD)
 targetsR: $(BldScript)
 	ninja -f $(BldScript) -t targets depth 2
 
-deps: $(BldScript)
-	ninja -f $(BldScript) -t deps
+deps: $(BldScriptD)
+	ninja -f $(BldScriptD) -t deps

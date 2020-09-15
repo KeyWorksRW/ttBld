@@ -148,7 +148,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
     {
         ttlib::cstr path(MakeFile);
         path.remove_filename();
-        if (!path.dir_exists())
+        if (path.size() && !path.dir_exists())
         {
             if (!fs::create_directory(path.wx_str()))
             {
