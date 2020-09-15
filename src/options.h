@@ -67,6 +67,15 @@ public:
         LAST
     };
 
+    enum : bool
+    {
+        optional = false,
+        required = true,
+
+        any = false,
+        boolean = true,
+    };
+
     struct CURRENT
     {
         ttlib::cstr value;
