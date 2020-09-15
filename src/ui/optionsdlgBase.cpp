@@ -17,7 +17,6 @@
 #include <wx/sizer.h>
 #include <wx/spinctrl.h>
 #include <wx/statbox.h>
-#include <wx/textctrl.h>
 #include <wx/valgen.h>
 #include <wx/valtext.h>
 
@@ -28,10 +27,10 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 {
 	SetSizeHints(wxDefaultSize, wxDefaultSize);
 
-	auto parent_sizer = new wxBoxSizer(wxHORIZONTAL);
+	auto parent_sizer = new wxBoxSizer(wxVERTICAL);
 
 	m_notebook = new wxNotebook(this, wxID_ANY);
-	m_notebook->SetMinSize(wxSize(400,-1));
+	m_notebook->SetMinSize(wxSize(370,-1));
 
 	auto m_panel = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	m_panel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
@@ -51,24 +50,28 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 
 	auto static_box = new wxStaticBoxSizer(new wxStaticBox(m_panel, wxID_ANY, "Project Type"), wxVERTICAL);
 
-	auto grid_sizer = new wxGridSizer(0, 2, 0, 0);
+	auto flex_grid_sizer6 = new wxFlexGridSizer(0, 2, 0, 0);
+
+	flex_grid_sizer6->AddGrowableCol(1);
+	flex_grid_sizer6->SetFlexibleDirection(wxBOTH);
+	flex_grid_sizer6->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	auto radioBtn = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "Window");
 	radioBtn->SetValidator(wxGenericValidator(&m_isWindow));
-	grid_sizer->Add(radioBtn, 0, wxALL, 5);
+	flex_grid_sizer6->Add(radioBtn, 0, wxALL, 5);
 
 	auto radioBtn2 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "Console");
 	radioBtn2->SetValidator(wxGenericValidator(&m_isConsole));
-	grid_sizer->Add(radioBtn2, 0, wxALL, 5);
+	flex_grid_sizer6->Add(radioBtn2, 0, wxALL, 5);
 
 	auto radioBtn3 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "Library");
 	radioBtn3->SetValidator(wxGenericValidator(&m_isLibrary));
-	grid_sizer->Add(radioBtn3, 0, wxALL, 5);
+	flex_grid_sizer6->Add(radioBtn3, 0, wxALL, 5);
 
 	auto radioBtn4 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "DLL");
 	radioBtn4->SetValidator(wxGenericValidator(&m_isDll));
-	grid_sizer->Add(radioBtn4, 0, wxALL, 5);
-	static_box->Add(grid_sizer, 0, wxALL|wxEXPAND, 5);
+	flex_grid_sizer6->Add(radioBtn4, 0, wxALL, 5);
+	static_box->Add(flex_grid_sizer6, 0, wxALL|wxEXPAND, 5);
 	parent_sizer2->Add(static_box, 0, wxALL|wxEXPAND, 5);
 
 	auto box_sizer2 = new wxBoxSizer(wxVERTICAL);
@@ -112,6 +115,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	box_sizer4->Add(staticText3, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
 
 	auto spinCtrl = new wxSpinCtrl(panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 4, 4);
+	spinCtrl->SetValidator(wxGenericValidator(&m_WarningLevel));
 	box_sizer4->Add(spinCtrl, 0, wxALL, 5);
 	parent_sizer3->Add(box_sizer4, 0, wxALL|wxEXPAND, 5);
 
@@ -121,7 +125,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	staticText4->Wrap(-1);
 	box_sizer5->Add(staticText4, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
 
-	m_PchHeaderPicker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, "Select a file", "Header files|*.h", wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_SMALL|wxFLP_USE_TEXTCTRL);
+	m_PchHeaderPicker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, "Select a file", "Header files|*.h;*.hh;*.hpp;*.hxx", wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
 	box_sizer5->Add(m_PchHeaderPicker, 0, wxALL, 5);
 	parent_sizer3->Add(box_sizer5, 0, wxALL|wxEXPAND, 5);
 
@@ -131,7 +135,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	staticText5->Wrap(-1);
 	box_sizer6->Add(staticText5, 0, wxALL, 5);
 
-	m_PchSrcPicker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, "Select a file", "Header files|*.h", wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_SMALL|wxFLP_USE_TEXTCTRL);
+	m_PchSrcPicker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, "Select a file", "Source files|*.cpp;*.cc;*.cxx", wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
 	box_sizer6->Add(m_PchSrcPicker, 0, wxALL, 5);
 	parent_sizer3->Add(box_sizer6, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 
@@ -147,9 +151,9 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 
 	auto box_sizer8 = new wxBoxSizer(wxHORIZONTAL);
 
-	auto textCtrl2 = new wxTextCtrl(panel, wxID_ANY);
-	textCtrl2->SetValidator(wxTextValidator(wxFILTER_NONE, &m_IncludeDirs));
-	box_sizer8->Add(textCtrl2, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
+	m_textIncludeDirs = new wxTextCtrl(panel, wxID_ANY);
+	m_textIncludeDirs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_IncludeDirs));
+	box_sizer8->Add(m_textIncludeDirs, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 	parent_sizer3->Add(box_sizer8, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 
 	auto static_box2 = new wxStaticBoxSizer(new wxStaticBox(panel, wxID_ANY, "Compiler Flags"), wxVERTICAL);
@@ -210,9 +214,9 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 
 	auto box_sizer10 = new wxBoxSizer(wxHORIZONTAL);
 
-	auto commonLibs = new wxTextCtrl(panel2, wxID_ANY);
-	commonLibs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_CommonLibs));
-	box_sizer10->Add(commonLibs, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
+	m_commonLibs = new wxTextCtrl(panel2, wxID_ANY);
+	m_commonLibs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_CommonLibs));
+	box_sizer10->Add(m_commonLibs, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 	parent_sizer4->Add(box_sizer10, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 
 	auto box_sizer11 = new wxBoxSizer(wxHORIZONTAL);
@@ -227,9 +231,9 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 
 	auto box_sizer14 = new wxBoxSizer(wxHORIZONTAL);
 
-	auto releaseLibs = new wxTextCtrl(panel2, wxID_ANY);
-	releaseLibs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_ReleaseLibs));
-	box_sizer14->Add(releaseLibs, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
+	m_releaseLibs = new wxTextCtrl(panel2, wxID_ANY);
+	m_releaseLibs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_ReleaseLibs));
+	box_sizer14->Add(m_releaseLibs, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 	parent_sizer4->Add(box_sizer14, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 
 	auto box_sizer12 = new wxBoxSizer(wxHORIZONTAL);
@@ -244,9 +248,9 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 
 	auto box_sizer15 = new wxBoxSizer(wxHORIZONTAL);
 
-	auto debugLibs = new wxTextCtrl(panel2, wxID_ANY);
-	debugLibs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_DebugLibs));
-	box_sizer15->Add(debugLibs, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
+	m_debugLibs = new wxTextCtrl(panel2, wxID_ANY);
+	m_debugLibs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_DebugLibs));
+	box_sizer15->Add(m_debugLibs, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 	parent_sizer4->Add(box_sizer15, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 
 	auto box_sizer13 = new wxBoxSizer(wxHORIZONTAL);
@@ -261,13 +265,86 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 
 	auto box_sizer16 = new wxBoxSizer(wxHORIZONTAL);
 
-	auto buildLibs3 = new wxTextCtrl(panel2, wxID_ANY);
-	buildLibs3->SetValidator(wxTextValidator(wxFILTER_NONE, &m_BuildLibs));
-	box_sizer16->Add(buildLibs3, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
+	m_buildLibs = new wxTextCtrl(panel2, wxID_ANY);
+	m_buildLibs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_BuildLibs));
+	box_sizer16->Add(m_buildLibs, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 	parent_sizer4->Add(box_sizer16, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
 
 	panel2->SetSizerAndFit(parent_sizer4);
 	m_notebook->AddPage(panel2, "Libs", false);
+
+	auto panel6 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	panel6->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+
+	auto parent_sizer8 = new wxBoxSizer(wxVERTICAL);
+
+	auto static_box6 = new wxStaticBoxSizer(new wxStaticBox(panel6, wxID_ANY, "Linker Flags"), wxVERTICAL);
+
+	auto flex_grid_sizer5 = new wxFlexGridSizer(0, 2, 0, 0);
+
+	flex_grid_sizer5->AddGrowableCol(1);
+	flex_grid_sizer5->SetFlexibleDirection(wxHORIZONTAL);
+	flex_grid_sizer5->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+
+	auto staticText23 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, "&Common:");
+	staticText23->Wrap(-1);
+	staticText23->SetToolTip("Compiler flags that will be used in all builds.");
+	flex_grid_sizer5->Add(staticText23, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+	auto commonFlags4 = new wxTextCtrl(static_box6->GetStaticBox(), wxID_ANY);
+	commonFlags4->SetValidator(wxTextValidator(wxFILTER_NONE, &m_CommonLinkFlags));
+	commonFlags4->SetToolTip("Compiler flags that will be used in all builds.");
+	flex_grid_sizer5->Add(commonFlags4, 0, wxALL|wxEXPAND, 5);
+
+	auto staticText24 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, "&Release:");
+	staticText24->Wrap(-1);
+	flex_grid_sizer5->Add(staticText24, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+	auto releaseFlags4 = new wxTextCtrl(static_box6->GetStaticBox(), wxID_ANY);
+	releaseFlags4->SetValidator(wxTextValidator(wxFILTER_NONE, &m_ReleaseLinkFlags));
+	flex_grid_sizer5->Add(releaseFlags4, 0, wxALL|wxEXPAND, 5);
+
+	auto staticText25 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, "&Debug:");
+	staticText25->Wrap(-1);
+	staticText25->SetToolTip("Compiler flags that will only be used in a Debug build.");
+	flex_grid_sizer5->Add(staticText25, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+	auto debugFlags4 = new wxTextCtrl(static_box6->GetStaticBox(), wxID_ANY);
+	debugFlags4->SetValidator(wxTextValidator(wxFILTER_NONE, &m_DebugLinkFlags));
+	debugFlags4->SetToolTip("Compiler flags that will only be used in a Debug build.");
+	flex_grid_sizer5->Add(debugFlags4, 0, wxALL|wxEXPAND, 5);
+	static_box6->Add(flex_grid_sizer5, 0, wxALL|wxEXPAND, 5);
+	parent_sizer8->Add(static_box6, 0, wxEXPAND|wxALL, 5);
+
+	auto box_sizer18 = new wxBoxSizer(wxHORIZONTAL);
+
+	auto staticText26 = new wxStaticText(panel6, wxID_ANY, "Dynamic CRT:");
+	staticText26->Wrap(-1);
+	box_sizer18->Add(staticText26, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+	auto checkBox2 = new wxCheckBox(panel6, wxID_ANY, "Release");
+	checkBox2->SetValue(true);
+	checkBox2->SetValidator(wxGenericValidator(&m_isReleaseDllCRT));
+	box_sizer18->Add(checkBox2, 0, wxALL, 5);
+
+	auto checkBox3 = new wxCheckBox(panel6, wxID_ANY, "Debug");
+	checkBox3->SetValue(true);
+	checkBox3->SetValidator(wxGenericValidator(&m_isDebugDllCRT));
+	box_sizer18->Add(checkBox3, 0, wxALL, 5);
+	parent_sizer8->Add(box_sizer18, 0, wxALL|wxEXPAND, 5);
+
+	auto box_sizer19 = new wxBoxSizer(wxHORIZONTAL);
+
+	auto staticText27 = new wxStaticText(panel6, wxID_ANY, "NATVIS File:");
+	staticText27->Wrap(-1);
+	box_sizer19->Add(staticText27, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+	m_NatvisPicker = new wxFilePickerCtrl(panel6, wxID_ANY, wxEmptyString, "Select a file", "Natvis Files|*.natvis", wxDefaultPosition, wxDefaultSize, wxFLP_USE_TEXTCTRL|wxFLP_OPEN|wxFLP_FILE_MUST_EXIST);
+	box_sizer19->Add(m_NatvisPicker, 1, wxALL, 5);
+	parent_sizer8->Add(box_sizer19, 0, wxALL|wxEXPAND, 5);
+
+	panel6->SetSizerAndFit(parent_sizer8);
+	m_notebook->AddPage(panel6, "Linker", false);
 
 	auto panel3 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	panel3->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
@@ -404,6 +481,19 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 
 	parent_sizer->Add(m_notebook, 1, wxEXPAND|wxALL, 5);
 
+	auto stdBtn = new wxStdDialogButtonSizer();
+
+	auto stdBtnOK = new wxButton(this, wxID_OK);
+	stdBtn->AddButton(stdBtnOK);
+
+	auto stdBtnCancel = new wxButton(this, wxID_CANCEL);
+	stdBtn->AddButton(stdBtnCancel);
+
+	stdBtnOK->SetDefault();
+
+	stdBtn->Realize();
+	parent_sizer->Add(stdBtn, 0, wxEXPAND|wxALL, 5);
+
 	SetSizerAndFit(parent_sizer);
 
 	Centre(wxBOTH);
@@ -412,6 +502,9 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
 	wxPersistentRegisterAndRestore(this);
 
 	// Event handlers
+	m_TargetDirPicker->Bind(wxEVT_DIRPICKER_CHANGED, &OptionsDlgBase::OnTargetDirChanged, this);
+	m_PchHeaderPicker->Bind(wxEVT_FILEPICKER_CHANGED, &OptionsDlgBase::OnPchHeaderChanged, this);
+	m_PchSrcPicker->Bind(wxEVT_FILEPICKER_CHANGED, &OptionsDlgBase::OnPchSrcChanged, this);
 	btnAddInclude->Bind(wxEVT_BUTTON, &OptionsDlgBase::OnAddIncDir, this);
 	btnAddCommonLibrary->Bind(wxEVT_BUTTON, &OptionsDlgBase::OnAddCommonLibraries, this);
 	btnAddReleaseLibraries->Bind(wxEVT_BUTTON, &OptionsDlgBase::OnAddReleaseLibraries, this);

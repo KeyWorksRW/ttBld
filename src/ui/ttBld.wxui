@@ -257,11 +257,12 @@
 			<property name="title">Options for .srcfiles</property>
 			<object class="wxBoxSizer">
 				<property name="name">parent_sizer</property>
+				<property name="orient">wxVERTICAL</property>
 				<object class="sizeritem">
 					<property name="flag">wxEXPAND|wxALL</property>
 					<property name="proportion">1</property>
 					<object class="wxNotebook">
-						<property name="minimum_size">400,-1</property>
+						<property name="minimum_size">370,-1</property>
 						<object class="notebookpage">
 							<property name="label">General</property>
 							<property name="select">true</property>
@@ -298,7 +299,9 @@
 											<property name="name">static_box</property>
 											<object class="sizeritem">
 												<property name="flag">wxALL|wxEXPAND</property>
-												<object class="wxGridSizer">
+												<object class="wxFlexGridSizer">
+													<property name="growablecols">1</property>
+													<property name="name">flex_grid_sizer6</property>
 													<object class="sizeritem">
 														<object class="wxRadioButton">
 															<property name="access">none</property>
@@ -351,6 +354,7 @@
 												<property name="flag">wxALL|wxEXPAND</property>
 												<object class="wxDirPickerCtrl">
 													<property name="name">m_TargetDirPicker</property>
+													<event name="OnDirChanged">OnTargetDirChanged</event>
 												</object>
 											</object>
 										</object>
@@ -417,6 +421,7 @@
 													<property name="max">4</property>
 													<property name="min">1</property>
 													<property name="name">spinCtrl</property>
+													<property name="validator_variable">m_WarningLevel</property>
 												</object>
 											</object>
 										</object>
@@ -436,8 +441,9 @@
 											<object class="sizeritem">
 												<object class="wxFilePickerCtrl">
 													<property name="name">m_PchHeaderPicker</property>
-													<property name="style">wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_SMALL|wxFLP_USE_TEXTCTRL</property>
-													<property name="wildcard">Header files|*.h</property>
+													<property name="style">wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL</property>
+													<property name="wildcard">Header files|*.h;*.hh;*.hpp;*.hxx</property>
+													<event name="OnFileChanged">OnPchHeaderChanged</event>
 												</object>
 											</object>
 										</object>
@@ -456,8 +462,9 @@
 											<object class="sizeritem">
 												<object class="wxFilePickerCtrl">
 													<property name="name">m_PchSrcPicker</property>
-													<property name="style">wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_SMALL|wxFLP_USE_TEXTCTRL</property>
-													<property name="wildcard">Header files|*.h</property>
+													<property name="style">wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL</property>
+													<property name="wildcard">Source files|*.cpp;*.cc;*.cxx</property>
+													<event name="OnFileChanged">OnPchSrcChanged</event>
 												</object>
 											</object>
 										</object>
@@ -493,8 +500,7 @@
 												<property name="flag">wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</property>
 												<property name="proportion">1</property>
 												<object class="wxTextCtrl">
-													<property name="access">none</property>
-													<property name="name">textCtrl2</property>
+													<property name="name">m_textIncludeDirs</property>
 													<property name="validator_variable">m_IncludeDirs</property>
 												</object>
 											</object>
@@ -610,8 +616,7 @@
 												<property name="flag">wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</property>
 												<property name="proportion">1</property>
 												<object class="wxTextCtrl">
-													<property name="access">none</property>
-													<property name="name">commonLibs</property>
+													<property name="name">m_commonLibs</property>
 													<property name="validator_variable">m_CommonLibs</property>
 												</object>
 											</object>
@@ -648,8 +653,7 @@
 												<property name="flag">wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</property>
 												<property name="proportion">1</property>
 												<object class="wxTextCtrl">
-													<property name="access">none</property>
-													<property name="name">releaseLibs</property>
+													<property name="name">m_releaseLibs</property>
 													<property name="validator_variable">m_ReleaseLibs</property>
 												</object>
 											</object>
@@ -686,8 +690,7 @@
 												<property name="flag">wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</property>
 												<property name="proportion">1</property>
 												<object class="wxTextCtrl">
-													<property name="access">none</property>
-													<property name="name">debugLibs</property>
+													<property name="name">m_debugLibs</property>
 													<property name="validator_variable">m_DebugLibs</property>
 												</object>
 											</object>
@@ -724,9 +727,141 @@
 												<property name="flag">wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT</property>
 												<property name="proportion">1</property>
 												<object class="wxTextCtrl">
-													<property name="access">none</property>
-													<property name="name">buildLibs3</property>
+													<property name="name">m_buildLibs</property>
 													<property name="validator_variable">m_BuildLibs</property>
+												</object>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+						<object class="notebookpage">
+							<property name="label">Linker</property>
+							<object class="wxPanel">
+								<property name="background_colour">wxSYS_COLOUR_BTNFACE</property>
+								<property name="name">panel6</property>
+								<property name="window_style">wxTAB_TRAVERSAL</property>
+								<object class="wxBoxSizer">
+									<property name="name">parent_sizer8</property>
+									<property name="orient">wxVERTICAL</property>
+									<object class="sizeritem">
+										<property name="flag">wxEXPAND|wxALL</property>
+										<object class="wxStaticBoxSizer">
+											<property name="access">none</property>
+											<property name="label">Linker Flags</property>
+											<property name="name">static_box6</property>
+											<object class="sizeritem">
+												<property name="flag">wxALL|wxEXPAND</property>
+												<object class="wxFlexGridSizer">
+													<property name="flexible_direction">wxHORIZONTAL</property>
+													<property name="growablecols">1</property>
+													<property name="name">flex_grid_sizer5</property>
+													<object class="sizeritem">
+														<property name="flag">wxALL|wxALIGN_CENTER_VERTICAL</property>
+														<object class="wxStaticText">
+															<property name="access">none</property>
+															<property name="label">&amp;Common:</property>
+															<property name="name">staticText23</property>
+															<property name="tooltip">Compiler flags that will be used in all builds.</property>
+														</object>
+													</object>
+													<object class="sizeritem">
+														<property name="flag">wxALL|wxEXPAND</property>
+														<object class="wxTextCtrl">
+															<property name="access">none</property>
+															<property name="name">commonFlags4</property>
+															<property name="tooltip">Compiler flags that will be used in all builds.</property>
+															<property name="validator_variable">m_CommonLinkFlags</property>
+														</object>
+													</object>
+													<object class="sizeritem">
+														<property name="flag">wxALL|wxALIGN_CENTER_VERTICAL</property>
+														<object class="wxStaticText">
+															<property name="access">none</property>
+															<property name="label">&amp;Release:</property>
+															<property name="name">staticText24</property>
+														</object>
+													</object>
+													<object class="sizeritem">
+														<property name="flag">wxALL|wxEXPAND</property>
+														<object class="wxTextCtrl">
+															<property name="access">none</property>
+															<property name="name">releaseFlags4</property>
+															<property name="validator_variable">m_ReleaseLinkFlags</property>
+														</object>
+													</object>
+													<object class="sizeritem">
+														<property name="flag">wxALL|wxALIGN_CENTER_VERTICAL</property>
+														<object class="wxStaticText">
+															<property name="access">none</property>
+															<property name="label">&amp;Debug:</property>
+															<property name="name">staticText25</property>
+															<property name="tooltip">Compiler flags that will only be used in a Debug build.</property>
+														</object>
+													</object>
+													<object class="sizeritem">
+														<property name="flag">wxALL|wxEXPAND</property>
+														<object class="wxTextCtrl">
+															<property name="access">none</property>
+															<property name="name">debugFlags4</property>
+															<property name="tooltip">Compiler flags that will only be used in a Debug build.</property>
+															<property name="validator_variable">m_DebugLinkFlags</property>
+														</object>
+													</object>
+												</object>
+											</object>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<property name="flag">wxALL|wxEXPAND</property>
+										<object class="wxBoxSizer">
+											<property name="name">box_sizer18</property>
+											<object class="sizeritem">
+												<property name="flag">wxALL|wxALIGN_CENTER_VERTICAL</property>
+												<object class="wxStaticText">
+													<property name="access">none</property>
+													<property name="label">Dynamic CRT:</property>
+													<property name="name">staticText26</property>
+												</object>
+											</object>
+											<object class="sizeritem">
+												<object class="wxCheckBox">
+													<property name="access">none</property>
+													<property name="checked">true</property>
+													<property name="label">Release</property>
+													<property name="name">checkBox2</property>
+													<property name="validator_variable">m_isReleaseDllCRT</property>
+												</object>
+											</object>
+											<object class="sizeritem">
+												<object class="wxCheckBox">
+													<property name="access">none</property>
+													<property name="checked">true</property>
+													<property name="label">Debug</property>
+													<property name="name">checkBox3</property>
+													<property name="validator_variable">m_isDebugDllCRT</property>
+												</object>
+											</object>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<property name="flag">wxALL|wxEXPAND</property>
+										<object class="wxBoxSizer">
+											<property name="name">box_sizer19</property>
+											<object class="sizeritem">
+												<property name="flag">wxALL|wxALIGN_CENTER_VERTICAL</property>
+												<object class="wxStaticText">
+													<property name="access">none</property>
+													<property name="label">NATVIS File:</property>
+													<property name="name">staticText27</property>
+												</object>
+											</object>
+											<object class="sizeritem">
+												<property name="proportion">1</property>
+												<object class="wxFilePickerCtrl">
+													<property name="name">m_NatvisPicker</property>
+													<property name="wildcard">Natvis Files|*.natvis</property>
 												</object>
 											</object>
 										</object>
@@ -974,6 +1109,10 @@
 							</object>
 						</object>
 					</object>
+				</object>
+				<object class="sizeritem">
+					<property name="flag">wxEXPAND|wxALL</property>
+					<object class="wxStdDialogButtonSizer" />
 				</object>
 			</object>
 		</object>

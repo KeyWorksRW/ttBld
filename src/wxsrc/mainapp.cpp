@@ -44,12 +44,14 @@
 #include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
 #include <ttparser.h>   // cmd -- Command line parser
 
-#include "convert.h"     // CConvert
-#include "funcs.h"       // List of function declarations
-#include "ninja.h"       // CNinja
-#include "stackwalk.h"   // Walk the stack filtering out anything unrelated to current app
-#include "uifuncs.h"     // Miscellaneous functions for displaying UI
-#include "writevcx.h"    // CVcxWrite -- Create a Visual Studio project file
+#include "convert.h"    // CConvert
+#include "funcs.h"      // List of function declarations
+#include "ninja.h"      // CNinja
+#include "stackwalk.h"  // Walk the stack filtering out anything unrelated to current app
+#include "uifuncs.h"    // Miscellaneous functions for displaying UI
+#include "writevcx.h"   // CVcxWrite -- Create a Visual Studio project file
+
+#include "ui/optionsdlg.h"  // OptionsDlg -- Dialog for setting all .srcfile options
 
 #if defined(TESTING)
     #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
@@ -298,8 +300,10 @@ int CMainApp::OnRun()
 
     if (!projectCreated && cmd.isOption("options"))
     {
-        if (!ChangeOptions(projectFile))
+        OptionsDlg dlg(projectFile);
+        if (dlg.ShowModal() != wxID_OK)
             return 1;
+        dlg.SaveChanges();
     }
 
     if (!projectCreated && cmd.isOption("vscode"))
