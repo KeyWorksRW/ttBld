@@ -81,6 +81,6 @@ namespace fs = std::filesystem;
 
 #include "strings.h"
 
-constexpr const auto txtVersion = "ttBld 1.7.0";
+constexpr const auto txtVersion = "ttBld 1.7.2";
 constexpr const auto txtCopyRight = "Copyright (c) 2002-2020 KeyWorks Software";
 constexpr const auto txtAppname = "ttBld";

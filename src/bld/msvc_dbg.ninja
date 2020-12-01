@@ -54,6 +54,8 @@ build $outdir/gencmdfiles.obj: compile gencmdfiles.cpp | $outdir/pch.obj
 
 build $outdir/gitfuncs.obj: compile gitfuncs.cpp | $outdir/pch.obj
 
+build $outdir/make_hgz.obj: compile make_hgz.cpp | $outdir/pch.obj
+
 build $outdir/ninja.obj: compile ninja.cpp | $outdir/pch.obj
 
 build $outdir/options.obj: compile options.cpp | $outdir/pch.obj
@@ -110,6 +112,7 @@ build ../bin/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/finder.obj $
   $outdir/gencmdfiles.obj $
   $outdir/gitfuncs.obj $
+  $outdir/make_hgz.obj $
   $outdir/ninja.obj $
   $outdir/options.obj $
   $outdir/rcdep.obj $
