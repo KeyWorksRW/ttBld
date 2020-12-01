@@ -81,17 +81,17 @@ int MakeHgz(ttlib::cstrVector& files)
     auto buf = static_cast<unsigned char*>(strm_buffer->GetBufferStart());
 
     size_t pos = 0;
+    auto buf_size = strm_buffer->GetBufferSize();
 
-    while (pos < strm_buffer->GetBufferSize())
+    while (pos < buf_size)
     {
         {
             auto& line = file.addEmptyLine();
-            for (; pos < strm_buffer->GetBufferSize() && line.size() < 116; ++pos)
+            for (; pos < buf_size && line.size() < 116; ++pos)
             {
                 line << static_cast<int>(buf[pos]) << ',';
             }
         }
-        ++pos;
     }
 
     if (file[file.size() - 1].back() == ',')
