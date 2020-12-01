@@ -19,7 +19,7 @@
 #include <ttcvector.h>   // Vector of ttlib::cstr strings
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
-static bool CopyStreamData(wxInputStream& inputStream, wxOutputStream& outputStream, wxFileOffset size);
+static bool CopyStreamData(wxInputStream* inputStream, wxOutputStream* outputStream, size_t size);
 
 int MakeHgz(ttlib::cstrVector& files)
 {
@@ -47,7 +47,7 @@ int MakeHgz(ttlib::cstrVector& files)
     wxMemoryOutputStream stream_out;
 
     wxScopedPtr<wxFilterOutputStream> filterOutputStream(filterClassFactory->NewStream(stream_out));
-    if (!CopyStreamData(inputFileStream, *filterOutputStream, inputFileStream.GetLength()))
+    if (!CopyStreamData(&inputFileStream, filterOutputStream.get(), inputFileStream.GetLength()))
     {
         std::cerr << _tt(strIdInternalError) << '\n';
         return 1;
@@ -108,34 +108,40 @@ int MakeHgz(ttlib::cstrVector& files)
     return 0;
 }
 
-static bool CopyStreamData(wxInputStream& inputStream, wxOutputStream& outputStream, wxFileOffset size)
+static bool CopyStreamData(wxInputStream* inputStream, wxOutputStream* outputStream, size_t size)
 {
-    wxChar buf[128 * 1024];
-    int readSize = 128 * 1024;
-    wxFileOffset copiedData = 0;
+    size_t buf_size;
+    if (size == tt::npos || size > (64 * 1024))
+        buf_size = (64 * 1024);
+    else
+        buf_size = static_cast<size_t>(size);
+
+    auto read_buf = std::make_unique<unsigned char[]>(buf_size);
+    auto read_size = buf_size;
+
+    size_t copied_data = 0;
     for (;;)
     {
-        if (size != -1 && copiedData + readSize > size)
-            readSize = size - copiedData;
-        inputStream.Read(buf, readSize);
+        if (size != tt::npos && copied_data + read_size > size)
+            read_size = size - copied_data;
+        inputStream->Read(read_buf.get(), read_size);
 
-        size_t actuallyRead = inputStream.LastRead();
-        outputStream.Write(buf, actuallyRead);
-        if (outputStream.LastWrite() != actuallyRead)
+        auto actually_read = inputStream->LastRead();
+        outputStream->Write(read_buf.get(), actually_read);
+        if (outputStream->LastWrite() != actually_read)
         {
-            // wxLogError("Failed to output data");
             return false;
         }
 
-        if (size == -1)
+        if (size == tt::npos)
         {
-            if (inputStream.Eof())
+            if (inputStream->Eof())
                 break;
         }
         else
         {
-            copiedData += actuallyRead;
-            if (copiedData >= size)
+            copied_data += actually_read;
+            if (copied_data >= size)
                 break;
         }
     }
