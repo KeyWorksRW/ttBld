@@ -58,6 +58,7 @@
 #endif
 
 void AddFiles(const ttlib::cstrVector& lstFiles);
+int MakeHgz(ttlib::cstrVector& files);
 
 enum UPDATE_TYPE
 {
@@ -146,6 +147,8 @@ int CMainApp::OnRun()
     cmd.addHiddenOption("uclangD");
     cmd.addHiddenOption("uclang_x86D");
 
+    cmd.addHiddenOption("hgz");  // -hgz src dst (converts src into -gz, saves as char array header file)
+
 #if defined(TESTING) && !defined(NDEBUG)
     cmd.addHiddenOption("tvdlg", ttlib::cmd::needsarg);
 #endif
@@ -162,6 +165,11 @@ int CMainApp::OnRun()
             std::cout << iter << '\n';
         }
         return 0;
+    }
+
+    if (cmd.isOption("hgz"))
+    {
+        return MakeHgz(cmd.getExtras());
     }
 
     UPDATE_TYPE upType = UPDATE_NORMAL;
