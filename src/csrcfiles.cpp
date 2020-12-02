@@ -17,14 +17,6 @@
 
 #include "csrcfiles.h"  // CSrcFiles
 
-enum SRC_SECTION : size_t
-{
-    SECTION_UNKNOWN,
-    SECTION_OPTIONS,
-    SECTION_FILES,
-    SECTION_DEBUG_FILES,
-};
-
 CSrcFiles::CSrcFiles() {}
 
 CSrcFiles::CSrcFiles(std::string_view NinjaDir)
@@ -88,6 +80,10 @@ bool CSrcFiles::ReadFile(std::string_view filename)
             {
                 m_section = SECTION_DEBUG_FILES;
             }
+            else if (ttlib::is_sameprefix(line, "GZIP:", tt::CASE::either) || ttlib::is_sameprefix(line, "[GZIP]", tt::CASE::either))
+            {
+                m_section = SECTION_GZIP;
+            }
             else if (ttlib::is_sameprefix(line, "Options:", tt::CASE::either) || ttlib::is_sameprefix(line, "[OPTIONS]"))
             {
                 m_section = SECTION_OPTIONS;
@@ -135,6 +131,10 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
             case SECTION_DEBUG_FILES:
                 ProcessDebugFile(begin);
+                break;
+
+            case SECTION_GZIP:
+                ProcessGzipLine(begin);
                 break;
 
             case SECTION_OPTIONS:
@@ -333,6 +333,36 @@ void CSrcFiles::ProcessDebugFile(std::string_view line)
     {
         AddError(_tt("Unable to locate the file ") + name);
     }
+}
+
+/*
+    Lines are expected to be of the form:
+
+        source.src_ext: header.hdr_ext  # optional comment
+
+        *.src_ext: *.hdr_ext
+
+        *.src_ext: header.hdr_ext
+
+    In the above case all files matching *.src_ext will be converted into arrays in header.hdr_ext
+
+    The reason for putting the source file first is because it is valid to have multiple source files with a single
+    destination.
+*/
+void CSrcFiles::ProcessGzipLine(std::string_view line)
+{
+    ttlib::multistr pair(line, ':');
+    if (pair.size() < 2)
+    {
+        AddError(_tt("Expected \"header: source\" but ':' not found seperating the two"));
+        return;
+    }
+
+    pair[0].trim(tt::TRIM::both);
+    pair[1].erase_from('#');
+    pair[1].trim(tt::TRIM::both);
+
+    m_gzip_files[pair[0]] = pair[1];
 }
 
 // Process a ".include" directive
