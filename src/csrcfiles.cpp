@@ -349,7 +349,7 @@ void CSrcFiles::ProcessGzipLine(std::string_view line)
     ttlib::multistr pair(line, ':');
     if (pair.size() < 2)
     {
-        AddError(_tt("Expected \"header: source\" but ':' not found seperating the two"));
+        AddError(_tt("Expected \"source: header\" but ':' not found seperating the two"));
         return;
     }
 
