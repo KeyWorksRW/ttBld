@@ -340,14 +340,9 @@ void CSrcFiles::ProcessDebugFile(std::string_view line)
 
         source.src_ext: header.hdr_ext  # optional comment
 
-        *.src_ext: *.hdr_ext
-
         *.src_ext: header.hdr_ext
 
     In the above case all files matching *.src_ext will be converted into arrays in header.hdr_ext
-
-    The reason for putting the source file first is because it is valid to have multiple source files with a single
-    destination.
 */
 void CSrcFiles::ProcessGzipLine(std::string_view line)
 {

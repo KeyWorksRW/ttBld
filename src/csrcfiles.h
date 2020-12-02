@@ -186,7 +186,7 @@ protected:
     ttlib::cstrVector m_lstIdlFiles;    // List of any idl files to compile with midl compiler
     ttlib::cstrVector m_lstDebugFiles;  // List of all source files for DEBUG builds only
 
-    std::map<std::string, std::string> m_gzip_files;  // Map of header/source filename pairs
+    std::map<ttlib::cstr, std::string> m_gzip_files;  // Map of header/source filename pairs
 
     ttlib::cstrVector m_lstIncludeSrcFiles;
 
