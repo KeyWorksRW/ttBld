@@ -147,7 +147,7 @@ int CMainApp::OnRun()
     cmd.addHiddenOption("uclangD");
     cmd.addHiddenOption("uclang_x86D");
 
-    cmd.addHiddenOption("hgz");  // -hgz src dst (converts src into -gz, saves as char array header file)
+    cmd.addHiddenOption("hgz");  // -hgz dst src (converts src into -gz, saves as char array header file)
 
 #if defined(TESTING) && !defined(NDEBUG)
     cmd.addHiddenOption("tvdlg", ttlib::cmd::needsarg);

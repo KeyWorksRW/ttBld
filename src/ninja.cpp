@@ -8,6 +8,9 @@
 
 #include "pch.h"
 
+#include <wx/arrstr.h>  // wxArrayString class
+#include <wx/dir.h>     // wxDir is a class for enumerating the files in a directory
+
 #include <ttcwd.h>       // Class for storing and optionally restoring the current directory
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
@@ -154,6 +157,48 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         msvcWriteMidlDirective(cmplr);
         msvcWriteLibDirective(cmplr);
         msvcWriteLinkDirective(cmplr);
+    }
+
+    if (m_gzip_files.size())
+    {
+        m_ninjafile.emplace_back("rule gzipHeader");
+        m_ninjafile.emplace_back("  command = ttBld -hgz $out $in");
+        m_ninjafile.emplace_back("  description = converting $in into $out");
+        m_ninjafile.addEmptyLine();
+
+        for (auto& iter: m_gzip_files)
+        {
+            if (iter.first.contains("*") || iter.first.contains("?"))
+            {
+                wxDir dir;
+                wxArrayString files;
+                ttlib::cstr in_directory(iter.first);
+                in_directory.remove_filename();
+                if (in_directory.empty())
+                    in_directory = ".";
+                dir.GetAllFiles(in_directory.wx_str(), &files, iter.first.filename().wx_str(), wxDIR_FILES);
+
+                if (files.size())
+                {
+                    auto& ninja_line = m_ninjafile.addEmptyLine();
+                    ninja_line << "build " << iter.second << ": gzipHeader";
+                    for (size_t pos_file = 0; pos_file < files.size(); ++pos_file)
+                    {
+                        ninja_line << ' ' << files[pos_file].wx_str();
+                    }
+                    ninja_line.backslashestoforward();
+                }
+                else
+                {
+                    AddError(_tt("No files found matching ") + iter.first);
+                }
+            }
+            else
+            {
+                m_ninjafile.addEmptyLine().Format("build %s: gzipHeader %s", iter.second.c_str(), iter.first.c_str());
+            }
+            m_ninjafile.addEmptyLine();
+        }
     }
 
     // Issue #80
