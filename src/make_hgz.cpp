@@ -36,35 +36,34 @@ int MakeHgz(ttlib::cstrVector& files)
         return 1;
     }
 
-    wxFileInputStream inputFileStream(files[0]);
-    auto len = inputFileStream.GetLength();
-    if (!inputFileStream.IsOk())
-    {
-        std::cerr << _tt(strIdCantOpen) << files[0] << '\n';
-        return 1;
-    }
-
-    wxMemoryOutputStream stream_out;
-
-    wxScopedPtr<wxFilterOutputStream> filterOutputStream(filterClassFactory->NewStream(stream_out));
-    if (!CopyStreamData(&inputFileStream, filterOutputStream.get(), inputFileStream.GetLength()))
-    {
-        std::cerr << _tt(strIdInternalError) << '\n';
-        return 1;
-    }
-    filterOutputStream->Close();
-
-    auto strm_buffer = stream_out.GetOutputStreamBuffer();
-    strm_buffer->Seek(0, wxFromStart);
-
+    std::vector<ttlib::cstr> src_filenames;
     ttlib::textfile file;
-    {
-        file.addEmptyLine() << "// .gz version of " << files[0].filename();
-        file.addEmptyLine();
-        file.addEmptyLine() << "#pragma once";
-        file.addEmptyLine();
 
-        ttlib::cstr str_name = files[0].filename();
+    for (size_t file_pos = 1; file_pos < files.size(); ++file_pos)
+    {
+        wxMemoryOutputStream stream_out;
+        wxScopedPtr<wxFilterOutputStream> filterOutputStream(filterClassFactory->NewStream(stream_out));
+
+        wxFileInputStream inputFileStream(files[file_pos]);
+        auto len = inputFileStream.GetLength();
+        if (!inputFileStream.IsOk())
+        {
+            std::cerr << _tt(strIdCantOpen) << files[0] << '\n';
+            return 1;
+        }
+
+        if (!CopyStreamData(&inputFileStream, filterOutputStream.get(), inputFileStream.GetLength()))
+        {
+            std::cerr << _tt(strIdInternalError) << '\n';
+            return 1;
+        }
+
+        src_filenames.emplace_back(files[file_pos]);
+        filterOutputStream->Close();
+        auto strm_buffer = stream_out.GetOutputStreamBuffer();
+        strm_buffer->Seek(0, wxFromStart);
+
+        ttlib::cstr str_name = files[file_pos].filename();
         ttlib::cstr ext = str_name.extension();
         str_name.remove_extension();
         if (ext.size())
@@ -75,33 +74,46 @@ int MakeHgz(ttlib::cstrVector& files)
         }
         str_name << "_gz";
 
+        file.insertEmptyLine(0) << "// " << str_name << "[] == " << files[file_pos];
+
+        file.addEmptyLine();
         file.addEmptyLine() << "static const unsigned char " << str_name << '[' << strm_buffer->GetBufferSize() << "] = {";
+
+        auto buf = static_cast<unsigned char*>(strm_buffer->GetBufferStart());
+
+        size_t pos = 0;
+        auto buf_size = strm_buffer->GetBufferSize();
+
+        while (pos < buf_size)
+        {
+            {
+                auto& line = file.addEmptyLine();
+                for (; pos < buf_size && line.size() < 116; ++pos)
+                {
+                    line << static_cast<int>(buf[pos]) << ',';
+                }
+            }
+        }
+
+        if (file[file.size() - 1].back() == ',')
+            file[file.size() - 1].pop_back();
+
+        file.addEmptyLine() << "};";
     }
 
-    auto buf = static_cast<unsigned char*>(strm_buffer->GetBufferStart());
-
-    size_t pos = 0;
-    auto buf_size = strm_buffer->GetBufferSize();
-
-    while (pos < buf_size)
+    for (size_t pos_cmt = 0; pos_cmt < file.size(); ++pos_cmt)
     {
+        if (!file[pos_cmt].is_sameprefix("//"))
         {
-            auto& line = file.addEmptyLine();
-            for (; pos < buf_size && line.size() < 116; ++pos)
-            {
-                line << static_cast<int>(buf[pos]) << ',';
-            }
+            file.insertEmptyLine(pos_cmt++);
+            file.insertEmptyLine(pos_cmt++) << "#pragma once";
+            break;
         }
     }
 
-    if (file[file.size() - 1].back() == ',')
-        file[file.size() - 1].pop_back();
-
-    file.addEmptyLine() << "};";
-
-    if (!file.WriteFile(files[1]))
+    if (!file.WriteFile(files[0]))
     {
-        std::cerr << _tt(strIdCantWrite) << files[1];
+        std::cerr << _tt(strIdCantWrite) << files[0];
         return 1;
     }
 
