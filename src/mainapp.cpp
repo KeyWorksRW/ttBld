@@ -30,8 +30,9 @@
     #endif
 #endif
 
-#include <wx/cshelp.h>
-#include <wx/log.h>
+#include <wx/cshelp.h>  // Context-sensitive help support classes
+#include <wx/image.h>   // wxImage class
+#include <wx/log.h>     // Assorted wxLogXXX functions, and wxLog (sink for logs)
 
 #include "mainapp.h"  // CMainApp -- Main application class
 
@@ -147,7 +148,9 @@ int CMainApp::OnRun()
     cmd.addHiddenOption("uclangD");
     cmd.addHiddenOption("uclang_x86D");
 
-    cmd.addHiddenOption("hgz");  // -hgz dst src (converts src into -gz, saves as char array header file)
+    cmd.addHiddenOption("hgz");  // -hgz dst src (converts src into gzip, saves as char array header file)
+
+    cmd.addHiddenOption("xpm");  // -xpm src dst
 
 #if defined(TESTING) && !defined(NDEBUG)
     cmd.addHiddenOption("tvdlg", ttlib::cmd::needsarg);
@@ -167,9 +170,39 @@ int CMainApp::OnRun()
         return 0;
     }
 
-    if (cmd.isOption("hgz"))
+    else if (cmd.isOption("hgz"))
     {
         return MakeHgz(cmd.getExtras());
+    }
+    else if (cmd.isOption("xpm"))
+    {
+        auto files = cmd.getExtras();
+        if (files.size() < 2)
+        {
+            std::cerr << "both src and dest files must be specified" << '\n';
+            return 1;
+        }
+
+        // Add all image handlers so that the EmbedImage class can be used to convert any type of image that wxWidgets supports.
+        wxInitAllImageHandlers();
+
+        wxImage image;
+        if (!image.LoadFile(files[0].wx_str()))
+        {
+            std::cerr << "Cannot load the image file " << files[0].wx_str() << '\n';
+            return 1;
+        }
+
+        if (image.HasAlpha())
+            image.ConvertAlphaToMask(wxIMAGE_ALPHA_THRESHOLD);
+
+        if (!image.SaveFile(files[1].wx_str(), wxBITMAP_TYPE_XPM))
+        {
+            std::cerr << "Cannot save the XPM file " << files[1].wx_str() << '\n';
+            return 1;
+        }
+
+        return 0;
     }
 
     UPDATE_TYPE upType = UPDATE_NORMAL;
