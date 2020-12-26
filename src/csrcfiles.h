@@ -178,6 +178,8 @@ protected:
 
 protected:
     void ProcessGzipLine(std::string_view line);
+    void ProcessXpmLine(std::string_view line);
+
     ttlib::cstr m_LIBname;  // Name and location of any additional library to build (used by Lib: section)
     ttlib::cstr m_RCname;   // Resource file to build (if any)
     ttlib::cstr m_HPPname;  // HTML Help project file
@@ -187,6 +189,7 @@ protected:
     ttlib::cstrVector m_lstDebugFiles;  // List of all source files for DEBUG builds only
 
     std::map<ttlib::cstr, std::string> m_gzip_files;  // Map of header/source filename pairs
+    std::map<ttlib::cstr, ttlib::cstr> m_xpm_files;   // Map of src/dst filename pairs
 
     ttlib::cstrVector m_lstIncludeSrcFiles;
 
@@ -217,6 +220,7 @@ private:
         SECTION_FILES,
         SECTION_DEBUG_FILES,
         SECTION_GZIP,
+        SECTION_XPM,
     };
     SRC_SECTION m_section { SECTION_UNKNOWN };
 
