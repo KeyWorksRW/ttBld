@@ -79,10 +79,10 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
             if (ttlib::is_sameprefix(view, "# unrecognized option --"))
             {
                 ttlib::cstr option_line = ttlib::stepover(view.substr(view.find("--")));
-                auto pos = option_line.find_oneof(":=");
-                if (pos == ttlib::cstr::npos)
+                auto pos_sep = option_line.find_oneof(":=");
+                if (pos_sep == ttlib::cstr::npos)
                     continue;
-                ttlib::cstr name(option_line.substr(0, pos));
+                ttlib::cstr name(option_line.substr(0, pos_sep));
                 auto option = FindOption(name);
                 if (option != OPT::LAST)
                 {

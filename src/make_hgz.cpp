@@ -47,7 +47,6 @@ int MakeHgz(ttlib::cstrVector& files)
         wxScopedPtr<wxFilterOutputStream> filterOutputStream(filterClassFactory->NewStream(stream_out));
 
         wxFileInputStream inputFileStream(files[file_pos]);
-        auto len = inputFileStream.GetLength();
         if (!inputFileStream.IsOk())
         {
             std::cerr << _tt(strIdCantOpen) << files[0] << '\n';
