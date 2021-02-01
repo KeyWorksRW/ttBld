@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CWriteSrcFiles
 // Purpose:   Writes a new or update srcfiles.yaml file
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   MIT License (see MIT License)
+// License:   Apache License -- see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once

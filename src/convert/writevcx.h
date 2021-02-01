@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CVcxWrite
 // Purpose:   Create a Visual Studio project file
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   MIT License (see MIT License)
+// License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
