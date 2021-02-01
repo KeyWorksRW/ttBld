@@ -9,7 +9,6 @@
 #include "pch.h"
 
 #include <exception>
-#include <sstream>
 
 #include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
 #include <tttextfile.h>  // Classes for reading and writing line-oriented files

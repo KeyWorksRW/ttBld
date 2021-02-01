@@ -8,7 +8,6 @@
 
 #include "pch.h"
 
-#include <sstream>
 #include <utility>
 
 #include <ttcwd.h>       // Class for storing and optionally restoring the current directory
@@ -213,9 +212,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
     pos = line.stepover(pos);
     if (pos == ttlib::cstr::npos)
     {
-        std::stringstream msg;
-        msg << _tt("The option ") << name << _tt(" does not have a value");
-        AddError(msg.str());
+        AddError(ttlib::cstr() << _tt("The option ") << name << _tt(" does not have a value"));
         return;
     }
 
@@ -224,9 +221,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
         auto posNext = value.ExtractSubString(line, pos);
         if (posNext == ttlib::cstr::npos)
         {
-            std::stringstream msg;
-            msg << _tt("The value for ") << name << _tt(" has an opening quote, but no closing quote.");
-            AddError(msg.str());
+            AddError(ttlib::cstr() << _tt("The value for ") << name << _tt(" has an opening quote, but no closing quote."));
             value.assign(line.substr(pos));
             posNext = pos;
         }
@@ -259,9 +254,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
     auto option = FindOption(name);
     if (option == OPT::LAST)
     {
-        std::stringstream msg;
-        msg << name << _tt(" is an unrecognized option and will be ignored.");
-        AddError(msg.str());
+        AddError(ttlib::cstr() << name << _tt(" is an unrecognized option and will be ignored."));
         return;
     }
 

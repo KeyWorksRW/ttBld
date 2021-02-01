@@ -317,16 +317,12 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
                 size_t defpos = 0;
                 for (; defpos < Defines.size() - 1; ++defpos)
                 {
-                    std::stringstream str;
-                    str << "                \"" << Defines[defpos] << "\",";
-                    file.insert(file.begin() + insertpos, str.str().c_str());
+                    file.insert(file.begin() + insertpos, ttlib::cstr() << "                \"" << Defines[defpos] << "\",");
                     ++insertpos;
                 }
 
                 // Write the last one without a trailing comma
-                std::stringstream str;
-                str << "                \"" << Defines[defpos] << "\"";
-                file.insert(file.begin() + insertpos, str.str().c_str());
+                file.insert(file.begin() + insertpos, ttlib::cstr() << "                \"" << Defines[defpos] << "\"");
                 ++insertpos;
             }
             line = insertpos;

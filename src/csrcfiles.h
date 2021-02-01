@@ -133,7 +133,6 @@ public:
 
     void SetReportingFile(std::string_view filename) { m_ReportPath = filename; }
 
-    void AddError(const std::stringstream& msg) { AddError(msg.str()); };
     void AddError(std::string_view err);
 
     void InitOptions();
