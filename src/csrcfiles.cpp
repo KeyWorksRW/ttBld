@@ -9,6 +9,7 @@
 #include "pch.h"
 
 #include <sstream>
+#include <utility>
 
 #include <ttcwd.h>       // Class for storing and optionally restoring the current directory
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings

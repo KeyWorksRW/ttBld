@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <ttcvector.h>  // cstrVector -- Vector of ttlib::cstr strings
 
 class cstr;

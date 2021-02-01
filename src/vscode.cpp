@@ -8,6 +8,9 @@
 
 #include "pch.h"
 
+#include <cctype>
+#include <string_view>
+
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 

@@ -11,6 +11,7 @@
 #include "pch.h"
 
 #include <filesystem>
+#include <vector>
 
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 

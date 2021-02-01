@@ -7,6 +7,8 @@
 
 #include "pch.h"
 
+#include <map>
+
 #include "strings.h"
 
 const std::map<int, const char*> englishStrings = {

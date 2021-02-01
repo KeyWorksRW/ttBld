@@ -8,7 +8,9 @@
 
 #pragma once
 
-#include <ttcstr.h>   // Classes for handling zero-terminated char strings.
+#include <array>
+
+#include <ttcstr.h>  // Classes for handling zero-terminated char strings.
 
 class OPT
 {

@@ -30,6 +30,8 @@
     #endif
 #endif
 
+#include <vector>
+
 #include <wx/cshelp.h>  // Context-sensitive help support classes
 #include <wx/image.h>   // wxImage class
 #include <wx/log.h>     // Assorted wxLogXXX functions, and wxLog (sink for logs)

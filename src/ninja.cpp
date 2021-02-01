@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <cctype>
+
 #include <wx/arrstr.h>  // wxArrayString class
 #include <wx/dir.h>     // wxDir is a class for enumerating the files in a directory
 

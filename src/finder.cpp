@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <cstdlib>
+
 #include <wx/utils.h>
 
 #include <ttcstr.h>      // cstr -- Classes for handling zero-terminated char strings.

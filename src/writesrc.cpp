@@ -8,15 +8,13 @@
 
 #include "pch.h"
 
-#include <array>
+#include <vector>
 
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "writesrc.h"  // CWriteSrcFiles
 
 CWriteSrcFiles::CWriteSrcFiles() {}
-
-// extern const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions;
 
 bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
 {

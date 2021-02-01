@@ -8,6 +8,8 @@
 
 #include "pch.h"
 
+#include <cctype>
+
 #if !defined(_WIN32)
     #error "This module can only be compiled for Windows"
 #endif

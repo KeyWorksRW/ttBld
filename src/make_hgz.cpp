@@ -9,6 +9,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <vector>
 
 #include <wx/archive.h>   // Streams for archive formats
 #include <wx/file.h>      // wxFile - encapsulates low-level "file descriptor"
