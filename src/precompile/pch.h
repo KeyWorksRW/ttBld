@@ -61,7 +61,6 @@
     #endif
 #endif
 
-#include <stdexcept>
 #include <string>
 #include <string_view>
 
