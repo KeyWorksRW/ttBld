@@ -1,8 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CConvert
 // Purpose:   Class for converting a Visual Studio .DSP file to .srcfiles.yaml
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2002-2021 KeyWorks Software (Ralph Walden)
 // License:   Apache License (see ../LICENSE)
 /////////////////////////////////////////////////////////////////////////////
 
@@ -12,7 +11,7 @@
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
-#include "convert.h"   // CConvert, CVcxWrite
+#include "convert.h"  // CConvert, CVcxWrite
 
 enum
 {
@@ -55,7 +54,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
 
     for (auto& line: fileIn)
     {
-        if (line.view_nonspace().empty())
+        if (line.view_nonspace().empty() || line.is_sameprefix("!MESSAGE"))
             continue;
 
         if (line.is_sameprefix("CFG", tt::CASE::either))
@@ -85,6 +84,61 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                     Group = GROUP_RESOURCE;
                 else
                     Group = GROUP_UNKNOWN;
+            }
+            else if (line.contains("TARGTYPE"))
+            {
+                if (line.contains("Dynamic-Link Library"))
+                    m_writefile.setOptValue(OPT::EXE_TYPE, "dll");
+            }
+            else if (line.contains("# ADD CPP /Yc"))
+            {
+                if (auto pos = line.find('\"'); ttlib::is_found(pos))
+                {
+                    ttlib::cstr header;
+                    header.AssignSubString(line.subview(pos));
+                    if (header.size())
+                        m_writefile.setOptValue(OPT::PCH, header);
+
+                    // The /Yc flag will be added after the src file that is used to create the precompiled header. At the
+                    // very least, we need to remove it from the files list since it will be processed differently. Adding it
+                    // as a PCH_CPP may not be necessary if it has the same base name as the precompiled header, but it
+                    // doesn't hurt to add it even if they do have the same name.
+
+                    auto& src_files = m_writefile.GetSrcFileList();
+                    m_writefile.setOptValue(OPT::PCH_CPP, src_files.back());
+                    src_files.pop_back();
+                }
+            }
+            else if (line.contains("# ADD LINK32"))
+            {
+                auto pos = line.find("/out:");
+                if (ttlib::is_found(pos))
+                {
+                    if (line.subview().contains(".ocx"))
+                        m_writefile.setOptValue(OPT::EXE_TYPE, "ocx");
+                }
+                pos = line.find("/map:");
+                if (ttlib::is_found(pos))
+                {
+                    pos += 5;
+                    // Visual Studio normally places all filenames in quotes, so we rely on that initial quote to tell us
+                    // where the filename begins and ends.
+                    if (line[pos] == '"')
+                    {
+                        ttlib::cstr filename;
+                        filename.AssignSubString(line.subview(pos));
+                        ttlib::cstr cur_flags;
+                        if (m_writefile.hasOptValue(OPT::LINK_REL))
+                            cur_flags = m_writefile.getOptValue(OPT::LINK_REL);
+                        if (!cur_flags.contains("/map:"))
+                        {
+                            if (cur_flags.size())
+                                cur_flags << ' ';
+                            cur_flags << "/map:" << '"' << filename << '"';
+                            m_writefile.setOptValue(OPT::LINK_REL, cur_flags);
+                        }
+                    }
+                }
             }
             else if (line.contains("ADD BASE CPP") || line.contains("ADD CPP"))
             {
@@ -141,8 +195,62 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                     m_writefile.setOptValue(OPT::CFLAGS_REL, CurFlags);
                 }
             }
+            else if (line.contains("ADD BASE MTL") || line.contains("ADD MTL"))
+            {
+                ttlib::cstr NewFlags;
+                ttlib::cstr CurFlags;
+                if (m_writefile.hasOptValue(OPT::MIDL_CMN))
+                    CurFlags = m_writefile.getOptValue(OPT::MIDL_CMN);
+
+                if (line.contains("/mktyplib203", tt::CASE::either) && !CurFlags.contains("/mktyplib203"))
+                {
+                    if (!NewFlags.empty())
+                        NewFlags += " ";
+                    NewFlags += "/mktyplib203";
+                }
+                if (line.contains("/win32", tt::CASE::either) && !CurFlags.contains("/win32"))
+                {
+                    if (!NewFlags.empty())
+                        NewFlags += " ";
+                    NewFlags += "/win32";
+                }
+
+                auto pos = line.find("/D");
+                if (pos != tt::npos)
+                {
+                    do
+                    {
+                        ttlib::cstr def;
+                        pos = def.ExtractSubString(line, line.find_space(pos));
+                        if (!def.is_sameprefix("NDEBUG") && !def.is_sameprefix("_DEBUG") && !def.is_sameprefix("_WIN32"))
+                        {
+                            ttlib::cstr Flag("-D" + def);
+                            // If we don't already have the flag, then add it
+                            if (!Flag.contains(CurFlags))
+                            {
+                                if (!NewFlags.empty())
+                                    NewFlags += " ";
+                                NewFlags += Flag.c_str();
+                            }
+                        }
+                        pos = line.find("/D", pos);
+                    } while (pos != tt::npos);
+                }
+
+                CurFlags.clear();
+                if (!NewFlags.empty())
+                {
+                    if (m_writefile.hasOptValue(OPT::MIDL_CMN))
+                    {
+                        CurFlags = m_writefile.getOptValue(OPT::MIDL_CMN);
+                        CurFlags += " ";
+                    }
+                    CurFlags += NewFlags.c_str();
+                    m_writefile.setOptValue(OPT::MIDL_CMN, CurFlags);
+                }
+            }
         }
-        else if (Group == GROUP_SRC && line.is_sameas("SOURCE"))
+        else if (Group == GROUP_SRC && line.is_sameprefix("SOURCE"))
         {
             auto pos = line.find('=');
             if (pos != tt::npos)
@@ -150,7 +258,23 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 pos = line.find_nonspace(pos + 1);
                 ttlib::cstr filename(line.c_str() + pos);
                 MakeNameRelative(filename);
-                m_writefile.GetSrcFileList().append(filename);
+                if (filename.extension().is_sameas(".def", tt::CASE::either))
+                {
+                    ttlib::cstr cur_flags;
+                    if (m_writefile.hasOptValue(OPT::LINK_REL))
+                        cur_flags = m_writefile.getOptValue(OPT::LINK_REL);
+                    if (!cur_flags.contains("/def:"))
+                    {
+                        if (cur_flags.size())
+                            cur_flags << ' ';
+                        cur_flags << "/def:" << '"' << filename << '"';
+                        m_writefile.setOptValue(OPT::LINK_REL, cur_flags);
+                    }
+                }
+                else
+                {
+                    m_writefile.GetSrcFileList().append(filename);
+                }
             }
         }
     }
