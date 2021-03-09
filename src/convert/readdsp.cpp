@@ -111,10 +111,33 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
             }
             else if (line.contains("# ADD LINK32"))
             {
-                if (auto pos = line.find("/out:"); ttlib::is_found(pos))
+                auto pos = line.find("/out:");
+                if (ttlib::is_found(pos))
                 {
                     if (line.subview().contains(".ocx"))
                         m_writefile.setOptValue(OPT::EXE_TYPE, "ocx");
+                }
+                pos = line.find("/map:");
+                if (ttlib::is_found(pos))
+                {
+                    pos += 5;
+                    // Visual Studio normally places all filenames in quotes, so we rely on that initial quote to tell us
+                    // where the filename begins and ends.
+                    if (line[pos] == '"')
+                    {
+                        ttlib::cstr filename;
+                        filename.AssignSubString(line.subview(pos));
+                        ttlib::cstr cur_flags;
+                        if (m_writefile.hasOptValue(OPT::LINK_REL))
+                            cur_flags = m_writefile.getOptValue(OPT::LINK_REL);
+                        if (!cur_flags.contains("/map:"))
+                        {
+                            if (cur_flags.size())
+                                cur_flags << ' ';
+                            cur_flags << "/map:" << '"' << filename << '"';
+                            m_writefile.setOptValue(OPT::LINK_REL, cur_flags);
+                        }
+                    }
                 }
             }
             else if (line.contains("ADD BASE CPP") || line.contains("ADD CPP"))
