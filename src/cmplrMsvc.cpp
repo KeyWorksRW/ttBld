@@ -168,7 +168,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         }
     }
 
-    if (hasOptValue(OPT::PCH))
+    if (HasPch())
     {
         ttlib::cstr tmp;
         line += (" /Fp$outdir/" + m_pchHdrName);
@@ -180,7 +180,7 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
 {
     ttlib::cview compiler = (cmplr == CMPLR_MSVC ? "cl.exe" : "clang-cl.exe");
 
-    if (hasOptValue(OPT::PCH))
+    if (HasPch())
     {
         m_ninjafile.emplace_back("rule compilePCH");
         m_ninjafile.emplace_back("  deps = msvc");
@@ -195,7 +195,7 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
     auto& line = m_ninjafile.addEmptyLine();
 
     ttlib::cstr addyu;
-    if (hasOptValue(OPT::PCH))
+    if (HasPch())
     {
         addyu = (" -Yu" + getOptValue(OPT::PCH));
     }

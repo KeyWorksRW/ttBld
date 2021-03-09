@@ -30,7 +30,7 @@ OptionsDlg::OptionsDlg(const std::string& ProjectFile) : OptionsDlgBase(nullptr)
     m_NatvisPicker->SetInitialDirectory(m_cwd);
     m_TargetDirPicker->SetInitialDirectory(m_cwd);
 
-    if (!hasOptValue(OPT::PCH) || getOptValue(OPT::PCH).is_sameas("none"))
+    if (!HasPch())
     {
         if (ttlib::file_exists("stdafx.h"))
             setOptValue(OPT::PCH, "stdafx.h");

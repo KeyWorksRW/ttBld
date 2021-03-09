@@ -113,6 +113,7 @@ public:
 
     const ttlib::cstr& GetProjectName() { return m_Options[OPT::PROJECT].value; }
     const ttlib::cstr& GetPchCpp();
+    bool HasPch() { return (hasOptValue(OPT::PCH) && !isOptValue(OPT::PCH, "none")); }
 
     void SetRcName(std::string_view name) { m_RCname = name; }
     const ttlib::cstr& getRcName() { return m_RCname; }
