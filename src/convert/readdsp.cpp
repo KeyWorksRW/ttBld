@@ -109,6 +109,14 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                     src_files.pop_back();
                 }
             }
+            else if (line.contains("# ADD LINK32"))
+            {
+                if (auto pos = line.find("/out:"); ttlib::is_found(pos))
+                {
+                    if (line.subview().contains(".ocx"))
+                        m_writefile.setOptValue(OPT::EXE_TYPE, "ocx");
+                }
+            }
             else if (line.contains("ADD BASE CPP") || line.contains("ADD CPP"))
             {
                 // Since this is a really old project, we ignore any compiler flags -- we just grab the defines
