@@ -235,7 +235,23 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 pos = line.find_nonspace(pos + 1);
                 ttlib::cstr filename(line.c_str() + pos);
                 MakeNameRelative(filename);
-                m_writefile.GetSrcFileList().append(filename);
+                if (filename.extension().is_sameas(".def", tt::CASE::either))
+                {
+                    ttlib::cstr cur_flags;
+                    if (m_writefile.hasOptValue(OPT::LINK_REL))
+                        cur_flags = m_writefile.getOptValue(OPT::LINK_REL);
+                    if (!cur_flags.contains("/def:"))
+                    {
+                        if (cur_flags.size())
+                            cur_flags << ' ';
+                        cur_flags << "/def:" << '"' << filename << '"';
+                        m_writefile.setOptValue(OPT::LINK_REL, cur_flags);
+                    }
+                }
+                else
+                {
+                    m_writefile.GetSrcFileList().append(filename);
+                }
             }
         }
     }
