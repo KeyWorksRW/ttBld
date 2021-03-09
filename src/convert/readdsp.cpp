@@ -90,6 +90,25 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 if (line.contains("Dynamic-Link Library"))
                     m_writefile.setOptValue(OPT::EXE_TYPE, "dll");
             }
+            else if (line.contains("# ADD CPP /Yc"))
+            {
+                if (auto pos = line.find('\"'); ttlib::is_found(pos))
+                {
+                    ttlib::cstr header;
+                    header.AssignSubString(line.subview(pos));
+                    if (header.size())
+                        m_writefile.setOptValue(OPT::PCH, header);
+
+                    // The /Yc flag will be added after the src file that is used to create the precompiled header. At the
+                    // very least, we need to remove it from the files list since it will be processed differently. Adding it
+                    // as a PCH_CPP may not be necessary if it has the same base name as the precompiled header, but it
+                    // doesn't hurt to add it even if they do have the same name.
+
+                    auto& src_files = m_writefile.GetSrcFileList();
+                    m_writefile.setOptValue(OPT::PCH_CPP, src_files.back());
+                    src_files.pop_back();
+                }
+            }
             else if (line.contains("ADD BASE CPP") || line.contains("ADD CPP"))
             {
                 // Since this is a really old project, we ignore any compiler flags -- we just grab the defines
