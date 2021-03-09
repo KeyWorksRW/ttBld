@@ -1,4 +1,4 @@
-# https://releases.llvm.org/9.0.0/tools/clang/docs/ClangFormatStyleOptions.html
+# https://releases.llvm.org/11.0.0/tools/clang/docs/ClangFormatStyleOptions.html
 
 AlignConsecutiveMacros: true
 AllowAllArgumentsOnNextLine: true
@@ -26,12 +26,12 @@ BinPackParameters: true
 BraceWrapping:
   AfterClass:      true
   AfterControlStatement: true
-  AfterEnum:       true
-  AfterFunction:   true
-  AfterNamespace:  true
+  AfterEnum:        true
+  AfterFunction:    true
+  AfterNamespace:   true
   AfterObjCDeclaration: true
-  AfterStruct:     true
-  AfterUnion:      true
+  AfterStruct:      true
+  AfterUnion:       true
   AfterExternBlock: true
   BeforeCatch:     false
   BeforeElse:      true
@@ -47,7 +47,7 @@ BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: AfterColon
 BreakInheritanceList: AfterColon
 BreakStringLiterals: true
-ColumnLimit: 140
+ColumnLimit: 125
 CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
@@ -72,8 +72,6 @@ IndentPPDirectives: BeforeHash
 IndentWidth:     4
 IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: false
-MacroBlockBegin: 'BEGIN_TTCMD_MAP|BEGIN_TTMSG_MAP|wxBEGIN_EVENT_TABLE|wxDECLARE_EXPORTED_EVENT|BEGIN_MSG_MAP'
-MacroBlockEnd: 'END_TTMSG_MAP|wxEND_EVENT_TABLE|END_MSG_MAP'
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: All
 PointerAlignment: Left
