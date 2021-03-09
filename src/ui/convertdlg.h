@@ -14,7 +14,7 @@ class ConvertDlg : public ConvertDlgBase
 public:
     ConvertDlg(std::string_view projectFile);
 
-    const ttlib::cstr& GetOutSrcFiles() { return m_cszOutSrcFiles; }
+    const ttlib::cstr& GetOutSrcFiles() { return m_new_srcfiles; }
 
 protected:
     // Handlers for ConvertDlgBase events.
@@ -24,5 +24,5 @@ protected:
     void OnOK(wxCommandEvent& WXUNUSED(event)) override;
 
 private:
-    ttlib::cstr m_cszOutSrcFiles;  // Where .srcfiles should be created
+    ttlib::cstr m_new_srcfiles;  // Where .srcfiles should be created
 };

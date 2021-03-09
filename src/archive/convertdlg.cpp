@@ -82,15 +82,15 @@ bool MakeNewProject(ttlib::cstr& projectFile)
 
 CConvertDlg::CConvertDlg() : ttlib::dlg(IDDDLG_CONVERT)
 {
-    m_cszOutSrcFiles = ".srcfiles.yaml";
+    m_new_srcfiles = ".srcfiles.yaml";
 }
 
 CConvertDlg::CConvertDlg(std::string_view projectFile) : ttlib::dlg(IDDDLG_CONVERT)
 {
     if (projectFile.size())
-        m_cszOutSrcFiles.assign(projectFile);
+        m_new_srcfiles.assign(projectFile);
     else
-        m_cszOutSrcFiles = ".srcfiles.yaml";
+        m_new_srcfiles = ".srcfiles.yaml";
 }
 
 void CConvertDlg::OnBegin(void)
@@ -125,9 +125,9 @@ void CConvertDlg::OnBegin(void)
     m_cwd.backslashestoforward();
     SetControlText(IDEDIT_IN_DIR, m_cwd);
 
-    if (!m_cszOutSrcFiles.empty())
+    if (!m_new_srcfiles.empty())
     {
-        tmp = m_cszOutSrcFiles;
+        tmp = m_new_srcfiles;
         tmp.make_relative(m_cwd);
         tmp.remove_filename();
         tmp.backslashestoforward();
@@ -268,8 +268,8 @@ void CConvertDlg::OnBtnChangeIn()
 
 void CConvertDlg::OnOK(void)
 {
-    m_cszOutSrcFiles.GetWndText(gethwnd(IDEDIT_OUT_DIR));
-    m_cszOutSrcFiles.append_filename(".srcfiles.yaml");
+    m_new_srcfiles.GetWndText(gethwnd(IDEDIT_OUT_DIR));
+    m_new_srcfiles.append_filename(".srcfiles.yaml");
     m_cszDirSrcFiles.GetWndText(gethwnd(IDEDIT_IN_DIR));
     if (GetCheck(IDRADIO_CONVERT))
         m_ConvertFile.GetWndText(gethwnd(IDCOMBO_SCRIPTS));
@@ -294,7 +294,7 @@ void CConvertDlg::OnOK(void)
 
 bool CConvertDlg::doConversion()
 {
-    ttASSERT_MSG(!m_cszOutSrcFiles.empty(), "Need to set path to .srcfiles.yaml before calling doConversion()");
+    ttASSERT_MSG(!m_new_srcfiles.empty(), "Need to set path to .srcfiles.yaml before calling doConversion()");
 
     // If there is no conversion script file, then convert using files in the current directory.
     if (m_ConvertFile.empty())
@@ -303,7 +303,7 @@ bool CConvertDlg::doConversion()
 
         if (!m_cSrcFiles.hasOptValue(OPT::PROJECT))
         {
-            ttlib::cstr projname(m_cszOutSrcFiles);
+            ttlib::cstr projname(m_new_srcfiles);
             projname.remove_filename();
             projname.backslashestoforward();
             if (projname.back() == '/')
@@ -340,9 +340,9 @@ bool CConvertDlg::doConversion()
         m_cSrcFiles.AddSourcePattern("*.cpp;*.cc;*.cxx");
 #endif
 
-        if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles) != bld::success)
+        if (m_cSrcFiles.WriteNew(m_new_srcfiles) != bld::success)
         {
-            ttlib::MsgBox(_tt(strIdCantWrite) + m_cszOutSrcFiles);
+            ttlib::MsgBox(_tt(strIdCantWrite) + m_new_srcfiles);
             CancelEnd();
             return false;
         }
@@ -356,31 +356,31 @@ bool CConvertDlg::doConversion()
         if (extension.is_sameas(".vcxproj", tt::CASE::either))
         {
             CConvert convert;
-            auto result = convert.ConvertVcx(m_ConvertFile, m_cszOutSrcFiles);
+            auto result = convert.ConvertVcx(m_ConvertFile, m_new_srcfiles);
             return (result == bld::success);
         }
         else if (extension.is_sameas(".vcproj", tt::CASE::either))
         {
             CConvert convert;
-            auto result = convert.ConvertVc(m_ConvertFile, m_cszOutSrcFiles);
+            auto result = convert.ConvertVc(m_ConvertFile, m_new_srcfiles);
             return (result == bld::success);
         }
         else if (extension.is_sameas(".dsp", tt::CASE::either))
         {
             CConvert convert;
-            auto result = convert.ConvertDsp(m_ConvertFile, m_cszOutSrcFiles);
+            auto result = convert.ConvertDsp(m_ConvertFile, m_new_srcfiles);
             return (result == bld::success);
         }
         else if (extension.is_sameas(".project", tt::CASE::either))
         {
             CConvert convert;
-            auto result = convert.ConvertCodeLite(m_ConvertFile, m_cszOutSrcFiles);
+            auto result = convert.ConvertCodeLite(m_ConvertFile, m_new_srcfiles);
             return (result == bld::success);
         }
         else if (m_ConvertFile.is_sameprefix(".srcfiles", tt::CASE::either))
         {
             CConvert convert;
-            auto result = convert.ConvertSrcfiles(m_ConvertFile, m_cszOutSrcFiles);
+            auto result = convert.ConvertSrcfiles(m_ConvertFile, m_new_srcfiles);
             return (result == bld::success);
         }
 
@@ -390,20 +390,20 @@ bool CConvertDlg::doConversion()
         {
             ttlib::cstr cszHdr, cszRelative;
             cszRelative = m_ConvertFile;
-            cszRelative.make_relative(m_cszOutSrcFiles);
+            cszRelative.make_relative(m_new_srcfiles);
 
             cszHdr = "# Converted from " + cszRelative;
 
             if (!m_cSrcFiles.hasOptValue(OPT::PROJECT))
             {
-                ttlib::cstr cszProject(m_cszOutSrcFiles);
+                ttlib::cstr cszProject(m_new_srcfiles);
                 cszProject.remove_filename();
                 m_cSrcFiles.setOptValue(OPT::PROJECT, cszProject.filename());
             }
 
-            if (m_cSrcFiles.WriteNew(m_cszOutSrcFiles.c_str(), cszHdr.c_str()) != bld::success)
+            if (m_cSrcFiles.WriteNew(m_new_srcfiles.c_str(), cszHdr.c_str()) != bld::success)
             {
-                ttlib::MsgBox(_tt(strIdCantWrite) + m_cszOutSrcFiles);
+                ttlib::MsgBox(_tt(strIdCantWrite) + m_new_srcfiles);
                 return false;
             }
             return true;
