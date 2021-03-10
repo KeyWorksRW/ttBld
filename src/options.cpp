@@ -83,9 +83,9 @@ const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
     { OPT::RC_REL, "Rc_rel", nullptr, "release build compiler flags", OPT::any, OPT::optional },
     { OPT::RC_DBG, "Rc_dbg", nullptr, "debug build compiler flags", OPT::any, OPT::optional },
 
-    { OPT::MIDL_CMN, "Midl_cmn", nullptr, "common compiler flags", OPT::any, OPT::optional },
-    { OPT::MIDL_REL, "Midl_rel", nullptr, "release build compiler flags", OPT::any, OPT::optional },
-    { OPT::MIDL_DBG, "Midl_dbg", nullptr, "debug build compiler flags", OPT::any, OPT::optional },
+    { OPT::MIDL_CMN, "Midl_cmn", nullptr, "common midl flags", OPT::any, OPT::optional },
+    { OPT::MIDL_REL, "Midl_rel", nullptr, "release build midl flags", OPT::any, OPT::optional },
+    { OPT::MIDL_DBG, "Midl_dbg", nullptr, "debug build midl flags", OPT::any, OPT::optional },
 
     { OPT::NATVIS, "Natvis", nullptr, "Debug visualizer", OPT::any, OPT::optional },
 

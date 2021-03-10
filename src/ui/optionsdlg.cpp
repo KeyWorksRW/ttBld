@@ -224,7 +224,7 @@ void OptionsDlg::SaveChanges()
     setOptValue(OPT::CLANG_REL, ttlib::cstr() << m_releaseClangFlags.wx_str());
     setOptValue(OPT::CLANG_DBG, ttlib::cstr() << m_debugClangFlags.wx_str());
 
-    setOptValue(OPT::LIBS_CMN, ttlib::cstr() << m_CommonLinkFlags.wx_str());
+    setOptValue(OPT::LIBS_CMN, ttlib::cstr() << m_CommonLibs.wx_str());
     setOptValue(OPT::LIBS_REL, ttlib::cstr() << m_ReleaseLibs.wx_str());
     setOptValue(OPT::LIBS_DBG, ttlib::cstr() << m_DebugLibs.wx_str());
 
@@ -232,13 +232,13 @@ void OptionsDlg::SaveChanges()
     setOptValue(OPT::LINK_REL, ttlib::cstr() << m_ReleaseLinkFlags.wx_str());
     setOptValue(OPT::LINK_DBG, ttlib::cstr() << m_DebugLinkFlags.wx_str());
 
-    setOptValue(OPT::RC_CMN, ttlib::cstr() << m_commonMidlFlags.wx_str());
-    setOptValue(OPT::RC_REL, ttlib::cstr() << m_ReleaseLinkFlags.wx_str());
-    setOptValue(OPT::RC_DBG, ttlib::cstr() << m_DebugLinkFlags.wx_str());
+    setOptValue(OPT::RC_CMN, ttlib::cstr() << m_commonRcFlags.wx_str());
+    setOptValue(OPT::RC_REL, ttlib::cstr() << m_releaseRcFlags.wx_str());
+    setOptValue(OPT::RC_DBG, ttlib::cstr() << m_debugRcFlags.wx_str());
 
-    setOptValue(OPT::MIDL_CMN, ttlib::cstr() << m_CommonLinkFlags.wx_str());
-    setOptValue(OPT::MIDL_REL, ttlib::cstr() << m_ReleaseLinkFlags.wx_str());
-    setOptValue(OPT::MIDL_DBG, ttlib::cstr() << m_DebugLinkFlags.wx_str());
+    setOptValue(OPT::MIDL_CMN, ttlib::cstr() << m_commonMidlFlags.wx_str());
+    setOptValue(OPT::MIDL_REL, ttlib::cstr() << m_releaseMidlFlags.wx_str());
+    setOptValue(OPT::MIDL_DBG, ttlib::cstr() << m_debugMidlFlags.wx_str());
 
     if (m_NatvisPicker->GetPath().size())
     {
