@@ -61,11 +61,12 @@
                 <node class="wxTextCtrl" class_access="none" var_name="textCtrl" validator_variable="m_ProjectName" proportion="1" />
               </node>
               <node class="wxStaticBoxSizer" class_access="none" label="Project Type" flags="wxEXPAND">
-                <node class="wxFlexGridSizer" var_name="flex_grid_sizer6" growablecols="1" flags="wxEXPAND">
+                <node class="wxFlexGridSizer" cols="3" var_name="flex_grid_sizer6" flags="wxEXPAND">
                   <node class="wxRadioButton" class_access="none" label="Window" var_name="radioBtn" validator_variable="m_isWindow" />
                   <node class="wxRadioButton" class_access="none" label="Console" var_name="radioBtn2" validator_variable="m_isConsole" />
                   <node class="wxRadioButton" class_access="none" label="Library" var_name="radioBtn3" validator_variable="m_isLibrary" />
                   <node class="wxRadioButton" class_access="none" label="DLL" var_name="radioBtn4" validator_variable="m_isDll" />
+                  <node class="wxRadioButton" class_access="none" label="OCX" var_name="radioBtn_5" validator_variable="m_isOcx" />
                 </node>
               </node>
               <node class="wxBoxSizer" orientation="wxVERTICAL" var_name="box_sizer2" flags="wxEXPAND">

@@ -53,10 +53,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
     auto static_box = new wxStaticBoxSizer(wxVERTICAL, page, wxString::FromUTF8("Project Type"));
     parent_sizer2->Add(static_box, wxSizerFlags().Expand().Border(wxALL));
 
-    auto flex_grid_sizer6 = new wxFlexGridSizer(2, 0, 0);
-    {
-        flex_grid_sizer6->AddGrowableCol(1);
-    }
+    auto flex_grid_sizer6 = new wxFlexGridSizer(3, 0, 0);
     static_box->Add(flex_grid_sizer6, wxSizerFlags().Expand().Border(wxALL));
 
     auto radioBtn = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Window"));
@@ -74,6 +71,10 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent, wxWindowID id, const wxString& 
     auto radioBtn4 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, wxString::FromUTF8("DLL"));
     radioBtn4->SetValidator(wxGenericValidator(&m_isDll));
     flex_grid_sizer6->Add(radioBtn4, wxSizerFlags().Border(wxALL));
+
+    auto radioBtn_5 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, wxString::FromUTF8("OCX"));
+    radioBtn_5->SetValidator(wxGenericValidator(&m_isOcx));
+    flex_grid_sizer6->Add(radioBtn_5, wxSizerFlags().Border(wxALL));
 
     auto box_sizer2 = new wxBoxSizer(wxVERTICAL);
     parent_sizer2->Add(box_sizer2, wxSizerFlags().Expand().Border(wxALL));

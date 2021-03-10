@@ -67,10 +67,12 @@ OptionsDlg::OptionsDlg(const std::string& ProjectFile) : OptionsDlgBase(nullptr)
 
     if (IsExeTypeConsole())
         m_isConsole = true;
-    else if (IsExeTypeDll())
-        m_isDll = true;
     else if (IsExeTypeLib())
         m_isLibrary = true;
+    else if (getOptValue(OPT::EXE_TYPE).is_sameas("dll", tt::CASE::either))
+        m_isDll = true;
+    else if (getOptValue(OPT::EXE_TYPE).is_sameas("ocx", tt::CASE::either))
+        m_isOcx = true;
     else
         m_isWindow = true;
 
@@ -171,6 +173,8 @@ void OptionsDlg::SaveChanges()
         setOptValue(OPT::EXE_TYPE, "lib");
     else if (m_isDll)
         setOptValue(OPT::EXE_TYPE, "dll");
+    else if (m_isOcx)
+        setOptValue(OPT::EXE_TYPE, "ocx");
 
     ttString path;
 

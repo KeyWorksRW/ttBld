@@ -48,7 +48,7 @@ const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
 {{
 
     { OPT::PROJECT,  "Project",  nullptr,   "project name", OPT::any, OPT::required },
-    { OPT::EXE_TYPE, "Exe_type", "console", "[window | console | lib | dll]", OPT::any, OPT::required },
+    { OPT::EXE_TYPE, "Exe_type", "console", "[window | console | lib | dll | ocx]", OPT::any, OPT::required },
     { OPT::PCH,      "Pch",      "none",    "name of precompiled header file, or \"none\" if not using precompiled headers",
                                                                 OPT::any, OPT::required },
     { OPT::PCH_CPP,  "Pch_cpp",  "none",    "source file used to build precompiled header (default uses same name as PCH option)",

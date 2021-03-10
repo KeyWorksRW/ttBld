@@ -30,6 +30,7 @@ protected:
     bool m_isDebugDllCRT { true };
     bool m_isDll { false };
     bool m_isLibrary { false };
+    bool m_isOcx { false };
     bool m_isReleaseDllCRT { true };
     bool m_isSpaceOptimization { true };
     bool m_isSpeedOptimization { false };
