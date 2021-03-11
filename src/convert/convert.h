@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   Class for converting project build files to .srcfiles.yaml
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2002-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -10,11 +10,11 @@
 #include <ttcstr.h>  // cstr -- Classes for handling zero-terminated char strings.
 
 // ttcview.h MUST be included before pugixml.hpp
-#include <ttcview.h> // cview -- string_view functionality on a zero-terminated char string.
+#include <ttcview.h>  // cview -- string_view functionality on a zero-terminated char string.
 
 #include "../pugixml/pugixml.hpp"  // pugixml parser
 
-#include "writesrc.h"   // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
+#include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
 class CConvert
 {

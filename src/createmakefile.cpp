@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CreateMakeFile()
 // Purpose:   Creates an MS nmake and GNU-make compatible makefile
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2002-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"

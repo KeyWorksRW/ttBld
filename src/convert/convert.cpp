@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   Various conversion methods
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 // Assumes that everything except a .DSP file is an xml file and has been parsed into m_xml

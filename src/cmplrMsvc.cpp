@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      cmplrMsvc.cpp
 // Purpose:   Creates .ninja scripts for MSVC and CLANG-CL compilers
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -56,8 +55,8 @@ void CNinja::msvcWriteCompilerComments(CMPLR_TYPE cmplr)
     m_ninjafile.addEmptyLine();  // force a blank line after the options are listed
 }
 
-// The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for
-// both CLANG and MSVC
+// The CLANG compiler we are writing for is clang-cl.exe, which means most of the compiler flags are common for both CLANG
+// and MSVC
 
 void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 {
@@ -66,13 +65,13 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 
     if (m_gentype == GEN_DEBUG)
     {
-        // For MSVC compiler you can either use -Z7 or -FS -Zf -Zi. My testing of the two approaches is that -Z7
-        // yields larger object files but reduces compile/link time by about 20% (compile speed is faster because
-        // no serialized writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not
-        // recognize -Zf.
+        // For MSVC compiler you can either use -Z7 or -FS -Zf -Zi. My testing of the two approaches is that -Z7 yields
+        // larger object files but reduces compile/link time by about 20% (compile speed is faster because no serialized
+        // writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not recognize -Zf.
 
-        line.Format("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s %s -Od -Z7", IsExeTypeConsole() ? " -D_CONSOLE" : "",
-                    getOptValue(OPT::WARN).c_str(), IsStaticCrtDbg() ? "-MD" : "-MDd");
+        line.Format("cflags = -nologo -D_DEBUG -showIncludes -EHsc%s -W%s %s -Od -Z7",
+                    IsExeTypeConsole() ? " -D_CONSOLE" : "", getOptValue(OPT::WARN).c_str(),
+                    IsStaticCrtDbg() ? "-MD" : "-MDd");
     }
     else
     {
@@ -184,8 +183,8 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
     {
         m_ninjafile.emplace_back("rule compilePCH");
         m_ninjafile.emplace_back("  deps = msvc");
-        m_ninjafile.addEmptyLine().Format("  command = %s -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s", compiler.c_str(),
-                                          GetProjectName().c_str(), getOptValue(OPT::PCH).c_str());
+        m_ninjafile.addEmptyLine().Format("  command = %s -c $cflags -Fo$outdir/ $in -Fd$outdir/%s.pdb -Yc%s",
+                                          compiler.c_str(), GetProjectName().c_str(), getOptValue(OPT::PCH).c_str());
         m_ninjafile.emplace_back("  description = compiling $in");
         m_ninjafile.addEmptyLine();
     }
@@ -409,10 +408,9 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
 
 void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
 {
-    // .idl files have one input file, and two output files: a header file (.h) and a type library file (.tlb).
-    // Typically the header file will be needed by one or more source files and the typelib file will be needed by
-    // the resource compiler. We create the header file as a target, and a phony rule for the typelib pointing to
-    // the header file target.
+    // .idl files have one input file, and two output files: a header file (.h) and a type library file (.tlb). Typically the
+    // header file will be needed by one or more source files and the typelib file will be needed by the resource compiler.
+    // We create the header file as a target, and a phony rule for the typelib pointing to the header file target.
 
     for (size_t pos = 0; pos < m_lstIdlFiles.size(); ++pos)
     {
@@ -430,9 +428,9 @@ void CNinja::msvcWriteMidlTargets(CMPLR_TYPE /* cmplr */)
 
 void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
 {
-    // Note that bin and lib don't need to exist ahead of time as ninja will create them, however if the output is
-    // supposed to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way
-    // around this would be to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
+    // Note that bin and lib don't need to exist ahead of time as ninja will create them, however if the output is supposed
+    // to be up one directory (../bin, ../lib) then the directories MUST exist ahead of time. Only way around this would be
+    // to add support for an "OutPrefix: ../" option in .srcfiles.yaml.
 
     m_ninjafile.addEmptyLine();
 
@@ -483,8 +481,8 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         }
     }
 
-    // The precompiled object file must be linked. It may or may not show up in the list of source files. We check
-    // here to make certain it does indeed get written.
+    // The precompiled object file must be linked. It may or may not show up in the list of source files. We check here to
+    // make certain it does indeed get written.
 
     if (!bPchSeen && !m_pchHdrNameObj.empty())
     {

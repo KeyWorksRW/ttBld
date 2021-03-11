@@ -1,17 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////////////////
-// Name:      ConvertCodeLite
 // Purpose:   Class for converting a CodeLite .project file to .srcfiles.yaml
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2002-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
 
-#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
+#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
-#include "convert.h"   // CConvert, CVcxWrite
+#include "convert.h"  // CConvert, CVcxWrite
 
 bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_view dstFile)
 {

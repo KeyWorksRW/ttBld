@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   Writes a new or update srcfiles.yaml file
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
 // License:   Apache License -- see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
@@ -9,7 +9,8 @@
 
 #include "csrcfiles.h"
 
-inline constexpr const char* txtNinjaVerFormat = "# Updated by ttBld.exe version 1.7.2 -- see https://github.com/KeyWorksRW/ttBld";
+inline constexpr const char* txtNinjaVerFormat =
+    "# Updated by ttBld.exe version 1.7.2 -- see https://github.com/KeyWorksRW/ttBld";
 
 // This class inherits from CSrcFiles and can be used anywhere CSrcFiles is used.
 class CWriteSrcFiles : public CSrcFiles

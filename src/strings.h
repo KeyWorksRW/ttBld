@@ -2,7 +2,7 @@
 // Purpose:   Contains translatable string IDs
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License -- see LICENSE
+// License:   Apache License -- see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -40,7 +40,8 @@ enum
     strIdOptionsUpdated,       // " Options: section updated."
     strIdCantCreateUuid,       // "Unable to create a UUID -- cannot create .vcxproj without it."
     strIdCurrent,              // " is up to date"
-    strIdCantConfigureJson,    // "Cannot locate a project file (typically .srcfiles.yaml) need to configure .vscode/*.json files."
+    strIdCantConfigureJson,    // "Cannot locate a project file (typically .srcfiles.yaml) need to configure .vscode/*.json
+                               // files."
     strIdVscodeIgnored,        // ".vscode/ added to "
     strIdQueryIgnore,          // "The directory .vscode/ is not being ignored by git. Would you like it to be added to "
     strIdCantCreateVsCodeDir,  // "Unable to create the required .vscode/ directory."
@@ -49,8 +50,9 @@ enum
     strIdCreatedSuffix,        // " created"
     strIdConfirmReplace,       // ".srcfiles.yaml already exists in this directory. Are you sure you want to replace it?"
     strIdFmtFilesLocated,      // "%kzd files located"
-    strIdOldVersion,           // "This version of ttBld is too old -- you need a newer version to correctly build the script files."
-    strIdMissingSrcfiles,      // "ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the location...
-    strIdIgnoredFiles,         // "Added directories and filenames to ignore to "
-    strIdInternalError,        // "An internal error has occurred: "
+    strIdOldVersion,  // "This version of ttBld is too old -- you need a newer version to correctly build the script files."
+    strIdMissingSrcfiles,  // "ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the
+                           // location...
+    strIdIgnoredFiles,     // "Added directories and filenames to ignore to "
+    strIdInternalError,    // "An internal error has occurred: "
 };

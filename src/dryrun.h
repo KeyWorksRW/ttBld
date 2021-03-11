@@ -1,23 +1,22 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CDryRun
 // Purpose:   Class to store information for a dry-run of functionality
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include <ttlibspace.h>
 #include <ttcstr.h>
 #include <ttcview.h>
+#include <ttlibspace.h>
 #include <tttextfile.h>
 
 // Class to store information for a dry-run of functionality
 class CDryRun
 {
 public:
-    CDryRun() {  }
+    CDryRun() {}
 
     // Class functions
 
@@ -33,5 +32,5 @@ private:
     // Class members
 
     ttlib::cstr m_filename;
-    bool isEnabled{false};
+    bool isEnabled { false };
 };

@@ -1,17 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      ConvertVcx
 // Purpose:   Class for converting a Visual Studio .vcxproj file to .srcfiles.yaml
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2002-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
 
-#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
+#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 
-#include "convert.h"   // CConvert, CVcxWrite
+#include "convert.h"  // CConvert, CVcxWrite
 
 bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view dstFile)
 {
@@ -52,9 +51,8 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
         auto filename = files[pos].node().first_attribute().as_cstr();
         if (!filename.empty())
         {
-            // The filename will be relative to the location of the xml file, so first we need to make it relative
-            // to that. Since the .srcfiles may be in a different location, we then need to make the file relative
-            // to that.
+            // The filename will be relative to the location of the xml file, so first we need to make it relative to that.
+            // Since the .srcfiles may be in a different location, we then need to make the file relative to that.
 
             MakeNameRelative(filename);
             m_writefile.GetSrcFileList().addfilename(filename);

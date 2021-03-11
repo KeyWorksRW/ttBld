@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CMainApp
 // Purpose:   Entry point
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once

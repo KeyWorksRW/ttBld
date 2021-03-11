@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      mainapp.cpp
 // Purpose:   entry point, global strings, library pragmas
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2002-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -185,7 +184,8 @@ int CMainApp::OnRun()
             return 1;
         }
 
-        // Add all image handlers so that the EmbedImage class can be used to convert any type of image that wxWidgets supports.
+        // Add all image handlers so that the EmbedImage class can be used to convert any type of image that wxWidgets
+        // supports.
         wxInitAllImageHandlers();
 
         wxImage image;
@@ -212,9 +212,9 @@ int CMainApp::OnRun()
     // this will only be initialized if the user specifies a -dir option
     ttlib::cstr RootDir;
 
-    // This will be initialized by the user if they specifies a name.yaml file on the command
-    // line. Otherwise, a search is made to find the most likely .srcfiles.yaml (or it's
-    // platform-variations) to use and this will be initialized to point to it.
+    // This will be initialized by the user if they specifies a name.yaml file on the command line. Otherwise, a search is
+    // made to find the most likely .srcfiles.yaml (or it's platform-variations) to use and this will be initialized to point
+    // to it.
     ttlib::cstr projectFile;
 
 // Change 0 to 1 to confirm that our locating functions are actually working as expected
@@ -313,7 +313,8 @@ int CMainApp::OnRun()
         return 0;
     }
 
-    // If a project file gets created, the options and vscode have already been set, and this flag will have been set to true.
+    // If a project file gets created, the options and vscode have already been set, and this flag will have been set to
+    // true.
     bool projectCreated = false;
 
     // Unless the user specified this on the command line, locate a version, or create on if none can be found.

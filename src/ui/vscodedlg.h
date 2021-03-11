@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   Dialog for setting options to create tasks.json and launch.json
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
 // License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,16 +16,15 @@ class CSrcFiles;
 class VsCodeDlg : public VsCodeDlgBase
 {
 public:
-	VsCodeDlg(wxWindow* parent = nullptr);
+    VsCodeDlg(wxWindow* parent = nullptr);
 
-	bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
-	bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
+    bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
+    bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
 
 protected:
+    // Handlers for VsCodeDlgBase events.
 
-	// Handlers for VsCodeDlgBase events.
-
-	void OnInit(wxInitDialogEvent& event) override;
+    void OnInit(wxInitDialogEvent& event) override;
 
 private:
     bool m_hasMakefileTask;  // MSVC on Windows, GCC otherwise

@@ -2,7 +2,7 @@
 // Purpose:   Contains translatable strings
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License -- see LICENSE
+// License:   Apache License -- see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -44,7 +44,8 @@ const std::map<int, const char*> englishStrings = {
     { strIdOptionsUpdated, " Options: section updated." },
     { strIdCantCreateUuid, "Unable to create a UUID -- cannot create .vcxproj without it." },
     { strIdCurrent, " is up to date" },
-    { strIdCantConfigureJson, "Cannot locate a project file (typically .srcfiles.yaml) need to configure .vscode/*.json files." },
+    { strIdCantConfigureJson,
+      "Cannot locate a project file (typically .srcfiles.yaml) need to configure .vscode/*.json files." },
     { strIdVscodeIgnored, ".vscode/ added to " },
     { strIdQueryIgnore, "The directory .vscode/ is not being ignored by git. Would you like it to be added to " },
     { strIdCantCreateVsCodeDir, "Unable to create the required .vscode/ directory." },

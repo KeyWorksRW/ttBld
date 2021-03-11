@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CDryRun
 // Purpose:   Class to store information for a dry-run of functionality
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"

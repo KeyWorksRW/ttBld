@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   Dialog for setting options to create tasks.json and launch.json
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
 // License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ void VsCodeDlg::OnInit(wxInitDialogEvent& event)
 
     ttlib::cstr tmp;
 #if defined(_WIN32)
-	m_taskMSVCBuild = true;
+    m_taskMSVCBuild = true;
     m_hasMingwMake = FindFileEnv("PATH", "mingw32-make.exe", tmp);
     if (FindFileEnv("PATH", "clang-cl.exe", tmp))
         m_taskCLANGBuild = true;
@@ -84,7 +84,7 @@ bool VsCodeDlg::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resu
         Launch.Replace("%bld%", "Ninja Debug Build");
     else
         Launch.Replace("%bld%", "");
-#else   // not defined(_WIN32)
+#else  // not defined(_WIN32)
     if (m_preLaunchMSVC)
         Launch.Replace("%bld%", "Build Debug GCC");
     else if (m_preLaunchCLANG)
@@ -219,11 +219,12 @@ bool VsCodeDlg::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resul
             MakeCommand = (m_hasMingwMake ? "mingw32-make.exe debug " : "nmake -nologo debug cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Build Debug CLANG", (m_defTaskCLANG) ? txtDefaultGroup : txtNormalGroup, MakeCommand);
 
-            MakeCommand = (m_hasMingwMake ? "mingw32-make.exe release " : "nmake -nologo release cmplr=clang ") + MakeFileOption;
+            MakeCommand =
+                (m_hasMingwMake ? "mingw32-make.exe release " : "nmake -nologo release cmplr=clang ") + MakeFileOption;
             AddClangTask(out, "Build Release CLANG", txtNormalGroup, MakeCommand);
 
-            MakeCommand =
-                (m_hasMingwMake ? "mingw32-make.exe clean release " : "nmake -nologo clean release cmplr=clang ") + MakeFileOption;
+            MakeCommand = (m_hasMingwMake ? "mingw32-make.exe clean release " : "nmake -nologo clean release cmplr=clang ") +
+                          MakeFileOption;
             AddClangTask(out, "Rebuild Release CLANG", txtNormalGroup, MakeCommand);
             if (m_hasNinjaTask && !m_hasMakefileTask)
                 AddClangTask(out, "Ninja Debug Build", (m_defTaskNinja) ? txtDefaultGroup : txtNormalGroup,
@@ -251,8 +252,8 @@ bool VsCodeDlg::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Resul
 #endif
     }
 
-    // At this point the task assume a bld/ directory -- if that needs to change, then we can simply iterate through the out vector and
-    // replace "-f bld/" with whatever the directory should be.
+    // At this point the task assume a bld/ directory -- if that needs to change, then we can simply iterate through the out
+    // vector and replace "-f bld/" with whatever the directory should be.
 
     if (!out.WriteFile(".vscode/tasks.json"))
     {

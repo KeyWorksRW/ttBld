@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      yamalize.cpp
 // Purpose:   Used to convert .srcfiles.yaml to .vscode/srcfiles.yaml
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -12,11 +11,10 @@
 
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
-// This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode
-// directory does not exist, it will be created. The srcfiles.yaml is not designed to be tracked, so it's fine to
-// customize it based on the current system (what compilers are available, what platform we're on, etc.). A lot of
-// the default options which would not be normally displayed are listed to make them easy to modify in VS Code or
-// any editor that understands YAML format
+// This file will read a .srcfiles.yaml in the current directory and write a .vscode/srcfiles.yaml. If the .vscode directory
+// does not exist, it will be created. The srcfiles.yaml is not designed to be tracked, so it's fine to customize it based on
+// the current system (what compilers are available, what platform we're on, etc.). A lot of the default options which would
+// not be normally displayed are listed to make them easy to modify in VS Code or any editor that understands YAML format
 
 bool Yamalize()
 {
@@ -92,7 +90,8 @@ bool Yamalize()
     cNewSrcFiles.setOptValue(OPT::XGET_FLAGS, cOrgSrcFiles.getOptValue(OPT::XGET_FLAGS));
 
     ttlib::cstr cszVersion;
-    cszVersion.Format(txtNinjaVerFormat, cNewSrcFiles.GetMajorRequired(), cNewSrcFiles.GetMinorRequired(), cNewSrcFiles.GetSubRequired());
+    cszVersion.Format(txtNinjaVerFormat, cNewSrcFiles.GetMajorRequired(), cNewSrcFiles.GetMinorRequired(),
+                      cNewSrcFiles.GetSubRequired());
 
     if (cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion) != bld::success)
     {

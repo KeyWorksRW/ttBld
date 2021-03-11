@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   Dialog for setting all .srcfile options
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
 // License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
@@ -350,14 +350,16 @@ void OptionsDlg::OnAddDebugLibraries(wxCommandEvent& WXUNUSED(event))
 
 void OptionsDlg::OnAddBuildLibraries(wxCommandEvent& WXUNUSED(event))
 {
-    wxFileDialog openFileDialog(this, "Library", m_cwd, "", "Project Files|.srcfiles*.yaml||", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    wxFileDialog openFileDialog(this, "Library", m_cwd, "", "Project Files|.srcfiles*.yaml||",
+                                wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     if (openFileDialog.ShowModal() != wxID_OK)
         return;
 
     ttString path = openFileDialog.GetPath();
 
     path.remove_filename();
-    // We need to see if this is the same path, so we need both paths to use forward slashes, and neither path to end with a slash.
+    // We need to see if this is the same path, so we need both paths to use forward slashes, and neither path to end with a
+    // slash.
     path.backslashestoforward();
     if (path.Last() == '/')
         path.RemoveLast();

@@ -2,7 +2,7 @@
 // Purpose:   Class for converting a Visual Studio .DSP file to .srcfiles.yaml
 // Author:    Ralph Walden
 // Copyright: Copyright (c) 2002-2021 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// License:   Apache License see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"

@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CNinja
 // Purpose:   Class for creating/maintaining *.ninja files for use by ninja.exe
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2002-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2002-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -82,8 +81,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     m_gentype = gentype;
 
-    // Note that resout goes to the same directory in all builds. The actual filename will have a 'D' appended for
-    // debug builds. Currently, 32 and 64 bit builds of the resource file are identical.
+    // Note that resout goes to the same directory in all builds. The actual filename will have a 'D' appended for debug
+    // builds. Currently, 32 and 64 bit builds of the resource file are identical.
 
     ttlib::cstr resout("resout = ");
     resout += GetBldDir();
@@ -223,17 +222,14 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         }
     }
 
-    // Issue #80
-
-    // If the project has a .idl file, then the midl compiler will create a matching header file that will be
-    // included in one or more source files. If the .idl file changes, or the header file doesn't exist yet, then
-    // we need to run the midl compiler before compiling any source files. If we knew ahead of time which source
-    // files included the header file, then we could create a dependency. However, that would essentially require
-    // an accurate C/C++ preprocessor to run on every source file which is far beyond the scope of this project.
-    // Instead, we add the dependency to the precompiled header if there is one, and if not, we add the dependency
-    // to every source m_ninjafile. Unfortunately that does mean that every time the .idl file changes, then every
-    // source file will get rebuilt whether or not a particular source file actually uses the generated header
-    // m_ninjafile.
+    // If the project has a .idl file, then the midl compiler will create a matching header file that will be included in one
+    // or more source files. If the .idl file changes, or the header file doesn't exist yet, then we need to run the midl
+    // compiler before compiling any source files. If we knew ahead of time which source files included the header file, then
+    // we could create a dependency. However, that would essentially require an accurate C/C++ preprocessor to run on every
+    // source file which is far beyond the scope of this project. Instead, we add the dependency to the precompiled header if
+    // there is one, and if not, we add the dependency to every source m_ninjafile. Unfortunately that does mean that every
+    // time the .idl file changes, then every source file will get rebuilt whether or not a particular source file actually
+    // uses the generated header m_ninjafile.
 
     if (HasPch())
     {
@@ -279,9 +275,9 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         }
         else
         {
-            // We get here if we don't have a precompiled header. We might have .idl files, which means we're going
-            // to need to add all the midl-generated header files as dependencies to each source m_ninjafile. See
-            // issue #80 for details.
+            // We get here if we don't have a precompiled header. We might have .idl files, which means we're going to need
+            // to add all the midl-generated header files as dependencies to each source m_ninjafile. See issue #80 for
+            // details.
 
             m_ninjafile.addEmptyLine();
             lastline().Format("build $outdir/%s: compile %s", objFile.c_str(), srcFile.c_str());
@@ -322,8 +318,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
             if (!m_pchHdrNameObj.empty())
             {
                 // we add m_pchHdrNameObj so it appears as a dependency and gets compiled, but not linked to
-                m_ninjafile.addEmptyLine().Format("build $outdir/%s: compile %s | $outdir/%s", objFile.c_str(), srcFile.c_str(),
-                                                  m_pchHdrNameObj.c_str());
+                m_ninjafile.addEmptyLine().Format("build $outdir/%s: compile %s | $outdir/%s", objFile.c_str(),
+                                                  srcFile.c_str(), m_pchHdrNameObj.c_str());
                 m_ninjafile.addEmptyLine();
             }
             else
@@ -424,8 +420,7 @@ void CNinja::ProcessBuildLibs()
             continue;
         }
 
-        // The current directory may just be the name of the library, but not necessarily where srcfiles is
-        // located.
+        // The current directory may just be the name of the library, but not necessarily where srcfiles is located.
 
         ttlib::cstr BuildDirectory(libPath);
         ttlib::cstr BuildFile(BuildDirectory);
@@ -480,23 +475,21 @@ void CNinja::ProcessBuildLibs()
                     }
                     else
                     {
-                        // We tried changing into a directory to find the file, that didn't work so we need to
-                        // back out.
+                        // We tried changing into a directory to find the file, that didn't work so we need to back out.
                         ttlib::ChangeDir("..");
                     }
                 }
 
-                // Any further directory searches should go above this -- once we get here, we can't find a
-                // .srcfiles.yaml. We go ahead and break out of the loop. cSrcFiles.ReadFile() will fail --
-                // we'll use whatever error reporting (if any) it uses for a file that cannot be found or read.
+                // Any further directory searches should go above this -- once we get here, we can't find a .srcfiles.yaml.
+                // We go ahead and break out of the loop. cSrcFiles.ReadFile() will fail -- we'll use whatever error
+                // reporting (if any) it uses for a file that cannot be found or read.
 
                 break;
             }
         }
 
-        // We've actually changed to the directory containing the .srcfiles.yaml, so CSrcFiles doesn't actually
-        // need the filename. However, if an error occurs, we need to indicate where the .srcfiles.yaml file is
-        // that had the problem.
+        // We've actually changed to the directory containing the .srcfiles.yaml, so CSrcFiles doesn't actually need the
+        // filename. However, if an error occurs, we need to indicate where the .srcfiles.yaml file is that had the problem.
 
         CSrcFiles cSrcFiles;
         // At this point, we should be in the same directory as .srcfiles.yaml

@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      vs.cpp
 // Purpose:   Creates .vs/tasks.vs.json and .vs/launch.vs.json (for devenv.exe)
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 // This generates files needed by Visual Studio. See vscode.cpp for generating files for Visual Studio Code.

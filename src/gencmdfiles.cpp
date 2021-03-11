@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      gencmdfiles.cpp
 // Purpose:   Generates MSVCenv.cmd and Code.cmd files
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -13,7 +12,7 @@
 #include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
 #include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
 
-#include "funcs.h"     // List of function declarations
+#include "funcs.h"  // List of function declarations
 
 #if defined(_WIN32)  // no reason to use the batch files on non-Windows platforms
 
@@ -64,9 +63,9 @@ void CreateCodeCmd(const char* pszFile)
     }
     else
     {
-        // It's possible to just move the entire VSCode directory and it will continue to work fine. In that case,
-        // the registry will still be pointing to the old location, but code.cmd may be located in the PATH, so we
-        // can look for that and use that directory if the registry location is wrong.
+        // It's possible to just move the entire VSCode directory and it will continue to work fine. In that case, the
+        // registry will still be pointing to the old location, but code.cmd may be located in the PATH, so we can look for
+        // that and use that directory if the registry location is wrong.
 
         ttlib::cstr NewPath;
         if (FindFileEnv("PATH", "code.cmd", NewPath))
@@ -135,8 +134,8 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         Path.append_filename("x86");
         lstPath32.addfilename(Path);
 
-        // The main reason for switching to Hostx64/x86 is to swap compilers. Not all parts of the toolchain are
-        // duplicated there, so we need to add a path to the rest of the toolchain.
+        // The main reason for switching to Hostx64/x86 is to swap compilers. Not all parts of the toolchain are duplicated
+        // there, so we need to add a path to the rest of the toolchain.
 
         if (bHost64)
         {
