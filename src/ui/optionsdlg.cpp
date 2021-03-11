@@ -135,8 +135,8 @@ OptionsDlg::OptionsDlg(const std::string& ProjectFile) : OptionsDlgBase(nullptr)
 
     m_useMSLinker = isOptTrue(OPT::MS_LINKER);
 
-    m_isReleaseDllCRT = !IsStaticCrtRel();
-    m_isDebugDllCRT = !IsStaticCrtDbg();
+    m_isReleaseDllCRT = isOptValue(OPT::CRT_REL, "dll");
+    m_isDebugDllCRT = isOptValue(OPT::CRT_DBG, "dll");
 
     if (hasOptValue(OPT::LINK_CMN))
         m_CommonLinkFlags = getOptValue(OPT::LINK_CMN);
@@ -207,8 +207,7 @@ void OptionsDlg::SaveChanges()
     setOptValue(OPT::WARN, ttlib::itoa(m_WarningLevel));
 
     setOptValue(OPT::CRT_DBG, m_isDebugDllCRT ? "dll" : "static");
-    if (!m_isReleaseDllCRT)
-        setOptValue(OPT::CRT_REL, "static");
+    setOptValue(OPT::CRT_REL, m_isReleaseDllCRT ? "dll" : "static");
 
     if (m_TargetDirPicker->GetPath().size())
     {
