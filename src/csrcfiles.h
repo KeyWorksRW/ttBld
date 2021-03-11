@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CSrcFiles
 // Purpose:   Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2018-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -53,7 +52,10 @@ public:
 
     // Public functions
 
-    bool isOptValue(size_t option, std::string_view value) const { return (getOptValue(option).is_sameas(value, tt::CASE::either)); }
+    bool isOptValue(size_t option, std::string_view value) const
+    {
+        return (getOptValue(option).is_sameas(value, tt::CASE::either));
+    }
 
     bool isOptTrue(size_t index) const
     {

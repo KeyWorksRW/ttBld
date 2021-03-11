@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   Writes a new or update srcfiles.yaml file
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
 // License:   Apache License -- see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
@@ -28,8 +28,9 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
 
     ttlib::textfile out;
 
-    // Always write the version of ttBld.exe used. That way if an older version is used and an option line gets commented out, the user
-    // might spot that an earlier version of ttBld is being used (if tracked by SCM, it will show up in the diff)
+    // Always write the version of ttBld.exe used. That way if an older version is used and an option line gets commented
+    // out, the user might spot that an earlier version of ttBld is being used (if tracked by SCM, it will show up in the
+    // diff)
 
     out.emplace_back(txtNinjaVerFormat);
     out.addEmptyLine();
@@ -73,8 +74,8 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
 
         if (view[0] == '#')
         {
-            // If this was marked as an unrecognized option by an older version of ttBld but it is now recognized,
-            // then write out the original option.
+            // If this was marked as an unrecognized option by an older version of ttBld but it is now recognized, then write
+            // out the original option.
 
             if (ttlib::is_sameprefix(view, "# unrecognized option --"))
             {
@@ -133,13 +134,13 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         if (getOptComment(option).size())
             line += (" # " + getOptComment(option));
 
-        // Keep track of every option we've written out. We'll use this outside of this loop to determine what
-        // additional options to write.
+        // Keep track of every option we've written out. We'll use this outside of this loop to determine what additional
+        // options to write.
         orgOptions.emplace_back(option);
     }
 
-    // At this point, all the original options specified have been written out with possible new values. If there are
-    // other options that are required or have non-default values, they must be written here.
+    // At this point, all the original options specified have been written out with possible new values. If there are other
+    // options that are required or have non-default values, they must be written here.
 
     bool SomethingChanged = false;
     for (size_t option = 0; option < OPT::LAST; ++option)
@@ -206,8 +207,7 @@ bld::RESULT CWriteSrcFiles::WriteNew(std::string_view filename, std::string_view
 
     out.emplace_back("Options:");
 
-    // REVIEW: [KeyWorks - 03-21-2020] These column numbers are placeholders. At some point we need to calculate
-    // them.
+    // REVIEW: [KeyWorks - 03-21-2020] These column numbers are placeholders. At some point we need to calculate them.
 
     size_t colValue = 18;
     size_t colComment = 29;
@@ -221,8 +221,7 @@ bld::RESULT CWriteSrcFiles::WriteNew(std::string_view filename, std::string_view
         auto& option = m_Options[defOption.optionID];
         if (!option.isRequired)
         {
-            // If the option isn't required, then we only output it if it has changed from the original default
-            // value.
+            // If the option isn't required, then we only output it if it has changed from the original default value.
             if (option.value.empty() || (option.OriginalValue && option.value.is_sameas(option.OriginalValue)))
                 continue;
         }

@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      CSrcFiles
 // Purpose:   Class for reading/writing .srcfiles.yaml (master file used by ttBld.exe to generate build scripts)
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2018-2019 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2018-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -62,8 +61,8 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
     for (auto& line: SrcFile)
     {
-        // Note that we are only looking for leading characters that would appear in a .srcfiles.yaml file, not all
-        // of the special characters allowed in the full YAML specification.
+        // Note that we are only looking for leading characters that would appear in a .srcfiles.yaml file, not all of the
+        // special characters allowed in the full YAML specification.
         if (line.empty() || line[0] == '#' || line[0] == '-')
             continue;
 
@@ -71,7 +70,8 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         // name
         if (ttlib::is_alpha(line[0]))
         {
-            if (ttlib::is_sameprefix(line, "Files:", tt::CASE::either) || ttlib::is_sameprefix(line, "[FILES]", tt::CASE::either))
+            if (ttlib::is_sameprefix(line, "Files:", tt::CASE::either) ||
+                ttlib::is_sameprefix(line, "[FILES]", tt::CASE::either))
             {
                 m_section = SECTION_FILES;
             }
@@ -80,11 +80,13 @@ bool CSrcFiles::ReadFile(std::string_view filename)
             {
                 m_section = SECTION_DEBUG_FILES;
             }
-            else if (ttlib::is_sameprefix(line, "GZIP:", tt::CASE::either) || ttlib::is_sameprefix(line, "[GZIP]", tt::CASE::either))
+            else if (ttlib::is_sameprefix(line, "GZIP:", tt::CASE::either) ||
+                     ttlib::is_sameprefix(line, "[GZIP]", tt::CASE::either))
             {
                 m_section = SECTION_GZIP;
             }
-            else if (ttlib::is_sameprefix(line, "XPM:", tt::CASE::either) || ttlib::is_sameprefix(line, "[XPM]", tt::CASE::either))
+            else if (ttlib::is_sameprefix(line, "XPM:", tt::CASE::either) ||
+                     ttlib::is_sameprefix(line, "[XPM]", tt::CASE::either))
             {
                 m_section = SECTION_XPM;
             }
@@ -107,8 +109,8 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         {
             // If an older version of ttBld marked the option as unrecognized, but this current version of ttBld does
             // recognize it, then go ahead and process it as if it was a normal option. Note that this means that if the
-            // Options dialog is reading this, it will display the option as if it was created normally. If it writes
-            // the file, the comment line will be replaced with the actual option.
+            // Options dialog is reading this, it will display the option as if it was created normally. If it writes the
+            // file, the comment line will be replaced with the actual option.
 
             if (m_section == SECTION_OPTIONS && ttlib::is_sameprefix(begin, "# unrecognized option --"))
             {
@@ -171,8 +173,8 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         setOptValue(OPT::PROJECT, name);
     }
 
-    // If no Files: were specified, then we still won't have any files to build. Default to every type of C++
-    // source file in the current directory.
+    // If no Files: were specified, then we still won't have any files to build. Default to every type of C++ source file in
+    // the current directory.
 
     if (!m_lstSrcFiles.size())
     {

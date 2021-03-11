@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      vscode.cpp
 // Purpose:   Creates/updates .vscode files
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -36,8 +35,8 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
             return results;
         }
 
-        // In most cases, the .vscode/ directory should be ignored since it can contain settings that are specific to
-        // the user. If it's not currently being ignored, then ask the user if they want to add the directory
+        // In most cases, the .vscode/ directory should be ignored since it can contain settings that are specific to the
+        // user. If it's not currently being ignored, then ask the user if they want to add the directory
 
         if (ttlib::cstr gitIgnore; !gitIsFileIgnored(gitIgnore, ".vscode/") && !gitIsExcluded(gitIgnore, ".vscode/"))
         {

@@ -141,8 +141,9 @@ void ConvertDlg::OnOK(wxCommandEvent& WXUNUSED(event))
                 return;
             }
 
-            // REVIEW: [KeyWorks - 03-09-2021] Theoretically, there are other errors that could occur, but currently none of the conversion
-            // tools generate those other errors, so we assume that if we get here then the conversion was successful.
+            // REVIEW: [KeyWorks - 03-09-2021] Theoretically, there are other errors that could occur, but currently none of
+            // the conversion tools generate those other errors, so we assume that if we get here then the conversion was
+            // successful.
         }
     }
     else if (m_useAllFiles)

@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      options.h
 // Purpose:   Structures and enum for storing/retrieving options in a .srcfiles.yaml file
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -15,8 +14,8 @@
 class OPT
 {
 public:
-    // We use this instead of "enum class Opt : size_t" because it allows iterating through the vector and
-    // returning a position as the option id.
+    // We use this instead of "enum class Opt : size_t" because it allows iterating through the vector and returning a
+    // position as the option id.
     enum : size_t
     {
         BIT32,

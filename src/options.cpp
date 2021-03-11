@@ -1,15 +1,14 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      options.cpp
 // Purpose:   Class for storing/retrieving options in a .srcfiles.yaml file
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 /*
     Ideally, s_aInitialOptions would be in a namespace. However, the Visual Studio debugger (2017 version) is not
-   able to display the array even if fully qualified with the namespace. That makes debugging rather difficult
-   since a lot of the functionality of ttBld relies on comparison between a modified option and the original.
+    able to display the array even if fully qualified with the namespace. That makes debugging rather difficult
+    since a lot of the functionality of ttBld relies on comparison between a modified option and the original.
 */
 
 #include "pch.h"
@@ -152,8 +151,7 @@ void CSrcFiles::InitOptions()
 
 #if !defined(NDEBUG)
     m_Options[OPT::LAST].OriginalName = "Don't Use this id!";
-    // The options are all indexed by the enumerated id, so it is imperative that each option appears in
-    // DefaultOptions.
+    // The options are all indexed by the enumerated id, so it is imperative that each option appears in DefaultOptions.
     for (size_t id = 0; id < m_Options.size(); ++id)
     {
         assertm(m_Options[id].OriginalName, "Option is missing a name! It means DefaultOptions is missing an option.");

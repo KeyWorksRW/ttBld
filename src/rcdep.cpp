@@ -1,9 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:      rcdep.cpp
 // Purpose:   Contains functions for parsing RC dependencies
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2019-2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License (see ../LICENSE)
+// Copyright: Copyright (c) 2019-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -99,9 +98,9 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                 ttlib::cstr incName;
                 incName.ExtractSubString(line);
 
-                // Older versions of Visual Studio do not allow <> to be placed around header files. Since system
-                // header files rarely change, and when they do they are not likely to require rebuilding the .rc
-                // file, we simply ignore them.
+                // Older versions of Visual Studio do not allow <> to be placed around header files. Since system header
+                // files rarely change, and when they do they are not likely to require rebuilding the .rc file, we simply
+                // ignore them.
 
                 if (incName.is_sameprefix("afx") || incName.is_sameprefix("atl") || incName.is_sameprefix("winres"))
                     continue;
@@ -114,9 +113,9 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
 
                 if (!incName.file_exists())
                 {
-                    // We can't really report this as an error unless we first check the INCLUDE environment
-                    // variable as well as the IncDirs option in .srcfiles.yaml. The resource compiler is going to
-                    // report the error, so there's not a huge advantage to reporting it here.
+                    // We can't really report this as an error unless we first check the INCLUDE environment variable as well
+                    // as the IncDirs option in .srcfiles.yaml. The resource compiler is going to report the error, so
+                    // there's not a huge advantage to reporting it here.
                     continue;
                 }
 
@@ -148,8 +147,8 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                 auto posKeyword = ttlib::findstr_pos(line, keyword);
                 if (posKeyword != tt::npos)
                 {
-                    // Make certain the keyword starts with whitespace. The RcKeywords list includes the trailing
-                    // space so we don't need to check for that.
+                    // Make certain the keyword starts with whitespace. The RcKeywords list includes the trailing space so we
+                    // don't need to check for that.
                     if (posKeyword > 0 && !ttlib::is_whitespace(line[posKeyword - 1]))
                         continue;
 
@@ -164,9 +163,9 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                         }
                     }
 
-                    // Some keywords such as FONT are also used in DIALOGs and don't actually load a file. By only
-                    // looking at names within quotes and even then only processing it if the file actually exists,
-                    // we avoid misinterpreting a DIALOG directive versus something that actually includes a file.
+                    // Some keywords such as FONT are also used in DIALOGs and don't actually load a file. By only looking at
+                    // names within quotes and even then only processing it if the file actually exists, we avoid
+                    // misinterpreting a DIALOG directive versus something that actually includes a file.
                     if (!filename.empty() && filename[0] == '\"')
                     {
                         ttlib::cstr parseName;
