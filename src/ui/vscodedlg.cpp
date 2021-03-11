@@ -56,7 +56,6 @@ constexpr auto txtLaunch = R"===(
          "cwd" : "${workspaceRoot}",
          "program": "${workspaceRoot}/%targetD%",
          "args": [ "" ],
-         "externalConsole": true,
          "logging": {
             "moduleLoad": false,
          },
