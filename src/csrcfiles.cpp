@@ -698,7 +698,7 @@ const ttlib::cstr& CSrcFiles::GetTargetDebug()
 const ttlib::cstr& CSrcFiles::GetTargetDebug32()
 {
     if (m_dbgTarget32.size())
-        return m_dbgTarget;
+        return m_dbgTarget32;
 
     m_dbgTarget32 = m_Options[OPT::TARGET_DIR32].value;
     ASSERT_MSG(m_dbgTarget32.size(), "Don't call GetTargetDebug32 if OPT::TARGET_DIR32 is empty!");
