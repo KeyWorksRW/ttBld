@@ -97,6 +97,7 @@ const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
     { OPT::LIB_DIRS32, "LibDirs32", nullptr, "additional directories for 32-bit library files", OPT::any, OPT::optional },
 
     { OPT::BUILD_LIBS, "BuildLibs", nullptr, "libraries to build (built in makefile)", OPT::any, OPT::optional },
+    { OPT::BUILD_LIBS32, "BuildLibs32", nullptr, "32-bit libraries to build (built in makefile)", OPT::any, OPT::optional },
 
     { OPT::LIBS_CMN, "Libs_cmn", nullptr, "additional libraries to link to in all builds", OPT::any, OPT::optional },
     { OPT::LIBS_REL, "Libs_rel", nullptr, "additional libraries to link to in release builds", OPT::any, OPT::optional },
