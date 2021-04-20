@@ -95,6 +95,8 @@ public:
     const std::string& GetTargetDir();
     const ttlib::cstr& GetTargetRelease();
     const ttlib::cstr& GetTargetDebug();
+    const ttlib::cstr& GetTargetRelease32();
+    const ttlib::cstr& GetTargetDebug32();
     const ttlib::cstr& GetBuildScriptDir();
 
     // If filename is not specified, CSrcFiles will attempt to locate the file.
@@ -213,6 +215,8 @@ private:
 
     ttlib::cstr m_relTarget;
     ttlib::cstr m_dbgTarget;
+    ttlib::cstr m_relTarget32;
+    ttlib::cstr m_dbgTarget32;
 
     std::string m_strTargetDir;
 

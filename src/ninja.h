@@ -24,7 +24,9 @@ public:
     {
         GEN_NONE,
         GEN_DEBUG,
-        GEN_RELEASE
+        GEN_RELEASE,
+        GEN_DEBUG32,
+        GEN_RELEASE32,
     };
 
     enum CMPLR_TYPE : size_t
@@ -44,6 +46,7 @@ public:
     // Public functions
 
     void ProcessBuildLibs();
+    void ProcessBuildLibs32();
 
     // Warning: this will first clear m_ninjafile.
     bool CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr);
@@ -110,6 +113,7 @@ private:
         ttlib::cstr libPathRel;
     };
     std::vector<BLD_LIB> m_bldLibs;
+    std::vector<BLD_LIB> m_bldLibs32;
 
     // ttCDblList m_dlstTargetDir;  // Target name, directory to use
 

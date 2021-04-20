@@ -654,6 +654,26 @@ const ttlib::cstr& CSrcFiles::GetTargetRelease()
     return m_relTarget;
 }
 
+const ttlib::cstr& CSrcFiles::GetTargetRelease32()
+{
+    if (m_relTarget32.size())
+        return m_relTarget32;
+
+    m_relTarget32 = m_Options[OPT::TARGET_DIR32].value;
+    ASSERT_MSG(m_relTarget32.size(), "Don't call GetTargetRelease32 if OPT::TARGET_DIR32 is empty!");
+    if (m_relTarget32.empty())
+        m_relTarget32 = GetTargetDir();
+    m_relTarget32.append_filename(GetProjectName());
+
+    if (IsExeTypeLib())
+        m_relTarget32 += ".lib";
+    else if (IsExeTypeDll())
+        m_relTarget32 += (getOptValue(OPT::EXE_TYPE).contains("ocx", tt::CASE::either) ? ".ocx" : ".dll");
+    else
+        m_relTarget32 += ".exe";
+    return m_relTarget32;
+}
+
 const ttlib::cstr& CSrcFiles::GetTargetDebug()
 {
     if (!m_dbgTarget.empty())
@@ -673,6 +693,30 @@ const ttlib::cstr& CSrcFiles::GetTargetDebug()
     else
         m_dbgTarget += ".exe";
     return m_dbgTarget;
+}
+
+const ttlib::cstr& CSrcFiles::GetTargetDebug32()
+{
+    if (m_dbgTarget32.size())
+        return m_dbgTarget;
+
+    m_dbgTarget32 = m_Options[OPT::TARGET_DIR32].value;
+    ASSERT_MSG(m_dbgTarget32.size(), "Don't call GetTargetDebug32 if OPT::TARGET_DIR32 is empty!");
+    if (m_dbgTarget32.empty())
+        m_dbgTarget32 = GetTargetDir();
+    m_dbgTarget32.append_filename(GetProjectName());
+
+    // Never automatically add a 'D' to a dll.
+    if (!IsExeTypeDll())
+        m_dbgTarget32 += "D";
+
+    if (IsExeTypeLib())
+        m_dbgTarget32 += ".lib";
+    else if (IsExeTypeDll())
+        m_dbgTarget32 += (getOptValue(OPT::EXE_TYPE).contains("ocx", tt::CASE::either) ? ".ocx" : ".dll");
+    else
+        m_dbgTarget32 += ".exe";
+    return m_dbgTarget32;
 }
 
 #if defined(WIN32)

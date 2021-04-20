@@ -21,6 +21,7 @@ public:
         BIT32,
         BIT64,
         BUILD_LIBS,
+        BUILD_LIBS32,
         CFLAGS_CMN,
         CFLAGS_DBG,
         CFLAGS_REL,

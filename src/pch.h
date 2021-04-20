@@ -68,8 +68,8 @@ namespace fs = std::filesystem;
 
 // Version is also set in writesrc.h and ttBld.rc -- if changed, change in all three locations
 
-inline constexpr const auto txtVersion = "ttBld 1.7.2";
-inline constexpr const auto txtCopyRight = "Copyright (c) 2002-2020 KeyWorks Software";
+inline constexpr const auto txtVersion = "ttBld 1.7.3";
+inline constexpr const auto txtCopyRight = "Copyright (c) 2002-2021 KeyWorks Software";
 inline constexpr const auto txtAppname = "ttBld";
 
 // Use THROW to throw this exception class
