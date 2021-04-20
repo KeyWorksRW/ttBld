@@ -94,25 +94,33 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     ttlib::cstr outdir("outdir = ");
     outdir += GetBldDir();
     outdir.addtrailingslash();
+    outdir += aszCompilerPrefix[cmplr];
 
     m_scriptFilename = GetBldDir();
     m_scriptFilename.backslashestoforward();
     m_scriptFilename.addtrailingslash();
+    m_scriptFilename += aszCompilerPrefix[cmplr];
 
     switch (gentype)
     {
         case GEN_DEBUG:
-            outdir += aszCompilerPrefix[cmplr];
             outdir += "Debug";
-            m_scriptFilename += aszCompilerPrefix[cmplr];
             m_scriptFilename += "dbg.ninja";
+            break;
+
+        case GEN_DEBUG32:
+            outdir += "Debug32";
+            m_scriptFilename += "dbg32.ninja";
+            break;
+
+        case GEN_RELEASE32:
+            outdir += "Release32";
+            m_scriptFilename += "rel32.ninja";
             break;
 
         case GEN_RELEASE:
         default:
-            outdir += aszCompilerPrefix[cmplr];
             outdir += "Release";
-            m_scriptFilename += aszCompilerPrefix[cmplr];
             m_scriptFilename += "rel.ninja";
             break;
     }
@@ -302,7 +310,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         }
     }
 
-    if (gentype == GEN_DEBUG && m_lstDebugFiles.size())
+    if ((gentype == GEN_DEBUG || gentype == GEN_DEBUG32) && m_lstDebugFiles.size())
     {
         for (auto& srcFile: m_lstDebugFiles)
         {
@@ -337,7 +345,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         ttlib::cstr resource { GetRcFile() };
 
         resource.replace_extension("");
-        resource += ((m_gentype == GEN_DEBUG) ? "D.res" : ".res");
+        resource += ((m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG32) ? "D.res" : ".res");
 
         m_ninjafile.addEmptyLine();
         lastline().Format("build $resout/%s: rc %s", resource.c_str(), GetRcFile().c_str());

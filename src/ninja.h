@@ -24,7 +24,9 @@ public:
     {
         GEN_NONE,
         GEN_DEBUG,
-        GEN_RELEASE
+        GEN_RELEASE,
+        GEN_DEBUG32,
+        GEN_RELEASE32,
     };
 
     enum CMPLR_TYPE : size_t

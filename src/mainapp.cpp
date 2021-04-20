@@ -418,11 +418,25 @@ int CMainApp::OnRun()
         countNinjas++;
     if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
         countNinjas++;
+    if (cNinja.hasOptValue(OPT::TARGET_DIR32))
+    {
+        if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_MSVC))
+            countNinjas++;
+        if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
+            countNinjas++;
+    }
 #endif
     if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
         countNinjas++;
     if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
         countNinjas++;
+    if (cNinja.hasOptValue(OPT::TARGET_DIR32))
+    {
+        if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
+            countNinjas++;
+    if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
+        countNinjas++;
+    }
 
     // Display any errors that occurred during processing
 
@@ -473,7 +487,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
                 break;
 
             case UPDATE_MSVC32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
                     std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
                 break;
 
@@ -483,7 +497,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
                 break;
 
             case UPDATE_CLANG_CL32:
-                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
+                if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
                     std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
                 break;
 
@@ -493,7 +507,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
                 break;
 
             case UPDATE_MSVC32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_MSVC))
                     std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
                 break;
 
@@ -503,7 +517,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
                 break;
 
             case UPDATE_CLANG_CL32D:
-                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
+                if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
                     std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
                 break;
 
