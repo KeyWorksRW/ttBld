@@ -35,6 +35,8 @@ static OPT::VERSION aoptVersions[]
 
     { OPT::MAKE_DIR, 1, 5, 0 },
 
+    { OPT::BUILD_LIBS32, 1, 7, 3 },
+
     // All options default to 1.0.0, so only add options above that require a newer version of ttBld
 
     { OPT::LAST, 1, 0, 0  }
