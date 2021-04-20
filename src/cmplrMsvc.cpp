@@ -318,12 +318,18 @@ void CNinja::msvcWriteLibDirective(CMPLR_TYPE cmplr)
     auto& line = m_ninjafile.addEmptyLine();
     if (cmplr == CMPLR_MSVC)
     {
-        line.Format("  command = lib.exe /MACHINE:%s /LTCG /NOLOGO /OUT:$out $in", (isOptTrue(OPT::BIT32) ? "x86" : "x64"));
+        if (m_gentype == GEN_DEBUG || m_gentype == GEN_RELEASE)
+            line << "  command = lib.exe /MACHINE:x64 /LTCG /NOLOGO /OUT:$out $in";
+        else
+            line << "  command = lib.exe /MACHINE:x86 /LTCG /NOLOGO /OUT:$out $in";
     }
     else
     {
-        // MSVC -LTCG option is not supported by lld
-        line.Format("  command = lld-link.exe /lib /machine:%s /out:$out $in", (isOptTrue(OPT::BIT32)) ? "x86" : "x64");
+        if (m_gentype == GEN_DEBUG || m_gentype == GEN_RELEASE)
+            // MSVC -LTCG option is not supported by lld
+            line << "  command = lld-link.exe /lib /machine:x64 /out:$out $in";
+        else
+            line << "  command = lld-link.exe /lib /machine:x86 /out:$out $in";
     }
     m_ninjafile.emplace_back("  description = creating library $out");
     m_ninjafile.addEmptyLine();

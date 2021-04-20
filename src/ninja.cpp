@@ -656,7 +656,7 @@ void CNinja::ProcessBuildLibs32()
         assertm(!cSrcFiles.GetTargetRelease().empty(), "Must have a release library target");
         assertm(!cSrcFiles.GetTargetDebug().empty(), "Must have a debug library target");
 
-        if (cSrcFiles.GetTargetRelease().empty() || cSrcFiles.GetTargetDebug().empty())
+        if (cSrcFiles.GetTargetRelease32().empty() || cSrcFiles.GetTargetDebug32().empty())
         {
             AddError("Invalid .srcfiles.yaml: " + BuildFile);
             continue;
@@ -674,11 +674,11 @@ void CNinja::ProcessBuildLibs32()
         bldLib.libPathDbg.assignCwd();
         bldLib.libPathRel = bldLib.libPathDbg;
 
-        bldLib.libPathDbg.append_filename(cSrcFiles.GetTargetDebug());
+        bldLib.libPathDbg.append_filename(cSrcFiles.GetTargetDebug32());
         bldLib.libPathDbg.make_relative(cwd);
         bldLib.libPathDbg.backslashestoforward();
 
-        bldLib.libPathRel.append_filename(cSrcFiles.GetTargetRelease());
+        bldLib.libPathRel.append_filename(cSrcFiles.GetTargetRelease32());
         bldLib.libPathRel.make_relative(cwd);
         bldLib.libPathRel.backslashestoforward();
     }
