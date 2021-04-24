@@ -25,6 +25,7 @@ static const char* RcKeywords[]
     "HTML ",
     "ICON ",
     "RCDATA ",
+    "RT_MANIFEST ",
 };
 
 static const char* aRemovals[]
