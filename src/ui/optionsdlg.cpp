@@ -211,10 +211,10 @@ void OptionsDlg::SaveChanges()
 
     if (m_TargetDirPicker->GetPath().size())
     {
-        ttString path = m_TargetDirPicker->GetPath();
-        path.make_relative_wx(m_cwd);
-        path.backslashestoforward();
-        setOptValue(OPT::TARGET_DIR, ttlib::cstr() << path.wx_str());
+        ttString target_dir = m_TargetDirPicker->GetPath();
+        target_dir.make_relative_wx(m_cwd);
+        target_dir.backslashestoforward();
+        setOptValue(OPT::TARGET_DIR, ttlib::cstr() << target_dir.wx_str());
     }
     else
         setOptValue(OPT::TARGET_DIR, "");
