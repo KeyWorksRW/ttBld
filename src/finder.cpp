@@ -11,10 +11,9 @@
 
 #include <wx/utils.h>
 
-#include <ttcstr.h>      // cstr -- Classes for handling zero-terminated char strings.
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
-#include <ttregistry.h>
-#include <ttwinff.h>  // winff -- Wrapper around Windows FindFile
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include "ttregistry.h"  // registry -- Class for working with the Windows registry
+#include "ttwinff.h"     // winff -- Wrapper around Windows FindFile
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that

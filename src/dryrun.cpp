@@ -9,13 +9,11 @@
 
 #include <iostream>
 
-#include <ttdebug.h>  // ttASSERT macros
-
 #include "dryrun.h"  // CDryRun
 
 void CDryRun::NewFile(std::string_view filename)
 {
-    ttASSERT(!filename.empty());
+    ASSERT(!filename.empty());
 
     m_filename = filename;
 }

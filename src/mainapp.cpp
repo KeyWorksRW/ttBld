@@ -41,10 +41,10 @@
 #include <direct.h>  // Functions for directory handling and creation
 #include <iostream>
 
-#include <ttconsole.h>  // ttConsoleColor
-#include <ttcvector.h>  // Vector of ttlib::cstr strings
-#include <ttcwd.h>      // cwd -- Class for storing and optionally restoring the current directory
-#include <ttparser.h>   // cmd -- Command line parser
+#include "ttconsole.h"  // ttConsoleColor
+#include "ttcvector.h"  // Vector of ttlib::cstr strings
+#include "ttcwd.h"      // cwd -- Class for storing and optionally restoring the current directory
+#include "ttparser.h"   // cmd -- Command line parser
 
 #include "convert.h"    // CConvert
 #include "funcs.h"      // List of function declarations

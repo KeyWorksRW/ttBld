@@ -10,7 +10,7 @@
 
 #include <vector>
 
-#include <ttcvector.h>  // cstrVector -- Vector of ttlib::cstr strings
+#include "ttcvector.h"  // cstrVector -- Vector of ttlib::cstr strings
 
 class cstr;
 class CSrcFiles;

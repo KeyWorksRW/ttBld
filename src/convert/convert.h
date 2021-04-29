@@ -7,11 +7,6 @@
 
 #pragma once
 
-#include <ttcstr.h>  // cstr -- Classes for handling zero-terminated char strings.
-
-// ttcview.h MUST be included before pugixml.hpp
-#include <ttcview.h>  // cview -- string_view functionality on a zero-terminated char string.
-
 #include "../pugixml/pugixml.hpp"  // pugixml parser
 
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file

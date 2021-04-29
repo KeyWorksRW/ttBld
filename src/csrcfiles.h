@@ -13,8 +13,7 @@
 #include <string_view>
 #include <vector>
 
-#include <ttcstr.h>     // Classes for handling zero-terminated char strings.
-#include <ttcvector.h>  // Vector of ttlib::cstr strings
+#include "ttcvector.h"  // Vector of ttlib::cstr strings
 
 #include "options.h"  // OPT -- Structures and enum for storing/retrieving options in a .srcfiles.yaml file
 

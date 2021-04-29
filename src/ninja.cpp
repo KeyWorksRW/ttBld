@@ -12,8 +12,8 @@
 #include <wx/arrstr.h>  // wxArrayString class
 #include <wx/dir.h>     // wxDir is a class for enumerating the files in a directory
 
-#include <ttcwd.h>       // Class for storing and optionally restoring the current directory
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
+#include "ttcwd.h"       // Class for storing and optionally restoring the current directory
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"     // CNinja
 #include "verninja.h"  // CVerMakeNinja

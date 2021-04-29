@@ -54,15 +54,11 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-#include <ttlibspace.h>  // Master header file for ttLib
+#include "ttlibspace.h"  // Master header file for ttLib
 
-#if defined(_WIN32)
-    #include <ttdebug.h>  // ttASSERT macros
-#endif
-
-#include <ttcstr.h>   // Classes for handling zero-terminated char strings.
-#include <ttcview.h>  // cview -- string_view functionality on a zero-terminated char string.
-#include <ttstrings.h>
+#include "ttcstr.h"   // Classes for handling zero-terminated char strings.
+#include "ttcview.h"  // cview -- string_view functionality on a zero-terminated char string.
+#include "ttstrings.h"
 
 #include "strings.h"
 
@@ -108,6 +104,9 @@ private:
     #define THROW(msg) throw CExcept(msg)
 #else  // not defined(NDEBUG)
     #if defined(_WIN32) && !defined(NONWIN_TEST)
+
+bool ttAssertionMsg(const char* filename, const char* function, int line, const char* cond, const std::string& msg);
+
         #define ASSERT(cond)                                                            \
             {                                                                           \
                 if (!(cond) && ttAssertionMsg(__FILE__, __func__, __LINE__, #cond, "")) \

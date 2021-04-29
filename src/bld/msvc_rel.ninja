@@ -15,7 +15,7 @@ msvc_deps_prefix = Note: including file:
 # -O1	// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)
 # -FC	  // Full path to source code file in diagnostics
 
-cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -FC -std:c++17 /Zc:__cplusplus /utf-8 -GL -I./ -Iui -Iconvert -I../ttlib/include /Fp$outdir/pch.pch
+cflags = -nologo -DNDEBUG -showIncludes -EHsc -D_CONSOLE -W4 -MD -O1 -FC -std:c++17 /Zc:__cplusplus /utf-8 -GL -I./ -Iui -Iconvert -Ittlib /Fp$outdir/pch.pch
 
 rule compilePCH
   deps = msvc
@@ -28,7 +28,7 @@ rule compile
   description = compiling $in
 
 rule rc
-  command = rc.exe -nologo -I./ -Iui -Iconvert -I../ttlib/include /l 0x409 -fo$out $in
+  command = rc.exe -nologo -I./ -Iui -Iconvert -Ittlib /l 0x409 -fo$out $in
   description = resource compiler... $in
 
 rule link
@@ -101,6 +101,30 @@ build $outdir/optionsdlgBase.obj: compile ui/optionsdlgBase.cpp | $outdir/pch.ob
 
 build $outdir/vscodedlgBase.obj: compile ui/vscodedlgBase.cpp | $outdir/pch.obj
 
+build $outdir/ttcstr.obj: compile ttLib/ttcstr.cpp | $outdir/pch.obj
+
+build $outdir/ttcvector.obj: compile ttLib/ttcvector.cpp | $outdir/pch.obj
+
+build $outdir/ttconsole.obj: compile ttLib/ttconsole.cpp | $outdir/pch.obj
+
+build $outdir/ttcview.obj: compile ttLib/ttcview.cpp | $outdir/pch.obj
+
+build $outdir/ttmultistr.obj: compile ttLib/ttmultistr.cpp | $outdir/pch.obj
+
+build $outdir/ttparser.obj: compile ttLib/ttparser.cpp | $outdir/pch.obj
+
+build $outdir/ttstr.obj: compile ttLib/ttstr.cpp | $outdir/pch.obj
+
+build $outdir/ttlibspace.obj: compile ttLib/ttlibspace.cpp | $outdir/pch.obj
+
+build $outdir/ttstrings.obj: compile ttLib/ttstrings.cpp | $outdir/pch.obj
+
+build $outdir/tttextfile.obj: compile ttLib/tttextfile.cpp | $outdir/pch.obj
+
+build $outdir/ttdebug.obj: compile ttLib/ttdebug.cpp | $outdir/pch.obj
+
+build $outdir/ttregistry.obj: compile ttLib/ttregistry.cpp | $outdir/pch.obj
+
 build $resout/ttBld.res: rc ttBld.rc | $
   ttBld.manifest
 
@@ -137,5 +161,16 @@ build ../bin/ttBld.exe : link $resout/ttBld.res $
   $outdir/convertdlgBase.obj $
   $outdir/optionsdlgBase.obj $
   $outdir/vscodedlgBase.obj $
-  $outdir/pch.obj $
-  ../ttLib/lib/ttLibwx.lib
+  $outdir/ttcstr.obj $
+  $outdir/ttcvector.obj $
+  $outdir/ttconsole.obj $
+  $outdir/ttcview.obj $
+  $outdir/ttmultistr.obj $
+  $outdir/ttparser.obj $
+  $outdir/ttstr.obj $
+  $outdir/ttlibspace.obj $
+  $outdir/ttstrings.obj $
+  $outdir/tttextfile.obj $
+  $outdir/ttdebug.obj $
+  $outdir/ttregistry.obj $
+  $outdir/pch.obj

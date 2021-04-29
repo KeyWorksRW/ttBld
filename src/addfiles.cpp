@@ -7,8 +7,8 @@
 
 #include "pch.h"
 
-#include <ttcvector.h>   // Vector of ttlib::cstr strings
-#include <tttextfile.h>  // Classes for reading and writing line-oriented files
+#include "ttcvector.h"   // Vector of ttlib::cstr strings
+#include "tttextfile.h"  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun

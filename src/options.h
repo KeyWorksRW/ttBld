@@ -9,8 +9,6 @@
 
 #include <array>
 
-#include <ttcstr.h>  // Classes for handling zero-terminated char strings.
-
 class OPT
 {
 public:

@@ -7,10 +7,7 @@
 
 #include "pch.h"
 
-#include <ttcstr.h>
-#include <ttcview.h>
-#include <ttlibspace.h>
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"  // CNinja
 

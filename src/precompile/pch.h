@@ -67,15 +67,9 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-#include <ttcstr.h>
-#include <ttlibspace.h>
-#include <ttstrings.h>
-
-#if defined(_WIN32)
-    #include <ttdebug.h>
-#else
-    #include <cassert>
-#endif
+#include "ttcstr.h"  // cstr -- std::string with additional methods
+#include "ttlibspace.h"  // ttlib namespace functions and declarations
+#include "ttstrings.h"  // Functions accessing translatable strings
 
 #include "strings.h"
 

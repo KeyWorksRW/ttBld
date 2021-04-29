@@ -18,8 +18,8 @@
 #include <wx/stream.h>    // stream classes
 #include <wx/wfstream.h>  // File stream classes
 
-#include <ttcvector.h>   // Vector of ttlib::cstr strings
-#include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
+#include "ttcvector.h"   // Vector of ttlib::cstr strings
+#include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
 static bool CopyStreamData(wxInputStream* inputStream, wxOutputStream* outputStream, size_t size);
 

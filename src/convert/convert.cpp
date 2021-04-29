@@ -9,13 +9,14 @@
 
 #include "pch.h"
 
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"
 
 #include "../ui/convertdlg.h"  // ConvertDlg -- Dialog specifying what to convert into a .srcfiles.yaml file
 #include "funcs.h"             // List of function declarations
 #include "ui/optionsdlg.h"     // OptionsDlg -- Dialog for setting all .srcfile options
+#include "uifuncs.h"           // Miscellaneous functions for displaying UI
 
 bool MakeNewProject(ttlib::cstr& projectFile)
 {
@@ -54,7 +55,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
     CSrcFiles srcOrg;
     if (!srcOrg.ReadFile(srcFile.c_str()))
     {
-        ttlib::MsgBox(_tt(strIdCantOpen) + srcFile);
+        appMsgBox(_tt(strIdCantOpen) + srcFile);
         return bld::RESULT::read_failed;
     }
 

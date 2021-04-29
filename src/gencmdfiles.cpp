@@ -9,8 +9,8 @@
 
 #include <iostream>
 
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
-#include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
 #include "funcs.h"  // List of function declarations
 
@@ -18,7 +18,7 @@
 
 void CreateCodeCmd(const char* pszFile)
 {
-    ttASSERT_MSG(pszFile, "NULL pointer!");
+    ASSERT_MSG(pszFile, "NULL pointer!");
 
     ttlib::cstr Root;
     if (!FindVsCode(Root))

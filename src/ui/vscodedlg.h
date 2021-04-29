@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <ttcvector.h>  // cstrVector -- Vector of ttlib::cstr strings
+#include "ttcvector.h"  // cstrVector -- Vector of ttlib::cstr strings
 
 #include "vscodedlgBase.h"
 

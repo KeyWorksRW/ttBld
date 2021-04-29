@@ -7,10 +7,7 @@
 
 #pragma once
 
-#include <ttcstr.h>
-#include <ttcview.h>
-#include <ttlibspace.h>
-#include <tttextfile.h>
+#include "tttextfile.h"
 
 // Class to store information for a dry-run of functionality
 class CDryRun

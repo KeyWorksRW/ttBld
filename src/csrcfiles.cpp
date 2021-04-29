@@ -9,10 +9,10 @@
 
 #include <utility>
 
-#include <ttcwd.h>       // Class for storing and optionally restoring the current directory
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
-#include <tttextfile.h>  // Classes for reading and writing line-oriented files
-#include <ttwinff.h>     // Wrapper around Windows FindFile
+#include "ttcwd.h"       // Class for storing and optionally restoring the current directory
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include "tttextfile.h"  // Classes for reading and writing line-oriented files
+#include "ttwinff.h"     // winff -- Wrapper around Windows FindFile
 
 #include "csrcfiles.h"  // CSrcFiles
 
@@ -720,12 +720,11 @@ const ttlib::cstr& CSrcFiles::GetTargetDebug32()
 }
 
 #if defined(WIN32)
-    #include <ttdebug.h>
 
 void CSrcFiles::AddError(std::string_view err)
 {
     m_lstErrMessages.append(err);
-    ttFAIL_MSG(err.data());
+    FAIL_MSG(err.data());
 }
 
 #else

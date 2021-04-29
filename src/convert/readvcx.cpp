@@ -7,10 +7,11 @@
 
 #include "pch.h"
 
-#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
+#include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"  // CConvert, CVcxWrite
+#include "uifuncs.h"   // Miscellaneous functions for displaying UI
 
 bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view dstFile)
 {
@@ -40,7 +41,7 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
 
     if (!result)
     {
-        ttlib::MsgBox(_tt(strIdCantOpen) + m_srcFile + "\n\n" + result.description());
+        appMsgBox(_tt(strIdCantOpen) + m_srcFile + "\n\n" + result.description());
         return bld::RESULT::read_failed;
     }
 

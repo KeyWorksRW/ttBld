@@ -10,7 +10,7 @@
 #include <wx/dirdlg.h>   // wxDirDialog base class
 #include <wx/filedlg.h>  // wxFileDialog base header
 
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "optionsdlg.h"  // auto-generated: optionsdlgBase.h and optionsdlgBase.cpp
 

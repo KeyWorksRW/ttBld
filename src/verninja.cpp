@@ -7,9 +7,6 @@
 
 #include "pch.h"
 
-#include <ttcview.h>     // string_view functionality on a zero-terminated char string.
-#include <ttlibspace.h>  // Contains the ttlib namespace functions/declarations common to all ttLib libraries
-
 #include "verninja.h"  // CVerMakeNinja
 
 extern const char* txtOptVersion;  // The minimum version of ttBld required by a .srcfiles.yaml

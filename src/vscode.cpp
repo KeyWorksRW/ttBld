@@ -10,11 +10,12 @@
 #include <cctype>
 #include <string_view>
 
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
-#include <tttextfile.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include "tttextfile.h"  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "funcs.h"      // List of function declarations
+#include "uifuncs.h"    // Miscellaneous functions for displaying UI
 #include "vscodedlg.h"  // VsCodeDlg -- Dialog for setting options to create tasks.json and launch.json
 
 bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
@@ -48,7 +49,7 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
                 gitIgnore = "../../.git/info/exclude";
 
             if (!gitIgnore.empty() &&
-                ttlib::MsgBox(_tt(strIdQueryIgnore) + gitIgnore + " ?", MB_YESNO | MB_DEFBUTTON2 | MB_ICONWARNING) == IDYES)
+                appMsgBox(_tt(strIdQueryIgnore) + gitIgnore + " ?", "Create .vscode files", wxYES_NO | wxNO_DEFAULT | wxICON_WARNING) == wxID_YES)
             {
                 if (gitAddtoIgnore(gitIgnore, ".vscode/"))
                 {
@@ -202,7 +203,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 
     if (!out.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        ttlib::MsgBox(_ttc(strIdCantWrite) + ".vscode/c_cpp_properties.json");
+        appMsgBox(_ttc(strIdCantWrite) + ".vscode/c_cpp_properties.json");
         return false;
     }
     else

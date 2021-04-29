@@ -16,7 +16,7 @@
 #include <Rpc.h>
 #pragma comment(lib, "Rpcrt4.lib")
 
-#include <ttwinff.h>  // winff -- Wrapper around Windows FindFile
+#include "ttwinff.h"  // winff -- Wrapper around Windows FindFile
 
 #include "writevcx.h"  // CVcxWrite
 

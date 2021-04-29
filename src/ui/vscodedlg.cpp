@@ -9,7 +9,7 @@
 
 #include <string_view>
 
-#include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
+#include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
 #include "vscodedlg.h"  // auto-generated: vscodedlgBase.h and vscodedlgBase.cpp
 

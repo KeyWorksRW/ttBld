@@ -7,11 +7,12 @@
 
 #include "pch.h"
 
-#include <ttcwd.h>       // cwd -- Class for storing and optionally restoring the current directory
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
-#include <tttextfile.h>  // textfile -- Classes for reading and writing line-oriented files
+#include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
 #include "convert.h"  // CConvert, CVcxWrite
+#include "uifuncs.h"  // Miscellaneous functions for displaying UI
 
 enum
 {
@@ -45,7 +46,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
     ttlib::textfile fileIn;
     if (!fileIn.ReadFile(srcFile))
     {
-        ttlib::MsgBox(_tt(strIdCantOpen) + srcFile);
+        appMsgBox(_tt(strIdCantOpen) + srcFile);
         return bld::RESULT::read_failed;
     }
 

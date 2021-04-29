@@ -123,7 +123,7 @@ const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
 void CSrcFiles::InitOptions()
 {
     // Calling this twice will wipe out any options changed in between calls.
-    ttASSERT(!m_Initialized);
+    ASSERT(!m_Initialized);
     if (m_Initialized)
         return;
     m_Initialized = true;

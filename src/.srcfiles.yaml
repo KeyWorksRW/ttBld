@@ -15,10 +15,9 @@ Options:
 
     TargetDir: ../bin         # 64-bit target directory
 
-    Natvis:      ../ttlib/ttlibwin.natvis # MSVC Debug visualizer
+    Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ./;ui;convert;../ttlib/include
-    BuildLibs:   ../ttLib/src/wxsrc
+    IncDirs:     ./;ui;convert;ttlib
 
 Files:
     ttBld.rc            # Windows resource files
@@ -63,3 +62,16 @@ Files:
     ui/convertdlgBase.cpp      # wxUiEditor generated file
     ui/optionsdlgBase.cpp      # wxUiEditor generated file
     ui/vscodedlgBase.cpp       # wxUiEditor generated file
+
+    ttLib/ttcstr.cpp
+    ttLib/ttcvector.cpp
+    ttLib/ttconsole.cpp
+    ttLib/ttcview.cpp
+    ttLib/ttmultistr.cpp
+    ttLib/ttparser.cpp
+    ttLib/ttstr.cpp
+    ttLib/ttlibspace.cpp
+    ttLib/ttstrings.cpp
+    ttLib/tttextfile.cpp
+    ttLib/ttdebug.cpp
+    ttLib/ttregistry.cpp

@@ -7,8 +7,7 @@
 
 #include "pch.h"
 
-#include <ttcstr.h>      // Classes for handling zero-terminated char strings.
-#include <ttmultistr.h>  // multistr -- Breaks a single string into multiple strings
+#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"  // CNinja
 

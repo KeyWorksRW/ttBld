@@ -10,7 +10,7 @@
 #include <wx/arrstr.h>  // wxArrayString class
 #include <wx/dir.h>     // wxDir is a class for enumerating the files in a directory
 
-#include <ttstr.h>  // ttString -- Enhanced version of wxString
+#include "ttstr.h"  // ttString -- Enhanced version of wxString
 
 #include "convertdlg.h"  // auto-generated: convertdlgBase.h and convertdlgBase.cpp
 
