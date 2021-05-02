@@ -60,6 +60,7 @@
 #endif
 
 void AddFiles(const ttlib::cstrVector& lstFiles);
+int ConvertImageToHeader(ttlib::cstrVector& files);
 int MakeHgz(ttlib::cstrVector& files);
 
 enum UPDATE_TYPE
@@ -152,6 +153,7 @@ int CMainApp::OnRun()
     cmd.addHiddenOption("hgz");  // -hgz dst src (converts src into gzip, saves as char array header file)
 
     cmd.addHiddenOption("xpm");  // -xpm src dst
+    cmd.addHiddenOption("png");  // -png src dst
 
 #if defined(TESTING) && !defined(NDEBUG)
     cmd.addHiddenOption("tvdlg", ttlib::cmd::needsarg);
@@ -174,6 +176,10 @@ int CMainApp::OnRun()
     else if (cmd.isOption("hgz"))
     {
         return MakeHgz(cmd.getExtras());
+    }
+    else if (cmd.isOption("png"))
+    {
+        return ConvertImageToHeader(cmd.getExtras());
     }
     else if (cmd.isOption("xpm"))
     {
@@ -434,8 +440,8 @@ int CMainApp::OnRun()
     {
         if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
             countNinjas++;
-    if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
-        countNinjas++;
+        if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
+            countNinjas++;
     }
 
     // Display any errors that occurred during processing

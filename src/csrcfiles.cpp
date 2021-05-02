@@ -90,6 +90,11 @@ bool CSrcFiles::ReadFile(std::string_view filename)
             {
                 m_section = SECTION_XPM;
             }
+            else if (ttlib::is_sameprefix(line, "PNG:", tt::CASE::either) ||
+                     ttlib::is_sameprefix(line, "[PNG]", tt::CASE::either))
+            {
+                m_section = SECTION_PNG;
+            }
             else if (ttlib::is_sameprefix(line, "Options:", tt::CASE::either) || ttlib::is_sameprefix(line, "[OPTIONS]"))
             {
                 m_section = SECTION_OPTIONS;
@@ -145,6 +150,10 @@ bool CSrcFiles::ReadFile(std::string_view filename)
 
             case SECTION_XPM:
                 ProcessXpmLine(begin);
+                break;
+
+            case SECTION_PNG:
+                ProcessPngLine(begin);
                 break;
 
             case SECTION_OPTIONS:
@@ -375,7 +384,7 @@ void CSrcFiles::ProcessXpmLine(std::string_view line)
     ttlib::multistr pair(line, ':');
     if (pair.size() < 2)
     {
-        AddError(_tt("Expected \"source: header\" but ':' not found seperating the two"));
+        AddError(_tt("Expected \"source: xpm\" but ':' not found seperating the two"));
         return;
     }
 
@@ -387,6 +396,31 @@ void CSrcFiles::ProcessXpmLine(std::string_view line)
         pair[1].replace_extension(".xpm");
 
     m_xpm_files[pair[0]] = pair[1];
+}
+
+/*
+    Lines are expected to be of the form:
+
+    source.ext: dst.h  # optional comment
+
+*/
+void CSrcFiles::ProcessPngLine(std::string_view line)
+{
+    ttlib::multistr pair(line, ':');
+    if (pair.size() < 2)
+    {
+        AddError(_tt("Expected \"source: header\" but ':' not found seperating the two"));
+        return;
+    }
+
+    pair[0].trim(tt::TRIM::both);
+    pair[1].erase_from('#');
+    pair[1].trim(tt::TRIM::both);
+
+    if (pair[1].extension().empty())
+        pair[1].replace_extension(".h");
+
+    m_png_files[pair[0]] = pair[1];
 }
 
 // Process a ".include" directive
