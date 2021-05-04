@@ -188,7 +188,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     if (m_png_files.size())
     {
-        m_ninjafile.emplace_back("rule xpmConversion");
+        m_ninjafile.emplace_back("rule pngConversion");
         m_ninjafile.emplace_back("  command = ttBld -png $in $out");
         m_ninjafile.emplace_back("  description = converting $in into $out");
         m_ninjafile.addEmptyLine();
@@ -244,7 +244,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     {
         for (auto& iter: m_png_files)
         {
-            m_ninjafile.addEmptyLine().Format("build %s: xpmConversion %s", iter.second.c_str(), iter.first.c_str());
+            m_ninjafile.addEmptyLine().Format("build %s: pngConversion %s", iter.second.c_str(), iter.first.c_str());
             m_ninjafile.addEmptyLine();
         }
     }
