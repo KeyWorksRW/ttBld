@@ -21,6 +21,8 @@
 #include "ttcvector.h"   // Vector of ttlib::cstr strings
 #include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
+#include "pugixml/pugixml.hpp"
+
 static bool CopyStreamData(wxInputStream* inputStream, wxOutputStream* outputStream, size_t size);
 
 int MakeHgz(ttlib::cstrVector& files)
@@ -36,6 +38,82 @@ int MakeHgz(ttlib::cstrVector& files)
     {
         std::cerr << "internal error -- .gz support not enabled" << '\n';
         return 1;
+    }
+
+    // XML files are special-cased. If the file can be parsed by pugixml, then only one source file is allowed and comments
+    // and formatting are removed in the output file.
+
+    if (files[1].has_extension(".xml"))
+    {
+        pugi::xml_document doc;
+        auto result = doc.load_file(files[1].c_str());
+
+        if (result)
+        {
+            std::stringstream strm;
+            doc.save(strm, "", pugi::format_raw);
+            // TODO: [KeyWorks - 05-10-2021] C++20 adds a view() method so that we don't have to make a copy of the string
+            auto string = strm.str();
+            wxMemoryInputStream inputFileStream(string.c_str(), string.size());
+
+            wxMemoryOutputStream stream_out;
+            wxScopedPtr<wxFilterOutputStream> filterOutputStream(filterClassFactory->NewStream(stream_out));
+
+            if (!CopyStreamData(&inputFileStream, filterOutputStream.get(), inputFileStream.GetLength()))
+            {
+                std::cerr << _tt(strIdInternalError) << '\n';
+                return 1;
+            }
+            filterOutputStream->Close();
+            auto strm_buffer = stream_out.GetOutputStreamBuffer();
+            strm_buffer->Seek(0, wxFromStart);
+
+            ttlib::cstr str_name = files[1].filename();
+            ttlib::cstr ext = str_name.extension();
+            str_name.remove_extension();
+            if (ext.size())
+            {
+                // replace the leading '.' with a '_' so that it looks like a normal string
+                ext[0] = '_';
+                str_name << ext;
+            }
+            str_name << "_gz";
+
+            ttlib::textfile file;
+
+            file.insertEmptyLine(0) << "// " << files[1].filename() << " -- comments and formatting removed, compressed with gizp";
+            file.addEmptyLine();
+            file.addEmptyLine() << "static const unsigned char " << str_name << '[' << strm_buffer->GetBufferSize()
+                                << "] = {";
+
+            auto buf = static_cast<unsigned char*>(strm_buffer->GetBufferStart());
+
+            size_t pos = 0;
+            auto buf_size = strm_buffer->GetBufferSize();
+
+            while (pos < buf_size)
+            {
+                {
+                    auto& line = file.addEmptyLine();
+                    for (; pos < buf_size && line.size() < 116; ++pos)
+                    {
+                        line << static_cast<int>(buf[pos]) << ',';
+                    }
+                }
+            }
+
+            if (file[file.size() - 1].back() == ',')
+                file[file.size() - 1].pop_back();
+
+            file.addEmptyLine() << "};";
+
+            if (!file.WriteFile(files[0]))
+            {
+                std::cerr << _tt(strIdCantWrite) << files[0];
+                return 1;
+            }
+            return 0;
+        }
     }
 
     std::vector<ttlib::cstr> src_filenames;
