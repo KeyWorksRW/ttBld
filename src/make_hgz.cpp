@@ -46,7 +46,7 @@ int MakeHgz(ttlib::cstrVector& files)
     if (files[1].has_extension(".xml"))
     {
         pugi::xml_document doc;
-        auto result = doc.load_file(files[1].c_str());
+        auto result = doc.load_file(files[1].c_str(), pugi::parse_default | pugi::parse_trim_pcdata);
 
         if (result)
         {
