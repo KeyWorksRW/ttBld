@@ -19,7 +19,7 @@
 
 // Any time you add an option below, you need to increment this version number and then add it to the aoptVersions
 // list
-const char* txtOptVersion { "1.4.0" };
+const char* txtOptVersion { "1.8.0" };
 
 // clang-format off
 static OPT::VERSION aoptVersions[]
@@ -32,6 +32,10 @@ static OPT::VERSION aoptVersions[]
     { OPT::TARGET_DIR, 1, 4, 0 },
     { OPT::TARGET_DIR32, 1, 4, 0 },
     { OPT::TARGET_DIR64, 1, 4, 0 },
+
+    { OPT::MSVC_CMN, 1, 5, 0 },
+    { OPT::MSVC_REL, 1, 5, 0 },
+    { OPT::MSVC_DBG, 1, 5, 0 },
 
     { OPT::MAKE_DIR, 1, 5, 0 },
 
@@ -75,6 +79,10 @@ const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions
     { OPT::CLANG_CMN, "Clang_cmn", nullptr, "clang common compiler flags", OPT::any, OPT::optional },
     { OPT::CLANG_REL, "Clang_rel", nullptr, "clang release build compiler flags", OPT::any, OPT::optional },
     { OPT::CLANG_DBG, "Clang_dbg", nullptr, "clang debug build compiler flags", OPT::any, OPT::optional },
+
+    { OPT::MSVC_CMN, "msvc_cmn", nullptr, "msvc common compiler flags", OPT::any, OPT::optional },
+    { OPT::MSVC_REL, "msvc_rel", nullptr, "msvc release build compiler flags", OPT::any, OPT::optional },
+    { OPT::MSVC_DBG, "msvc_dbg", nullptr, "msvc debug build compiler flags", OPT::any, OPT::optional },
 
     { OPT::LINK_CMN, "LFlags_cmn", nullptr, "common linker flags", OPT::any, OPT::optional },
     { OPT::LINK_REL, "LFlags_rel", nullptr, "release build linker flags", OPT::any, OPT::optional },
