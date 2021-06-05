@@ -165,7 +165,7 @@ void CSrcFiles::InitOptions()
     // The options are all indexed by the enumerated id, so it is imperative that each option appears in DefaultOptions.
     for (size_t id = 0; id < m_Options.size(); ++id)
     {
-        assertm(m_Options[id].OriginalName, "Option is missing a name! It means DefaultOptions is missing an option.");
+        ASSERT_MSG(m_Options[id].OriginalName, "Option is missing a name! It means DefaultOptions is missing an option.");
     }
 #endif
 }
