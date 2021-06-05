@@ -694,7 +694,6 @@ const ttlib::cstr& CSrcFiles::GetTargetRelease32()
         return m_relTarget32;
 
     m_relTarget32 = m_Options[OPT::TARGET_DIR32].value;
-    ASSERT_MSG(m_relTarget32.size(), "Don't call GetTargetRelease32 if OPT::TARGET_DIR32 is empty!");
     if (m_relTarget32.empty())
         m_relTarget32 = GetTargetDir();
     m_relTarget32.append_filename(GetProjectName());
@@ -735,7 +734,6 @@ const ttlib::cstr& CSrcFiles::GetTargetDebug32()
         return m_dbgTarget32;
 
     m_dbgTarget32 = m_Options[OPT::TARGET_DIR32].value;
-    ASSERT_MSG(m_dbgTarget32.size(), "Don't call GetTargetDebug32 if OPT::TARGET_DIR32 is empty!");
     if (m_dbgTarget32.empty())
         m_dbgTarget32 = GetTargetDir();
     m_dbgTarget32.append_filename(GetProjectName());
