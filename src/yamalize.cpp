@@ -51,6 +51,10 @@ bool Yamalize()
     cNewSrcFiles.setOptValue(OPT::CLANG_REL, cOrgSrcFiles.getOptValue(OPT::CLANG_REL));
     cNewSrcFiles.setOptValue(OPT::CLANG_DBG, cOrgSrcFiles.getOptValue(OPT::CLANG_DBG));
 
+    cNewSrcFiles.setOptValue(OPT::MSVC_CMN, cOrgSrcFiles.getOptValue(OPT::MSVC_CMN));
+    cNewSrcFiles.setOptValue(OPT::MSVC_REL, cOrgSrcFiles.getOptValue(OPT::MSVC_REL));
+    cNewSrcFiles.setOptValue(OPT::MSVC_DBG, cOrgSrcFiles.getOptValue(OPT::MSVC_DBG));
+
     cNewSrcFiles.setOptValue(OPT::LINK_CMN, cOrgSrcFiles.getOptValue(OPT::LINK_CMN));
     cNewSrcFiles.setOptValue(OPT::LINK_REL, cOrgSrcFiles.getOptValue(OPT::LINK_REL));
     cNewSrcFiles.setOptValue(OPT::LINK_DBG, cOrgSrcFiles.getOptValue(OPT::LINK_DBG));

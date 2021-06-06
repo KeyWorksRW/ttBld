@@ -534,8 +534,8 @@ void CNinja::ProcessBuildLibs()
             }
         }
 
-        assertm(!cSrcFiles.GetTargetRelease().empty(), "Must have a release library target");
-        assertm(!cSrcFiles.GetTargetDebug().empty(), "Must have a debug library target");
+        ASSERT_MSG(!cSrcFiles.GetTargetRelease().empty(), "Must have a release library target");
+        ASSERT_MSG(!cSrcFiles.GetTargetDebug().empty(), "Must have a debug library target");
 
         if (cSrcFiles.GetTargetRelease().empty() || cSrcFiles.GetTargetDebug().empty())
         {
@@ -670,8 +670,8 @@ void CNinja::ProcessBuildLibs32()
             }
         }
 
-        assertm(!cSrcFiles.GetTargetRelease().empty(), "Must have a release library target");
-        assertm(!cSrcFiles.GetTargetDebug().empty(), "Must have a debug library target");
+        ASSERT_MSG(cSrcFiles.GetTargetRelease().size(), "Must have a release library target");
+        ASSERT_MSG(cSrcFiles.GetTargetDebug().size(), "Must have a debug library target");
 
         if (cSrcFiles.GetTargetRelease32().empty() || cSrcFiles.GetTargetDebug32().empty())
         {

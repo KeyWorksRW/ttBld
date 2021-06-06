@@ -122,12 +122,32 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     if (cmplr == CMPLR_MSVC)
     {
         if (m_gentype == GEN_RELEASE || m_gentype == GEN_RELEASE32)
+        {
             line += " -GL";
+
+            if (hasOptValue(OPT::MSVC_REL))
+            {
+                line += (" " + getOptValue(OPT::MSVC_REL));
+            }
+        }
+
+        if (hasOptValue(OPT::MSVC_CMN))
+        {
+            line += (" " + getOptValue(OPT::MSVC_CMN));
+        }
+
+        if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG32)
+        {
+            if (hasOptValue(OPT::MSVC_DBG))
+            {
+                line += (" " + getOptValue(OPT::MSVC_DBG));
+            }
+        }
     }
 
     else
     {
-        // unlike the non-MSVC compatible version, clang-cl.exe (version 7) doesn't define this
+        // unlike the non-MSVC compatible version, clang-cl.exe doesn't define this
         line += " -D__clang__";
         line += " -fms-compatibility-version=19";
         // line += isOptTrue(OPT::BIT32) ? " -m32" : " -m64";

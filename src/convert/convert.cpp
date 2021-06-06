@@ -74,6 +74,10 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
     m_writefile.setOptValue(OPT::CFLAGS_REL, srcOrg.getOptValue(OPT::CFLAGS_REL));
     m_writefile.setOptValue(OPT::CFLAGS_DBG, srcOrg.getOptValue(OPT::CFLAGS_DBG));
 
+    m_writefile.setOptValue(OPT::MSVC_CMN, srcOrg.getOptValue(OPT::MSVC_CMN));
+    m_writefile.setOptValue(OPT::MSVC_REL, srcOrg.getOptValue(OPT::MSVC_REL));
+    m_writefile.setOptValue(OPT::MSVC_DBG, srcOrg.getOptValue(OPT::MSVC_DBG));
+
     m_writefile.setOptValue(OPT::CLANG_CMN, srcOrg.getOptValue(OPT::CLANG_CMN));
     m_writefile.setOptValue(OPT::CLANG_REL, srcOrg.getOptValue(OPT::CLANG_REL));
     m_writefile.setOptValue(OPT::CLANG_DBG, srcOrg.getOptValue(OPT::CLANG_DBG));

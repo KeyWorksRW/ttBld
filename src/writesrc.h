@@ -10,7 +10,7 @@
 #include "csrcfiles.h"
 
 inline constexpr const char* txtNinjaVerFormat =
-    "# Updated by ttBld.exe version 1.7.3 -- see https://github.com/KeyWorksRW/ttBld";
+    "# Updated by ttBld.exe version 1.8.0 -- see https://github.com/KeyWorksRW/ttBld";
 
 // This class inherits from CSrcFiles and can be used anywhere CSrcFiles is used.
 class CWriteSrcFiles : public CSrcFiles
