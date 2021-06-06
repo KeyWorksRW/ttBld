@@ -188,9 +188,9 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
                 for (auto& filename: enumPaths)
                 {
                     MakeNameRelative(filename);
-                    if (!Includes.empty())
-                        Includes += ";";
-                    Includes += filename;
+                    if (Includes.size())
+                        Includes << ';';
+                    Includes << filename;
                 }
                 if (!Includes.empty())
                     m_writefile.setOptValue(OPT::INC_DIRS, Includes);
@@ -198,14 +198,13 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
         }
         else if (name.is_sameas("VCLinkerTool", tt::CASE::either))
         {
-            auto val = tool.attribute("AdditionalDependencies").cvalue();
-            if (!val.empty())
+            if (auto val = tool.attribute("AdditionalDependencies").cvalue(); val.size())
             {
                 m_writefile.setOptValue(OPT::LIBS_DBG, val);
             }
 
             auto filename = tool.attribute("OutputFile").as_cstr();
-            if (!filename.empty() && m_writefile.GetProjectName().empty())
+            if (filename.size() && m_writefile.GetProjectName().empty())
             {
                 filename.remove_extension();
                 m_writefile.setOptValue(OPT::PROJECT, filename.filename());
