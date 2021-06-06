@@ -11,7 +11,7 @@
 #include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"  // CConvert, CVcxWrite
-#include "uifuncs.h"   // Miscellaneous functions for displaying UI
+#include "uifuncs.h"  // Miscellaneous functions for displaying UI
 
 bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view dstFile)
 {
@@ -36,12 +36,10 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
 
     std::wstring str16;
     ttlib::utf8to16(srcFile, str16);
-    // auto result = m_xmldoc.load_file(str16.c_str());
-    auto result = m_xmldoc.load_file(srcFile.c_str());
 
-    if (!result)
+    if (auto result = m_xmldoc.load_file(srcFile.c_str()); !result)
     {
-        appMsgBox(_tt(strIdCantOpen) + m_srcFile + "\n\n" + result.description());
+        appMsgBox(ttlib::cstr() << _tt(strIdCantOpen) << m_srcFile << "\n\n" << result.description());
         return bld::RESULT::read_failed;
     }
 
@@ -50,7 +48,7 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
     for (size_t pos = 0; pos < files.size(); ++pos)
     {
         auto filename = files[pos].node().first_attribute().as_cstr();
-        if (!filename.empty())
+        if (filename.size())
         {
             // The filename will be relative to the location of the xml file, so first we need to make it relative to that.
             // Since the .srcfiles may be in a different location, we then need to make the file relative to that.
@@ -68,16 +66,16 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
     for (size_t pos = 0; pos < configs.size(); ++pos)
     {
         auto condition = configs[pos].node().first_attribute().cvalue();
-        if (!condition.empty())
+        if (condition.empty())
             continue;  // theoretically impossible
-        if (ttlib::contains(condition, "Debug|"))
+        if (condition.contains("Debug|"))
         {
             if (DebugProcessed)
                 continue;
             ProcessVcxDebug(configs[pos].node());
             DebugProcessed = true;
         }
-        else if (ttlib::contains(condition, "Release|"))
+        else if (condition.contains("Release|"))
         {
             if (ReleaseProcessed)
                 continue;
@@ -109,8 +107,7 @@ void CConvert::MakeNameRelative(ttlib::cstr& filename)
 
 void CConvert::ProcessVcxDebug(pugi::xml_node node)
 {
-    auto compile = node.child("ClCompile");
-    if (compile)
+    if (auto compile = node.child("ClCompile"); compile)
     {
         auto val = compile.child("PrecompiledHeader").first_child().cvalue();
         if (!val.empty() && !ttlib::is_sameprefix(val, "NotUsing", tt::CASE::either))
@@ -136,8 +133,8 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
             {
                 MakeNameRelative(filename);
                 if (!Includes.empty())
-                    Includes += ";";
-                Includes += filename;
+                    Includes << ';';
+                Includes << filename;
             }
             if (!Includes.empty())
                 m_writefile.setOptValue(OPT::INC_DIRS, Includes);
@@ -157,32 +154,26 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
         }
     }
 
-    auto link = node.child("Link");
-    if (link)
+    if (auto link = node.child("Link"); link)
     {
-        auto val = link.child("SubSystem").first_child().cvalue();
-        if (!val.empty())
+        if (auto val = link.child("SubSystem").first_child().cvalue();
+            val.size() && val.is_sameprefix("Console", tt::CASE::either))
         {
-            if (ttlib::is_sameprefix(val, "Console", tt::CASE::either))
-                m_writefile.setOptValue(OPT::EXE_TYPE, "console");
+            m_writefile.setOptValue(OPT::EXE_TYPE, "console");
         }
 
-        val = link.child("AdditionalDependencies").first_child().cvalue();
-        if (!val.empty())
+        if (auto libs = link.child("AdditionalDependencies").first_child().as_cstr(); libs.size())
         {
-            ttlib::cstr libs(val);
             libs.Replace(";%(AdditionalDependencies)", "");
 
-            if (!libs.empty())
+            if (libs.size())
                 m_writefile.setOptValue(OPT::LIBS_DBG, libs);
         }
 
-        val = link.child("AdditionalOptions").first_child().cvalue();
-        if (!val.empty())
+        if (auto options = link.child("AdditionalOptions").first_child().as_cstr(); options.size())
         {
-            ttlib::cstr options(val);
             options.Replace("%(AdditionalOptions)", "");
-            if (!options.empty())
+            if (options.size())
                 m_writefile.setOptValue(OPT::LINK_DBG, options);
         }
     }
@@ -190,8 +181,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
 
 void CConvert::ProcessVcxRelease(pugi::xml_node node)
 {
-    auto compile = node.child("ClCompile");
-    if (compile)
+    if (auto compile = node.child("ClCompile"); compile)
     {
         auto val = compile.child("FavorSizeOrSpeed").first_child().cvalue();
         if (ttlib::is_sameprefix(val, "Speed", tt::CASE::either))
@@ -211,34 +201,27 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
         }
     }
 
-    auto link = node.child("Link");
-    if (link)
+    if (auto link = node.child("Link"); link)
     {
-        auto val = link.child("SubSystem").first_child().cvalue();
-        if (!val.empty())
+        if (auto val = link.child("SubSystem").first_child().cvalue();
+            val.size() && val.is_sameprefix("Console", tt::CASE::either))
         {
-            if (ttlib::is_sameprefix(val, "Console", tt::CASE::either))
-                m_writefile.setOptValue(OPT::EXE_TYPE, "console");
-            // TODO: [KeyWorks - 03-29-2020] Need to add other types here
+            m_writefile.setOptValue(OPT::EXE_TYPE, "console");
         }
 
-        val = link.child("AdditionalDependencies").first_child().cvalue();
-        if (!val.empty())
+        if (auto libs = link.child("AdditionalDependencies").first_child().as_cstr(); libs.size())
         {
-            ttlib::cstr libs(val);
             libs.Replace(";%(AdditionalDependencies)", "");
 
-            if (!libs.empty())
+            if (libs.size())
                 m_writefile.setOptValue(OPT::LIBS_REL, libs);
         }
 
-        val = link.child("AdditionalOptions").first_child().cvalue();
-        if (!val.empty())
+        if (auto options = link.child("AdditionalOptions").first_child().as_cstr(); options.size())
         {
-            ttlib::cstr options(val);
             options.Replace("%(AdditionalOptions)", "");
-            if (!options.empty())
-                m_writefile.setOptValue(OPT::LINK_DBG, options);
+            if (options.size())
+                m_writefile.setOptValue(OPT::LINK_REL, options);
         }
     }
 }

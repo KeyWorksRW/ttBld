@@ -272,7 +272,7 @@ void OptionsDlg::SaveChanges()
 
 void OptionsDlg::OnAddIncDir(wxCommandEvent& WXUNUSED(event))
 {
-    wxDirDialog dlg(this, wxT("Include Directory"), m_cwd);
+    wxDirDialog dlg(this, "Include Directory", m_cwd);
     if (dlg.ShowModal() == wxID_OK)
     {
         ttString path = dlg.GetPath();
@@ -284,8 +284,8 @@ void OptionsDlg::OnAddIncDir(wxCommandEvent& WXUNUSED(event))
         if (!olddirs.contains_wx(path))
         {
             if (olddirs.size() && olddirs.Last() != ';')
-                olddirs += ';';
-            olddirs += path;
+                olddirs << ';';
+            olddirs << path;
             m_textIncludeDirs->SetValue(olddirs);
         }
     }

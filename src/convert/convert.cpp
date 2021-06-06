@@ -170,7 +170,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
             cszRelative.assign(iter);
             cszRelative.make_absolute();
             cszRelative.make_relative(cszCurCwd);
-            IncDirs += (";" + cszRelative);
+            IncDirs << ';' << cszRelative;
         }
 
         cszRelative += srcOrg.getOptValue(OPT::INC_DIRS);

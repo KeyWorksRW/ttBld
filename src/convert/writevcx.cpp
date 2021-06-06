@@ -47,20 +47,20 @@ static bool CreateGuid(ttlib::cstr& Result)
 
 bool CVcxWrite::CreateBuildFile()
 {
-    ttlib::cstr cszGuid;
-    if (!CreateGuid(cszGuid))
+    ttlib::cstr guid;
+    if (!CreateGuid(guid))
     {
         AddError(_tt(strIdCantCreateUuid));
         return false;
     }
 
-    ttlib::cstr cszProjVC(GetProjectName());
-    cszProjVC.replace_extension(".vcxproj");
-    if (!cszProjVC.file_exists())
+    ttlib::cstr vc_project_file(GetProjectName());
+    vc_project_file.replace_extension(".vcxproj");
+    if (!vc_project_file.file_exists())
     {
         ttlib::cstr master(ttlib::find_nonspace(res_vcxproj_xml));
 
-        master.Replace("%guid%", cszGuid, true);
+        master.Replace("%guid%", guid, true);
         master.Replace("%%DebugExe%", GetTargetDebug(), true);
         master.Replace("%%ReleaseExe%", GetTargetRelease(), true);
         master.Replace("%%DebugExe64%", GetTargetDebug(), true);
@@ -103,22 +103,22 @@ bool CVcxWrite::CreateBuildFile()
         out.emplace_back("  </ImportGroup>");
         out.emplace_back("</Project>");
 
-        if (!out.WriteFile(cszProjVC))
+        if (!out.WriteFile(vc_project_file))
         {
-            AddError(_tt(strIdCantWrite) + cszProjVC);
+            AddError(_tt(strIdCantWrite) + vc_project_file);
             return false;
         }
         else
-            std::cout << _tt(strIdCreated) << cszProjVC << '\n';
+            std::cout << _tt(strIdCreated) << vc_project_file << '\n';
 
         master = ttlib::find_nonspace(res_vcxproj_filters_xml);
 
-        CreateGuid(cszGuid);  // it already succeeded once if we got here, so we don't check for error again
-        master.Replace("%guidSrc%", cszGuid, true);
-        CreateGuid(cszGuid);
-        master.Replace("%guidHdr%", cszGuid, true);
-        CreateGuid(cszGuid);
-        master.Replace("%guidResource%", cszGuid, true);
+        CreateGuid(guid);  // it already succeeded once if we got here, so we don't check for error again
+        master.Replace("%guidSrc%", guid, true);
+        CreateGuid(guid);
+        master.Replace("%guidHdr%", guid, true);
+        CreateGuid(guid);
+        master.Replace("%guidResource%", guid, true);
 
         out.clear();
         out.ReadString(master);
@@ -137,14 +137,14 @@ bool CVcxWrite::CreateBuildFile()
         }
         out.emplace_back("  </ItemGroup>");
         out.emplace_back("</Project>");
-        cszProjVC += ".filters";
-        if (!out.WriteFile(cszProjVC))
+        vc_project_file << ".filters";
+        if (!out.WriteFile(vc_project_file))
         {
-            AddError(_tt(strIdCantWrite) + cszProjVC);
+            AddError(_tt(strIdCantWrite) + vc_project_file);
             return false;
         }
         else
-            std::cout << _tt(strIdCreated) << cszProjVC << '\n';
+            std::cout << _tt(strIdCreated) << vc_project_file << '\n';
     }
     else
     {

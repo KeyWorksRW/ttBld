@@ -120,19 +120,18 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         if (option == OPT::LAST)
         {
             auto& line = out.addEmptyLine();
-            line.assign("    # unrecognized option -- ");
-            line += orgFile[pos];
+            line << "    # unrecognized option -- " << orgFile[pos];
             continue;
         }
         auto& line = out.addEmptyLine();
-        line.assign("    " + name + ":");
+        line << "    " << name << ':';
         while (line.length() < 22)
             line.push_back(' ');
-        line += getOptValue(option);
+        line << getOptValue(option);
         while (line.length() < 30)
             line.push_back(' ');
         if (getOptComment(option).size())
-            line += (" # " + getOptComment(option));
+            line << " # " << getOptComment(option);
 
         // Keep track of every option we've written out. We'll use this outside of this loop to determine what additional
         // options to write.
@@ -153,13 +152,13 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         {
             SomethingChanged = true;
             auto& line = out.addEmptyLine();
-            line.assign("    " + getOptionName(option) + ":");
+            line << "    " << getOptionName(option) << ':';
             while (line.length() < 22)
                 line.push_back(' ');
-            line += getOptValue(option);
+            line << getOptValue(option);
             while (line.length() < 30)
                 line.push_back(' ');
-            line += (" # " + getOptComment(option));
+            line << " # " << getOptComment(option);
         }
     }
 

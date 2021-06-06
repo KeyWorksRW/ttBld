@@ -150,17 +150,19 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                     CurFlags = m_writefile.getOptValue(OPT::CFLAGS_CMN);
                 if (inReleaseSection && m_writefile.hasOptValue(OPT::CFLAGS_REL))
                 {
-                    if (!CurFlags.empty())
-                        CurFlags += " ";
-                    CurFlags += m_writefile.getOptValue(OPT::CFLAGS_REL);
+                    if (CurFlags.size())
+                    {
+                        CurFlags << ' ';
+                    }
+                    CurFlags << m_writefile.getOptValue(OPT::CFLAGS_REL);
                 }
                 else if (!inReleaseSection && m_writefile.hasOptValue(OPT::CFLAGS_DBG))
                 {
-                    if (!CurFlags.empty())
+                    if (CurFlags.size())
                     {
-                        CurFlags += " ";
-                        CurFlags += m_writefile.getOptValue(OPT::CFLAGS_DBG);
+                        CurFlags << ' ';
                     }
+                    CurFlags << m_writefile.getOptValue(OPT::CFLAGS_DBG);
                 }
 
                 auto pos = line.find("/D");
@@ -176,9 +178,11 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                             // If we don't already have the flag, then add it
                             if (!Flag.contains(CurFlags))
                             {
-                                if (!NewFlags.empty())
-                                    NewFlags += " ";
-                                NewFlags += Flag.c_str();
+                                if (NewFlags.size())
+                                {
+                                    NewFlags << ' ';
+                                }
+                                NewFlags << Flag;
                             }
                         }
                         pos = line.find("/D", pos);
@@ -189,10 +193,9 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 {
                     if (inReleaseSection && m_writefile.hasOptValue(OPT::CFLAGS_REL))
                     {
-                        CurFlags = m_writefile.getOptValue(OPT::CFLAGS_REL);
-                        CurFlags += " ";
+                        CurFlags << m_writefile.getOptValue(OPT::CFLAGS_REL) << ' ';
                     }
-                    CurFlags += NewFlags.c_str();
+                    CurFlags << NewFlags;
                     m_writefile.setOptValue(OPT::CFLAGS_REL, CurFlags);
                 }
             }
@@ -205,15 +208,19 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
 
                 if (line.contains("/mktyplib203", tt::CASE::either) && !CurFlags.contains("/mktyplib203"))
                 {
-                    if (!NewFlags.empty())
-                        NewFlags += " ";
-                    NewFlags += "/mktyplib203";
+                    if (NewFlags.size())
+                    {
+                        NewFlags << ' ';
+                    }
+                    NewFlags << "/mktyplib203";
                 }
                 if (line.contains("/win32", tt::CASE::either) && !CurFlags.contains("/win32"))
                 {
-                    if (!NewFlags.empty())
-                        NewFlags += " ";
-                    NewFlags += "/win32";
+                    if (NewFlags.size())
+                    {
+                        NewFlags << ' ';
+                    }
+                    NewFlags << "/win32";
                 }
 
                 auto pos = line.find("/D");
@@ -229,9 +236,11 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                             // If we don't already have the flag, then add it
                             if (!Flag.contains(CurFlags))
                             {
-                                if (!NewFlags.empty())
-                                    NewFlags += " ";
-                                NewFlags += Flag.c_str();
+                                if (NewFlags.size())
+                                {
+                                    NewFlags << ' ';
+                                }
+                                NewFlags << Flag;
                             }
                         }
                         pos = line.find("/D", pos);
@@ -243,10 +252,9 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 {
                     if (m_writefile.hasOptValue(OPT::MIDL_CMN))
                     {
-                        CurFlags = m_writefile.getOptValue(OPT::MIDL_CMN);
-                        CurFlags += " ";
+                        CurFlags << m_writefile.getOptValue(OPT::MIDL_CMN) << ' ';
                     }
-                    CurFlags += NewFlags.c_str();
+                    CurFlags << NewFlags;
                     m_writefile.setOptValue(OPT::MIDL_CMN, CurFlags);
                 }
             }
