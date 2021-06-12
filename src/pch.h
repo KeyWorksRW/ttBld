@@ -32,6 +32,10 @@
 #define wxUSE_UNICODE     1
 #define wxUSE_NO_MANIFEST 1  // This is required for compiling using CLANG 8 and earlier
 
+#ifdef _MSC_VER
+    #pragma warning(push)
+#endif
+
 #include <wx/defs.h>
 
 #if defined(__WINDOWS__)
@@ -40,6 +44,10 @@
     #if wxUSE_COMMON_DIALOGS
         #include <commdlg.h>
     #endif
+#endif
+
+#ifdef _MSC_VER
+    #pragma warning(pop)
 #endif
 
 // Ensure that _DEBUG is defined in non-release builds
