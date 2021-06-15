@@ -8,6 +8,7 @@
 #include "pch.h"
 
 #include <cctype>
+#include <filesystem>
 
 #include <wx/arrstr.h>  // wxArrayString class
 #include <wx/dir.h>     // wxDir is a class for enumerating the files in a directory
@@ -392,7 +393,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
     if (!GetBldDir().dir_exists())
     {
-        if (!fs::create_directory(GetBldDir().c_str()))
+        if (!std::filesystem::create_directory(GetBldDir().wx_str()))
         {
             AddError(_tt(strIdCantWrite) + GetBldDir());
             return false;

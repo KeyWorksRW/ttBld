@@ -7,6 +7,8 @@
 
 #include "pch.h"
 
+#include <filesystem>
+
 #include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"  // CNinja
@@ -148,7 +150,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
         path.remove_filename();
         if (path.size() && !path.dir_exists())
         {
-            if (!fs::create_directory(path.wx_str()))
+            if (!std::filesystem::create_directory(path.wx_str()))
             {
                 std::cout << _tt(strIdCantWrite) << MakeFile << '\n';
                 return false;

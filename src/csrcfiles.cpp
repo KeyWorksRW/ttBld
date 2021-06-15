@@ -11,6 +11,7 @@
 
 #include "ttcwd.h"       // Class for storing and optionally restoring the current directory
 #include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include "ttstrings.h"   // Functions accessing translatable strings
 #include "tttextfile.h"  // Classes for reading and writing line-oriented files
 #include "ttwinff.h"     // winff -- Wrapper around Windows FindFile
 
@@ -454,7 +455,7 @@ void CSrcFiles::ProcessIncludeDirective(std::string_view file, ttlib::cstr root)
         ttlib::cstr NewDir(FullPath);
         auto filename = NewDir.filename();
         if (!filename.empty())
-            fs::current_path(filename.c_str());
+            ttlib::ChangeDir(filename);
     }
     catch (const std::exception& e)
     {

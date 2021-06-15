@@ -59,9 +59,6 @@
 #include <string>
 #include <string_view>
 
-#include <filesystem>
-namespace fs = std::filesystem;
-
 #include "ttlibspace.h"  // Master header file for ttLib
 
 #include "ttcstr.h"   // Classes for handling zero-terminated char strings.

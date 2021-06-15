@@ -9,6 +9,8 @@
 
 #include "pch.h"
 
+#include <filesystem>
+
 #include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"
@@ -164,7 +166,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
     if (srcOrg.hasOptValue(OPT::INC_DIRS))
     {
         ttlib::multistr enumPaths(srcOrg.getOptValue(OPT::INC_DIRS));
-        fs::current_path(Root.c_str());
+        std::filesystem::current_path(Root.wx_str());
         for (auto& iter: enumPaths)
         {
             cszRelative.assign(iter);

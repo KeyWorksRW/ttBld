@@ -17,7 +17,7 @@ Options:
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ./;ui;convert;ttlib
+    IncDirs:     ./;precompile;ui;convert;ttlib
 
 Files:
     ttBld.rc            # Windows resource files

@@ -8,6 +8,7 @@
 #include "pch.h"
 
 #include <cctype>
+#include <filesystem>
 #include <string_view>
 
 #include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
@@ -30,7 +31,7 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
 
     if (!ttlib::dir_exists(".vscode"))
     {
-        if (!fs::create_directory(".vscode"))
+        if (!std::filesystem::create_directory(".vscode"))
         {
             results += _tt(strIdCantCreateVsCodeDir);
             return results;
@@ -48,8 +49,8 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
             else if (ttlib::dir_exists("../../.git"))
                 gitIgnore = "../../.git/info/exclude";
 
-            if (!gitIgnore.empty() &&
-                appMsgBox(_tt(strIdQueryIgnore) + gitIgnore + " ?", "Create .vscode files", wxYES_NO | wxNO_DEFAULT | wxICON_WARNING) == wxID_YES)
+            if (!gitIgnore.empty() && appMsgBox(_tt(strIdQueryIgnore) + gitIgnore + " ?", "Create .vscode files",
+                                                wxYES_NO | wxNO_DEFAULT | wxICON_WARNING) == wxID_YES)
             {
                 if (gitAddtoIgnore(gitIgnore, ".vscode/"))
                 {
