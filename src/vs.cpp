@@ -11,7 +11,6 @@
 
 #include <filesystem>
 #include <vector>
-#include <sstream>
 
 #include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
@@ -81,9 +80,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
 
     if (!file.WriteFile(".vs/tasks.vs.json"))
     {
-        std::ostringstream str;
-        str << _tt(strIdCantWrite) << ".vs/tasks.vs.json";
-        results.push_back(str.str());
+        results.push_back(ttlib::cstr() << _tt(strIdCantWrite) << ".vs/tasks.vs.json");
         return false;
     }
     else
@@ -106,9 +103,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
 
     if (!file.WriteFile(".vs/launch.vs.json"))
     {
-        std::ostringstream str;
-        str << _tt(strIdCantWrite) << ".vs/launch.vs.json";
-        results.push_back(str.str());
+        results.push_back(ttlib::cstr() << _tt(strIdCantWrite) << ".vs/launch.vs.json");
         return false;
     }
     else
