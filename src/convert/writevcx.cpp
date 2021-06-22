@@ -9,14 +9,23 @@
 
 #include <cctype>
 
-#if !defined(_WIN32)
-    #error "This module can only be compiled for Windows"
-#endif
+#if defined(_WIN32)
+    #include <Rpc.h>
+    #pragma comment(lib, "Rpcrt4.lib")
 
-#include <Rpc.h>
-#pragma comment(lib, "Rpcrt4.lib")
+#elif defined(__WXMAC__)
+    #include <array>
+    #include <stdio.h>
 
-#include "ttwinff.h"  // winff -- Wrapper around Windows FindFile
+    #include <CoreFoundation/CFUUID.h>
+
+#else
+    #include <array>
+    #include <stdio.h>
+
+    #include <uuid/uuid.h>
+
+#endif  // _WIN32
 
 #include "writevcx.h"  // CVcxWrite
 
@@ -30,6 +39,8 @@ const char* res_vcxproj_filters_xml =
 
 static bool CreateGuid(ttlib::cstr& Result)
 {
+#if defined(_WIN32)
+
     UUID uuid;
     auto ret_val = ::UuidCreate(&uuid);
 
@@ -42,6 +53,40 @@ static bool CreateGuid(ttlib::cstr& Result)
             ::RpcStringFreeA(&pszUuid);
         }
     }
+
+#elif defined(__WXMAC__)
+    auto newId = CFUUIDCreate(NULL);
+    auto bytes = CFUUIDGetUUIDBytes(newId);
+    CFRelease(newId);
+
+    std::array<unsigned char, 16> byteArray = {
+        { bytes.byte0, bytes.byte1, bytes.byte2, bytes.byte3, bytes.byte4, bytes.byte5, bytes.byte6, bytes.byte7,
+          bytes.byte8, bytes.byte9, bytes.byte10, bytes.byte11, bytes.byte12, bytes.byte13, bytes.byte14, bytes.byte15 }
+    };
+
+#else
+    std::array<unsigned char, 16> byteArray;
+    uuid_generate(byteArray.data());
+#endif
+
+#if !defined(_WIN32)
+    char one[10], two[6], three[6], four[6], five[14];
+
+    snprintf(one, 10, "%02x%02x%02x%02x", _bytes[0], _bytes[1], _bytes[2], _bytes[3]);
+    snprintf(two, 6, "%02x%02x", _bytes[4], _bytes[5]);
+    snprintf(three, 6, "%02x%02x", _bytes[6], _bytes[7]);
+    snprintf(four, 6, "%02x%02x", _bytes[8], _bytes[9]);
+    snprintf(five, 14, "%02x%02x%02x%02x%02x%02x", _bytes[10], _bytes[11], _bytes[12], _bytes[13], _bytes[14], _bytes[15]);
+
+    const std::string sep("-");
+
+    Result = one;
+    Result += sep + two;
+    Result += sep + three;
+    Result += sep + four;
+    Result += sep + five;
+#endif
+
     return !Result.empty();
 }
 
@@ -87,6 +132,9 @@ bool CVcxWrite::CreateBuildFile()
             out.emplace_back(" </ItemGroup>");
         }
 
+#if 0
+// REVIEW: [KeyWorks - 06-22-2021] This won't work -- it adds files that might not be part of the project, leaves out header files in sub-directories, and requires a .h extension.
+
         ttlib::winff ff("*.h");  // add all header files in current directory
         if (ff.isvalid())
         {
@@ -97,6 +145,7 @@ bool CVcxWrite::CreateBuildFile()
                 out.emplace_back(" </ItemGroup>");
             } while (ff.next());
         }
+#endif
 
         out.emplace_back("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />");
         out.emplace_back("  <ImportGroup Label=\"ExtensionTargets\">");
