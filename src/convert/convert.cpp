@@ -158,7 +158,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
     cszRelative = srcFile.c_str();
     cszRelative.make_relative(cszCurCwd);
 
-    m_writefile.GetSrcFileList().addfilename(".include " + cszRelative);
+    ttlib::add_if(m_writefile.GetSrcFileList(), ".include " + cszRelative);
 
     ttlib::cstr IncDirs(cszRelative);
     IncDirs.remove_filename();

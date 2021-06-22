@@ -120,13 +120,13 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                     continue;
                 }
 
-                if (!m_RcDependencies.has_filename(incName))
+                if (!ttlib::has_filename(m_RcDependencies, incName))
                 {
                     if (workingDir.size())
                     {
                         auto saveLength = workingDir.size();
                         workingDir.append_filename(incName);
-                        m_RcDependencies.addfilename(workingDir);
+                        m_RcDependencies.emplace_back(workingDir);
                         ttlib::cwd CurrentCWD(true);
                         SavedCWD.ChangeDir();
                         FindRcDependencies(rcfile, workingDir);
@@ -134,7 +134,7 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                     }
                     else
                     {
-                        m_RcDependencies.addfilename(incName);
+                        m_RcDependencies.emplace_back(incName);
                         FindRcDependencies(rcfile, incName);
                     }
                 }
@@ -183,12 +183,12 @@ bool CNinja::FindRcDependencies(std::string_view rcfile, std::string_view header
                             {
                                 auto saveLength = workingDir.size();
                                 workingDir.append_filename(parseName);
-                                m_RcDependencies.addfilename(workingDir);
+                                m_RcDependencies.emplace_back(workingDir);
                                 workingDir.erase(saveLength, workingDir.size() - saveLength);
                             }
                             else
                             {
-                                m_RcDependencies.addfilename(parseName);
+                                m_RcDependencies.emplace_back(parseName);
                             }
                         }
                     }

@@ -14,7 +14,7 @@
 class StackLogger : public wxStackWalker
 {
 public:
-    ttlib::cstrVector& GetCalls() { return m_calls; }
+    std::vector<ttlib::cstr>& GetCalls() { return m_calls; }
 
 protected:
     void OnStackFrame(const wxStackFrame& frame) override
@@ -53,7 +53,7 @@ protected:
         }
     }
 
-    ttlib::cstrVector m_calls;
+    std::vector<ttlib::cstr> m_calls;
 };
 
 #endif  // defined(_DEBUG) && defined(wxUSE_ON_FATAL_EXCEPTION) && defined(wxUSE_STACKWALKER)

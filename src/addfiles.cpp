@@ -7,13 +7,12 @@
 
 #include "pch.h"
 
-#include "ttcvector.h"   // Vector of ttlib::cstr strings
 #include "tttextfile.h"  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
 
-void AddFiles(const ttlib::cstrVector& lstFiles)
+void AddFiles(const std::vector<ttlib::cstr>& lstFiles)
 {
     if (lstFiles.size() < 1)
     {
@@ -31,9 +30,9 @@ void AddFiles(const ttlib::cstrVector& lstFiles)
     size_t cFilesAdded = 0;
     for (auto& iter: lstFiles)
     {
-        if (!cSrcFiles.GetSrcFileList().has_filename(iter))
+        if (!ttlib::has_filename(cSrcFiles.GetSrcFileList(), iter))
         {
-            cSrcFiles.GetSrcFileList() += iter;
+            ttlib::add_if(cSrcFiles.GetSrcFileList(), iter);
             ++cFilesAdded;
         }
     }

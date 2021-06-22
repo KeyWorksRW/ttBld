@@ -54,7 +54,7 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
             // Since the .srcfiles may be in a different location, we then need to make the file relative to that.
 
             MakeNameRelative(filename);
-            m_writefile.GetSrcFileList().addfilename(filename);
+            m_writefile.GetSrcFileList().emplace_back(filename);
         }
     }
 

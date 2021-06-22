@@ -13,7 +13,6 @@
 #include <wx/mstream.h>   // Memory stream classes
 #include <wx/wfstream.h>  // File stream classes
 
-#include "ttcvector.h"   // Vector of ttlib::cstr strings
 #include "ttstr.h"       // ttString -- wxString with additional methods similar to ttlib::cstr
 #include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
@@ -39,7 +38,7 @@ bool isConvertibleMime(const ttString& suffix)
     return true;
 }
 
-int ConvertImageToHeader(ttlib::cstrVector& files)
+int ConvertImageToHeader(std::vector<ttlib::cstr>& files)
 {
     if (files.size() < 2)
     {

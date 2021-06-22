@@ -65,7 +65,6 @@ Files:
     ui/vscodedlgBase.cpp       # wxUiEditor generated file
 
     ttLib/ttcstr.cpp
-    ttLib/ttcvector.cpp
     ttLib/ttconsole.cpp
     ttLib/ttcview.cpp
     ttLib/ttmultistr.cpp

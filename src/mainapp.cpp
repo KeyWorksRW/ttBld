@@ -42,7 +42,6 @@
 #include <iostream>
 
 #include "ttconsole.h"  // ttConsoleColor
-#include "ttcvector.h"  // Vector of ttlib::cstr strings
 #include "ttcwd.h"      // cwd -- Class for storing and optionally restoring the current directory
 #include "ttparser.h"   // cmd -- Command line parser
 
@@ -59,9 +58,9 @@
     #include "dlgvscode.h"  // CDlgVsCode -- IDDLG_VSCODE dialog handler
 #endif
 
-void AddFiles(const ttlib::cstrVector& lstFiles);
-int ConvertImageToHeader(ttlib::cstrVector& files);
-int MakeHgz(ttlib::cstrVector& files);
+void AddFiles(const std::vector<ttlib::cstr>& lstFiles);
+int ConvertImageToHeader(std::vector<ttlib::cstr>& files);
+int MakeHgz(std::vector<ttlib::cstr>& files);
 
 enum UPDATE_TYPE
 {

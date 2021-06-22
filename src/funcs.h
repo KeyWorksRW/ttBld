@@ -10,8 +10,6 @@
 
 #include <vector>
 
-#include "ttcvector.h"  // cstrVector -- Vector of ttlib::cstr strings
-
 class cstr;
 class CSrcFiles;
 
@@ -29,7 +27,7 @@ bool ConvertBuildScript(const char* pszBldFile);
 // Search PATH, LIB, or INCLUDE (or variants)
 bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathResult);
 
-void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines);
+void ParseDefines(std::vector<ttlib::cstr>& Results, std::string_view Defines);
 
 // Creates .json files for Visual Studio
 bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results);
@@ -37,7 +35,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results);
 // Following functions are for use in setting up a build system for VS Code
 
 // Returns true unless unable to write to a file
-ttlib::cstrVector CreateVsCodeProject(std::string_view SrcFilename);
+std::vector<ttlib::cstr> CreateVsCodeProject(std::string_view SrcFilename);
 bool Yamalize();
 
 #if defined(_WIN32)

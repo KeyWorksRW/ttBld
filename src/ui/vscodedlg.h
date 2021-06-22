@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include "ttcvector.h"  // cstrVector -- Vector of ttlib::cstr strings
-
 #include "vscodedlgBase.h"
 
 class CSrcFiles;
@@ -18,8 +16,8 @@ class VsCodeDlg : public VsCodeDlgBase
 public:
     VsCodeDlg(wxWindow* parent = nullptr);
 
-    bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
-    bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
+    bool CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results);
+    bool CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results);
 
 protected:
     // Handlers for VsCodeDlgBase events.

@@ -86,14 +86,14 @@ namespace ttlib
     /// Is ch the start of a utf8 sequence?
     constexpr inline bool is_utf8(char ch) noexcept { return ((ch & 0xC0) != 0x80); }
 
-    template<typename T>
+    template <typename T>
     /// Compares result against -1 -- use with returns from find, contains, locate, etc.
     constexpr bool is_error(T result)
     {
         return (static_cast<ptrdiff_t>(result)) == -1;
     }
 
-    template<typename T>
+    template <typename T>
     /// Compares result against -1 -- use with returns from find, contains, locate, etc.
     constexpr bool is_found(T result)
     {
@@ -119,7 +119,7 @@ namespace ttlib
     /// Same as find_str but with a boolean return instead of a string_view.
     bool contains(std::string_view main, std::string_view sub, tt::CASE checkcase = tt::CASE::exact);
 
-    template<class iterT>
+    template <class iterT>
     /// Returns true if any string in the iteration list appears somewhere in the the main string.
     bool strContains(std::string_view str, iterT iter, tt::CASE checkcase = tt::CASE::exact)
     {
@@ -145,8 +145,24 @@ namespace ttlib
         return false;
     }
 
+    // Case-insensitive when compiled for Windows, otherwise case-sensitive
     template <class T>
+#if defined(_WIN32)
+    bool has_filename(const std::vector<T>& vec, std::string_view str, tt::CASE checkcase = tt::CASE::either)
+#else
+    bool has_filename(const std::vector<T>& vec, std::string_view str, tt::CASE checkcase = tt::CASE::exact)
+#endif
+    {
+        for (size_t idx = 0; idx < vec.size(); ++idx)
+        {
+            if (ttlib::is_sameas(vec[idx], str, checkcase))
+                return true;
+        }
+        return false;
+    }
+
     /// Only adds the string if it doesn't already exist.
+    template <class T>
     void add_if(std::vector<T>& vec, std::string_view str, tt::CASE checkcase = tt::CASE::exact)
     {
         for (size_t idx = 0; idx < vec.size(); ++idx)
@@ -158,7 +174,18 @@ namespace ttlib
     }
 
     template <class T>
+    size_t find_member(const std::vector<T>& vec, std::string_view str, tt::CASE checkcase = tt::CASE::exact)
+    {
+        for (size_t idx = 0; idx < vec.size(); ++idx)
+        {
+            if (ttlib::is_sameas(vec[idx], str, checkcase))
+                return idx;
+        }
+        return tt::npos;
+    }
+
     /// Search the entire vector for a member containing the substring.
+    template <class T>
     size_t find_substr(std::vector<T>& vec, std::string_view str, tt::CASE checkcase = tt::CASE::exact)
     {
         for (size_t idx = 0; idx < vec.size(); ++idx)
@@ -169,8 +196,8 @@ namespace ttlib
         return tt::npos;
     }
 
-    template <class T>
     /// Search the vector from the given start index for a member containing the substring.
+    template <class T>
     size_t find_substr(std::vector<T>& vec, size_t start, std::string_view str, tt::CASE checkcase = tt::CASE::exact)
     {
         for (size_t idx = start; idx < vec.size(); ++idx)
@@ -253,7 +280,8 @@ namespace ttlib
 
     /// Performs a check to see if a directory entry is a filename and contains the
     /// specified extension.
-    bool has_extension(std::filesystem::directory_entry name, std::string_view extension, tt::CASE checkcase = tt::CASE::exact);
+    bool has_extension(std::filesystem::directory_entry name, std::string_view extension,
+                       tt::CASE checkcase = tt::CASE::exact);
 
     /// Confirms newdir exists and is a directory and then changes to that directory.
     ///
