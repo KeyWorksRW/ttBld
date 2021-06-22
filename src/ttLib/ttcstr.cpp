@@ -2,8 +2,8 @@
 // Name:      ttcstr.cpp
 // Purpose:   Class for handling zero-terminated char strings.
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License -- see ../LICENSE
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <ios>
 #include <locale>
+#include <sstream>
 
 #include "ttcstr.h"
 #include "ttlibspace.h"
@@ -165,7 +166,8 @@ std::string_view cstr::view_substr(size_t offset, char chBegin, char chEnd)
             // is unnecessary. Should we support it?
 
             // only check quotes -- a slash is valid before other character pairs.
-            if (at(offset) == '\\' && (chBegin == '"' || chBegin == '\'') && offset + 1 < size() && (at(offset + 1) == chEnd))
+            if (at(offset) == '\\' && (chBegin == '"' || chBegin == '\'') && offset + 1 < size() &&
+                (at(offset + 1) == chEnd))
             {
                 // step over an escaped quote if the string to fetch is within a quote
                 offset += 2;

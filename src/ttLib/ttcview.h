@@ -2,8 +2,8 @@
 // Name:      ttcview.h
 // Purpose:   string_view functionality on a zero-terminated char string.
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License -- see ../LICENSE
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 /// @file
@@ -29,8 +29,6 @@
 // This can be used to conditionalize code where <ttcview.h> is available or not
 #define _TTLIB_CVIEW_AVAILABLE_
 
-#include <filesystem>
-#include <sstream>
 #include <string_view>
 
 namespace ttlib

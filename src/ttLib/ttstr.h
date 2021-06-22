@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   wxString with additional methods similar to ttlib::cstr
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License -- see ../LICENSE
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 // This class is only available in ttLibwx.lib (see src/wxsrc) or in a UNIX build.
@@ -210,6 +210,13 @@ public:
     ///
     /// Note: Windows API functions work fine with forward slashes instead of backslashes.
     ttString& backslashestoforward();
+
+#if defined(_WIN32)
+    /// Converts all forward slashes in the string to backward slashes.
+    ///
+    /// Note: Windows API functions work fine with forward slashes instead of backslashes.
+    ttString& forwardslashestoback();
+#endif  // _WIN32
 
     /// ext param should begin with a period (e.g., ".cpp")
     bool has_extension(std::string_view ext, tt::CASE checkcase = tt::CASE::either) { return extension().is_sameas(ext, checkcase); }

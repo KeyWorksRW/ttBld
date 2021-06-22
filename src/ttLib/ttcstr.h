@@ -2,8 +2,8 @@
 // Name:      ttcstr.h
 // Purpose:   std::string with additional methods
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License -- see ../LICENSE
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -18,8 +18,6 @@
 /// most places where std::string<char> is used. It provides additional functionality including utf8/16
 /// conversions, file name handling, etc.
 
-#include <cassert>
-#include <filesystem>
 #include <string>
 #include <string_view>
 

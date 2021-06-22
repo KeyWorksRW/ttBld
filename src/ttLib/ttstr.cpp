@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
 // Purpose:   Enhanced version of wxString
 // Author:    Ralph Walden
-// Copyright: Copyright (c) 2020 KeyWorks Software (Ralph Walden)
-// License:   Apache License -- see ../LICENSE
+// Copyright: Copyright (c) 2020-2021 KeyWorks Software (Ralph Walden)
+// License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -394,6 +394,19 @@ ttString& ttString::backslashestoforward()
     }
     return *this;
 }
+
+#if defined(_WIN32)
+
+ttString& ttString::forwardslashestoback()
+{
+    for (auto pos = find('/'); pos != wxString::npos; pos = find('/'))
+    {
+        replace(pos, 1, L"\\");
+    }
+    return *this;
+}
+
+#endif  // _WIN32
 
 ttString ttString::extension() const
 {
