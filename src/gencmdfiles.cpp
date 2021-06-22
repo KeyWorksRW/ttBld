@@ -84,7 +84,7 @@ void CreateCodeCmd(const char* pszFile)
 
 #endif  // !defined(_WIN32)
 
-static void AddToList(const char* pszEnv, ttlib::cstrVector& lstPaths)
+static void AddToList(const char* pszEnv, std::vector<ttlib::cstr>& lstPaths)
 {
     ttlib::cstr Env;
     Env.assignEnvVar(pszEnv);
@@ -96,7 +96,7 @@ static void AddToList(const char* pszEnv, ttlib::cstrVector& lstPaths)
         {
             iter.backslashestoforward();
 
-            lstPaths.addfilename(iter);
+            lstPaths.emplace_back(iter);
         }
     }
 }
@@ -110,11 +110,11 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
 
     bool bHost64 = IsHost64();  // figure out what processor we have to determine what compiler host to use
 
-    ttlib::cstrVector lstLib;
-    ttlib::cstrVector lstLib32;
-    ttlib::cstrVector lstPath;
-    ttlib::cstrVector lstPath32;
-    ttlib::cstrVector lstInc;
+    std::vector<ttlib::cstr> lstLib;
+    std::vector<ttlib::cstr> lstLib32;
+    std::vector<ttlib::cstr> lstPath;
+    std::vector<ttlib::cstr> lstPath32;
+    std::vector<ttlib::cstr> lstInc;
 
     // Add the PATH to the toolchain first so that it becomes the first directory searched
 
@@ -124,7 +124,7 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
     Path.append_filename("bin/");
     Path.append_filename(bHost64 ? "Hostx64/" : "Hostx86/");
     Path.append_filename(bDef64 ? "x64" : "x86");
-    lstPath.addfilename(Path);
+    lstPath.emplace_back(Path);
 
     if (bDef64)
     {
@@ -132,7 +132,7 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         Path.append_filename("bin/");
         Path.append_filename(bHost64 ? "Hostx64/" : "Hostx86/");
         Path.append_filename("x86");
-        lstPath32.addfilename(Path);
+        lstPath32.emplace_back(Path);
 
         // The main reason for switching to Hostx64/x86 is to swap compilers. Not all parts of the toolchain are duplicated
         // there, so we need to add a path to the rest of the toolchain.
@@ -141,7 +141,7 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
         {
             Path = MSVC;
             Path.append_filename("bin/Hostx64/x64");
-            lstPath32.addfilename(Path);
+            lstPath32.emplace_back(Path);
         }
     }
 
@@ -174,18 +174,18 @@ bool CreateMSVCEnvCmd(const char* pszDstFile, bool bDef64)
 
     Path = MSVC;
     Path.append_filename(bDef64 ? "lib/x64" : "lib/x86");
-    lstLib.addfilename(Path);
+    lstLib.emplace_back(Path);
 
     if (bDef64)
     {
         Path = MSVC;
         Path.append_filename("lib/x86");
-        lstLib32.addfilename(Path);
+        lstLib32.emplace_back(Path);
     }
 
     Path = MSVC;
     Path.append_filename("include");
-    lstInc.addfilename(Path);
+    lstInc.emplace_back(Path);
 
     ttlib::textfile file;
     file.emplace_back("@echo off");

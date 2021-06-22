@@ -56,7 +56,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
             {
                 auto filename = file.attribute("Name").as_cstr();
                 MakeNameRelative(filename);
-                m_writefile.GetSrcFileList().addfilename(filename);
+                ttlib::add_if(m_writefile.GetSrcFileList(), filename);
                 file = file.next_sibling();
             } while (file);
         }

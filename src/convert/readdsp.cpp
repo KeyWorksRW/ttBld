@@ -282,7 +282,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 }
                 else
                 {
-                    m_writefile.GetSrcFileList().append(filename);
+                    ttlib::add_if(m_writefile.GetSrcFileList(), filename);
                 }
             }
         }

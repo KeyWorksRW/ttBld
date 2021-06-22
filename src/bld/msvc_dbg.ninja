@@ -104,8 +104,6 @@ build $outdir/vscodedlgBase.obj: compile ui/vscodedlgBase.cpp | $outdir/pch.obj
 
 build $outdir/ttcstr.obj: compile ttLib/ttcstr.cpp | $outdir/pch.obj
 
-build $outdir/ttcvector.obj: compile ttLib/ttcvector.cpp | $outdir/pch.obj
-
 build $outdir/ttconsole.obj: compile ttLib/ttconsole.cpp | $outdir/pch.obj
 
 build $outdir/ttcview.obj: compile ttLib/ttcview.cpp | $outdir/pch.obj
@@ -164,7 +162,6 @@ build ../bin/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/optionsdlgBase.obj $
   $outdir/vscodedlgBase.obj $
   $outdir/ttcstr.obj $
-  $outdir/ttcvector.obj $
   $outdir/ttconsole.obj $
   $outdir/ttcview.obj $
   $outdir/ttmultistr.obj $

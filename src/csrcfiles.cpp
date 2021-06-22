@@ -309,14 +309,15 @@ void CSrcFiles::ProcessFile(std::string_view line)
         return;
     }
 
-    if (auto name = m_lstSrcFiles.addfilename(filename); !name.file_exists())
+    ttlib::add_if(m_lstSrcFiles, filename);
+    if (!filename.file_exists())
     {
-        AddError(_tt("Unable to locate the file ") + name);
+        AddError(_tt("Unable to locate the file ") + filename);
     }
 
     if (filename.has_extension(".idl"))
     {
-        m_lstIdlFiles += filename.c_str();
+        m_lstIdlFiles.emplace_back(filename);
     }
 
     // ignore .rc2, .resources, etc.
@@ -343,9 +344,10 @@ void CSrcFiles::ProcessDebugFile(std::string_view line)
         return;
     }
 
-    if (auto name = m_lstDebugFiles.addfilename(filename); !name.file_exists())
+    ttlib::add_if(m_lstDebugFiles, filename);
+    if (!filename.file_exists())
     {
-        AddError(_tt("Unable to locate the file ") + name);
+        AddError(_tt("Unable to locate the file ") + filename);
     }
 }
 
@@ -475,7 +477,7 @@ void CSrcFiles::ProcessIncludeDirective(std::string_view file, ttlib::cstr root)
         filename.make_relative(incRoot);
         filename.make_absolute();
         filename.make_relative(root);
-        m_lstSrcFiles.addfilename(filename);
+        ttlib::add_if(m_lstSrcFiles, filename);
     }
 }
 
@@ -494,15 +496,15 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
             if (name.has_extension(".c") || name.has_extension(".cpp") || name.has_extension(".cxx"))
             {
                 if (m_section == SECTION_DEBUG_FILES)
-                    m_lstDebugFiles.addfilename(name);
+                   ttlib::add_if(m_lstDebugFiles, name);
                 else
-                    m_lstSrcFiles.addfilename(name);
+                    ttlib::add_if(m_lstSrcFiles,name);
             }
             else if (name.has_extension(".rc"))
             {
                 if (m_section != SECTION_DEBUG_FILES)
                 {
-                    m_lstSrcFiles.addfilename(name);
+                    ttlib::add_if(m_lstSrcFiles, name);
                     m_RCname = name;
                 }
             }
@@ -517,8 +519,8 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
             {
                 if (m_section != SECTION_DEBUG_FILES)
                 {
-                    m_lstSrcFiles.addfilename(name);
-                    m_lstIdlFiles.addfilename(name);
+                    ttlib::add_if(m_lstSrcFiles, name);
+                    ttlib::add_if(m_lstIdlFiles, name);
                 }
             }
 
@@ -756,7 +758,7 @@ const ttlib::cstr& CSrcFiles::GetTargetDebug32()
 
 void CSrcFiles::AddError(std::string_view err)
 {
-    m_lstErrMessages.append(err);
+    m_lstErrMessages.emplace_back(err);
     FAIL_MSG(err.data());
 }
 

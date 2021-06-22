@@ -19,21 +19,21 @@
 #include "uifuncs.h"    // Miscellaneous functions for displaying UI
 #include "vscodedlg.h"  // VsCodeDlg -- Dialog for setting options to create tasks.json and launch.json
 
-bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
-bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results);
+bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results);
+bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results);
 
 void AddMsvcTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
 void AddClangTask(ttlib::textfile& fileOut, std::string_view Label, std::string_view Group, std::string_view Command);
 
-ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
+std::vector<ttlib::cstr> CreateVsCodeProject(std::string_view projectFile)
 {
-    ttlib::cstrVector results;
+    std::vector<ttlib::cstr> results;
 
     if (!ttlib::dir_exists(".vscode"))
     {
         if (!std::filesystem::create_directory(".vscode"))
         {
-            results += _tt(strIdCantCreateVsCodeDir);
+            results.emplace_back(_tt(strIdCantCreateVsCodeDir));
             return results;
         }
 
@@ -63,7 +63,7 @@ ttlib::cstrVector CreateVsCodeProject(std::string_view projectFile)
     CSrcFiles cSrcFiles;
     if (!cSrcFiles.ReadFile(projectFile))
     {
-        results += _tt(strIdCantConfigureJson);
+        results.emplace_back(_tt(strIdCantConfigureJson));
         return results;
     }
 
@@ -117,7 +117,7 @@ constexpr auto txtProperties = R"===(
 }
 )===";
 
-bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
+bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results)
 {
     ttlib::textfile out;
     ttlib::textfile propFile;
@@ -128,7 +128,7 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
         if (propLine->view_nonspace().is_sameprefix("\"defines", tt::CASE::either))
         {
             out.emplace_back(*propLine);
-            ttlib::cstrVector Defines;
+            std::vector<ttlib::cstr> Defines;
             if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
                 ParseDefines(Defines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN));
             if (cSrcFiles.hasOptValue(OPT::CFLAGS_DBG))
@@ -209,13 +209,13 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
     }
     else
     {
-        Results += (_ttc(strIdCreated) + ".vscode/c_cpp_properties.json");
+        Results.emplace_back(_ttc(strIdCreated) + ".vscode/c_cpp_properties.json");
     }
 
     return true;
 }
 
-bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
+bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results)
 {
     ttlib::textfile file;
     if (!file.ReadFile(".vscode/c_cpp_properties.json"))
@@ -226,7 +226,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 
     // Gather all of our include directories into a list
 
-    ttlib::cstrVector Includes;
+    std::vector<ttlib::cstr> Includes;
 
     if (!cSrcFiles.getOptValue(OPT::INC_DIRS).empty())
     {
@@ -245,7 +245,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
             // Remove trailing backslash just to make all paths look the same
             if (iter.back() == '/')
                 iter.pop_back();
-            Includes.addfilename("${workspaceRoot}/" + iter);
+            Includes.emplace_back("${workspaceRoot}/" + iter);
         }
     }
 
@@ -266,7 +266,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 
     // Gather all the common and debug defines specified in CFlags: and CFlagsD:
 
-    ttlib::cstrVector Defines;
+    std::vector<ttlib::cstr> Defines;
 
     if (cSrcFiles.hasOptValue(OPT::CFLAGS_CMN))
         ParseDefines(Defines, cSrcFiles.getOptValue(OPT::CFLAGS_CMN));
@@ -310,7 +310,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
                     continue;
                 ttlib::cstr tmp;
                 tmp.ExtractSubString(file[line], start);
-                Defines.append(tmp);  // Only gets added if it doesn't already exist
+                ttlib::add_if(Defines, tmp);
                 file.erase(file.begin() + line, file.begin() + line + 1);
             }
             if (Defines.size())
@@ -357,16 +357,16 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 #endif
                     if (!path.contains(":"))
                     {
-                        Includes.addfilename("${workspaceRoot}/" + path);
+                        Includes.emplace_back("${workspaceRoot}/" + path);
                     }
                     else
                     {
-                        Includes.addfilename(path);
+                        Includes.emplace_back(path);
                     }
                 }
                 else
                 {
-                    Includes.addfilename(path);
+                    Includes.emplace_back(path);
                 }
                 file.erase(file.begin() + line, file.begin() + line + 1);
             }
@@ -436,7 +436,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
 
 // Given a string, finds any definitions and stores them in the provided list. Primarily used
 // to parse a CFlags: option string
-void ParseDefines(ttlib::cstrVector& Results, std::string_view Defines)
+void ParseDefines(std::vector<ttlib::cstr>& Results, std::string_view Defines)
 {
     if (Defines.empty())
         return;

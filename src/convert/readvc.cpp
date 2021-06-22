@@ -62,7 +62,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                     {
                         ttlib::cstr relative(path);
                         MakeNameRelative(relative);
-                        m_writefile.GetSrcFileList().addfilename(relative);
+                        m_writefile.GetSrcFileList().emplace_back(relative);
                     }
                 }
             }
@@ -78,7 +78,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                         if (relative.has_extension(".rc"))
                         {
                             MakeNameRelative(relative);
-                            m_writefile.GetSrcFileList().addfilename(relative);
+                            m_writefile.GetSrcFileList().emplace_back(relative);
                             m_writefile.SetRcName(relative);
                         }
                     }

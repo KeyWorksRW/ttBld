@@ -7,8 +7,6 @@
 
 #include "pch.h"
 
-#include "ttcvector.h"
-
 #include "uifuncs.h"   // Miscellaneous functions for displaying UI
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 

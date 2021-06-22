@@ -13,8 +13,6 @@
 #include <string_view>
 #include <vector>
 
-#include "ttcvector.h"  // Vector of ttlib::cstr strings
-
 #include "options.h"  // OPT -- Structures and enum for storing/retrieving options in a .srcfiles.yaml file
 
 namespace bld
@@ -111,7 +109,6 @@ public:
     bool IsStaticCrtDbg() const { return (isOptValue(OPT::CRT_DBG, "static")); }
     bool IsOptimizeSpeed() const { return (isOptValue(OPT::OPTIMIZE, "speed")); }
 
-    ttlib::cstr& AddFile(std::string_view filename) { return m_lstSrcFiles.addfilename(filename); }
     void AddSourcePattern(std::string_view FilePattern);
 
     const ttlib::cstr& GetProjectName() { return m_Options[OPT::PROJECT].value; }
@@ -131,9 +128,9 @@ public:
     int GetMinorRequired() { return m_RequiredMinor; }
     int GetSubRequired() { return m_RequiredSub; }
 
-    const ttlib::cstrVector& getErrorMsgs() { return m_lstErrMessages; }
+    const auto& getErrorMsgs() { return m_lstErrMessages; }
 
-    ttlib::cstrVector& GetSrcFileList() { return m_lstSrcFiles; }
+    auto& GetSrcFileList() { return m_lstSrcFiles; }
 
     void SetReportingFile(std::string_view filename) { m_ReportPath = filename; }
 
@@ -189,15 +186,15 @@ protected:
     ttlib::cstr m_RCname;   // Resource file to build (if any)
     ttlib::cstr m_HPPname;  // HTML Help project file
 
-    ttlib::cstrVector m_lstSrcFiles;    // List of all source files except DEBUG build files
-    ttlib::cstrVector m_lstIdlFiles;    // List of any idl files to compile with midl compiler
-    ttlib::cstrVector m_lstDebugFiles;  // List of all source files for DEBUG builds only
+    std::vector<ttlib::cstr> m_lstSrcFiles;    // List of all source files except DEBUG build files
+    std::vector<ttlib::cstr> m_lstIdlFiles;    // List of any idl files to compile with midl compiler
+    std::vector<ttlib::cstr> m_lstDebugFiles;  // List of all source files for DEBUG builds only
 
     std::map<ttlib::cstr, std::string> m_gzip_files;  // Map of header/source filename pairs
     std::map<ttlib::cstr, ttlib::cstr> m_xpm_files;   // Map of src/dst filename pairs for xpm conversion
     std::map<ttlib::cstr, ttlib::cstr> m_png_files;   // Map of src/dst filename pairs for png conversion
 
-    ttlib::cstrVector m_lstIncludeSrcFiles;
+    std::vector<ttlib::cstr> m_lstIncludeSrcFiles;
 
     ttlib::cstr m_pchCPPname;
 
@@ -206,7 +203,7 @@ protected:
 private:
     friend CWriteSrcFiles;
 
-    ttlib::cstrVector m_lstErrMessages;  // List of any errors that occurred during processing
+    std::vector<ttlib::cstr> m_lstErrMessages;  // List of any errors that occurred during processing
 
     std::vector<CURRENT> m_Options { OPT::LAST + 1 };
 

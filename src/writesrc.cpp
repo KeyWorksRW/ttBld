@@ -266,10 +266,8 @@ bld::RESULT CWriteSrcFiles::WriteNew(std::string_view filename, std::string_view
 
     if (!m_RCname.empty())
     {
-        // If there is a .rc file, then add it first and remove from srcfiles list so it doesn't get added twice.
-        auto posFile = m_lstSrcFiles.find(0, m_RCname);
-        if (posFile != tt::npos)
-            m_lstSrcFiles.erase(m_lstSrcFiles.begin() + posFile);
+        if (auto pos_file = ttlib::find_member(m_lstSrcFiles, m_RCname); ttlib::is_found(pos_file))
+            m_lstSrcFiles.erase(m_lstSrcFiles.begin() + pos_file);
         out.emplace_back("    " + m_RCname);
         out.addEmptyLine();
     }

@@ -67,7 +67,7 @@ constexpr auto txtLaunch = R"===(
 };
 )===";
 
-bool VsCodeDlg::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
+bool VsCodeDlg::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results)
 {
     if (cSrcFiles.IsExeTypeLib() || cSrcFiles.IsExeTypeDll())
         return true;  // nothing that we know how to launch if this is a library or dynamic link library
@@ -151,7 +151,7 @@ constexpr auto txtDefaultTask = R"===(
 
 constexpr auto txtNormalGroup = "            \"group\": \"build\",\n";
 
-bool VsCodeDlg::CreateVsCodeTasks(CSrcFiles& cSrcFiles, ttlib::cstrVector& Results)
+bool VsCodeDlg::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results)
 {
     ttlib::textfile out;
 

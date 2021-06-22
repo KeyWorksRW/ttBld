@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "ttcvector.h"   // Vector of ttlib::cstr strings
 #include "tttextfile.h"  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
@@ -102,7 +101,7 @@ private:
 
     ttlib::cstr m_scriptFilename;  // The .ninja file
 
-    ttlib::cstrVector m_RcDependencies;
+    std::vector<ttlib::cstr> m_RcDependencies;
 
     struct BLD_LIB
     {
