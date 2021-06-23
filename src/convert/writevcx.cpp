@@ -29,13 +29,9 @@
 
 #include "writevcx.h"  // CVcxWrite
 
-const char* res_vcxproj_xml =
-#include "res/vcxproj.xml"
-    ;
+#include "uifuncs.h"  // Miscellaneous functions for displaying UI
 
-const char* res_vcxproj_filters_xml =
-#include "res/vcxproj.filters.xml"
-    ;
+#include "..\pugixml\pugixml.hpp"
 
 static bool CreateGuid(ttlib::cstr& Result)
 {
@@ -90,8 +86,20 @@ static bool CreateGuid(ttlib::cstr& Result)
     return !Result.empty();
 }
 
+static bool UpdateBuildFile(ttlib::cstr filename)
+{
+    return false;
+}
+
 bool CVcxWrite::CreateBuildFile()
 {
+    if (!IsProcessed())
+    {
+        // TODO: [KeyWorks - 06-22-2021] We should use a file open dialog to search for it.
+        appMsgBox("Unable to locate .srcfiles.yaml");
+        return false;
+    }
+
     ttlib::cstr guid;
     if (!CreateGuid(guid))
     {
@@ -101,105 +109,104 @@ bool CVcxWrite::CreateBuildFile()
 
     ttlib::cstr vc_project_file(GetProjectName());
     vc_project_file.replace_extension(".vcxproj");
-    if (!vc_project_file.file_exists())
-    {
-        ttlib::cstr master(ttlib::find_nonspace(res_vcxproj_xml));
-
-        master.Replace("%guid%", guid, true);
-        master.Replace("%%DebugExe%", GetTargetDebug(), true);
-        master.Replace("%%ReleaseExe%", GetTargetRelease(), true);
-        master.Replace("%%DebugExe64%", GetTargetDebug(), true);
-        master.Replace("%%ReleaseExe64%", GetTargetRelease(), true);
-
-        ttlib::textfile out;
-        out.ReadString(master);
-
-        for (auto& file: m_lstSrcFiles)
-        {
-            auto ext = file.extension();
-            if (ext.empty() || std::tolower(ext[1] != 'c'))
-                continue;
-            out.emplace_back(" <ItemGroup>");
-            out.addEmptyLine().Format("    <ClCompile Include=%ks />", file.c_str());
-            out.emplace_back(" </ItemGroup>");
-        }
-
-        ttlib::cstr cszSrcFile;
-        if (!m_RCname.empty())
-        {
-            out.emplace_back(" <ItemGroup>");
-            out.addEmptyLine().Format("    <ResourceCompile Include=%ks />", m_RCname.c_str());
-            out.emplace_back(" </ItemGroup>");
-        }
 
 #if 0
-// REVIEW: [KeyWorks - 06-22-2021] This won't work -- it adds files that might not be part of the project, leaves out header files in sub-directories, and requires a .h extension.
-
-        ttlib::winff ff("*.h");  // add all header files in current directory
-        if (ff.isvalid())
-        {
-            do
-            {
-                out.emplace_back(" <ItemGroup>");
-                out.addEmptyLine().Format("    <ClInclude Include=%ks />", ff.c_str());
-                out.emplace_back(" </ItemGroup>");
-            } while (ff.next());
-        }
+    if (vc_project_file.file_exists())
+        return UpdateBuildFile(vc_project_file);
 #endif
 
-        out.emplace_back("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />");
-        out.emplace_back("  <ImportGroup Label=\"ExtensionTargets\">");
-        out.emplace_back("  </ImportGroup>");
-        out.emplace_back("</Project>");
+    pugi::xml_document doc;
 
-        if (!out.WriteFile(vc_project_file))
-        {
-            AddError(_tt(strIdCantWrite) + vc_project_file);
-            return false;
-        }
-        else
-            std::cout << _tt(strIdCreated) << vc_project_file << '\n';
+    auto Project = doc.append_child("Project");
+    Project.append_attribute("DefaultTargets").set_value("Build");
+    Project.append_attribute("ToolsVersion").set_value("15.0");
+    Project.append_attribute("xmlns").set_value("http://schemas.microsoft.com/developer/msbuild/2003");
+    ;
 
-        master = ttlib::find_nonspace(res_vcxproj_filters_xml);
+    auto ItemGroup = Project.append_child("ItemGroup");
+    ItemGroup.append_attribute("Label").set_value("ProjectConfigurations");
 
-        CreateGuid(guid);  // it already succeeded once if we got here, so we don't check for error again
-        master.Replace("%guidSrc%", guid, true);
-        CreateGuid(guid);
-        master.Replace("%guidHdr%", guid, true);
-        CreateGuid(guid);
-        master.Replace("%guidResource%", guid, true);
+    auto child = ItemGroup.append_child("ProjectConfiguration");
+    child.append_attribute("Include").set_value("Debug|x64");
+    child.append_child("Configuration").text().set("Debug");
+    child.append_child("Platform").text().set("x64");
 
-        out.clear();
-        out.ReadString(master);
+    child = ItemGroup.append_child("ProjectConfiguration");
+    child.append_attribute("Include").set_value("Release|x64");
+    child.append_child("Configuration").text().set("Release");
+    child.append_child("Platform").text().set("x64");
 
-        out.emplace_back("  <ItemGroup>");
-
-        for (size_t pos = 0; pos < m_lstSrcFiles.size(); ++pos)
-        {
-            if (m_lstSrcFiles[pos].contains(".c"))  // only add C/C++ files
-            {
-                out.addEmptyLine().Format("    <ClCompile Include=%ks>", m_lstSrcFiles[pos].c_str());
-                out.emplace_back("      <Filter>Source Files</Filter>");
-                out.emplace_back("    </ClCompile>");
-                out.emplace_back(cszSrcFile);
-            }
-        }
-        out.emplace_back("  </ItemGroup>");
-        out.emplace_back("</Project>");
-        vc_project_file << ".filters";
-        if (!out.WriteFile(vc_project_file))
-        {
-            AddError(_tt(strIdCantWrite) + vc_project_file);
-            return false;
-        }
-        else
-            std::cout << _tt(strIdCreated) << vc_project_file << '\n';
-    }
-    else
+    if (hasOptValue(OPT::TARGET_DIR32))
     {
-        // TODO: [KeyWorks - 04-19-2020] Need to support changing the files to compile to match what's in
-        // .srcfiles.
+        child = ItemGroup.append_child("ProjectConfiguration");
+        child.append_attribute("Include").set_value("Debug|Win32");
+        child.append_child("Configuration").text().set("Debug");
+        child.append_child("Platform").text().set("Win32");
+
+        child = ItemGroup.append_child("ProjectConfiguration");
+        child.append_attribute("Include").set_value("Release|Win32");
+        child.append_child("Configuration").text().set("Release");
+        child.append_child("Platform").text().set("Win32");
+    }
+
+    auto PropGroup = Project.append_child("PropertyGroup");
+    PropGroup.append_attribute("Label").set_value("Globals");
+    {
+        ttlib::cstr gd;
+        gd << '{' << guid << '}';
+        PropGroup.append_child("ProjectGuid").text().set(gd.c_str());
+        PropGroup.append_child("Keyword").text().set("Win32Proj");
+        PropGroup.append_child("ProjectName").text().set(GetProjectName().c_str());
+    }
+
+    auto Import = Project.append_child("Import");
+    Import.append_attribute("Project").set_value("$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
+
+    PropGroup = Project.append_child("PropertyGroup");
+    PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+    PropGroup.append_attribute("Label").set_value("Configuration");
+    PropGroup.append_child("ConfigurationType").text().set("Application");
+
+    PropGroup = Project.append_child("PropertyGroup");
+    PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
+    PropGroup.append_attribute("Label").set_value("Configuration");
+    PropGroup.append_child("ConfigurationType").text().set("Application");
+
+    auto ItemDef = Project.append_child("ItemDefinitionGroup");
+    ItemDef.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+    auto ClCompile = ItemDef.append_child("ClCompile");
+    ClCompile.append_child("Optimization").text().set("Disabled");
+    ClCompile.append_child("RuntimeLibrary").text().set("MultiThreadedDebugDLL");
+
+    auto Link = ItemDef.append_child("Link");
+    Link.append_child("GenerateDebugInformation").text().set("true");
+
+    ItemGroup = Project.append_child("ItemGroup");
+    for (auto& iter: GetSrcFileList())
+    {
+        if (iter.is_sameas(GetRcFile()))
+            continue;
+        ClCompile = ItemGroup.append_child("ClCompile");
+        ClCompile.append_attribute("Include").set_value(iter.c_str());
+    }
+
+    if (GetRcFile().size())
+    {
+        ItemGroup = Project.append_child("ItemGroup");
+        auto ResourceCompile = ItemGroup.append_child("ResourceCompile");
+        ResourceCompile.append_attribute("Include").set_value(GetRcFile().c_str());
+    }
+
+    Import = Project.append_child("Import");
+    Import.append_attribute("Project").set_value("$(VCTargetsPath)\\Microsoft.Cpp.targets");
+
+    if (!doc.save_file(vc_project_file.c_str()))
+    {
+        AddError(_tt(strIdCantWrite) + vc_project_file);
         return false;
     }
+    else
+        std::cout << _tt(strIdCreated) << vc_project_file << '\n';
+
     return true;
 }
