@@ -15,4 +15,8 @@ public:
     CVcxWrite(std::string_view NinjaDir = ttlib::emptystring) : CNinja(NinjaDir) {}
 
     bool CreateBuildFile();
+
+protected:
+    bool CVcxWrite::CreateFilterFile(ttlib::cstr vc_project_file);
+
 };

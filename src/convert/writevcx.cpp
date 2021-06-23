@@ -121,7 +121,6 @@ bool CVcxWrite::CreateBuildFile()
     Project.append_attribute("DefaultTargets").set_value("Build");
     Project.append_attribute("ToolsVersion").set_value("15.0");
     Project.append_attribute("xmlns").set_value("http://schemas.microsoft.com/developer/msbuild/2003");
-    ;
 
     auto ItemGroup = Project.append_child("ItemGroup");
     ItemGroup.append_attribute("Label").set_value("ProjectConfigurations");
@@ -202,11 +201,60 @@ bool CVcxWrite::CreateBuildFile()
 
     if (!doc.save_file(vc_project_file.c_str()))
     {
-        AddError(_tt(strIdCantWrite) + vc_project_file);
+        std::cout << _tt(strIdCantWrite) + vc_project_file << '\n';
         return false;
     }
     else
+    {
         std::cout << _tt(strIdCreated) << vc_project_file << '\n';
+    }
+
+    return CreateFilterFile(vc_project_file);
+}
+
+bool CVcxWrite::CreateFilterFile(ttlib::cstr vc_project_file)
+{
+    vc_project_file.remove_extension();
+    vc_project_file += ".vcxproj.filters";
+
+    pugi::xml_document doc;
+
+    auto Project = doc.append_child("Project");
+    Project.append_attribute("ToolsVersion").set_value("15.0");
+    Project.append_attribute("xmlns").set_value("http://schemas.microsoft.com/developer/msbuild/2003");
+
+    auto ItemGroup = Project.append_child("ItemGroup");
+    auto Filter = ItemGroup.append_child("Filter");
+    Filter.append_attribute("Include").set_value("Source Files");
+    {
+        ttlib::cstr guid;
+        CreateGuid(guid);
+        ttlib::cstr gd;
+        gd << '{' << guid << '}';
+        Filter.append_child("UniqueIdentifier").text().set(gd.c_str());
+        Filter.append_child("Extensions").text().set("cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx");
+    }
+
+    ItemGroup = Project.append_child("ItemGroup");
+    for (auto& iter: GetSrcFileList())
+    {
+        if (iter.is_sameas(GetRcFile()))
+            continue;
+        auto ClCompile = ItemGroup.append_child("ClCompile");
+        ttlib::cstr tmp("Source Files\\");
+        tmp += iter;
+        ClCompile.append_attribute("Include").set_value(tmp.c_str());
+    }
+
+    if (!doc.save_file(vc_project_file.c_str()))
+    {
+        std::cout << _tt(strIdCantWrite) + vc_project_file << '\n';
+        return false;
+    }
+    else
+    {
+        std::cout << _tt(strIdCreated) << vc_project_file << '\n';
+    }
 
     return true;
 }
