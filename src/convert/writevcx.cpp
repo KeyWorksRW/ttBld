@@ -119,13 +119,58 @@ bool CVcxWrite::CreateBuildFile()
 
     auto Project = doc.append_child("Project");
     Project.append_attribute("DefaultTargets").set_value("Build");
-    Project.append_attribute("ToolsVersion").set_value("15.0");
+    Project.append_attribute("ToolsVersion").set_value("4.0");
     Project.append_attribute("xmlns").set_value("http://schemas.microsoft.com/developer/msbuild/2003");
+
+    auto PropGroup = Project.append_child("PropertyGroup");
+    PropGroup.append_attribute("Label").set_value("Configuration");
+    auto Version = PropGroup.append_child("VisualStudioVersion");
+    Version.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == ''");
+    Version.text().set("10.0");
+
+    // Add known platform versions
+
+    auto child = PropGroup.append_child("PlatformToolset");
+    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '10.0'");
+    child.text().set("v100");
+
+    child = PropGroup.append_child("PlatformToolset");
+    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '11.0'");
+    child.text().set("v110");
+
+    child = PropGroup.append_child("PlatformToolset");
+    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '12.0'");
+    child.text().set("v120");
+
+    child = PropGroup.append_child("PlatformToolset");
+    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '14.0'");
+    child.text().set("v140");
+
+    child = PropGroup.append_child("PlatformToolset");
+    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '15.0'");
+    child.text().set("v141");
+
+    child = PropGroup.append_child("PlatformToolset");
+    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '16.0'");
+    child.text().set("v142");
+
+    PropGroup = Project.append_child("PropertyGroup");
+    PropGroup.append_attribute("Condition")
+        .set_value("'$(VisualStudioVersion)' >= '15.0' and '$(WindowsTargetPlatformVersion)'==''");
+    PropGroup.append_child("LatestTargetPlatformVersion")
+        .text()
+        .set("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))");
+    child = PropGroup.append_child("WindowsTargetPlatformVersion");
+    child.append_attribute("Condition").set_value("'$(WindowsTargetPlatformVersion)' == ''");
+    child.text().set("$(LatestTargetPlatformVersion)");
+    PropGroup.append_child("TargetPlatformVersion").text().set("$(WindowsTargetPlatformVersion)");
+
+    // Add Build types
 
     auto ItemGroup = Project.append_child("ItemGroup");
     ItemGroup.append_attribute("Label").set_value("ProjectConfigurations");
 
-    auto child = ItemGroup.append_child("ProjectConfiguration");
+    child = ItemGroup.append_child("ProjectConfiguration");
     child.append_attribute("Include").set_value("Debug|x64");
     child.append_child("Configuration").text().set("Debug");
     child.append_child("Platform").text().set("x64");
@@ -148,7 +193,7 @@ bool CVcxWrite::CreateBuildFile()
         child.append_child("Platform").text().set("Win32");
     }
 
-    auto PropGroup = Project.append_child("PropertyGroup");
+    PropGroup = Project.append_child("PropertyGroup");
     PropGroup.append_attribute("Label").set_value("Globals");
     {
         ttlib::cstr gd;
@@ -165,11 +210,13 @@ bool CVcxWrite::CreateBuildFile()
     PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
     PropGroup.append_attribute("Label").set_value("Configuration");
     PropGroup.append_child("ConfigurationType").text().set("Application");
+    // PropGroup.append_child("PlatformToolset").text().set("v142");
 
     PropGroup = Project.append_child("PropertyGroup");
     PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
     PropGroup.append_attribute("Label").set_value("Configuration");
     PropGroup.append_child("ConfigurationType").text().set("Application");
+    // PropGroup.append_child("PlatformToolset").text().set("v142");
 
     auto ItemDef = Project.append_child("ItemDefinitionGroup");
     ItemDef.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
@@ -220,7 +267,7 @@ bool CVcxWrite::CreateFilterFile(ttlib::cstr vc_project_file)
     pugi::xml_document doc;
 
     auto Project = doc.append_child("Project");
-    Project.append_attribute("ToolsVersion").set_value("15.0");
+    Project.append_attribute("ToolsVersion").set_value("4.0");
     Project.append_attribute("xmlns").set_value("http://schemas.microsoft.com/developer/msbuild/2003");
 
     auto ItemGroup = Project.append_child("ItemGroup");
