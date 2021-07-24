@@ -118,6 +118,8 @@ bool CVcxWrite::CreateBuildFile()
     pugi::xml_document doc;
 
     auto Project = doc.append_child("Project");
+    m_Project = &Project;
+
     Project.append_attribute("DefaultTargets").set_value("Build");
     Project.append_attribute("ToolsVersion").set_value("4.0");
     Project.append_attribute("xmlns").set_value("http://schemas.microsoft.com/developer/msbuild/2003");
@@ -170,27 +172,13 @@ bool CVcxWrite::CreateBuildFile()
     auto ItemGroup = Project.append_child("ItemGroup");
     ItemGroup.append_attribute("Label").set_value("ProjectConfigurations");
 
-    child = ItemGroup.append_child("ProjectConfiguration");
-    child.append_attribute("Include").set_value("Debug|x64");
-    child.append_child("Configuration").text().set("Debug");
-    child.append_child("Platform").text().set("x64");
-
-    child = ItemGroup.append_child("ProjectConfiguration");
-    child.append_attribute("Include").set_value("Release|x64");
-    child.append_child("Configuration").text().set("Release");
-    child.append_child("Platform").text().set("x64");
+    AddConfiguration(ItemGroup, GEN_DEBUG);
+    AddConfiguration(ItemGroup, GEN_RELEASE);
 
     if (hasOptValue(OPT::TARGET_DIR32))
     {
-        child = ItemGroup.append_child("ProjectConfiguration");
-        child.append_attribute("Include").set_value("Debug|Win32");
-        child.append_child("Configuration").text().set("Debug");
-        child.append_child("Platform").text().set("Win32");
-
-        child = ItemGroup.append_child("ProjectConfiguration");
-        child.append_attribute("Include").set_value("Release|Win32");
-        child.append_child("Configuration").text().set("Release");
-        child.append_child("Platform").text().set("Win32");
+        AddConfiguration(ItemGroup, GEN_DEBUG32);
+        AddConfiguration(ItemGroup, GEN_RELEASE32);
     }
 
     PropGroup = Project.append_child("PropertyGroup");
@@ -206,17 +194,25 @@ bool CVcxWrite::CreateBuildFile()
     auto Import = Project.append_child("Import");
     Import.append_attribute("Project").set_value("$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
 
-    PropGroup = Project.append_child("PropertyGroup");
-    PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
-    PropGroup.append_attribute("Label").set_value("Configuration");
-    PropGroup.append_child("ConfigurationType").text().set("Application");
-    // PropGroup.append_child("PlatformToolset").text().set("v142");
+    AddConfigAppType(Project, GEN_DEBUG);
+    AddConfigAppType(Project, GEN_RELEASE);
+
+    if (hasOptValue(OPT::TARGET_DIR32))
+    {
+        AddConfigAppType(Project, GEN_DEBUG32);
+        AddConfigAppType(Project, GEN_RELEASE32);
+    }
 
     PropGroup = Project.append_child("PropertyGroup");
-    PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
-    PropGroup.append_attribute("Label").set_value("Configuration");
-    PropGroup.append_child("ConfigurationType").text().set("Application");
-    // PropGroup.append_child("PlatformToolset").text().set("v142");
+
+    AddOutDirs(PropGroup, GEN_DEBUG);
+    AddOutDirs(PropGroup, GEN_RELEASE);
+
+    if (hasOptValue(OPT::TARGET_DIR32))
+    {
+        AddOutDirs(PropGroup, GEN_DEBUG32);
+        AddOutDirs(PropGroup, GEN_RELEASE32);
+    }
 
     auto ItemDef = Project.append_child("ItemDefinitionGroup");
     ItemDef.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
@@ -232,8 +228,67 @@ bool CVcxWrite::CreateBuildFile()
     {
         if (iter.is_sameas(GetRcFile()))
             continue;
+        ttlib::cstr header(iter);
+        header.replace_extension(".h");
+        bool header_found = header.file_exists();
+        for (; !header_found;)
+        {
+            header.replace_extension(".hh");
+            header_found = header.file_exists();
+            if (header_found)
+                break;
+
+            header.replace_extension(".hpp");
+            header_found = header.file_exists();
+            if (header_found)
+                break;
+
+            header.replace_extension(".hxx");
+            header_found = header.file_exists();
+
+            break;
+        }
+
+        if (header_found)
+        {
+            auto ClInclude = ItemGroup.append_child("ClInclude");
+            ClInclude.append_attribute("Include").set_value(header.c_str());
+        }
+    }
+    if (HasPch())
+    {
+        auto ClInclude = ItemGroup.append_child("ClInclude");
+        ClInclude.append_attribute("Include").set_value(getOptValue(OPT::PCH).c_str());
+    }
+
+    ItemGroup = Project.append_child("ItemGroup");
+    for (auto& iter: GetSrcFileList())
+    {
+        if (iter.is_sameas(GetRcFile()))
+            continue;
         ClCompile = ItemGroup.append_child("ClCompile");
         ClCompile.append_attribute("Include").set_value(iter.c_str());
+    }
+
+    if (GetPchCpp().size())
+    {
+        ClCompile = ItemGroup.append_child("ClCompile");
+        ClCompile.append_attribute("Include").set_value(GetPchCpp().c_str());
+        child = ClCompile.append_child("PrecompiledHeader");
+        child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+        child.text().set("Create");
+        child = ClCompile.append_child("PrecompiledHeader");
+        child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
+        child.text().set("Create");
+        if (hasOptValue(OPT::TARGET_DIR32))
+        {
+            child = ClCompile.append_child("PrecompiledHeader");
+            child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
+            child.text().set("Create");
+            child = ClCompile.append_child("PrecompiledHeader");
+            child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
+            child.text().set("Create");
+        }
     }
 
     if (GetRcFile().size())
@@ -279,7 +334,18 @@ bool CVcxWrite::CreateFilterFile(ttlib::cstr vc_project_file)
         ttlib::cstr gd;
         gd << '{' << guid << '}';
         Filter.append_child("UniqueIdentifier").text().set(gd.c_str());
-        Filter.append_child("Extensions").text().set("cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx");
+        Filter.append_child("Extensions").text().set("cpp;c;cc;cxx");
+    }
+
+    Filter = ItemGroup.append_child("Filter");
+    Filter.append_attribute("Include").set_value("Header Files");
+    {
+        ttlib::cstr guid;
+        CreateGuid(guid);
+        ttlib::cstr gd;
+        gd << '{' << guid << '}';
+        Filter.append_child("UniqueIdentifier").text().set(gd.c_str());
+        Filter.append_child("Extensions").text().set("h;hh;hpp;hxx");
     }
 
     ItemGroup = Project.append_child("ItemGroup");
@@ -304,4 +370,131 @@ bool CVcxWrite::CreateFilterFile(ttlib::cstr vc_project_file)
     }
 
     return true;
+}
+
+void CVcxWrite::AddConfiguration(pugi::xml_node parent, GEN_TYPE gentype)
+{
+    auto configure = parent.append_child("ProjectConfiguration");
+    switch (gentype)
+    {
+        case GEN_DEBUG:
+            configure.append_attribute("Include").set_value("Debug|x64");
+            configure.append_child("Configuration").text().set("Debug");
+            configure.append_child("Platform").text().set("x64");
+            break;
+
+        case GEN_DEBUG32:
+            configure.append_attribute("Include").set_value("Debug|Win32");
+            configure.append_child("Configuration").text().set("Debug");
+            configure.append_child("Platform").text().set("Win32");
+            break;
+
+        case GEN_RELEASE:
+            configure.append_attribute("Include").set_value("Release|x64");
+            configure.append_child("Configuration").text().set("Release");
+            configure.append_child("Platform").text().set("x64");
+            break;
+
+        case GEN_RELEASE32:
+            configure.append_attribute("Include").set_value("Release|Win32");
+            configure.append_child("Configuration").text().set("Release");
+            configure.append_child("Platform").text().set("Win32");
+            break;
+
+        default:
+            break;
+    }
+}
+
+void CVcxWrite::AddConfigAppType(pugi::xml_node parent, GEN_TYPE gentype)
+{
+    std::string type("Application");
+    if (getOptValue(OPT::EXE_TYPE).is_sameas("lib"))
+        type = "Static Library";
+    if (getOptValue(OPT::EXE_TYPE).is_sameas("dll"))
+        type = "Dynamic Library";
+
+    auto PropGroup = parent.append_child("PropertyGroup");
+
+    switch (gentype)
+    {
+        case GEN_DEBUG:
+            PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+            break;
+
+        case GEN_DEBUG32:
+            PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
+            break;
+
+        case GEN_RELEASE:
+            PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
+            break;
+
+        case GEN_RELEASE32:
+            PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
+            break;
+
+        default:
+            break;
+    }
+
+    PropGroup.append_attribute("Label").set_value("Configuration");
+    PropGroup.append_child("ConfigurationType").text().set(type.c_str());
+
+    if (gentype == GEN_DEBUG || gentype == GEN_DEBUG32)
+    {
+        PropGroup.append_child("UseDebugLibraries").text().set("true");
+    }
+    else
+    {
+        PropGroup.append_child("UseDebugLibraries").text().set("false");
+        PropGroup.append_child("WholeProgramOptimization").text().set("true");
+    }
+}
+
+void CVcxWrite::AddOutDirs(pugi::xml_node parent, GEN_TYPE gentype)
+{
+    pugi::xml_node dir;
+
+    switch (gentype)
+    {
+        case GEN_DEBUG:
+            dir = parent.append_child("OutDir");
+            dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+            dir.text().set("bld\\msvc_Debug");
+            dir = parent.append_child("IntDir");
+            dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+            dir.text().set("bld\\msvc_Debug");
+            break;
+
+        case GEN_DEBUG32:
+            dir = parent.append_child("OutDir");
+            dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
+            dir.text().set("bld\\msvc_Debug32");
+            dir = parent.append_child("IntDir");
+            dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
+            dir.text().set("bld\\msvc_Debug32");
+            break;
+
+        case GEN_RELEASE:
+            dir = parent.append_child("OutDir");
+            dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
+            dir.text().set("bld\\msvc_Release");
+            dir = parent.append_child("IntDir");
+            dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
+            dir.text().set("bld\\msvc_Release");
+            break;
+
+        case GEN_RELEASE32:
+            dir = parent.append_child("OutDir");
+            dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
+            dir.text().set("bld\\msvc_Release32");
+            dir = parent.append_child("IntDir");
+            dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
+            dir.text().set("bld\\msvc_Release32");
+            break;
+
+        default:
+            break;
+    }
 }
