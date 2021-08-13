@@ -28,14 +28,14 @@ At an absolute minimum, you will need to have the following in your PATH:
 
 - [wxWidgets](https://www.wxwidgets.org/) -- The debug build requires the DLL versions, the release build links to static libraries
 
-Before building, you will need to start one of the Visual Studio command shells, preferably one that builds 64-bit targets. From within that shell, you can use the following commands to build the library:
+Before building, you will need to start one of the Visual Studio command shells, preferably one that builds 64-bit targets. From within that shell, you can use the following commands to build the executable:
 
 	cd src
 	nmake
 
-By default, this will build a 64-bit release version of the `ttLibwx.lib` library followed by a 64-bit version of `ttBld.exe`.
+By default, this will build a 64-bit release version `ttBld.exe`.
 
-Once you have built `ttLib.exe` or you have downloaded a binary release version, you can use **ttBld** to generate ninja scripts for compiling with `clang-cl`. If you have MINGW installed and both MINGW and the **clang-cl** compiler are in your `$PATH`, you can use the following commands to build:
+Once you have built `ttBld.exe` or you have downloaded a binary release version, you can use **ttBld** to generate ninja scripts for compiling with `clang-cl`. If you have MINGW installed and both MINGW and the **clang-cl** compiler are in your `$PATH`, you can use the following commands to build:
 
 	cd src
 	mingw32-make
