@@ -118,22 +118,23 @@ int CMainApp::OnRun()
     ttlib::cmd cmd(argc, argv);
 #endif  // _WIN32
 
-    cmd.addHelpOption("h|help", _tt(strIdHelpMsg));
+    cmd.addHelpOption("h|help", "display this help message");
 
-    cmd.addOption("codecmd", _tt(strIdHelpCodecmd));
+    cmd.addOption("codecmd", "create code32.cmd and code64.cmd batch files used to run VS Code on Windows");
 
-    cmd.addOption("dir", _tt(strIdHelpDir), ttlib::cmd::needsarg);
+    cmd.addOption("dir", "(directory) -- uses specified directory to create .ninja files (default is bld/)",
+                  ttlib::cmd::needsarg);
 
-    cmd.addOption("options", _tt(strIdHelpOptions));
-    cmd.addOption("vscode", _tt(strIdHelpVscode));
-    cmd.addOption("force", _tt(strIdHelpForce));
-    cmd.addOption("makefile", _tt(strIdHelpMakefile));
+    cmd.addOption("options", "displays a dialog allowing you to change options in .srcfiles.yaml");
+    cmd.addOption("force", "create .ninja file(s) even if nothing has changed");
+    cmd.addOption("makefile", "creates a makefile that doesn't require ttBld.exe");
 
-#if defined(_WIN32)
-    // REVIEW: [KeyWorks - 04-30-2020] What's the difference between these two?
-    cmd.addOption("vs", _tt("adds or updates .json files in the .vs/ directory"));
-    cmd.addOption("vcxproj", _tt(strIdHelpVcxproj));
-#endif
+    cmd.addOption("vscode", "creates or updates .vscode/*.json files used to build and debug a project using VS Code");
+    cmd.addOption("vcxproj", "creates or updates Visual Studio project file (.vcxproj)");
+    cmd.addOption("vs", "adds or updates .vs/*.json files used by Visual Studio");
+
+    // The following options are all hidden -- they will not be displayed in the -help command list
+
     cmd.addHiddenOption("add");
 
     cmd.addHiddenOption("msvcenv64", ttlib::cmd::needsarg);
@@ -163,7 +164,7 @@ int CMainApp::OnRun()
     if (cmd.isHelpRequested())
     {
         std::cout << txtVersion << '\n' << txtCopyRight << "\n\n";
-        std::cout << _tt("ttBld.exe [options] [project file]") << '\n';
+        std::cout << "ttBld.exe [options] [project file]" << '\n';
 
         for (auto& iter: cmd.getUsage())
         {
@@ -189,8 +190,7 @@ int CMainApp::OnRun()
             return 1;
         }
 
-        // Add all image handlers so that the EmbedImage class can be used to convert any type of image that wxWidgets
-        // supports.
+        // Add all image handlers so that any type of image that wxWidgets supports can be converted.
         wxInitAllImageHandlers();
 
         wxImage image;
@@ -322,7 +322,7 @@ int CMainApp::OnRun()
     // true.
     bool projectCreated = false;
 
-    // Unless the user specified this on the command line, locate a version, or create on if none can be found.
+    // Unless the user specified this on the command line, locate a version, or create one if none can be found.
     if (projectFile.empty())
     {
         projectFile.assign(locateProjectFile(RootDir));
@@ -365,10 +365,9 @@ int CMainApp::OnRun()
             std::cout << iter << '\n';
     }
 
-#if defined(_WIN32)
     if (cmd.isOption("vcxproj"))
     {
-        CVcxWrite vcx;
+        CVcxWrite vcx(projectFile);
         return (vcx.CreateBuildFile() ? 0 : 1);
     }
     else if (cmd.isOption("vs"))
@@ -379,7 +378,6 @@ int CMainApp::OnRun()
         for (auto msg: results)
             std::cout << msg << '\n';
     }
-#endif  // _WIN32
 
     // It's possible that the user specified a different location and even a different name for the project file to use.
     // If the project file is in a different directory, then we change to that directory now before continuing. The
