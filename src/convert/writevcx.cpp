@@ -86,10 +86,12 @@ static bool CreateGuid(ttlib::cstr& Result)
     return !Result.empty();
 }
 
-static bool UpdateBuildFile(ttlib::cstr filename)
+#if 0
+static bool UpdateBuildFile(ttlib::cstr /* filename */)
 {
     return false;
 }
+#endif
 
 bool CVcxWrite::CreateBuildFile()
 {
@@ -103,7 +105,7 @@ bool CVcxWrite::CreateBuildFile()
     ttlib::cstr guid;
     if (!CreateGuid(guid))
     {
-        AddError(_tt(strIdCantCreateUuid));
+        AddError("Unable to create a UUID -- cannot create .vcxproj without it.");
         return false;
     }
 
@@ -303,12 +305,12 @@ bool CVcxWrite::CreateBuildFile()
 
     if (!doc.save_file(vc_project_file.c_str()))
     {
-        std::cout << _tt(strIdCantWrite) + vc_project_file << '\n';
+        std::cout << "Unable to create or write to " + vc_project_file << '\n';
         return false;
     }
     else
     {
-        std::cout << _tt(strIdCreated) << vc_project_file << '\n';
+        std::cout << "Created " << vc_project_file << '\n';
     }
 
     return CreateFilterFile(vc_project_file);
@@ -361,12 +363,12 @@ bool CVcxWrite::CreateFilterFile(ttlib::cstr vc_project_file)
 
     if (!doc.save_file(vc_project_file.c_str()))
     {
-        std::cout << _tt(strIdCantWrite) + vc_project_file << '\n';
+        std::cout << "Unable to create or write to " + vc_project_file << '\n';
         return false;
     }
     else
     {
-        std::cout << _tt(strIdCreated) << vc_project_file << '\n';
+        std::cout << "Created " << vc_project_file << '\n';
     }
 
     return true;

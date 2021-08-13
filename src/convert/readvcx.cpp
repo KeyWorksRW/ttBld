@@ -39,7 +39,7 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
 
     if (auto result = m_xmldoc.load_file(srcFile.c_str()); !result)
     {
-        appMsgBox(ttlib::cstr() << _tt(strIdCantOpen) << m_srcFile << "\n\n" << result.description());
+        appMsgBox(ttlib::cstr() << "Cannot open " << m_srcFile << "\n\n" << result.description());
         return bld::RESULT::read_failed;
     }
 

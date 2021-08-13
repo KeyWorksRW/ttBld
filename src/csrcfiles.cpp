@@ -11,7 +11,6 @@
 
 #include "ttcwd.h"       // Class for storing and optionally restoring the current directory
 #include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
-#include "ttstrings.h"   // Functions accessing translatable strings
 #include "tttextfile.h"  // Classes for reading and writing line-oriented files
 #include "ttwinff.h"     // winff -- Wrapper around Windows FindFile
 
@@ -32,7 +31,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
         if (project.empty())
         {
             ttlib::cwd cwd;
-            AddError(_tt("Cannot locate .srcfiles.yaml starting in ") + cwd);
+            AddError("Cannot locate .srcfiles.yaml starting in " + cwd);
             return false;  // if we still can't find it, bail
         }
         m_srcfilename = std::move(project);
@@ -50,7 +49,7 @@ bool CSrcFiles::ReadFile(std::string_view filename)
     ttlib::viewfile SrcFile;
     if (!SrcFile.ReadFile(m_srcfilename))
     {
-        AddError(_tt("Cannot open ") + m_srcfilename);
+        AddError("Cannot open " + m_srcfilename);
         return false;
     }
 
@@ -208,7 +207,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
     auto pos = line.find_oneof(":=");
     if (pos == ttlib::cstr::npos)
     {
-        AddError(_tt("Invalid Option -- missing ':' or '=' character"));
+        AddError("Invalid Option -- missing ':' or '=' character");
         return;
     }
 
@@ -224,7 +223,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
     pos = line.stepover(pos);
     if (pos == ttlib::cstr::npos)
     {
-        AddError(ttlib::cstr() << _tt("The option ") << name << _tt(" does not have a value"));
+        AddError(ttlib::cstr() << "The option " << name << " does not have a value");
         return;
     }
 
@@ -233,7 +232,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
         auto posNext = value.ExtractSubString(line, pos);
         if (posNext == ttlib::cstr::npos)
         {
-            AddError(ttlib::cstr() << _tt("The value for ") << name << _tt(" has an opening quote, but no closing quote."));
+            AddError(ttlib::cstr() << "The value for " << name << " has an opening quote, but no closing quote.");
             value.assign(line.substr(pos));
             posNext = pos;
         }
@@ -266,7 +265,7 @@ void CSrcFiles::ProcessOption(std::string_view yamlLine)
     auto option = FindOption(name);
     if (option == OPT::LAST)
     {
-        AddError(ttlib::cstr() << name << _tt(" is an unrecognized option and will be ignored."));
+        AddError(ttlib::cstr() << name << " is an unrecognized option and will be ignored.");
         return;
     }
 
@@ -312,7 +311,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
     ttlib::add_if(m_lstSrcFiles, filename);
     if (!filename.file_exists())
     {
-        AddError(_tt("Unable to locate the file ") + filename);
+        AddError("Unable to locate the file " + filename);
     }
 
     if (filename.has_extension(".idl"))
@@ -347,7 +346,7 @@ void CSrcFiles::ProcessDebugFile(std::string_view line)
     ttlib::add_if(m_lstDebugFiles, filename);
     if (!filename.file_exists())
     {
-        AddError(_tt("Unable to locate the file ") + filename);
+        AddError("Unable to locate the file " + filename);
     }
 }
 
@@ -365,7 +364,7 @@ void CSrcFiles::ProcessGzipLine(std::string_view line)
     ttlib::multistr pair(line, ':');
     if (pair.size() < 2)
     {
-        AddError(_tt("Expected \"source: header\" but ':' not found seperating the two"));
+        AddError("Expected \"source: header\" but ':' not found seperating the two");
         return;
     }
 
@@ -387,7 +386,7 @@ void CSrcFiles::ProcessXpmLine(std::string_view line)
     ttlib::multistr pair(line, ':');
     if (pair.size() < 2)
     {
-        AddError(_tt("Expected \"source: xpm\" but ':' not found seperating the two"));
+        AddError("Expected \"source: xpm\" but ':' not found seperating the two");
         return;
     }
 
@@ -412,7 +411,7 @@ void CSrcFiles::ProcessPngLine(std::string_view line)
     ttlib::multistr pair(line, ':');
     if (pair.size() < 2)
     {
-        AddError(_tt("Expected \"source: header\" but ':' not found seperating the two"));
+        AddError("Expected \"source: header\" but ':' not found seperating the two");
         return;
     }
 
@@ -461,13 +460,13 @@ void CSrcFiles::ProcessIncludeDirective(std::string_view file, ttlib::cstr root)
     }
     catch (const std::exception& e)
     {
-        AddError(_tt("An exception occurred while reading ") + FullPath + ": " + e.what());
+        AddError("An exception occurred while reading " + FullPath + ": " + e.what());
         return;
     }
 
     if (!cIncSrcFiles.ReadFile(FullPath))
     {
-        AddError(_tt("Unable to locate the file ") + FullPath);
+        AddError("Unable to locate the file " + FullPath);
         return;
     }
 

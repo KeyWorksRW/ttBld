@@ -331,7 +331,9 @@ int CMainApp::OnRun()
             if (!MakeNewProject(projectFile))
             {
                 ttlib::concolor clr(ttlib::concolor::LIGHTRED);
-                std::cout << _tt(strIdMissingSrcfiles) << '\n';
+                std::cout << "ttBld was unable to locate a .srcfiles.yaml file -- either use the -new option, or set the "
+                             "location with -dir."
+                          << '\n';
                 return 1;
             }
             projectCreated = true;
@@ -399,7 +401,8 @@ int CMainApp::OnRun()
     CNinja cNinja(projectFile);
     if (!cNinja.IsValidVersion())
     {
-        std::cerr << _tt(strIdOldVersion) << '\n';
+        std::cerr << "This version of ttBld is too old -- you need a newer version to correctly build the script files."
+                  << '\n';
         return 1;
     }
 
@@ -458,17 +461,19 @@ int CMainApp::OnRun()
 
     if (countNinjas > 0)
     {
-        std::cout << _tt(strIdCreated) << countNinjas << " .ninja" << _tt(strIdFiles) << '\n';
+        std::cout << "Created " << countNinjas << " .ninja"
+                  << " files" << '\n';
 #if defined(_DEBUG)
-        ttlib::cstr msg(_ttc(strIdCreated) << countNinjas << " .ninja" << _tt(strIdFiles) << '\n');
+        ttlib::cstr msg(ttlib::cstr("Created ") << countNinjas << " .ninja"
+                                           << " files" << '\n');
         wxLogDebug(msg.to_utf16().c_str());
 #endif  // _DEBUG
     }
     else
     {
-        std::cout << _ttc(strIdAllNinjaCurrent) << '\n';
+        std::cout << ttlib::cstr("All ninja scripts are up to date.") << '\n';
 #if defined(_DEBUG)
-        wxLogDebug(_ttc(strIdAllNinjaCurrent).to_utf16().c_str());
+        wxLogDebug(ttlib::cstr("All ninja scripts are up to date.").to_utf16().c_str());
         wxLogDebug(L"\n");
 #endif  // _DEBUG
     }
@@ -486,42 +491,42 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
         {
             case UPDATE_MSVC:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
+                    std::cout << cNinja.GetScriptFile() << " updated." << '\n';
                 break;
 
             case UPDATE_MSVC32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
+                    std::cout << cNinja.GetScriptFile() << " updated." << '\n';
                 break;
 
             case UPDATE_CLANG_CL:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
+                    std::cout << cNinja.GetScriptFile() << " updated." << '\n';
                 break;
 
             case UPDATE_CLANG_CL32:
                 if (cNinja.CreateBuildFile(CNinja::GEN_RELEASE32, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
+                    std::cout << cNinja.GetScriptFile() << " updated." << '\n';
                 break;
 
             case UPDATE_MSVCD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
+                    std::cout << cNinja.GetScriptFile() << " updated." << '\n';
                 break;
 
             case UPDATE_MSVC32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_MSVC))
-                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
+                    std::cout << cNinja.GetScriptFile() << " updated." << '\n';
                 break;
 
             case UPDATE_CLANG_CLD:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
+                    std::cout << cNinja.GetScriptFile() << " updated." << '\n';
                 break;
 
             case UPDATE_CLANG_CL32D:
                 if (cNinja.CreateBuildFile(CNinja::GEN_DEBUG32, CNinja::CMPLR_CLANG))
-                    std::cout << cNinja.GetScriptFile() << _tt(strIdUpdated) << '\n';
+                    std::cout << cNinja.GetScriptFile() << " updated." << '\n';
                 break;
 
             default:
@@ -532,7 +537,7 @@ void MakeFileCaller(UPDATE_TYPE upType, const char* pszRootDir)
     else
     {
         ttlib::concolor clr(ttlib::concolor::LIGHTRED);
-        std::cout << _tt(strIdOldVersion);
+        std::cout << "This version of ttBld is too old -- you need a newer version to correctly build the script files.";
     }
 }
 
@@ -549,7 +554,7 @@ int CMainApp::OnExit()
 void CMainApp::OnFatalException()
 {
     // Let the user know something terrible happened.
-    appMsgBox(_tt(strIdInternalError), txtVersion);
+    appMsgBox("An internal error has occurred: ", txtVersion);
 }
 
 #else  // not defined(NDEBUG)
@@ -580,11 +585,11 @@ void CMainApp::OnFatalException()
         wxTrap();
 
     else
-        wxFAIL_MSG(_tt(strIdInternalError));
+        wxFAIL_MSG("An internal error has occurred: ");
 
  #else  // not defined(_WIN32)
 
-    wxFAIL_MSG(_tt(strIdInternalError));
+    wxFAIL_MSG("An internal error has occurred: ");
 
 #endif  // defined(_WIN32)
 }

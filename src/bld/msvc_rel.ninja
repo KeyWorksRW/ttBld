@@ -65,8 +65,6 @@ build $outdir/options.obj: compile options.cpp | $outdir/pch.obj
 
 build $outdir/rcdep.obj: compile rcdep.cpp | $outdir/pch.obj
 
-build $outdir/strings.obj: compile strings.cpp | $outdir/pch.obj
-
 build $outdir/verninja.obj: compile verninja.cpp | $outdir/pch.obj
 
 build $outdir/vs.obj: compile vs.cpp | $outdir/pch.obj
@@ -103,11 +101,13 @@ build $outdir/optionsdlgBase.obj: compile ui/optionsdlgBase.cpp | $outdir/pch.ob
 
 build $outdir/vscodedlgBase.obj: compile ui/vscodedlgBase.cpp | $outdir/pch.obj
 
-build $outdir/ttcstr.obj: compile ../ttlib/src/ttcstr.cpp | $outdir/pch.obj
-
 build $outdir/ttconsole.obj: compile ../ttlib/src/ttconsole.cpp | $outdir/pch.obj
 
+build $outdir/ttcstr.obj: compile ../ttlib/src/ttcstr.cpp | $outdir/pch.obj
+
 build $outdir/ttcview.obj: compile ../ttlib/src/ttcview.cpp | $outdir/pch.obj
+
+build $outdir/ttlibspace.obj: compile ../ttlib/src/ttlibspace.cpp | $outdir/pch.obj
 
 build $outdir/ttmultistr.obj: compile ../ttlib/src/ttmultistr.cpp | $outdir/pch.obj
 
@@ -115,15 +115,13 @@ build $outdir/ttparser.obj: compile ../ttlib/src/ttparser.cpp | $outdir/pch.obj
 
 build $outdir/ttstr.obj: compile ../ttlib/src/ttstr.cpp | $outdir/pch.obj
 
-build $outdir/ttlibspace.obj: compile ../ttlib/src/ttlibspace.cpp | $outdir/pch.obj
-
-build $outdir/ttstrings.obj: compile ../ttlib/src/ttstrings.cpp | $outdir/pch.obj
-
 build $outdir/tttextfile.obj: compile ../ttlib/src/tttextfile.cpp | $outdir/pch.obj
 
-build $outdir/ttdebug.obj: compile ../ttlib/src/ttdebug.cpp | $outdir/pch.obj
+build $outdir/ttloadstr.obj: compile ../ttlib/src/winsrc/ttloadstr.cpp | $outdir/pch.obj
 
-build $outdir/ttregistry.obj: compile ../ttlib/src/ttregistry.cpp | $outdir/pch.obj
+build $outdir/ttregistry.obj: compile ../ttlib/src/winsrc/ttregistry.cpp | $outdir/pch.obj
+
+build $outdir/ttwinspace.obj: compile ../ttlib/src/winsrc/ttwinspace.cpp | $outdir/pch.obj
 
 build $resout/ttBld.res: rc ttBld.rc | $
   ttBld.manifest
@@ -143,7 +141,6 @@ build ../bin/ttBld.exe : link $resout/ttBld.res $
   $outdir/ninja.obj $
   $outdir/options.obj $
   $outdir/rcdep.obj $
-  $outdir/strings.obj $
   $outdir/verninja.obj $
   $outdir/vs.obj $
   $outdir/vscode.obj $
@@ -162,15 +159,15 @@ build ../bin/ttBld.exe : link $resout/ttBld.res $
   $outdir/convertdlgBase.obj $
   $outdir/optionsdlgBase.obj $
   $outdir/vscodedlgBase.obj $
-  $outdir/ttcstr.obj $
   $outdir/ttconsole.obj $
+  $outdir/ttcstr.obj $
   $outdir/ttcview.obj $
+  $outdir/ttlibspace.obj $
   $outdir/ttmultistr.obj $
   $outdir/ttparser.obj $
   $outdir/ttstr.obj $
-  $outdir/ttlibspace.obj $
-  $outdir/ttstrings.obj $
   $outdir/tttextfile.obj $
-  $outdir/ttdebug.obj $
+  $outdir/ttloadstr.obj $
   $outdir/ttregistry.obj $
+  $outdir/ttwinspace.obj $
   $outdir/pch.obj

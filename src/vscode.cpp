@@ -33,7 +33,7 @@ std::vector<ttlib::cstr> CreateVsCodeProject(std::string_view projectFile)
     {
         if (!std::filesystem::create_directory(".vscode"))
         {
-            results.emplace_back(_tt(strIdCantCreateVsCodeDir));
+            results.emplace_back("Unable to create the required .vscode/ directory.");
             return results;
         }
 
@@ -49,12 +49,14 @@ std::vector<ttlib::cstr> CreateVsCodeProject(std::string_view projectFile)
             else if (ttlib::dir_exists("../../.git"))
                 gitIgnore = "../../.git/info/exclude";
 
-            if (!gitIgnore.empty() && appMsgBox(_tt(strIdQueryIgnore) + gitIgnore + " ?", "Create .vscode files",
-                                                wxYES_NO | wxNO_DEFAULT | wxICON_WARNING) == wxID_YES)
+            if (!gitIgnore.empty() &&
+                appMsgBox("The directory .vscode/ is not being ignored by git. Would you like it to be added to " +
+                              gitIgnore + " ?",
+                          "Create .vscode files", wxYES_NO | wxNO_DEFAULT | wxICON_WARNING) == wxID_YES)
             {
                 if (gitAddtoIgnore(gitIgnore, ".vscode/"))
                 {
-                    results.emplace_back(_tt(strIdVscodeIgnored) + gitIgnore);
+                    results.emplace_back(".vscode/ added to " + gitIgnore);
                 }
             }
         }
@@ -63,7 +65,8 @@ std::vector<ttlib::cstr> CreateVsCodeProject(std::string_view projectFile)
     CSrcFiles cSrcFiles;
     if (!cSrcFiles.ReadFile(projectFile))
     {
-        results.emplace_back(_tt(strIdCantConfigureJson));
+        results.emplace_back(
+            "Cannot locate a project file (typically .srcfiles.yaml) need to configure .vscode/*.json files.");
         return results;
     }
 
@@ -204,12 +207,12 @@ bool CreateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results)
 
     if (!out.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        appMsgBox(_ttc(strIdCantWrite) + ".vscode/c_cpp_properties.json");
+        appMsgBox(ttlib::cstr("Unable to create or write to ") + ".vscode/c_cpp_properties.json");
         return false;
     }
     else
     {
-        Results.emplace_back(_ttc(strIdCreated) + ".vscode/c_cpp_properties.json");
+        Results.emplace_back("Created .vscode/c_cpp_properties.json");
     }
 
     return true;
@@ -220,7 +223,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results)
     ttlib::textfile file;
     if (!file.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        Results.emplace_back(_ttc(strIdCantOpen) + ".vscode/c_cpp_properties.json");
+        Results.emplace_back(ttlib::cstr("Cannot open ") + ".vscode/c_cpp_properties.json");
         return false;
     }
 
@@ -398,7 +401,7 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results)
     ttlib::viewfile orgfile;
     if (!orgfile.ReadFile(".vscode/c_cpp_properties.json"))
     {
-        Results.emplace_back(_ttc(strIdCantOpen) + ".vscode/c_cpp_properties.json");
+        Results.emplace_back(ttlib::cstr("Cannot open ") + ".vscode/c_cpp_properties.json");
         return false;
     }
 
@@ -419,17 +422,17 @@ bool UpdateVsCodeProps(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>& Results)
 
     if (!Modified)
     {
-        Results.emplace_back("c_cpp_properties.json" + _ttc(strIdCurrent));
+        Results.emplace_back("c_cpp_properties.json is up to date");
         return true;
     }
 
     if (!file.WriteFile(".vscode/c_cpp_properties.json"))
     {
-        Results.emplace_back(_ttc(strIdCantWrite) + ".vscode/c_cpp_properties.json");
+        Results.emplace_back("Unable to create or write to .vscode/c_cpp_properties.json");
         return false;
     }
 
-    Results.emplace_back(".vscode/c_cpp_properties.json" + _ttc(strIdUpdated));
+    Results.emplace_back(".vscode/c_cpp_properties.json updated.");
 
     return true;
 }

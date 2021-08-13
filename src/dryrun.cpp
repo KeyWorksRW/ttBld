@@ -22,7 +22,7 @@ void CDryRun::DisplayFileDiff(const ttlib::viewfile& orgfile, const ttlib::textf
 {
     if (!m_filename.empty())
     {
-        std::cout << m_filename << _tt(" dryrun changes:") << '\n';
+        std::cout << m_filename << " dryrun changes:" << '\n';
     }
 
     size_t posOrg = 0;
