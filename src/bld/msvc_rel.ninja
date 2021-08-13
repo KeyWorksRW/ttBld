@@ -15,7 +15,7 @@ msvc_deps_prefix = Note: including file:
 # -O1	// Optimize for size (/Og /Os /Oy /Ob2 /Gs /GF /Gy)
 # -FC	  // Full path to source code file in diagnostics
 
-cflags = -nologo -showIncludes -EHsc -W4 -O1 -MD -DNDEBUG -D_CONSOLE -FC -std:c++17 /Zc:__cplusplus /utf-8 -GL -I./ -Iprecompile -Iui -Iconvert -Ittlib /Fp$outdir/pch.pch
+cflags = -nologo -showIncludes -EHsc -W4 -O1 -MD -DNDEBUG -D_CONSOLE -FC -std:c++17 /Zc:__cplusplus /utf-8 -GL -I./ -Iprecompile -Iui -Iconvert -I../ttlib/include /Fp$outdir/pch.pch
 
 rule compilePCH
   deps = msvc
@@ -28,7 +28,7 @@ rule compile
   description = compiling $in
 
 rule rc
-  command = rc.exe -nologo -I./ -Iprecompile -Iui -Iconvert -Ittlib /l 0x409 -fo$out $in
+  command = rc.exe -nologo -I./ -Iprecompile -Iui -Iconvert -I../ttlib/include /l 0x409 -fo$out $in
   description = resource compiler... $in
 
 rule link
@@ -103,27 +103,27 @@ build $outdir/optionsdlgBase.obj: compile ui/optionsdlgBase.cpp | $outdir/pch.ob
 
 build $outdir/vscodedlgBase.obj: compile ui/vscodedlgBase.cpp | $outdir/pch.obj
 
-build $outdir/ttcstr.obj: compile ttLib/ttcstr.cpp | $outdir/pch.obj
+build $outdir/ttcstr.obj: compile ../ttlib/src/ttcstr.cpp | $outdir/pch.obj
 
-build $outdir/ttconsole.obj: compile ttLib/ttconsole.cpp | $outdir/pch.obj
+build $outdir/ttconsole.obj: compile ../ttlib/src/ttconsole.cpp | $outdir/pch.obj
 
-build $outdir/ttcview.obj: compile ttLib/ttcview.cpp | $outdir/pch.obj
+build $outdir/ttcview.obj: compile ../ttlib/src/ttcview.cpp | $outdir/pch.obj
 
-build $outdir/ttmultistr.obj: compile ttLib/ttmultistr.cpp | $outdir/pch.obj
+build $outdir/ttmultistr.obj: compile ../ttlib/src/ttmultistr.cpp | $outdir/pch.obj
 
-build $outdir/ttparser.obj: compile ttLib/ttparser.cpp | $outdir/pch.obj
+build $outdir/ttparser.obj: compile ../ttlib/src/ttparser.cpp | $outdir/pch.obj
 
-build $outdir/ttstr.obj: compile ttLib/ttstr.cpp | $outdir/pch.obj
+build $outdir/ttstr.obj: compile ../ttlib/src/ttstr.cpp | $outdir/pch.obj
 
-build $outdir/ttlibspace.obj: compile ttLib/ttlibspace.cpp | $outdir/pch.obj
+build $outdir/ttlibspace.obj: compile ../ttlib/src/ttlibspace.cpp | $outdir/pch.obj
 
-build $outdir/ttstrings.obj: compile ttLib/ttstrings.cpp | $outdir/pch.obj
+build $outdir/ttstrings.obj: compile ../ttlib/src/ttstrings.cpp | $outdir/pch.obj
 
-build $outdir/tttextfile.obj: compile ttLib/tttextfile.cpp | $outdir/pch.obj
+build $outdir/tttextfile.obj: compile ../ttlib/src/tttextfile.cpp | $outdir/pch.obj
 
-build $outdir/ttdebug.obj: compile ttLib/ttdebug.cpp | $outdir/pch.obj
+build $outdir/ttdebug.obj: compile ../ttlib/src/ttdebug.cpp | $outdir/pch.obj
 
-build $outdir/ttregistry.obj: compile ttLib/ttregistry.cpp | $outdir/pch.obj
+build $outdir/ttregistry.obj: compile ../ttlib/src/ttregistry.cpp | $outdir/pch.obj
 
 build $resout/ttBld.res: rc ttBld.rc | $
   ttBld.manifest
