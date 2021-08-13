@@ -45,7 +45,7 @@ bool MakeNewProject(ttlib::cstr& projectFile)
         ttlib::cstr GitExclude;
         if (gitIgnoreAll(GitExclude))
         {
-            std::cout << _tt(strIdIgnoredFiles) << GitExclude << '\n';
+            std::cout << "Added directories and filenames to ignore to " << GitExclude << '\n';
         }
     }
 
@@ -57,7 +57,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
     CSrcFiles srcOrg;
     if (!srcOrg.ReadFile(srcFile.c_str()))
     {
-        appMsgBox(_tt(strIdCantOpen) + srcFile);
+        appMsgBox("Cannot open " + srcFile);
         return bld::RESULT::read_failed;
     }
 

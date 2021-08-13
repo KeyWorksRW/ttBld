@@ -46,7 +46,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
     ttlib::textfile fileIn;
     if (!fileIn.ReadFile(srcFile))
     {
-        appMsgBox(_tt(strIdCantOpen) + srcFile);
+        appMsgBox("Cannot open " + srcFile);
         return bld::RESULT::read_failed;
     }
 

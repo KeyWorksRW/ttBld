@@ -44,7 +44,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
     if (!result)
     {
         ttlib::cstr msg;
-        ttlib::MsgBox(msg.Format(_tt("Unable to read %s.\n\n%s"), m_srcFile.c_str(), result.description()));
+        ttlib::MsgBox(msg.Format("Unable to read %s.\n\n%s", m_srcFile.c_str(), result.description()));
         return bld::RESULT::read_failed;
     }
 

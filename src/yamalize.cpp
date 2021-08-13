@@ -98,7 +98,7 @@ bool Yamalize()
 
     if (cNewSrcFiles.WriteNew(".vscode/srcfiles.yaml", cszVersion) != bld::success)
     {
-        appMsgBox(_ttc(strIdCantWrite) + ".vscode/srcfiles.yaml");
+        appMsgBox(ttlib::cstr("Unable to create or write to ") + ".vscode/srcfiles.yaml");
         return false;
     }
 

@@ -63,9 +63,6 @@
 
 #include "ttcstr.h"   // Classes for handling zero-terminated char strings.
 #include "ttcview.h"  // cview -- string_view functionality on a zero-terminated char string.
-#include "ttstrings.h"
-
-#include "strings.h"
 
 // Version is also set in writesrc.h and ttBld.rc -- if changed, change in all three locations
 

@@ -108,12 +108,12 @@ bool VsCodeDlg::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr
 
     if (!file.WriteFile(".vscode/launch.json"))
     {
-        appMsgBox(_ttc(strIdCantWrite) + ".vscode/launch.json");
+        appMsgBox(ttlib::cstr("Unable to create or write to ") + ".vscode/launch.json");
         return false;
     }
     else
     {
-        Results.emplace_back(_ttc(strIdCreated) + ".vscode/launch.json");
+        Results.emplace_back("Created .vscode/launch.json");
     }
 
     return true;
@@ -257,12 +257,12 @@ bool VsCodeDlg::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>
 
     if (!out.WriteFile(".vscode/tasks.json"))
     {
-        Results.emplace_back(_ttc(strIdCantWrite) + ".vscode/tasks.json");
+        Results.emplace_back(ttlib::cstr("Unable to create or write to ") + ".vscode/tasks.json");
         return false;
     }
     else
     {
-        Results.emplace_back(_ttc(strIdCreated) + ".vscode/tasks.json");
+        Results.emplace_back("Created .vscode/tasks.json");
     }
 
     return true;

@@ -156,7 +156,8 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
 
         if (!m_pchCppName.file_exists())
         {
-            AddError(getOptValue(OPT::PCH) + _tt(strIdMissingPchCpp));
+            AddError(getOptValue(OPT::PCH) +
+                     " does not have a matching C++ source file -- precompiled header will fail without it!");
         }
     }
 
@@ -221,7 +222,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
                 }
                 else
                 {
-                    AddError(_tt("No files found matching ") + iter.first);
+                    AddError("No files found matching " + iter.first);
                 }
             }
             else
@@ -395,7 +396,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     {
         if (!std::filesystem::create_directory(GetBldDir().wx_str()))
         {
-            AddError(_tt(strIdCantWrite) + GetBldDir());
+            AddError("Unable to create or write to " + GetBldDir());
             return false;
         }
     }
@@ -422,7 +423,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     if (!m_ninjafile.WriteFile(m_scriptFilename))
     {
         m_ninjafile.clear();
-        std::string str(_tt(strIdIgnoredFiles) + m_scriptFilename + '\n');
+        std::string str("Added directories and filenames to ignore to " + m_scriptFilename + '\n');
         AddError(str);
         return false;
     }
@@ -444,7 +445,7 @@ void CNinja::ProcessBuildLibs()
 
         if (!ttlib::ChangeDir(libPath))
         {
-            AddError(_tt(strIdLibSrcDir) + libPath + _tt(strIdInvalidBuildlib));
+            AddError("The library source directory " + libPath + " specified in BuildLibs: does not exist.");
             continue;
         }
 
@@ -523,7 +524,7 @@ void CNinja::ProcessBuildLibs()
         // At this point, we should be in the same directory as .srcfiles.yaml
         if (!cSrcFiles.ReadFile(BuildFile))
         {
-            AddError(_tt(strIdMissingSrcfilesIn) + BuildFile);
+            AddError("Cannot read .srcfiles.yaml in " + BuildFile);
             continue;
         }
 
@@ -580,7 +581,7 @@ void CNinja::ProcessBuildLibs32()
 
         if (!ttlib::ChangeDir(libPath))
         {
-            AddError(_tt(strIdLibSrcDir) + libPath + _tt(strIdInvalidBuildlib));
+            AddError("The library source directory " + libPath + " specified in BuildLibs: does not exist.");
             continue;
         }
 
@@ -659,7 +660,7 @@ void CNinja::ProcessBuildLibs32()
         // At this point, we should be in the same directory as .srcfiles.yaml
         if (!cSrcFiles.ReadFile(BuildFile))
         {
-            AddError(_tt(strIdMissingSrcfilesIn) + BuildFile);
+            AddError("Cannot read .srcfiles.yaml in " + BuildFile);
             continue;
         }
 

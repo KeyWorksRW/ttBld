@@ -41,7 +41,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
 
     if (!result)
     {
-        appMsgBox(_tt(strIdCantOpen) + m_srcFile + "\n\n" + result.description());
+        appMsgBox("Cannot open " + m_srcFile + "\n\n" + result.description());
         return bld::RESULT::read_failed;
     }
 

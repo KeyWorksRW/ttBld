@@ -132,12 +132,12 @@ void ConvertDlg::OnOK(wxCommandEvent& WXUNUSED(event))
 
             if (result == bld::read_failed)
             {
-                appMsgBox(_ttc(strIdCantOpen) << project_file, "Project conversion");
+                appMsgBox(ttlib::cstr("Cannot open ") << project_file, "Project conversion");
                 return;
             }
             else if (result == bld::write_failed)
             {
-                appMsgBox(_ttc(strIdCantWrite) << m_new_srcfiles, "Project conversion");
+                appMsgBox(ttlib::cstr("Unable to create or write to ") << m_new_srcfiles, "Project conversion");
                 return;
             }
 
@@ -158,7 +158,7 @@ void ConvertDlg::OnOK(wxCommandEvent& WXUNUSED(event))
 #endif
         if (srcfiles.WriteNew(m_new_srcfiles) != bld::success)
         {
-            appMsgBox(_ttc(strIdCantWrite) << m_new_srcfiles, "Project conversion");
+            appMsgBox(ttlib::cstr("Unable to create or write to ") << m_new_srcfiles, "Project conversion");
             return;
         }
     }

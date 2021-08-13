@@ -60,7 +60,7 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
     {
         if (!std::filesystem::create_directory(".vs"))
         {
-            results.push_back(_tt(strIdCantCreateVsDir));
+            results.push_back("Unable to create the required .vs/ directory.");
             return false;
         }
     }
@@ -80,12 +80,13 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
 
     if (!file.WriteFile(".vs/tasks.vs.json"))
     {
-        results.push_back(ttlib::cstr() << _tt(strIdCantWrite) << ".vs/tasks.vs.json");
+        results.push_back(ttlib::cstr() << "Unable to create or write to "
+                                        << ".vs/tasks.vs.json");
         return false;
     }
     else
     {
-        results.push_back(_ttc(strIdCreated) + ".vs/tasks.vs.json");
+        results.push_back("Created .vs/tasks.vs.json");
     }
 
     file.clear();
@@ -97,18 +98,19 @@ bool CreateVsJson(const char* pszSrcFiles, std::vector<std::string>& results)
         file.at(file.FindLineContaining("%project%")).Replace("%project%", cSrcFiles.GetProjectName());
     else
     {
-        results.push_back(_tt(strIdMissingProjectName) + cSrcFiles.GetSrcFilesName());
+        results.push_back("Project name not specified in " + cSrcFiles.GetSrcFilesName());
         return false;
     }
 
     if (!file.WriteFile(".vs/launch.vs.json"))
     {
-        results.push_back(ttlib::cstr() << _tt(strIdCantWrite) << ".vs/launch.vs.json");
+        results.push_back(ttlib::cstr() << "Unable to create or write to "
+                                        << ".vs/launch.vs.json");
         return false;
     }
     else
     {
-        results.push_back(_tt(strIdCreated));
+        results.push_back("Created ");
     }
 
     return true;

@@ -261,12 +261,12 @@ void OptionsDlg::SaveChanges()
     if (GetSrcFilesName().file_exists())
     {
         if (UpdateOptions(GetSrcFilesName()) == bld::success)
-            std::cout << GetSrcFilesName() + _tt(strIdOptionsUpdated) << '\n';
+            std::cout << GetSrcFilesName() + " Options: section updated." << '\n';
     }
     else
     {
         if (UpdateOptions() == bld::success)
-            std::cout << GetSrcFilesName() + _tt(strIdCreatedSuffix) << '\n';
+            std::cout << GetSrcFilesName() + " created" << '\n';
     }
 }
 
@@ -366,7 +366,7 @@ void OptionsDlg::OnAddBuildLibraries(wxCommandEvent& WXUNUSED(event))
 
     if (m_cwd.is_sameas_wx(path, tt::CASE::either))
     {
-        appMsgBox(_tt(strIdRecursiveBld));
+        appMsgBox("You cannot create the current project as a Build Library of itself.");
     }
     else
     {

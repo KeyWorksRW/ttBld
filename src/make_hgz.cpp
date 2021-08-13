@@ -61,7 +61,7 @@ int MakeHgz(std::vector<ttlib::cstr>& files)
 
             if (!CopyStreamData(&inputFileStream, filterOutputStream.get(), inputFileStream.GetLength()))
             {
-                std::cerr << _tt(strIdInternalError) << '\n';
+                std::cerr << "An internal error has occurred: " << '\n';
                 return 1;
             }
             filterOutputStream->Close();
@@ -109,7 +109,7 @@ int MakeHgz(std::vector<ttlib::cstr>& files)
 
             if (!file.WriteFile(files[0]))
             {
-                std::cerr << _tt(strIdCantWrite) << files[0];
+                std::cerr << "Unable to create or write to " << files[0];
                 return 1;
             }
             return 0;
@@ -127,13 +127,13 @@ int MakeHgz(std::vector<ttlib::cstr>& files)
         wxFileInputStream inputFileStream(files[file_pos]);
         if (!inputFileStream.IsOk())
         {
-            std::cerr << _tt(strIdCantOpen) << files[0] << '\n';
+            std::cerr << "Cannot open " << files[0] << '\n';
             return 1;
         }
 
         if (!CopyStreamData(&inputFileStream, filterOutputStream.get(), inputFileStream.GetLength()))
         {
-            std::cerr << _tt(strIdInternalError) << '\n';
+            std::cerr << "An internal error has occurred: " << '\n';
             return 1;
         }
 
@@ -192,7 +192,7 @@ int MakeHgz(std::vector<ttlib::cstr>& files)
 
     if (!file.WriteFile(files[0]))
     {
-        std::cerr << _tt(strIdCantWrite) << files[0];
+        std::cerr << "Unable to create or write to " << files[0];
         return 1;
     }
 

@@ -41,7 +41,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
 
     if (!result)
     {
-        appMsgBox(_tt(strIdCantOpen) + m_srcFile + "\n\n" + result.description());
+        appMsgBox("Cannot open " + m_srcFile + "\n\n" + result.description());
         return bld::RESULT::read_failed;
     }
 

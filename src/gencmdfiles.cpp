@@ -59,7 +59,7 @@ void CreateCodeCmd(const char* pszFile)
 
     if (file.WriteFile(Path))
     {
-        std::cout << Path << _tt(strIdCreatedSuffix) << '\n';
+        std::cout << Path << " created" << '\n';
     }
     else
     {
@@ -73,12 +73,12 @@ void CreateCodeCmd(const char* pszFile)
             NewPath.replace_filename(pszFile);
             if (file.WriteFile(NewPath))
             {
-                std::cout << NewPath << _tt(strIdCreatedSuffix) << '\n';
+                std::cout << NewPath << " created" << '\n';
                 return;
             }
         }
 
-        std::cerr << _tt(strIdCantWrite) << Path << '\n';
+        std::cerr << "Unable to create or write to " << Path << '\n';
     }
 }
 

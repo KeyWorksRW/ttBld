@@ -29,7 +29,7 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
 
     if (type == MAKE_TYPE::normal && MakeFile.file_exists())
     {
-        AddError(_tt(strIdMakefileExists));
+        AddError("-makefile cannot be used if the makefile already exists");
         return true;  // Don't overwrite an existing makefile
     }
 
@@ -134,12 +134,12 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
             }
             else if (file.WriteFile(MakeFile))
             {
-                std::cout << MakeFile << _tt(strIdUpdated) << '\n';
+                std::cout << MakeFile << " updated." << '\n';
                 return true;
             }
             else
             {
-                std::cout << _tt(strIdCantWrite) << MakeFile << '\n';
+                std::cout << "Unable to create or write to " << MakeFile << '\n';
                 return false;
             }
         }
@@ -152,19 +152,19 @@ bool CNinja::CreateMakeFile(MAKE_TYPE type)
         {
             if (!std::filesystem::create_directory(path.wx_str()))
             {
-                std::cout << _tt(strIdCantWrite) << MakeFile << '\n';
+                std::cout << "Unable to create or write to " << MakeFile << '\n';
                 return false;
             }
         }
 
         if (file.WriteFile(MakeFile))
         {
-            std::cout << _tt(strIdCreated) << MakeFile << '\n';
+            std::cout << "Created " << MakeFile << '\n';
             return true;
         }
         else
         {
-            std::cout << _tt(strIdCantWrite) << MakeFile << '\n';
+            std::cout << "Unable to create or write to " << MakeFile << '\n';
             return false;
         }
     }
