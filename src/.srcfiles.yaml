@@ -17,7 +17,7 @@ Options:
 
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ./;precompile;ui;convert;ttlib
+    IncDirs:     ./;precompile;ui;convert;../ttlib/include
 
 Files:
     ttBld.rc            # Windows resource files
@@ -64,14 +64,21 @@ Files:
     ui/optionsdlgBase.cpp      # wxUiEditor generated file
     ui/vscodedlgBase.cpp       # wxUiEditor generated file
 
-    ttLib/ttcstr.cpp
-    ttLib/ttconsole.cpp
-    ttLib/ttcview.cpp
-    ttLib/ttmultistr.cpp
-    ttLib/ttparser.cpp
-    ttLib/ttstr.cpp
-    ttLib/ttlibspace.cpp
-    ttLib/ttstrings.cpp
-    ttLib/tttextfile.cpp
-    ttLib/ttdebug.cpp
-    ttLib/ttregistry.cpp
+    ../ttlib/src/ttcstr.cpp      # Class for handling zero-terminated char strings.
+    ../ttlib/src/ttconsole.cpp   # Sets/restores console foreground color
+    ../ttlib/src/ttcview.cpp     # string_view functionality on a zero-terminated char string.
+    ../ttlib/src/ttmultistr.cpp  # Breaks a single string into multiple strings
+    ../ttlib/src/ttparser.cpp    # Command line parser
+    ../ttlib/src/ttstr.cpp       # Enhanced version of wxString
+    ../ttlib/src/ttlibspace.cpp  # ttlib namespace functions
+    ../ttlib/src/ttstrings.cpp   # Class for handling zero-terminated char strings.
+    ../ttlib/src/tttextfile.cpp  # Classes for reading and writing text files.
+
+    ../ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
+    ../ttlib/src/winsrc/ttwinspace.cpp  # Windows-only ttlib namespace functions
+    ../ttlib/src/winsrc/ttloadstr.cpp   # Load a language-specific version of a string resource
+
+# When ttBld generates the ninja scripts, the files in the DebugFiles section will ONLY be added to the
+# debug ninja scripts.
+DebugFiles:
+    ttdebug.cpp  # we use our own version of this to minimize Windows code requirements
