@@ -116,13 +116,9 @@ build $outdir/ttstr.obj: compile ../ttlib/src/ttstr.cpp | $outdir/pch.obj
 
 build $outdir/tttextfile.obj: compile ../ttlib/src/tttextfile.cpp | $outdir/pch.obj
 
-build $outdir/ttloadstr.obj: compile ../ttlib/src/winsrc/ttloadstr.cpp | $outdir/pch.obj
-
 build $outdir/ttregistry.obj: compile ../ttlib/src/winsrc/ttregistry.cpp | $outdir/pch.obj
 
-build $outdir/ttwinspace.obj: compile ../ttlib/src/winsrc/ttwinspace.cpp | $outdir/pch.obj
-
-build $outdir/ttdebug.obj: compile ttdebug.cpp | $outdir/pch.obj
+build $outdir/ttdebug_min.obj: compile ../ttlib/src/winsrc/ttdebug_min.cpp | $outdir/pch.obj
 
 build $resout/ttBldD.res: rc ttBld.rc | $
   ttBld.manifest
@@ -168,9 +164,7 @@ build ../bin/ttBldD.exe : link $resout/ttBldD.res $
   $outdir/ttparser.obj $
   $outdir/ttstr.obj $
   $outdir/tttextfile.obj $
-  $outdir/ttloadstr.obj $
   $outdir/ttregistry.obj $
-  $outdir/ttwinspace.obj $
-  $outdir/ttdebug.obj $
+  $outdir/ttdebug_min.obj $
   $outdir/pch.obj $
   | ttBld.natvis
