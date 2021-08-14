@@ -72,12 +72,10 @@ Files:
     ../ttlib/src/ttstr.cpp       # ttString -- enhanced version of wxString
     ../ttlib/src/tttextfile.cpp  # Classes for reading and writing text files.
 
-    ../ttlib/src/winsrc/ttloadstr.cpp   # Load a language-specific version of a string resource
     ../ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
-    ../ttlib/src/winsrc/ttwinspace.cpp  # Windows-only ttlib namespace functions
 
 # When ttBld generates the ninja scripts, the files in the DebugFiles section will ONLY be added to the
 # debug ninja scripts.
 
 DebugFiles:
-    ttdebug.cpp  # we use our own version of this to minimize Windows code requirements
+    ../ttlib/src/winsrc/ttdebug_min.cpp  # we use our own version of this to minimize Windows code requirements
