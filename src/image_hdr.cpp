@@ -38,6 +38,17 @@ bool isConvertibleMime(const ttString& suffix)
     return true;
 }
 
+// clang-format off
+
+inline constexpr const auto txt_ImgPrefix =
+R"===(#if (__cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L))
+    inline
+#else
+    static
+#endif)===";
+
+// clang-format on
+
 int ConvertImageToHeader(std::vector<ttlib::cstr>& files)
 {
     if (files.size() < 2)
@@ -118,13 +129,8 @@ int ConvertImageToHeader(std::vector<ttlib::cstr>& files)
     string_name.remove_extension();
     string_name.Replace(".", "_", true);
 
-    // Using `inline constexpr` instead of `static` ensures the array won't be duplicated in the executable no matter how
-    // many times it has been #included. However, it does require a c++17 or later compiler, so if we move this from
-    // experimental to publicly documented, then we'll need an option for the compiler version that will be used and switch
-    // to `static` if an older compiler will be used.
-
-    file_out.addEmptyLine().Format("inline constexpr const unsigned char %s[%zu] = {", string_name.c_str(),
-                               read_stream->GetBufferSize());
+    file_out.emplace_back(txt_ImgPrefix);
+    file_out.addEmptyLine().Format("const unsigned char %s[%zu] = {", string_name.c_str(), read_stream->GetBufferSize());
 
     read_stream->Seek(0, wxFromStart);
 
