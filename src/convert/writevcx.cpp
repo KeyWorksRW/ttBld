@@ -120,54 +120,13 @@ bool CVcxWrite::CreateBuildFile()
     pugi::xml_document doc;
 
     auto Project = doc.append_child("Project");
+    pugi::xml_node child;
+    pugi::xml_node PropGroup;
     m_Project = &Project;
 
     Project.append_attribute("DefaultTargets").set_value("Build");
     Project.append_attribute("ToolsVersion").set_value("4.0");
     Project.append_attribute("xmlns").set_value("http://schemas.microsoft.com/developer/msbuild/2003");
-
-    auto PropGroup = Project.append_child("PropertyGroup");
-    PropGroup.append_attribute("Label").set_value("Configuration");
-    auto Version = PropGroup.append_child("VisualStudioVersion");
-    Version.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == ''");
-    Version.text().set("10.0");
-
-    // Add known platform versions
-
-    auto child = PropGroup.append_child("PlatformToolset");
-    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '10.0'");
-    child.text().set("v100");
-
-    child = PropGroup.append_child("PlatformToolset");
-    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '11.0'");
-    child.text().set("v110");
-
-    child = PropGroup.append_child("PlatformToolset");
-    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '12.0'");
-    child.text().set("v120");
-
-    child = PropGroup.append_child("PlatformToolset");
-    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '14.0'");
-    child.text().set("v140");
-
-    child = PropGroup.append_child("PlatformToolset");
-    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '15.0'");
-    child.text().set("v141");
-
-    child = PropGroup.append_child("PlatformToolset");
-    child.append_attribute("Condition").set_value("'$(VisualStudioVersion)' == '16.0'");
-    child.text().set("v142");
-
-    PropGroup = Project.append_child("PropertyGroup");
-    PropGroup.append_attribute("Condition")
-        .set_value("'$(VisualStudioVersion)' >= '15.0' and '$(WindowsTargetPlatformVersion)'==''");
-    PropGroup.append_child("LatestTargetPlatformVersion")
-        .text()
-        .set("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))");
-    child = PropGroup.append_child("WindowsTargetPlatformVersion");
-    child.append_attribute("Condition").set_value("'$(WindowsTargetPlatformVersion)' == ''");
-    child.text().set("$(LatestTargetPlatformVersion)");
-    PropGroup.append_child("TargetPlatformVersion").text().set("$(WindowsTargetPlatformVersion)");
 
     // Add Build types
 
@@ -189,7 +148,7 @@ bool CVcxWrite::CreateBuildFile()
         ttlib::cstr gd;
         gd << '{' << guid << '}';
         PropGroup.append_child("ProjectGuid").text().set(gd.c_str());
-        PropGroup.append_child("Keyword").text().set("Win32Proj");
+        // PropGroup.append_child("Keyword").text().set("Win32Proj");
         PropGroup.append_child("ProjectName").text().set(GetProjectName().c_str());
     }
 
@@ -204,6 +163,9 @@ bool CVcxWrite::CreateBuildFile()
         AddConfigAppType(Project, GEN_DEBUG32);
         AddConfigAppType(Project, GEN_RELEASE32);
     }
+
+    Import = Project.append_child("Import");
+    Import.append_attribute("Project").set_value("$(VCTargetsPath)\\Microsoft.Cpp.props");
 
     PropGroup = Project.append_child("PropertyGroup");
 
@@ -452,6 +414,7 @@ void CVcxWrite::AddConfigAppType(pugi::xml_node parent, GEN_TYPE gentype)
         PropGroup.append_child("UseDebugLibraries").text().set("false");
         PropGroup.append_child("WholeProgramOptimization").text().set("true");
     }
+    PropGroup.append_child("PlatformToolset").text().set("v142");
 }
 
 void CVcxWrite::AddOutDirs(pugi::xml_node parent, GEN_TYPE gentype)
@@ -463,37 +426,37 @@ void CVcxWrite::AddOutDirs(pugi::xml_node parent, GEN_TYPE gentype)
         case GEN_DEBUG:
             dir = parent.append_child("OutDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
-            dir.text().set("bld\\msvc_Debug");
+            dir.text().set("bld\\msvc_Debug\\");
             dir = parent.append_child("IntDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
-            dir.text().set("bld\\msvc_Debug");
+            dir.text().set("bld\\msvc_Debug\\");
             break;
 
         case GEN_DEBUG32:
             dir = parent.append_child("OutDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
-            dir.text().set("bld\\msvc_Debug32");
+            dir.text().set("bld\\msvc_Debug32\\");
             dir = parent.append_child("IntDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
-            dir.text().set("bld\\msvc_Debug32");
+            dir.text().set("bld\\msvc_Debug32\\");
             break;
 
         case GEN_RELEASE:
             dir = parent.append_child("OutDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
-            dir.text().set("bld\\msvc_Release");
+            dir.text().set("bld\\msvc_Release\\");
             dir = parent.append_child("IntDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
-            dir.text().set("bld\\msvc_Release");
+            dir.text().set("bld\\msvc_Release\\");
             break;
 
         case GEN_RELEASE32:
             dir = parent.append_child("OutDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
-            dir.text().set("bld\\msvc_Release32");
+            dir.text().set("bld\\msvc_Release32\\");
             dir = parent.append_child("IntDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
-            dir.text().set("bld\\msvc_Release32");
+            dir.text().set("bld\\msvc_Release32\\");
             break;
 
         default:
