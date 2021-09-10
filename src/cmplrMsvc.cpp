@@ -299,6 +299,26 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
         }
     }
 
+    if (hasOptValue(OPT::LIB_DIRS64) && (m_gentype == GEN_DEBUG || m_gentype == GEN_RELEASE))
+    {
+        ttlib::multistr enumLib(getOptValue(OPT::LIB_DIRS64), ';');
+        for (auto dir: enumLib)
+        {
+            dir.Replace("$", "$$", true);
+            line << " /LIBPATH:" << dir;
+        }
+    }
+
+    if (hasOptValue(OPT::LIB_DIRS32) && (m_gentype == GEN_DEBUG32 || m_gentype == GEN_RELEASE32))
+    {
+        ttlib::multistr enumLib(getOptValue(OPT::LIB_DIRS32), ';');
+        for (auto dir: enumLib)
+        {
+            dir.Replace("$", "$$", true);
+            line << " /LIBPATH:" << dir;
+        }
+    }
+
     if (hasOptValue(OPT::LIBS_CMN))
     {
         ttlib::multiview enumLib(getOptValue(OPT::LIBS_CMN), ';');
