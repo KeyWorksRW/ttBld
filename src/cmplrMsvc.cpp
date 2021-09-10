@@ -189,6 +189,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
         ttlib::multistr IncDirs(getOptValue(OPT::INC_DIRS));
         for (auto dir: IncDirs)
         {
+            dir.Replace("$", "$$", true);
             // If the directory name contains a space, then place it in quotes
             if (ttlib::is_found(dir.find(' ')))
                 line << " -I\"" << dir << '\"';
@@ -290,10 +291,11 @@ void CNinja::msvcWriteLinkDirective(CMPLR_TYPE cmplr)
 
     if (hasOptValue(OPT::LIB_DIRS))
     {
-        ttlib::multiview enumLib(getOptValue(OPT::LIB_DIRS), ';');
-        for (auto iter: enumLib)
+        ttlib::multistr enumLib(getOptValue(OPT::LIB_DIRS), ';');
+        for (auto dir: enumLib)
         {
-            line << " /LIBPATH:" << iter;
+            dir.Replace("$", "$$", true);
+            line << " /LIBPATH:" << dir;
         }
     }
 
@@ -371,12 +373,13 @@ void CNinja::msvcWriteRcDirective(CMPLR_TYPE cmplr)
     if (hasOptValue(OPT::INC_DIRS))
     {
         ttlib::multistr enumDirs(getOptValue(OPT::INC_DIRS));
-        for (auto iter: enumDirs)
+        for (auto dir: enumDirs)
         {
-            if (iter.contains(" "))
-                line << " -I\"" << iter << '\"';
+            dir.Replace("$", "$$", true);
+            if (dir.contains(" "))
+                line << " -I\"" << dir << '\"';
             else
-                line << " -I" << iter;
+                line << " -I" << dir;
         }
     }
 
@@ -414,12 +417,13 @@ void CNinja::msvcWriteMidlDirective(CMPLR_TYPE /* cmplr */)
     if (hasOptValue(OPT::INC_DIRS))
     {
         ttlib::multistr enumDirs(getOptValue(OPT::INC_DIRS));
-        for (auto iter: enumDirs)
+        for (auto dir: enumDirs)
         {
-            if (iter.contains(" "))
-                line << " -I\"" << iter << '\"';
+            dir.Replace("$", "$$", true);
+            if (dir.contains(" "))
+                line << " -I\"" << dir << '\"';
             else
-                line << " -I" << iter;
+                line << " -I" << dir;
         }
     }
 
