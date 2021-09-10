@@ -415,6 +415,31 @@ void CVcxWrite::AddConfigAppType(pugi::xml_node parent, GEN_TYPE gentype)
         PropGroup.append_child("WholeProgramOptimization").text().set("true");
     }
     PropGroup.append_child("PlatformToolset").text().set("v142");
+    if (hasOptValue(OPT::INC_DIRS))
+        PropGroup.append_child("IncludePath").text().set(getOptValue(OPT::INC_DIRS).c_str());
+
+    ttlib::cstr LibPath;
+    if (hasOptValue(OPT::LIB_DIRS))
+    {
+        if (LibPath.size() && LibPath.back() != ';')
+            LibPath << ';';
+        LibPath << getOptValue(OPT::LIB_DIRS);
+    }
+    if (hasOptValue(OPT::LIB_DIRS64) && (gentype == GEN_DEBUG || gentype == GEN_RELEASE))
+    {
+        if (LibPath.size() && LibPath.back() != ';')
+            LibPath << ';';
+        LibPath << getOptValue(OPT::LIB_DIRS64);
+    }
+    if (hasOptValue(OPT::LIB_DIRS32) && (gentype == GEN_DEBUG32 || gentype == GEN_RELEASE32))
+    {
+        if (LibPath.size() && LibPath.back() != ';')
+            LibPath << ';';
+        LibPath << getOptValue(OPT::LIB_DIRS32);
+    }
+
+    if (LibPath.size())
+        PropGroup.append_child("LibraryPath").text().set(LibPath.c_str());
 }
 
 void CVcxWrite::AddOutDirs(pugi::xml_node parent, GEN_TYPE gentype)
