@@ -33,6 +33,13 @@
 
 #include "..\pugixml\pugixml.hpp"
 
+constexpr const char* lst_platforms[] = {
+    "'$(Configuration)|$(Platform)'=='Debug|x64'",
+    "'$(Configuration)|$(Platform)'=='Release|x64'",
+    "'$(Configuration)|$(Platform)'=='Debug|Win32'",
+    "'$(Configuration)|$(Platform)'=='Release|Win32'",
+};
+
 static bool CreateGuid(ttlib::cstr& Result)
 {
 #if defined(_WIN32)
@@ -178,14 +185,192 @@ bool CVcxWrite::CreateBuildFile()
         AddOutDirs(PropGroup, GEN_RELEASE32);
     }
 
-    auto ItemDef = Project.append_child("ItemDefinitionGroup");
-    ItemDef.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
-    auto ClCompile = ItemDef.append_child("ClCompile");
-    ClCompile.append_child("Optimization").text().set("Disabled");
-    ClCompile.append_child("RuntimeLibrary").text().set("MultiThreadedDebugDLL");
+    for (auto& iter: lst_platforms)
+    {
+        if (ttlib::contains(iter, "Debug"))
+        {
+            PropGroup = Project.append_child("PropertyGroup");
+            if (ttlib::contains(iter, "x64"))
+            {
+                PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+                child = PropGroup.append_child("TargetName");
+                ttlib::cstr target_name = GetTargetDebug().filename();
+                target_name.remove_extension();
+                child.text().set(target_name.c_str());
+            }
+            else
+            {
+                PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
+                child = PropGroup.append_child("TargetName");
+                ttlib::cstr target_name = GetTargetDebug32().filename();
+                target_name.remove_extension();
+                child.text().set(target_name.c_str());
+            }
 
-    auto Link = ItemDef.append_child("Link");
-    Link.append_child("GenerateDebugInformation").text().set("true");
+            // REVIEW: [KeyWorks - 09-10-2021] This assumes the manifest is in the resource file
+            PropGroup.append_child("GenerateManifest").text().set("false");
+        }
+        else
+        {
+            PropGroup = Project.append_child("PropertyGroup");
+            if (ttlib::contains(iter, "x64"))
+            {
+                PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+            }
+            else
+            {
+                PropGroup.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
+            }
+
+            // REVIEW: [KeyWorks - 09-10-2021] This assumes the manifest is in the resource file
+            PropGroup.append_child("GenerateManifest").text().set("false");
+        }
+    }
+
+    ttlib::cstr LibPath;
+    if (hasOptValue(OPT::LIB_DIRS))
+    {
+        if (LibPath.size() && LibPath.back() != ';')
+            LibPath << ';';
+        LibPath << getOptValue(OPT::LIB_DIRS);
+    }
+
+    for (auto& iter: lst_platforms)
+    {
+        auto ItemDef = Project.append_child("ItemDefinitionGroup");
+        ItemDef.append_attribute("Condition").set_value(iter);
+        auto ClCompile = ItemDef.append_child("ClCompile");
+
+        if (getOptValue(OPT::CFLAGS_CMN).contains("-std:c++latest") || getOptValue(OPT::MSVC_CMN).contains("-std:c++latest"))
+        {
+            ClCompile.append_child("LanguageStandard").text().set("stdcpplatest");
+        }
+        else if (getOptValue(OPT::CFLAGS_CMN).contains("-std:c++"))
+        {
+            ttlib::cstr std("stdcpp");
+            auto ptr = getOptValue(OPT::CFLAGS_CMN).c_str() + getOptValue(OPT::CFLAGS_CMN).find("-std:c++");
+            while (*ptr && !ttlib::is_digit(*ptr))
+            {
+                ++ptr;
+            }
+            std << ttlib::atoi(ptr);
+            ClCompile.append_child("LanguageStandard").text().set(std.c_str());
+        }
+        else if (getOptValue(OPT::MSVC_CMN).contains("-std:c++"))
+        {
+            ttlib::cstr std("stdcpp");
+            auto ptr = getOptValue(OPT::MSVC_CMN).c_str() + getOptValue(OPT::MSVC_CMN).find("-std:c++");
+            while (*ptr && !ttlib::is_digit(*ptr))
+            {
+                ++ptr;
+            }
+            std << ttlib::atoi(ptr);
+            ClCompile.append_child("LanguageStandard").text().set(std.c_str());
+        }
+        ClCompile.append_child("MultiProcessorCompilation").text().set("true");
+        if (hasOptValue(OPT::WARN))
+        {
+            ttlib::cstr warn_level("Level");
+            warn_level << getOptValue(OPT::WARN).atoi(getOptValue(OPT::WARN).find_oneof("0123456"));
+            ClCompile.append_child("WarningLevel").text().set(warn_level.c_str());
+        }
+
+        ttlib::cstr options;
+        if (hasOptValue(OPT::CFLAGS_CMN))
+        {
+            options << getOptValue(OPT::CFLAGS_CMN);
+        }
+
+        if (ttlib::contains(iter, "Debug"))
+        {
+            ClCompile.append_child("Optimization").text().set("Disabled");
+            ClCompile.append_child("RuntimeLibrary").text().set("MultiThreadedDebugDLL");
+            if (hasOptValue(OPT::CFLAGS_DBG))
+            {
+                if (options.size())
+                    options << ' ';
+                options << getOptValue(OPT::CFLAGS_DBG);
+            }
+            if (options.size())
+                ClCompile.append_child("AdditionalOptions").text().set(options.c_str());
+
+            auto Link = ItemDef.append_child("Link");
+            Link.append_child("GenerateDebugInformation").text().set("true");
+            if (ttlib::contains(iter, "x64"))
+            {
+                Link.append_child("OutputFile").text().set(GetTargetDebug().c_str());
+
+                if (hasOptValue(OPT::LIB_DIRS64))
+                {
+                    if (LibPath.size() && LibPath.back() != ';')
+                        LibPath << ';';
+                    LibPath << getOptValue(OPT::LIB_DIRS64);
+                }
+            }
+            else
+            {
+                Link.append_child("OutputFile").text().set(GetTargetDebug32().c_str());
+
+                if (hasOptValue(OPT::LIB_DIRS32))
+                {
+                    if (LibPath.size() && LibPath.back() != ';')
+                        LibPath << ';';
+                    LibPath << getOptValue(OPT::LIB_DIRS32);
+                }
+            }
+
+            if (LibPath.size())
+            {
+                LibPath << ";%(AdditionalLibraryDirectories)";
+                Link.append_child("AdditionalLibraryDirectories").text().set(LibPath.c_str());
+            }
+        }
+        else
+        {
+            if (!IsOptimizeSpeed())
+                ClCompile.append_child("Optimization").text().set("MinSpace");
+
+            if (hasOptValue(OPT::CFLAGS_REL))
+            {
+                if (options.size())
+                    options << ' ';
+                options << getOptValue(OPT::CFLAGS_REL);
+            }
+            if (options.size())
+                ClCompile.append_child("AdditionalOptions").text().set(options.c_str());
+
+            auto Link = ItemDef.append_child("Link");
+            Link.append_child("GenerateDebugInformation").text().set("false");
+            if (ttlib::contains(iter, "x64"))
+            {
+                Link.append_child("OutputFile").text().set(GetTargetRelease().c_str());
+
+                if (hasOptValue(OPT::LIB_DIRS64))
+                {
+                    if (LibPath.size() && LibPath.back() != ';')
+                        LibPath << ';';
+                    LibPath << getOptValue(OPT::LIB_DIRS64);
+                }
+            }
+            else
+            {
+                Link.append_child("OutputFile").text().set(GetTargetRelease32().c_str());
+
+                if (hasOptValue(OPT::LIB_DIRS32))
+                {
+                    if (LibPath.size() && LibPath.back() != ';')
+                        LibPath << ';';
+                    LibPath << getOptValue(OPT::LIB_DIRS32);
+                }
+            }
+
+            if (LibPath.size())
+            {
+                LibPath << ";%(AdditionalLibraryDirectories)";
+                Link.append_child("AdditionalLibraryDirectories").text().set(LibPath.c_str());
+            }
+        }
+    }
 
     ItemGroup = Project.append_child("ItemGroup");
     for (auto& iter: GetSrcFileList())
@@ -219,6 +404,7 @@ bool CVcxWrite::CreateBuildFile()
             ClInclude.append_attribute("Include").set_value(header.c_str());
         }
     }
+
     if (HasPch())
     {
         auto ClInclude = ItemGroup.append_child("ClInclude");
@@ -230,13 +416,25 @@ bool CVcxWrite::CreateBuildFile()
     {
         if (iter.is_sameas(GetRcFile()))
             continue;
-        ClCompile = ItemGroup.append_child("ClCompile");
+        auto ClCompile = ItemGroup.append_child("ClCompile");
         ClCompile.append_attribute("Include").set_value(iter.c_str());
+    }
+
+    for (auto& iter: m_lstDebugFiles)
+    {
+        auto ClCompile = ItemGroup.append_child("ClCompile");
+        ClCompile.append_attribute("Include").set_value(iter.c_str());
+        child = ClCompile.append_child("ExcludedFromBuild");
+        child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
+        child.text().set("true");
+        child = ClCompile.append_child("ExcludedFromBuild");
+        child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
+        child.text().set("true");
     }
 
     if (GetPchCpp().size())
     {
-        ClCompile = ItemGroup.append_child("ClCompile");
+        auto ClCompile = ItemGroup.append_child("ClCompile");
         ClCompile.append_attribute("Include").set_value(GetPchCpp().c_str());
         child = ClCompile.append_child("PrecompiledHeader");
         child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
@@ -252,6 +450,27 @@ bool CVcxWrite::CreateBuildFile()
             child = ClCompile.append_child("PrecompiledHeader");
             child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
             child.text().set("Create");
+        }
+
+        if (hasOptValue(OPT::PCH))
+        {
+            child = ClCompile.append_child("PrecompiledHeaderFile");
+            child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
+            child.text().set(getOptValue(OPT::PCH).c_str());
+
+            child = ClCompile.append_child("PrecompiledHeaderFile");
+            child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
+            child.text().set(getOptValue(OPT::PCH).c_str());
+            if (hasOptValue(OPT::TARGET_DIR32))
+            {
+                child = ClCompile.append_child("PrecompiledHeaderFile");
+                child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
+                child.text().set(getOptValue(OPT::PCH).c_str());
+
+                child = ClCompile.append_child("PrecompiledHeaderFile");
+                child.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
+                child.text().set(getOptValue(OPT::PCH).c_str());
+            }
         }
     }
 
@@ -417,41 +636,22 @@ void CVcxWrite::AddConfigAppType(pugi::xml_node parent, GEN_TYPE gentype)
     PropGroup.append_child("PlatformToolset").text().set("v142");
     if (hasOptValue(OPT::INC_DIRS))
         PropGroup.append_child("IncludePath").text().set(getOptValue(OPT::INC_DIRS).c_str());
-
-    ttlib::cstr LibPath;
-    if (hasOptValue(OPT::LIB_DIRS))
-    {
-        if (LibPath.size() && LibPath.back() != ';')
-            LibPath << ';';
-        LibPath << getOptValue(OPT::LIB_DIRS);
-    }
-    if (hasOptValue(OPT::LIB_DIRS64) && (gentype == GEN_DEBUG || gentype == GEN_RELEASE))
-    {
-        if (LibPath.size() && LibPath.back() != ';')
-            LibPath << ';';
-        LibPath << getOptValue(OPT::LIB_DIRS64);
-    }
-    if (hasOptValue(OPT::LIB_DIRS32) && (gentype == GEN_DEBUG32 || gentype == GEN_RELEASE32))
-    {
-        if (LibPath.size() && LibPath.back() != ';')
-            LibPath << ';';
-        LibPath << getOptValue(OPT::LIB_DIRS32);
-    }
-
-    if (LibPath.size())
-        PropGroup.append_child("LibraryPath").text().set(LibPath.c_str());
 }
 
 void CVcxWrite::AddOutDirs(pugi::xml_node parent, GEN_TYPE gentype)
 {
     pugi::xml_node dir;
+    ttlib::cstr path;
 
     switch (gentype)
     {
         case GEN_DEBUG:
             dir = parent.append_child("OutDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
-            dir.text().set("bld\\msvc_Debug\\");
+            path = GetTargetDebug();
+            path.remove_filename();
+            dir.text().set(path.c_str());
+
             dir = parent.append_child("IntDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|x64'");
             dir.text().set("bld\\msvc_Debug\\");
@@ -460,7 +660,10 @@ void CVcxWrite::AddOutDirs(pugi::xml_node parent, GEN_TYPE gentype)
         case GEN_DEBUG32:
             dir = parent.append_child("OutDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
-            dir.text().set("bld\\msvc_Debug32\\");
+            path = GetTargetDebug32();
+            path.remove_filename();
+            dir.text().set(path.c_str());
+
             dir = parent.append_child("IntDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Debug|Win32'");
             dir.text().set("bld\\msvc_Debug32\\");
@@ -469,7 +672,10 @@ void CVcxWrite::AddOutDirs(pugi::xml_node parent, GEN_TYPE gentype)
         case GEN_RELEASE:
             dir = parent.append_child("OutDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
-            dir.text().set("bld\\msvc_Release\\");
+            path = GetTargetRelease();
+            path.remove_filename();
+            dir.text().set(path.c_str());
+
             dir = parent.append_child("IntDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|x64'");
             dir.text().set("bld\\msvc_Release\\");
@@ -478,7 +684,10 @@ void CVcxWrite::AddOutDirs(pugi::xml_node parent, GEN_TYPE gentype)
         case GEN_RELEASE32:
             dir = parent.append_child("OutDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
-            dir.text().set("bld\\msvc_Release32\\");
+            path = GetTargetRelease32();
+            path.remove_filename();
+            dir.text().set(path.c_str());
+
             dir = parent.append_child("IntDir");
             dir.append_attribute("Condition").set_value("'$(Configuration)|$(Platform)'=='Release|Win32'");
             dir.text().set("bld\\msvc_Release32\\");
