@@ -33,6 +33,11 @@
 #define wxUSE_NO_MANIFEST 1  // This is required for compiling using CLANG 8 and earlier
 
 #ifdef _MSC_VER
+    // REVIEW: [KeyWorks - 09-10-2021] VS 11.2 with latest windows platform sdk is generating tons of these warnings
+    #pragma warning(disable : 4251)  // needs to have dll-interface
+#endif
+
+#ifdef _MSC_VER
     #pragma warning(push)
 #endif
 
