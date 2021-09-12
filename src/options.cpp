@@ -170,22 +170,21 @@ void CSrcFiles::InitOptions()
 #endif
 }
 
-size_t CSrcFiles::FindOption(const std::string_view name) const
+OPT::value CSrcFiles::FindOption(const std::string_view name) const
 {
     assert(!name.empty());
     if (name.empty())
         return OPT::LAST;
 
-    size_t pos { 0 };
-    for (; pos < m_Options.size(); ++pos)
+    for (const auto& option: optIterator())
     {
-        if (ttlib::is_sameas(name, m_Options[pos].OriginalName, tt::CASE::either))
-            return pos;
+        if (ttlib::is_sameas(name, m_Options[option].OriginalName, tt::CASE::either))
+            return option;
     }
     return OPT::LAST;
 }
 
-void CSrcFiles::setOptValue(size_t index, std::string_view value)
+void CSrcFiles::setOptValue(OPT::value index, std::string_view value)
 {
     assert(index < OPT::LAST);
 
@@ -200,7 +199,7 @@ void CSrcFiles::setOptValue(size_t index, std::string_view value)
     }
 }
 
-void CSrcFiles::setBoolOptValue(size_t index, bool value)
+void CSrcFiles::setBoolOptValue(OPT::value index, bool value)
 {
     assert(index < OPT::LAST);
     assert(m_Options[index].isBooleanValue);

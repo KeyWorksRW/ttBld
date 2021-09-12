@@ -14,9 +14,10 @@ class OPT
 public:
     // We use this instead of "enum class Opt : size_t" because it allows iterating through the vector and returning a
     // position as the option id.
-    enum : size_t
+    enum value : size_t
     {
-        BIT32,
+        FIRST,
+        BIT32 = FIRST,
         BIT64,
         BUILD_LIBS,
         BUILD_LIBS32,
@@ -95,7 +96,7 @@ public:
     struct ORIGINAL
     {
         // This must be one of the ids from the enumeration above
-        size_t optionID;
+        OPT::value optionID;
 
         const char* name;
         const char* value;
@@ -107,7 +108,7 @@ public:
 
     struct VERSION
     {
-        size_t optionID;
+        OPT::value optionID;
         size_t major;
         size_t minor;
         size_t sub;
@@ -115,3 +116,35 @@ public:
 };
 
 extern const std::array<OPT::ORIGINAL, OPT::LAST + 1> DefaultOptions;
+
+// The following code makes it possible to iterate through all of the OPT values via:
+//
+// for (const auto& option: optIterator()) {}
+
+#include <type_traits>
+
+template <typename C, C beginVal, C endVal>
+class Iterator
+{
+    typedef typename std::underlying_type<C>::type val_t;
+    size_t val;
+
+public:
+    Iterator(const C& f) : val(static_cast<val_t>(f)) {}
+    Iterator() : val(static_cast<val_t>(beginVal)) {}
+    Iterator operator++()
+    {
+        ++val;
+        return *this;
+    }
+    C operator*() { return static_cast<C>(val); }
+    Iterator begin() { return *this; }  // default ctor is good
+    Iterator end()
+    {
+        static const Iterator endIter = ++Iterator(endVal);  // cache it
+        return endIter;
+    }
+    bool operator!=(const Iterator& i) { return val != i.val; }
+};
+
+typedef Iterator<OPT::value, OPT::BIT32, static_cast<OPT::value>(OPT::LAST - 1)> optIterator;
