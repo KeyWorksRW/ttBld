@@ -142,7 +142,8 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
     // options that are required or have non-default values, they must be written here.
 
     bool SomethingChanged = false;
-    for (size_t option = 0; option < OPT::LAST; ++option)
+
+    for (const auto& option: optIterator())
     {
         // ignore if we've already written out the option
         if (std::find(orgOptions.begin(), orgOptions.end(), option) != orgOptions.end())

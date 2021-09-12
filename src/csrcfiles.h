@@ -49,44 +49,44 @@ public:
 
     // Public functions
 
-    bool isOptValue(size_t option, std::string_view value) const
+    bool isOptValue(OPT::value option, std::string_view value) const
     {
         return (getOptValue(option).is_sameas(value, tt::CASE::either));
     }
 
-    bool isOptTrue(size_t index) const
+    bool isOptTrue(OPT::value option) const
     {
-        assert(index < OPT::LAST);
-        return ttlib::is_sameas(m_Options[index].value, "true", tt::CASE::either);
+        assert(option < OPT::LAST);
+        return ttlib::is_sameas(m_Options[option].value, "true", tt::CASE::either);
     }
 
-    bool hasOptValue(size_t option) const noexcept { return (!getOptValue(option).empty()); }
+    bool hasOptValue(OPT::value option) const noexcept { return (!getOptValue(option).empty()); }
 
-    const ttlib::cstr& getOptValue(size_t index) const noexcept
+    const ttlib::cstr& getOptValue(OPT::value option) const noexcept
     {
-        assert(index < OPT::LAST);
-        return m_Options[index].value;
+        assert(option < OPT::LAST);
+        return m_Options[option].value;
     }
 
-    void setOptValue(size_t index, std::string_view value);
-    void setBoolOptValue(size_t index, bool value = true);
+    void setOptValue(OPT::value option, std::string_view value);
+    void setBoolOptValue(OPT::value option, bool value = true);
 
-    const std::string& getOptComment(size_t index) const noexcept
+    const std::string& getOptComment(OPT::value option) const noexcept
     {
-        assert(index < OPT::LAST);
-        return m_Options[index].comment;
+        assert(option < OPT::LAST);
+        return m_Options[option].comment;
     }
 
-    void setOptComment(size_t index, std::string_view value)
+    void setOptComment(OPT::value option, std::string_view value)
     {
-        assert(index < OPT::LAST);
-        m_Options[index].comment = value;
+        assert(option < OPT::LAST);
+        m_Options[option].comment = value;
     }
 
-    void SetRequired(size_t index, bool isRequired = true)
+    void SetRequired(OPT::value option, bool isRequired = true)
     {
-        assert(index < OPT::LAST);
-        m_Options[index].isRequired = isRequired;
+        assert(option < OPT::LAST);
+        m_Options[option].isRequired = isRequired;
     }
 
     const std::string& GetTargetDir();
@@ -138,26 +138,26 @@ public:
 
     void InitOptions();
 
-    bool isOptionRequired(size_t index) const
+    bool isOptionRequired(OPT::value option) const
     {
-        assert(index < OPT::LAST);
-        return m_Options[index].isRequired;
+        assert(option < OPT::LAST);
+        return m_Options[option].isRequired;
     }
 
-    std::string getOptionName(size_t index) const
+    std::string getOptionName(OPT::value option) const
     {
-        assert(index < OPT::LAST);
+        assert(option < OPT::LAST);
         std::string name;
-        name.assign(m_Options[index].OriginalName);
+        name.assign(m_Options[option].OriginalName);
         return name;
     }
 
-    bool hasOptionChanged(size_t index) const
+    bool hasOptionChanged(OPT::value option) const
     {
-        assert(index < OPT::LAST);
+        assert(option < OPT::LAST);
 
-        if (m_Options[index].value.empty() || !m_Options[index].OriginalValue ||
-            m_Options[index].value.is_sameas(m_Options[index].OriginalValue))
+        if (m_Options[option].value.empty() ||
+            (m_Options[option].OriginalValue && m_Options[option].value.is_sameas(m_Options[option].OriginalValue)))
         {
             return false;
         }
@@ -198,7 +198,7 @@ protected:
 
     ttlib::cstr m_pchCPPname;
 
-    size_t FindOption(const std::string_view name) const;
+    OPT::value FindOption(const std::string_view name) const;
 
 private:
     friend CWriteSrcFiles;
