@@ -201,7 +201,7 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     if (HasPch())
     {
         ttlib::cstr tmp;
-        line << " /Fp$outdir/" << m_pchHdrName;
+        line << " /Fp$outdir/" << m_pchHdrName.filename();
     }
     m_ninjafile.addEmptyLine();
 }
