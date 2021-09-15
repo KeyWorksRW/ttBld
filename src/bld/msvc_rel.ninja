@@ -87,6 +87,8 @@ build $outdir/readvcx.obj: compile convert/readvcx.cpp | $outdir/pch.obj
 
 build $outdir/writevcx.obj: compile convert/writevcx.cpp | $outdir/pch.obj
 
+build $outdir/write_cmake.obj: compile convert/write_cmake.cpp | $outdir/pch.obj
+
 build $outdir/pugixml.obj: compile pugixml/pugixml.cpp | $outdir/pch.obj
 
 build $outdir/convertdlg.obj: compile ui/convertdlg.cpp | $outdir/pch.obj
@@ -114,6 +116,8 @@ build $outdir/ttmultistr.obj: compile ../ttlib/src/ttmultistr.cpp | $outdir/pch.
 build $outdir/ttparser.obj: compile ../ttlib/src/ttparser.cpp | $outdir/pch.obj
 
 build $outdir/ttstr.obj: compile ../ttlib/src/ttstr.cpp | $outdir/pch.obj
+
+build $outdir/ttsview.obj: compile ../ttlib/src/ttsview.cpp | $outdir/pch.obj
 
 build $outdir/tttextfile.obj: compile ../ttlib/src/tttextfile.cpp | $outdir/pch.obj
 
@@ -148,6 +152,7 @@ build ../bin/ttBld.exe : link $resout/ttBld.res $
   $outdir/readvc.obj $
   $outdir/readvcx.obj $
   $outdir/writevcx.obj $
+  $outdir/write_cmake.obj $
   $outdir/pugixml.obj $
   $outdir/convertdlg.obj $
   $outdir/vscodedlg.obj $
@@ -162,6 +167,7 @@ build ../bin/ttBld.exe : link $resout/ttBld.res $
   $outdir/ttmultistr.obj $
   $outdir/ttparser.obj $
   $outdir/ttstr.obj $
+  $outdir/ttsview.obj $
   $outdir/tttextfile.obj $
   $outdir/ttregistry.obj $
   $outdir/pch.obj

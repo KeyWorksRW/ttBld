@@ -131,6 +131,7 @@ public:
     const auto& getErrorMsgs() { return m_lstErrMessages; }
 
     auto& GetSrcFileList() { return m_lstSrcFiles; }
+    auto& GetDebugFileList() { return m_lstDebugFiles; }
 
     void SetReportingFile(std::string_view filename) { m_ReportPath = filename; }
 

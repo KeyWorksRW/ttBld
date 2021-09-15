@@ -49,6 +49,7 @@ Files:
     convert/readvc.cpp        # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml
     convert/readvcx.cpp       # Converts a Visual Studio project file into .srcfiles.yaml
     convert/writevcx.cpp      # Create a Visual Studio project file
+    convert/write_cmake.cpp   # Create a CMakeLists.txt file
 
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     pugixml/pugixml.cpp        # Built directly rather than building a library
@@ -59,9 +60,9 @@ Files:
     ui/vscodedlg.cpp           # Dialog for setting options to create tasks.json and launch.json
     ui/optionsdlg.cpp          # Dialog for setting all .srcfile options
 
-    ui/convertdlgBase.cpp      # wxUiEditor generated file
-    ui/optionsdlgBase.cpp      # wxUiEditor generated file
-    ui/vscodedlgBase.cpp       # wxUiEditor generated file
+    ui/convertdlgBase.cpp       # wxUiEditor generated file
+    ui/optionsdlgBase.cpp       # wxUiEditor generated file
+    ui/vscodedlgBase.cpp        # wxUiEditor generated file
 
     ../ttlib/src/ttconsole.cpp   # Sets/restores console foreground color
     ../ttlib/src/ttcstr.cpp      # Class for handling zero-terminated char strings.
@@ -70,6 +71,7 @@ Files:
     ../ttlib/src/ttmultistr.cpp  # Breaks a single string into multiple strings
     ../ttlib/src/ttparser.cpp    # Command line parser
     ../ttlib/src/ttstr.cpp       # ttString -- enhanced version of wxString
+    ../ttlib/src/ttsview.cpp     # std::string_view with additional methods
     ../ttlib/src/tttextfile.cpp  # Classes for reading and writing text files.
 
     ../ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
