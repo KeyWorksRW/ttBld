@@ -17,7 +17,17 @@
 class ConvertDlgBase : public wxDialog
 {
 public:
-    ConvertDlgBase(wxWindow* parent);
+    ConvertDlgBase() {}
+    ConvertDlgBase(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = wxString::FromUTF8("Create new .srcfiles.yaml file"),
+        const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+        long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER, const wxString &name = wxDialogNameStr)
+    {
+        Create(parent, id, title, pos, size, style, name);
+    }
+
+    bool Create(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = wxString::FromUTF8("Create new .srcfiles.yaml file"),
+        const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+        long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER, const wxString &name = wxDialogNameStr);
 
     bool isCreateVsCode() const { return m_AddVscodeDir; }
     bool isAddToGitExclude() const { return m_gitIgnore; }

@@ -13,9 +13,11 @@
 
 #include "vscodedlgBase.h"
 
-VsCodeDlgBase::VsCodeDlgBase(wxWindow* parent) : wxDialog()
+bool VsCodeDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &title,
+        const wxPoint&pos, const wxSize& size, long style, const wxString &name)
 {
-    Create(parent, wxID_ANY, wxString::FromUTF8("Create .vscode files"));
+    if (!wxDialog::Create(parent, id, title, pos, size, style, name))
+        return false;
 
     auto parent_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -85,4 +87,6 @@ VsCodeDlgBase::VsCodeDlgBase(wxWindow* parent) : wxDialog()
 
     // Event handlers
     Bind(wxEVT_INIT_DIALOG, &VsCodeDlgBase::OnInit, this);
+
+    return true;
 }

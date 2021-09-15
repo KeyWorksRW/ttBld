@@ -16,10 +16,11 @@
 
 #include "convertdlgBase.h"
 
-ConvertDlgBase::ConvertDlgBase(wxWindow* parent) : wxDialog()
+bool ConvertDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &title,
+        const wxPoint&pos, const wxSize& size, long style, const wxString &name)
 {
-    Create(parent, wxID_ANY, wxString::FromUTF8("Create new .srcfiles.yaml file"), wxDefaultPosition, wxDefaultSize,
-        wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
+    if (!wxDialog::Create(parent, id, title, pos, size, style, name))
+        return false;
 
     auto parent_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -90,4 +91,6 @@ ConvertDlgBase::ConvertDlgBase(wxWindow* parent) : wxDialog()
     Bind(wxEVT_INIT_DIALOG, &ConvertDlgBase::OnInit, this);
     m_filePickerProject->Bind(wxEVT_FILEPICKER_CHANGED, &ConvertDlgBase::OnProjectFileLocated, this);
     Bind(wxEVT_BUTTON, &ConvertDlgBase::OnOK, this, wxID_OK);
+
+    return true;
 }

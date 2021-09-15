@@ -22,10 +22,11 @@
 
 #include "optionsdlgBase.h"
 
-OptionsDlgBase::OptionsDlgBase(wxWindow* parent) : wxDialog()
+bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &title,
+        const wxPoint&pos, const wxSize& size, long style, const wxString &name)
 {
-    Create(parent, wxID_ANY, wxString::FromUTF8("Options for .srcfiles"), wxDefaultPosition, wxDefaultSize,
-        wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
+    if (!wxDialog::Create(parent, id, title, pos, size, style, name))
+        return false;
 
     auto parent_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -113,8 +114,7 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent) : wxDialog()
     auto staticText3 = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8("&Warning level:"));
     box_sizer4->Add(staticText3, wxSizerFlags().Center().Border(wxALL));
 
-    auto spinCtrl = new wxSpinCtrl(panel, wxID_ANY, wxEmptyString,
-    wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 4, 4);
+    auto spinCtrl = new wxSpinCtrl(panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 4, 4);
     spinCtrl->SetValidator(wxGenericValidator(&m_WarningLevel));
     box_sizer4->Add(spinCtrl, wxSizerFlags().Border(wxALL));
 
@@ -473,4 +473,6 @@ OptionsDlgBase::OptionsDlgBase(wxWindow* parent) : wxDialog()
     btnAddReleaseLibraries->Bind(wxEVT_BUTTON, &OptionsDlgBase::OnAddReleaseLibraries, this);
     btnAddDebugLibraries->Bind(wxEVT_BUTTON, &OptionsDlgBase::OnAddDebugLibraries, this);
     btnAddBuildLibraries->Bind(wxEVT_BUTTON, &OptionsDlgBase::OnAddBuildLibraries, this);
+
+    return true;
 }
