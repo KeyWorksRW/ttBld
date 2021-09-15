@@ -129,6 +129,7 @@ int CMainApp::OnRun()
     cmd.addOption("force", "create .ninja file(s) even if nothing has changed");
     cmd.addOption("makefile", "creates a makefile that doesn't require ttBld.exe");
 
+    cmd.addOption("cmake", "Uses .srcfiles.yaml as a template to create a cmake CMakeLists.txt file");
     cmd.addOption("vscode", "creates or updates .vscode/*.json files used to build and debug a project using VS Code");
     cmd.addOption("vcxproj", "creates or updates Visual Studio project file (.vcxproj)");
     cmd.addOption("vs", "adds or updates .vs/*.json files used by Visual Studio");
@@ -318,6 +319,15 @@ int CMainApp::OnRun()
         return 0;
     }
 
+    if (cmd.isOption("cmake"))
+    {
+        if (projectFile.empty())
+        {
+            projectFile.assign(locateProjectFile(RootDir));
+        }
+        return (CreateCmakeProject(projectFile) ? 0 : 1);
+    }
+
     // If a project file gets created, the options and vscode have already been set, and this flag will have been set to
     // true.
     bool projectCreated = false;
@@ -465,7 +475,7 @@ int CMainApp::OnRun()
                   << " files" << '\n';
 #if defined(_DEBUG)
         ttlib::cstr msg(ttlib::cstr("Created ") << countNinjas << " .ninja"
-                                           << " files" << '\n');
+                                                << " files" << '\n');
         wxLogDebug(msg.to_utf16().c_str());
 #endif  // _DEBUG
     }
