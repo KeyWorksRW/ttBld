@@ -119,16 +119,13 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
     out += "";
 
     out += "if (MSVC)";
-    out += "    # /FC	  // Full path to source code file in diagnostics";
-    out += "    string(APPEND CMAKE_CXX_FLAGS \" /FC /Zc:__cplusplus /utf-8\")";
-    out += "";
-
     out += "    # /O1 often results in faster code than /O2 due to CPU caching";
     out += "    string(REPLACE \"/O2\" \"/O1\" cl_optimize ${CMAKE_CXX_FLAGS_RELEASE})";
     out += "    set(CMAKE_CXX_FLAGS_RELEASE ${cl_optimize} CACHE STRING \"C++ Release flags\" FORCE)";
     out += "";
 
-    out += "    # Using /Z7 instead of /Zi to avoid blocking while parallel compilers write to the pdb file";
+    out += "    # Using /Z7 instead of /Zi to avoid blocking while parallel compilers write to the pdb file.";
+    out += "    # This can considerably speed up build times at the cost of larger object files.";
     out += "    string(REPLACE \"/Zi\" \"/Z7\" z_seven ${CMAKE_CXX_FLAGS_DEBUG})";
     out += "    set(CMAKE_CXX_FLAGS_DEBUG ${z_seven} CACHE STRING \"C++ Debug flags\" FORCE)";
 
@@ -137,8 +134,10 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
 
     bool need_blank_line { false };
 
-    if (flags_cmn.size() &&
-        (flags_cmn.contains("/D") || flags_cmn.contains("-D")))
+    // Note that we make definitions global for the project rather than for just the target. That's because flags like
+    // -DWXUSINGDLL *MUST* be global.
+
+    if (flags_cmn.size() && (flags_cmn.contains("/D") || flags_cmn.contains("-D")))
     {
         need_blank_line = true;
         ttlib::cstr flags = flags_cmn;
@@ -214,27 +213,6 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
         out += "";
         need_blank_line = false;
     }
-
-    out += "if (MSVC)";
-    out += "    # /GL is combined with the Linker flag /LTCG to perform whole program optimization";
-    out += "    add_compile_options(\"$<$<CONFIG:Release>:/GL>\")";
-    out += "    add_link_options($<$<CONFIG:Release>:LTCG>)";
-
-    if (srcfiles.hasOptValue(OPT::NATVIS))
-    {
-        // The natvis file is relative to the build directory which is parellel to any src directoyr
-        out.emplace_back(
-            ttlib::cstr() << "    add_link_options($<$<CONFIG:Debug>:/natvis:" << srcfiles.getOptValue(OPT::NATVIS) << ">)");
-    }
-
-    if (srcfiles.getRcName().size())
-    {
-        out += "\n    # Assume the manifest is in the resource file";
-        out += "    add_link_options(/manifest:no)";
-    }
-
-    out += "endif()";
-    out += "";
 
     if (srcfiles.GetDebugFileList().size())
     {
@@ -354,14 +332,46 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
     out += ")";
     out += "";
 
+    if (need_blank_line)
+    {
+        out += "";
+        need_blank_line = false;
+    }
+
+    out += "if (MSVC)";
+    out += "    # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build";
+    out += "    # /FC -- Full path to source code file in diagnostics";
+    out.emplace_back(ttlib::cstr() << "    target_compile_options(" << srcfiles.GetProjectName()
+                                   << " PRIVATE \"$<$<CONFIG:Release>:/GL>\" \"/FC\" \"/Zc:__cplusplus\" \"/utf-8\")");
+    out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
+                                   << " PRIVATE \"$<$<CONFIG:Release>:LTCG>\")\n");
+
+    if (srcfiles.hasOptValue(OPT::NATVIS))
+    {
+        // The natvis file is relative to the build directory which is parellel to any src directory
+        out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
+                                       << " PRIVATE \"$<$<CONFIG:Debug>:/natvis:" << srcfiles.getOptValue(OPT::NATVIS)
+                                       << ">\")");
+    }
+
+    if (srcfiles.getRcName().size())
+    {
+        out += "\n    # Assume the manifest is in the resource file";
+        out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
+                                       << " PRIVATE \"/manifest:no\")");
+    }
+
+    out += "endif()";
+    out += "";
+
     if (srcfiles.HasPch())
     {
         ttlib::cstr pch_path;
         if (file_prefix.size())
             pch_path = file_prefix;
         pch_path << srcfiles.getOptValue(OPT::PCH);
-        out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << srcfiles.GetProjectName() << " PRIVATE "
-                                       << pch_path << ")");
+        out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << srcfiles.GetProjectName() << " PRIVATE \""
+                                       << pch_path << "\")");
         out += "";
     }
 
