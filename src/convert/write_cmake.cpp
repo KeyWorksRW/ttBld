@@ -344,7 +344,7 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
     out.emplace_back(ttlib::cstr() << "    target_compile_options(" << srcfiles.GetProjectName()
                                    << " PRIVATE \"$<$<CONFIG:Release>:/GL>\" \"/FC\" \"/Zc:__cplusplus\" \"/utf-8\")");
     out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
-                                   << " PRIVATE \"$<$<CONFIG:Release>:LTCG>\")\n");
+                                   << " PRIVATE \"$<$<CONFIG:Release>:/LTCG>\")\n");
 
     if (srcfiles.hasOptValue(OPT::NATVIS))
     {

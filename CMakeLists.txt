@@ -105,7 +105,7 @@ if (MSVC)
     # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build
     # /FC -- Full path to source code file in diagnostics
     target_compile_options(ttBld PRIVATE "$<$<CONFIG:Release>:/GL>" "/FC" "/Zc:__cplusplus" "/utf-8")
-    target_link_options(ttBld PRIVATE "$<$<CONFIG:Release>:LTCG>")
+    target_link_options(ttBld PRIVATE "$<$<CONFIG:Release>:/LTCG>")
 
     target_link_options(ttBld PRIVATE "$<$<CONFIG:Debug>:/natvis:../src/ttBld.natvis>")
 
