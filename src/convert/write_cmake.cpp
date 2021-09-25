@@ -348,9 +348,14 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
 
     if (srcfiles.hasOptValue(OPT::NATVIS))
     {
+        ttlib::cstr file_path;
+        if (file_prefix.size())
+            file_path << "../" << file_prefix;
+        file_path << srcfiles.getOptValue(OPT::NATVIS);
+
         // The natvis file is relative to the build directory which is parellel to any src directory
         out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
-                                       << " PRIVATE \"$<$<CONFIG:Debug>:/natvis:" << srcfiles.getOptValue(OPT::NATVIS)
+                                       << " PRIVATE \"$<$<CONFIG:Debug>:/natvis:" << file_path
                                        << ">\")");
     }
 
@@ -370,6 +375,21 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
         if (file_prefix.size())
             pch_path = file_prefix;
         pch_path << srcfiles.getOptValue(OPT::PCH);
+        if (!pch_path.file_exists() && srcfiles.hasOptValue(OPT::INC_DIRS))
+        {
+            ttlib::multiview inc_list(srcfiles.getOptValue(OPT::INC_DIRS));
+            for (auto& iter: inc_list)
+            {
+                pch_path.clear();
+                if (file_prefix.size())
+                    pch_path = file_prefix;
+                pch_path.append_filename(iter);
+                pch_path.addtrailingslash();
+                pch_path << srcfiles.getOptValue(OPT::PCH);
+                if (pch_path.file_exists())
+                    break;
+            }
+        }
         out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << srcfiles.GetProjectName() << " PRIVATE \""
                                        << pch_path << "\")");
         out += "";
