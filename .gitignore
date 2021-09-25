@@ -41,6 +41,7 @@ messages.po
 *.res
 *.rtf
 *.tmp
+*.ttBld
 *.txt
 *.zip
 
