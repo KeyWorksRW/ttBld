@@ -341,22 +341,24 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
     out += "if (MSVC)";
     out += "    # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build";
     out += "    # /FC -- Full path to source code file in diagnostics";
-    out.emplace_back(ttlib::cstr() << "    target_compile_options(" << srcfiles.GetProjectName()
-                                   << " PRIVATE \"$<$<CONFIG:Release>:/GL>\" \"/FC\" \"/Zc:__cplusplus\" \"/utf-8\")");
+    out.emplace_back(
+        ttlib::cstr() << "    target_compile_options(" << srcfiles.GetProjectName()
+                      << " PRIVATE \"$<$<CONFIG:Release>:/GL>\" \"/FC\" \"/W4\" \"/Zc:__cplusplus\" \"/utf-8\")");
     out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
                                    << " PRIVATE \"$<$<CONFIG:Release>:/LTCG>\")\n");
 
     if (srcfiles.hasOptValue(OPT::NATVIS))
     {
         ttlib::cstr file_path;
-        if (file_prefix.size())
+        if (file_prefix.size() && !srcfiles.getOptValue(OPT::NATVIS).is_sameprefix("../"))
+        {
             file_path << "../" << file_prefix;
+        }
         file_path << srcfiles.getOptValue(OPT::NATVIS);
 
         // The natvis file is relative to the build directory which is parellel to any src directory
         out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
-                                       << " PRIVATE \"$<$<CONFIG:Debug>:/natvis:" << file_path
-                                       << ">\")");
+                                       << " PRIVATE \"$<$<CONFIG:Debug>:/natvis:" << file_path << ">\")");
     }
 
     if (srcfiles.getRcName().size())
@@ -415,6 +417,11 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
             if (!iter.is_sameas("./"))
                 inc_path << iter;
 
+            if (file_prefix.size() && inc_path.is_sameprefix(ttlib::cstr() << "    " << file_prefix << "../"))
+            {
+                inc_path = "    ";
+                inc_path << iter.subview(3);
+            }
             out.emplace_back(inc_path);
         }
         out += ")";
