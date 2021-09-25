@@ -1,5 +1,7 @@
 // This header file is used to create a pre-compiled header for use in the entire project
 
+#pragma once
+
 #if defined(_WIN32)
 
 // Reduce the number of Windows files that get read
