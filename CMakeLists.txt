@@ -62,26 +62,28 @@ add_executable(ttBld
     src/writesrc.cpp        # Writes a new or update srcfiles.yaml file
     src/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
 
-    src/convert/convert.cpp       # Various conversion methods
-    src/convert/readcodelite.cpp  # Class for converting a CodeLite .project file to .srcfiles.yaml
-    src/convert/readdsp.cpp       # Class for converting a Visual Studio .DSP file to .srcfiles.yaml
-    src/convert/readvc.cpp        # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml
-    src/convert/readvcx.cpp       # Converts a Visual Studio project file into .srcfiles.yaml
-    src/convert/writevcx.cpp      # Create a Visual Studio project file
-    src/convert/write_cmake.cpp   # Create a CMakeLists.txt file
+    src/convert/convert.cpp          # Various conversion methods
+    src/convert/readcodelite.cpp     # Class for converting a CodeLite .project file to .srcfiles.yaml
+    src/convert/readdsp.cpp          # Class for converting a Visual Studio .DSP file to .srcfiles.yaml
+    src/convert/readvc.cpp           # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml
+    src/convert/readvcx.cpp          # Converts a Visual Studio project file into .srcfiles.yaml
+    src/convert/writevcx.cpp         # Create a Visual Studio project file
+    src/convert/write_cmake.cpp      # Create a CMakeLists.txt file
 
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
-    src/pugixml/pugixml.cpp        # Built directly rather than building a library
+    src/pugixml/pugixml.cpp          # Built directly rather than building a library
 
     # wxUiEditor generated classes and their derived version for displaying wxWidgets UI
 
-    src/ui/convertdlg.cpp          # Dialog specifying what to convert into a .srcfiles.yaml file
-    src/ui/vscodedlg.cpp           # Dialog for setting options to create tasks.json and launch.json
-    src/ui/optionsdlg.cpp          # Dialog for setting all .srcfile options
+    src/ui/convertdlg.cpp            # Dialog specifying what to convert into a .srcfiles.yaml file
+    src/ui/vscodedlg.cpp             # Dialog for setting options to create tasks.json and launch.json
+    src/ui/optionsdlg.cpp            # Dialog for setting all .srcfile options
 
-    src/ui/convertdlgBase.cpp       # wxUiEditor generated file
-    src/ui/optionsdlgBase.cpp       # wxUiEditor generated file
-    src/ui/vscodedlgBase.cpp        # wxUiEditor generated file
+    src/ui/convertdlgBase.cpp        # wxUiEditor generated file
+    src/ui/optionsdlgBase.cpp        # wxUiEditor generated file
+    src/ui/vscodedlgBase.cpp         # wxUiEditor generated file
+
+    # ttLib files
 
     ttlib/src/ttconsole.cpp   # Sets/restores console foreground color
     ttlib/src/ttcstr.cpp      # Class for handling zero-terminated char strings.
@@ -94,9 +96,6 @@ add_executable(ttBld
     ttlib/src/tttextfile.cpp  # Classes for reading and writing text files.
 
     ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
-
-# When ttBld generates the ninja scripts, the files in the DebugFiles section will ONLY be added to the
-# debug ninja scripts.
 
     $<$<CONFIG:Debug>:ttlib/src/winsrc/ttdebug_min.cpp>  # we use our own version of this to minimize Windows code requirements
 )
@@ -115,10 +114,11 @@ endif()
 
 target_precompile_headers(ttBld PRIVATE "src/precompile/pch.h")
 
-target_include_directories(ttBld PRIVATE
+target_include_directories(ttBld PRIVATE 
     src/
     src/precompile
     src/ui
     src/convert
     src/../ttlib/include
 )
+
