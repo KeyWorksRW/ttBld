@@ -103,7 +103,7 @@ add_executable(ttBld
 if (MSVC)
     # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build
     # /FC -- Full path to source code file in diagnostics
-    target_compile_options(ttBld PRIVATE "$<$<CONFIG:Release>:/GL>" "/FC" "/Zc:__cplusplus" "/utf-8")
+    target_compile_options(ttBld PRIVATE "$<$<CONFIG:Release>:/GL>" "/FC" "/W4" "/Zc:__cplusplus" "/utf-8")
     target_link_options(ttBld PRIVATE "$<$<CONFIG:Release>:/LTCG>")
 
     target_link_options(ttBld PRIVATE "$<$<CONFIG:Debug>:/natvis:../src/ttBld.natvis>")
@@ -114,11 +114,10 @@ endif()
 
 target_precompile_headers(ttBld PRIVATE "src/precompile/pch.h")
 
-target_include_directories(ttBld PRIVATE 
+target_include_directories(ttBld PRIVATE
     src/
     src/precompile
     src/ui
     src/convert
-    src/../ttlib/include
+    ttlib/include
 )
-
