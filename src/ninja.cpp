@@ -287,7 +287,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
     for (auto& srcFile: m_lstSrcFiles)
     {
         auto ext = srcFile.extension();
-        if (ext.empty() || std::tolower(ext[1] != 'c'))
+        if (ext.empty() || std::tolower(ext.at(1)) != 'c')
             continue;
         if (srcFile.is_sameas(m_pchCppName))
             continue;
@@ -336,7 +336,7 @@ bool CNinja::CreateBuildFile(GEN_TYPE gentype, CMPLR_TYPE cmplr)
         for (auto& srcFile: m_lstDebugFiles)
         {
             auto ext = srcFile.extension();
-            if (ext.empty() || std::tolower(ext[1] != 'c'))
+            if (ext.empty() || std::tolower(ext.at(1)) != 'c')
                 continue;
             if (srcFile.is_sameas(m_pchCppName))
                 continue;

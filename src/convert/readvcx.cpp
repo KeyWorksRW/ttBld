@@ -116,7 +116,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
         val = compile.child("WarningLevel").first_child().cvalue();
         if (val.empty())
         {
-            while (val.size() && !ttlib::is_digit(val[0]))
+            while (val.size() && !ttlib::is_digit(val.at(0)))
                 val.remove_prefix(1);
             m_writefile.setOptValue(OPT::WARN, val);
         }

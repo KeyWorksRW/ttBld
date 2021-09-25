@@ -518,7 +518,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
     for (auto file: m_lstSrcFiles)
     {
         auto ext = file.extension();
-        if (ext.empty() || std::tolower(ext[1] != 'c'))
+        if (ext.empty() || std::tolower(ext.at(1)) != 'c')
             continue;
         ttlib::cstr objFile(file.filename());
         objFile.replace_extension(".obj");
@@ -533,7 +533,7 @@ void CNinja::msvcWriteLinkTargets(CMPLR_TYPE /* cmplr */)
         for (auto file: m_lstDebugFiles)
         {
             auto ext = file.extension();
-            if (ext.empty() || std::tolower(ext[1] != 'c'))
+            if (ext.empty() || std::tolower(ext.at(1)) != 'c')
                 continue;
             ttlib::cstr objFile(file.filename());
             objFile.replace_extension(".obj");
