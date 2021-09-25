@@ -23,10 +23,10 @@
     <!-- ttLib visualizers -->
 
     <Type Name="ttlib::winff">
-      <DisplayString>{m_filename,s}</DisplayString>
+      <DisplayString>{m_filename,s8}</DisplayString>
     </Type>
     <Type Name="ttlib::openfile">
-      <DisplayString>{m_filename,s}</DisplayString>
+      <DisplayString>{m_filename,s8}</DisplayString>
     </Type>
 
     <Type Name="ttlib::cview">
