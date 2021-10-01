@@ -2,8 +2,7 @@
 <wxUiEditorData
   data_version="12">
   <node
-    class="Project"
-    local_pch_file="pch.h">
+    class="Project">
     <node
       class="wxDialog"
       base_file="vscodedlgBase"
