@@ -5,8 +5,6 @@
 // License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
-
 #include <utility>
 
 #include "ttcwd.h"       // Class for storing and optionally restoring the current directory

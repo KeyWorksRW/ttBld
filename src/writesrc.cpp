@@ -5,8 +5,6 @@
 // License:   Apache License -- see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
-
 #include <vector>
 
 #include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files

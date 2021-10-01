@@ -5,8 +5,6 @@
 // License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
-
 #include <wx/dirdlg.h>   // wxDirDialog base class
 #include <wx/filedlg.h>  // wxFileDialog base header
 

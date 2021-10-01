@@ -5,8 +5,6 @@
 // License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
-
 #include "verninja.h"  // CVerMakeNinja
 
 extern const char* txtOptVersion;  // The minimum version of ttBld required by a .srcfiles.yaml

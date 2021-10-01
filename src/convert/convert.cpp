@@ -7,8 +7,6 @@
 
 // Assumes that everything except a .DSP file is an xml file and has been parsed into m_xml
 
-#include "pch.h"
-
 #include <filesystem>
 
 #include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings

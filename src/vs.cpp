@@ -7,8 +7,6 @@
 
 // This generates files needed by Visual Studio. See vscode.cpp for generating files for Visual Studio Code.
 
-#include "pch.h"
-
 #include <filesystem>
 #include <vector>
 

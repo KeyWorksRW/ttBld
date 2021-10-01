@@ -5,8 +5,6 @@
 // License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
-
 #include <iostream>
 
 #include <wx/image.h>     // wxImage class

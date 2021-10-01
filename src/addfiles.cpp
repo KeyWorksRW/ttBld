@@ -5,8 +5,6 @@
 // License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
-
 #include "tttextfile.h"  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles

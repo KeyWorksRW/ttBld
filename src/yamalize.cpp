@@ -5,8 +5,6 @@
 // License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
-
 #include "uifuncs.h"   // Miscellaneous functions for displaying UI
 #include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
 
