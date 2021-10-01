@@ -11,8 +11,6 @@
     since a lot of the functionality of ttBld relies on comparison between a modified option and the original.
 */
 
-#include "pch.h"
-
 #include <array>
 
 #include "csrcfiles.h"

@@ -5,8 +5,6 @@
 // License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
-
 #ifdef _MSC_VER
     #define wxMSVC_VERSION_ABI_COMPAT
     #include <msvc/wx/setup.h>  // This will add #pragmas for the wxWidgets libraries
