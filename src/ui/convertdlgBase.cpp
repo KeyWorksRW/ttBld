@@ -37,7 +37,7 @@ bool ConvertDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     parent_sizer->Add(box_sizer2, wxSizerFlags().Expand().Border(wxALL));
 
     m_radioBtn = new wxRadioButton(this, wxID_ANY, wxString::FromUTF8("Create using all files in:"), wxDefaultPosition, wxDefaultSize,
-    wxRB_GROUP);
+        wxRB_GROUP);
     m_radioBtn->SetValidator(wxGenericValidator(&m_useAllFiles));
     box_sizer2->Add(m_radioBtn, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
@@ -59,8 +59,8 @@ bool ConvertDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     box_sizer4->Add(m_choiceProjects, wxSizerFlags(1).Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
     m_filePickerProject = new wxFilePickerCtrl(this, wxID_ANY, wxEmptyString, wxFileSelectorPromptStr, 
-    wxString::FromUTF8("Project Files|*.vcxproj;*.vcproj;*.project;*.cbp;*.dsp"), wxDefaultPosition, wxDefaultSize,
-    wxFLP_FILE_MUST_EXIST|wxFLP_OPEN);
+        wxString::FromUTF8("Project Files|*.vcxproj;*.vcproj;*.project;*.cbp;*.dsp"), wxDefaultPosition, wxDefaultSize,
+        wxFLP_FILE_MUST_EXIST|wxFLP_OPEN);
     box_sizer4->Add(m_filePickerProject, wxSizerFlags().Border(wxALL));
 
     auto box_sizer5 = new wxBoxSizer(wxVERTICAL);

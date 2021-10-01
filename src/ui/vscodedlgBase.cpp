@@ -44,7 +44,7 @@ bool VsCodeDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &titl
     box_sizer->Add(static_box_sizer2, wxSizerFlags().Expand().Border(wxALL));
 
     m_radioBtn = new wxRadioButton(static_box_sizer2->GetStaticBox(), wxID_ANY, wxString::FromUTF8("MSVC debug"), wxDefaultPosition, wxDefaultSize,
-    wxRB_GROUP);
+        wxRB_GROUP);
     m_radioBtn->SetValidator(wxGenericValidator(&m_defTaskMSVC));
     static_box_sizer2->Add(m_radioBtn, wxSizerFlags().Border(wxALL));
 
@@ -63,7 +63,7 @@ bool VsCodeDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &titl
     box_sizer2->Add(static_box_sizer3, wxSizerFlags(1).Expand().Border(wxALL));
 
     m_radioBtn4 = new wxRadioButton(static_box_sizer3->GetStaticBox(), wxID_ANY, wxString::FromUTF8("none"), wxDefaultPosition, wxDefaultSize,
-    wxRB_GROUP);
+        wxRB_GROUP);
     m_radioBtn4->SetValidator(wxGenericValidator(&m_preLaunchNone));
     static_box_sizer3->Add(m_radioBtn4, wxSizerFlags().Border(wxALL));
 

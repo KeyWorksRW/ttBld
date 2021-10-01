@@ -100,7 +100,7 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     box_sizer3->Add(staticText2, wxSizerFlags().Border(wxALL));
 
     auto radioBtn5 = new wxRadioButton(panel, wxID_ANY, wxString::FromUTF8("Space"), wxDefaultPosition, wxDefaultSize,
-    wxRB_GROUP);
+        wxRB_GROUP);
     radioBtn5->SetValidator(wxGenericValidator(&m_isSpaceOptimization));
     box_sizer3->Add(radioBtn5, wxSizerFlags().Border(wxALL));
 
@@ -125,8 +125,8 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     box_sizer5->Add(staticText4, wxSizerFlags().Center().Border(wxALL));
 
     m_PchHeaderPicker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, wxFileSelectorPromptStr, 
-    wxString::FromUTF8("Header files|*.h;*.hh;*.hpp;*.hxx"), wxDefaultPosition, wxDefaultSize,
-    wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
+        wxString::FromUTF8("Header files|*.h;*.hh;*.hpp;*.hxx"), wxDefaultPosition, wxDefaultSize,
+        wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
     box_sizer5->Add(m_PchHeaderPicker, wxSizerFlags().Border(wxALL));
 
     auto box_sizer6 = new wxBoxSizer(wxHORIZONTAL);
@@ -136,8 +136,8 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     box_sizer6->Add(staticText5, wxSizerFlags().Border(wxALL));
 
     m_PchSrcPicker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, wxFileSelectorPromptStr, 
-    wxString::FromUTF8("Source files|*.cpp;*.cc;*.cxx"), wxDefaultPosition, wxDefaultSize,
-    wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
+        wxString::FromUTF8("Source files|*.cpp;*.cc;*.cxx"), wxDefaultPosition, wxDefaultSize,
+        wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
     box_sizer6->Add(m_PchSrcPicker, wxSizerFlags().Border(wxALL));
 
     auto box_sizer7 = new wxBoxSizer(wxHORIZONTAL);
@@ -329,8 +329,8 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     box_sizer19->Add(staticText27, wxSizerFlags().Center().Border(wxALL));
 
     m_NatvisPicker = new wxFilePickerCtrl(panel6, wxID_ANY, wxEmptyString, wxFileSelectorPromptStr, 
-    wxString::FromUTF8("Natvis Files|*.natvis"), wxDefaultPosition, wxDefaultSize,
-    wxFLP_USE_TEXTCTRL|wxFLP_OPEN|wxFLP_FILE_MUST_EXIST);
+        wxString::FromUTF8("Natvis Files|*.natvis"), wxDefaultPosition, wxDefaultSize,
+        wxFLP_USE_TEXTCTRL|wxFLP_OPEN|wxFLP_FILE_MUST_EXIST);
     box_sizer19->Add(m_NatvisPicker, wxSizerFlags(1).Border(wxALL));
 
     panel6->SetSizerAndFit(parent_sizer8);
