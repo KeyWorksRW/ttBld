@@ -246,7 +246,10 @@ void CNinja::msvcWriteCompilerDirectives(CMPLR_TYPE cmplr)
     }
 
     if (HasPch())
+    {
         line << " -Yu" << getOptValue(OPT::PCH);
+        line << " -FI" << getOptValue(OPT::PCH);
+    }
 
     m_ninjafile.emplace_back("  description = compiling $in");
     m_ninjafile.addEmptyLine();
