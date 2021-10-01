@@ -171,7 +171,6 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
     {
         // unlike the non-MSVC compatible version, clang-cl.exe doesn't define this
         line << " -D__clang__";
-        line << " -fms-compatibility-version=19";
         if (m_gentype == GEN_DEBUG || m_gentype == GEN_RELEASE)
             line << " -m64";
         else
