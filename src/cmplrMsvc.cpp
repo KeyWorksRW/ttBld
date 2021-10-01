@@ -64,11 +64,22 @@ void CNinja::msvcWriteCompilerFlags(CMPLR_TYPE cmplr)
 
     if (m_gentype == GEN_DEBUG || m_gentype == GEN_DEBUG32)
     {
+        line << " -Od";
+
         // For MSVC compiler you can either use -Z7 or -FS -Zf -Zi. My testing of the two approaches is that -Z7 yields
         // larger object files but reduces compile/link time by about 20% (compile speed is faster because no serialized
         // writing to the PDB file). CLANG behaves the same with either -Z7 or -Zi but does not recognize -Zf.
 
-        line << " -Od -Z7";
+        if (cmplr == CMPLR_MSVC || (cmplr == CMPLR_CLANG && isOptTrue(OPT::MS_LINKER)))
+        {
+            line << " -Z7";
+        }
+        else
+        {
+            // When using lld as the linker, this will create the smallest object and pdb files, and somewhat speedup build
+            // times.
+            line << " -gcodeview";
+        }
 
         line << (IsStaticCrtDbg() ? " -MTd" : " -MDd");
 
