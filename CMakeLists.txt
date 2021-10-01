@@ -37,9 +37,38 @@ endif()
 
 add_compile_definitions($<$<CONFIG:Debug>:WXUSINGDLL>)
 
+if (WIN32)
+    set(win_ttlib_sources
+        ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
+
+        $<$<CONFIG:Debug>:ttlib/src/winsrc/ttdebug_min.cpp>
+    )
+
+    set(win_resource "src/ttBld.rc")
+endif()
+
+add_library(ttLib STATIC
+
+    ../ttLib/src/ttconsole.cpp          # class that sets/restores console foreground color
+    ../ttLib/src/ttcstr.cpp             # Class for handling zero-terminated char strings.
+    ../ttLib/src/ttcvector.cpp          # Vector class for storing ttlib::cstr strings
+    ../ttLib/src/ttcview.cpp            # string_view functionality on a zero-terminated char string.
+    ../ttLib/src/ttlibspace.cpp         # ttlib namespace functions
+    ../ttLib/src/ttmultistr.cpp         # Breaks a single string into multiple strings
+    ../ttLib/src/ttparser.cpp           # Command line parser
+    ../ttLib/src/ttstrings.cpp          # Class for handling zero-terminated char strings.
+    ../ttLib/src/ttsview.cpp            # std::string_view with additional methods
+    ../ttLib/src/tttextfile.cpp         # Classes for reading and writing text files.
+
+    ../ttLib/src/ttstr.cpp              # Enhanced version of wxString
+
+    ${win_ttlib_sources}
+
+)
+
 # Note the requirement that --config Debug is used to get the additional debug files
 add_executable(ttBld
-    src/ttBld.rc            # Windows resource files
+    ${win_resource}
 
     src/mainapp.cpp         # entry point, global strings, library pragmas
 
@@ -73,32 +102,21 @@ add_executable(ttBld
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     src/pugixml/pugixml.cpp          # Built directly rather than building a library
 
-    # wxUiEditor generated classes and their derived version for displaying wxWidgets UI
+    # wxUiEditor derived classes
 
     src/ui/convertdlg.cpp            # Dialog specifying what to convert into a .srcfiles.yaml file
-    src/ui/vscodedlg.cpp             # Dialog for setting options to create tasks.json and launch.json
     src/ui/optionsdlg.cpp            # Dialog for setting all .srcfile options
+    src/ui/vscodedlg.cpp             # Dialog for setting options to create tasks.json and launch.json
+
+    # wxUiEditor generated classes
 
     src/ui/convertdlgBase.cpp        # wxUiEditor generated file
     src/ui/optionsdlgBase.cpp        # wxUiEditor generated file
     src/ui/vscodedlgBase.cpp         # wxUiEditor generated file
 
-    # ttLib files
-
-    ttlib/src/ttconsole.cpp   # Sets/restores console foreground color
-    ttlib/src/ttcstr.cpp      # Class for handling zero-terminated char strings.
-    ttlib/src/ttcview.cpp     # string_view functionality on a zero-terminated char string.
-    ttlib/src/ttlibspace.cpp  # ttlib namespace functions
-    ttlib/src/ttmultistr.cpp  # Breaks a single string into multiple strings
-    ttlib/src/ttparser.cpp    # Command line parser
-    ttlib/src/ttstr.cpp       # ttString -- enhanced version of wxString
-    ttlib/src/ttsview.cpp     # std::string_view with additional methods
-    ttlib/src/tttextfile.cpp  # Classes for reading and writing text files.
-
-    ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
-
-    $<$<CONFIG:Debug>:ttlib/src/winsrc/ttdebug_min.cpp>  # we use our own version of this to minimize Windows code requirements
 )
+
+target_link_libraries(ttBld PRIVATE ttLib)
 
 if (MSVC)
     # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build
@@ -113,6 +131,7 @@ if (MSVC)
 endif()
 
 target_precompile_headers(ttBld PRIVATE "src/precompile/pch.h")
+target_precompile_headers(ttLib PRIVATE "src/precompile/pch.h")
 
 target_include_directories(ttBld PRIVATE
     src/
@@ -120,4 +139,9 @@ target_include_directories(ttBld PRIVATE
     src/ui
     src/convert
     ttlib/include
+)
+
+target_include_directories(ttLib PRIVATE
+    src/precompile
+    ttLib/include
 )
