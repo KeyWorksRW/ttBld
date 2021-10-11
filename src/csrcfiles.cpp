@@ -493,9 +493,9 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
             if (name.has_extension(".c") || name.has_extension(".cpp") || name.has_extension(".cxx"))
             {
                 if (m_section == SECTION_DEBUG_FILES)
-                   ttlib::add_if(m_lstDebugFiles, name);
+                    ttlib::add_if(m_lstDebugFiles, name);
                 else
-                    ttlib::add_if(m_lstSrcFiles,name);
+                    ttlib::add_if(m_lstSrcFiles, name);
             }
             else if (name.has_extension(".rc"))
             {

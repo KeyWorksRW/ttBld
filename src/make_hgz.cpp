@@ -8,8 +8,8 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <vector>
 #include <sstream>
+#include <vector>
 
 #include <wx/archive.h>   // Streams for archive formats
 #include <wx/file.h>      // wxFile - encapsulates low-level "file descriptor"
@@ -79,7 +79,8 @@ int MakeHgz(std::vector<ttlib::cstr>& files)
 
             ttlib::textfile file;
 
-            file.insertEmptyLine(0) << "// " << files[1].filename() << " -- comments and formatting removed, compressed with gizp";
+            file.insertEmptyLine(0) << "// " << files[1].filename()
+                                    << " -- comments and formatting removed, compressed with gizp";
             file.addEmptyLine();
             file.addEmptyLine() << "static const unsigned char " << str_name << '[' << strm_buffer->GetBufferSize()
                                 << "] = {";
