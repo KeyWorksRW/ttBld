@@ -1,4 +1,4 @@
 ./src/archive
-.src/pugixml
+./src/pugixml
 ./src/ui/*Base.*
 ./src/ui/ui_images.*
