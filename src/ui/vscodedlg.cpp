@@ -82,7 +82,7 @@ bool VsCodeDlg::CreateVsCodeLaunch(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr
         Launch.Replace("%bld%", "Ninja Debug Build");
     else
         Launch.Replace("%bld%", "");
-#else  // not defined(_WIN32)
+#else   // not defined(_WIN32)
     if (m_preLaunchMSVC)
         Launch.Replace("%bld%", "Build Debug GCC");
     else if (m_preLaunchCLANG)
