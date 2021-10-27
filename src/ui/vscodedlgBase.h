@@ -16,14 +16,14 @@ class VsCodeDlgBase : public wxDialog
 {
 public:
     VsCodeDlgBase() {}
-    VsCodeDlgBase(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = wxString::FromUTF8("Create .vscode files"),
+    VsCodeDlgBase(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = "Create .vscode files",
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_DIALOG_STYLE, const wxString &name = wxDialogNameStr)
     {
         Create(parent, id, title, pos, size, style, name);
     }
 
-    bool Create(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = wxString::FromUTF8("Create .vscode files"),
+    bool Create(wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& title = "Create .vscode files",
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_DIALOG_STYLE, const wxString &name = wxDialogNameStr);
 
