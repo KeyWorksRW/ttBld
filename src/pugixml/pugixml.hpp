@@ -1,7 +1,7 @@
 /**
- * pugixml parser - version 1.10
+ * pugixml parser - version 1.11
  * --------------------------------------------------------
- * Copyright (C) 2006-2019, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+ * Copyright (C) 2006-2020, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at https://pugixml.org/
  *
  * Github location: https://github.com/zeux/pugixml
@@ -19,7 +19,7 @@
 #ifndef PUGIXML_VERSION
 // Define version macro; evaluates to major * 1000 + minor * 10 + patch so that it's safe to use in less-than comparisons
 // Note: pugixml used major * 100 + minor * 10 + patch format up until 1.9 (which had version identifier 190); starting from pugixml 1.10, the minor version number is two digits
-#	define PUGIXML_VERSION 1100
+#	define PUGIXML_VERSION 1110
 #endif
 
 // Include user configuration file (this can define various configuration macros)
@@ -113,6 +113,15 @@
 #		define PUGIXML_OVERRIDE override
 #	else
 #		define PUGIXML_OVERRIDE
+#	endif
+#endif
+
+// If C++ is 2011 or higher, use 'nullptr'
+#ifndef PUGIXML_NULL
+#	if __cplusplus >= 201103
+#		define PUGIXML_NULL nullptr
+#	else
+#		define PUGIXML_NULL 0
 #	endif
 #endif
 
@@ -308,6 +317,8 @@ namespace pugi
 		It begin() const { return _begin; }
 		It end() const { return _end; }
 
+		bool empty() const { return _begin == _end; }
+
 	private:
 		It _begin, _end;
 	};
@@ -391,17 +402,23 @@ namespace pugi
 		const char_t* name() const;
 		const char_t* value() const;
 
-        // Get attribute value, or the default value if attribute is empty
+		// Get attribute value, or the default value if attribute is empty
 		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
 
+#ifndef PUGIXML_NO_STL
+		std::string_view view_name() const {  return { name() }; }
+        std::string as_str(const char_t* defvalue = PUGIXML_TEXT("")) const
+        {
+            return std::string(as_string(defvalue));
+        }
+#endif
+
 #if defined(_TTLIB_CVIEW_AVAILABLE_)
-        ttlib::cview cname() const { return { name() }; }
-        ttlib::cview cvalue() const { return { value() }; }
-        ttlib::cview cvalue(const char_t* defvalue) const { return { as_string(defvalue) }; }
+        ttlib::cview cname() const { return name(); }
+        ttlib::cview cvalue() const { return value(); }
         ttlib::cstr as_cstr(const char_t* defvalue = "") const
         {
-            ttlib::cstr str(as_string(defvalue));
-            return str;
+            return ttlib::cstr(as_string(defvalue));
         }
 #endif
 
@@ -517,18 +534,27 @@ namespace pugi
 		// Note: For <node>text</node> node.value() does not return "text"! Use child_value() or text() methods to access text inside nodes.
 		const char_t* value() const;
 
+#ifndef PUGIXML_NO_STL
+		std::string_view view_name() const {  return { name() }; }
+		std::string_view view_value() const {  return { value() }; }
+        std::string as_str() const
+        {
+            return std::string(value());
+        }
+#endif
+
 #if defined(_TTLIB_CVIEW_AVAILABLE_)
-        ttlib::cview cname() const { return { name() }; }
-        ttlib::cview cvalue() const { return { value() }; }
-        ttlib::cstr  as_cstr() const { ttlib::cstr str(value()); return str; }
+        ttlib::cview cname() const { return name(); }
+        ttlib::cview cvalue() const { return value(); }
+        ttlib::cstr  as_cstr() const { return ttlib::cstr(value()); }
 
 		ttlib::cview child_cvalue() const { return { child_value() }; }
-        ttlib::cstr  child_as_cstr() const { ttlib::cstr str(child_value()); return str; }
+        ttlib::cstr  child_as_cstr() const { return ttlib::cstr(child_value()); }
 
         // Get child value of child with specified name. Equivalent to child(name).child_cvalue().
-		ttlib::cview child_cvalue(const char_t* name) const { return { child_value(name) }; }
+		ttlib::cview child_cvalue(const char_t* name) const { return child_value(name); }
         // Get child value of child with specified name. Equivalent to child(name).child_as_cstr().
-        ttlib::cstr  child_as_cstr(const char_t* name) const { ttlib::cstr str(child_value(name)); return str; }
+        ttlib::cstr  child_as_cstr(const char_t* name) const { return ttlib::cstr(child_value(name)); }
 #endif
 
 		// Get attribute list
@@ -563,6 +589,7 @@ namespace pugi
 
 		// Get child value of current node; that is, value of the first child node of type PCDATA/CDATA
 		const char_t* child_value() const;
+
 		// Get child value of child with specified name. Equivalent to child(name).child_value().
 		const char_t* child_value(const char_t* name) const;
 
@@ -690,15 +717,15 @@ namespace pugi
 
 	#ifndef PUGIXML_NO_XPATH
 		// Select single node by evaluating XPath query. Returns first node from the resulting node set.
-		xpath_node select_node(const char_t* query, xpath_variable_set* variables = 0) const;
+		xpath_node select_node(const char_t* query, xpath_variable_set* variables = PUGIXML_NULL) const;
 		xpath_node select_node(const xpath_query& query) const;
 
 		// Select node set by evaluating XPath query
-		xpath_node_set select_nodes(const char_t* query, xpath_variable_set* variables = 0) const;
+		xpath_node_set select_nodes(const char_t* query, xpath_variable_set* variables = PUGIXML_NULL) const;
 		xpath_node_set select_nodes(const xpath_query& query) const;
 
 		// (deprecated: use select_node instead) Select single node by evaluating XPath query.
-		PUGIXML_DEPRECATED xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
+		PUGIXML_DEPRECATED xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = PUGIXML_NULL) const;
 		PUGIXML_DEPRECATED xpath_node select_single_node(const xpath_query& query) const;
 
 	#endif
@@ -778,12 +805,19 @@ namespace pugi
 		// Get text, or the default value if object is empty
 		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
 
-#if defined(_TTLIB_CVIEW_AVAILABLE_)
-        ttlib::cview cget() const { return { get() }; }
-        ttlib::cstr as_cstr(const char_t* defvalue = "") const
+#ifndef PUGIXML_NO_STL
+		std::string_view as_view() const { return get(); }
+        std::string as_str(const char_t* defvalue = PUGIXML_TEXT("")) const
         {
-            ttlib::cstr str(as_string(defvalue));
-            return str;
+            return std::string(as_string(defvalue));
+        }
+#endif
+
+#if defined(_TTLIB_CVIEW_AVAILABLE_)
+        ttlib::cview cget() const { return get(); }
+        ttlib::cstr as_cstr(const char_t* defvalue = PUGIXML_TEXT("")) const
+        {
+            return ttlib::cstr(as_string(defvalue));
         }
 #endif
 		// Get text as a number, or the default value if conversion did not succeed or object is empty
@@ -879,10 +913,10 @@ namespace pugi
 		xml_node& operator*() const;
 		xml_node* operator->() const;
 
-		const xml_node_iterator& operator++();
+		xml_node_iterator& operator++();
 		xml_node_iterator operator++(int);
 
-		const xml_node_iterator& operator--();
+		xml_node_iterator& operator--();
 		xml_node_iterator operator--(int);
 	};
 
@@ -921,10 +955,10 @@ namespace pugi
 		xml_attribute& operator*() const;
 		xml_attribute* operator->() const;
 
-		const xml_attribute_iterator& operator++();
+		xml_attribute_iterator& operator++();
 		xml_attribute_iterator operator++(int);
 
-		const xml_attribute_iterator& operator--();
+		xml_attribute_iterator& operator--();
 		xml_attribute_iterator operator--(int);
 	};
 
@@ -957,10 +991,10 @@ namespace pugi
 		xml_node& operator*() const;
 		xml_node* operator->() const;
 
-		const xml_named_node_iterator& operator++();
+		xml_named_node_iterator& operator++();
 		xml_named_node_iterator operator++(int);
 
-		const xml_named_node_iterator& operator--();
+		xml_named_node_iterator& operator--();
 		xml_named_node_iterator operator--(int);
 
 	private:
@@ -1249,7 +1283,7 @@ namespace pugi
 	public:
 		// Construct a compiled object from XPath expression.
 		// If PUGIXML_NO_EXCEPTIONS is not defined, throws xpath_exception on compilation errors.
-		explicit xpath_query(const char_t* query, xpath_variable_set* variables = 0);
+		explicit xpath_query(const char_t* query, xpath_variable_set* variables = PUGIXML_NULL);
 
 		// Constructor
 		xpath_query();
@@ -1502,7 +1536,7 @@ namespace std
 #endif
 
 /**
- * Copyright (c) 2006-2019 Arseny Kapoulkine
+ * Copyright (c) 2006-2020 Arseny Kapoulkine
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
