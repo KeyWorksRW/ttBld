@@ -14,7 +14,7 @@
 class CConvert
 {
 public:
-    CConvert() { m_writefile.InitOptions(); }
+    CConvert() { m_srcfiles.InitOptions(); }
 
     bld::RESULT ConvertVc(const std::string& srcFile, std::string_view dstFile);
     bld::RESULT ConvertVcx(const std::string& srcFile, std::string_view dstFile);
@@ -33,7 +33,7 @@ protected:
 
 private:
     pugi::xml_document m_xmldoc;
-    CWriteSrcFiles m_writefile;
+    CWriteSrcFiles m_srcfiles;
 
     ttlib::cstr m_srcFile;
     ttlib::cstr m_dstFile;

@@ -52,7 +52,7 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
             // Since the .srcfiles may be in a different location, we then need to make the file relative to that.
 
             MakeNameRelative(filename);
-            m_writefile.GetSrcFileList().emplace_back(filename);
+            m_srcfiles.GetSrcFileList().emplace_back(filename);
         }
     }
 
@@ -83,15 +83,15 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
     }
 
     // If debug and release libraries are identical, switch them to shared libraries
-    if (m_writefile.hasOptValue(OPT::LIBS_DBG) && m_writefile.hasOptValue(OPT::LIBS_REL) &&
-        m_writefile.getOptValue(OPT::LIBS_DBG) == m_writefile.getOptValue(OPT::LIBS_REL))
+    if (m_srcfiles.hasOptValue(OPT::LIBS_DBG) && m_srcfiles.hasOptValue(OPT::LIBS_REL) &&
+        m_srcfiles.getOptValue(OPT::LIBS_DBG) == m_srcfiles.getOptValue(OPT::LIBS_REL))
     {
-        m_writefile.setOptValue(OPT::LIBS_CMN, m_writefile.getOptValue(OPT::LIBS_DBG));
-        m_writefile.setOptValue(OPT::LIBS_DBG, {});
-        m_writefile.setOptValue(OPT::LIBS_REL, {});
+        m_srcfiles.setOptValue(OPT::LIBS_CMN, m_srcfiles.getOptValue(OPT::LIBS_DBG));
+        m_srcfiles.setOptValue(OPT::LIBS_DBG, {});
+        m_srcfiles.setOptValue(OPT::LIBS_REL, {});
     }
 
-    return m_writefile.WriteNew(dstFile);
+    return m_srcfiles.WriteNew(dstFile);
 }
 
 void CConvert::MakeNameRelative(ttlib::cstr& filename)
@@ -109,14 +109,14 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
     {
         auto val = compile.child("PrecompiledHeader").first_child().cvalue();
         if (!val.empty() && !ttlib::is_sameprefix(val, "NotUsing", tt::CASE::either))
-            m_writefile.setOptValue(OPT::PCH, val);
+            m_srcfiles.setOptValue(OPT::PCH, val);
 
         val = compile.child("WarningLevel").first_child().cvalue();
         if (val.empty())
         {
             while (val.size() && !ttlib::is_digit(val.at(0)))
                 val.remove_prefix(1);
-            m_writefile.setOptValue(OPT::WARN, val);
+            m_srcfiles.setOptValue(OPT::WARN, val);
         }
 
         val = compile.child("AdditionalIncludeDirectories").first_child().cvalue();
@@ -135,7 +135,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
                 Includes << filename;
             }
             if (!Includes.empty())
-                m_writefile.setOptValue(OPT::INC_DIRS, Includes);
+                m_srcfiles.setOptValue(OPT::INC_DIRS, Includes);
         }
 
         val = compile.child("PreprocessorDefinitions").first_child().cvalue();
@@ -148,7 +148,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
             Flags.Replace("WINDOWS;", "");
             Flags.Replace(";%(PreprocessorDefinitions)", "");
             Flags.Replace(";", " -D", true);
-            m_writefile.setOptValue(OPT::CFLAGS_DBG, Flags);
+            m_srcfiles.setOptValue(OPT::CFLAGS_DBG, Flags);
         }
     }
 
@@ -157,7 +157,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
         if (auto val = link.child("SubSystem").first_child().cvalue();
             val.size() && val.is_sameprefix("Console", tt::CASE::either))
         {
-            m_writefile.setOptValue(OPT::EXE_TYPE, "console");
+            m_srcfiles.setOptValue(OPT::EXE_TYPE, "console");
         }
 
         if (auto libs = link.child("AdditionalDependencies").first_child().as_cstr(); libs.size())
@@ -165,14 +165,14 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
             libs.Replace(";%(AdditionalDependencies)", "");
 
             if (libs.size())
-                m_writefile.setOptValue(OPT::LIBS_DBG, libs);
+                m_srcfiles.setOptValue(OPT::LIBS_DBG, libs);
         }
 
         if (auto options = link.child("AdditionalOptions").first_child().as_cstr(); options.size())
         {
             options.Replace("%(AdditionalOptions)", "");
             if (options.size())
-                m_writefile.setOptValue(OPT::LINK_DBG, options);
+                m_srcfiles.setOptValue(OPT::LINK_DBG, options);
         }
     }
 }
@@ -183,7 +183,7 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
     {
         auto val = compile.child("FavorSizeOrSpeed").first_child().cvalue();
         if (ttlib::is_sameprefix(val, "Speed", tt::CASE::either))
-            m_writefile.setOptValue(OPT::OPTIMIZE, "speed");
+            m_srcfiles.setOptValue(OPT::OPTIMIZE, "speed");
 
         val = compile.child("PreprocessorDefinitions").first_child().cvalue();
         if (!val.empty())
@@ -195,7 +195,7 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
             Flags.Replace("WINDOWS;", "");
             Flags.Replace(";%(PreprocessorDefinitions)", "");
             Flags.Replace(";", " -D", true);
-            m_writefile.setOptValue(OPT::CFLAGS_DBG, Flags);
+            m_srcfiles.setOptValue(OPT::CFLAGS_DBG, Flags);
         }
     }
 
@@ -204,7 +204,7 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
         if (auto val = link.child("SubSystem").first_child().cvalue();
             val.size() && val.is_sameprefix("Console", tt::CASE::either))
         {
-            m_writefile.setOptValue(OPT::EXE_TYPE, "console");
+            m_srcfiles.setOptValue(OPT::EXE_TYPE, "console");
         }
 
         if (auto libs = link.child("AdditionalDependencies").first_child().as_cstr(); libs.size())
@@ -212,14 +212,14 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
             libs.Replace(";%(AdditionalDependencies)", "");
 
             if (libs.size())
-                m_writefile.setOptValue(OPT::LIBS_REL, libs);
+                m_srcfiles.setOptValue(OPT::LIBS_REL, libs);
         }
 
         if (auto options = link.child("AdditionalOptions").first_child().as_cstr(); options.size())
         {
             options.Replace("%(AdditionalOptions)", "");
             if (options.size())
-                m_writefile.setOptValue(OPT::LINK_REL, options);
+                m_srcfiles.setOptValue(OPT::LINK_REL, options);
         }
     }
 }
