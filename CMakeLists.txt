@@ -108,7 +108,6 @@ add_executable(ttBld
     # wxUiEditor derived classes
 
     src/ui/convertdlg.cpp            # Dialog specifying what to convert into a .srcfiles.yaml file
-    src/ui/convertvs.cpp             # Dialog to get file and path for VS to CMake conversion
     src/ui/optionsdlg.cpp            # Dialog for setting all .srcfile options
     src/ui/vscodedlg.cpp             # Dialog for setting options to create tasks.json and launch.json
 

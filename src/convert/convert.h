@@ -26,6 +26,7 @@ public:
 
     bld::RESULT CreateCmakeProject(ttlib::cstr& projectFile);
     bld::RESULT WriteCmakeProject();
+    bld::RESULT ConvertToCmakeProject();
 
     void DontCreateSrcFiles() { m_CreateSrcFiles = false; }
 

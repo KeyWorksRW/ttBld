@@ -130,13 +130,17 @@ public:
 
     const auto& getErrorMsgs() { return m_lstErrMessages; }
 
+    // Returns the address of the vector containing all source files
     auto& GetSrcFileList() { return m_lstSrcFiles; }
+
+    // Returns the address of the vector containing all debug-only source files
     auto& GetDebugFileList() { return m_lstDebugFiles; }
 
     void SetReportingFile(std::string_view filename) { m_ReportPath = filename; }
 
     void AddError(std::string_view err);
 
+    // Initialize default options
     void InitOptions();
 
     bool isOptionRequired(OPT::value option) const

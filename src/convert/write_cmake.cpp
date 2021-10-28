@@ -10,9 +10,10 @@
 #include "ttsview.h"     // sview -- std::string_view with additional methods
 #include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
-#include "convert.h"    // CConvert -- Class for converting project build files to .srcfiles.yaml
-#include "csrcfiles.h"  // CSrcFiles
-#include "uifuncs.h"    // Miscellaneous functions for displaying UI
+#include "convert.h"         // CConvert -- Class for converting project build files to .srcfiles.yaml
+#include "convertvs_base.h"  // ConvertVS -- Dialog to get file and path for VS to CMake conversion
+#include "csrcfiles.h"       // CSrcFiles
+#include "uifuncs.h"         // Miscellaneous functions for displaying UI
 
 #include "../pugixml/pugixml.hpp"  // pugixml parser
 
@@ -568,4 +569,63 @@ void CConvert::CMakeAddFiles(ttlib::textfile& out)
             out.emplace_back(ttlib::cstr() << "    $<$<CONFIG:Debug>:" << iter << '>');
         }
     }
+}
+
+bld::RESULT CConvert::ConvertToCmakeProject()
+{
+    ConvertVS dlg(nullptr);
+    if (dlg.ShowModal() != wxID_OK)
+        return bld::RESULT::failure;
+
+    while (dlg.m_filePicker->GetPath().IsEmpty())
+    {
+        appMsgBox("You need to specify a VS Project file to convert.", "Convert Visual Studio Project");
+        if (dlg.ShowModal() != wxID_OK)
+            return bld::RESULT::failure;
+    }
+
+    bld::RESULT result = bld::failure;
+    ttlib::cstr project_file = dlg.m_filePicker->GetPath().ToUTF8().data();
+    auto extension = project_file.extension();
+    if (!extension.empty())
+    {
+        if (extension.is_sameas(".vcxproj", tt::CASE::either))
+        {
+            result = ConvertVcx(project_file, ttlib::emptystring);
+        }
+        else if (extension.is_sameas(".vcproj", tt::CASE::either))
+        {
+            result = ConvertVc(project_file, ttlib::emptystring);
+        }
+        else if (extension.is_sameas(".dsp", tt::CASE::either))
+        {
+            result = ConvertDsp(project_file, ttlib::emptystring);
+        }
+        else if (extension.is_sameas(".project", tt::CASE::either))
+        {
+            result = ConvertCodeLite(project_file, ttlib::emptystring);
+        }
+        else if (project_file.is_sameprefix(".srcfiles", tt::CASE::either))
+        {
+            result = ConvertSrcfiles(project_file, ttlib::emptystring);
+        }
+
+        if (result == bld::read_failed)
+        {
+            appMsgBox(ttlib::cstr("Cannot open ") << project_file, "Project conversion");
+        }
+    }
+    else
+    {
+        m_srcfiles.AddSourcePattern("*.c;*.cpp;*.cc;*.cxx");
+        result = bld::success;
+    }
+
+    if (result == bld::success)
+    {
+        m_dstDir = dlg.m_dirPicker->GetPath().ToUTF8().data();
+        result = WriteCmakeProject();
+    }
+
+    return result;
 }
