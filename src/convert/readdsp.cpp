@@ -286,5 +286,5 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
         }
     }
 
-    return m_srcfiles.WriteNew(dstFile);
+    return (m_CreateSrcFiles ? m_srcfiles.WriteNew(dstFile) : bld::RESULT::success);
 }

@@ -22,6 +22,8 @@ public:
     bld::RESULT ConvertCodeLite(const std::string& srcFile, std::string_view dstFile);
     bld::RESULT ConvertSrcfiles(const std::string& srcFile, std::string_view dstFile);
 
+    void DontCreateSrcFiles() { m_CreateSrcFiles = false; }
+
 protected:
     void MakeNameRelative(ttlib::cstr& filename);
 
@@ -39,4 +41,6 @@ private:
     ttlib::cstr m_dstFile;
     ttlib::cstr m_srcDir;
     ttlib::cstr m_dstDir;
+
+    bool m_CreateSrcFiles { true };
 };

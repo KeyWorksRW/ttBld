@@ -120,7 +120,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
         }
     }
 
-    return m_srcfiles.WriteNew(dstFile);
+    return (m_CreateSrcFiles ? m_srcfiles.WriteNew(dstFile) : bld::RESULT::success);
 }
 
 void CConvert::ProcessVcDebug(pugi::xml_node node)

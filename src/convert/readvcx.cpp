@@ -91,7 +91,7 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
         m_srcfiles.setOptValue(OPT::LIBS_REL, {});
     }
 
-    return m_srcfiles.WriteNew(dstFile);
+    return (m_CreateSrcFiles ? m_srcfiles.WriteNew(dstFile) : bld::RESULT::success);
 }
 
 void CConvert::MakeNameRelative(ttlib::cstr& filename)

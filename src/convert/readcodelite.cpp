@@ -89,5 +89,5 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
         }
     }
 
-    return m_srcfiles.WriteNew(dstFile);
+    return (m_CreateSrcFiles ? m_srcfiles.WriteNew(dstFile) : bld::RESULT::success);
 }
