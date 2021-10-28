@@ -25,7 +25,7 @@ public:
     bld::RESULT ConvertSrcfiles(const std::string& srcFile, std::string_view dstFile);
 
     bld::RESULT CreateCmakeProject(ttlib::cstr& projectFile);
-    bld::RESULT CConvert::WriteCmakeProject();
+    bld::RESULT WriteCmakeProject();
 
     void DontCreateSrcFiles() { m_CreateSrcFiles = false; }
 

@@ -250,6 +250,10 @@ bld::RESULT CConvert::WriteCmakeProject()
         }
         CMakeAddFilesSection(in, out, file_pos);
     }
+    else
+    {
+        CMakeAddFiles(out);
+    }
 
     if (need_blank_line)
     {
@@ -521,4 +525,47 @@ void CConvert::CMakeAddFilesSection(ttlib::viewfile& in, ttlib::textfile& out, s
 
     out += ")";
     out += "";
+}
+
+void CConvert::CMakeAddFiles(ttlib::textfile& out)
+{
+    for (auto& iter: m_srcfiles.GetSrcFileList())
+    {
+        if (m_srcDir.size())
+        {
+            ttlib::cstr path;
+            ttlib::cstr non_relative;
+            non_relative << m_srcDir << "../";
+            path << m_srcDir << ttlib::find_nonspace(iter);
+            if (path.is_sameprefix(non_relative))
+            {
+                path.erase(0, non_relative.size());
+            }
+            out.emplace_back(ttlib::cstr() << "    " << path);
+        }
+        else
+        {
+            out += iter;
+        }
+    }
+
+    for (auto& iter: m_srcfiles.GetDebugFileList())
+    {
+        if (m_srcDir.size())
+        {
+            ttlib::cstr path;
+            ttlib::cstr non_relative;
+            non_relative << m_srcDir << "../";
+            path << m_srcDir << ttlib::find_nonspace(iter);
+            if (path.is_sameprefix(non_relative))
+            {
+                path.erase(0, non_relative.size());
+            }
+            out.emplace_back(ttlib::cstr() << "    $<$<CONFIG:Debug>:" << path << '>');
+        }
+        else
+        {
+            out.emplace_back(ttlib::cstr() << "    $<$<CONFIG:Debug>:" << iter << '>');
+        }
+    }
 }
