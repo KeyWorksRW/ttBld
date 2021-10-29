@@ -60,7 +60,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                     {
                         ttlib::cstr relative(path);
                         MakeNameRelative(relative);
-                        m_writefile.GetSrcFileList().emplace_back(relative);
+                        m_srcfiles.GetSrcFileList().emplace_back(relative);
                     }
                 }
             }
@@ -76,8 +76,8 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                         if (relative.has_extension(".rc"))
                         {
                             MakeNameRelative(relative);
-                            m_writefile.GetSrcFileList().emplace_back(relative);
-                            m_writefile.SetRcName(relative);
+                            m_srcfiles.GetSrcFileList().emplace_back(relative);
+                            m_srcfiles.SetRcName(relative);
                         }
                     }
                 }
@@ -111,16 +111,16 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                 ReleaseProcessed = true;
                 auto type = configs[pos].node().attribute("ConfigurationType").cvalue();
                 if (type.is_sameas("1"))
-                    m_writefile.setOptValue(OPT::EXE_TYPE, "window");
+                    m_srcfiles.setOptValue(OPT::EXE_TYPE, "window");
                 else if (type.is_sameas("2"))
-                    m_writefile.setOptValue(OPT::EXE_TYPE, "console");
+                    m_srcfiles.setOptValue(OPT::EXE_TYPE, "console");
                 else if (type.is_sameas("4"))
-                    m_writefile.setOptValue(OPT::EXE_TYPE, "dll");
+                    m_srcfiles.setOptValue(OPT::EXE_TYPE, "dll");
             }
         }
     }
 
-    return m_writefile.WriteNew(dstFile);
+    return (m_CreateSrcFiles ? m_srcfiles.WriteNew(dstFile) : bld::RESULT::success);
 }
 
 void CConvert::ProcessVcDebug(pugi::xml_node node)
@@ -140,7 +140,7 @@ void CConvert::ProcessVcDebug(pugi::xml_node node)
                 Flags.Replace("WINDOWS;", "");
                 Flags.Replace(";%(PreprocessorDefinitions)", "");
                 Flags.Replace(";", " -D", true);
-                m_writefile.setOptValue(OPT::CFLAGS_DBG, Flags);
+                m_srcfiles.setOptValue(OPT::CFLAGS_DBG, Flags);
             }
         }
     }
@@ -163,19 +163,19 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
                 Flags.Replace("WINDOWS;", "");
                 Flags.Replace(";%(PreprocessorDefinitions)", "");
                 Flags.Replace(";", " -D", true);
-                m_writefile.setOptValue(OPT::CFLAGS_REL, Flags);
+                m_srcfiles.setOptValue(OPT::CFLAGS_REL, Flags);
             }
 
             val = tool.attribute("WarningLevel").cvalue();
             if (!val.empty())
             {
-                m_writefile.setOptValue(OPT::WARN, val);
+                m_srcfiles.setOptValue(OPT::WARN, val);
             }
 
             val = tool.attribute("PrecompiledHeaderFile").cvalue();
             if (!val.empty())
             {
-                m_writefile.setOptValue(OPT::PCH, val);
+                m_srcfiles.setOptValue(OPT::PCH, val);
             }
 
             auto incs = tool.attribute("AdditionalIncludeDirectories").as_cstr();
@@ -191,21 +191,21 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
                     Includes << filename;
                 }
                 if (!Includes.empty())
-                    m_writefile.setOptValue(OPT::INC_DIRS, Includes);
+                    m_srcfiles.setOptValue(OPT::INC_DIRS, Includes);
             }
         }
         else if (name.is_sameas("VCLinkerTool", tt::CASE::either))
         {
             if (auto val = tool.attribute("AdditionalDependencies").cvalue(); val.size())
             {
-                m_writefile.setOptValue(OPT::LIBS_DBG, val);
+                m_srcfiles.setOptValue(OPT::LIBS_DBG, val);
             }
 
             auto filename = tool.attribute("OutputFile").as_cstr();
-            if (filename.size() && m_writefile.GetProjectName().empty())
+            if (filename.size() && m_srcfiles.GetProjectName().empty())
             {
                 filename.remove_extension();
-                m_writefile.setOptValue(OPT::PROJECT, filename.filename());
+                m_srcfiles.setOptValue(OPT::PROJECT, filename.filename());
             }
         }
     }

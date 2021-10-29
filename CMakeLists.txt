@@ -37,6 +37,9 @@ endif()
 
 add_compile_definitions($<$<CONFIG:Debug>:WXUSINGDLL>)
 
+list(APPEND CMAKE_MODULE_PATH "src/ui/")
+include(src/ui/wxui_code.cmake)  # This will set ${wxue_generated_code} with list of generated files
+
 if (WIN32)
     set(win_ttlib_sources
         ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
@@ -108,12 +111,7 @@ add_executable(ttBld
     src/ui/optionsdlg.cpp            # Dialog for setting all .srcfile options
     src/ui/vscodedlg.cpp             # Dialog for setting options to create tasks.json and launch.json
 
-    # wxUiEditor generated classes
-
-    src/ui/convertdlgBase.cpp        # wxUiEditor generated file
-    src/ui/optionsdlgBase.cpp        # wxUiEditor generated file
-    src/ui/vscodedlgBase.cpp         # wxUiEditor generated file
-
+    ${wxue_generated_code}
 )
 
 target_link_libraries(ttBld PRIVATE ttLib)

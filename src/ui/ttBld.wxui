@@ -2,7 +2,8 @@
 <wxUiEditorData
   data_version="12">
   <node
-    class="Project">
+    class="Project"
+    generate_cmake="true">
     <node
       class="wxDialog"
       base_file="vscodedlgBase"
@@ -912,6 +913,57 @@
               </node>
             </node>
           </node>
+        </node>
+        <node
+          class="wxStdDialogButtonSizer"
+          flags="wxEXPAND" />
+      </node>
+    </node>
+    <node
+      class="wxDialog"
+      base_file="convertvs_base"
+      class_name="ConvertVS"
+      title="Convert Visual Studio Project"
+      wxEVT_INIT_DIALOG="[this](wxInitDialogEvent&amp; event)@@{ @@m_dirPicker->SetPath(wxFileName::GetCwd());@@m_filePicker->SetInitialDirectory(wxFileName::GetCwd());@@event.Skip();@@}">
+      <node
+        class="wxBoxSizer"
+        orientation="wxVERTICAL"
+        var_name="dlg_sizer"
+        flags="wxEXPAND">
+        <node
+          class="wxBoxSizer">
+          <node
+            class="wxStaticText"
+            class_access="none"
+            label="Specify the filename of the Visual Studio project file you wish to convert, and the CMake root directory where the CmakeLists.txt file should be created."
+            var_name="staticText_3"
+            wrap="350" />
+        </node>
+        <node
+          class="wxFlexGridSizer"
+          minimum_size="-1,-1"
+          flags="wxEXPAND"
+          proportion="1">
+          <node
+            class="wxStaticText"
+            class_access="none"
+            label="VS Project:"
+            var_name="staticText"
+            alignment="wxALIGN_CENTER_VERTICAL" />
+          <node
+            class="wxFilePickerCtrl"
+            class_access="public:"
+            minimum_size="250,-1" />
+          <node
+            class="wxStaticText"
+            class_access="none"
+            label="CMake Root:"
+            var_name="staticText_2"
+            alignment="wxALIGN_CENTER_VERTICAL" />
+          <node
+            class="wxDirPickerCtrl"
+            class_access="public:"
+            minimum_size="250,-1" />
         </node>
         <node
           class="wxStdDialogButtonSizer"

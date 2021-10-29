@@ -61,59 +61,59 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
 
     // First we copy all the options. Then we tweak those that will need to be changed to use a different path.
 
-    m_writefile.setOptValue(OPT::PROJECT, srcOrg.getOptValue(OPT::PROJECT));
-    m_writefile.setOptValue(OPT::EXE_TYPE, srcOrg.getOptValue(OPT::EXE_TYPE));
-    m_writefile.setOptValue(OPT::PCH, srcOrg.getOptValue(OPT::PCH));
+    m_srcfiles.setOptValue(OPT::PROJECT, srcOrg.getOptValue(OPT::PROJECT));
+    m_srcfiles.setOptValue(OPT::EXE_TYPE, srcOrg.getOptValue(OPT::EXE_TYPE));
+    m_srcfiles.setOptValue(OPT::PCH, srcOrg.getOptValue(OPT::PCH));
 
-    m_writefile.setOptValue(OPT::OPTIMIZE, srcOrg.getOptValue(OPT::OPTIMIZE));
-    m_writefile.SetRequired(OPT::OPTIMIZE);
-    m_writefile.setOptValue(OPT::WARN, srcOrg.getOptValue(OPT::WARN));
-    m_writefile.SetRequired(OPT::WARN);
+    m_srcfiles.setOptValue(OPT::OPTIMIZE, srcOrg.getOptValue(OPT::OPTIMIZE));
+    m_srcfiles.SetRequired(OPT::OPTIMIZE);
+    m_srcfiles.setOptValue(OPT::WARN, srcOrg.getOptValue(OPT::WARN));
+    m_srcfiles.SetRequired(OPT::WARN);
 
-    m_writefile.setOptValue(OPT::CFLAGS_CMN, srcOrg.getOptValue(OPT::CFLAGS_CMN));
-    m_writefile.setOptValue(OPT::CFLAGS_REL, srcOrg.getOptValue(OPT::CFLAGS_REL));
-    m_writefile.setOptValue(OPT::CFLAGS_DBG, srcOrg.getOptValue(OPT::CFLAGS_DBG));
+    m_srcfiles.setOptValue(OPT::CFLAGS_CMN, srcOrg.getOptValue(OPT::CFLAGS_CMN));
+    m_srcfiles.setOptValue(OPT::CFLAGS_REL, srcOrg.getOptValue(OPT::CFLAGS_REL));
+    m_srcfiles.setOptValue(OPT::CFLAGS_DBG, srcOrg.getOptValue(OPT::CFLAGS_DBG));
 
-    m_writefile.setOptValue(OPT::MSVC_CMN, srcOrg.getOptValue(OPT::MSVC_CMN));
-    m_writefile.setOptValue(OPT::MSVC_REL, srcOrg.getOptValue(OPT::MSVC_REL));
-    m_writefile.setOptValue(OPT::MSVC_DBG, srcOrg.getOptValue(OPT::MSVC_DBG));
+    m_srcfiles.setOptValue(OPT::MSVC_CMN, srcOrg.getOptValue(OPT::MSVC_CMN));
+    m_srcfiles.setOptValue(OPT::MSVC_REL, srcOrg.getOptValue(OPT::MSVC_REL));
+    m_srcfiles.setOptValue(OPT::MSVC_DBG, srcOrg.getOptValue(OPT::MSVC_DBG));
 
-    m_writefile.setOptValue(OPT::CLANG_CMN, srcOrg.getOptValue(OPT::CLANG_CMN));
-    m_writefile.setOptValue(OPT::CLANG_REL, srcOrg.getOptValue(OPT::CLANG_REL));
-    m_writefile.setOptValue(OPT::CLANG_DBG, srcOrg.getOptValue(OPT::CLANG_DBG));
+    m_srcfiles.setOptValue(OPT::CLANG_CMN, srcOrg.getOptValue(OPT::CLANG_CMN));
+    m_srcfiles.setOptValue(OPT::CLANG_REL, srcOrg.getOptValue(OPT::CLANG_REL));
+    m_srcfiles.setOptValue(OPT::CLANG_DBG, srcOrg.getOptValue(OPT::CLANG_DBG));
 
-    m_writefile.setOptValue(OPT::LINK_CMN, srcOrg.getOptValue(OPT::LINK_CMN));
-    m_writefile.setOptValue(OPT::LINK_REL, srcOrg.getOptValue(OPT::LINK_REL));
-    m_writefile.setOptValue(OPT::LINK_DBG, srcOrg.getOptValue(OPT::LINK_DBG));
+    m_srcfiles.setOptValue(OPT::LINK_CMN, srcOrg.getOptValue(OPT::LINK_CMN));
+    m_srcfiles.setOptValue(OPT::LINK_REL, srcOrg.getOptValue(OPT::LINK_REL));
+    m_srcfiles.setOptValue(OPT::LINK_DBG, srcOrg.getOptValue(OPT::LINK_DBG));
 
 #if defined(_WIN32)
-    m_writefile.setOptValue(OPT::NATVIS, srcOrg.getOptValue(OPT::NATVIS));
+    m_srcfiles.setOptValue(OPT::NATVIS, srcOrg.getOptValue(OPT::NATVIS));
 
-    m_writefile.setOptValue(OPT::RC_CMN, srcOrg.getOptValue(OPT::RC_CMN));
-    m_writefile.setOptValue(OPT::RC_REL, srcOrg.getOptValue(OPT::RC_REL));
-    m_writefile.setOptValue(OPT::RC_DBG, srcOrg.getOptValue(OPT::RC_DBG));
+    m_srcfiles.setOptValue(OPT::RC_CMN, srcOrg.getOptValue(OPT::RC_CMN));
+    m_srcfiles.setOptValue(OPT::RC_REL, srcOrg.getOptValue(OPT::RC_REL));
+    m_srcfiles.setOptValue(OPT::RC_DBG, srcOrg.getOptValue(OPT::RC_DBG));
 
-    m_writefile.setOptValue(OPT::MIDL_CMN, srcOrg.getOptValue(OPT::MIDL_CMN));
-    m_writefile.setOptValue(OPT::MIDL_REL, srcOrg.getOptValue(OPT::MIDL_REL));
-    m_writefile.setOptValue(OPT::MIDL_DBG, srcOrg.getOptValue(OPT::MIDL_DBG));
+    m_srcfiles.setOptValue(OPT::MIDL_CMN, srcOrg.getOptValue(OPT::MIDL_CMN));
+    m_srcfiles.setOptValue(OPT::MIDL_REL, srcOrg.getOptValue(OPT::MIDL_REL));
+    m_srcfiles.setOptValue(OPT::MIDL_DBG, srcOrg.getOptValue(OPT::MIDL_DBG));
 
-    m_writefile.setOptValue(OPT::MS_LINKER, srcOrg.getOptValue(OPT::MS_LINKER));
+    m_srcfiles.setOptValue(OPT::MS_LINKER, srcOrg.getOptValue(OPT::MS_LINKER));
 
 #endif  // defined(_WIN32)
 
-    m_writefile.setOptValue(OPT::CRT_REL, srcOrg.getOptValue(OPT::CRT_REL));
-    m_writefile.setOptValue(OPT::CRT_DBG, srcOrg.getOptValue(OPT::CRT_DBG));
+    m_srcfiles.setOptValue(OPT::CRT_REL, srcOrg.getOptValue(OPT::CRT_REL));
+    m_srcfiles.setOptValue(OPT::CRT_DBG, srcOrg.getOptValue(OPT::CRT_DBG));
 
-    m_writefile.setOptValue(OPT::BIT64, srcOrg.getOptValue(OPT::BIT64));
-    m_writefile.setOptValue(OPT::TARGET_DIR64, srcOrg.getOptValue(OPT::TARGET_DIR64));
-    m_writefile.setOptValue(OPT::BIT32, srcOrg.getOptValue(OPT::BIT32));
-    m_writefile.setOptValue(OPT::TARGET_DIR32, srcOrg.getOptValue(OPT::TARGET_DIR32));
+    m_srcfiles.setOptValue(OPT::BIT64, srcOrg.getOptValue(OPT::BIT64));
+    m_srcfiles.setOptValue(OPT::TARGET_DIR64, srcOrg.getOptValue(OPT::TARGET_DIR64));
+    m_srcfiles.setOptValue(OPT::BIT32, srcOrg.getOptValue(OPT::BIT32));
+    m_srcfiles.setOptValue(OPT::TARGET_DIR32, srcOrg.getOptValue(OPT::TARGET_DIR32));
 
-    m_writefile.setOptValue(OPT::LIBS_CMN, srcOrg.getOptValue(OPT::LIBS_CMN));
-    m_writefile.setOptValue(OPT::LIBS_REL, srcOrg.getOptValue(OPT::LIBS_REL));
-    m_writefile.setOptValue(OPT::LIBS_DBG, srcOrg.getOptValue(OPT::LIBS_DBG));
+    m_srcfiles.setOptValue(OPT::LIBS_CMN, srcOrg.getOptValue(OPT::LIBS_CMN));
+    m_srcfiles.setOptValue(OPT::LIBS_REL, srcOrg.getOptValue(OPT::LIBS_REL));
+    m_srcfiles.setOptValue(OPT::LIBS_DBG, srcOrg.getOptValue(OPT::LIBS_DBG));
 
-    m_writefile.setOptValue(OPT::XGET_FLAGS, srcOrg.getOptValue(OPT::XGET_FLAGS));
+    m_srcfiles.setOptValue(OPT::XGET_FLAGS, srcOrg.getOptValue(OPT::XGET_FLAGS));
 
     ttlib::cstr Root(srcFile);
     Root.remove_filename();
@@ -150,13 +150,13 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
 
         cszPch.make_relative(cszCurCwd);
         cszPch.backslashestoforward();
-        m_writefile.setOptValue(OPT::PCH_CPP, cszPch);
+        m_srcfiles.setOptValue(OPT::PCH_CPP, cszPch);
     }
 
     cszRelative = srcFile.c_str();
     cszRelative.make_relative(cszCurCwd);
 
-    ttlib::add_if(m_writefile.GetSrcFileList(), ".include " + cszRelative);
+    ttlib::add_if(m_srcfiles.GetSrcFileList(), ".include " + cszRelative);
 
     ttlib::cstr IncDirs(cszRelative);
     IncDirs.remove_filename();
@@ -175,7 +175,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
 
         cszRelative += srcOrg.getOptValue(OPT::INC_DIRS);
     }
-    m_writefile.setOptValue(OPT::INC_DIRS, IncDirs);
+    m_srcfiles.setOptValue(OPT::INC_DIRS, IncDirs);
 
 #if defined(_WIN32)
     if (srcOrg.hasOptValue(OPT::NATVIS))
@@ -183,7 +183,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
         cszRelative = srcOrg.getOptValue(OPT::NATVIS);
         cszRelative.make_absolute();
         cszRelative.make_relative(cszCurCwd);
-        m_writefile.setOptValue(OPT::NATVIS, cszRelative);
+        m_srcfiles.setOptValue(OPT::NATVIS, cszRelative);
     }
 #endif  // _WIN32
 
@@ -192,7 +192,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
         cszRelative = srcOrg.getOptValue(OPT::TARGET_DIR);
         cszRelative.make_absolute();
         cszRelative.make_relative(cszCurCwd);
-        m_writefile.setOptValue(OPT::TARGET_DIR, cszRelative);
+        m_srcfiles.setOptValue(OPT::TARGET_DIR, cszRelative);
     }
 
     if (srcOrg.hasOptValue(OPT::TARGET_DIR32))
@@ -200,7 +200,7 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
         cszRelative = srcOrg.getOptValue(OPT::TARGET_DIR32);
         cszRelative.make_absolute();
         cszRelative.make_relative(cszCurCwd);
-        m_writefile.setOptValue(OPT::TARGET_DIR32, cszRelative);
+        m_srcfiles.setOptValue(OPT::TARGET_DIR32, cszRelative);
     }
 
     if (srcOrg.hasOptValue(OPT::LIB_DIRS))
@@ -208,14 +208,14 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
         cszRelative = srcOrg.getOptValue(OPT::LIB_DIRS);
         cszRelative.make_absolute();
         cszRelative.make_relative(cszCurCwd);
-        m_writefile.setOptValue(OPT::LIB_DIRS, cszRelative);
+        m_srcfiles.setOptValue(OPT::LIB_DIRS, cszRelative);
     }
     if (srcOrg.hasOptValue(OPT::LIB_DIRS32))
     {
         cszRelative = srcOrg.getOptValue(OPT::LIB_DIRS32);
         cszRelative.make_absolute();
         cszRelative.make_relative(cszCurCwd);
-        m_writefile.setOptValue(OPT::LIB_DIRS32, cszRelative);
+        m_srcfiles.setOptValue(OPT::LIB_DIRS32, cszRelative);
     }
 
     if (srcOrg.hasOptValue(OPT::BUILD_LIBS))
@@ -223,8 +223,8 @@ bld::RESULT CConvert::ConvertSrcfiles(const std::string& srcFile, std::string_vi
         cszRelative = srcOrg.getOptValue(OPT::BUILD_LIBS);
         cszRelative.make_absolute();
         cszRelative.make_relative(cszCurCwd);
-        m_writefile.setOptValue(OPT::BUILD_LIBS, cszRelative);
+        m_srcfiles.setOptValue(OPT::BUILD_LIBS, cszRelative);
     }
 
-    return m_writefile.WriteNew(dstFile);
+    return m_srcfiles.WriteNew(dstFile);
 }

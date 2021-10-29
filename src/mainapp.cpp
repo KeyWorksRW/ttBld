@@ -128,6 +128,7 @@ int CMainApp::OnRun()
     cmd.addOption("makefile", "creates a makefile that doesn't require ttBld.exe");
 
     cmd.addOption("cmake", "Uses .srcfiles.yaml as a template to create a cmake CMakeLists.txt file");
+    cmd.addOption("vcxmake", "Creates a CMakeLists.txt file based on a .vcxproj file");
     cmd.addOption("vscode", "creates or updates .vscode/*.json files used to build and debug a project using VS Code");
     cmd.addOption("vcxproj", "creates or updates Visual Studio project file (.vcxproj)");
     cmd.addOption("vs", "adds or updates .vs/*.json files used by Visual Studio");
@@ -323,7 +324,16 @@ int CMainApp::OnRun()
         {
             projectFile.assign(locateProjectFile(RootDir));
         }
-        return (CreateCmakeProject(projectFile) ? 0 : 1);
+        CConvert convert;
+        auto result = convert.CreateCmakeProject(projectFile);
+        return (result == bld::RESULT::success ? 0 : 1);
+    }
+
+    if (cmd.isOption("vcxmake"))
+    {
+        CConvert convert;
+        auto result = convert.ConvertToCmakeProject(projectFile);
+        return (result == bld::RESULT::success ? 0 : 1);
     }
 
     // If a project file gets created, the options and vscode have already been set, and this flag will have been set to

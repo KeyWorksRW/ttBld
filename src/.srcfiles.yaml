@@ -58,9 +58,10 @@ Files:
     # wxUiEditor generated classes and their derived version for displaying wxWidgets UI
 
     ui/convertdlg.cpp            # Dialog specifying what to convert into a .srcfiles.yaml file
-    ui/vscodedlg.cpp             # Dialog for setting options to create tasks.json and launch.json
     ui/optionsdlg.cpp            # Dialog for setting all .srcfile options
+    ui/vscodedlg.cpp             # Dialog for setting options to create tasks.json and launch.json
 
+    ui/convertvs_base.cpp        # Dialog to get file and path for VS to CMake conversion
     ui/convertdlgBase.cpp        # wxUiEditor generated file
     ui/optionsdlgBase.cpp        # wxUiEditor generated file
     ui/vscodedlgBase.cpp         # wxUiEditor generated file

@@ -54,7 +54,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
             {
                 auto filename = file.attribute("Name").as_cstr();
                 MakeNameRelative(filename);
-                ttlib::add_if(m_writefile.GetSrcFileList(), filename);
+                ttlib::add_if(m_srcfiles.GetSrcFileList(), filename);
                 file = file.next_sibling();
             } while (file);
         }
@@ -65,9 +65,9 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
     if (settings)
     {
         if (settings.attribute("Type").cvalue().is_sameas("Dynamic Library"))
-            m_writefile.setOptValue(OPT::EXE_TYPE, "dll");
+            m_srcfiles.setOptValue(OPT::EXE_TYPE, "dll");
         else if (settings.attribute("Type").cvalue().is_sameas("Static Library"))
-            m_writefile.setOptValue(OPT::EXE_TYPE, "lib");
+            m_srcfiles.setOptValue(OPT::EXE_TYPE, "lib");
 
         auto Definitions = m_xmldoc.select_nodes("/CodeLite_Project/Settings/GlobalSettings/Compiler/Preprocessor[@Value]");
         ttlib::cstr defs;
@@ -76,7 +76,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
             defs += "-D" + Definitions[pos].attribute().as_cstr() + " ";
         }
         defs.trim();
-        m_writefile.setOptValue(OPT::CFLAGS_CMN, defs);
+        m_srcfiles.setOptValue(OPT::CFLAGS_CMN, defs);
 
         auto Includes = m_xmldoc.select_nodes("/CodeLite_Project/Settings/Configuration/Compiler/IncludePath[@Value]");
 
@@ -89,5 +89,5 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
         }
     }
 
-    return m_writefile.WriteNew(dstFile);
+    return (m_CreateSrcFiles ? m_srcfiles.WriteNew(dstFile) : bld::RESULT::success);
 }

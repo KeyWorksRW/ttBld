@@ -33,7 +33,7 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     parent_sizer->Add(m_notebook, wxSizerFlags(1).Expand().Border(wxALL));
 
     auto page = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-    m_notebook->AddPage(page, wxString::FromUTF8("General"), true);
+    m_notebook->AddPage(page, "General", true);
     page->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
     auto parent_sizer2 = new wxBoxSizer(wxVERTICAL);
@@ -41,43 +41,43 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer2->Add(box_sizer, wxSizerFlags().Expand().Border(wxALL));
 
-    m_staticText = new wxStaticText(page, wxID_ANY, wxString::FromUTF8("&Project Name:"));
+    m_staticText = new wxStaticText(page, wxID_ANY, "&Project Name:");
     box_sizer->Add(m_staticText, wxSizerFlags().Center().Border(wxALL));
 
     auto textCtrl = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
     textCtrl->SetValidator(wxTextValidator(wxFILTER_NONE, &m_ProjectName));
     box_sizer->Add(textCtrl, wxSizerFlags(1).Border(wxALL));
 
-    auto static_box = new wxStaticBoxSizer(wxVERTICAL, page, wxString::FromUTF8("Project Type"));
+    auto static_box = new wxStaticBoxSizer(wxVERTICAL, page, "Project Type");
     parent_sizer2->Add(static_box, wxSizerFlags().Expand().Border(wxALL));
 
     auto flex_grid_sizer6 = new wxFlexGridSizer(3, 0, 0);
     static_box->Add(flex_grid_sizer6, wxSizerFlags().Expand().Border(wxALL));
 
-    auto radioBtn = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Window"));
+    auto radioBtn = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "Window");
     radioBtn->SetValidator(wxGenericValidator(&m_isWindow));
     flex_grid_sizer6->Add(radioBtn, wxSizerFlags().Border(wxALL));
 
-    auto radioBtn2 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Console"));
+    auto radioBtn2 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "Console");
     radioBtn2->SetValidator(wxGenericValidator(&m_isConsole));
     flex_grid_sizer6->Add(radioBtn2, wxSizerFlags().Border(wxALL));
 
-    auto radioBtn3 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Library"));
+    auto radioBtn3 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "Library");
     radioBtn3->SetValidator(wxGenericValidator(&m_isLibrary));
     flex_grid_sizer6->Add(radioBtn3, wxSizerFlags().Border(wxALL));
 
-    auto radioBtn4 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, wxString::FromUTF8("DLL"));
+    auto radioBtn4 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "DLL");
     radioBtn4->SetValidator(wxGenericValidator(&m_isDll));
     flex_grid_sizer6->Add(radioBtn4, wxSizerFlags().Border(wxALL));
 
-    auto radioBtn_5 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, wxString::FromUTF8("OCX"));
+    auto radioBtn_5 = new wxRadioButton(static_box->GetStaticBox(), wxID_ANY, "OCX");
     radioBtn_5->SetValidator(wxGenericValidator(&m_isOcx));
     flex_grid_sizer6->Add(radioBtn_5, wxSizerFlags().Border(wxALL));
 
     auto box_sizer2 = new wxBoxSizer(wxVERTICAL);
     parent_sizer2->Add(box_sizer2, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText = new wxStaticText(page, wxID_ANY, wxString::FromUTF8("&Target Directory"));
+    auto staticText = new wxStaticText(page, wxID_ANY, "&Target Directory");
     box_sizer2->Add(staticText, wxSizerFlags().Border(wxALL));
 
     m_TargetDirPicker = new wxDirPickerCtrl(page, wxID_ANY, wxEmptyString,  wxDirSelectorPromptStr);
@@ -86,7 +86,7 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     page->SetSizerAndFit(parent_sizer2);
 
     auto panel = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-    m_notebook->AddPage(panel, wxString::FromUTF8("Compiler"));
+    m_notebook->AddPage(panel, "Compiler");
     panel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
     auto parent_sizer3 = new wxBoxSizer(wxVERTICAL);
@@ -94,22 +94,21 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer3 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer3->Add(box_sizer3, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText2 = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8("&Optimize for"));
+    auto staticText2 = new wxStaticText(panel, wxID_ANY, "&Optimize for");
     box_sizer3->Add(staticText2, wxSizerFlags().Border(wxALL));
 
-    auto radioBtn5 = new wxRadioButton(panel, wxID_ANY, wxString::FromUTF8("Space"), wxDefaultPosition, wxDefaultSize,
-        wxRB_GROUP);
+    auto radioBtn5 = new wxRadioButton(panel, wxID_ANY, "Space", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
     radioBtn5->SetValidator(wxGenericValidator(&m_isSpaceOptimization));
     box_sizer3->Add(radioBtn5, wxSizerFlags().Border(wxALL));
 
-    auto radioBtn6 = new wxRadioButton(panel, wxID_ANY, wxString::FromUTF8("Speed"));
+    auto radioBtn6 = new wxRadioButton(panel, wxID_ANY, "Speed");
     radioBtn6->SetValidator(wxGenericValidator(&m_isSpeedOptimization));
     box_sizer3->Add(radioBtn6, wxSizerFlags().Border(wxALL));
 
     auto box_sizer4 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer3->Add(box_sizer4, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText3 = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8("&Warning level:"));
+    auto staticText3 = new wxStaticText(panel, wxID_ANY, "&Warning level:");
     box_sizer4->Add(staticText3, wxSizerFlags().Center().Border(wxALL));
 
     auto spinCtrl = new wxSpinCtrl(panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 4, 4);
@@ -119,32 +118,32 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer5 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer3->Add(box_sizer5, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText4 = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8("PCH &Header:"));
+    auto staticText4 = new wxStaticText(panel, wxID_ANY, "PCH &Header:");
     box_sizer5->Add(staticText4, wxSizerFlags().Center().Border(wxALL));
 
     m_PchHeaderPicker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, wxFileSelectorPromptStr, 
-        wxString::FromUTF8("Header files|*.h;*.hh;*.hpp;*.hxx"), wxDefaultPosition, wxDefaultSize,
+        "Header files|*.h;*.hh;*.hpp;*.hxx", wxDefaultPosition, wxDefaultSize,
         wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
     box_sizer5->Add(m_PchHeaderPicker, wxSizerFlags().Border(wxALL));
 
     auto box_sizer6 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer3->Add(box_sizer6, wxSizerFlags().Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
 
-    auto staticText5 = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8("PCH &Source:"));
+    auto staticText5 = new wxStaticText(panel, wxID_ANY, "PCH &Source:");
     box_sizer6->Add(staticText5, wxSizerFlags().Border(wxALL));
 
     m_PchSrcPicker = new wxFilePickerCtrl(panel, wxID_ANY, wxEmptyString, wxFileSelectorPromptStr, 
-        wxString::FromUTF8("Source files|*.cpp;*.cc;*.cxx"), wxDefaultPosition, wxDefaultSize,
+        "Source files|*.cpp;*.cc;*.cxx", wxDefaultPosition, wxDefaultSize,
         wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
     box_sizer6->Add(m_PchSrcPicker, wxSizerFlags().Border(wxALL));
 
     auto box_sizer7 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer3->Add(box_sizer7, wxSizerFlags().Expand().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
-    auto staticText6 = new wxStaticText(panel, wxID_ANY, wxString::FromUTF8("&Include Directories:"));
+    auto staticText6 = new wxStaticText(panel, wxID_ANY, "&Include Directories:");
     box_sizer7->Add(staticText6, wxSizerFlags(1).Center().Border(wxALL));
 
-    auto btnAddInclude = new wxButton(panel, wxID_ANY, wxString::FromUTF8("&Add.."));
+    auto btnAddInclude = new wxButton(panel, wxID_ANY, "&Add..");
     box_sizer7->Add(btnAddInclude, wxSizerFlags().Border(wxALL));
 
     auto box_sizer8 = new wxBoxSizer(wxHORIZONTAL);
@@ -154,7 +153,7 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     m_textIncludeDirs->SetValidator(wxTextValidator(wxFILTER_NONE, &m_IncludeDirs));
     box_sizer8->Add(m_textIncludeDirs, wxSizerFlags(1).Expand().Border(wxLEFT|wxRIGHT|wxBOTTOM, wxSizerFlags::GetDefaultBorder()));
 
-    auto static_box2 = new wxStaticBoxSizer(wxVERTICAL, panel, wxString::FromUTF8("Compiler Flags"));
+    auto static_box2 = new wxStaticBoxSizer(wxVERTICAL, panel, "Compiler Flags");
     parent_sizer3->Add(static_box2, wxSizerFlags().Expand().Border(wxALL));
 
     auto flex_grid_sizer = new wxFlexGridSizer(2, 0, 0);
@@ -164,35 +163,35 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     }
     static_box2->Add(flex_grid_sizer, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText7 = new wxStaticText(static_box2->GetStaticBox(), wxID_ANY, wxString::FromUTF8("&Common:"));
-    staticText7->SetToolTip(wxString::FromUTF8("Compiler flags that will be used in all builds."));
+    auto staticText7 = new wxStaticText(static_box2->GetStaticBox(), wxID_ANY, "&Common:");
+    staticText7->SetToolTip("Compiler flags that will be used in all builds.");
     flex_grid_sizer->Add(staticText7, wxSizerFlags().Center().Border(wxALL));
 
     auto commonFlags = new wxTextCtrl(static_box2->GetStaticBox(), wxID_ANY, wxEmptyString);
     commonFlags->SetValidator(wxTextValidator(wxFILTER_NONE, &m_CommonCppFlags));
-    commonFlags->SetToolTip(wxString::FromUTF8("Compiler flags that will be used in all builds."));
+    commonFlags->SetToolTip("Compiler flags that will be used in all builds.");
     flex_grid_sizer->Add(commonFlags, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText8 = new wxStaticText(static_box2->GetStaticBox(), wxID_ANY, wxString::FromUTF8("&Release:"));
+    auto staticText8 = new wxStaticText(static_box2->GetStaticBox(), wxID_ANY, "&Release:");
     flex_grid_sizer->Add(staticText8, wxSizerFlags().Center().Border(wxALL));
 
     auto releaseFlags = new wxTextCtrl(static_box2->GetStaticBox(), wxID_ANY, wxEmptyString);
     releaseFlags->SetValidator(wxTextValidator(wxFILTER_NONE, &m_ReleaseCppFlags));
     flex_grid_sizer->Add(releaseFlags, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText9 = new wxStaticText(static_box2->GetStaticBox(), wxID_ANY, wxString::FromUTF8("&Debug:"));
-    staticText9->SetToolTip(wxString::FromUTF8("Compiler flags that will only be used in a Debug build."));
+    auto staticText9 = new wxStaticText(static_box2->GetStaticBox(), wxID_ANY, "&Debug:");
+    staticText9->SetToolTip("Compiler flags that will only be used in a Debug build.");
     flex_grid_sizer->Add(staticText9, wxSizerFlags().Center().Border(wxALL));
 
     auto debugFlags = new wxTextCtrl(static_box2->GetStaticBox(), wxID_ANY, wxEmptyString);
     debugFlags->SetValidator(wxTextValidator(wxFILTER_NONE, &m_DebugCppFlags));
-    debugFlags->SetToolTip(wxString::FromUTF8("Compiler flags that will only be used in a Debug build."));
+    debugFlags->SetToolTip("Compiler flags that will only be used in a Debug build.");
     flex_grid_sizer->Add(debugFlags, wxSizerFlags().Expand().Border(wxALL));
 
     panel->SetSizerAndFit(parent_sizer3);
 
     auto panel2 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-    m_notebook->AddPage(panel2, wxString::FromUTF8("Libs"));
+    m_notebook->AddPage(panel2, "Libs");
     panel2->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
     auto parent_sizer4 = new wxBoxSizer(wxVERTICAL);
@@ -200,10 +199,10 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer9 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer4->Add(box_sizer9, wxSizerFlags().Expand().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
-    auto staticText10 = new wxStaticText(panel2, wxID_ANY, wxString::FromUTF8("&Common Libraries:"));
+    auto staticText10 = new wxStaticText(panel2, wxID_ANY, "&Common Libraries:");
     box_sizer9->Add(staticText10, wxSizerFlags(1).Bottom().Border(wxALL));
 
-    auto btnAddCommonLibrary = new wxButton(panel2, wxID_ANY, wxString::FromUTF8("&Add.."));
+    auto btnAddCommonLibrary = new wxButton(panel2, wxID_ANY, "&Add..");
     box_sizer9->Add(btnAddCommonLibrary, wxSizerFlags().Border(wxALL));
 
     auto box_sizer10 = new wxBoxSizer(wxHORIZONTAL);
@@ -216,10 +215,10 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer11 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer4->Add(box_sizer11, wxSizerFlags().Expand().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
-    auto staticText11 = new wxStaticText(panel2, wxID_ANY, wxString::FromUTF8("&Release Libraries:"));
+    auto staticText11 = new wxStaticText(panel2, wxID_ANY, "&Release Libraries:");
     box_sizer11->Add(staticText11, wxSizerFlags(1).Bottom().Border(wxALL));
 
-    auto btnAddReleaseLibraries = new wxButton(panel2, wxID_ANY, wxString::FromUTF8("&Add.."));
+    auto btnAddReleaseLibraries = new wxButton(panel2, wxID_ANY, "&Add..");
     box_sizer11->Add(btnAddReleaseLibraries, wxSizerFlags().Border(wxALL));
 
     auto box_sizer14 = new wxBoxSizer(wxHORIZONTAL);
@@ -232,10 +231,10 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer12 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer4->Add(box_sizer12, wxSizerFlags().Expand().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
-    auto staticText12 = new wxStaticText(panel2, wxID_ANY, wxString::FromUTF8("&Debug Libraries:"));
+    auto staticText12 = new wxStaticText(panel2, wxID_ANY, "&Debug Libraries:");
     box_sizer12->Add(staticText12, wxSizerFlags(1).Bottom().Border(wxALL));
 
-    auto btnAddDebugLibraries = new wxButton(panel2, wxID_ANY, wxString::FromUTF8("&Add.."));
+    auto btnAddDebugLibraries = new wxButton(panel2, wxID_ANY, "&Add..");
     box_sizer12->Add(btnAddDebugLibraries, wxSizerFlags().Border(wxALL));
 
     auto box_sizer15 = new wxBoxSizer(wxHORIZONTAL);
@@ -248,10 +247,10 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer13 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer4->Add(box_sizer13, wxSizerFlags().Expand().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
-    auto staticText13 = new wxStaticText(panel2, wxID_ANY, wxString::FromUTF8("&Build and link to these libraries:"));
+    auto staticText13 = new wxStaticText(panel2, wxID_ANY, "&Build and link to these libraries:");
     box_sizer13->Add(staticText13, wxSizerFlags(1).Bottom().Border(wxALL));
 
-    auto btnAddBuildLibraries = new wxButton(panel2, wxID_ANY, wxString::FromUTF8("&Add.."));
+    auto btnAddBuildLibraries = new wxButton(panel2, wxID_ANY, "&Add..");
     box_sizer13->Add(btnAddBuildLibraries, wxSizerFlags().Border(wxALL));
 
     auto box_sizer16 = new wxBoxSizer(wxHORIZONTAL);
@@ -264,12 +263,12 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     panel2->SetSizerAndFit(parent_sizer4);
 
     auto panel6 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-    m_notebook->AddPage(panel6, wxString::FromUTF8("Linker"));
+    m_notebook->AddPage(panel6, "Linker");
     panel6->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
     auto parent_sizer8 = new wxBoxSizer(wxVERTICAL);
 
-    auto static_box6 = new wxStaticBoxSizer(wxVERTICAL, panel6, wxString::FromUTF8("Linker Flags"));
+    auto static_box6 = new wxStaticBoxSizer(wxVERTICAL, panel6, "Linker Flags");
     parent_sizer8->Add(static_box6, wxSizerFlags().Expand().Border(wxALL));
 
     auto flex_grid_sizer5 = new wxFlexGridSizer(2, 0, 0);
@@ -279,43 +278,43 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     }
     static_box6->Add(flex_grid_sizer5, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText23 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, wxString::FromUTF8("&Common:"));
-    staticText23->SetToolTip(wxString::FromUTF8("Compiler flags that will be used in all builds."));
+    auto staticText23 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, "&Common:");
+    staticText23->SetToolTip("Compiler flags that will be used in all builds.");
     flex_grid_sizer5->Add(staticText23, wxSizerFlags().Center().Border(wxALL));
 
     auto commonFlags4 = new wxTextCtrl(static_box6->GetStaticBox(), wxID_ANY, wxEmptyString);
     commonFlags4->SetValidator(wxTextValidator(wxFILTER_NONE, &m_CommonLinkFlags));
-    commonFlags4->SetToolTip(wxString::FromUTF8("Compiler flags that will be used in all builds."));
+    commonFlags4->SetToolTip("Compiler flags that will be used in all builds.");
     flex_grid_sizer5->Add(commonFlags4, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText24 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, wxString::FromUTF8("&Release:"));
+    auto staticText24 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, "&Release:");
     flex_grid_sizer5->Add(staticText24, wxSizerFlags().Center().Border(wxALL));
 
     auto releaseFlags4 = new wxTextCtrl(static_box6->GetStaticBox(), wxID_ANY, wxEmptyString);
     releaseFlags4->SetValidator(wxTextValidator(wxFILTER_NONE, &m_ReleaseLinkFlags));
     flex_grid_sizer5->Add(releaseFlags4, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText25 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, wxString::FromUTF8("&Debug:"));
-    staticText25->SetToolTip(wxString::FromUTF8("Compiler flags that will only be used in a Debug build."));
+    auto staticText25 = new wxStaticText(static_box6->GetStaticBox(), wxID_ANY, "&Debug:");
+    staticText25->SetToolTip("Compiler flags that will only be used in a Debug build.");
     flex_grid_sizer5->Add(staticText25, wxSizerFlags().Center().Border(wxALL));
 
     auto debugFlags4 = new wxTextCtrl(static_box6->GetStaticBox(), wxID_ANY, wxEmptyString);
     debugFlags4->SetValidator(wxTextValidator(wxFILTER_NONE, &m_DebugLinkFlags));
-    debugFlags4->SetToolTip(wxString::FromUTF8("Compiler flags that will only be used in a Debug build."));
+    debugFlags4->SetToolTip("Compiler flags that will only be used in a Debug build.");
     flex_grid_sizer5->Add(debugFlags4, wxSizerFlags().Expand().Border(wxALL));
 
     auto box_sizer18 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer8->Add(box_sizer18, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText26 = new wxStaticText(panel6, wxID_ANY, wxString::FromUTF8("Dynamic CRT:"));
+    auto staticText26 = new wxStaticText(panel6, wxID_ANY, "Dynamic CRT:");
     box_sizer18->Add(staticText26, wxSizerFlags().Center().Border(wxALL));
 
-    auto checkBox2 = new wxCheckBox(panel6, wxID_ANY, wxString::FromUTF8("Release"));
+    auto checkBox2 = new wxCheckBox(panel6, wxID_ANY, "Release");
     checkBox2->SetValue(true);
     checkBox2->SetValidator(wxGenericValidator(&m_isReleaseDllCRT));
     box_sizer18->Add(checkBox2, wxSizerFlags().Border(wxALL));
 
-    auto checkBox3 = new wxCheckBox(panel6, wxID_ANY, wxString::FromUTF8("Debug"));
+    auto checkBox3 = new wxCheckBox(panel6, wxID_ANY, "Debug");
     checkBox3->SetValue(true);
     checkBox3->SetValidator(wxGenericValidator(&m_isDebugDllCRT));
     box_sizer18->Add(checkBox3, wxSizerFlags().Border(wxALL));
@@ -323,23 +322,23 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer19 = new wxBoxSizer(wxHORIZONTAL);
     parent_sizer8->Add(box_sizer19, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText27 = new wxStaticText(panel6, wxID_ANY, wxString::FromUTF8("NATVIS File:"));
+    auto staticText27 = new wxStaticText(panel6, wxID_ANY, "NATVIS File:");
     box_sizer19->Add(staticText27, wxSizerFlags().Center().Border(wxALL));
 
     m_NatvisPicker = new wxFilePickerCtrl(panel6, wxID_ANY, wxEmptyString, wxFileSelectorPromptStr, 
-        wxString::FromUTF8("Natvis Files|*.natvis"), wxDefaultPosition, wxDefaultSize,
+        "Natvis Files|*.natvis", wxDefaultPosition, wxDefaultSize,
         wxFLP_USE_TEXTCTRL|wxFLP_OPEN|wxFLP_FILE_MUST_EXIST);
     box_sizer19->Add(m_NatvisPicker, wxSizerFlags(1).Border(wxALL));
 
     panel6->SetSizerAndFit(parent_sizer8);
 
     auto panel3 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-    m_notebook->AddPage(panel3, wxString::FromUTF8("RC"));
+    m_notebook->AddPage(panel3, "RC");
     panel3->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
     auto parent_sizer5 = new wxBoxSizer(wxVERTICAL);
 
-    auto static_box3 = new wxStaticBoxSizer(wxVERTICAL, panel3, wxString::FromUTF8("Resource compiler flags"));
+    auto static_box3 = new wxStaticBoxSizer(wxVERTICAL, panel3, "Resource compiler flags");
     parent_sizer5->Add(static_box3, wxSizerFlags().Expand().Border(wxALL));
 
     auto flex_grid_sizer2 = new wxFlexGridSizer(2, 0, 0);
@@ -348,21 +347,21 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     }
     static_box3->Add(flex_grid_sizer2, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText14 = new wxStaticText(static_box3->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Common:"));
+    auto staticText14 = new wxStaticText(static_box3->GetStaticBox(), wxID_ANY, "Common:");
     flex_grid_sizer2->Add(staticText14, wxSizerFlags().Center().Border(wxALL));
 
     auto commonRCFlags = new wxTextCtrl(static_box3->GetStaticBox(), wxID_ANY, wxEmptyString);
     commonRCFlags->SetValidator(wxTextValidator(wxFILTER_NONE, &m_commonRcFlags));
     flex_grid_sizer2->Add(commonRCFlags, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText15 = new wxStaticText(static_box3->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Release:"));
+    auto staticText15 = new wxStaticText(static_box3->GetStaticBox(), wxID_ANY, "Release:");
     flex_grid_sizer2->Add(staticText15, wxSizerFlags().Center().Border(wxALL));
 
     auto releaseRCFlags = new wxTextCtrl(static_box3->GetStaticBox(), wxID_ANY, wxEmptyString);
     releaseRCFlags->SetValidator(wxTextValidator(wxFILTER_NONE, &m_releaseRcFlags));
     flex_grid_sizer2->Add(releaseRCFlags, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText16 = new wxStaticText(static_box3->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Debug:"));
+    auto staticText16 = new wxStaticText(static_box3->GetStaticBox(), wxID_ANY, "Debug:");
     flex_grid_sizer2->Add(staticText16, wxSizerFlags().Center().Border(wxALL));
 
     auto debugRCFlags = new wxTextCtrl(static_box3->GetStaticBox(), wxID_ANY, wxEmptyString);
@@ -372,12 +371,12 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     panel3->SetSizerAndFit(parent_sizer5);
 
     auto panel5 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-    m_notebook->AddPage(panel5, wxString::FromUTF8("CLang"));
+    m_notebook->AddPage(panel5, "CLang");
     panel5->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
     auto parent_sizer7 = new wxBoxSizer(wxVERTICAL);
 
-    auto static_box5 = new wxStaticBoxSizer(wxVERTICAL, panel5, wxString::FromUTF8("Additional flags for clang-cl (Windows)"));
+    auto static_box5 = new wxStaticBoxSizer(wxVERTICAL, panel5, "Additional flags for clang-cl (Windows)");
     parent_sizer7->Add(static_box5, wxSizerFlags().Expand().Border(wxALL));
 
     auto flex_grid_sizer4 = new wxFlexGridSizer(2, 0, 0);
@@ -386,21 +385,21 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     }
     static_box5->Add(flex_grid_sizer4, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText20 = new wxStaticText(static_box5->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Common:"));
+    auto staticText20 = new wxStaticText(static_box5->GetStaticBox(), wxID_ANY, "Common:");
     flex_grid_sizer4->Add(staticText20, wxSizerFlags().Center().Border(wxALL));
 
     auto commonFlags3 = new wxTextCtrl(static_box5->GetStaticBox(), wxID_ANY, wxEmptyString);
     commonFlags3->SetValidator(wxTextValidator(wxFILTER_NONE, &m_commonClangFlags));
     flex_grid_sizer4->Add(commonFlags3, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText21 = new wxStaticText(static_box5->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Release:"));
+    auto staticText21 = new wxStaticText(static_box5->GetStaticBox(), wxID_ANY, "Release:");
     flex_grid_sizer4->Add(staticText21, wxSizerFlags().Center().Border(wxALL));
 
     auto releaseFlags3 = new wxTextCtrl(static_box5->GetStaticBox(), wxID_ANY, wxEmptyString);
     releaseFlags3->SetValidator(wxTextValidator(wxFILTER_NONE, &m_releaseClangFlags));
     flex_grid_sizer4->Add(releaseFlags3, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText22 = new wxStaticText(static_box5->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Debug:"));
+    auto staticText22 = new wxStaticText(static_box5->GetStaticBox(), wxID_ANY, "Debug:");
     flex_grid_sizer4->Add(staticText22, wxSizerFlags().Center().Border(wxALL));
 
     auto debugFlags3 = new wxTextCtrl(static_box5->GetStaticBox(), wxID_ANY, wxEmptyString);
@@ -410,19 +409,19 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer17 = new wxBoxSizer(wxHORIZONTAL);
     static_box5->Add(box_sizer17, wxSizerFlags().Expand().Border(wxALL));
 
-    auto checkBox = new wxCheckBox(static_box5->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Always use &MS Linker (link.exe)"));
+    auto checkBox = new wxCheckBox(static_box5->GetStaticBox(), wxID_ANY, "Always use &MS Linker (link.exe)");
     checkBox->SetValidator(wxGenericValidator(&m_useMSLinker));
     box_sizer17->Add(checkBox, wxSizerFlags().Border(wxALL));
 
     panel5->SetSizerAndFit(parent_sizer7);
 
     auto panel4 = new wxPanel(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-    m_notebook->AddPage(panel4, wxString::FromUTF8("MIDL"));
+    m_notebook->AddPage(panel4, "MIDL");
     panel4->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
     auto parent_sizer6 = new wxBoxSizer(wxVERTICAL);
 
-    auto static_box4 = new wxStaticBoxSizer(wxVERTICAL, panel4, wxString::FromUTF8("MIDL compiler flags"));
+    auto static_box4 = new wxStaticBoxSizer(wxVERTICAL, panel4, "MIDL compiler flags");
     parent_sizer6->Add(static_box4, wxSizerFlags().Expand().Border(wxALL));
 
     auto flex_grid_sizer3 = new wxFlexGridSizer(2, 0, 0);
@@ -431,21 +430,21 @@ bool OptionsDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     }
     static_box4->Add(flex_grid_sizer3, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText17 = new wxStaticText(static_box4->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Common:"));
+    auto staticText17 = new wxStaticText(static_box4->GetStaticBox(), wxID_ANY, "Common:");
     flex_grid_sizer3->Add(staticText17, wxSizerFlags().Center().Border(wxALL));
 
     auto commonFlags2 = new wxTextCtrl(static_box4->GetStaticBox(), wxID_ANY, wxEmptyString);
     commonFlags2->SetValidator(wxTextValidator(wxFILTER_NONE, &m_commonMidlFlags));
     flex_grid_sizer3->Add(commonFlags2, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText18 = new wxStaticText(static_box4->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Release:"));
+    auto staticText18 = new wxStaticText(static_box4->GetStaticBox(), wxID_ANY, "Release:");
     flex_grid_sizer3->Add(staticText18, wxSizerFlags().Center().Border(wxALL));
 
     auto releaseFlags2 = new wxTextCtrl(static_box4->GetStaticBox(), wxID_ANY, wxEmptyString);
     releaseFlags2->SetValidator(wxTextValidator(wxFILTER_NONE, &m_releaseMidlFlags));
     flex_grid_sizer3->Add(releaseFlags2, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText19 = new wxStaticText(static_box4->GetStaticBox(), wxID_ANY, wxString::FromUTF8("Debug:"));
+    auto staticText19 = new wxStaticText(static_box4->GetStaticBox(), wxID_ANY, "Debug:");
     flex_grid_sizer3->Add(staticText19, wxSizerFlags().Center().Border(wxALL));
 
     auto debugFlags2 = new wxTextCtrl(static_box4->GetStaticBox(), wxID_ANY, wxEmptyString);

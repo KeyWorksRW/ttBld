@@ -25,7 +25,7 @@ bool ConvertDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer = new wxBoxSizer(wxVERTICAL);
     parent_sizer->Add(box_sizer, wxSizerFlags().Expand().Border(wxALL));
 
-    auto staticText = new wxStaticText(this, wxID_ANY, wxString::FromUTF8("C&reate .srcfiles.yaml in:"));
+    auto staticText = new wxStaticText(this, wxID_ANY, "C&reate .srcfiles.yaml in:");
     box_sizer->Add(staticText, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
     m_dirPickerOut = new wxDirPickerCtrl(this, wxID_ANY, wxEmptyString,  wxDirSelectorPromptStr);
@@ -34,7 +34,7 @@ bool ConvertDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer2 = new wxBoxSizer(wxVERTICAL);
     parent_sizer->Add(box_sizer2, wxSizerFlags().Expand().Border(wxALL));
 
-    m_radioBtn = new wxRadioButton(this, wxID_ANY, wxString::FromUTF8("Create using all files in:"), wxDefaultPosition, wxDefaultSize,
+    m_radioBtn = new wxRadioButton(this, wxID_ANY, "Create using all files in:", wxDefaultPosition, wxDefaultSize,
         wxRB_GROUP);
     m_radioBtn->SetValidator(wxGenericValidator(&m_useAllFiles));
     box_sizer2->Add(m_radioBtn, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
@@ -45,7 +45,7 @@ bool ConvertDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     auto box_sizer3 = new wxBoxSizer(wxVERTICAL);
     parent_sizer->Add(box_sizer3, wxSizerFlags().Expand().Border(wxALL));
 
-    m_radioBtn2 = new wxRadioButton(this, wxID_ANY, wxString::FromUTF8("Create using &project file:"));
+    m_radioBtn2 = new wxRadioButton(this, wxID_ANY, "Create using &project file:");
     m_radioBtn2->SetValidator(wxGenericValidator(&m_useProjectFile));
     box_sizer3->Add(m_radioBtn2, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
@@ -57,21 +57,21 @@ bool ConvertDlgBase::Create(wxWindow *parent, wxWindowID id, const wxString &tit
     box_sizer4->Add(m_choiceProjects, wxSizerFlags(1).Border(wxLEFT|wxRIGHT|wxTOP, wxSizerFlags::GetDefaultBorder()));
 
     m_filePickerProject = new wxFilePickerCtrl(this, wxID_ANY, wxEmptyString, wxFileSelectorPromptStr, 
-        wxString::FromUTF8("Project Files|*.vcxproj;*.vcproj;*.project;*.cbp;*.dsp"), wxDefaultPosition, wxDefaultSize,
+        "Project Files|*.vcxproj;*.vcproj;*.project;*.cbp;*.dsp", wxDefaultPosition, wxDefaultSize,
         wxFLP_FILE_MUST_EXIST|wxFLP_OPEN);
     box_sizer4->Add(m_filePickerProject, wxSizerFlags().Border(wxALL));
 
     auto box_sizer5 = new wxBoxSizer(wxVERTICAL);
     parent_sizer->Add(box_sizer5, wxSizerFlags().Expand().Border(wxALL));
 
-    m_checkBox = new wxCheckBox(this, wxID_ANY, wxString::FromUTF8("&Add .vscode/ directory and files (tasks.json, launch.json, etc.)"));
+    m_checkBox = new wxCheckBox(this, wxID_ANY, "&Add .vscode/ directory and files (tasks.json, launch.json, etc.)");
     m_checkBox->SetValidator(wxGenericValidator(&m_AddVscodeDir));
-    m_checkBox->SetToolTip(wxString::FromUTF8("If checked, files are added to a .vscode/ directory so that you can build the project from with Visual Studio Code."));
+    m_checkBox->SetToolTip("If checked, files are added to a .vscode/ directory so that you can build the project from with Visual Studio Code.");
     box_sizer5->Add(m_checkBox, wxSizerFlags().Border(wxALL));
 
-    m_checkGitIgnore = new wxCheckBox(this, wxID_ANY, wxString::FromUTF8("Have &git ignore all generated files and directories"));
+    m_checkGitIgnore = new wxCheckBox(this, wxID_ANY, "Have &git ignore all generated files and directories");
     m_checkGitIgnore->SetValidator(wxGenericValidator(&m_gitIgnore));
-    m_checkGitIgnore->SetToolTip(wxString::FromUTF8("If checked, all ttBld generated file types and directories will be added to .git/info/exclude so that they will not be tracked."));
+    m_checkGitIgnore->SetToolTip("If checked, all ttBld generated file types and directories will be added to .git/info/exclude so that they will not be tracked.");
     box_sizer5->Add(m_checkGitIgnore, wxSizerFlags().Border(wxALL));
 
     auto static_line = new wxStaticLine(this);

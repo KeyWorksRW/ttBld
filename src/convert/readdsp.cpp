@@ -64,7 +64,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 pos = line.find_nonspace(pos + 1);
                 auto end = line.find_space(pos);
                 std::string project(line.c_str() + pos, end - pos);
-                m_writefile.setOptValue(OPT::PROJECT, project);
+                m_srcfiles.setOptValue(OPT::PROJECT, project);
             }
         }
         else if (line.is_sameprefix("CFG", tt::CASE::either) && line.contains("$(CFG)"))
@@ -87,7 +87,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
             else if (line.contains("TARGTYPE"))
             {
                 if (line.contains("Dynamic-Link Library"))
-                    m_writefile.setOptValue(OPT::EXE_TYPE, "dll");
+                    m_srcfiles.setOptValue(OPT::EXE_TYPE, "dll");
             }
             else if (line.contains("# ADD CPP /Yc"))
             {
@@ -96,15 +96,15 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                     ttlib::cstr header;
                     header.AssignSubString(line.subview(pos));
                     if (header.size())
-                        m_writefile.setOptValue(OPT::PCH, header);
+                        m_srcfiles.setOptValue(OPT::PCH, header);
 
                     // The /Yc flag will be added after the src file that is used to create the precompiled header. At the
                     // very least, we need to remove it from the files list since it will be processed differently. Adding it
                     // as a PCH_CPP may not be necessary if it has the same base name as the precompiled header, but it
                     // doesn't hurt to add it even if they do have the same name.
 
-                    auto& src_files = m_writefile.GetSrcFileList();
-                    m_writefile.setOptValue(OPT::PCH_CPP, src_files.back());
+                    auto& src_files = m_srcfiles.GetSrcFileList();
+                    m_srcfiles.setOptValue(OPT::PCH_CPP, src_files.back());
                     src_files.pop_back();
                 }
             }
@@ -114,7 +114,7 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 if (ttlib::is_found(pos))
                 {
                     if (line.subview().contains(".ocx"))
-                        m_writefile.setOptValue(OPT::EXE_TYPE, "ocx");
+                        m_srcfiles.setOptValue(OPT::EXE_TYPE, "ocx");
                 }
                 pos = line.find("/map:");
                 if (ttlib::is_found(pos))
@@ -127,14 +127,14 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                         ttlib::cstr filename;
                         filename.AssignSubString(line.subview(pos));
                         ttlib::cstr cur_flags;
-                        if (m_writefile.hasOptValue(OPT::LINK_REL))
-                            cur_flags = m_writefile.getOptValue(OPT::LINK_REL);
+                        if (m_srcfiles.hasOptValue(OPT::LINK_REL))
+                            cur_flags = m_srcfiles.getOptValue(OPT::LINK_REL);
                         if (!cur_flags.contains("/map:"))
                         {
                             if (cur_flags.size())
                                 cur_flags << ' ';
                             cur_flags << "/map:" << '"' << filename << '"';
-                            m_writefile.setOptValue(OPT::LINK_REL, cur_flags);
+                            m_srcfiles.setOptValue(OPT::LINK_REL, cur_flags);
                         }
                     }
                 }
@@ -144,23 +144,23 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 // Since this is a really old project, we ignore any compiler flags -- we just grab the defines
                 ttlib::cstr NewFlags;
                 ttlib::cstr CurFlags;
-                if (m_writefile.hasOptValue(OPT::CFLAGS_CMN))
-                    CurFlags = m_writefile.getOptValue(OPT::CFLAGS_CMN);
-                if (inReleaseSection && m_writefile.hasOptValue(OPT::CFLAGS_REL))
+                if (m_srcfiles.hasOptValue(OPT::CFLAGS_CMN))
+                    CurFlags = m_srcfiles.getOptValue(OPT::CFLAGS_CMN);
+                if (inReleaseSection && m_srcfiles.hasOptValue(OPT::CFLAGS_REL))
                 {
                     if (CurFlags.size())
                     {
                         CurFlags << ' ';
                     }
-                    CurFlags << m_writefile.getOptValue(OPT::CFLAGS_REL);
+                    CurFlags << m_srcfiles.getOptValue(OPT::CFLAGS_REL);
                 }
-                else if (!inReleaseSection && m_writefile.hasOptValue(OPT::CFLAGS_DBG))
+                else if (!inReleaseSection && m_srcfiles.hasOptValue(OPT::CFLAGS_DBG))
                 {
                     if (CurFlags.size())
                     {
                         CurFlags << ' ';
                     }
-                    CurFlags << m_writefile.getOptValue(OPT::CFLAGS_DBG);
+                    CurFlags << m_srcfiles.getOptValue(OPT::CFLAGS_DBG);
                 }
 
                 auto pos = line.find("/D");
@@ -189,20 +189,20 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 CurFlags.clear();
                 if (!NewFlags.empty())
                 {
-                    if (inReleaseSection && m_writefile.hasOptValue(OPT::CFLAGS_REL))
+                    if (inReleaseSection && m_srcfiles.hasOptValue(OPT::CFLAGS_REL))
                     {
-                        CurFlags << m_writefile.getOptValue(OPT::CFLAGS_REL) << ' ';
+                        CurFlags << m_srcfiles.getOptValue(OPT::CFLAGS_REL) << ' ';
                     }
                     CurFlags << NewFlags;
-                    m_writefile.setOptValue(OPT::CFLAGS_REL, CurFlags);
+                    m_srcfiles.setOptValue(OPT::CFLAGS_REL, CurFlags);
                 }
             }
             else if (line.contains("ADD BASE MTL") || line.contains("ADD MTL"))
             {
                 ttlib::cstr NewFlags;
                 ttlib::cstr CurFlags;
-                if (m_writefile.hasOptValue(OPT::MIDL_CMN))
-                    CurFlags = m_writefile.getOptValue(OPT::MIDL_CMN);
+                if (m_srcfiles.hasOptValue(OPT::MIDL_CMN))
+                    CurFlags = m_srcfiles.getOptValue(OPT::MIDL_CMN);
 
                 if (line.contains("/mktyplib203", tt::CASE::either) && !CurFlags.contains("/mktyplib203"))
                 {
@@ -248,12 +248,12 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 CurFlags.clear();
                 if (!NewFlags.empty())
                 {
-                    if (m_writefile.hasOptValue(OPT::MIDL_CMN))
+                    if (m_srcfiles.hasOptValue(OPT::MIDL_CMN))
                     {
-                        CurFlags << m_writefile.getOptValue(OPT::MIDL_CMN) << ' ';
+                        CurFlags << m_srcfiles.getOptValue(OPT::MIDL_CMN) << ' ';
                     }
                     CurFlags << NewFlags;
-                    m_writefile.setOptValue(OPT::MIDL_CMN, CurFlags);
+                    m_srcfiles.setOptValue(OPT::MIDL_CMN, CurFlags);
                 }
             }
         }
@@ -268,23 +268,23 @@ bld::RESULT CConvert::ConvertDsp(const std::string& srcFile, std::string_view ds
                 if (filename.extension().is_sameas(".def", tt::CASE::either))
                 {
                     ttlib::cstr cur_flags;
-                    if (m_writefile.hasOptValue(OPT::LINK_REL))
-                        cur_flags = m_writefile.getOptValue(OPT::LINK_REL);
+                    if (m_srcfiles.hasOptValue(OPT::LINK_REL))
+                        cur_flags = m_srcfiles.getOptValue(OPT::LINK_REL);
                     if (!cur_flags.contains("/def:"))
                     {
                         if (cur_flags.size())
                             cur_flags << ' ';
                         cur_flags << "/def:" << '"' << filename << '"';
-                        m_writefile.setOptValue(OPT::LINK_REL, cur_flags);
+                        m_srcfiles.setOptValue(OPT::LINK_REL, cur_flags);
                     }
                 }
                 else
                 {
-                    ttlib::add_if(m_writefile.GetSrcFileList(), filename);
+                    ttlib::add_if(m_srcfiles.GetSrcFileList(), filename);
                 }
             }
         }
     }
 
-    return m_writefile.WriteNew(dstFile);
+    return (m_CreateSrcFiles ? m_srcfiles.WriteNew(dstFile) : bld::RESULT::success);
 }

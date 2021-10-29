@@ -10,7 +10,12 @@
 #include "ttsview.h"     // sview -- std::string_view with additional methods
 #include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
 
-#include "csrcfiles.h"  // CSrcFiles
+#include "convert.h"         // CConvert -- Class for converting project build files to .srcfiles.yaml
+#include "convertvs_base.h"  // ConvertVS -- Dialog to get file and path for VS to CMake conversion
+#include "csrcfiles.h"       // CSrcFiles
+#include "uifuncs.h"         // Miscellaneous functions for displaying UI
+
+#include "../pugixml/pugixml.hpp"  // pugixml parser
 
 const char* multi_config = R"===(
 get_property(isMultiConfig GLOBAL
@@ -51,45 +56,50 @@ const char* preset_json = R"===({
 }
 )===";
 
-bool CreateCmakeProject(ttlib::cstr& projectFile)
+bld::RESULT CConvert::CreateCmakeProject(ttlib::cstr& projectFile)
 {
     ttlib::cwd cur_cwd;
 
-    ttlib::cstr file_prefix;
-    if (projectFile.contains("/"))
+    m_srcFile = projectFile;
+
+    if (m_srcFile.contains("/"))
     {
-        file_prefix = projectFile;
-        file_prefix.remove_filename();
+        m_srcDir = m_srcFile;
+        m_srcDir.remove_filename();
     }
 
-    if (file_prefix.size())
-        ttlib::ChangeDir(file_prefix);
+    if (m_srcDir.size())
+        ttlib::ChangeDir(m_srcDir);
 
-    CSrcFiles srcfiles;
-    if (!srcfiles.ReadFile(projectFile.filename()))
+    if (!m_srcfiles.ReadFile(m_srcFile.filename()))
     {
         std::cout << "Cannot locate a .srcfiles.yaml to create CMakeLists.txt from!" << '\n';
-        return false;
+        return bld::RESULT::invalid_file;
     }
 
-    if (file_prefix.size())
+    if (m_srcDir.size())
         ttlib::ChangeDir(cur_cwd);
 
+    return WriteCmakeProject();
+}
+
+bld::RESULT CConvert::WriteCmakeProject()
+{
     ttlib::textfile out;
 
     out += "cmake_minimum_required(VERSION 3.20)";
     out += "";
-    out.emplace_back(ttlib::cstr() << "project(" << srcfiles.GetProjectName() << " LANGUAGES CXX)");
+    out.emplace_back(ttlib::cstr() << "project(" << m_srcfiles.GetProjectName() << " LANGUAGES CXX)");
     out += "";
 
     int standard = 17;
 
-    ttlib::cstr flags_cmn(srcfiles.getOptValue(OPT::CFLAGS_CMN));
-    if (srcfiles.hasOptValue(OPT::MSVC_CMN))
+    ttlib::cstr flags_cmn(m_srcfiles.getOptValue(OPT::CFLAGS_CMN));
+    if (m_srcfiles.hasOptValue(OPT::MSVC_CMN))
     {
         if (flags_cmn.size())
             flags_cmn << ' ';
-        flags_cmn << srcfiles.getOptValue(OPT::MSVC_CMN);
+        flags_cmn << m_srcfiles.getOptValue(OPT::MSVC_CMN);
     }
 
     if (flags_cmn.contains("std:c++"))
@@ -141,6 +151,8 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
         ttlib::cstr flags = flags_cmn;
         flags.Replace("-D", "/D", true, tt::CASE::exact);
 
+        std::vector<ttlib::cstr> defs;
+
         ttlib::cstr definitions;
         auto start = flags.find("/D");
         while (ttlib::is_found(start))
@@ -151,21 +163,36 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
                 end = flags.size();
             if (definitions.size())
                 definitions << ' ';
+            defs.emplace_back() << flags.subview(start, end - start);
             definitions << flags.subview(start, end - start);
             start = flags.find("/D", end);
         }
 
-        out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << definitions << ')');
+        if (defs.size() < 2)
+        {
+            out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << defs.at(0) << ')');
+        }
+        else
+        {
+            out.emplace_back() << "add_compile_definitions(";
+            for (auto& iter: defs)
+            {
+                out.emplace_back() << "    " << iter;
+            }
+            out.emplace_back() << ')';
+        }
+
+        // out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << definitions << ')');
     }
 
-    if (srcfiles.hasOptValue(OPT::CFLAGS_REL) &&
-        (srcfiles.getOptValue(OPT::CFLAGS_REL).contains("/D") || srcfiles.getOptValue(OPT::CFLAGS_REL).contains("-D")))
+    if (m_srcfiles.hasOptValue(OPT::CFLAGS_REL) &&
+        (m_srcfiles.getOptValue(OPT::CFLAGS_REL).contains("/D") || m_srcfiles.getOptValue(OPT::CFLAGS_REL).contains("-D")))
     {
         need_blank_line = true;
-        ttlib::cstr flags = srcfiles.getOptValue(OPT::CFLAGS_REL);
+        ttlib::cstr flags = m_srcfiles.getOptValue(OPT::CFLAGS_REL);
         flags.Replace("-D", "/D", true, tt::CASE::exact);
 
-        ttlib::cstr definitions;
+        std::vector<ttlib::cstr> defs;
         auto start = flags.find("/D");
         while (ttlib::is_found(start))
         {
@@ -173,23 +200,33 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
             auto end = flags.find_space(start);
             if (!ttlib::is_found(end))
                 end = flags.size();
-            if (definitions.size())
-                definitions << ' ';
-            definitions << "$<$<CONFIG:Release>:" << flags.subview(start, end - start) << '>';
+            defs.emplace_back() << "$<$<CONFIG:Release>:" << flags.subview(start, end - start) << '>';
             start = flags.find("/D", end);
         }
 
-        out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << definitions << ')');
+        if (defs.size() < 2)
+        {
+            out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << defs.at(0) << ')');
+        }
+        else
+        {
+            out.emplace_back() << "add_compile_definitions(";
+            for (auto& iter: defs)
+            {
+                out.emplace_back() << "    " << iter;
+            }
+            out.emplace_back() << ')';
+        }
     }
 
-    if (srcfiles.hasOptValue(OPT::CFLAGS_DBG) &&
-        (srcfiles.getOptValue(OPT::CFLAGS_DBG).contains("/D") || srcfiles.getOptValue(OPT::CFLAGS_DBG).contains("-D")))
+    if (m_srcfiles.hasOptValue(OPT::CFLAGS_DBG) &&
+        (m_srcfiles.getOptValue(OPT::CFLAGS_DBG).contains("/D") || m_srcfiles.getOptValue(OPT::CFLAGS_DBG).contains("-D")))
     {
         need_blank_line = true;
-        ttlib::cstr flags = srcfiles.getOptValue(OPT::CFLAGS_DBG);
+        ttlib::cstr flags = m_srcfiles.getOptValue(OPT::CFLAGS_DBG);
         flags.Replace("-D", "/D", true, tt::CASE::exact);
 
-        ttlib::cstr definitions;
+        std::vector<ttlib::cstr> defs;
         auto start = flags.find("/D");
         while (ttlib::is_found(start))
         {
@@ -197,13 +234,23 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
             auto end = flags.find_space(start);
             if (!ttlib::is_found(end))
                 end = flags.size();
-            if (definitions.size())
-                definitions << ' ';
-            definitions << "$<$<CONFIG:Debug>:" << flags.subview(start, end - start) << '>';
+            defs.emplace_back() << "$<$<CONFIG:Debug>:" << flags.subview(start, end - start) << '>';
             start = flags.find("/D", end);
         }
 
-        out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << definitions << ')');
+        if (defs.size() < 2)
+        {
+            out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << defs.at(0) << ')');
+        }
+        else
+        {
+            out.emplace_back() << "add_compile_definitions(";
+            for (auto& iter: defs)
+            {
+                out.emplace_back() << "    " << iter;
+            }
+            out.emplace_back() << ')';
+        }
     }
 
     if (need_blank_line)
@@ -212,31 +259,239 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
         need_blank_line = false;
     }
 
-    if (srcfiles.GetDebugFileList().size())
+    if (m_srcfiles.GetDebugFileList().size())
     {
         out += "# Note the requirement that --config Debug is used to get the additional debug files";
     }
 
-    ttlib::viewfile in;
-    if (!in.ReadFile(projectFile))
-    {
-        std::cout << "Unable to read " << srcfiles.GetSrcFilesName() << '\n';
-        return false;
-    }
-
-    auto file_pos = in.FindLineContaining("Files:");
-    if (!ttlib::is_found(file_pos))
-    {
-        std::cout << srcfiles.GetSrcFilesName() << " does not contain a Files: section" << '\n';
-        return false;
-    }
-
-    out.emplace_back(ttlib::cstr() << "add_executable(" << srcfiles.GetProjectName());
-    if (srcfiles.IsExeTypeWindow())
+    out.emplace_back(ttlib::cstr() << "add_executable(" << m_srcfiles.GetProjectName());
+    if (m_srcfiles.IsExeTypeWindow())
     {
         out.back() << " WIN32";
     }
 
+    if (m_srcFile.size())
+    {
+        ttlib::viewfile in;
+        if (!in.ReadFile(m_srcFile))
+        {
+            std::cout << "Unable to read " << m_srcfiles.GetSrcFilesName() << '\n';
+            return bld::RESULT::read_failed;
+        }
+
+        size_t file_pos = in.FindLineContaining("Files:");
+
+        if (!ttlib::is_found(file_pos))
+        {
+            std::cout << m_srcfiles.GetSrcFilesName() << " does not contain a Files: section" << '\n';
+            return bld::RESULT::invalid_file;
+        }
+        CMakeAddFilesSection(in, out, file_pos);
+    }
+    else
+    {
+        CMakeAddFiles(out);
+    }
+
+    if (need_blank_line)
+    {
+        out += "";
+        need_blank_line = false;
+    }
+
+    out += "if (MSVC)";
+    out += "    # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build";
+    out += "    # /FC -- Full path to source code file in diagnostics";
+    out.emplace_back(
+        ttlib::cstr() << "    target_compile_options(" << m_srcfiles.GetProjectName()
+                      << " PRIVATE \"$<$<CONFIG:Release>:/GL>\" \"/FC\" \"/W4\" \"/Zc:__cplusplus\" \"/utf-8\")");
+    out.emplace_back(ttlib::cstr() << "    target_link_options(" << m_srcfiles.GetProjectName()
+                                   << " PRIVATE \"$<$<CONFIG:Release>:/LTCG>\")\n");
+
+    if (m_srcfiles.hasOptValue(OPT::NATVIS))
+    {
+        ttlib::cstr file_path;
+        if (m_srcDir.size() && !m_srcfiles.getOptValue(OPT::NATVIS).is_sameprefix("../"))
+        {
+            file_path << "../" << m_srcDir;
+        }
+        file_path << m_srcfiles.getOptValue(OPT::NATVIS);
+
+        // The natvis file is relative to the build directory which is parellel to any src directory
+        out.emplace_back(ttlib::cstr() << "    target_link_options(" << m_srcfiles.GetProjectName()
+                                       << " PRIVATE \"$<$<CONFIG:Debug>:/natvis:" << file_path << ">\")");
+    }
+
+    if (m_srcfiles.getRcName().size())
+    {
+        out += "\n    # Assume the manifest is in the resource file";
+        out.emplace_back(ttlib::cstr() << "    target_link_options(" << m_srcfiles.GetProjectName()
+                                       << " PRIVATE \"/manifest:no\")");
+    }
+
+    out += "endif()";
+    out += "";
+
+    if (m_srcfiles.HasPch())
+    {
+        if (m_isConvertToCmake)
+        {
+            out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << m_srcfiles.GetProjectName() << " PRIVATE \""
+                                           << m_srcfiles.getOptValue(OPT::PCH) << "\")");
+        }
+        else
+        {
+            ttlib::cstr pch_path;
+            if (m_srcDir.size())
+                pch_path = m_srcDir;
+            pch_path << m_srcfiles.getOptValue(OPT::PCH);
+            if (!pch_path.file_exists() && m_srcfiles.hasOptValue(OPT::INC_DIRS))
+            {
+                ttlib::multiview inc_list(m_srcfiles.getOptValue(OPT::INC_DIRS));
+                for (auto& iter: inc_list)
+                {
+                    pch_path.clear();
+                    if (m_srcDir.size())
+                        pch_path = m_srcDir;
+                    pch_path.append_filename(iter);
+                    pch_path.addtrailingslash();
+                    pch_path << m_srcfiles.getOptValue(OPT::PCH);
+                    if (pch_path.file_exists())
+                        break;
+                }
+            }
+            out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << m_srcfiles.GetProjectName() << " PRIVATE \""
+                                           << pch_path << "\")");
+        }
+        out += "";
+    }
+
+    if (m_srcfiles.hasOptValue(OPT::INC_DIRS))
+    {
+        out.emplace_back(ttlib::cstr() << "target_include_directories(" << m_srcfiles.GetProjectName() << " PRIVATE ");
+
+        ttlib::multiview inc_list(m_srcfiles.getOptValue(OPT::INC_DIRS));
+        for (auto& iter: inc_list)
+        {
+            ttlib::cstr inc_path("    ");
+            if (iter.front() == '$')
+            {
+                auto end = iter.find(')');
+                inc_path << "$ENV{" << iter.substr(2, end - 2) << '}' << iter.subview(end + 1);
+                out.emplace_back(inc_path);
+                continue;
+            }
+
+            if (m_isConvertToCmake)
+            {
+                // Hack alert! This is to remove the unused include directory that isn't needed when building with CMake
+                if (iter == "build/msw/$(OutDir)$(wxIncSubDir)")
+                    continue;
+
+                out.emplace_back(ttlib::cstr() << "    " << iter);
+            }
+
+            else
+            {
+                if (m_srcDir.size())
+                    inc_path << m_srcDir;
+                if (!iter.is_sameas("./"))
+                    inc_path << iter;
+
+                if (m_srcDir.size() && inc_path.is_sameprefix(ttlib::cstr() << "    " << m_srcDir << "../"))
+                {
+                    inc_path = "    ";
+                    inc_path << iter.subview(3);
+                }
+                out.emplace_back(inc_path);
+            }
+        }
+        out += ")";
+        out += "";
+    }
+
+    if (m_srcfiles.hasOptValue(OPT::LIB_DIRS) || m_srcfiles.hasOptValue(OPT::LIB_DIRS64))
+        out += "if (MSVC)";
+
+    if (m_srcfiles.hasOptValue(OPT::LIB_DIRS))
+    {
+        out.emplace_back(ttlib::cstr() << "    target_link_directories(" << m_srcfiles.GetProjectName() << " PRIVATE ");
+
+        ttlib::multiview lib_list(m_srcfiles.getOptValue(OPT::LIB_DIRS));
+        for (auto& iter: lib_list)
+        {
+            ttlib::cstr lib_path("        ");
+            if (iter.front() == '$')
+            {
+                auto end = iter.find(')');
+                lib_path << "$ENV{" << iter.substr(2, end - 2) << '}' << iter.subview(end + 1);
+                out.emplace_back(lib_path);
+                continue;
+            }
+
+            if (m_srcDir.size() && iter.front() == '.')
+                lib_path << m_srcDir;
+            lib_path << iter;
+
+            out.emplace_back(lib_path);
+        }
+        out += "    )";
+    }
+    else if (m_srcfiles.hasOptValue(OPT::LIB_DIRS64))
+    {
+        out.emplace_back(ttlib::cstr() << "    target_link_directories(" << m_srcfiles.GetProjectName() << " PRIVATE ");
+
+        ttlib::multiview lib_list(m_srcfiles.getOptValue(OPT::LIB_DIRS64));
+        for (auto& iter: lib_list)
+        {
+            ttlib::cstr lib_path("        ");
+            if (iter.front() == '$')
+            {
+                auto end = iter.find(')');
+                lib_path << "$ENV{" << iter.substr(2, end - 2) << '}' << iter.subview(end + 1);
+                out.emplace_back(lib_path);
+                continue;
+            }
+
+            if (m_srcDir.size() && iter.front() == '.')
+                lib_path << m_srcDir;
+            lib_path << iter;
+
+            out.emplace_back(lib_path);
+        }
+        out += "    )";
+    }
+    if (m_srcfiles.hasOptValue(OPT::LIB_DIRS) || m_srcfiles.hasOptValue(OPT::LIB_DIRS64))
+        out += "endif()";
+
+    ttlib::cstr out_name("CMakeLists.txt");
+    if (ttlib::file_exists(out_name))
+    {
+        out_name.replace_extension(".ttbld");
+    }
+
+    if (!out.WriteFile(out_name))
+    {
+        std::cout << "Cannot write to " << out_name << '\n';
+        return bld::RESULT::write_failed;
+    }
+
+    std::cout << "Created " << out_name << '\n';
+    if (!ttlib::file_exists("CMakePresets.json"))
+    {
+        out.clear();
+        out.ReadString(preset_json);
+        if (out.WriteFile("CMakePresets.json"))
+        {
+            std::cout << "Created CMakePresets.json" << '\n';
+        }
+    }
+
+    return bld::RESULT::success;
+}
+
+void CConvert::CMakeAddFilesSection(ttlib::viewfile& in, ttlib::textfile& out, size_t file_pos)
+{
     for (++file_pos; file_pos < in.size(); ++file_pos)
     {
         if (in[file_pos].empty())
@@ -259,12 +514,12 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
             continue;
         }
 
-        if (file_prefix.size())
+        if (m_srcDir.size())
         {
             ttlib::cstr path;
             ttlib::cstr non_relative;
-            non_relative << file_prefix << "../";
-            path << file_prefix << ttlib::find_nonspace(in[file_pos]);
+            non_relative << m_srcDir << "../";
+            path << m_srcDir << ttlib::find_nonspace(in[file_pos]);
             if (path.is_sameprefix(non_relative))
             {
                 path.erase(0, non_relative.size());
@@ -302,11 +557,11 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
             }
 
             ttlib::cstr path;
-            path << file_prefix << ttlib::find_nonspace(in[file_pos]);
-            if (file_prefix.size())
+            path << m_srcDir << ttlib::find_nonspace(in[file_pos]);
+            if (m_srcDir.size())
             {
                 ttlib::cstr non_relative;
-                non_relative << file_prefix << "../";
+                non_relative << m_srcDir << "../";
                 if (path.is_sameprefix(non_relative))
                 {
                     path.erase(0, non_relative.size());
@@ -329,179 +584,105 @@ bool CreateCmakeProject(ttlib::cstr& projectFile)
 
     out += ")";
     out += "";
+}
 
-    if (need_blank_line)
+void CConvert::CMakeAddFiles(ttlib::textfile& out)
+{
+    // Hack alert! We assume we got here via a call to CreateCmakeProject, which means the path to the source files is
+    // already relative to the CMakeList.txt path.
+
+    for (auto& iter: m_srcfiles.GetSrcFileList())
     {
-        out += "";
-        need_blank_line = false;
+        // Hack alert! This is used by wxWidgets for creating a precompiled header -- CMake doesn't need this
+        if (iter == "src/common/dummy.cpp")
+            continue;
+
+        out.emplace_back(ttlib::cstr() << "    " << iter);
     }
 
-    out += "if (MSVC)";
-    out += "    # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build";
-    out += "    # /FC -- Full path to source code file in diagnostics";
-    out.emplace_back(
-        ttlib::cstr() << "    target_compile_options(" << srcfiles.GetProjectName()
-                      << " PRIVATE \"$<$<CONFIG:Release>:/GL>\" \"/FC\" \"/W4\" \"/Zc:__cplusplus\" \"/utf-8\")");
-    out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
-                                   << " PRIVATE \"$<$<CONFIG:Release>:/LTCG>\")\n");
-
-    if (srcfiles.hasOptValue(OPT::NATVIS))
+    for (auto& iter: m_srcfiles.GetDebugFileList())
     {
-        ttlib::cstr file_path;
-        if (file_prefix.size() && !srcfiles.getOptValue(OPT::NATVIS).is_sameprefix("../"))
-        {
-            file_path << "../" << file_prefix;
-        }
-        file_path << srcfiles.getOptValue(OPT::NATVIS);
-
-        // The natvis file is relative to the build directory which is parellel to any src directory
-        out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
-                                       << " PRIVATE \"$<$<CONFIG:Debug>:/natvis:" << file_path << ">\")");
+        out.emplace_back(ttlib::cstr() << "    $<$<CONFIG:Debug>:" << iter << '>');
     }
 
-    if (srcfiles.getRcName().size())
-    {
-        out += "\n    # Assume the manifest is in the resource file";
-        out.emplace_back(ttlib::cstr() << "    target_link_options(" << srcfiles.GetProjectName()
-                                       << " PRIVATE \"/manifest:no\")");
-    }
-
-    out += "endif()";
+    out += ")";
     out += "";
+}
 
-    if (srcfiles.HasPch())
+bld::RESULT CConvert::ConvertToCmakeProject(ttlib::cstr& projectFile)
+{
+    ConvertVS dlg(nullptr);
+    if (projectFile.size())
     {
-        ttlib::cstr pch_path;
-        if (file_prefix.size())
-            pch_path = file_prefix;
-        pch_path << srcfiles.getOptValue(OPT::PCH);
-        if (!pch_path.file_exists() && srcfiles.hasOptValue(OPT::INC_DIRS))
+        dlg.m_filePicker->SetPath(projectFile.wx_str());
+    }
+
+    if (dlg.ShowModal() != wxID_OK)
+        return bld::RESULT::failure;
+
+    while (dlg.m_filePicker->GetPath().IsEmpty())
+    {
+        appMsgBox("You need to specify a VS Project file to convert.", "Convert Visual Studio Project");
+        if (dlg.ShowModal() != wxID_OK)
+            return bld::RESULT::failure;
+    }
+
+    m_isConvertToCmake = true;
+    m_dstDir = dlg.m_dirPicker->GetPath().ToUTF8().data();
+
+    bld::RESULT result = bld::failure;
+    ttlib::cstr project_file = dlg.m_filePicker->GetPath().ToUTF8().data();
+    auto extension = project_file.extension();
+    ttlib::cstr project_name = project_file.filename();
+    project_name.remove_extension();
+    m_srcfiles.setOptValue(OPT::PROJECT, project_name);
+    if (!extension.empty())
+    {
+        ttlib::cwd save_cwd;
+        ttlib::cstr new_cwd(projectFile);
+        new_cwd.remove_filename();
+        ttlib::ChangeDir(new_cwd);
+
+        DontCreateSrcFiles();
+
+        if (extension.is_sameas(".vcxproj", tt::CASE::either))
         {
-            ttlib::multiview inc_list(srcfiles.getOptValue(OPT::INC_DIRS));
-            for (auto& iter: inc_list)
-            {
-                pch_path.clear();
-                if (file_prefix.size())
-                    pch_path = file_prefix;
-                pch_path.append_filename(iter);
-                pch_path.addtrailingslash();
-                pch_path << srcfiles.getOptValue(OPT::PCH);
-                if (pch_path.file_exists())
-                    break;
-            }
+            result = ConvertVcx(project_file, ttlib::emptystring);
         }
-        out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << srcfiles.GetProjectName() << " PRIVATE \""
-                                       << pch_path << "\")");
-        out += "";
-    }
-
-    if (srcfiles.hasOptValue(OPT::INC_DIRS))
-    {
-        out.emplace_back(ttlib::cstr() << "target_include_directories(" << srcfiles.GetProjectName() << " PRIVATE ");
-
-        ttlib::multiview inc_list(srcfiles.getOptValue(OPT::INC_DIRS));
-        for (auto& iter: inc_list)
+        else if (extension.is_sameas(".vcproj", tt::CASE::either))
         {
-            ttlib::cstr inc_path("    ");
-            if (iter.front() == '$')
-            {
-                auto end = iter.find(')');
-                inc_path << "$ENV{" << iter.substr(2, end - 2) << '}' << iter.subview(end + 1);
-                out.emplace_back(inc_path);
-                continue;
-            }
-            if (file_prefix.size())
-                inc_path << file_prefix;
-            if (!iter.is_sameas("./"))
-                inc_path << iter;
-
-            if (file_prefix.size() && inc_path.is_sameprefix(ttlib::cstr() << "    " << file_prefix << "../"))
-            {
-                inc_path = "    ";
-                inc_path << iter.subview(3);
-            }
-            out.emplace_back(inc_path);
+            result = ConvertVc(project_file, ttlib::emptystring);
         }
-        out += ")";
-        out += "";
-    }
-
-    if (srcfiles.hasOptValue(OPT::LIB_DIRS) || srcfiles.hasOptValue(OPT::LIB_DIRS64))
-        out += "if (MSVC)";
-
-    if (srcfiles.hasOptValue(OPT::LIB_DIRS))
-    {
-        out.emplace_back(ttlib::cstr() << "    target_link_directories(" << srcfiles.GetProjectName() << " PRIVATE ");
-
-        ttlib::multiview lib_list(srcfiles.getOptValue(OPT::LIB_DIRS));
-        for (auto& iter: lib_list)
+        else if (extension.is_sameas(".dsp", tt::CASE::either))
         {
-            ttlib::cstr lib_path("        ");
-            if (iter.front() == '$')
-            {
-                auto end = iter.find(')');
-                lib_path << "$ENV{" << iter.substr(2, end - 2) << '}' << iter.subview(end + 1);
-                out.emplace_back(lib_path);
-                continue;
-            }
-
-            if (file_prefix.size() && iter.front() == '.')
-                lib_path << file_prefix;
-            lib_path << iter;
-
-            out.emplace_back(lib_path);
+            result = ConvertDsp(project_file, ttlib::emptystring);
         }
-        out += "    )";
-    }
-    else if (srcfiles.hasOptValue(OPT::LIB_DIRS64))
-    {
-        out.emplace_back(ttlib::cstr() << "    target_link_directories(" << srcfiles.GetProjectName() << " PRIVATE ");
-
-        ttlib::multiview lib_list(srcfiles.getOptValue(OPT::LIB_DIRS64));
-        for (auto& iter: lib_list)
+        else if (extension.is_sameas(".project", tt::CASE::either))
         {
-            ttlib::cstr lib_path("        ");
-            if (iter.front() == '$')
-            {
-                auto end = iter.find(')');
-                lib_path << "$ENV{" << iter.substr(2, end - 2) << '}' << iter.subview(end + 1);
-                out.emplace_back(lib_path);
-                continue;
-            }
-
-            if (file_prefix.size() && iter.front() == '.')
-                lib_path << file_prefix;
-            lib_path << iter;
-
-            out.emplace_back(lib_path);
+            result = ConvertCodeLite(project_file, ttlib::emptystring);
         }
-        out += "    )";
-    }
-    if (srcfiles.hasOptValue(OPT::LIB_DIRS) || srcfiles.hasOptValue(OPT::LIB_DIRS64))
-        out += "endif()";
-
-    ttlib::cstr out_name("CMakeLists.txt");
-    if (ttlib::file_exists(out_name))
-    {
-        out_name.replace_extension(".ttbld");
-    }
-
-    if (!out.WriteFile(out_name))
-    {
-        std::cout << "Cannot write to " << out_name << '\n';
-        return false;
-    }
-
-    std::cout << "Created " << out_name << '\n';
-    if (!ttlib::file_exists("CMakePresets.json"))
-    {
-        out.clear();
-        out.ReadString(preset_json);
-        if (out.WriteFile("CMakePresets.json"))
+        else if (project_file.is_sameprefix(".srcfiles", tt::CASE::either))
         {
-            std::cout << "Created CMakePresets.json" << '\n';
+            result = ConvertSrcfiles(project_file, ttlib::emptystring);
+        }
+
+        if (result == bld::read_failed)
+        {
+            appMsgBox(ttlib::cstr("Cannot open ") << project_file, "Project conversion");
         }
     }
+    else
+    {
+        m_srcfiles.AddSourcePattern("*.c;*.cpp;*.cc;*.cxx");
+        result = bld::success;
+    }
 
-    return true;
+    if (result == bld::success)
+    {
+        ttlib::ChangeDir(m_dstDir);
+        m_srcFile.clear();  // This is the original project file, WriteCmakeProject() assumes it is a .srcfiles.yaml file
+        result = WriteCmakeProject();
+    }
+
+    return result;
 }
