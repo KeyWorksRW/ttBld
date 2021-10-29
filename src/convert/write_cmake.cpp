@@ -151,6 +151,8 @@ bld::RESULT CConvert::WriteCmakeProject()
         ttlib::cstr flags = flags_cmn;
         flags.Replace("-D", "/D", true, tt::CASE::exact);
 
+        std::vector<ttlib::cstr> defs;
+
         ttlib::cstr definitions;
         auto start = flags.find("/D");
         while (ttlib::is_found(start))
@@ -161,11 +163,26 @@ bld::RESULT CConvert::WriteCmakeProject()
                 end = flags.size();
             if (definitions.size())
                 definitions << ' ';
+            defs.emplace_back() << flags.subview(start, end - start);
             definitions << flags.subview(start, end - start);
             start = flags.find("/D", end);
         }
 
-        out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << definitions << ')');
+        if (defs.size() < 2)
+        {
+            out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << defs.at(0) << ')');
+        }
+        else
+        {
+            out.emplace_back() << "add_compile_definitions(";
+            for (auto& iter: defs)
+            {
+                out.emplace_back() << "    " << iter;
+            }
+            out.emplace_back() << ')';
+        }
+
+        // out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << definitions << ')');
     }
 
     if (m_srcfiles.hasOptValue(OPT::CFLAGS_REL) &&
@@ -175,7 +192,7 @@ bld::RESULT CConvert::WriteCmakeProject()
         ttlib::cstr flags = m_srcfiles.getOptValue(OPT::CFLAGS_REL);
         flags.Replace("-D", "/D", true, tt::CASE::exact);
 
-        ttlib::cstr definitions;
+        std::vector<ttlib::cstr> defs;
         auto start = flags.find("/D");
         while (ttlib::is_found(start))
         {
@@ -183,13 +200,23 @@ bld::RESULT CConvert::WriteCmakeProject()
             auto end = flags.find_space(start);
             if (!ttlib::is_found(end))
                 end = flags.size();
-            if (definitions.size())
-                definitions << ' ';
-            definitions << "$<$<CONFIG:Release>:" << flags.subview(start, end - start) << '>';
+            defs.emplace_back() << "$<$<CONFIG:Release>:" << flags.subview(start, end - start) << '>';
             start = flags.find("/D", end);
         }
 
-        out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << definitions << ')');
+        if (defs.size() < 2)
+        {
+            out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << defs.at(0) << ')');
+        }
+        else
+        {
+            out.emplace_back() << "add_compile_definitions(";
+            for (auto& iter: defs)
+            {
+                out.emplace_back() << "    " << iter;
+            }
+            out.emplace_back() << ')';
+        }
     }
 
     if (m_srcfiles.hasOptValue(OPT::CFLAGS_DBG) &&
@@ -199,7 +226,7 @@ bld::RESULT CConvert::WriteCmakeProject()
         ttlib::cstr flags = m_srcfiles.getOptValue(OPT::CFLAGS_DBG);
         flags.Replace("-D", "/D", true, tt::CASE::exact);
 
-        ttlib::cstr definitions;
+        std::vector<ttlib::cstr> defs;
         auto start = flags.find("/D");
         while (ttlib::is_found(start))
         {
@@ -207,13 +234,23 @@ bld::RESULT CConvert::WriteCmakeProject()
             auto end = flags.find_space(start);
             if (!ttlib::is_found(end))
                 end = flags.size();
-            if (definitions.size())
-                definitions << ' ';
-            definitions << "$<$<CONFIG:Debug>:" << flags.subview(start, end - start) << '>';
+            defs.emplace_back() << "$<$<CONFIG:Debug>:" << flags.subview(start, end - start) << '>';
             start = flags.find("/D", end);
         }
 
-        out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << definitions << ')');
+        if (defs.size() < 2)
+        {
+            out.emplace_back(ttlib::cstr() << "add_compile_definitions(" << defs.at(0) << ')');
+        }
+        else
+        {
+            out.emplace_back() << "add_compile_definitions(";
+            for (auto& iter: defs)
+            {
+                out.emplace_back() << "    " << iter;
+            }
+            out.emplace_back() << ')';
+        }
     }
 
     if (need_blank_line)
@@ -297,27 +334,35 @@ bld::RESULT CConvert::WriteCmakeProject()
 
     if (m_srcfiles.HasPch())
     {
-        ttlib::cstr pch_path;
-        if (m_srcDir.size())
-            pch_path = m_srcDir;
-        pch_path << m_srcfiles.getOptValue(OPT::PCH);
-        if (!pch_path.file_exists() && m_srcfiles.hasOptValue(OPT::INC_DIRS))
+        if (m_isConvertToCmake)
         {
-            ttlib::multiview inc_list(m_srcfiles.getOptValue(OPT::INC_DIRS));
-            for (auto& iter: inc_list)
-            {
-                pch_path.clear();
-                if (m_srcDir.size())
-                    pch_path = m_srcDir;
-                pch_path.append_filename(iter);
-                pch_path.addtrailingslash();
-                pch_path << m_srcfiles.getOptValue(OPT::PCH);
-                if (pch_path.file_exists())
-                    break;
-            }
+            out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << m_srcfiles.GetProjectName() << " PRIVATE \""
+                                           << m_srcfiles.getOptValue(OPT::PCH) << "\")");
         }
-        out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << m_srcfiles.GetProjectName() << " PRIVATE \""
-                                       << pch_path << "\")");
+        else
+        {
+            ttlib::cstr pch_path;
+            if (m_srcDir.size())
+                pch_path = m_srcDir;
+            pch_path << m_srcfiles.getOptValue(OPT::PCH);
+            if (!pch_path.file_exists() && m_srcfiles.hasOptValue(OPT::INC_DIRS))
+            {
+                ttlib::multiview inc_list(m_srcfiles.getOptValue(OPT::INC_DIRS));
+                for (auto& iter: inc_list)
+                {
+                    pch_path.clear();
+                    if (m_srcDir.size())
+                        pch_path = m_srcDir;
+                    pch_path.append_filename(iter);
+                    pch_path.addtrailingslash();
+                    pch_path << m_srcfiles.getOptValue(OPT::PCH);
+                    if (pch_path.file_exists())
+                        break;
+                }
+            }
+            out.emplace_back(ttlib::cstr() << "target_precompile_headers(" << m_srcfiles.GetProjectName() << " PRIVATE \""
+                                           << pch_path << "\")");
+        }
         out += "";
     }
 
@@ -339,6 +384,10 @@ bld::RESULT CConvert::WriteCmakeProject()
 
             if (m_isConvertToCmake)
             {
+                // Hack alert! This is to remove the unused include directory that isn't needed when building with CMake
+                if (iter == "build/msw/$(OutDir)$(wxIncSubDir)")
+                    continue;
+
                 out.emplace_back(ttlib::cstr() << "    " << iter);
             }
 
@@ -544,6 +593,10 @@ void CConvert::CMakeAddFiles(ttlib::textfile& out)
 
     for (auto& iter: m_srcfiles.GetSrcFileList())
     {
+        // Hack alert! This is used by wxWidgets for creating a precompiled header -- CMake doesn't need this
+        if (iter == "src/common/dummy.cpp")
+            continue;
+
         out.emplace_back(ttlib::cstr() << "    " << iter);
     }
 

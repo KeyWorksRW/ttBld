@@ -129,8 +129,8 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
 {
     if (auto compile = node.child("ClCompile"); compile)
     {
-        auto val = compile.child("PrecompiledHeader").first_child().cvalue();
-        if (!val.empty() && !ttlib::is_sameprefix(val, "NotUsing", tt::CASE::either))
+        auto val = compile.child("PrecompiledHeaderFile").first_child().cvalue();
+        if (val.size())
             m_srcfiles.setOptValue(OPT::PCH, val);
 
         val = compile.child("WarningLevel").first_child().cvalue();
