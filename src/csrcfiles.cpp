@@ -490,7 +490,8 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
         while (ff.isvalid())
         {
             auto& name = ff.getcstr();
-            if (name.has_extension(".c") || name.has_extension(".cc") || name.has_extension(".cpp") || name.has_extension(".cxx"))
+            if (name.has_extension(".c") || name.has_extension(".cc") || name.has_extension(".cpp") ||
+                name.has_extension(".cxx"))
             {
                 if (m_section == SECTION_DEBUG_FILES)
                     ttlib::add_if(m_lstDebugFiles, name);
