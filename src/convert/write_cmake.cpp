@@ -336,17 +336,26 @@ bld::RESULT CConvert::WriteCmakeProject()
                 out.emplace_back(inc_path);
                 continue;
             }
-            if (m_srcDir.size())
-                inc_path << m_srcDir;
-            if (!iter.is_sameas("./"))
-                inc_path << iter;
 
-            if (m_srcDir.size() && inc_path.is_sameprefix(ttlib::cstr() << "    " << m_srcDir << "../"))
+            if (m_isConvertToCmake)
             {
-                inc_path = "    ";
-                inc_path << iter.subview(3);
+                out.emplace_back(ttlib::cstr() << "    " << iter);
             }
-            out.emplace_back(inc_path);
+
+            else
+            {
+                if (m_srcDir.size())
+                    inc_path << m_srcDir;
+                if (!iter.is_sameas("./"))
+                    inc_path << iter;
+
+                if (m_srcDir.size() && inc_path.is_sameprefix(ttlib::cstr() << "    " << m_srcDir << "../"))
+                {
+                    inc_path = "    ";
+                    inc_path << iter.subview(3);
+                }
+                out.emplace_back(inc_path);
+            }
         }
         out += ")";
         out += "";
@@ -530,50 +539,31 @@ void CConvert::CMakeAddFilesSection(ttlib::viewfile& in, ttlib::textfile& out, s
 
 void CConvert::CMakeAddFiles(ttlib::textfile& out)
 {
+    // Hack alert! We assume we got here via a call to CreateCmakeProject, which means the path to the source files is
+    // already relative to the CMakeList.txt path.
+
     for (auto& iter: m_srcfiles.GetSrcFileList())
     {
-        if (m_srcDir.size())
-        {
-            ttlib::cstr path;
-            ttlib::cstr non_relative;
-            non_relative << m_srcDir << "../";
-            path << m_srcDir << ttlib::find_nonspace(iter);
-            if (path.is_sameprefix(non_relative))
-            {
-                path.erase(0, non_relative.size());
-            }
-            out.emplace_back(ttlib::cstr() << "    " << path);
-        }
-        else
-        {
-            out += iter;
-        }
+        out.emplace_back(ttlib::cstr() << "    " << iter);
     }
 
     for (auto& iter: m_srcfiles.GetDebugFileList())
     {
-        if (m_srcDir.size())
-        {
-            ttlib::cstr path;
-            ttlib::cstr non_relative;
-            non_relative << m_srcDir << "../";
-            path << m_srcDir << ttlib::find_nonspace(iter);
-            if (path.is_sameprefix(non_relative))
-            {
-                path.erase(0, non_relative.size());
-            }
-            out.emplace_back(ttlib::cstr() << "    $<$<CONFIG:Debug>:" << path << '>');
-        }
-        else
-        {
-            out.emplace_back(ttlib::cstr() << "    $<$<CONFIG:Debug>:" << iter << '>');
-        }
+        out.emplace_back(ttlib::cstr() << "    $<$<CONFIG:Debug>:" << iter << '>');
     }
+
+    out += ")";
+    out += "";
 }
 
-bld::RESULT CConvert::ConvertToCmakeProject()
+bld::RESULT CConvert::ConvertToCmakeProject(ttlib::cstr& projectFile)
 {
     ConvertVS dlg(nullptr);
+    if (projectFile.size())
+    {
+        dlg.m_filePicker->SetPath(projectFile.wx_str());
+    }
+
     if (dlg.ShowModal() != wxID_OK)
         return bld::RESULT::failure;
 
@@ -584,11 +574,24 @@ bld::RESULT CConvert::ConvertToCmakeProject()
             return bld::RESULT::failure;
     }
 
+    m_isConvertToCmake = true;
+    m_dstDir = dlg.m_dirPicker->GetPath().ToUTF8().data();
+
     bld::RESULT result = bld::failure;
     ttlib::cstr project_file = dlg.m_filePicker->GetPath().ToUTF8().data();
     auto extension = project_file.extension();
+    ttlib::cstr project_name = project_file.filename();
+    project_name.remove_extension();
+    m_srcfiles.setOptValue(OPT::PROJECT, project_name);
     if (!extension.empty())
     {
+        ttlib::cwd save_cwd;
+        ttlib::cstr new_cwd(projectFile);
+        new_cwd.remove_filename();
+        ttlib::ChangeDir(new_cwd);
+
+        DontCreateSrcFiles();
+
         if (extension.is_sameas(".vcxproj", tt::CASE::either))
         {
             result = ConvertVcx(project_file, ttlib::emptystring);
@@ -623,7 +626,8 @@ bld::RESULT CConvert::ConvertToCmakeProject()
 
     if (result == bld::success)
     {
-        m_dstDir = dlg.m_dirPicker->GetPath().ToUTF8().data();
+        ttlib::ChangeDir(m_dstDir);
+        m_srcFile.clear();  // This is the original project file, WriteCmakeProject() assumes it is a .srcfiles.yaml file
         result = WriteCmakeProject();
     }
 

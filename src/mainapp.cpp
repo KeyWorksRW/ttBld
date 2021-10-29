@@ -332,7 +332,7 @@ int CMainApp::OnRun()
     if (cmd.isOption("vcxmake"))
     {
         CConvert convert;
-        auto result = convert.ConvertToCmakeProject();
+        auto result = convert.ConvertToCmakeProject(projectFile);
         return (result == bld::RESULT::success ? 0 : 1);
     }
 

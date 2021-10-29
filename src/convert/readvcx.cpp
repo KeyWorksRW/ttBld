@@ -7,6 +7,7 @@
 
 #include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
 #include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include "ttstr.h"       // ttString -- wxString with additional methods similar to ttlib::cstr
 
 #include "convert.h"  // CConvert, CVcxWrite
 #include "uifuncs.h"  // Miscellaneous functions for displaying UI
@@ -15,22 +16,29 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
 {
     ttlib::cwd cwd;
     m_srcFile.assign(srcFile);
-    m_dstFile.assign(dstFile);
+
+    if (!m_isConvertToCmake)
+    {
+        m_dstFile.assign(dstFile);
+        m_dstFile.make_relative(cwd);
+        m_dstFile.backslashestoforward();
+    }
     m_srcFile.make_relative(cwd);
-    m_dstFile.make_relative(cwd);
 
 #if defined(_WIN32)
     m_srcFile.backslashestoforward();
-    m_dstFile.backslashestoforward();
 #endif  // _WIN32
 
     m_srcDir = srcFile;
     m_srcDir.make_absolute();
     m_srcDir.remove_filename();
 
-    m_dstDir = dstFile;
-    m_dstDir.make_absolute();
-    m_dstDir.remove_filename();
+    if (m_dstDir.empty())
+    {
+        m_dstDir = dstFile;
+        m_dstDir.make_absolute();
+        m_dstDir.remove_filename();
+    }
 
     std::wstring str16;
     ttlib::utf8to16(srcFile, str16);
@@ -91,15 +99,29 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
         m_srcfiles.setOptValue(OPT::LIBS_REL, {});
     }
 
-    return (m_CreateSrcFiles ? m_srcfiles.WriteNew(dstFile) : bld::RESULT::success);
+    return (!m_isConvertToCmake ? m_srcfiles.WriteNew(m_dstFile) : bld::RESULT::success);
 }
 
 void CConvert::MakeNameRelative(ttlib::cstr& filename)
 {
+    if (m_dstDir.size())
+    {
+        ttString ws;
+        ws << filename.wx_str();
+        ws.make_absolute();
+        ws.make_relative(m_dstDir);
+        filename = ws.ToUTF8().data();
+        filename.backslashestoforward();
+        return;
+    }
+
     filename.make_absolute();
     filename.make_relative(m_srcDir);
-    filename.make_absolute();
-    filename.make_relative(m_dstDir);
+    if (m_dstDir.size())
+    {
+        filename.make_absolute();
+        filename.make_relative(m_dstDir);
+    }
     filename.backslashestoforward();
 }
 
