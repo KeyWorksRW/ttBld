@@ -17,7 +17,7 @@
 
 // Any time you add an option below, you need to increment this version number and then add it to the aoptVersions
 // list
-const char* txtOptVersion { "1.8.0" };
+const char* txtOptVersion { "1.8.1" };
 
 // clang-format off
 static OPT::VERSION aoptVersions[]
