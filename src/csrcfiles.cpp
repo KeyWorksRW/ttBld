@@ -296,6 +296,26 @@ void CSrcFiles::ProcessFile(std::string_view line)
             ProcessIncludeDirective(filename);
         return;
     }
+    else if (ttlib::contains(line, "wxui_code.cmake", tt::CASE::either))
+    {
+        ttlib::cstr root(line);
+        root.remove_filename();
+
+        ttlib::viewfile cmake_files;
+        if (cmake_files.ReadFile(line))
+        {
+            for (ttlib::sview iter: cmake_files)
+            {
+                if (iter.contains("${CMAKE_CURRENT_LIST_DIR}"))
+                {
+                    ttlib::cstr filename(root);
+                    filename.append_filename(iter.filename());
+                    ttlib::add_if(m_lstSrcFiles, filename);
+                }
+            }
+        }
+        return;
+    }
 
     ttlib::cstr filename = line;
     filename.erase_from('#');
@@ -338,6 +358,26 @@ void CSrcFiles::ProcessDebugFile(std::string_view line)
     if (filename.find('*') != tt::npos || filename.find('?') != tt::npos)
     {
         AddSourcePattern(filename);
+        return;
+    }
+    else if (ttlib::contains(line, "wxui_code.cmake", tt::CASE::either))
+    {
+        ttlib::cstr root(line);
+        root.remove_filename();
+
+        ttlib::viewfile cmake_files;
+        if (cmake_files.ReadFile(line))
+        {
+            for (ttlib::sview iter: cmake_files)
+            {
+                if (iter.contains("${CMAKE_CURRENT_LIST_DIR}"))
+                {
+                    ttlib::cstr filename(root);
+                    filename.append_filename(iter.filename());
+                    ttlib::add_if(m_lstDebugFiles, filename);
+                }
+            }
+        }
         return;
     }
 
