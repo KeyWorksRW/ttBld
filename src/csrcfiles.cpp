@@ -372,7 +372,7 @@ void CSrcFiles::ProcessDebugFile(std::string_view line)
             {
                 if (iter.contains("${CMAKE_CURRENT_LIST_DIR}"))
                 {
-                    ttlib::cstr filename(root);
+                    filename = root;
                     filename.append_filename(iter.filename());
                     ttlib::add_if(m_lstDebugFiles, filename);
                 }
