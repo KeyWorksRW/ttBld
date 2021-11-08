@@ -52,18 +52,18 @@ endif()
 
 add_library(ttLib STATIC
 
-    ../ttLib/src/ttconsole.cpp          # class that sets/restores console foreground color
-    ../ttLib/src/ttcstr.cpp             # Class for handling zero-terminated char strings.
-    ../ttLib/src/ttcvector.cpp          # Vector class for storing ttlib::cstr strings
-    ../ttLib/src/ttcview.cpp            # string_view functionality on a zero-terminated char string.
-    ../ttLib/src/ttlibspace.cpp         # ttlib namespace functions
-    ../ttLib/src/ttmultistr.cpp         # Breaks a single string into multiple strings
-    ../ttLib/src/ttparser.cpp           # Command line parser
-    ../ttLib/src/ttstrings.cpp          # Class for handling zero-terminated char strings.
-    ../ttLib/src/ttsview.cpp            # std::string_view with additional methods
-    ../ttLib/src/tttextfile.cpp         # Classes for reading and writing text files.
+    ttLib/src/ttconsole.cpp          # class that sets/restores console foreground color
+    ttLib/src/ttcstr.cpp             # Class for handling zero-terminated char strings.
+    ttLib/src/ttcvector.cpp          # Vector class for storing ttlib::cstr strings
+    ttLib/src/ttcview.cpp            # string_view functionality on a zero-terminated char string.
+    ttLib/src/ttlibspace.cpp         # ttlib namespace functions
+    ttLib/src/ttmultistr.cpp         # Breaks a single string into multiple strings
+    ttLib/src/ttparser.cpp           # Command line parser
+    ttLib/src/ttstrings.cpp          # Class for handling zero-terminated char strings.
+    ttLib/src/ttsview.cpp            # std::string_view with additional methods
+    ttLib/src/tttextfile.cpp         # Classes for reading and writing text files.
 
-    ../ttLib/src/ttstr.cpp              # Enhanced version of wxString
+    ttLib/src/ttstr.cpp              # Enhanced version of wxString
 
     ${win_ttlib_sources}
 
@@ -136,7 +136,7 @@ target_include_directories(ttBld PRIVATE
     src/precompile
     src/ui
     src/convert
-    ttlib/include
+    ttLib/include
 )
 
 target_include_directories(ttLib PRIVATE
