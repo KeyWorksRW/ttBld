@@ -35,10 +35,11 @@ if (NOT isMultiConfig)
     endif()
 endif()
 
-add_compile_definitions($<$<CONFIG:Debug>:WXUSINGDLL>)
+# This will build wxCLib.lib and wxWidgets.lib
+add_subdirectory(wxSnapshot)
 
 list(APPEND CMAKE_MODULE_PATH "src/ui/")
-include(src/ui/wxui_code.cmake)  # This will set ${wxue_generated_code} with list of generated files
+include(src/ui/wxui_code.cmake)  # This will set ${wxue_generated_code} with a list of generated files
 
 if (WIN32)
     set(win_ttlib_sources
@@ -50,6 +51,8 @@ if (WIN32)
     set(win_resource "src/ttBld.rc")
 endif()
 
+# Build the library directly instead of using add_subdirectory() to limit the modules we want and to add
+# any modules that require wxWidgets.
 add_library(ttLib STATIC
 
     ttLib/src/ttconsole.cpp          # class that sets/restores console foreground color
@@ -66,7 +69,6 @@ add_library(ttLib STATIC
     ttLib/src/ttstr.cpp              # Enhanced version of wxString
 
     ${win_ttlib_sources}
-
 )
 
 # Note the requirement that --config Debug is used to get the additional debug files
@@ -114,7 +116,7 @@ add_executable(ttBld
     ${wxue_generated_code}
 )
 
-target_link_libraries(ttBld PRIVATE ttLib)
+target_link_libraries(ttBld PRIVATE ttLib wxCLib wxWidgets)
 
 if (MSVC)
     # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build
@@ -132,6 +134,7 @@ target_precompile_headers(ttBld PRIVATE "src/precompile/pch.h")
 target_precompile_headers(ttLib PRIVATE "src/precompile/pch.h")
 
 target_include_directories(ttBld PRIVATE
+    wxSnapshot/include
     src/
     src/precompile
     src/ui
@@ -140,6 +143,7 @@ target_include_directories(ttBld PRIVATE
 )
 
 target_include_directories(ttLib PRIVATE
+    wxSnapshot/include
     src/precompile
     ttLib/include
 )
