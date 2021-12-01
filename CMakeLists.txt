@@ -38,8 +38,8 @@ endif()
 # This will build wxCLib.lib and wxWidgets.lib
 add_subdirectory(wxSnapshot)
 
-list(APPEND CMAKE_MODULE_PATH "src/ui/")
 include(src/ui/wxui_code.cmake)  # This will set ${wxue_generated_code} with a list of generated files
+include(src/file_list.cmake)     # This will set ${file_list} with a list of source files
 
 if (WIN32)
     set(win_ttlib_sources
@@ -73,46 +73,16 @@ add_library(ttLib STATIC
 
 # Note the requirement that --config Debug is used to get the additional debug files
 add_executable(ttBld
+
     ${win_resource}
+    ${file_list}
+    ${wxue_generated_code}
+)
 
-    src/mainapp.cpp         # entry point, global strings, library pragmas
-
-    src/addfiles.cpp        # Used to add one or more filenames to a .srcfiles file
-    src/cmplrMsvc.cpp       # Creates .ninja scripts for MSVC and CLANG-CL compilers
-    src/createmakefile.cpp  # CreateMakeFile method for creating a makefile
-    src/csrcfiles.cpp       # CSrcFiles class for reading .srcfiles
-    src/dryrun.cpp          # CDryRun class for testing
-    src/finder.cpp          # Routines for finding executables such as the MSVC compiler
-    src/gencmdfiles.cpp     # Generates MSVCenv.cmd and Code.cmd files
-    src/gitfuncs.cpp        # Functions for working with .git
-    src/image_hdr.cpp       # Convert image into png header
-    src/make_hgz.cpp        # Converts a file into a .gz and stores as char array header
-    src/ninja.cpp           # CNinja for creating .ninja scripts
-    src/options.cpp         # contains all Options strings and CSrcOptions class for working with them
-    src/rcdep.cpp           # Contains functions for parsing RC dependencies
-    src/verninja.cpp        # CVerMakeNinja class
-    src/vs.cpp              # Creates .vs/tasks.vs.json and .vs/launch.vs.json
-    src/vscode.cpp          # Creates/updates .vscode files
-    src/writesrc.cpp        # Writes a new or update srcfiles.yaml file
-    src/yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
-
-    src/convert/convert.cpp          # Various conversion methods
-    src/convert/readcodelite.cpp     # Class for converting a CodeLite .project file to .srcfiles.yaml
-    src/convert/readdsp.cpp          # Class for converting a Visual Studio .DSP file to .srcfiles.yaml
-    src/convert/readvc.cpp           # Class for converting a Visual Studio .vcproj file to .srcfiles.yaml
-    src/convert/readvcx.cpp          # Converts a Visual Studio project file into .srcfiles.yaml
-    src/convert/writevcx.cpp         # Create a Visual Studio project file
-    src/convert/write_cmake.cpp      # Create a CMakeLists.txt file
-
-    # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
-    src/pugixml/pugixml.cpp          # Built directly rather than building a library
-
-    # wxUiEditor derived classes
-
-    src/ui/convertdlg.cpp            # Dialog specifying what to convert into a .srcfiles.yaml file
-    src/ui/optionsdlg.cpp            # Dialog for setting all .srcfile options
-    src/ui/vscodedlg.cpp             # Dialog for setting options to create tasks.json and launch.json
-
+# This is just used by a github action to confirm that all the source code can be compiled
+add_library(check_build STATIC EXCLUDE_FROM_ALL
+    ${win_resource}
+    ${file_list}
     ${wxue_generated_code}
 )
 
@@ -131,9 +101,19 @@ if (MSVC)
 endif()
 
 target_precompile_headers(ttBld PRIVATE "src/precompile/pch.h")
+target_precompile_headers(check_build PRIVATE "src/precompile/pch.h")
 target_precompile_headers(ttLib PRIVATE "src/precompile/pch.h")
 
 target_include_directories(ttBld PRIVATE
+    wxSnapshot/include
+    src/
+    src/precompile
+    src/ui
+    src/convert
+    ttLib/include
+)
+
+target_include_directories(check_build PRIVATE
     wxSnapshot/include
     src/
     src/precompile
