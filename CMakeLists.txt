@@ -106,6 +106,9 @@ target_precompile_headers(ttLib PRIVATE "src/precompile/pch.h")
 
 target_include_directories(ttBld PRIVATE
     wxSnapshot/include
+    if (WIN32)
+        wxSnapshot/win
+    endif()
     src/
     src/precompile
     src/ui
@@ -115,6 +118,9 @@ target_include_directories(ttBld PRIVATE
 
 target_include_directories(check_build PRIVATE
     wxSnapshot/include
+    if (WIN32)
+        wxSnapshot/win
+    endif()
     src/
     src/precompile
     src/ui
@@ -124,6 +130,9 @@ target_include_directories(check_build PRIVATE
 
 target_include_directories(ttLib PRIVATE
     wxSnapshot/include
+    if (WIN32)
+        wxSnapshot/win
+    endif()
     src/precompile
     ttLib/include
 )
