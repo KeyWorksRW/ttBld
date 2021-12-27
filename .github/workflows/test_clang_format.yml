@@ -7,19 +7,21 @@ on:
     paths-ignore:
       - src/archive
       - src/art
-      - src/xml
+      - src/res
       - src/pugixml
       - ttLib
       - tests
+      - wxSnapshot
 
   pull_request:
     paths-ignore:
       - src/archive
       - src/art
-      - src/xml
+      - src/res
       - src/pugixml
       - ttLib
       - tests
+      - wxSnapshot
 
 jobs:
   build:
