@@ -13,6 +13,16 @@ on:
       - tests
       - wxSnapshot
 
+  pull_request:
+    paths-ignore:
+      - src/archive
+      - src/art
+      - src/res
+      - src/pugixml
+      - ttLib
+      - tests
+      - wxSnapshot
+
 env:
   BUILD_TYPE: Release
 
