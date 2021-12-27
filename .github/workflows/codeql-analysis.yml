@@ -46,7 +46,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
-    - run: cmake -G "Visual Studio 16 2019" --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target check_build
+    - run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target check_build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
