@@ -11,293 +11,294 @@
 
 // build/files doesn't include the C files, so we hard-code them here
 
-inline constexpr const auto txt_wxCLib_sources = R"===(set (wxCLib_sources
-    ../src/jpeg/jaricom.c
-    ../src/jpeg/jcapimin.c
-    ../src/jpeg/jcapistd.c
-    ../src/jpeg/jcarith.c
-    ../src/jpeg/jccoefct.c
-    ../src/jpeg/jccolor.c
-    ../src/jpeg/jcdctmgr.c
-    ../src/jpeg/jchuff.c
-    ../src/jpeg/jcinit.c
-    ../src/jpeg/jcmainct.c
-    ../src/jpeg/jcmarker.c
-    ../src/jpeg/jcmaster.c
-    ../src/jpeg/jcomapi.c
-    ../src/jpeg/jcparam.c
-    ../src/jpeg/jcprepct.c
-    ../src/jpeg/jcsample.c
-    ../src/jpeg/jctrans.c
-    ../src/jpeg/jdapimin.c
-    ../src/jpeg/jdapistd.c
-    ../src/jpeg/jdarith.c
-    ../src/jpeg/jdatadst.c
-    ../src/jpeg/jdatasrc.c
-    ../src/jpeg/jdcoefct.c
-    ../src/jpeg/jdcolor.c
-    ../src/jpeg/jddctmgr.c
-    ../src/jpeg/jdhuff.c
-    ../src/jpeg/jdinput.c
-    ../src/jpeg/jdmainct.c
-    ../src/jpeg/jdmarker.c
-    ../src/jpeg/jdmaster.c
-    ../src/jpeg/jdmerge.c
-    ../src/jpeg/jdpostct.c
-    ../src/jpeg/jdsample.c
-    ../src/jpeg/jdtrans.c
-    ../src/jpeg/jerror.c
-    ../src/jpeg/jfdctflt.c
-    ../src/jpeg/jfdctfst.c
-    ../src/jpeg/jfdctint.c
-    ../src/jpeg/jidctflt.c
-    ../src/jpeg/jidctfst.c
-    ../src/jpeg/jidctint.c
-    ../src/jpeg/jmemmgr.c
-    ../src/jpeg/jmemnobs.c
-    ../src/jpeg/jquant1.c
-    ../src/jpeg/jquant2.c
-    ../src/jpeg/jutils.c
+inline constexpr const auto txt_wxCLib_sources = {
 
-    ../src/tiff/libtiff/tif_aux.c
-    ../src/tiff/libtiff/tif_close.c
-    ../src/tiff/libtiff/tif_codec.c
-    ../src/tiff/libtiff/tif_color.c
-    ../src/tiff/libtiff/tif_compress.c
-    ../src/tiff/libtiff/tif_dir.c
-    ../src/tiff/libtiff/tif_dirinfo.c
-    ../src/tiff/libtiff/tif_dirread.c
-    ../src/tiff/libtiff/tif_dirwrite.c
-    ../src/tiff/libtiff/tif_dumpmode.c
-    ../src/tiff/libtiff/tif_error.c
-    ../src/tiff/libtiff/tif_extension.c
-    ../src/tiff/libtiff/tif_fax3.c
-    ../src/tiff/libtiff/tif_fax3sm.c
-    ../src/tiff/libtiff/tif_flush.c
-    ../src/tiff/libtiff/tif_getimage.c
-    ../src/tiff/libtiff/tif_jbig.c
-    ../src/tiff/libtiff/tif_jpeg.c
-    ../src/tiff/libtiff/tif_jpeg_12.c
-    ../src/tiff/libtiff/tif_luv.c
-    ../src/tiff/libtiff/tif_lzma.c
-    ../src/tiff/libtiff/tif_lzw.c
-    ../src/tiff/libtiff/tif_next.c
-    ../src/tiff/libtiff/tif_ojpeg.c
-    ../src/tiff/libtiff/tif_open.c
-    ../src/tiff/libtiff/tif_packbits.c
-    ../src/tiff/libtiff/tif_pixarlog.c
-    ../src/tiff/libtiff/tif_predict.c
-    ../src/tiff/libtiff/tif_print.c
-    ../src/tiff/libtiff/tif_read.c
-    ../src/tiff/libtiff/tif_strip.c
-    ../src/tiff/libtiff/tif_swab.c
-    ../src/tiff/libtiff/tif_thunder.c
-    ../src/tiff/libtiff/tif_tile.c
-    ../src/tiff/libtiff/tif_version.c
-    ../src/tiff/libtiff/tif_warning.c
-    ../src/tiff/libtiff/tif_webp.c
-    ../src/tiff/libtiff/tif_win32.c
-    ../src/tiff/libtiff/tif_write.c
-    ../src/tiff/libtiff/tif_zip.c
-    ../src/tiff/libtiff/tif_zstd.c
+    "jpeg/jaricom.c",
+    "jpeg/jcapimin.c",
+    "jpeg/jcapistd.c",
+    "jpeg/jcarith.c",
+    "jpeg/jccoefct.c",
+    "jpeg/jccolor.c",
+    "jpeg/jcdctmgr.c",
+    "jpeg/jchuff.c",
+    "jpeg/jcinit.c",
+    "jpeg/jcmainct.c",
+    "jpeg/jcmarker.c",
+    "jpeg/jcmaster.c",
+    "jpeg/jcomapi.c",
+    "jpeg/jcparam.c",
+    "jpeg/jcprepct.c",
+    "jpeg/jcsample.c",
+    "jpeg/jctrans.c",
+    "jpeg/jdapimin.c",
+    "jpeg/jdapistd.c",
+    "jpeg/jdarith.c",
+    "jpeg/jdatadst.c",
+    "jpeg/jdatasrc.c",
+    "jpeg/jdcoefct.c",
+    "jpeg/jdcolor.c",
+    "jpeg/jddctmgr.c",
+    "jpeg/jdhuff.c",
+    "jpeg/jdinput.c",
+    "jpeg/jdmainct.c",
+    "jpeg/jdmarker.c",
+    "jpeg/jdmaster.c",
+    "jpeg/jdmerge.c",
+    "jpeg/jdpostct.c",
+    "jpeg/jdsample.c",
+    "jpeg/jdtrans.c",
+    "jpeg/jerror.c",
+    "jpeg/jfdctflt.c",
+    "jpeg/jfdctfst.c",
+    "jpeg/jfdctint.c",
+    "jpeg/jidctflt.c",
+    "jpeg/jidctfst.c",
+    "jpeg/jidctint.c",
+    "jpeg/jmemmgr.c",
+    "jpeg/jmemnobs.c",
+    "jpeg/jquant1.c",
+    "jpeg/jquant2.c",
+    "jpeg/jutils.c",
 
-    ../src/png/png.c
-    ../src/png/pngerror.c
-    ../src/png/pngget.c
-    ../src/png/pngmem.c
-    ../src/png/pngpread.c
-    ../src/png/pngread.c
-    ../src/png/pngrio.c
-    ../src/png/pngrtran.c
-    ../src/png/pngrutil.c
-    ../src/png/pngset.c
-    ../src/png/pngtrans.c
-    ../src/png/pngwio.c
-    ../src/png/pngwrite.c
-    ../src/png/pngwtran.c
-    ../src/png/pngwutil.c
-    ../src/png/arm/arm_init.c
-    ../src/png/arm/filter_neon_intrinsics.c
-    ../src/png/arm/palette_neon_intrinsics.c
-    ../src/png/intel/intel_init.c
-    ../src/png/intel/filter_sse2_intrinsics.c
+    "tiff/libtiff/tif_aux.c",
+    "tiff/libtiff/tif_close.c",
+    "tiff/libtiff/tif_codec.c",
+    "tiff/libtiff/tif_color.c",
+    "tiff/libtiff/tif_compress.c",
+    "tiff/libtiff/tif_dir.c",
+    "tiff/libtiff/tif_dirinfo.c",
+    "tiff/libtiff/tif_dirread.c",
+    "tiff/libtiff/tif_dirwrite.c",
+    "tiff/libtiff/tif_dumpmode.c",
+    "tiff/libtiff/tif_error.c",
+    "tiff/libtiff/tif_extension.c",
+    "tiff/libtiff/tif_fax3.c",
+    "tiff/libtiff/tif_fax3sm.c",
+    "tiff/libtiff/tif_flush.c",
+    "tiff/libtiff/tif_getimage.c",
+    "tiff/libtiff/tif_jbig.c",
+    "tiff/libtiff/tif_jpeg.c",
+    "tiff/libtiff/tif_jpeg_12.c",
+    "tiff/libtiff/tif_luv.c",
+    "tiff/libtiff/tif_lzma.c",
+    "tiff/libtiff/tif_lzw.c",
+    "tiff/libtiff/tif_next.c",
+    "tiff/libtiff/tif_ojpeg.c",
+    "tiff/libtiff/tif_open.c",
+    "tiff/libtiff/tif_packbits.c",
+    "tiff/libtiff/tif_pixarlog.c",
+    "tiff/libtiff/tif_predict.c",
+    "tiff/libtiff/tif_print.c",
+    "tiff/libtiff/tif_read.c",
+    "tiff/libtiff/tif_strip.c",
+    "tiff/libtiff/tif_swab.c",
+    "tiff/libtiff/tif_thunder.c",
+    "tiff/libtiff/tif_tile.c",
+    "tiff/libtiff/tif_version.c",
+    "tiff/libtiff/tif_warning.c",
+    "tiff/libtiff/tif_webp.c",
+    "tiff/libtiff/tif_win32.c",
+    "tiff/libtiff/tif_write.c",
+    "tiff/libtiff/tif_zip.c",
+    "tiff/libtiff/tif_zstd.c",
 
-    ../src/zlib/adler32.c
-    ../src/zlib/compress.c
-    ../src/zlib/crc32.c
-    ../src/zlib/deflate.c
-    ../src/zlib/gzclose.c
-    ../src/zlib/gzlib.c
-    ../src/zlib/gzread.c
-    ../src/zlib/gzwrite.c
-    ../src/zlib/infback.c
-    ../src/zlib/inffast.c
-    ../src/zlib/inflate.c
-    ../src/zlib/inftrees.c
-    ../src/zlib/trees.c
-    ../src/zlib/uncompr.c
-    ../src/zlib/zutil.c
+    "png/png.c",
+    "png/pngerror.c",
+    "png/pngget.c",
+    "png/pngmem.c",
+    "png/pngpread.c",
+    "png/pngread.c",
+    "png/pngrio.c",
+    "png/pngrtran.c",
+    "png/pngrutil.c",
+    "png/pngset.c",
+    "png/pngtrans.c",
+    "png/pngwio.c",
+    "png/pngwrite.c",
+    "png/pngwtran.c",
+    "png/pngwutil.c",
+    "png/arm/arm_init.c",
+    "png/arm/filter_neon_intrinsics.c",
+    "png/arm/palette_neon_intrinsics.c",
+    "png/intel/intel_init.c",
+    "png/intel/filter_sse2_intrinsics.c",
 
-    ../src/regex/regcomp.c
-    ../src/regex/regerror.c
-    ../src/regex/regexec.c
-    ../src/regex/regfree.c
+    "zlib/adler32.c",
+    "zlib/compress.c",
+    "zlib/crc32.c",
+    "zlib/deflate.c",
+    "zlib/gzclose.c",
+    "zlib/gzlib.c",
+    "zlib/gzread.c",
+    "zlib/gzwrite.c",
+    "zlib/infback.c",
+    "zlib/inffast.c",
+    "zlib/inflate.c",
+    "zlib/inftrees.c",
+    "zlib/trees.c",
+    "zlib/uncompr.c",
+    "zlib/zutil.c",
 
-    ../src/expat/expat/lib/xmlparse.c
-    ../src/expat/expat/lib/xmlrole.c
-    ../src/expat/expat/lib/xmltok.c
+    "regex/regcomp.c",
+    "regex/regerror.c",
+    "regex/regexec.c",
+    "regex/regfree.c",
 
-    ../src/common/extended.c
-)
-)===";
+    "expat/expat/lib/xmlparse.c",
+    "expat/expat/lib/xmlrole.c",
+    "expat/expat/lib/xmltok.c",
+
+    "common/extended.c"
+};
+
 
 // build/files doesn't include the scintilla *.cxx files, so we hard-code them here
 
 inline constexpr const auto txt_scintilla_files = {
 
-    "src/stc/scintilla/src/AutoComplete.cxx",
-    "src/stc/scintilla/src/CallTip.cxx",
-    "src/stc/scintilla/src/CaseConvert.cxx",
-    "src/stc/scintilla/src/CaseFolder.cxx",
-    "src/stc/scintilla/src/Catalogue.cxx",
-    "src/stc/scintilla/src/CellBuffer.cxx",
-    "src/stc/scintilla/src/CellBuffer.cxx",
-    "src/stc/scintilla/src/CharClassify.cxx",
-    "src/stc/scintilla/src/ContractionState.cxx",
-    "src/stc/scintilla/src/Decoration.cxx",
-    "src/stc/scintilla/src/Document.cxx",
-    "src/stc/scintilla/src/EditModel.cxx",
-    "src/stc/scintilla/src/EditView.cxx",
-    "src/stc/scintilla/src/Editor.cxx",
-    "src/stc/scintilla/src/ExternalLexer.cxx",
-    "src/stc/scintilla/src/Indicator.cxx",
-    "src/stc/scintilla/src/KeyMap.cxx",
-    "src/stc/scintilla/src/LineMarker.cxx",
-    "src/stc/scintilla/src/MarginView.cxx",
-    "src/stc/scintilla/src/PerLine.cxx",
-    "src/stc/scintilla/src/PositionCache.cxx",
-    "src/stc/scintilla/src/RESearch.cxx",
-    "src/stc/scintilla/src/RunStyles.cxx",
-    "src/stc/scintilla/src/ScintillaBase.cxx",
-    "src/stc/scintilla/src/Selection.cxx",
-    "src/stc/scintilla/src/Style.cxx",
-    "src/stc/scintilla/src/UniConversion.cxx",
-    "src/stc/scintilla/src/ViewStyle.cxx",
-    "src/stc/scintilla/src/XPM.cxx",
-    "src/stc/scintilla/lexlib/Accessor.cxx",
-    "src/stc/scintilla/lexlib/CharacterCategory.cxx",
-    "src/stc/scintilla/lexlib/CharacterSet.cxx",
-    "src/stc/scintilla/lexlib/LexerBase.cxx",
-    "src/stc/scintilla/lexlib/LexerModule.cxx",
-    "src/stc/scintilla/lexlib/LexerNoExceptions.cxx",
-    "src/stc/scintilla/lexlib/LexerSimple.cxx",
-    "src/stc/scintilla/lexlib/PropSetSimple.cxx",
-    "src/stc/scintilla/lexlib/StyleContext.cxx",
-    "src/stc/scintilla/lexlib/WordList.cxx",
-    "src/stc/scintilla/lexers/LexA68k.cxx",
-    "src/stc/scintilla/lexers/LexAbaqus.cxx",
-    "src/stc/scintilla/lexers/LexAda.cxx",
-    "src/stc/scintilla/lexers/LexAPDL.cxx",
-    "src/stc/scintilla/lexers/LexAsm.cxx",
-    "src/stc/scintilla/lexers/LexAsn1.cxx",
-    "src/stc/scintilla/lexers/LexASY.cxx",
-    "src/stc/scintilla/lexers/LexAU3.cxx",
-    "src/stc/scintilla/lexers/LexAVE.cxx",
-    "src/stc/scintilla/lexers/LexAVS.cxx",
-    "src/stc/scintilla/lexers/LexBaan.cxx",
-    "src/stc/scintilla/lexers/LexBash.cxx",
-    "src/stc/scintilla/lexers/LexBasic.cxx",
-    "src/stc/scintilla/lexers/LexBatch.cxx",
-    "src/stc/scintilla/lexers/LexBibTeX.cxx",
-    "src/stc/scintilla/lexers/LexBullant.cxx",
-    "src/stc/scintilla/lexers/LexCaml.cxx",
-    "src/stc/scintilla/lexers/LexCLW.cxx",
-    "src/stc/scintilla/lexers/LexCmake.cxx",
-    "src/stc/scintilla/lexers/LexCOBOL.cxx",
-    "src/stc/scintilla/lexers/LexCoffeeScript.cxx",
-    "src/stc/scintilla/lexers/LexConf.cxx",
-    "src/stc/scintilla/lexers/LexCPP.cxx",
-    "src/stc/scintilla/lexers/LexCrontab.cxx",
-    "src/stc/scintilla/lexers/LexCsound.cxx",
-    "src/stc/scintilla/lexers/LexCSS.cxx",
-    "src/stc/scintilla/lexers/LexD.cxx",
-    "src/stc/scintilla/lexers/LexDiff.cxx",
-    "src/stc/scintilla/lexers/LexDMAP.cxx",
-    "src/stc/scintilla/lexers/LexDMIS.cxx",
-    "src/stc/scintilla/lexers/LexECL.cxx",
-    "src/stc/scintilla/lexers/LexEDIFACT.cxx",
-    "src/stc/scintilla/lexers/LexEiffel.cxx",
-    "src/stc/scintilla/lexers/LexErlang.cxx",
-    "src/stc/scintilla/lexers/LexErrorList.cxx",
-    "src/stc/scintilla/lexers/LexEScript.cxx",
-    "src/stc/scintilla/lexers/LexFlagship.cxx",
-    "src/stc/scintilla/lexers/LexForth.cxx",
-    "src/stc/scintilla/lexers/LexFortran.cxx",
-    "src/stc/scintilla/lexers/LexGAP.cxx",
-    "src/stc/scintilla/lexers/LexGui4Cli.cxx",
-    "src/stc/scintilla/lexers/LexHaskell.cxx",
-    "src/stc/scintilla/lexers/LexHex.cxx",
-    "src/stc/scintilla/lexers/LexHTML.cxx",
-    "src/stc/scintilla/lexers/LexInno.cxx",
-    "src/stc/scintilla/lexers/LexJSON.cxx",
-    "src/stc/scintilla/lexers/LexKix.cxx",
-    "src/stc/scintilla/lexers/LexKVIrc.cxx",
-    "src/stc/scintilla/lexers/LexLaTeX.cxx",
-    "src/stc/scintilla/lexers/LexLisp.cxx",
-    "src/stc/scintilla/lexers/LexLout.cxx",
-    "src/stc/scintilla/lexers/LexLua.cxx",
-    "src/stc/scintilla/lexers/LexMagik.cxx",
-    "src/stc/scintilla/lexers/LexMake.cxx",
-    "src/stc/scintilla/lexers/LexMarkdown.cxx",
-    "src/stc/scintilla/lexers/LexMatlab.cxx",
-    "src/stc/scintilla/lexers/LexMetapost.cxx",
-    "src/stc/scintilla/lexers/LexMMIXAL.cxx",
-    "src/stc/scintilla/lexers/LexModula.cxx",
-    "src/stc/scintilla/lexers/LexMPT.cxx",
-    "src/stc/scintilla/lexers/LexMSSQL.cxx",
-    "src/stc/scintilla/lexers/LexMySQL.cxx",
-    "src/stc/scintilla/lexers/LexNimrod.cxx",
-    "src/stc/scintilla/lexers/LexNsis.cxx",
-    "src/stc/scintilla/lexers/LexNull.cxx",
-    "src/stc/scintilla/lexers/LexOpal.cxx",
-    "src/stc/scintilla/lexers/LexOScript.cxx",
-    "src/stc/scintilla/lexers/LexPascal.cxx",
-    "src/stc/scintilla/lexers/LexPB.cxx",
-    "src/stc/scintilla/lexers/LexPerl.cxx",
-    "src/stc/scintilla/lexers/LexPLM.cxx",
-    "src/stc/scintilla/lexers/LexPO.cxx",
-    "src/stc/scintilla/lexers/LexPOV.cxx",
-    "src/stc/scintilla/lexers/LexPowerPro.cxx",
-    "src/stc/scintilla/lexers/LexPowerShell.cxx",
-    "src/stc/scintilla/lexers/LexProgress.cxx",
-    "src/stc/scintilla/lexers/LexProps.cxx",
-    "src/stc/scintilla/lexers/LexPS.cxx",
-    "src/stc/scintilla/lexers/LexPython.cxx",
-    "src/stc/scintilla/lexers/LexR.cxx",
-    "src/stc/scintilla/lexers/LexRebol.cxx",
-    "src/stc/scintilla/lexers/LexRegistry.cxx",
-    "src/stc/scintilla/lexers/LexRuby.cxx",
-    "src/stc/scintilla/lexers/LexRust.cxx",
-    "src/stc/scintilla/lexers/LexScriptol.cxx",
-    "src/stc/scintilla/lexers/LexSmalltalk.cxx",
-    "src/stc/scintilla/lexers/LexSML.cxx",
-    "src/stc/scintilla/lexers/LexSorcus.cxx",
-    "src/stc/scintilla/lexers/LexSpecman.cxx",
-    "src/stc/scintilla/lexers/LexSpice.cxx",
-    "src/stc/scintilla/lexers/LexSQL.cxx",
-    "src/stc/scintilla/lexers/LexSTTXT.cxx",
-    "src/stc/scintilla/lexers/LexTACL.cxx",
-    "src/stc/scintilla/lexers/LexTADS3.cxx",
-    "src/stc/scintilla/lexers/LexTAL.cxx",
-    "src/stc/scintilla/lexers/LexTCL.cxx",
-    "src/stc/scintilla/lexers/LexTCMD.cxx",
-    "src/stc/scintilla/lexers/LexTeX.cxx",
-    "src/stc/scintilla/lexers/LexTxt2tags.cxx",
-    "src/stc/scintilla/lexers/LexVB.cxx",
-    "src/stc/scintilla/lexers/LexVerilog.cxx",
-    "src/stc/scintilla/lexers/LexVHDL.cxx",
-    "src/stc/scintilla/lexers/LexVisualProlog.cxx",
-    "src/stc/scintilla/lexers/LexYAML.cxx",
+    "stc/scintilla/src/AutoComplete.cxx",
+    "stc/scintilla/src/CallTip.cxx",
+    "stc/scintilla/src/CaseConvert.cxx",
+    "stc/scintilla/src/CaseFolder.cxx",
+    "stc/scintilla/src/Catalogue.cxx",
+    "stc/scintilla/src/CellBuffer.cxx",
+    "stc/scintilla/src/CellBuffer.cxx",
+    "stc/scintilla/src/CharClassify.cxx",
+    "stc/scintilla/src/ContractionState.cxx",
+    "stc/scintilla/src/Decoration.cxx",
+    "stc/scintilla/src/Document.cxx",
+    "stc/scintilla/src/EditModel.cxx",
+    "stc/scintilla/src/EditView.cxx",
+    "stc/scintilla/src/Editor.cxx",
+    "stc/scintilla/src/ExternalLexer.cxx",
+    "stc/scintilla/src/Indicator.cxx",
+    "stc/scintilla/src/KeyMap.cxx",
+    "stc/scintilla/src/LineMarker.cxx",
+    "stc/scintilla/src/MarginView.cxx",
+    "stc/scintilla/src/PerLine.cxx",
+    "stc/scintilla/src/PositionCache.cxx",
+    "stc/scintilla/src/RESearch.cxx",
+    "stc/scintilla/src/RunStyles.cxx",
+    "stc/scintilla/src/ScintillaBase.cxx",
+    "stc/scintilla/src/Selection.cxx",
+    "stc/scintilla/src/Style.cxx",
+    "stc/scintilla/src/UniConversion.cxx",
+    "stc/scintilla/src/ViewStyle.cxx",
+    "stc/scintilla/src/XPM.cxx",
+    "stc/scintilla/lexlib/Accessor.cxx",
+    "stc/scintilla/lexlib/CharacterCategory.cxx",
+    "stc/scintilla/lexlib/CharacterSet.cxx",
+    "stc/scintilla/lexlib/LexerBase.cxx",
+    "stc/scintilla/lexlib/LexerModule.cxx",
+    "stc/scintilla/lexlib/LexerNoExceptions.cxx",
+    "stc/scintilla/lexlib/LexerSimple.cxx",
+    "stc/scintilla/lexlib/PropSetSimple.cxx",
+    "stc/scintilla/lexlib/StyleContext.cxx",
+    "stc/scintilla/lexlib/WordList.cxx",
+    "stc/scintilla/lexers/LexA68k.cxx",
+    "stc/scintilla/lexers/LexAbaqus.cxx",
+    "stc/scintilla/lexers/LexAda.cxx",
+    "stc/scintilla/lexers/LexAPDL.cxx",
+    "stc/scintilla/lexers/LexAsm.cxx",
+    "stc/scintilla/lexers/LexAsn1.cxx",
+    "stc/scintilla/lexers/LexASY.cxx",
+    "stc/scintilla/lexers/LexAU3.cxx",
+    "stc/scintilla/lexers/LexAVE.cxx",
+    "stc/scintilla/lexers/LexAVS.cxx",
+    "stc/scintilla/lexers/LexBaan.cxx",
+    "stc/scintilla/lexers/LexBash.cxx",
+    "stc/scintilla/lexers/LexBasic.cxx",
+    "stc/scintilla/lexers/LexBatch.cxx",
+    "stc/scintilla/lexers/LexBibTeX.cxx",
+    "stc/scintilla/lexers/LexBullant.cxx",
+    "stc/scintilla/lexers/LexCaml.cxx",
+    "stc/scintilla/lexers/LexCLW.cxx",
+    "stc/scintilla/lexers/LexCmake.cxx",
+    "stc/scintilla/lexers/LexCOBOL.cxx",
+    "stc/scintilla/lexers/LexCoffeeScript.cxx",
+    "stc/scintilla/lexers/LexConf.cxx",
+    "stc/scintilla/lexers/LexCPP.cxx",
+    "stc/scintilla/lexers/LexCrontab.cxx",
+    "stc/scintilla/lexers/LexCsound.cxx",
+    "stc/scintilla/lexers/LexCSS.cxx",
+    "stc/scintilla/lexers/LexD.cxx",
+    "stc/scintilla/lexers/LexDiff.cxx",
+    "stc/scintilla/lexers/LexDMAP.cxx",
+    "stc/scintilla/lexers/LexDMIS.cxx",
+    "stc/scintilla/lexers/LexECL.cxx",
+    "stc/scintilla/lexers/LexEDIFACT.cxx",
+    "stc/scintilla/lexers/LexEiffel.cxx",
+    "stc/scintilla/lexers/LexErlang.cxx",
+    "stc/scintilla/lexers/LexErrorList.cxx",
+    "stc/scintilla/lexers/LexEScript.cxx",
+    "stc/scintilla/lexers/LexFlagship.cxx",
+    "stc/scintilla/lexers/LexForth.cxx",
+    "stc/scintilla/lexers/LexFortran.cxx",
+    "stc/scintilla/lexers/LexGAP.cxx",
+    "stc/scintilla/lexers/LexGui4Cli.cxx",
+    "stc/scintilla/lexers/LexHaskell.cxx",
+    "stc/scintilla/lexers/LexHex.cxx",
+    "stc/scintilla/lexers/LexHTML.cxx",
+    "stc/scintilla/lexers/LexInno.cxx",
+    "stc/scintilla/lexers/LexJSON.cxx",
+    "stc/scintilla/lexers/LexKix.cxx",
+    "stc/scintilla/lexers/LexKVIrc.cxx",
+    "stc/scintilla/lexers/LexLaTeX.cxx",
+    "stc/scintilla/lexers/LexLisp.cxx",
+    "stc/scintilla/lexers/LexLout.cxx",
+    "stc/scintilla/lexers/LexLua.cxx",
+    "stc/scintilla/lexers/LexMagik.cxx",
+    "stc/scintilla/lexers/LexMake.cxx",
+    "stc/scintilla/lexers/LexMarkdown.cxx",
+    "stc/scintilla/lexers/LexMatlab.cxx",
+    "stc/scintilla/lexers/LexMetapost.cxx",
+    "stc/scintilla/lexers/LexMMIXAL.cxx",
+    "stc/scintilla/lexers/LexModula.cxx",
+    "stc/scintilla/lexers/LexMPT.cxx",
+    "stc/scintilla/lexers/LexMSSQL.cxx",
+    "stc/scintilla/lexers/LexMySQL.cxx",
+    "stc/scintilla/lexers/LexNimrod.cxx",
+    "stc/scintilla/lexers/LexNsis.cxx",
+    "stc/scintilla/lexers/LexNull.cxx",
+    "stc/scintilla/lexers/LexOpal.cxx",
+    "stc/scintilla/lexers/LexOScript.cxx",
+    "stc/scintilla/lexers/LexPascal.cxx",
+    "stc/scintilla/lexers/LexPB.cxx",
+    "stc/scintilla/lexers/LexPerl.cxx",
+    "stc/scintilla/lexers/LexPLM.cxx",
+    "stc/scintilla/lexers/LexPO.cxx",
+    "stc/scintilla/lexers/LexPOV.cxx",
+    "stc/scintilla/lexers/LexPowerPro.cxx",
+    "stc/scintilla/lexers/LexPowerShell.cxx",
+    "stc/scintilla/lexers/LexProgress.cxx",
+    "stc/scintilla/lexers/LexProps.cxx",
+    "stc/scintilla/lexers/LexPS.cxx",
+    "stc/scintilla/lexers/LexPython.cxx",
+    "stc/scintilla/lexers/LexR.cxx",
+    "stc/scintilla/lexers/LexRebol.cxx",
+    "stc/scintilla/lexers/LexRegistry.cxx",
+    "stc/scintilla/lexers/LexRuby.cxx",
+    "stc/scintilla/lexers/LexRust.cxx",
+    "stc/scintilla/lexers/LexScriptol.cxx",
+    "stc/scintilla/lexers/LexSmalltalk.cxx",
+    "stc/scintilla/lexers/LexSML.cxx",
+    "stc/scintilla/lexers/LexSorcus.cxx",
+    "stc/scintilla/lexers/LexSpecman.cxx",
+    "stc/scintilla/lexers/LexSpice.cxx",
+    "stc/scintilla/lexers/LexSQL.cxx",
+    "stc/scintilla/lexers/LexSTTXT.cxx",
+    "stc/scintilla/lexers/LexTACL.cxx",
+    "stc/scintilla/lexers/LexTADS3.cxx",
+    "stc/scintilla/lexers/LexTAL.cxx",
+    "stc/scintilla/lexers/LexTCL.cxx",
+    "stc/scintilla/lexers/LexTCMD.cxx",
+    "stc/scintilla/lexers/LexTeX.cxx",
+    "stc/scintilla/lexers/LexTxt2tags.cxx",
+    "stc/scintilla/lexers/LexVB.cxx",
+    "stc/scintilla/lexers/LexVerilog.cxx",
+    "stc/scintilla/lexers/LexVHDL.cxx",
+    "stc/scintilla/lexers/LexVisualProlog.cxx",
+    "stc/scintilla/lexers/LexYAML.cxx",
 
 };
 
@@ -346,6 +347,10 @@ int WidgetsFile::Convert(std::vector<ttlib::cstr>& files)
 
             ttlib::cview view(line);
             view.moveto_nonspace();
+            if (view.is_sameprefix("src/"))
+            {
+                view.remove_prefix(4);
+            }
 
             if (view.contains(" ="))
             {
@@ -406,27 +411,27 @@ int WidgetsFile::Convert(std::vector<ttlib::cstr>& files)
                     continue;
                 }
 
-                if (view.contains("src/unix") || view.contains("src/gtk"))
+                if (view.contains("unix") || view.contains("gtk"))
                 {
                     m_unix_list.emplace(view.c_str());
                 }
-                else if (view.contains("src/msw"))
+                else if (view.contains("msw"))
                 {
                     m_msw_list.emplace(view.c_str());
                 }
-                else if (view.contains("src/osx") || view.contains("src/motif"))
+                else if (view.contains("osx") || view.contains("motif"))
                 {
                     m_osx_list.emplace(view.c_str());
                 }
-                else if (view.contains("src/qt"))
+                else if (view.contains("qt"))
                 {
                     continue;  // this shouldn't happen, but let's be certain
                 }
-                else if (view.contains("src/x11"))
+                else if (view.contains("x11"))
                 {
                     continue;  // we don't build x11 code
                 }
-                else if (view.contains("src/univ"))
+                else if (view.contains("univ"))
                 {
                     continue;  // we don't build universal
                 }
@@ -464,7 +469,7 @@ int WidgetsFile::Convert(std::vector<ttlib::cstr>& files)
     output += "set (common_sources";
     for (auto& iter: m_common_list)
     {
-        output.addEmptyLine() << "    ../" << iter;
+        output.addEmptyLine() << "    ${CMAKE_CURRENT_LIST_DIR}/" << iter;
     }
     output += ")";
     output.addEmptyLine();
@@ -472,7 +477,7 @@ int WidgetsFile::Convert(std::vector<ttlib::cstr>& files)
     output += "set (msw_sources";
     for (auto& iter: m_msw_list)
     {
-        output.addEmptyLine() << "    ../" << iter;
+        output.addEmptyLine() << "    ${CMAKE_CURRENT_LIST_DIR}/" << iter;
     }
     output += ")";
     output.addEmptyLine();
@@ -480,7 +485,7 @@ int WidgetsFile::Convert(std::vector<ttlib::cstr>& files)
     output += "set (unix_sources";
     for (auto& iter: m_unix_list)
     {
-        output.addEmptyLine() << "    ../" << iter;
+        output.addEmptyLine() << "    ${CMAKE_CURRENT_LIST_DIR}/" << iter;
     }
     output += ")";
     output.addEmptyLine();
@@ -488,12 +493,17 @@ int WidgetsFile::Convert(std::vector<ttlib::cstr>& files)
     output += "set (osx_sources";
     for (auto& iter: m_osx_list)
     {
-        output.addEmptyLine() << "    ../" << iter;
+        output.addEmptyLine() << "    ${CMAKE_CURRENT_LIST_DIR}/" << iter;
     }
     output += ")";
     output.addEmptyLine();
 
-    output += txt_wxCLib_sources;
+    output += "set (wxCLib_sources";
+    for (auto& iter: txt_wxCLib_sources)
+    {
+        output.addEmptyLine() << "    ${CMAKE_CURRENT_LIST_DIR}/" << iter;
+    }
+    output += ")";
 
     output.WriteFile(files[1]);
 
