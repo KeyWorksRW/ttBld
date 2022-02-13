@@ -40,12 +40,13 @@
 #include "ttcwd.h"      // cwd -- Class for storing and optionally restoring the current directory
 #include "ttparser.h"   // cmd -- Command line parser
 
-#include "convert.h"    // CConvert
-#include "funcs.h"      // List of function declarations
-#include "ninja.h"      // CNinja
-#include "stackwalk.h"  // Walk the stack filtering out anything unrelated to current app
-#include "uifuncs.h"    // Miscellaneous functions for displaying UI
-#include "writevcx.h"   // CVcxWrite -- Create a Visual Studio project file
+#include "convert.h"         // CConvert
+#include "funcs.h"           // List of function declarations
+#include "ninja.h"           // CNinja
+#include "stackwalk.h"       // Walk the stack filtering out anything unrelated to current app
+#include "uifuncs.h"         // Miscellaneous functions for displaying UI
+#include "writevcx.h"        // CVcxWrite -- Create a Visual Studio project file
+#include "wxWidgets_file.h"  // WidgetsFile -- Convert wxWidgets build/file to CMake file list
 
 #include "ui/optionsdlg.h"  // OptionsDlg -- Dialog for setting all .srcfile options
 
@@ -129,6 +130,7 @@ int CMainApp::OnRun()
     cmd.addOption("vscode", "creates or updates .vscode/*.json files used to build and debug a project using VS Code");
     cmd.addOption("vcxproj", "creates or updates Visual Studio project file (.vcxproj)");
     cmd.addOption("vs", "adds or updates .vs/*.json files used by Visual Studio");
+    cmd.addOption("widgets", "[file] [dest] Converts wxWidgets build\\file into a dest.cmake file");
 
     // The following options are all hidden -- they will not be displayed in the -help command list
 
@@ -177,6 +179,11 @@ int CMainApp::OnRun()
     else if (cmd.isOption("png"))
     {
         return ConvertImageToHeader(cmd.getExtras());
+    }
+    else if (cmd.isOption("widgets"))
+    {
+        WidgetsFile wx_file;
+        return wx_file.Convert(cmd.getExtras());
     }
     else if (cmd.isOption("xpm"))
     {

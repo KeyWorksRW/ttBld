@@ -51,6 +51,7 @@ Files:
     convert/readvcx.cpp          # Converts a Visual Studio project file into .srcfiles.yaml
     convert/writevcx.cpp         # Create a Visual Studio project file
     convert/write_cmake.cpp      # Create a CMakeLists.txt file
+    convert/wxWidgets_file.cpp   # Convert wxWidgets build/file to CMake file list
 
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     pugixml/pugixml.cpp          # Built directly rather than building a library
