@@ -171,7 +171,7 @@ bld::RESULT CWriteSrcFiles::UpdateOptions(std::string_view filename)
         out.emplace_back(orgFile[pos++]);
     }
 
-    if (out.WriteFile(filename))
+    if (out.WriteFile(ttlib::cstr(filename)))
         return bld::success;
 
     return bld::write_failed;
@@ -276,5 +276,5 @@ bld::RESULT CWriteSrcFiles::WriteNew(std::string_view filename, std::string_view
         out.emplace_back("    " + iter);
     }
 
-    return (out.WriteFile(filename) ? bld::success : bld::write_failed);
+    return (out.WriteFile(ttlib::cstr(filename)) ? bld::success : bld::write_failed);
 }
