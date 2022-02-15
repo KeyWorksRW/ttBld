@@ -1,8 +1,12 @@
-# Requires ttBld.exe version 1.8.0 or higher to process
+# Requires ttBld.exe version 1.8.1 or higher to process
+
+# This file is only used as a quick lookup for files, and to use ttBld.exe to generate ninja files that allow
+# clang-cl.exe to be used for additional code checking on Windows (clang-cl can spot different problems that
+# the msvc compiler doesn't warn about.)
 
 Options:
     Project:     ttBld        # Target name ('D' will be appended to Debug builds, e.g. ttBldD.exe)
-    Exe_type:    console      # [window | console | lib | dll]
+    Exe_type:    lib          # [window | console | lib | dll]
     Pch:         pch.h        # "none" or name of header file to use for precompilation
     Optimize:    space        # [space | speed] optimization
     Warn:        4            # [1-4]
@@ -11,14 +15,11 @@ Options:
     Ms_linker:   true         # true means use link.exe even when compiling with clang
 
     CFlags_cmn: -std:c++17 /Zc:__cplusplus /utf-8
-    CFlags_dbg: -DWXUSINGDLL  # debug build links to dll version of wxWidgets, release version links statically
 
-    TargetDir:   ../bin       # 64-bit target directory
-    TargetDir32: ../bin32     # 32-bit target directory
-
+    IncDirs:     ./;precompile;ui;convert;../ttlib/include;../wxSnapshot/include;../wxSnapshot/win
+    TargetDir:   ../build/CMakeFiles/CMakeTmp   # just a temporary location for the library
     Natvis:      ttBld.natvis # MSVC Debug visualizer
 
-    IncDirs:     ./;precompile;ui;convert;../ttlib/include
 
 Files:
     ttBld.rc            # Windows resource files
