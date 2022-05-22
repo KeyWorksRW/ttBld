@@ -68,8 +68,12 @@
 
 #include "ttlibspace.h"  // Master header file for ttLib
 
-#include "ttcstr.h"   // Classes for handling zero-terminated char strings.
-#include "ttcview.h"  // cview -- string_view functionality on a zero-terminated char string.
+// Currently, the order of the ttLib includes is critical, so use blank lines to keep clang-format from reordering them.
+
+#include "ttcview.h"  // ttlib::cview -- std::string_view functionality on a zero-terminated char string.
+#include "ttsview.h"  // ttlib::sview -- std::string_view with additional methods
+
+#include "ttcstr.h"      // ttlib::cstr -- std::string with additional functions
 
 // Version is also set in writesrc.h and ttBld.rc -- if changed, change in all three locations
 
