@@ -296,29 +296,40 @@ void CSrcFiles::ProcessFile(std::string_view line)
             ProcessIncludeDirective(filename);
         return;
     }
-    else if (ttlib::contains(line, "wxui_code.cmake", tt::CASE::either))
+
+    ttlib::sview filename = line;
+    filename.erase_from("#");
+    filename.trim(tt::TRIM::right);
+
+    if (filename.extension() == ".cmake")
     {
         ttlib::cstr root(line);
         root.remove_filename();
 
         ttlib::viewfile cmake_files;
-        if (cmake_files.ReadFile(line))
+        if (cmake_files.ReadFile(filename))
         {
-            for (ttlib::sview iter: cmake_files)
+            for (ttlib::sview file: cmake_files)
             {
-                if (iter.contains("${CMAKE_CURRENT_LIST_DIR}"))
+                if (file.contains("${CMAKE_CURRENT_LIST_DIR}"))
                 {
-                    ttlib::cstr filename(root);
-                    filename.append_filename(iter.filename());
-                    ttlib::add_if(m_lstSrcFiles, filename);
+                    // Remove any comment
+                    file.erase_from("#");
+                    file.trim(tt::TRIM::right);
+
+                    // remove the ${CMAKE_CURRENT_LIST_DIR}/ portion
+                    if (auto len = file.find('/'); ttlib::is_found(len))
+                    {
+                        file.remove_prefix(len + 1);
+                        ttlib::cstr path(root);
+                        path.append_filename(file);
+                        ttlib::add_if(m_lstSrcFiles, path);
+                    }
                 }
             }
         }
         return;
     }
-
-    ttlib::cstr filename = line;
-    filename.erase_from('#');
 
     if (filename.find('*') != tt::npos || filename.find('?') != tt::npos)
     {
@@ -329,7 +340,7 @@ void CSrcFiles::ProcessFile(std::string_view line)
     ttlib::add_if(m_lstSrcFiles, filename);
     if (!filename.file_exists())
     {
-        AddError("Unable to locate the file " + filename);
+        AddError(ttlib::cstr("Unable to locate the file ") << filename);
     }
 
     if (filename.has_extension(".idl"))
