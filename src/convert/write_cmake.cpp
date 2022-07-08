@@ -18,9 +18,7 @@
 #include "../pugixml/pugixml.hpp"  // pugixml parser
 
 const char* multi_config = R"===(
-get_property(isMultiConfig GLOBAL
-  PROPERTY GENERATOR_IS_MULTI_CONFIG
-)
+get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
 if (NOT isMultiConfig)
     message("\nBecause you are using a single target generator, you MUST specify")
@@ -136,6 +134,10 @@ bld::RESULT CConvert::WriteCmakeProject()
     out += "    # This can considerably speed up build times at the cost of larger object files.";
     out += "    string(REPLACE \"/Zi\" \"/Z7\" z_seven ${CMAKE_CXX_FLAGS_DEBUG})";
     out += "    set(CMAKE_CXX_FLAGS_DEBUG ${z_seven} CACHE STRING \"C++ Debug flags\" FORCE)";
+    out += "";
+
+    out += "    # Use static runtime for Release builds to run with Wine without needing to install the dlls.";
+    out += "    set(CMAKE_MSVC_RUNTIME_LIBRARY \"MultiThreaded$<$<CONFIG:Debug>:Debug>\")";
 
     out += "endif()";
     out += multi_config;
