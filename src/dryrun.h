@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "tttextfile.h"
+#include "tttextfile_wx.h"
 
 // Class to store information for a dry-run of functionality
 class CDryRun
@@ -19,7 +19,7 @@ public:
 
     void Enable() { isEnabled = true; }
     bool IsEnabled() { return isEnabled; }
-    ttlib::cview GetFileName() { return m_filename; }
+    const ttlib::cstr& GetFileName() { return m_filename; }
 
     void NewFile(std::string_view filename);
     // Display each line that differs from the original

@@ -8,7 +8,7 @@
 #include <exception>
 
 #include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
-#include "tttextfile.h"  // Classes for reading and writing line-oriented files
+#include <tttextfile_wx.h>  // Classes for reading and writing line-oriented files
 
 #include "ninja.h"  // CNinja
 

@@ -6,8 +6,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
-#include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
+#include <tttextfile_wx.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "convert.h"  // CConvert, CVcxWrite
 #include "uifuncs.h"  // Miscellaneous functions for displaying UI

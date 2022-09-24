@@ -9,6 +9,8 @@
 
 #include "wxWidgets_file.h"
 
+#include "ttcview_wx.h"
+
 // build/files doesn't include the C files, so we hard-code them here
 
 inline constexpr const auto txt_wxCLib_sources = {

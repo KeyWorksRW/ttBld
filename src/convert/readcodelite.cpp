@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"  // CConvert, CVcxWrite
 #include "uifuncs.h"  // Miscellaneous functions for displaying UI
@@ -47,12 +47,12 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
 
     for (size_t pos = 0; pos < Directories.size(); ++pos)
     {
-        if (Directories[pos].node().cname().is_sameas("src"))
+        if (Directories[pos].node().name() == "src")
         {
             auto file = Directories[pos].node().first_child();
             do
             {
-                auto filename = file.attribute("Name").as_cstr();
+                ttlib::cstr filename = file.attribute("Name").value();
                 MakeNameRelative(filename);
                 ttlib::add_if(m_srcfiles.GetSrcFileList(), filename);
                 file = file.next_sibling();
@@ -64,16 +64,16 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
     auto settings = root.child("Settings");
     if (settings)
     {
-        if (settings.attribute("Type").cvalue().is_sameas("Dynamic Library"))
+        if (settings.attribute("Type").value() == "Dynamic Library")
             m_srcfiles.setOptValue(OPT::EXE_TYPE, "dll");
-        else if (settings.attribute("Type").cvalue().is_sameas("Static Library"))
+        else if (settings.attribute("Type").value() == "Static Library")
             m_srcfiles.setOptValue(OPT::EXE_TYPE, "lib");
 
         auto Definitions = m_xmldoc.select_nodes("/CodeLite_Project/Settings/GlobalSettings/Compiler/Preprocessor[@Value]");
         ttlib::cstr defs;
         for (size_t pos = 0; pos < Definitions.size(); ++pos)
         {
-            defs += "-D" + Definitions[pos].attribute().as_cstr() + " ";
+            defs += "-D" + Definitions[pos].attribute().as_std_str() + " ";
         }
         defs.trim();
         m_srcfiles.setOptValue(OPT::CFLAGS_CMN, defs);
@@ -85,7 +85,7 @@ bld::RESULT CConvert::ConvertCodeLite(const std::string& srcFile, std::string_vi
         {
             if (!incs.empty())
                 incs += ";";
-            incs += Includes[pos].attribute().cvalue();
+            incs += Includes[pos].attribute().value();
         }
     }
 

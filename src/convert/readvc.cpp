@@ -6,7 +6,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"  // CConvert, CVcxWrite
 #include "uifuncs.h"  // Miscellaneous functions for displaying UI
@@ -47,7 +47,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
 
     for (size_t pos = 0; pos < files.size(); ++pos)
     {
-        auto name = files[pos].node().first_attribute().cvalue();
+        auto name = files[pos].node().first_attribute().value();
         if (!name.empty())
         {
             if (ttlib::is_sameprefix(name, "Source Files", tt::CASE::either))
@@ -55,7 +55,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                 auto node = files[pos].node();
                 for (auto filename: node.child("File"))
                 {
-                    auto path = filename.attribute("RelativePath").cvalue();
+                    auto path = filename.attribute("RelativePath").value();
                     if (!path.empty())
                     {
                         ttlib::cstr relative(path);
@@ -69,7 +69,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                 auto node = files[pos].node();
                 for (auto filename: node.child("File"))
                 {
-                    auto path = filename.attribute("RelativePath").cvalue();
+                    auto path = filename.attribute("RelativePath").value();
                     if (!path.empty())
                     {
                         ttlib::cstr relative(path);
@@ -93,7 +93,7 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
 
     for (size_t pos = 0; pos < configs.size(); ++pos)
     {
-        auto name = configs[pos].node().first_attribute().cvalue();
+        auto name = configs[pos].node().first_attribute().value();
         if (!name.empty())
         {
             if (ttlib::contains(name, "Debug|"))
@@ -109,12 +109,12 @@ bld::RESULT CConvert::ConvertVc(const std::string& srcFile, std::string_view dst
                     continue;
                 ProcessVcRelease(configs[pos].node());
                 ReleaseProcessed = true;
-                auto type = configs[pos].node().attribute("ConfigurationType").cvalue();
-                if (type.is_sameas("1"))
+                auto type = configs[pos].node().attribute("ConfigurationType").value();
+                if (type == "1")
                     m_srcfiles.setOptValue(OPT::EXE_TYPE, "window");
-                else if (type.is_sameas("2"))
+                else if (type == "2")
                     m_srcfiles.setOptValue(OPT::EXE_TYPE, "console");
-                else if (type.is_sameas("4"))
+                else if (type == "4")
                     m_srcfiles.setOptValue(OPT::EXE_TYPE, "dll");
             }
         }
@@ -127,10 +127,10 @@ void CConvert::ProcessVcDebug(pugi::xml_node node)
 {
     for (auto tool: node.child("Tool"))
     {
-        auto name = tool.attribute("Name").cvalue();
-        if (name.is_sameas("VCCLCompilerTool", tt::CASE::either))
+        auto name = tool.attribute("Name").value();
+        if (name == "VCCLCompilerTool")
         {
-            auto val = tool.attribute("PreprocessorDefinitions").cvalue();
+            auto val = tool.attribute("PreprocessorDefinitions").value();
             if (!val.empty())
             {
                 ttlib::cstr Flags("-D");
@@ -150,10 +150,10 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
 {
     for (auto tool: node.child("Tool"))
     {
-        auto name = tool.attribute("Name").cvalue();
-        if (name.is_sameas("VCCLCompilerTool", tt::CASE::either))
+        auto name = tool.attribute("Name").value();
+        if (name == "VCCLCompilerTool")
         {
-            auto val = tool.attribute("PreprocessorDefinitions").cvalue();
+            auto val = tool.attribute("PreprocessorDefinitions").value();
             if (!val.empty())
             {
                 ttlib::cstr Flags("-D");
@@ -166,19 +166,19 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
                 m_srcfiles.setOptValue(OPT::CFLAGS_REL, Flags);
             }
 
-            val = tool.attribute("WarningLevel").cvalue();
+            val = tool.attribute("WarningLevel").value();
             if (!val.empty())
             {
                 m_srcfiles.setOptValue(OPT::WARN, val);
             }
 
-            val = tool.attribute("PrecompiledHeaderFile").cvalue();
+            val = tool.attribute("PrecompiledHeaderFile").value();
             if (!val.empty())
             {
                 m_srcfiles.setOptValue(OPT::PCH, val);
             }
 
-            auto incs = tool.attribute("AdditionalIncludeDirectories").as_cstr();
+            auto incs = tool.attribute("AdditionalIncludeDirectories").as_string();
             if (!incs.empty())
             {
                 ttlib::multistr enumPaths(incs);
@@ -194,14 +194,14 @@ void CConvert::ProcessVcRelease(pugi::xml_node node)
                     m_srcfiles.setOptValue(OPT::INC_DIRS, Includes);
             }
         }
-        else if (name.is_sameas("VCLinkerTool", tt::CASE::either))
+        else if (name == "VCLinkerTool")
         {
-            if (auto val = tool.attribute("AdditionalDependencies").cvalue(); val.size())
+            if (auto val = tool.attribute("AdditionalDependencies").value(); val.size())
             {
                 m_srcfiles.setOptValue(OPT::LIBS_DBG, val);
             }
 
-            auto filename = tool.attribute("OutputFile").as_cstr();
+            ttlib::cstr filename = tool.attribute("OutputFile").as_string();
             if (filename.size() && m_srcfiles.GetProjectName().empty())
             {
                 filename.remove_extension();

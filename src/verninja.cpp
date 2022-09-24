@@ -15,7 +15,7 @@ CVerMakeNinja::CVerMakeNinja()
     m_minMinor = 0;
     m_minSub = 0;
 
-    ttlib::cview version = txtOptVersion;  // we assume this string to be "n.n.n" where n is an integer for major,
+    ttlib::sview version = txtOptVersion;  // we assume this string to be "n.n.n" where n is an integer for major,
                                            // minor, and sub version
     m_major = ttlib::atoi(version);
     auto pos = version.find('.');

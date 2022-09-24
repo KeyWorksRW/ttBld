@@ -50,12 +50,16 @@ if (NOT isMultiConfig)
 endif()
 
 # This will build wxCLib.lib and wxWidgets.lib
-add_subdirectory(wxSnapshot)
+set (widget_dir ${CMAKE_CURRENT_LIST_DIR}/wxSnapshot)
+set (widget_cmake_dir ${CMAKE_CURRENT_LIST_DIR}/wxSnapshot)
+add_subdirectory(${widget_cmake_dir})
 
-include(src/ui/wxui_code.cmake)  # This will set ${wxue_generated_code} with a list of generated files
+# wxUiEditor maintains the wxui_code.cmake file which contains the list of generated files
+include(src/ui/wxui_code.cmake)  # This will set ${wxue_generated_code}
 include(src/file_list.cmake)     # This will set ${file_list} with a list of source files
 
 if (WIN32)
+    set(setup_dir ${widget_cmake_dir}/win)
     set(win_ttlib_sources
         ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
 
@@ -63,26 +67,24 @@ if (WIN32)
     )
 
     set(win_resource "src/ttBld.rc")
+else()
+    # Currently we don't support building on unix, but if we did, this is what we would need
+    set(setup_dir ${widget_cmake_dir}/unix)
 endif()
 
-# Build the library directly instead of using add_subdirectory() to limit the modules we want and to add
-# any modules that require wxWidgets.
-add_library(ttLib STATIC
+# MSVC release builds will already define this, but let's be sure in case we build with a
+# different compiler
+add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 
-    ttLib/src/ttconsole.cpp          # class that sets/restores console foreground color
-    ttLib/src/ttcstr.cpp             # Class for handling zero-terminated char strings.
-    ttLib/src/ttcvector.cpp          # Vector class for storing ttlib::cstr strings
-    ttLib/src/ttcview.cpp            # string_view functionality on a zero-terminated char string.
-    ttLib/src/ttlibspace.cpp         # ttlib namespace functions
-    ttLib/src/ttmultistr.cpp         # Breaks a single string into multiple strings
-    ttLib/src/ttparser.cpp           # Command line parser
-    ttLib/src/ttstrings.cpp          # Class for handling zero-terminated char strings.
-    ttLib/src/ttsview.cpp            # std::string_view with additional methods
-    ttLib/src/tttextfile.cpp         # Classes for reading and writing text files.
-
-    ttLib/src/ttstr.cpp              # Enhanced version of wxString
-
-    ${win_ttlib_sources}
+# Instructions for building the ttlib_wx library using this project's precompiled header
+include(ttLib_wx/src/ttlib_file_list.cmake)
+add_library(ttLib_wx STATIC ${ttlib_file_list})
+target_precompile_headers(ttLib_wx PRIVATE "src/precompile/pch_wx.h")
+target_include_directories(ttLib_wx PRIVATE
+    ${widget_dir}/include
+    ${setup_dir}
+    src/
+    ttLib_wx/src
 )
 
 # Note the requirement that --config Debug is used to get the additional debug files
@@ -100,7 +102,7 @@ add_library(check_build STATIC EXCLUDE_FROM_ALL
     ${wxue_generated_code}
 )
 
-target_link_libraries(ttBld PRIVATE ttLib wxCLib wxWidgets)
+target_link_libraries(ttBld PRIVATE ttLib_wx wxCLib wxWidgets)
 
 if (MSVC)
     # /GL -- combined with the Linker flag /LTCG to perform whole program optimization in Release build
@@ -114,9 +116,8 @@ if (MSVC)
     target_link_options(ttBld PRIVATE "/manifest:no")
 endif()
 
-target_precompile_headers(ttBld PRIVATE "src/precompile/pch.h")
-target_precompile_headers(check_build PRIVATE "src/precompile/pch.h")
-target_precompile_headers(ttLib PRIVATE "src/precompile/pch.h")
+target_precompile_headers(ttBld PRIVATE "src/precompile/pch_wx.h")
+target_precompile_headers(check_build PRIVATE "src/precompile/pch_wx.h")
 
 target_include_directories(ttBld PRIVATE
     wxSnapshot/include
@@ -127,7 +128,7 @@ target_include_directories(ttBld PRIVATE
     src/precompile
     src/ui
     src/convert
-    ttLib/include
+    ttLib_wx/src
 )
 
 target_include_directories(check_build PRIVATE
@@ -139,14 +140,5 @@ target_include_directories(check_build PRIVATE
     src/precompile
     src/ui
     src/convert
-    ttLib/include
-)
-
-target_include_directories(ttLib PRIVATE
-    wxSnapshot/include
-    if (WIN32)
-        wxSnapshot/win
-    endif()
-    src/precompile
-    ttLib/include
+    ttLib_wx/src
 )

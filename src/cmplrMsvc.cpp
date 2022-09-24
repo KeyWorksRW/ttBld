@@ -5,7 +5,9 @@
 // License:   Apache License see ../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
+
+#include "ttcview_wx.h"  // cview -- string_view functionality on a zero-terminated char string.
 
 #include "ninja.h"  // CNinja
 

@@ -36,9 +36,10 @@
 #include <direct.h>  // Functions for directory handling and creation
 #include <iostream>
 
-#include "ttconsole.h"  // ttConsoleColor
-#include "ttcwd.h"      // cwd -- Class for storing and optionally restoring the current directory
-#include "ttparser.h"   // cmd -- Command line parser
+#include "../../ttLib/include/ttconsole.h"  // ttConsoleColor
+
+#include "ttcwd_wx.h"      // cwd -- Class for storing and optionally restoring the current directory
+#include "ttparser_wx.h"   // cmd -- Command line parser
 
 #include "convert.h"         // CConvert
 #include "funcs.h"           // List of function declarations

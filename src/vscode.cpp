@@ -9,8 +9,8 @@
 #include <filesystem>
 #include <string_view>
 
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
-#include "tttextfile.h"  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
+#include <tttextfile_wx.h>  // ttTextFile, ttViewFile -- Similar to wxTextFile, but uses UTF8 strings
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "funcs.h"      // List of function declarations

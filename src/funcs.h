@@ -25,7 +25,7 @@ bool ChangeOptions(std::string& ProjectFile);
 bool ConvertBuildScript(const char* pszBldFile);
 
 // Search PATH, LIB, or INCLUDE (or variants)
-bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathResult);
+bool FindFileEnv(const std::string& Env, std::string_view filename, ttlib::cstr& pathResult);
 
 void ParseDefines(std::vector<ttlib::cstr>& Results, std::string_view Defines);
 

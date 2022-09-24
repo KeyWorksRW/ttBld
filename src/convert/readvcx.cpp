@@ -5,9 +5,9 @@
 // License:   Apache License see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
-#include "ttstr.h"       // ttString -- wxString with additional methods similar to ttlib::cstr
+#include "ttcwd.h"          // cwd -- Class for storing and optionally restoring the current directory
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
+#include <ttstring_wx.h>    // ttString -- wxString with additional methods similar to ttlib::cstr
 
 #include "convert.h"  // CConvert, CVcxWrite
 #include "uifuncs.h"  // Miscellaneous functions for displaying UI
@@ -53,7 +53,7 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
 
     for (size_t pos = 0; pos < files.size(); ++pos)
     {
-        auto filename = files[pos].node().first_attribute().as_cstr();
+        ttlib::cstr filename = files[pos].node().first_attribute().as_string();
         if (filename.size())
         {
             // The filename will be relative to the location of the xml file, so first we need to make it relative to that.
@@ -71,7 +71,7 @@ bld::RESULT CConvert::ConvertVcx(const std::string& srcFile, std::string_view ds
     auto configs = m_xmldoc.select_nodes("/Project/ItemDefinitionGroup[@Condition]");
     for (size_t pos = 0; pos < configs.size(); ++pos)
     {
-        auto condition = configs[pos].node().first_attribute().cvalue();
+        ttlib::cstr condition = configs[pos].node().first_attribute().value();
         if (condition.empty())
             continue;  // theoretically impossible
         if (condition.contains("Debug|"))
@@ -129,11 +129,11 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
 {
     if (auto compile = node.child("ClCompile"); compile)
     {
-        auto val = compile.child("PrecompiledHeaderFile").first_child().cvalue();
+        auto val = compile.child("PrecompiledHeaderFile").first_child().value();
         if (val.size())
             m_srcfiles.setOptValue(OPT::PCH, val);
 
-        val = compile.child("WarningLevel").first_child().cvalue();
+        val = compile.child("WarningLevel").first_child().value();
         if (val.empty())
         {
             while (val.size() && !ttlib::is_digit(val.at(0)))
@@ -141,7 +141,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
             m_srcfiles.setOptValue(OPT::WARN, val);
         }
 
-        val = compile.child("AdditionalIncludeDirectories").first_child().cvalue();
+        val = compile.child("AdditionalIncludeDirectories").first_child().value();
         if (!val.empty())
         {
             ttlib::cstr incs(val);
@@ -160,7 +160,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
                 m_srcfiles.setOptValue(OPT::INC_DIRS, Includes);
         }
 
-        val = compile.child("PreprocessorDefinitions").first_child().cvalue();
+        val = compile.child("PreprocessorDefinitions").first_child().value();
         if (val.empty())
         {
             ttlib::cstr Flags("-D");
@@ -176,13 +176,13 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
 
     if (auto link = node.child("Link"); link)
     {
-        if (auto val = link.child("SubSystem").first_child().cvalue();
+        if (ttlib::cstr val = link.child("SubSystem").first_child().value();
             val.size() && val.is_sameprefix("Console", tt::CASE::either))
         {
             m_srcfiles.setOptValue(OPT::EXE_TYPE, "console");
         }
 
-        if (auto libs = link.child("AdditionalDependencies").first_child().as_cstr(); libs.size())
+        if (ttlib::cstr libs = link.child("AdditionalDependencies").first_child().value(); libs.size())
         {
             libs.Replace(";%(AdditionalDependencies)", "");
 
@@ -190,7 +190,7 @@ void CConvert::ProcessVcxDebug(pugi::xml_node node)
                 m_srcfiles.setOptValue(OPT::LIBS_DBG, libs);
         }
 
-        if (auto options = link.child("AdditionalOptions").first_child().as_cstr(); options.size())
+        if (ttlib::cstr options = link.child("AdditionalOptions").first_child().value(); options.size())
         {
             options.Replace("%(AdditionalOptions)", "");
             if (options.size())
@@ -203,11 +203,11 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
 {
     if (auto compile = node.child("ClCompile"); compile)
     {
-        auto val = compile.child("FavorSizeOrSpeed").first_child().cvalue();
+        auto val = compile.child("FavorSizeOrSpeed").first_child().value();
         if (ttlib::is_sameprefix(val, "Speed", tt::CASE::either))
             m_srcfiles.setOptValue(OPT::OPTIMIZE, "speed");
 
-        val = compile.child("PreprocessorDefinitions").first_child().cvalue();
+        val = compile.child("PreprocessorDefinitions").first_child().value();
         if (!val.empty())
         {
             ttlib::cstr Flags("-D");
@@ -223,13 +223,13 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
 
     if (auto link = node.child("Link"); link)
     {
-        if (auto val = link.child("SubSystem").first_child().cvalue();
+        if (ttlib::sview val = link.child("SubSystem").first_child().value();
             val.size() && val.is_sameprefix("Console", tt::CASE::either))
         {
             m_srcfiles.setOptValue(OPT::EXE_TYPE, "console");
         }
 
-        if (auto libs = link.child("AdditionalDependencies").first_child().as_cstr(); libs.size())
+        if (ttlib::cstr libs = link.child("AdditionalDependencies").first_child().value(); libs.size())
         {
             libs.Replace(";%(AdditionalDependencies)", "");
 
@@ -237,7 +237,7 @@ void CConvert::ProcessVcxRelease(pugi::xml_node node)
                 m_srcfiles.setOptValue(OPT::LIBS_REL, libs);
         }
 
-        if (auto options = link.child("AdditionalOptions").first_child().as_cstr(); options.size())
+        if (ttlib::cstr options = link.child("AdditionalOptions").first_child().value(); options.size())
         {
             options.Replace("%(AdditionalOptions)", "");
             if (options.size())

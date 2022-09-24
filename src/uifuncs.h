@@ -12,7 +12,7 @@
 
 /////////////////////// inline functions ////////////////////////////////////////
 
-inline int appMsgBox(const ttlib::cstr str, ttlib::cview caption = txtAppname, int style = wxICON_WARNING | wxOK,
+inline int appMsgBox(const ttlib::cstr str, const std::string& caption = txtAppname, int style = wxICON_WARNING | wxOK,
                      wxWindow* parent = nullptr)
 {
     return wxMessageBox(str.wx_str(), caption.c_str(), style, parent);

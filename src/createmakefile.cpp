@@ -7,7 +7,7 @@
 
 #include <filesystem>
 
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "ninja.h"  // CNinja
 

@@ -7,7 +7,7 @@
 
 #include <string_view>
 
-#include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
+#include <tttextfile_wx.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "vscodedlg.h"  // auto-generated: vscodedlgBase.h and vscodedlgBase.cpp
 
@@ -195,7 +195,7 @@ bool VsCodeDlg::CreateVsCodeTasks(CSrcFiles& cSrcFiles, std::vector<ttlib::cstr>
             // Build MSVC release
 
             ttlib::cstr Label;
-            Label.Format("Build %s (release) using MSVC", cSrcFiles.GetTargetRelease().filename().c_str());
+            Label << "Build " << cSrcFiles.GetTargetRelease().filename() << " (release) using MSVC";
 
             MakeCommand = "nmake.exe -nologo release " + MakeFileOption;
             AddMsvcTask(out, "Build Release MSVC", txtNormalGroup, MakeCommand);

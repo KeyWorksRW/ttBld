@@ -7,10 +7,11 @@
 
 #include <utility>
 
-#include "ttcwd.h"       // Class for storing and optionally restoring the current directory
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
-#include "tttextfile.h"  // Classes for reading and writing line-oriented files
-#include "ttwinff.h"     // winff -- Wrapper around Windows FindFile
+#include <wx/filefn.h>  // File- and directory-related functions
+
+#include "ttcwd.h"                     // Class for storing and optionally restoring the current directory
+#include <ttmultistr_wx.h>             // multistr -- Breaks a single string into multiple strings
+#include <tttextfile_wx.h>             // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
 
@@ -537,23 +538,22 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
     ttlib::multistr enumPattern(FilePattern, ';');
     for (auto& pattern: enumPattern)
     {
-        ttlib::winff ff(pattern);
-        while (ff.isvalid())
+        ttString name = wxFindFirstFile(pattern.wx_str(), wxFILE);
+        while (!name.empty())
         {
-            auto& name = ff.getcstr();
             if (name.has_extension(".c") || name.has_extension(".cc") || name.has_extension(".cpp") ||
                 name.has_extension(".cxx"))
             {
                 if (m_section == SECTION_DEBUG_FILES)
-                    ttlib::add_if(m_lstDebugFiles, name);
+                    ttlib::add_if(m_lstDebugFiles, name.sub_cstr());
                 else
-                    ttlib::add_if(m_lstSrcFiles, name);
+                    ttlib::add_if(m_lstSrcFiles, name.sub_cstr());
             }
             else if (name.has_extension(".rc"))
             {
                 if (m_section != SECTION_DEBUG_FILES)
                 {
-                    ttlib::add_if(m_lstSrcFiles, name);
+                    ttlib::add_if(m_lstSrcFiles, name.sub_cstr());
                     m_RCname = name;
                 }
             }
@@ -568,13 +568,12 @@ void CSrcFiles::AddSourcePattern(std::string_view FilePattern)
             {
                 if (m_section != SECTION_DEBUG_FILES)
                 {
-                    ttlib::add_if(m_lstSrcFiles, name);
-                    ttlib::add_if(m_lstIdlFiles, name);
+                    ttlib::add_if(m_lstSrcFiles, name.sub_cstr());
+                    ttlib::add_if(m_lstIdlFiles, name.sub_cstr());
                 }
             }
 
-            if (!ff.next())
-                break;
+            wxFindNextFile();
         }
     }
 }

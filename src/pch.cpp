@@ -1,3 +1,3 @@
 // Purpose: Creates pre-compiled header data
 
-#include "pch.h"  // precompile/pch.h
+#include "pch_wx.h"  // precompile/pch.h

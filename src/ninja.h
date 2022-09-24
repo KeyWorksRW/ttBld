@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "tttextfile.h"  // Classes for reading and writing line-oriented files
+#include "tttextfile_wx.h"  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
 #include "dryrun.h"     // CDryRun
@@ -59,8 +59,8 @@ public:
     bool IsValidVersion() { return m_isInvalidVersion != true; }
 
     // Name and location of any additional library to build
-    ttlib::cview GetLibName() { return m_LIBname; }
-    ttlib::cview GetHHPName() { return m_HPPname; }
+    const ttlib::cstr& GetLibName() { return m_LIBname; }
+    const ttlib::cstr& GetHHPName() { return m_HPPname; }
 
     void EnableDryRun() { m_dryrun.Enable(); }
     void ForceWrite(bool bForceWrite = true) { m_isWriteIfNoChange = bForceWrite; }

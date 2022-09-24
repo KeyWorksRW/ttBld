@@ -7,11 +7,11 @@
 
 #include <cstdlib>
 
+#include <wx/msw/registry.h>
 #include <wx/utils.h>
 
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
-#include "ttregistry.h"  // registry -- Class for working with the Windows registry
-#include "ttwinff.h"     // winff -- Wrapper around Windows FindFile
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
+#include <ttstring_wx.h>    // ttString -- wxString with additional methods similar to ttlib::cstr
 
 /*
     The path to the MSVC compiler changes every time a new version is downloaded, no matter how minor a change that
@@ -25,68 +25,76 @@
 
 bool FindCurMsvcPath(ttlib::cstr& Result)
 {
+    bool found = false;
+
 #if defined(_WIN32)
-    ttlib::registry reg;
-    if (reg.OpenLocal("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\devenv.exe", KEY_READ))
+    wxRegKey reg(wxRegKey::HKLM, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\devenv.exe");
+    reg.Open(wxRegKey::Read);
+    if (reg.IsOpened())
     {
-        auto path = reg.ReadString("");
-        if (!path.empty())
+        ttString path;
+        if (reg.QueryValue("", path))
         {
-            Result.ExtractSubString(path);
+            Result.ExtractSubString(path.sub_cstr());
             auto pos = Result.locate("Common", 0, tt::CASE::either);
             if (pos != tt::npos)
             {
                 Result.erase(pos);
                 Result += "VC\\Tools\\MSVC\\*.*";
+                ttString name = wxFindFirstFile(Result.wx_str(), wxDIR);
 
-                ttlib::winff ff(Result);
-                if (ff.isvalid())
+                if (!name.empty())
                 {
-                    do
-                    {
-                        if (ff.isdir())
-                        {
-                            Result.replace_filename(ff.getcstr());
-                            return true;
-                        }
-                    } while (ff.next());
+                    Result.replace_filename(name.sub_cstr());
+                    found = true;
                 }
             }
         }
+        reg.Close();
     }
 #endif  // _WIN32
 
-    return false;
+    return found;
 }
 
 bool FindVsCode(ttlib::cstr& Result)
 {
+    bool found = false;
+
 #if defined(_WIN32)
-    ttlib::registry reg;
-    if (reg.OpenClasses("Applications\\Code.exe\\shell\\open\\command"))
+    wxRegKey reg(wxRegKey::HKCR, "Applications\\Code.exe\\shell\\open\\command");
+    reg.Open(wxRegKey::Read);
+    if (reg.IsOpened())
     {
-        auto path = reg.ReadString("");
-        if (!path.empty())
+        ttString path;
+        if (reg.QueryValue("", path))
         {
-            Result.ExtractSubString(path);
+            Result.ExtractSubString(path.sub_cstr());
             Result.remove_filename();
-            return true;
+            found = true;
         }
+        reg.Close();
     }
-    return false;
 #endif  // _WIN32
+
+    return found;
 }
 
 bool IsVsCodeAvail()
 {
+    bool found = false;
+
 #if defined(_WIN32)
-    ttlib::registry reg;
-    if (reg.OpenClasses("Applications\\Code.exe\\shell\\open\\command"))
+    wxRegKey reg(wxRegKey::HKCR, "Applications\\Code.exe\\shell\\open\\command");
+    reg.Open(wxRegKey::Read);
+    if (reg.IsOpened())
     {
-        return true;
+        found = true;
+        reg.Close();
     }
 #endif  // _WIN32
-    return false;
+
+    return found;
 }
 
 bool IsHost64()
@@ -94,9 +102,9 @@ bool IsHost64()
     return wxIsPlatform64Bit();
 }
 
-bool FindFileEnv(ttlib::cview Env, std::string_view filename, ttlib::cstr& pathResult)
+bool FindFileEnv(const std::string& Env, std::string_view filename, ttlib::cstr& pathResult)
 {
-    auto pszEnv = std::getenv(Env);
+    auto pszEnv = std::getenv(Env.c_str());
     if (pszEnv)
     {
         ttlib::multistr enumstr(pszEnv);

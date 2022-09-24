@@ -6,9 +6,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
-#include "ttmultistr.h"  // multistr -- Breaks a single string into multiple strings
-#include "ttsview.h"     // sview -- std::string_view with additional methods
-#include "tttextfile.h"  // textfile -- Classes for reading and writing line-oriented files
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
+#include <ttsview_wx.h>     // sview -- std::string_view with additional methods
+#include <tttextfile_wx.h>  // textfile -- Classes for reading and writing line-oriented files
 
 #include "convert.h"         // CConvert -- Class for converting project build files to .srcfiles.yaml
 #include "convertvs_base.h"  // ConvertVS -- Dialog to get file and path for VS to CMake conversion
