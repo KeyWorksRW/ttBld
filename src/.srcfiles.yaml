@@ -44,6 +44,7 @@ Files:
     vscode.cpp          # Creates/updates .vscode files
     writesrc.cpp        # Writes a new or update srcfiles.yaml file
     yamalize.cpp        # Used to convert .srcfiles to .vscode/srcfiles.yaml
+    ttconsole.cpp       # Sets/restores console foreground color
 
     convert/convert.cpp          # Various conversion methods
     convert/readcodelite.cpp     # Class for converting a CodeLite .project file to .srcfiles.yaml
@@ -68,19 +69,5 @@ Files:
     ui/optionsdlgBase.cpp        # wxUiEditor generated file
     ui/vscodedlgBase.cpp         # wxUiEditor generated file
 
-    # ttLib files
-
-    ../ttlib/src/ttconsole.cpp   # Sets/restores console foreground color
-    ../ttlib/src/ttcstr.cpp      # Class for handling zero-terminated char strings.
-    ../ttlib/src/ttcview.cpp     # string_view functionality on a zero-terminated char string.
-    ../ttlib/src/ttlibspace.cpp  # ttlib namespace functions
-    ../ttlib/src/ttmultistr.cpp  # Breaks a single string into multiple strings
-    ../ttlib/src/ttparser.cpp    # Command line parser
-    ../ttlib/src/ttstr.cpp       # ttString -- enhanced version of wxString
-    ../ttlib/src/ttsview.cpp     # std::string_view with additional methods
-    ../ttlib/src/tttextfile.cpp  # Classes for reading and writing text files.
-
-    ../ttlib/src/winsrc/ttregistry.cpp  # Class for working with the Windows registry
-
 DebugFiles:
-    ../ttlib/src/winsrc/ttdebug_min.cpp  # we use our own version of this to minimize Windows code requirements
+    ../ttLib_wx/src/assertion_dlg.cpp  # Assertion Dialog

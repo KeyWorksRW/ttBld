@@ -9,8 +9,8 @@
 
 #include <optional>
 
-#include <ttstring_wx.h>     // ttString -- wxString with additional methods similar to ttlib::cstr
-#include "writesrc.h"  // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
+#include "writesrc.h"     // CWriteSrcFiles -- Writes a new or update srcfiles.yaml file
+#include <ttstring_wx.h>  // ttString -- wxString with additional methods similar to ttlib::cstr
 
 #include "optionsdlgBase.h"
 

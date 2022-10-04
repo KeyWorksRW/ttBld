@@ -38,8 +38,8 @@
 
 #include "../../ttLib/include/ttconsole.h"  // ttConsoleColor
 
-#include "ttcwd_wx.h"      // cwd -- Class for storing and optionally restoring the current directory
-#include "ttparser_wx.h"   // cmd -- Command line parser
+#include "ttcwd_wx.h"     // cwd -- Class for storing and optionally restoring the current directory
+#include "ttparser_wx.h"  // cmd -- Command line parser
 
 #include "convert.h"         // CConvert
 #include "funcs.h"           // List of function declarations

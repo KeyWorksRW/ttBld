@@ -14,7 +14,7 @@
     #error "You must include wx/defs.h before including this file."
 #endif
 
-#include "ttcstr_wx.h"  // ttString -- wxString with additional methods similar to ttlib::cstr
+#include "ttcstr_wx.h"    // ttString -- wxString with additional methods similar to ttlib::cstr
 #include "ttstring_wx.h"  // ttString -- wxString with additional methods similar to ttlib::cstr
 
 namespace ttlib
@@ -50,7 +50,6 @@ namespace ttlib
     private:
         ttlib::cstr m_restore;
     };
-
 
     /// Retrieves the current working directory. Construct with (true) to restore the
     /// directory in the dtor.
