@@ -69,8 +69,5 @@ Files:
     ui/optionsdlgBase.cpp        # wxUiEditor generated file
     ui/vscodedlgBase.cpp         # wxUiEditor generated file
 
-    # ttLib files
-
-
 DebugFiles:
-    ../ttlib/src/winsrc/ttdebug_min.cpp  # we use our own version of this to minimize Windows code requirements
+    ../ttLib_wx/src/assertion_dlg.cpp  # Assertion Dialog
