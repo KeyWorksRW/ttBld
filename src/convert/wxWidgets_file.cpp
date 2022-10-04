@@ -153,7 +153,6 @@ inline constexpr const auto txt_wxCLib_sources = {
     "common/extended.c"
 };
 
-
 // build/files doesn't include the scintilla *.cxx files, so we hard-code them here
 
 inline constexpr const auto txt_scintilla_files = {

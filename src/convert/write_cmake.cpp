@@ -5,7 +5,7 @@
 // License:   Apache License -- see ../../LICENSE
 /////////////////////////////////////////////////////////////////////////////
 
-#include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
+#include "ttcwd.h"          // cwd -- Class for storing and optionally restoring the current directory
 #include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
 #include <ttsview_wx.h>     // sview -- std::string_view with additional methods
 #include <tttextfile_wx.h>  // textfile -- Classes for reading and writing line-oriented files

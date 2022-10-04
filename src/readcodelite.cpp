@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "ttcwd.h"       // cwd -- Class for storing and optionally restoring the current directory
+#include "ttcwd.h"          // cwd -- Class for storing and optionally restoring the current directory
 #include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
 
 #include "convert.h"  // CConvert, CVcxWrite

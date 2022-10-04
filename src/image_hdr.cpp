@@ -11,7 +11,7 @@
 #include <wx/mstream.h>   // Memory stream classes
 #include <wx/wfstream.h>  // File stream classes
 
-#include <ttstring_wx.h>       // ttString -- wxString with additional methods similar to ttlib::cstr
+#include <ttstring_wx.h>    // ttString -- wxString with additional methods similar to ttlib::cstr
 #include <tttextfile_wx.h>  // textfile -- Classes for reading and writing line-oriented files
 
 // clang-format off

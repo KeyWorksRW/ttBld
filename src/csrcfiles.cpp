@@ -9,9 +9,9 @@
 
 #include <wx/filefn.h>  // File- and directory-related functions
 
-#include "ttcwd.h"                     // Class for storing and optionally restoring the current directory
-#include <ttmultistr_wx.h>             // multistr -- Breaks a single string into multiple strings
-#include <tttextfile_wx.h>             // Classes for reading and writing line-oriented files
+#include "ttcwd.h"          // Class for storing and optionally restoring the current directory
+#include <ttmultistr_wx.h>  // multistr -- Breaks a single string into multiple strings
+#include <tttextfile_wx.h>  // Classes for reading and writing line-oriented files
 
 #include "csrcfiles.h"  // CSrcFiles
 

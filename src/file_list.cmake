@@ -31,7 +31,7 @@ set (file_list
     ${CMAKE_CURRENT_LIST_DIR}/convert/wxWidgets_file.cpp   # Convert wxWidgets build/file to CMake file list
 
     ${CMAKE_CURRENT_LIST_DIR}/../ttLib_wx/src/assertion_dlg.cpp  # Assertion Dialog
-    ${CMAKE_CURRENT_LIST_DIR}/../ttLib/src/ttconsole.cpp         # Sets/restores console foreground color
+    ${CMAKE_CURRENT_LIST_DIR}/ttconsole.cpp                      # Sets/restores console foreground color
 
     # DO NOT RUN clang-format on the following file! We need to be able to sync changes from the original repository
     ${CMAKE_CURRENT_LIST_DIR}/pugixml/pugixml.cpp          # Built directly rather than building a library

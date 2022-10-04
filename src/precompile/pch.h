@@ -73,7 +73,7 @@
 #include "ttcview.h"  // ttlib::cview -- std::string_view functionality on a zero-terminated char string.
 #include "ttsview.h"  // ttlib::sview -- std::string_view with additional methods
 
-#include "ttcstr.h"      // ttlib::cstr -- std::string with additional functions
+#include "ttcstr.h"  // ttlib::cstr -- std::string with additional functions
 
 // Version is also set in writesrc.h and ttBld.rc -- if changed, change in all three locations
 
